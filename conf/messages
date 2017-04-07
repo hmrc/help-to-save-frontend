@@ -1,0 +1,17 @@
+hts.register.declaration.title=Help to Save
+hts.register.declaration.header-page=Confirm your contact details
+hts.register.declaration.header=Check your details and create your account
+hts.register.declaration.your-details-header=Your details
+hts.register.declaration.your-details=Your details
+hts.register.declaration.name=Name:
+hts.register.declaration.national-insurance-number=National Insurance number:
+hts.register.declaration.date-of-birth=Date of Birth:
+hts.register.declaration.contact-details=Contact details
+hts.register.declaration.email=Email:
+hts.register.declaration.phone-number=Phone number:
+hts.register.declaration.address=Address:
+hts.register.declaration.change=Change
+hts.register.declaration.contact-preference=Contact preference
+hts.register.declaration.create-your-account-header=Create your account
+hts.register.declaration.text=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
+hts.register.declaration.lable=Accept and create account

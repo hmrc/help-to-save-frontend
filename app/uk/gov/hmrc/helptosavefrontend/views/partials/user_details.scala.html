@@ -1,0 +1,57 @@
+@*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.models.UserDetails
+@import cats.syntax.show._
+
+@(userDetails: UserDetails)(implicit messages: play.api.i18n.Messages)
+<div>
+    <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
+        <div class="grid-layout__column grid-layout__column--1-4">
+            <p>@Messages("hts.register.declaration.your-details")</p>
+        </div>
+        <div class="grid-layout__column grid-layout__column--2-4">
+            <p>@Messages("hts.register.declaration.name") @(userDetails.name)</p>
+            <p>@Messages("hts.register.declaration.national-insurance-number") @(userDetails.NINO)</p>
+            <p>@Messages("hts.register.declaration.date-of-birth") @(userDetails.dateOfBirth.show) </p>
+        </div>
+    </div>
+    <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
+        <div class="grid-layout__column grid-layout__column--1-4">
+            <p>@Messages("hts.register.declaration.contact-details")</p>
+        </div>
+        <div class="grid-layout__column grid-layout__column--2-4">
+            <p>@Messages("hts.register.declaration.email") @(userDetails.email) </p>
+            <p>@Messages("hts.register.declaration.phone-number") @(userDetails.phoneNumber) </p>
+            <p>@Messages("hts.register.declaration.address") @(userDetails.address.mkString(","))</p>
+        </div>
+        <div class="grid-layout__column grid-layout__column--1-4">
+            <p><a>change</a></p>
+        </div>
+    </div>
+
+    <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
+        <div class="grid-layout__column grid-layout__column--1-4">
+            <p>@Messages("hts.register.declaration.contact-preference")</p>
+        </div>
+        <div class="grid-layout__column grid-layout__column--2-4">
+            <p>@(userDetails.contactPreference.show)</p>
+        </div>
+        <div class="grid-layout__column grid-layout__column--1-4">
+            <p><a>change</a></p>
+        </div>
+    </div>
+</div>
