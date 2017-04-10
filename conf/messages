@@ -1,23 +1,12 @@
-hts.core.help-to-save-service-start.header-page=Help To Save
-hts.core.help-to-save-service-start.header=Apply for Help to Save
-hts.core.help-to-save-service-start.par-1=Help to Save is a savings account that lets you earn a 50% government bonus on money you''ve saved.
-hts.core.help-to-save-service-start.par-2=You can apply for a Help to Save account if you'’re getting one of these benefits:
-hts.core.help-to-save-service-start.benefit-1=Working Tax Credit      
-hts.core.help-to-save-service-start.benefit-2=Universal Credit
-         
-hts.core.help-to-save-service-start.name=Name:
-hts.core.help-to-save-service-start.national-insurance-number=National Insurance number:
-hts.core.help-to-save-service-start.date-of-birth=Date of Birth:
-hts.core.help-to-save-service-start.contact-details=Contact details
-hts.core.help-to-save-service-start.title=Help to Save
-hts.core.help-to-save-service-start.email=Email:
-hts.core.help-to-save-service-start.phone-number=Phone number:
-hts.core.help-to-save-service-start.address=Address:
-hts.core.help-to-save-service-start.change=Change
-hts.core.help-to-save-service-start.contact-preference=Contact preference
-hts.core.help-to-save-service-start.create-your-account-header=Create your account
-hts.core.help-to-save-service-start.text=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
-hts.core.help-to-save-service-start.lable=Accept and create account
+hts.core.start.header-page=Help To Save
+hts.core.start.header=Apply for Help to Save
+hts.core.start.par-1=Help to Save is a savings account that lets you earn a 50% government bonus on money you''ve saved.
+hts.core.start.par-2=You can apply for a Help to Save account if you'’re getting one of these benefits:
+hts.core.start.benefit-1=Working Tax Credit      
+hts.core.start.benefit-2=Universal Credit
+hts.core.start.par-3=You must also be a UK resident, or a Crown servant or member of the British armed forces living overseas.
+hts.core.start.button=Start now
+
 
 hts.register.declaration.title=Help to Save
 hts.register.declaration.header-page=Confirm your contact details

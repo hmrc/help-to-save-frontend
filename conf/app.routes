@@ -1,3 +1,5 @@
 # microservice specific routes
 
 GET        /declaration         uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.helpToSave
+
+GET        /                    uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.start
