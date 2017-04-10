@@ -2,10 +2,12 @@ hts.core.start.header-page=Help To Save
 hts.core.start.header=Apply for Help to Save
 hts.core.start.par-1=Help to Save is a savings account that lets you earn a 50% government bonus on money you''ve saved.
 hts.core.start.par-2=You can apply for a Help to Save account if you'’re getting one of these benefits:
-hts.core.start.benefit-1=Working Tax Credit      
-hts.core.start.benefit-2=Universal Credit
+hts.core.start.working-tax-credit=Working Tax Credit
+hts.core.start.universal-credit=Universal Credit
+hts.core.start.universal-credit-extra=and your household earnings are at least £120 per week
 hts.core.start.par-3=You must also be a UK resident, or a Crown servant or member of the British armed forces living overseas.
 hts.core.start.button=Start now
+hts.core.start.elsewhere=Elsewhere on GOV.UK
 
 
 hts.register.declaration.title=Help to Save
