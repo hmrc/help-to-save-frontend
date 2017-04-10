@@ -18,13 +18,13 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.time.LocalDate
 
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import play.api.mvc._
-
-import scala.concurrent.Future
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
+import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.models.{ContactPreference, UserDetails}
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+
+import scala.concurrent.Future
 
 object HelpToSave extends HelpToSave
 
@@ -40,7 +40,13 @@ trait HelpToSave extends FrontendController {
       ContactPreference.Email
      )
 
-  val helpToSave = Action.async { implicit request =>
+  val helpToSave = Action.async { implicit request ⇒
 		Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)))
   }
+
+  val start = Action.async{ implicit request ⇒
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.start()))
+  }
+
+
 }
