@@ -14,28 +14,28 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend
+package uk.gov.hmrc.helptosavefrontend.controllers
 
+import akka.actor.Actor
 import play.api.http.Status
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{charset, contentType}
-import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave
+import play.api.test.Helpers.{charset, contentType, _}
+import uk.gov.hmrc.helptosavefrontend.connectors.FakeEligibilityConnector
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class StartPageSpec extends UnitSpec with WithFakeApplication{
+class StartSpec extends UnitSpec with WithFakeApplication{
 
   val fakeRequest = FakeRequest("GET", "/")
-
+  val helpToSave = new HelpToSave(new FakeEligibilityConnector(Actor.noSender))
 
   "GET /" should {
     "return 200" in {
-      val result = HelpToSave.start(fakeRequest)
+      val result = helpToSave.start(fakeRequest)
       status(result) shouldBe Status.OK
     }
 
     "return HTML" in {
-      val result = HelpToSave.start(fakeRequest)
+      val result = helpToSave.start(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }

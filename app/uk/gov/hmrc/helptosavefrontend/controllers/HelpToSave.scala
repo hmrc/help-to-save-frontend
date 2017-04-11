@@ -16,33 +16,18 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.time.LocalDate
-
+import com.google.inject.Inject
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.models.{ContactPreference, UserDetails}
+import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-object HelpToSave extends HelpToSave
+class HelpToSave @Inject()(eligibilityConnector: EligibilityConnector) extends FrontendController {
 
-trait HelpToSave extends FrontendController {
-
-  val user =
-    UserDetails("Bob",
-      "abcdefg",
-      LocalDate.ofEpochDay(0L),
-      "bob@email.com",
-      "01234567890",
-      List("1 the Street, Happy Town, AB1 B23"),
-      ContactPreference.Email
-     )
-
-  val helpToSave = Action.async { implicit request ⇒
-		Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)))
-  }
+  val nino = "A434387534D"
 
   val notElgibible = Action.async { implicit request ⇒
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligibile()))
@@ -52,5 +37,9 @@ trait HelpToSave extends FrontendController {
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.start()))
   }
 
-
+  val declaration =
+    Action.async { implicit request ⇒
+      eligibilityConnector.checkEligibility(nino).map(user ⇒
+          Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)))
+  }
 }
