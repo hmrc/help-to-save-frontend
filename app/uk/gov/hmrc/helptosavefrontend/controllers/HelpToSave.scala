@@ -44,6 +44,10 @@ trait HelpToSave extends FrontendController {
 		Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)))
   }
 
+  val notelgibible = Action.async { implicit request ⇒
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligibile()))
+  }
+
   val start = Action.async{ implicit request ⇒
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.start()))
   }
