@@ -29,7 +29,7 @@ class HelpToSave @Inject()(eligibilityConnector: EligibilityConnector) extends F
 
   val nino = "A434387534D"
 
-  val notElgibible = Action.async { implicit request ⇒
+  val notEligible = Action.async { implicit request ⇒
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligibile()))
   }
 
