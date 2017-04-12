@@ -20,12 +20,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import cats.Show
-import uk.gov.hmrc.helptosavefrontend.models.UserDetails.DateOfBirth
+import play.api.libs.json._
 
 /** Details of the user - displayed on declaration page */
 case class UserDetails(name: String,
                        NINO: String,
-                       dateOfBirth: DateOfBirth,
+                       dateOfBirth: LocalDate,
                        email: String,
                        phoneNumber: String,
                        address: List[String],
@@ -33,21 +33,9 @@ case class UserDetails(name: String,
 
 object UserDetails {
 
-  case class DateOfBirth(date: LocalDate)
+  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")))
 
-  object DateOfBirth {
-    implicit val dateOfBirthShow: Show[DateOfBirth] = Show.show(_.date.format(DateTimeFormatter.ofPattern("DD/MM/yyyy")))
-  }
-
-  def apply(name: String,
-            NINO: String,
-            dateOfBirth: LocalDate,
-            email: String,
-            phoneNumber: String,
-            address: List[String],
-            contactPreference: ContactPreference): UserDetails = UserDetails(
-    name, NINO, DateOfBirth(dateOfBirth), email, phoneNumber, address, contactPreference
-  )
+  implicit val userDetailsFormat: Format[UserDetails] = Json.format[UserDetails]
 }
 
 

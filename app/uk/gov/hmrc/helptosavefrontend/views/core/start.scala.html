@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @()(implicit request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
@@ -46,7 +47,7 @@
             <p> @Messages("hts.core.start.par-3") </p>
 
             @* TODO: link to login page when implemented *@
-            <a href="declaration">
+            <a href=@routes.HelpToSave.declaration().url>
                 <button class="button button--get-started">
                 @Messages("hts.core.start.button")
                 </button>

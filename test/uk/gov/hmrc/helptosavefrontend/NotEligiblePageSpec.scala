@@ -16,25 +16,28 @@
 
 package uk.gov.hmrc.helptosavefrontend
 
+import akka.actor.Actor
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentType, _}
+import uk.gov.hmrc.helptosavefrontend.connectors.FakeEligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class NotEligiblePageSpec extends UnitSpec with WithFakeApplication {
 
+  val helpToSave = new HelpToSave(new FakeEligibilityConnector(Actor.noSender))
+
   val fakeRequest = FakeRequest("GET", "/")
-
-
+  
   "GET /" should {
     "return 200" in {
-      val result = HelpToSave.notelgibible(fakeRequest)
+      val result = helpToSave.notEligible(fakeRequest)
       status(result) shouldBe Status.OK
     }
 
     "return HTML" in {
-      val result = HelpToSave.notelgibible(fakeRequest)
+      val result = helpToSave.notEligible(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }

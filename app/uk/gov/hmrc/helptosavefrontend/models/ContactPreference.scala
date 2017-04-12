@@ -17,10 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import cats.Show
+import play.api.libs.json._
 
 sealed trait ContactPreference
 
 object ContactPreference {
+
   case object Email extends ContactPreference
   case object SMS extends ContactPreference
 
@@ -28,5 +30,23 @@ object ContactPreference {
     case Email => "Email"
     case SMS => "SMS"
   })
+
+  implicit val contactPreferenceFormat: Format[ContactPreference] = new Format[ContactPreference] {
+    def writes(o: ContactPreference): JsValue = o match {
+      case ContactPreference.Email ⇒ JsString("email")
+      case ContactPreference.SMS ⇒ JsString("sms")
+    }
+    def reads(o : JsValue) : JsResult[ContactPreference] = o match {
+      case JsString(s) ⇒
+        s.toLowerCase.trim match {
+          case "email" ⇒ JsSuccess(ContactPreference.Email)
+          case "sms" ⇒ JsSuccess(ContactPreference.SMS)
+          case other ⇒ JsError(s"Could not read contact preference: $other")
+        }
+
+      case other ⇒ JsError(s"Expected string but got $other")
+    }
+  }
+
 }
 
