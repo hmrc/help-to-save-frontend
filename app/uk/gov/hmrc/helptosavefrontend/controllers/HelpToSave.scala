@@ -21,25 +21,24 @@ import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
-import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.helptosavefrontend.views
 
 import scala.concurrent.Future
 
-class HelpToSave @Inject()(eligibilityConnector: EligibilityConnector) extends FrontendController {
+class HelpToSave @Inject()(eligibilityConnector: EligibilityConnector) extends HelpToSaveController  {
 
   val nino = "A434387534D"
 
   val notEligible = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.core.not_eligibile()))
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligibile()))
   }
 
-  val start = Action.async{ implicit request ⇒
-    Future.successful(Ok(views.html.core.start()))
+  def start = Action.async { implicit request ⇒
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.start()))
   }
 
-  val declaration =
-    Action.async { implicit request ⇒
+  def declaration =
+    authorisedHtsUser { implicit authContext => implicit request ⇒
       eligibilityConnector.checkEligibility(nino)
         .map(result ⇒
           Ok(result.fold(
