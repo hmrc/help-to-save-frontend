@@ -46,6 +46,9 @@ class DeclarationSpec extends TestKit(ActorSystem("HelpToSaveSpec")) with Implic
 
   def doRequest(): Future[Result] = helpToSave.declaration(fakeRequest)
 
+  def successfulEligibilityResult(): EligibilityResult = EligibilityResult(Some(randomUserDetails()))
+  def failedEligibilityResult(): EligibilityResult = EligibilityResult(None)
+
   "GET /" should {
 
     "call getEligibility from the given EligibilityStubConnector" in {
@@ -57,7 +60,7 @@ class DeclarationSpec extends TestKit(ActorSystem("HelpToSaveSpec")) with Implic
       val result: Future[Result] = doRequest()
 
       val check = expectMsgType[CheckEligibility].promise
-      check.success(randomUserDetails())
+      check.success(successfulEligibilityResult())
 
       status(result) shouldBe Status.OK
     }
@@ -66,18 +69,19 @@ class DeclarationSpec extends TestKit(ActorSystem("HelpToSaveSpec")) with Implic
       val result = doRequest()
 
       val check = expectMsgType[CheckEligibility].promise
-      check.success(randomUserDetails())
+      check.success(successfulEligibilityResult())
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
     "display the user details if the eligibility check is successful" in {
-      val user = randomUserDetails()
+      val eligibilityResult = successfulEligibilityResult()
+      val user = eligibilityResult.value.getOrElse(sys.error("Could not find user"))
 
       val result = doRequest()
       val check = expectMsgType[CheckEligibility].promise
-      check.success(user)
+      check.success(eligibilityResult)
       val html = contentAsString(result)
 
       html should include(user.name)
@@ -88,6 +92,18 @@ class DeclarationSpec extends TestKit(ActorSystem("HelpToSaveSpec")) with Implic
       html should include(user.address.mkString(","))
       html should include(user.contactPreference.show)
     }
+
+    "display a 'Not Eligible' page if the eligibility check is negative" in {
+      val result = doRequest()
+      val check = expectMsgType[CheckEligibility].promise
+      check.success(failedEligibilityResult())
+      val html = contentAsString(result)
+
+      html should include("not eligible")
+      html should include("To be eligible for an account")
+    }
+
+
   }
 }
 

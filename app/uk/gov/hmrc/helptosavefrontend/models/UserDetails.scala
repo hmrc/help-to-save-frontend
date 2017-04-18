@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter
 import cats.Show
 import play.api.libs.json._
 
-/** Details of the user - displayed on declaration page */
+/** Details of the user */
 case class UserDetails(name: String,
                        NINO: String,
                        dateOfBirth: LocalDate,
