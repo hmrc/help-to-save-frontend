@@ -39,7 +39,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   private lazy val companyAuthFrontend = getConfString("company-auth.url", throw new RuntimeException("Company auth url required"))
   private lazy val companyAuthSignInPath = getConfString("company-auth.sign-in-path", "")
-  private lazy val companyAuthSignOutPath = getConfString("company-auth.sign-out-path", "")
+
   lazy val companySignInloginUrl: String =  companyAuthFrontend + companyAuthSignInPath
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")

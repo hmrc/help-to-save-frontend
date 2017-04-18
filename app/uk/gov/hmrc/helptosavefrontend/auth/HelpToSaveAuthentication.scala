@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import play.api.Logger
 import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.play.frontend.auth._
@@ -34,8 +33,7 @@ case class HtsRegime(authenticationProvider: AuthenticationProvider) extends Tax
 
   override def authenticationType: AuthenticationProvider = authenticationProvider
 
-  override def unauthorisedLandingPage = {
-
+  override def unauthorisedLandingPage: Some[String] = {
     Some(routes.HelpToSave.notEligible().url)
   }
 }
