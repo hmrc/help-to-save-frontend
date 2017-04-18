@@ -18,15 +18,15 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import akka.actor.ActorRef
 import uk.gov.hmrc.helptosavefrontend.connectors.FakeEligibilityConnector.CheckEligibility
-import uk.gov.hmrc.helptosavefrontend.models.UserDetails
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserDetails}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{Future, Promise}
 
 class FakeEligibilityConnector(reportTo: ActorRef) extends EligibilityConnector {
 
-  override def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Future[UserDetails] = {
-    val promise = Promise[UserDetails]()
+  override def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Future[EligibilityResult] = {
+    val promise = Promise[EligibilityResult]()
     reportTo ! CheckEligibility(promise)
     promise.future
   }
@@ -35,6 +35,6 @@ class FakeEligibilityConnector(reportTo: ActorRef) extends EligibilityConnector 
 
 object FakeEligibilityConnector {
 
-  case class CheckEligibility(promise: Promise[UserDetails])
+  case class CheckEligibility(promise: Promise[EligibilityResult])
 
 }
