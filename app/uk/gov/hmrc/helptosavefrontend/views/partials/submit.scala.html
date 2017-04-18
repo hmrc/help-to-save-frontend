@@ -19,7 +19,7 @@
 @argsMap = @{ args.toMap }
 @defining({
     var a = argsMap.filterNot(entry => entry._1.name.startsWith("_")) + ('type -> "submit")
-    if (argsMap.get('_buttonClass).isDefined) {
+    if (argsMap.isDefinedAt('_buttonClass)) {
         a = a + ('_modifierClass -> argsMap.get('_buttonClass).get)
     }
     a.toVector
