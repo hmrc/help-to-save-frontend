@@ -15,8 +15,8 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.html.partials.{form,button,submit}
 @()(implicit request: Request[_], messages: Messages)
-
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.start.header-page"),
     bodyClasses = None){
@@ -47,12 +47,9 @@
             <p> @Messages("hts.core.start.par-3") </p>
 
             @* TODO: link to login page when implemented *@
-            <a href=@routes.HelpToSave.declaration().url>
-                <button class="button button--get-started">
-                @Messages("hts.core.start.button")
-                </button>
-            </a>
-        </div>
+                    @form(routes.HelpToSave.declaration(), 'class -> "group") {
+                        @submit('_buttonClass -> "button--get-started"){ @Messages("hts.core.start.button")}
+                    }
 
         <div class="grid-layout__column grid-layout__column--1-3">
             <section class="section section--blue-top">
