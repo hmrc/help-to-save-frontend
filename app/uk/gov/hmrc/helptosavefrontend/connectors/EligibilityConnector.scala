@@ -21,7 +21,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.WSHttp
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserDetails}
+import uk.gov.hmrc.helptosavefrontend.models.EligibilityResult
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.Future
