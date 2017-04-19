@@ -33,7 +33,7 @@ case class HtsRegime(authenticationProvider: AuthenticationProvider) extends Tax
 
   override def authenticationType: AuthenticationProvider = authenticationProvider
 
-  override def unauthorisedLandingPage: Some[String] = {
+  override def unauthorisedLandingPage: Option[String] = {
     Some(routes.HelpToSave.notEligible().url)
   }
 }
