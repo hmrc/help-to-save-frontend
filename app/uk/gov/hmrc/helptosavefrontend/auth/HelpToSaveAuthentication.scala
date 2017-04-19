@@ -21,7 +21,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.play.frontend.auth._
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 
-object HelpToSaveAuthentication extends  GovernmentGateway{
+object HelpToSaveAuthentication extends GovernmentGateway{
   override def continueURL: String = FrontendAppConfig.redirectUrlForAuth
   override def loginURL: String = FrontendAppConfig.companySignInloginUrl
 }

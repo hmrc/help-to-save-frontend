@@ -17,8 +17,8 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.helptosavefrontend.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.{HelpToSaveAuthentication, HtsRegime}
+import uk.gov.hmrc.helptosavefrontend.FrontendAuthConnector
 import uk.gov.hmrc.play.frontend.auth._
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel
@@ -28,6 +28,9 @@ import scala.concurrent.Future
 
 
 trait HelpToSaveController extends FrontendController with Actions{
+
+  protected type AsyncPlayUserRequest = AuthContext => Request[AnyContent] => Future[Result]
+
   override lazy val authConnector: AuthConnector = FrontendAuthConnector
   protected lazy val authenticationProvider: GovernmentGateway = HelpToSaveAuthentication
 
@@ -35,8 +38,6 @@ trait HelpToSaveController extends FrontendController with Actions{
   private val helpToPayConfidenceLevel = new IdentityConfidencePredicate(ConfidenceLevel.L0,
     Future.successful(Redirect(routes.HelpToSave.notEligible())))
 
-  protected type AsyncPlayUserRequest = AuthContext => Request[AnyContent] => Future[Result]
-  def authorisedHtsUser(body: AsyncPlayUserRequest): Action[AnyContent] = {
+  def authorisedHtsUser(body: AsyncPlayUserRequest): Action[AnyContent] =
     AuthorisedFor(htsRegime, helpToPayConfidenceLevel).async(body)
-  }
 }

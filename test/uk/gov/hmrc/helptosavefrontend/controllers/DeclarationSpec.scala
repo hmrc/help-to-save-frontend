@@ -16,72 +16,90 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import akka.actor.ActorSystem
-import akka.testkit.{ImplicitSender, TestKit}
 import cats.syntax.show._
-import org.scalatest.BeforeAndAfterAll
+import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.connectors.FakeEligibilityConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.FakeEligibilityConnector.CheckEligibility
+import uk.gov.hmrc.domain.SaUtr
+import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserDetails.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, SaAccount}
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L200
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.CredentialStrength.Strong
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
+import scala.concurrent.duration._
 
-class DeclarationSpec extends TestKit(ActorSystem("HelpToSaveSpec")) with ImplicitSender
-   with UnitSpec with BeforeAndAfterAll with WithFakeApplication{
+class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
-  override def afterAll {
-    super.afterAll()
-    TestKit.shutdownActorSystem(system)
+  val user = "user"
+
+  def fakeRequest = FakeRequest("GET", "/").withSession("userId" → user, "token" → "token", "name" → "name")
+
+  val authorisedUser = Authority(user, Accounts(sa = Some(SaAccount("", SaUtr("1234567890")))),
+    None, None, Strong, L200, None, None, None, "")
+
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
+
+  val helpToSave = new HelpToSave(mockEligibilityConnector){
+    override lazy val authConnector = mockAuthConnector
   }
-
-  val fakeRequest = FakeRequest("GET", "/")
-
-  val helpToSave = new HelpToSave(new FakeEligibilityConnector(self))
 
   def doRequest(): Future[Result] = helpToSave.declaration(fakeRequest)
 
-  def successfulEligibilityResult(): EligibilityResult = EligibilityResult(Some(randomUserDetails()))
-  def failedEligibilityResult(): EligibilityResult = EligibilityResult(None)
+  def mockAuthorisation(): Unit =
+    (mockAuthConnector.currentAuthority(_: HeaderCarrier)).expects(*).returning(Future.successful({
+      Some(authorisedUser)
+    }))
+
+  def mockEligibilityResult(nino: String, result: Option[UserDetails]): Unit =
+    (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
+      .expects(nino, *)
+      .returning(Future.successful(EligibilityResult(result)))
+
 
   "GET /" should {
 
     "call getEligibility from the given EligibilityStubConnector" in {
-      doRequest()
-      expectMsgType[CheckEligibility].promise
+      mockAuthorisation()
+      // this test will fail if the following line is not present - it checks the eligibility
+      // connector is actually being called
+      mockEligibilityResult(helpToSave.nino, None)
+      val result = doRequest()
+      Await.result(result, 3.seconds)
     }
 
     "return 200 if the eligibility check is successful" in {
+      mockAuthorisation()
+      mockEligibilityResult(helpToSave.nino, Some(randomUserDetails()))
+
       val result: Future[Result] = doRequest()
-
-      val check = expectMsgType[CheckEligibility].promise
-      check.success(successfulEligibilityResult())
-
       status(result) shouldBe Status.OK
     }
 
     "return HTML if the eligibility check is successful" in {
-      val result = doRequest()
+      mockAuthorisation()
+      mockEligibilityResult(helpToSave.nino, Some(randomUserDetails()))
 
-      val check = expectMsgType[CheckEligibility].promise
-      check.success(successfulEligibilityResult())
+      val result = doRequest()
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
     "display the user details if the eligibility check is successful" in {
-      val eligibilityResult = successfulEligibilityResult()
-      val user = eligibilityResult.value.getOrElse(sys.error("Could not find user"))
+      val user = randomUserDetails()
+      mockAuthorisation()
+      mockEligibilityResult(helpToSave.nino, Some(user))
 
       val result = doRequest()
-      val check = expectMsgType[CheckEligibility].promise
-      check.success(eligibilityResult)
       val html = contentAsString(result)
 
       html should include(user.name)
@@ -94,9 +112,9 @@ class DeclarationSpec extends TestKit(ActorSystem("HelpToSaveSpec")) with Implic
     }
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
+      mockAuthorisation()
+      mockEligibilityResult(helpToSave.nino, None)
       val result = doRequest()
-      val check = expectMsgType[CheckEligibility].promise
-      check.success(failedEligibilityResult())
       val html = contentAsString(result)
 
       html should include("not eligible")

@@ -16,17 +16,19 @@
 
 package uk.gov.hmrc.helptosavefrontend
 
-import akka.actor.Actor
+import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentType, _}
-import uk.gov.hmrc.helptosavefrontend.connectors.FakeEligibilityConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class NotEligiblePageSpec extends UnitSpec with WithFakeApplication {
+class NotEligiblePageSpec extends UnitSpec with WithFakeApplication with MockFactory{
 
-  val helpToSave = new HelpToSave(new FakeEligibilityConnector(Actor.noSender))
+  val mockEligibilityConnector = mock[EligibilityConnector]
+
+  val helpToSave = new HelpToSave(mockEligibilityConnector)
 
   val fakeRequest = FakeRequest("GET", "/")
   
