@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.syntax.show._
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
+import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -48,7 +49,7 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
 
-  val helpToSave = new HelpToSave(mockEligibilityConnector){
+  val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector){
     override lazy val authConnector = mockAuthConnector
   }
 

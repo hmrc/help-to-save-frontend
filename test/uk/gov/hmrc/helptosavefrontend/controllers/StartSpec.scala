@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentType, _}
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
@@ -28,7 +29,7 @@ class StartSpec extends UnitSpec with WithFakeApplication with MockFactory{
   val mockEligibilityConnector = mock[EligibilityConnector]
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new HelpToSave(mockEligibilityConnector)
+  val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector)
 
   "GET /" should {
     "return 200" in {

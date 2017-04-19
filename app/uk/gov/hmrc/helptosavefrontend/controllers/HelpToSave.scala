@@ -16,21 +16,23 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import javax.inject.Singleton
 import com.google.inject.Inject
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
+import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.views
 
 import scala.concurrent.Future
 
-class HelpToSave @Inject()(eligibilityConnector: EligibilityConnector) extends HelpToSaveController  {
+@Singleton
+class HelpToSave @Inject()(val messagesApi: MessagesApi,
+                           eligibilityConnector: EligibilityConnector) extends HelpToSaveController with I18nSupport  {
 
   val nino = "A434387534D"
 
   val notEligible = Action.async { implicit request ⇒
-    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligibile()))
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligible()))
   }
 
   def start = Action.async { implicit request ⇒
@@ -42,7 +44,7 @@ class HelpToSave @Inject()(eligibilityConnector: EligibilityConnector) extends H
       eligibilityConnector.checkEligibility(nino)
         .map(result ⇒
           Ok(result.fold(
-            views.html.core.not_eligibile(),
+            views.html.core.not_eligible(),
             user ⇒ uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)
           )))
   }
