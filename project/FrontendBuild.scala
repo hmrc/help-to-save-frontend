@@ -30,7 +30,7 @@ object FrontendBuild extends Build with MicroService {
     "org.pegdown" % "pegdown" % "1.6.0" % scope,
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-    "com.typesafe.akka" %% "akka-testkit" % "2.4.17" % scope
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope
   )
 
 }

@@ -33,6 +33,15 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   private val contactHost = configuration.getString(s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
+  val logInContinueURL = getConfString("auth.login-callback.base-url", "")
+  val loginURL = getConfString("auth.login-callback.path", "")
+  val redirectUrlForAuth = logInContinueURL + loginURL
+
+  private lazy val companyAuthFrontend = getConfString("company-auth.url", throw new RuntimeException("Company auth url required"))
+  private lazy val companyAuthSignInPath = getConfString("company-auth.sign-in-path", "")
+
+  val companySignInloginUrl: String =  companyAuthFrontend + companyAuthSignInPath
+
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")
   override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
