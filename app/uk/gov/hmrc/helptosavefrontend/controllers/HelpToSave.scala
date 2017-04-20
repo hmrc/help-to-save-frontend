@@ -45,22 +45,23 @@ class HelpToSave @Inject()(val messagesApi: MessagesApi,
 
   def declaration =
     authorisedHtsUser { implicit authContext => implicit request ⇒
-       eligibilityConnector.checkEligibility(retrieveNino(authContext).nino)
+       eligibilityConnector.checkEligibility(retrieveNino(authContext))
         .map(result ⇒
           Ok(result.fold(
             views.html.core.not_eligible(),
             user ⇒ uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)
           )))
   }
-  def retrieveNino(authContext: AuthContext): Nino = {
-    def getNino(accounts:Accounts):Nino = (accounts.paye,accounts.tai,accounts.tcs,accounts.iht) match {
-      case (Some(paye),_,_,_) => paye.nino
-      case (_,Some(tai),_,_) => tai.nino
-      case (_,_,Some(tcs),_) => tcs.nino
-      case (_,_,_,Some(iht)) => iht.nino
-      case _ =>   Nino("Hello world we dont have a nino")
+  def retrieveNino(authContext: AuthContext): String = {
+    def getNino(accounts:Accounts):Option[String] = (accounts.paye,accounts.tai,accounts.tcs,accounts.iht) match {
+      case (Some(paye),_,_,_) => Some(paye.nino.nino)
+      case (_,Some(tai),_,_) => Some(tai.nino.nino)
+      case (_,_,Some(tcs),_) => Some(tcs.nino.nino)
+      case (_,_,_,Some(iht)) => Some(iht.nino.nino)
+      case _ =>  None
     }
-    getNino(authContext.principal.accounts)
+    //todo figure out what do to do if nino is not returned via signin
+    getNino(authContext.principal.accounts).getOrElse("WM123456C")
   }
 
 }
