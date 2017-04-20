@@ -18,15 +18,14 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
 
-import akka.event.slf4j.Logger
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.helptosavefrontend.connectors.{AuthConnector, EligibilityConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
-import uk.gov.hmrc.play.frontend.auth.{AuthContext, Principal}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,7 +34,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class HelpToSave @Inject()(val messagesApi: MessagesApi,
                            eligibilityConnector: EligibilityConnector) extends HelpToSaveController with I18nSupport  {
 
-  val nino = "A434387534D"
 
   val notEligible = Action.async { implicit request ⇒
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligible()))

@@ -23,12 +23,12 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.domain.SaUtr
+import uk.gov.hmrc.domain.{Nino, SaUtr}
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserDetails.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, SaAccount}
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, PayeAccount, SaAccount}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L200
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.CredentialStrength.Strong
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -40,10 +40,10 @@ import scala.concurrent.duration._
 class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val user = "user"
-
+  val fakeNino = "WM123456C"
   def fakeRequest = FakeRequest("GET", "/").withSession("userId" → user, "token" → "token", "name" → "name")
 
-  val authorisedUser = Authority(user, Accounts(sa = Some(SaAccount("", SaUtr("1234567890")))),
+  val authorisedUser = Authority(user, Accounts(paye = Some(PayeAccount("", Nino(fakeNino)))),
     None, None, Strong, L200, None, None, None, "")
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
@@ -72,14 +72,14 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
       mockAuthorisation()
       // this test will fail if the following line is not present - it checks the eligibility
       // connector is actually being called
-      mockEligibilityResult(helpToSave.nino, None)
+      mockEligibilityResult(fakeNino, None)
       val result = doRequest()
       Await.result(result, 3.seconds)
     }
 
     "return 200 if the eligibility check is successful" in {
       mockAuthorisation()
-      mockEligibilityResult(helpToSave.nino, Some(randomUserDetails()))
+      mockEligibilityResult(fakeNino, Some(randomUserDetails()))
 
       val result: Future[Result] = doRequest()
       status(result) shouldBe Status.OK
@@ -87,7 +87,7 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
 
     "return HTML if the eligibility check is successful" in {
       mockAuthorisation()
-      mockEligibilityResult(helpToSave.nino, Some(randomUserDetails()))
+      mockEligibilityResult(fakeNino, Some(randomUserDetails()))
 
       val result = doRequest()
 
@@ -98,7 +98,7 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
     "display the user details if the eligibility check is successful" in {
       val user = randomUserDetails()
       mockAuthorisation()
-      mockEligibilityResult(helpToSave.nino, Some(user))
+      mockEligibilityResult(fakeNino, Some(user))
 
       val result = doRequest()
       val html = contentAsString(result)
@@ -114,7 +114,7 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
       mockAuthorisation()
-      mockEligibilityResult(helpToSave.nino, None)
+      mockEligibilityResult(fakeNino, None)
       val result = doRequest()
       val html = contentAsString(result)
 
