@@ -23,12 +23,12 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.domain.{Nino, SaUtr}
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserDetails.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, PayeAccount, SaAccount}
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, PayeAccount}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L200
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.CredentialStrength.Strong
 import uk.gov.hmrc.play.http.HeaderCarrier
