@@ -17,13 +17,19 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
+
+import akka.event.slf4j.Logger
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.helptosavefrontend.connectors.{AuthConnector, EligibilityConnector}
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
+import uk.gov.hmrc.play.frontend.auth.{AuthContext, Principal}
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class HelpToSave @Inject()(val messagesApi: MessagesApi,
@@ -41,11 +47,22 @@ class HelpToSave @Inject()(val messagesApi: MessagesApi,
 
   def declaration =
     authorisedHtsUser { implicit authContext => implicit request ⇒
-      eligibilityConnector.checkEligibility(nino)
+       eligibilityConnector.checkEligibility(retrieveNino(authContext).nino)
         .map(result ⇒
           Ok(result.fold(
             views.html.core.not_eligible(),
             user ⇒ uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)
           )))
   }
+  def retrieveNino(authContext: AuthContext)(implicit hc: HeaderCarrier, ec: ExecutionContext): Nino = {
+    def getNino(accounts:Accounts):Nino = (accounts.paye,accounts.tai,accounts.tcs,accounts.iht) match {
+      case (Some(paye),_,_,_) => paye.nino
+      case (_,Some(tai),_,_) => tai.nino
+      case (_,_,Some(tcs),_) => tcs.nino
+      case (_,_,_,Some(iht)) => iht.nino
+      case _ =>   Nino("Hello world we dont have a nino")
+    }
+    getNino(authContext.principal.accounts)
+  }
+
 }
