@@ -52,7 +52,7 @@ class HelpToSave @Inject()(val messagesApi: MessagesApi,
             user ⇒ uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)
           )))
   }
-  def retrieveNino(authContext: AuthContext)(implicit hc: HeaderCarrier, ec: ExecutionContext): Nino = {
+  def retrieveNino(authContext: AuthContext): Nino = {
     def getNino(accounts:Accounts):Nino = (accounts.paye,accounts.tai,accounts.tcs,accounts.iht) match {
       case (Some(paye),_,_,_) => paye.nino
       case (_,Some(tai),_,_) => tai.nino
