@@ -17,19 +17,23 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
+
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.play.frontend.auth.AuthContext
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class HelpToSave @Inject()(val messagesApi: MessagesApi,
                            eligibilityConnector: EligibilityConnector) extends HelpToSaveController with I18nSupport  {
 
-  val nino = "A434387534D"
 
   val notEligible = Action.async { implicit request ⇒
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligible()))
@@ -39,13 +43,28 @@ class HelpToSave @Inject()(val messagesApi: MessagesApi,
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.start()))
   }
 
-  def declaration =
+  def declaration  =
     authorisedHtsUser { implicit authContext => implicit request ⇒
-      eligibilityConnector.checkEligibility(nino)
-        .map(result ⇒
-          Ok(result.fold(
-            views.html.core.not_eligible(),
-            user ⇒ uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)
-          )))
+      retrieveNino(authContext) match {
+        case Some(nino) => eligibilityConnector.checkEligibility(nino)
+          .map(result ⇒
+            Ok(result.fold(
+              views.html.core.not_eligible(),
+              user ⇒ uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)
+            )))
+        case None => Future.successful(Ok(views.html.core.not_eligible()))
+      }
   }
+  def retrieveNino(authContext: AuthContext): Option[String] = {
+    def getNino(accounts:Accounts):Option[String] = (accounts.paye,accounts.tai,accounts.tcs,accounts.iht) match {
+      case (Some(paye),_,_,_) => Some(paye.nino.nino)
+      case (_,Some(tai),_,_) => Some(tai.nino.nino)
+      case (_,_,Some(tcs),_) => Some(tcs.nino.nino)
+      case (_,_,_,Some(iht)) => Some(iht.nino.nino)
+      case _ =>  None
+    }
+    //todo figure out what do to do if nino is not returned via signin
+    getNino(authContext.principal.accounts)
+  }
+
 }
