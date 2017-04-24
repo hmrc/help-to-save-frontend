@@ -30,12 +30,12 @@ object HTSCompositePageVisibilityPredicate extends CompositePageVisibilityPredic
   //TODO: not sure how to make of this(UpliftingIdentityConfidencePredicate)
   private val ivUpliftURI: URI =
     new URI(s"${ivUpliftUrl}?origin=$sosOrigin&" +
-      s"completionURL=${URLEncoder.encode(redirectUrlAfterAuth, "UTF-8")}&" +
+      s"completionURL=${URLEncoder.encode(loginCallbackURL, "UTF-8")}&" +
       s"failureURL=${URLEncoder.encode(perTaxIdentityCheckFailedUrl, "UTF-8")}" +
       s"&confidenceLevel=200")
 
   private val twoFactorURI: URI =
     new URI(s"${twoFactorUrl}?" +
-      s"continue=${URLEncoder.encode(redirectUrlAfterAuth, "UTF-8")}&" +
+      s"continue=${URLEncoder.encode(loginCallbackURL, "UTF-8")}&" +
       s"failure=${URLEncoder.encode(perTaxIdentityCheckFailedUrl, "UTF-8")}")
 }
