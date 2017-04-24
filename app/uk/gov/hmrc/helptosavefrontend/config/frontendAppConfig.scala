@@ -33,9 +33,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   private val contactHost = configuration.getString(s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
-  private val logInContinueURL = getConfString("auth.login-callback.base-url", "")
-  private val loginURL = getConfString("auth.login-callback.path", "")
-  val redirectUrlAfterAuth = logInContinueURL + loginURL
+  val loginCallbackURL = getConfString("login-callback.url", "")
 
   private val companyAuthFrontend = getConfString("company-auth.url", throw new RuntimeException("Company auth url required"))
   private val companyAuthSignInPath = getConfString("company-auth.sign-in-path", "")

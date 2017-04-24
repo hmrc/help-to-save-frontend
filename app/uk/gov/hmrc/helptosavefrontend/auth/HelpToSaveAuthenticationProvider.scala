@@ -29,7 +29,7 @@ object HelpToSaveAuthenticationProvider extends GovernmentGateway {
 
   override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = ggRedirect
 
-  override def continueURL: String = redirectUrlAfterAuth
+  override def continueURL: String = loginCallbackURL
 
   override def loginURL: String = companySignInUrl
 
