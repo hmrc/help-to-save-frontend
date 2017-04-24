@@ -28,19 +28,20 @@ import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserDetails.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.{L0, L200}
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.CredentialStrength.{Strong, Weak}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, PayeAccount}
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L200
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.CredentialStrength.Strong
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
 class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val user = "user"
   val fakeNino = "WM123456C"
+
   def fakeRequest = FakeRequest("GET", "/").withSession("userId" → user, "token" → "token", "name" → "name")
 
   val authorisedUser = Authority(user, Accounts(paye = Some(PayeAccount("", Nino(fakeNino)))),
@@ -49,13 +50,13 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
 
-  val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector){
+  val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector) {
     override lazy val authConnector = mockAuthConnector
   }
 
   def doRequest(): Future[Result] = helpToSave.declaration(fakeRequest)
 
-  def mockAuthorisation(): Unit =
+  def mockAuthorisation(authorisedUser: Authority = authorisedUser): Unit =
     (mockAuthConnector.currentAuthority(_: HeaderCarrier)).expects(*).returning(Future.successful({
       Some(authorisedUser)
     }))
@@ -67,6 +68,16 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
 
 
   "GET /" should {
+
+    "should redirect to 2-factor auth if the credential strength is Weak" in {
+      val authorisedUser = Authority(user, Accounts(paye = Some(PayeAccount("", Nino(fakeNino)))),
+        None, None, Weak, L0, None, None, None, "")
+
+      mockAuthorisation(authorisedUser)
+      val result = doRequest()
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result).get should include("http://localhost:9949/coafe/two-step-verification/register/?continue=http%3A%2F%2Flocalhost%3A7000%2Fhelp-to-save%2Fdeclaration")
+    }
 
     "call getEligibility from the given EligibilityStubConnector" in {
       mockAuthorisation()

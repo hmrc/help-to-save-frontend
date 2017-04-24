@@ -33,14 +33,21 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   private val contactHost = configuration.getString(s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
-  val logInContinueURL = getConfString("auth.login-callback.base-url", "")
-  val loginURL = getConfString("auth.login-callback.path", "")
-  val redirectUrlForAuth = logInContinueURL + loginURL
+  private val logInContinueURL = getConfString("auth.login-callback.base-url", "")
+  private val loginURL = getConfString("auth.login-callback.path", "")
+  val redirectUrlAfterAuth = logInContinueURL + loginURL
 
-  private lazy val companyAuthFrontend = getConfString("company-auth.url", throw new RuntimeException("Company auth url required"))
-  private lazy val companyAuthSignInPath = getConfString("company-auth.sign-in-path", "")
+  private val companyAuthFrontend = getConfString("company-auth.url", throw new RuntimeException("Company auth url required"))
+  private val companyAuthSignInPath = getConfString("company-auth.sign-in-path", "")
 
-  val companySignInloginUrl: String =  companyAuthFrontend + companyAuthSignInPath
+  val twoFactorUrl: String = getConfString("two-factor.url", "")
+  val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
+
+  val perTaxFrontendHost: String = getConfString("pertax-frontend.url", "")
+  val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
+
+  val perTaxIdentityCheckFailedUrl: String = s"$perTaxFrontendHost/identity-check-failed"
+  val companySignInUrl: String = companyAuthFrontend + companyAuthSignInPath
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")

@@ -17,27 +17,20 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.helptosavefrontend.auth.{HelpToSaveAuthentication, HtsRegime}
 import uk.gov.hmrc.helptosavefrontend.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.auth.{HTSCompositePageVisibilityPredicate, HelpToSaveAuthenticationProvider, HtsRegime}
 import uk.gov.hmrc.play.frontend.auth._
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-
-trait HelpToSaveController extends FrontendController with Actions{
+trait HelpToSaveController extends FrontendController with Actions {
 
   protected type AsyncPlayUserRequest = AuthContext => Request[AnyContent] => Future[Result]
 
   override lazy val authConnector: AuthConnector = FrontendAuthConnector
-  protected lazy val authenticationProvider: GovernmentGateway = HelpToSaveAuthentication
-
-  protected lazy val htsRegime = HtsRegime(authenticationProvider)
-  private val helpToPayConfidenceLevel = new IdentityConfidencePredicate(ConfidenceLevel.L0,
-    Future.successful(Redirect(routes.HelpToSave.notEligible())))
 
   def authorisedHtsUser(body: AsyncPlayUserRequest): Action[AnyContent] =
-    AuthorisedFor(htsRegime, helpToPayConfidenceLevel).async(body)
+    AuthorisedFor(HtsRegime, HTSCompositePageVisibilityPredicate).async(body)
 }

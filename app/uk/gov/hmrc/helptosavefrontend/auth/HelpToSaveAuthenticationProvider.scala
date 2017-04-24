@@ -16,22 +16,38 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig
+import play.api.mvc.Results.Redirect
+import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.play.frontend.auth._
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 
-object HelpToSaveAuthentication extends GovernmentGateway{
-  override def continueURL: String = FrontendAppConfig.redirectUrlForAuth
-  override def loginURL: String = FrontendAppConfig.companySignInloginUrl
+import scala.concurrent.Future
+
+object HelpToSaveAuthenticationProvider extends GovernmentGateway {
+
+  override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = ggRedirect
+
+  override def continueURL: String = redirectUrlAfterAuth
+
+  override def loginURL: String = companySignInUrl
+
+  def ggRedirect: Future[Result] = {
+
+    Future.successful(Redirect(loginURL, Map(
+      "continue" -> Seq(continueURL),
+      "accountType" -> Seq("company")
+    )))
+  }
 }
 
-case class HtsRegime(authenticationProvider: AuthenticationProvider) extends TaxRegime {
+object HtsRegime extends TaxRegime {
 
   //todo find out what to do here ????
-  override def isAuthorised(accounts: Accounts): Boolean = true
+  override def isAuthorised(accounts: Accounts): Boolean = true //accounts.paye.isDefined
 
-  override def authenticationType: AuthenticationProvider = authenticationProvider
+  override def authenticationType: AuthenticationProvider = HelpToSaveAuthenticationProvider
 
   override def unauthorisedLandingPage: Option[String] = {
     Some(routes.HelpToSave.notEligible().url)
