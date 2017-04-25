@@ -1,0 +1,162 @@
+@*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.html.partials.{form, button, submit}
+@()(implicit request: Request[_], messages: Messages)
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+    title = Messages("hts.core.about-help-to-save.header-page"),
+    bodyClasses = None) {
+    <div class="grid-layout grid-layout--stacked">
+        <div class="grid-layout__column grid-layout__column--2-3">
+            <header class="page-header text">
+                <h1>@Messages("hts.core.about-help-to-save.header-page")</h1>
+            </header>
+            <ul class="divider--bottom">
+                <li>1. @Messages("hts.core.about-help-to-save.link-1") </li>
+                <li>2. @Messages("hts.core.about-help-to-save.link-2") </li>
+                <li>3. @Messages("hts.core.about-help-to-save.link-3") </li>
+                    &nbsp;
+            </ul>
+            <h2>@Messages("hts.core.about-help-to-save.header-1")  </h2>
+            <p> @Messages("hts.core.about-help-to-save.par-1") </p>
+            <p> @Messages("hts.core.about-help-to-save.par-2") </p>
+
+            <ul class="bullets">
+                <li>
+                    @* TODO: read link location from config? *@
+                    <a class="link--no-underline" href="https://www.gov.uk/working-tax-credit">
+                    @Messages("hts.core.start.working-tax-credit")
+                    </a>
+                </li>
+                <li>
+                    <a class="link--no-underline" href="https://www.gov.uk/universal-credit">
+                    @Messages("hts.core.start.universal-credit")
+                    </a>
+                    @Messages("hts.core.start.universal-credit-extra")
+                </li>
+            </ul>
+
+            <p> @Messages("hts.core.about-help-to-save.par-3") </p>
+            <details class="panel-indent panel-indent--gutter">
+                <summary> @Messages("hts.core.about-help-to-save.account-works-header") </summary>
+                <h2>@Messages("hts.core.about-help-to-save.account-works.your-bonus")</h2>
+                <p>@Messages("hts.core.about-help-to-save.account-works.your-bonus.par")</p>
+                <ul class="bullets">
+                    <li>
+                    @Messages("hts.core.about-help-to-save.account-works.your-bonus.point-1")
+                    </li>
+                    <li>
+                    @Messages("hts.core.about-help-to-save.account-works.your-bonus.point-2")
+                    </li>
+                </ul>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.first-bonus")</h3>
+                <p>@Messages("hts.core.about-help-to-save.account-works.first-bonus.par-1")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.first-bonus.par-2")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.first-bonus.par-3")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.first-bonus.par-4")</p>
+
+                <h3>@Messages("hts.core.about-help-to-save.account-works.first-bonus.table-header-1")</h3>
+                <table>
+                    <tr class="highlight">
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.if-you-pay-in")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-savings-would-be")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-initial-bonus-would-be")</td>
+                    </tr>
+                    <tr>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.if-you-pay-in-1")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-savings-would-be-1")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-initial-bonus-would-be-1")</td>
+                    </tr>
+                    <tr>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.if-you-pay-in-2")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-savings-would-be-2")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-initial-bonus-would-be-2")</td>
+                    </tr>
+                    <tr>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.if-you-pay-in-3")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-savings-would-be-3")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-initial-bonus-would-be-3")</td>
+                    </tr>
+                    <tr>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.if-you-pay-in-4")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-savings-would-be-4")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.first-bonus.your-initial-bonus-would-be-4")</td>
+                    </tr>
+                </table>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.final-bonus")</h3>
+                <p>@Messages("hts.core.about-help-to-save.account-works.final-bonus.par-1")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.final-bonus.par-2")</p>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.table-header-1")</h3>
+                <table>
+                    <tr class="highlight">
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.time")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.your-balance")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.bonus-amount")</td>
+                    </tr>
+                    <tr>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.time-1")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.your-balance-1")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.bonus-amount-1")</td>
+                    </tr>
+                    <tr>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.time-2")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.your-balance-2")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.bonus-amount-2")</td>
+                    </tr>
+                    <tr>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.time-3")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.your-balance-3")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.bonus-amount-3")</td>
+                    </tr>
+                    <tr>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.time-4")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.your-balance-4")</td>
+                        <td>@Messages("hts.core.about-help-to-save.account-works.final-bonus-example.bonus-amount-4")</td>
+                    </tr>
+                </table>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.how-your-bonus-is-paid")</h3>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-your-bonus-is-paid.par-1")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-your-bonus-is-paid.par-2")</p>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.when-you-can-pay-in-money")</h3>
+                <p>@Messages("hts.core.about-help-to-save.account-works.when-you-can-pay-in-money.par")</p>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.how-much-money-you-can-pay")</h3>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-much-money-you-can-pay.par-1")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-much-money-you-can-pay.par-2")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-much-money-you-can-pay.par-3")</p>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.make-one-off-payments-or-set-up-a-standing-order")</h3>
+                <p>@Messages("hts.core.about-help-to-save.account-works.make-one-off-payments-or-set-up-a-standing-order.par-1")</p>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.how-to-withdraw-money")</h3>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-to-withdraw-money.par-1")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-to-withdraw-money.par-2")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-to-withdraw-money.par-3")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-to-withdraw-money.par-4")</p>
+                <h3>@Messages("hts.core.about-help-to-save.account-works.how-to-close-your-account")</h3>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-to-close-your-account.par-1")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-to-close-your-account.par-2")</p>
+                <p>@Messages("hts.core.about-help-to-save.account-works.how-to-close-your-account.par-3")</p>
+            </details>
+            @* TODO: figure out why that arrow is not showing up *@
+            <div class="sidebar">
+            <a class=" page-nav__link page-nav__link--next"
+            title="Navigate to next part" rel="next" href="#">
+                <span class="page-nav__label">Next</span>
+                <span class="page-nav__title">Inheritance Tax reliefs</span>
+            </a>
+            </div>
+        </div>
+    </div>
+}

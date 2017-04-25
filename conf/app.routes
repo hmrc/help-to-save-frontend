@@ -3,3 +3,4 @@
 GET        /declaration         @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.declaration
 GET        /not-eligible        @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.notEligible
 GET        /                    @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.start
+GET        /about-help-to-save  @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.getStartHelpToSave

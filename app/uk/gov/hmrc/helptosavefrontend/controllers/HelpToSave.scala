@@ -42,6 +42,9 @@ class HelpToSave @Inject()(val messagesApi: MessagesApi,
   def start = Action.async { implicit request ⇒
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.start()))
   }
+  def  getStartHelpToSave =  Action.async { implicit request ⇒
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.about_help_to_save()))
+  }
 
   def declaration  =
     authorisedHtsUser { implicit authContext => implicit request ⇒
