@@ -19,23 +19,23 @@ package uk.gov.hmrc.helptosavefrontend.auth
 import java.net.{URI, URLEncoder}
 
 import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig._
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L200
 import uk.gov.hmrc.play.frontend.auth.{CompositePageVisibilityPredicate, PageVisibilityPredicate}
 
 object HTSCompositePageVisibilityPredicate extends CompositePageVisibilityPredicate {
   override def children: Seq[PageVisibilityPredicate] = Seq(
-    new HTSStrongCredentialPredicate(twoFactorURI) //,
-    //new UpliftingIdentityConfidencePredicate(L200, ivUpliftURI)
+    new HTSStrongCredentialPredicate(twoFactorURI),
+    new UpliftingIdentityConfidencePredicate(L200, ivUpliftURI)
   )
 
-  //TODO: not sure how to make of this(UpliftingIdentityConfidencePredicate)
   private val ivUpliftURI: URI =
-    new URI(s"${ivUpliftUrl}?origin=$sosOrigin&" +
+    new URI(s"$ivUpliftUrl?origin=$sosOrigin&" +
       s"completionURL=${URLEncoder.encode(loginCallbackURL, "UTF-8")}&" +
       s"failureURL=${URLEncoder.encode(perTaxIdentityCheckFailedUrl, "UTF-8")}" +
       s"&confidenceLevel=200")
 
   private val twoFactorURI: URI =
-    new URI(s"${twoFactorUrl}?" +
+    new URI(s"$twoFactorUrl?" +
       s"continue=${URLEncoder.encode(loginCallbackURL, "UTF-8")}&" +
       s"failure=${URLEncoder.encode(perTaxIdentityCheckFailedUrl, "UTF-8")}")
 }

@@ -41,6 +41,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   val twoFactorUrl: String = getConfString("two-factor.url", "")
   val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
 
+   val verifySignIn = getConfString("verify-sign-in.url", "")
+
   val perTaxFrontendHost: String = getConfString("pertax-frontend.url", "")
   val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
 

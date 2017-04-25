@@ -16,21 +16,26 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import play.api.mvc.Request
-import uk.gov.hmrc.play.frontend.auth.{AnyAuthenticationProvider, GovernmentGateway, Verify}
+import play.api.mvc.Results._
+import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig.{loginCallbackURL, sosOrigin, verifySignIn}
+import uk.gov.hmrc.play.frontend.auth.Verify
+import uk.gov.hmrc.play.http.SessionKeys
 
-object HelpToSaveAuthenticationProvider extends AnyAuthenticationProvider {
+import scala.concurrent.Future
 
-  override def ggwAuthenticationProvider: GovernmentGateway = HelpToSaveGateway
-
-  override def verifyAuthenticationProvider: Verify = HTSIVerify
+object HTSIVerify extends Verify {
 
   override def login: String = throw new RuntimeException("Unused")
 
-  //TODO: Implement this
-  //  override def handleSessionTimeout(implicit request: Request[_]): Future[Result] = {
-  //     Future.successful(Redirect(routes.ServiceController.sessionTimeOut().url))
-  //  }
+  override def redirectToLogin(implicit request: Request[_]) = idaRedirect
 
-  override def redirectToLogin(implicit request: Request[_]) = HelpToSaveGateway.ggRedirect
+  private def idaRedirect(implicit request: Request[_]): Future[Result] = {
+    lazy val idaSignIn = verifySignIn
+
+    Future.successful(Redirect(idaSignIn).withSession(
+      SessionKeys.loginOrigin -> sosOrigin,
+      SessionKeys.redirect -> loginCallbackURL
+    ))
+  }
 }

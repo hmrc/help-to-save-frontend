@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.auth.{HTSCompositePageVisibilityPredicate, HelpToSaveAuthenticationProvider, HtsRegime}
+import uk.gov.hmrc.helptosavefrontend.auth.{HTSCompositePageVisibilityPredicate, HelpToSaveGateway, HTSRegime}
 import uk.gov.hmrc.play.frontend.auth._
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -32,5 +32,5 @@ trait HelpToSaveController extends FrontendController with Actions {
   override lazy val authConnector: AuthConnector = FrontendAuthConnector
 
   def authorisedHtsUser(body: AsyncPlayUserRequest): Action[AnyContent] =
-    AuthorisedFor(HtsRegime, HTSCompositePageVisibilityPredicate).async(body)
+    AuthorisedFor(HTSRegime, HTSCompositePageVisibilityPredicate).async(body)
 }
