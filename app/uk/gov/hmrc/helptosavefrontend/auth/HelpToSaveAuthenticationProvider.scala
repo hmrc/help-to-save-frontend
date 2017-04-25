@@ -19,6 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.auth
 import play.api.mvc.Request
 import uk.gov.hmrc.play.frontend.auth.{AnyAuthenticationProvider, GovernmentGateway, Verify}
 
+import scala.concurrent.Future
+
 object HelpToSaveAuthenticationProvider extends AnyAuthenticationProvider {
 
   override def ggwAuthenticationProvider: GovernmentGateway = HelpToSaveGateway
@@ -32,5 +34,5 @@ object HelpToSaveAuthenticationProvider extends AnyAuthenticationProvider {
   //     Future.successful(Redirect(routes.ServiceController.sessionTimeOut().url))
   //  }
 
-  override def redirectToLogin(implicit request: Request[_]) = HelpToSaveGateway.ggRedirect
+  override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = HelpToSaveGateway.ggRedirect
 }

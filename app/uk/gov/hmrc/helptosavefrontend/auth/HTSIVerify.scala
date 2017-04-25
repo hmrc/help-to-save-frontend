@@ -28,7 +28,7 @@ object HTSIVerify extends Verify {
 
   override def login: String = throw new RuntimeException("Unused")
 
-  override def redirectToLogin(implicit request: Request[_]) = idaRedirect
+  override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = idaRedirect
 
   private def idaRedirect(implicit request: Request[_]): Future[Result] = {
     lazy val idaSignIn = verifySignIn

@@ -16,18 +16,23 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import uk.gov.hmrc.helptosavefrontend.controllers.routes
-import uk.gov.hmrc.play.frontend.auth.{AuthenticationProvider, TaxRegime}
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.auth.HTSIVerify.redirectToLogin
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-object HTSRegime extends TaxRegime {
+class HTSIVerifySpec extends UnitSpec with WithFakeApplication {
 
-  //todo find out what to do here ????
-  override def isAuthorised(accounts: Accounts): Boolean = true
+  "redirect to login " should {
 
-  override def authenticationType: AuthenticationProvider = HelpToSaveAuthenticationProvider
+    "take the user to verify sign in url" in {
 
-  override def unauthorisedLandingPage: Option[String] = {
-    Some(routes.HelpToSave.identityCheckFailed().url)
+      val fakeRequest = FakeRequest("GET", "/")
+
+      val result = await(redirectToLogin(fakeRequest))
+      status(result) shouldBe 303
+      val nextURL = redirectLocation(result).getOrElse("")
+      nextURL.contains("ida/login") shouldBe true
+    }
   }
 }
