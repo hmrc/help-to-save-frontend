@@ -15,31 +15,31 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.html.partials.{form, button, submit, start_nav}
+@import uk.gov.hmrc.helptosavefrontend.views.html.partials.{form, button, submit, start_nav,link,sidebar}
 @()(implicit request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.eligibility-help-to-save.header-page"),
+    sidebarLinks = Some(sidebar()),
     bodyClasses = None) {
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             @start_nav(request.uri)
             <h2>@Messages("hts.core.eligibility-help-to-save.header-1")  </h2>
-            <p> @Messages("hts.core.eligibility-help-to-save.par-1") <a class="link--no-underline" href="https://www.gov.uk/working-tax-credit">
-            @Messages("hts.core.eligibility-help-to-save.link-4")</a>
+            <p> @Messages("hts.core.eligibility-help-to-save.par-1")
+                @link(routes.HelpToSave.getApplyHelpToSave().url,Messages("hts.core.eligibility-help-to-save.link-1"))
                 @Messages("hts.core.eligibility-help-to-save.par-3")</p>
 
             <ul class="bullets">
                 <li>
-                    @* TODO: read link location from config? *@
                     <a class="link--no-underline" href="https://www.gov.uk/working-tax-credit">
-                    @Messages("hts.core.start.working-tax-credit")
+                    @Messages("hts.core.eligibility-help-to-save.link-2")
                     </a>
                 </li>
                 <li>
                     <a class="link--no-underline" href="https://www.gov.uk/universal-credit">
-                    @Messages("hts.core.start.universal-credit")
+                    @Messages("hts.core.eligibility-help-to-save.link-3")
                     </a>
-                    @Messages("hts.core.start.universal-credit-extra")
+                    @Messages("hts.core.eligibility-help-to-save.universal-credit-extra")
                 </li>
             </ul>
             <p>@Messages("hts.core.eligibility-help-to-save.par-4") </p>
@@ -70,15 +70,15 @@
                 </li>
             </ul>
             <a class="page-nav__link page-nav__link--previous"
-            title="Navigate to previous part" rel="prev" href="#">
+            title="Navigate to previous part" rel="prev" href=@routes.HelpToSave.getAboutHelpToSave()>
                 <span class="page-nav__label">Previous</span>
-                <span class="page-nav__title">Overview</span>
+                <span class="page-nav__title">About Help to Save</span>
             </a>
             <div class="sidebar">
                 <a class=" page-nav__link page-nav__link--next"
-                title="Navigate to next part" rel="next" href="#">
+                title="Navigate to next part" rel="next" href=@routes.HelpToSave.getApplyHelpToSave()>
                     <span class="page-nav__label">Next</span>
-                    <span class="page-nav__title">Inheritance Tax reliefs</span>
+                    <span class="page-nav__title">Apply</span>
                 </a>
             </div>
         </div>

@@ -24,7 +24,7 @@ import play.api.test.Helpers.{charset, contentType, _}
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class StartSpec extends UnitSpec with WithFakeApplication with MockFactory{
+class HelpToSaveSpec extends UnitSpec with WithFakeApplication with MockFactory{
 
   val mockEligibilityConnector = mock[EligibilityConnector]
 

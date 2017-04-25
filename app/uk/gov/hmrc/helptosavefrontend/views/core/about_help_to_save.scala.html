@@ -15,10 +15,11 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.html.partials.{form, button, submit,start_nav}
+@import uk.gov.hmrc.helptosavefrontend.views.html.partials.{form, button, submit,start_nav,sidebar}
 @()(implicit request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.about-help-to-save.header-page"),
+    sidebarLinks = Some(sidebar()),
     bodyClasses = None) {
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
@@ -31,14 +32,14 @@
                 <li>
                     @* TODO: read link location from config? *@
                     <a class="link--no-underline" href="https://www.gov.uk/working-tax-credit">
-                    @Messages("hts.core.start.working-tax-credit")
+                    @Messages("hts.core.about-help-to-save.link-1")
                     </a>
                 </li>
                 <li>
                     <a class="link--no-underline" href="https://www.gov.uk/universal-credit">
-                    @Messages("hts.core.start.universal-credit")
+                    @Messages("hts.core.about-help-to-save.link-2")
                     </a>
-                    @Messages("hts.core.start.universal-credit-extra")
+                    @Messages("hts.core.about-help-to-save.universal-credit-extra")
                 </li>
             </ul>
 
@@ -144,9 +145,9 @@
             @* TODO: link to login page when implemented *@
             <div class="sidebar">
             <a class=" page-nav__link page-nav__link--next"
-            title="Navigate to next part" rel="next" href="#">
+            title="Navigate to next part" rel="next" href=@routes.HelpToSave.getEligibilityHelpToSave()>
                 <span class="page-nav__label">Next</span>
-                <span class="page-nav__title">Inheritance Tax reliefs</span>
+                <span class="page-nav__title">Eligibility</span>
             </a>
             </div>
         </div>
