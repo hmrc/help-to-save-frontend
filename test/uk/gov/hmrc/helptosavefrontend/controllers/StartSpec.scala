@@ -33,12 +33,12 @@ class StartSpec extends UnitSpec with WithFakeApplication with MockFactory{
 
   "GET /" should {
     "return 200" in {
-      val result = helpToSave.start(fakeRequest)
+      val result = helpToSave.getApplyHelpToSave(fakeRequest)
       status(result) shouldBe Status.OK
     }
 
     "return HTML" in {
-      val result = helpToSave.start(fakeRequest)
+      val result = helpToSave.getApplyHelpToSave(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
