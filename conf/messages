@@ -85,9 +85,34 @@ hts.core.about-help-to-save.account-works.how-to-close-your-account=How to withd
 hts.core.about-help-to-save.account-works.how-to-close-your-account.par-1=Accounts mature after 4 years and then close.
 hts.core.about-help-to-save.account-works.how-to-close-your-account.par-2=You can close your Help to Save account at any time, but if you do, you won'’t get any bonus. You won'’t be able to open another Help to Save account.
 hts.core.about-help-to-save.account-works.how-to-close-your-account.par-3=If you die or become terminally ill your account could mature earlier.
+
+hts.core.eligibility-help-to-save.header-page=Help To Save
+hts.core.eligibility-help-to-save.link-1=About Help to Save
+hts.core.eligibility-help-to-save.link-2=Eligibility
+hts.core.eligibility-help-to-save.link-3=Apply
+hts.core.eligibility-help-to-save.header-1=2.Eligibility
+hts.core.eligibility-help-to-save.par-1=You can
+hts.core.eligibility-help-to-save.link-4=apply for a Help to Save account
+hts.core.eligibility-help-to-save.par-2=You can
+hts.core.eligibility-help-to-save.par-3=if you’re getting one of these benefits:
+hts.core.eligibility-help-to-save.link-5=Working Tax Credit
+hts.core.eligibility-help-to-save.link-6=Universal Credit 
+hts.core.eligibility-help-to-save.universal-credit-extra=and your household earnings are at least £120 per week
+hts.core.eligibility-help-to-save.par-4=For those on Universal Credit, the National Living Wage (NLW) is used to calculate the minimum amount of household earnings needed per week.
+hts.core.eligibility-help-to-save.if-your-situation-changes=If your situation changes
+hts.core.eligibility-help-to-save.if-your-situation-changes-par=If you stop getting Working Tax Credit or Universal Credit, you can still keep your account, pay in money and get any bonuses you’re entitled to.
+hts.core.eligibility-help-to-save.uk-residency=UK residency
+hts.core.eligibility-help-to-save.uk-residency.par-1=To apply for an account, you must be a UK resident. You can still open an account if you’re a Crown servant or member of the British armed forces living overseas - or their spouse or civil partner.
+hts.core.eligibility-help-to-save.uk-residency.par-2=If you leave the UK for 8 weeks or more you must tell us and aren’t allowed to pay in money to your account.
+hts.core.eligibility-help-to-save.uk-residency.par-3=You don'’t have to tell us you'’ve left the UK, if you:
+hts.core.eligibility-help-to-save.uk-residency.list-1=or your partner, or child, are getting medical treatment
+hts.core.eligibility-help-to-save.uk-residency.list-2=are a mariner
+hts.core.eligibility-help-to-save.uk-residency.list-3=are an oil worker based on the continental shelf
+hts.core.eligibility-help-to-save.uk-residency.list-4=are out of the UK because your partner, child or close relative has died
+
+
 hts.core.about-help-to-save.next=Next
 hts.core.about-help-to-save.eligibility=Eligibility
-
 hts.core.not-eligible.header-page=Help To Save
 hts.core.not-eligible.header=You''re not eligible for Help to Save
 hts.core.not-eligible.par-1=To be eligible for an account you, or your spouse or civil partner, need to be getting one of these benefits:
