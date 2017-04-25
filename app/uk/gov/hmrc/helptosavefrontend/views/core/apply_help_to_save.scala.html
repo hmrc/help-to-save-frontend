@@ -15,22 +15,14 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.html.partials.{form, button, submit}
+@import uk.gov.hmrc.helptosavefrontend.views.html.partials.{form, button, submit,start_nav}
 @()(implicit request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.start.header-page"),
     bodyClasses = None) {
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h1>@Messages("hts.core.apply-help-to-save.header-page")</h1>
-            </header>
-            <ul class="divider--bottom">
-                <li>1. @Messages("hts.core.apply-help-to-save.link-1") </li>
-                <li>2. @Messages("hts.core.apply-help-to-save.link-2") </li>
-                <li>3. @Messages("hts.core.apply-help-to-save.link-3") </li>
-                    &nbsp;
-            </ul>
+            @start_nav(request.uri)
             <h3>@Messages("hts.core.apply-help-to-save.header-1")</h3>
             <p>
             @Messages("hts.core.apply-help-to-save.par-1")

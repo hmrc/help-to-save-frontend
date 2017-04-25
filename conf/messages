@@ -1,8 +1,5 @@
-hts.core.apply-help-to-save.header-page=Help To Save
+
 hts.core.apply-help-to-save.header=Apply for Help to Save
-hts.core.apply-help-to-save.link-1=About Help to Save
-hts.core.apply-help-to-save.link-2=Eligibility
-hts.core.apply-help-to-save.link-3=Apply
 hts.core.apply-help-to-save.header-1=3. Apply
 hts.core.apply-help-to-save.par-1=To apply for a Help to Save account online, you’'ll need to:
 hts.core.apply-help-to-save.par-2=You can apply for a Help to Save account if you'’re getting one of these benefits:
@@ -15,10 +12,6 @@ hts.core.apply-help-to-save.link-4=eligible
 hts.core.apply-help-to-save.link-5=Goverment Gateway
 hts.core.apply-help-to-save.button=Apply now
 
-hts.core.about-help-to-save.header-page=Help To Save
-hts.core.about-help-to-save.link-1=About Help to Save
-hts.core.about-help-to-save.link-2=Eligibility
-hts.core.about-help-to-save.link-3=Apply
 hts.core.about-help-to-save.header-1=1.About Help to Save
 hts.core.about-help-to-save.par-1=Help to Save is a savings account that lets you earn a 50% government bonus on money you''ve saved. You can only open one account in your lifetime.
 hts.core.about-help-to-save.par-2=You can apply for an account if you get one of these benefits:
@@ -92,10 +85,6 @@ hts.core.about-help-to-save.account-works.how-to-close-your-account.par-1=Accoun
 hts.core.about-help-to-save.account-works.how-to-close-your-account.par-2=You can close your Help to Save account at any time, but if you do, you won'’t get any bonus. You won'’t be able to open another Help to Save account.
 hts.core.about-help-to-save.account-works.how-to-close-your-account.par-3=If you die or become terminally ill your account could mature earlier.
 
-hts.core.eligibility-help-to-save.header-page=Help To Save
-hts.core.eligibility-help-to-save.link-1=About Help to Save
-hts.core.eligibility-help-to-save.link-2=Eligibility
-hts.core.eligibility-help-to-save.link-3=Apply
 hts.core.eligibility-help-to-save.header-1=2.Eligibility
 hts.core.eligibility-help-to-save.par-1=You can
 hts.core.eligibility-help-to-save.link-4=apply for a Help to Save account
@@ -115,6 +104,11 @@ hts.core.eligibility-help-to-save.uk-residency.list-1=or your partner, or child,
 hts.core.eligibility-help-to-save.uk-residency.list-2=are a mariner
 hts.core.eligibility-help-to-save.uk-residency.list-3=are an oil worker based on the continental shelf
 hts.core.eligibility-help-to-save.uk-residency.list-4=are out of the UK because your partner, child or close relative has died
+
+hts.partials.header-page=Help To Save
+hts.partials.link-1=About Help to Save
+hts.partials.link-2=Eligibility
+hts.partials.link-3=Apply
 
 
 hts.core.about-help-to-save.next=Next
