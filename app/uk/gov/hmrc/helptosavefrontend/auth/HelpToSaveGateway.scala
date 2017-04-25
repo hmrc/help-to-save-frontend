@@ -35,7 +35,7 @@ object HelpToSaveGateway extends GovernmentGateway {
 
     Future.successful(Redirect(loginURL, Map(
       "continue" -> Seq(continueURL),
-      "accountType" -> Seq("company")
+      "accountType" -> Seq("individual")
     )))
   }
 }
