@@ -20,12 +20,12 @@ import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.play.frontend.auth.{AuthenticationProvider, TaxRegime}
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 
-object HTSRegime extends TaxRegime {
+object HtsRegime extends TaxRegime {
 
   //todo find out what to do here ????
   override def isAuthorised(accounts: Accounts): Boolean = true
 
-  override def authenticationType: AuthenticationProvider = HelpToSaveAuthenticationProvider
+  override def authenticationType: AuthenticationProvider = HtsAuthenticationProvider
 
   override def unauthorisedLandingPage: Option[String] = {
     Some(routes.HelpToSave.identityCheckFailed().url)

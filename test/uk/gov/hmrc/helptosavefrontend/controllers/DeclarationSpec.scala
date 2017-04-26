@@ -42,7 +42,7 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
 
   val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector) {
-    override lazy val authConnector = MockApplicationAuthConnector
+    override lazy val authConnector = MockAuthConnector
   }
 
   private def authenticatedFakeRequest =

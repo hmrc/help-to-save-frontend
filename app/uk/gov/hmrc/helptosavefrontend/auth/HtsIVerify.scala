@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.http.SessionKeys
 
 import scala.concurrent.Future
 
-object HTSIVerify extends Verify {
+object HtsIVerify extends Verify {
 
   override def login: String = throw new RuntimeException("Unused")
 

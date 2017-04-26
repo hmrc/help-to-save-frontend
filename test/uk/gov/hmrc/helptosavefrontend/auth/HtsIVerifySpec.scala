@@ -18,36 +18,21 @@ package uk.gov.hmrc.helptosavefrontend.auth
 
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuthenticationProvider.redirectToLogin
+import uk.gov.hmrc.helptosavefrontend.auth.HtsIVerify.redirectToLogin
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class HelpToSaveAuthenticationProviderSpec extends UnitSpec with WithFakeApplication {
+class HtsIVerifySpec extends UnitSpec with WithFakeApplication {
 
   "redirect to login " should {
 
-    "take the user to gg sign in url" in {
+    "take the user to verify sign in url" in {
 
       val fakeRequest = FakeRequest("GET", "/")
 
       val result = await(redirectToLogin(fakeRequest))
       status(result) shouldBe 303
       val nextURL = redirectLocation(result).getOrElse("")
-
-      nextURL.contains("gg/sign-in") shouldBe true
-    }
-  }
-
-  "GG account login" should {
-
-    "be of type: individual" in {
-
-      val fakeRequest = FakeRequest("GET", "/")
-
-      val result = await(redirectToLogin(fakeRequest))
-      status(result) shouldBe 303
-      val nextURL = redirectLocation(result).getOrElse("")
-
-      nextURL.contains("accountType=individual") shouldBe true
+      nextURL.contains("ida/login") shouldBe true
     }
   }
 }

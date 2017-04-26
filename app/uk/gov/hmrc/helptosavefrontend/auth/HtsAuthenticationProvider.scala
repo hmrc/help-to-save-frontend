@@ -21,11 +21,11 @@ import uk.gov.hmrc.play.frontend.auth.{AnyAuthenticationProvider, GovernmentGate
 
 import scala.concurrent.Future
 
-object HelpToSaveAuthenticationProvider extends AnyAuthenticationProvider {
+object HtsAuthenticationProvider extends AnyAuthenticationProvider {
 
-  override def ggwAuthenticationProvider: GovernmentGateway = HelpToSaveGateway
+  override def ggwAuthenticationProvider: GovernmentGateway = HtsGovernmentGateway
 
-  override def verifyAuthenticationProvider: Verify = HTSIVerify
+  override def verifyAuthenticationProvider: Verify = HtsIVerify
 
   override def login: String = throw new RuntimeException("Unused")
 
@@ -34,5 +34,5 @@ object HelpToSaveAuthenticationProvider extends AnyAuthenticationProvider {
   //     Future.successful(Redirect(routes.ServiceController.sessionTimeOut().url))
   //  }
 
-  override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = HelpToSaveGateway.ggRedirect
+  override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = HtsGovernmentGateway.ggRedirect
 }

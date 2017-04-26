@@ -18,13 +18,17 @@ package uk.gov.hmrc.helptosavefrontend.auth
 
 import java.net.{URI, URLEncoder}
 
+import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig._
+import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.L200
-import uk.gov.hmrc.play.frontend.auth.{CompositePageVisibilityPredicate, PageVisibilityPredicate}
+import uk.gov.hmrc.play.frontend.auth.{CompositePageVisibilityPredicate, IdentityConfidencePredicate, PageVisibilityPredicate}
 
-object HTSCompositePageVisibilityPredicate extends CompositePageVisibilityPredicate {
+import scala.concurrent.Future
+
+object HtsCompositePageVisibilityPredicate extends CompositePageVisibilityPredicate {
   override def children: Seq[PageVisibilityPredicate] = Seq(
-    new HTSStrongCredentialPredicate(twoFactorURI),
+    new HtsStrongCredentialPredicate(twoFactorURI),
     new UpliftingIdentityConfidencePredicate(L200, ivUpliftURI)
   )
 
@@ -38,4 +42,9 @@ object HTSCompositePageVisibilityPredicate extends CompositePageVisibilityPredic
     new URI(s"$twoFactorUrl?" +
       s"continue=${URLEncoder.encode(loginCallbackURL, "UTF-8")}&" +
       s"failure=${URLEncoder.encode(identityCheckFailedUrl, "UTF-8")}")
+
+  class UpliftingIdentityConfidencePredicate(requiredConfidenceLevel: ConfidenceLevel, upliftConfidenceUri: URI)
+    extends IdentityConfidencePredicate(requiredConfidenceLevel, Future.successful(Redirect(upliftConfidenceUri.toString)))
+
+
 }

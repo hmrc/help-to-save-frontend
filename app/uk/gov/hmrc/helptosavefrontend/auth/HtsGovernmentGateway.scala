@@ -16,14 +16,26 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import java.net.URI
-
 import play.api.mvc.Results.Redirect
-import uk.gov.hmrc.play.frontend.auth.IdentityConfidencePredicate
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel
+import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig._
+import uk.gov.hmrc.play.frontend.auth._
 
 import scala.concurrent.Future
 
-class UpliftingIdentityConfidencePredicate(requiredConfidenceLevel: ConfidenceLevel, upliftConfidenceUri: URI)
-  extends IdentityConfidencePredicate(requiredConfidenceLevel, Future.successful(Redirect(upliftConfidenceUri.toString)))
+object HtsGovernmentGateway extends GovernmentGateway {
 
+  override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = ggRedirect
+
+  override def continueURL: String = loginCallbackURL
+
+  override def loginURL: String = companySignInUrl
+
+  def ggRedirect: Future[Result] = {
+
+    Future.successful(Redirect(loginURL, Map(
+      "continue" -> Seq(continueURL),
+      "accountType" -> Seq("individual")
+    )))
+  }
+}

@@ -23,7 +23,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 
 import scala.concurrent.Future
 
-object MockApplicationAuthConnector extends AuthConnector {
+object MockAuthConnector extends AuthConnector {
   override val serviceUrl: String = ""
   override def http :HttpGet = ???
   val nino:Option[String]=Some("WM123456C")
