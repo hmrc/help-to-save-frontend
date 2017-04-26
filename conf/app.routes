@@ -2,6 +2,7 @@
 
 GET        /declaration         @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.declaration
 GET        /not-eligible        @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.notEligible
-GET        /                    @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.start
-
+GET        /apply-help-to-save  @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.getApplyHelpToSave
+GET        /about-help-to-save  @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.getAboutHelpToSave
+GET        /eligibility-help-to-save  @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.getEligibilityHelpToSave
 GET        /identity-check-failed   @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.identityCheckFailed

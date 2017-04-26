@@ -37,8 +37,14 @@ class HelpToSave @Inject()(val messagesApi: MessagesApi,
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligible()))
   }
 
-  def start = Action.async { implicit request ⇒
-    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.start()))
+  def getApplyHelpToSave = Action.async { implicit request ⇒
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.apply_help_to_save()))
+  }
+  def  getAboutHelpToSave =  Action.async { implicit request ⇒
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.about_help_to_save()))
+  }
+  def  getEligibilityHelpToSave =  Action.async { implicit request ⇒
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.eligibility_help_to_save()))
   }
 
   def declaration  =

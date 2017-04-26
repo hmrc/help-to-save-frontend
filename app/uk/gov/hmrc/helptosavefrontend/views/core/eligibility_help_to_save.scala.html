@@ -1,0 +1,87 @@
+@*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form, button, submit, start_nav,link,sidebar}
+@()(implicit request: Request[_], messages: Messages)
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+    title = Messages("hts.core.eligibility-help-to-save.header-page"),
+    sidebarLinks = Some(sidebar()),
+    bodyClasses = None) {
+    <div class="grid-layout grid-layout--stacked">
+        <div class="grid-layout__column grid-layout__column--2-3">
+            @start_nav(request.uri)
+            <h2>@Messages("hts.core.eligibility-help-to-save.header-1")  </h2>
+            <p> @Messages("hts.core.eligibility-help-to-save.par-1")
+                @link(routes.HelpToSave.getApplyHelpToSave().url,Messages("hts.core.eligibility-help-to-save.link-1"))
+                @Messages("hts.core.eligibility-help-to-save.par-3")</p>
+
+            <ul class="bullets">
+                <li>
+                    <a class="link--no-underline" href="https://www.gov.uk/working-tax-credit">
+                    @Messages("hts.core.eligibility-help-to-save.link-2")
+                    </a>
+                </li>
+                <li>
+                    <a class="link--no-underline" href="https://www.gov.uk/universal-credit">
+                    @Messages("hts.core.eligibility-help-to-save.link-3")
+                    </a>
+                    @Messages("hts.core.eligibility-help-to-save.universal-credit-extra")
+                </li>
+            </ul>
+            <p>@Messages("hts.core.eligibility-help-to-save.par-4") </p>
+            <h3>
+            @Messages("hts.core.eligibility-help-to-save.if-your-situation-changes")
+            </h3>
+            <p>
+            @Messages("hts.core.eligibility-help-to-save.if-your-situation-changes-par")
+            </p>
+            <h3>
+            @Messages("hts.core.eligibility-help-to-save.uk-residency")
+            </h3>
+            <p>@Messages("hts.core.eligibility-help-to-save.uk-residency.par-1")</p>
+            <p>@Messages("hts.core.eligibility-help-to-save.uk-residency.par-2")</p>
+            <p>@Messages("hts.core.eligibility-help-to-save.uk-residency.par-3")</p>
+            <ul class="bullets">
+                <li>
+                @Messages("hts.core.eligibility-help-to-save.uk-residency.list-1")
+                </li>
+                <li>
+                @Messages("hts.core.eligibility-help-to-save.uk-residency.list-2")
+                </li>
+                <li>
+                @Messages("hts.core.eligibility-help-to-save.uk-residency.list-3")
+                </li>
+                <li>
+                @Messages("hts.core.eligibility-help-to-save.uk-residency.list-4")
+                </li>
+            </ul>
+            <a class="page-nav__link page-nav__link--previous"
+            title="Navigate to previous part" rel="prev" href=@routes.HelpToSave.getAboutHelpToSave()>
+                <span class="page-nav__label">Previous</span>
+                <span class="page-nav__title">About Help to Save</span>
+            </a>
+            <div class="sidebar">
+                @* TODO:fix this on the front end *@
+                <a class=" page-nav__link page-nav__link--next"
+                title="Navigate to next part" rel="next" href=@routes.HelpToSave.getApplyHelpToSave()>
+                    <span class="page-nav__label">Next</span>
+                    <span class="page-nav__title">Apply</span>
+                </a>
+            </div>
+        </div>
+    </div>
+}
