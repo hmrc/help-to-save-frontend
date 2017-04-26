@@ -25,12 +25,13 @@ import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
+import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 @Singleton
 class HelpToSave @Inject()(val messagesApi: MessagesApi,
-                           eligibilityConnector: EligibilityConnector) extends HelpToSaveController with I18nSupport  {
+                           eligibilityConnector: EligibilityConnector)   extends FrontendController with I18nSupport  {
 
 
   val notEligible = Action.async { implicit request ⇒
@@ -45,34 +46,6 @@ class HelpToSave @Inject()(val messagesApi: MessagesApi,
   }
   def  getEligibilityHelpToSave =  Action.async { implicit request ⇒
     Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.eligibility_help_to_save()))
-  }
-
-  def declaration  =
-    authorisedHtsUser { implicit authContext => implicit request ⇒
-      retrieveNino(authContext) match {
-        case Some(nino) => eligibilityConnector.checkEligibility(nino)
-          .map(result ⇒
-            Ok(result.fold(
-              views.html.core.not_eligible(),
-              user ⇒ uk.gov.hmrc.helptosavefrontend.views.html.register.declaration(user)
-            )))
-        case None => Future.successful(Ok(views.html.core.not_eligible()))
-      }
-  }
-  def retrieveNino(authContext: AuthContext): Option[String] = {
-    def getNino(accounts:Accounts):Option[String] = (accounts.paye,accounts.tai,accounts.tcs,accounts.iht) match {
-      case (Some(paye),_,_,_) => Some(paye.nino.nino)
-      case (_,Some(tai),_,_) => Some(tai.nino.nino)
-      case (_,_,Some(tcs),_) => Some(tcs.nino.nino)
-      case (_,_,_,Some(iht)) => Some(iht.nino.nino)
-      case _ =>  None
-    }
-    //todo figure out what do to do if nino is not returned via signin
-    getNino(authContext.principal.accounts)
-  }
-
-  def identityCheckFailed = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.exceptions.identityCheckFailed()))
   }
 
 }

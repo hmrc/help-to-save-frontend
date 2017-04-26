@@ -24,7 +24,7 @@ import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserDetails.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -35,13 +35,13 @@ import uk.gov.hmrc.time.DateTimeUtils.now
 
 import scala.concurrent.Future
 
-class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory {
+class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val fakeNino = "WM123456C"
 
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
 
-  val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector) {
+  val register = new Register(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector) {
     override lazy val authConnector = MockAuthConnector
   }
 
@@ -53,7 +53,7 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
       SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
     )
 
-  def doRequest(): Future[Result] = helpToSave.declaration(authenticatedFakeRequest)
+  def doRequest(): Future[Result] = register.declaration(authenticatedFakeRequest)
 
   def mockEligibilityResult(nino: String, result: Option[UserDetails]): Unit =
     (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
@@ -78,9 +78,7 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
       html should include(user.dateOfBirth.show)
       html should include(user.email)
       html should include(user.NINO)
-      html should include(user.phoneNumber)
       html should include(user.address.mkString(","))
-      html should include(user.contactPreference.show)
 
     }
 
@@ -91,6 +89,16 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
 
       html should include("not eligible")
       html should include("To be eligible for an account")
+    }
+    "the getAboutHelpToSave return 200" in {
+      val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
+      status(result) shouldBe Status.OK
+    }
+
+    "the getAboutHelpToSave return HTML" in {
+      val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
     }
   }
 }

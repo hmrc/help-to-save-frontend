@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.user_details
 @import uk.gov.hmrc.helptosavefrontend.models.UserDetails
-
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @(userDetails: UserDetails)(implicit request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.declaration.header-page"), bodyClasses = None) {
@@ -32,5 +32,5 @@
  <header>
   <p>@Messages("hts.register.declaration.text")</p>
  </header>
- <a href="prompt-bank-details" class="button">@Messages("hts.register.declaration.label")</a>
+ <a href=@routes.Register.getCreateAccountHelpToSave() class="button">@Messages("hts.register.declaration.label")</a>
 }
