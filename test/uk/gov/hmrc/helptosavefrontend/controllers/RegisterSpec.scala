@@ -90,12 +90,12 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       html should include("not eligible")
       html should include("To be eligible for an account")
     }
-    "the getAboutHelpToSave return 200" in {
+    "the getCreateAccountHelpToSave return 200" in {
       val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
       status(result) shouldBe Status.OK
     }
 
-    "the getAboutHelpToSave return HTML" in {
+    "the getCreateAccountHelpToSave return HTML" in {
       val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
