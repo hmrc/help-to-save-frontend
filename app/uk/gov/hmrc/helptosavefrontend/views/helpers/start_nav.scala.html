@@ -18,31 +18,31 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.link
 @(currentPageUrl: String)(implicit messages: play.api.i18n.Messages)
 <header class="page-header text">
-    <h1>@Messages("hts.partials.header-page")</h1>
+    <h1>@Messages("hts.helpers.header-page")</h1>
 </header>
 <ul class="divider--bottom">
     <li>
         @{if(routes.HelpToSave.getAboutHelpToSave().url == currentPageUrl){
-            Messages("hts.partials.link-1")
+            Messages("hts.helpers.link-1")
         }
     else {
-            link(routes.HelpToSave.getAboutHelpToSave().url, Messages("hts.partials.link-1"))
+            link(routes.HelpToSave.getAboutHelpToSave().url, Messages("hts.helpers.link-1"))
         }}
     </li>
     <li>
     @{if(routes.HelpToSave.getEligibilityHelpToSave().url == currentPageUrl){
-        Messages("hts.partials.link-2")
+        Messages("hts.helpers.link-2")
     }
     else {
-        link(routes.HelpToSave.getEligibilityHelpToSave().url, Messages("hts.partials.link-2"))
+        link(routes.HelpToSave.getEligibilityHelpToSave().url, Messages("hts.helpers.link-2"))
     }}
     </li>
     <li>
     @{if(routes.HelpToSave.getApplyHelpToSave().url == currentPageUrl){
-        Messages("hts.partials.link-3")
+        Messages("hts.helpers.link-3")
     }
     else {
-        link(routes.HelpToSave.getApplyHelpToSave().url, Messages("hts.partials.link-3"))
+        link(routes.HelpToSave.getApplyHelpToSave().url, Messages("hts.helpers.link-3"))
     }}
     </li>
         &nbsp;

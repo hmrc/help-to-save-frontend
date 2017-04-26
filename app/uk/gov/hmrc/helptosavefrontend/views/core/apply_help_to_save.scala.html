@@ -24,7 +24,7 @@
     <div class="grid-layout">
         <div class="grid-layout__column grid-layout__column--2-3">
             @start_nav(request.uri)
-            <h3>@Messages("hts.core.apply-help-to-save.header-1")</h3>
+            <h2>@Messages("hts.core.apply-help-to-save.header-1")</h2>
             <p>
             @Messages("hts.core.apply-help-to-save.par-1")
             </p>
@@ -49,11 +49,10 @@
                     @Messages("hts.core.apply-help-to-save.button")
                 }
             }
-            @* TODO:fix this on the front end *@
             <a class="page-nav__link page-nav__link--previous"
             title="Navigate to previous part" rel="prev" href=@routes.HelpToSave.getEligibilityHelpToSave()>
                 <span class="page-nav__label">Previous</span>
-                <span class="page-nav__title">Overview</span>
+                <span class="page-nav__title">Eligibility</span>
             </a>
         </div>
     </div>
