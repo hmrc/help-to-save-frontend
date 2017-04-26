@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.util.UUID
+
 import cats.syntax.show._
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
@@ -23,95 +25,53 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserDetails.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.ConfidenceLevel.{L0, L200}
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.CredentialStrength.{Strong, Weak}
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.{Accounts, Authority, PayeAccount}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
+import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.time.DateTimeUtils.now
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
-  val user = "user"
   val fakeNino = "WM123456C"
 
-  def fakeRequest = FakeRequest("GET", "/").withSession("userId" → user, "token" → "token", "name" → "name")
-
-  val authorisedUser = Authority(user, Accounts(paye = Some(PayeAccount("", Nino(fakeNino)))),
-    None, None, Strong, L200, None, None, None, "")
-
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
 
   val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector) {
-    override lazy val authConnector = mockAuthConnector
+    override lazy val authConnector = MockAuthConnector
   }
 
-  def doRequest(): Future[Result] = helpToSave.declaration(fakeRequest)
+  private def authenticatedFakeRequest =
+    FakeRequest().withSession(
+      SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
+      SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
+      SessionKeys.userId -> s"/path/to/authority",
+      SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
+    )
 
-  def mockAuthorisation(authorisedUser: Authority = authorisedUser): Unit =
-    (mockAuthConnector.currentAuthority(_: HeaderCarrier)).expects(*).returning(Future.successful({
-      Some(authorisedUser)
-    }))
+  def doRequest(): Future[Result] = helpToSave.declaration(authenticatedFakeRequest)
 
   def mockEligibilityResult(nino: String, result: Option[UserDetails]): Unit =
     (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
       .expects(nino, *)
       .returning(Future.successful(EligibilityResult(result)))
 
-
   "GET /" should {
 
-    "should redirect to 2-factor auth if the credential strength is Weak" in {
-      val authorisedUser = Authority(user, Accounts(paye = Some(PayeAccount("", Nino(fakeNino)))),
-        None, None, Weak, L0, None, None, None, "")
-
-      mockAuthorisation(authorisedUser)
-      val result = doRequest()
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result).get should include("http://localhost:9949/coafe/two-step-verification/register/?continue=http%3A%2F%2Flocalhost%3A7000%2Fhelp-to-save%2Fdeclaration")
-    }
-
-    "call getEligibility from the given EligibilityStubConnector" in {
-      mockAuthorisation()
-      // this test will fail if the following line is not present - it checks the eligibility
-      // connector is actually being called
-      mockEligibilityResult(fakeNino, None)
-      val result = doRequest()
-      Await.result(result, 3.seconds)
-    }
-
     "return 200 if the eligibility check is successful" in {
-      mockAuthorisation()
-      mockEligibilityResult(fakeNino, Some(randomUserDetails()))
+      val user = randomUserDetails()
+      mockEligibilityResult(fakeNino, Some(user))
 
       val result: Future[Result] = doRequest()
       status(result) shouldBe Status.OK
-    }
-
-    "return HTML if the eligibility check is successful" in {
-      mockAuthorisation()
-      mockEligibilityResult(fakeNino, Some(randomUserDetails()))
-
-      val result = doRequest()
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
-    }
 
-    "display the user details if the eligibility check is successful" in {
-      val user = randomUserDetails()
-      mockAuthorisation()
-      mockEligibilityResult(fakeNino, Some(user))
-
-      val result = doRequest()
       val html = contentAsString(result)
 
       html should include(user.name)
@@ -121,10 +81,10 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
       html should include(user.phoneNumber)
       html should include(user.address.mkString(","))
       html should include(user.contactPreference.show)
+
     }
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
-      mockAuthorisation()
       mockEligibilityResult(fakeNino, None)
       val result = doRequest()
       val html = contentAsString(result)
@@ -132,8 +92,6 @@ class DeclarationSpec extends UnitSpec with WithFakeApplication with MockFactory
       html should include("not eligible")
       html should include("To be eligible for an account")
     }
-
-
   }
 }
 

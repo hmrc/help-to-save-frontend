@@ -25,7 +25,7 @@ import uk.gov.hmrc.play.frontend.auth.connectors.domain.CredentialStrength
 
 import scala.concurrent.Future
 
-class HTSStrongCredentialPredicate(twoFactorAuthenticationUri: URI) extends PageVisibilityPredicate {
+class HtsStrongCredentialPredicate(twoFactorAuthenticationUri: URI) extends PageVisibilityPredicate {
 
   override def apply(authContext: AuthContext, request: Request[AnyContent]): Future[PageVisibilityResult] = {
 
