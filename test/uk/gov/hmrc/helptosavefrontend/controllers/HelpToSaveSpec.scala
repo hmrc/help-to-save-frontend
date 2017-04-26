@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentType, _}
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
@@ -32,13 +32,33 @@ class HelpToSaveSpec extends UnitSpec with WithFakeApplication with MockFactory{
   val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector)
 
   "GET /" should {
-    "return 200" in {
+    "the getApplyHelpToSave should  return 200" in {
       val result = helpToSave.getApplyHelpToSave(fakeRequest)
       status(result) shouldBe Status.OK
     }
 
-    "return HTML" in {
+    "the getApplyHelpToSave should  return HTML" in {
       val result = helpToSave.getApplyHelpToSave(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+    "the getEligibilityHelpToSave should  return 200" in {
+      val result = helpToSave.getEligibilityHelpToSave(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+
+    "the getEligibilityHelpToSave should return HTML" in {
+      val result = helpToSave.getEligibilityHelpToSave(fakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+    "the getAboutHelpToSave return 200" in {
+      val result = helpToSave.getAboutHelpToSave(fakeRequest)
+      status(result) shouldBe Status.OK
+    }
+
+    "the getAboutHelpToSave return HTML" in {
+      val result = helpToSave.getAboutHelpToSave(fakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
