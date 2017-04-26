@@ -132,7 +132,7 @@ hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 
 hts.register.declaration.title=Help to Save
 hts.register.declaration.header-page=Confirm your contact details
-hts.register.declaration.header=Check your details and create your account
+hts.register.declaration.header=Check and confirms your details
 hts.register.declaration.your-details-header=Your details
 hts.register.declaration.your-details=Your details
 hts.register.declaration.name=Name:
@@ -146,7 +146,7 @@ hts.register.declaration.change=Change
 hts.register.declaration.contact-preference=Contact preference
 hts.register.declaration.create-your-account-header=Create your account
 hts.register.declaration.text=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
-hts.register.declaration.lable=Accept and create account
+hts.register.declaration.label=Continue
 
 hts.identitycheck.header.page=HMRC Help to Save Identity verification
 hts.identitycheck.failed=You need 2-step verification to use Help to Save Account

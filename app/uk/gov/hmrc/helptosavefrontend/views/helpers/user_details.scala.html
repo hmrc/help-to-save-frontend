@@ -36,20 +36,7 @@
         </div>
         <div class="grid-layout__column grid-layout__column--2-4">
             <p>@Messages("hts.register.declaration.email") @(userDetails.email) </p>
-            <p>@Messages("hts.register.declaration.phone-number") @(userDetails.phoneNumber) </p>
             <p>@Messages("hts.register.declaration.address") @(userDetails.address.mkString(","))</p>
-        </div>
-        <div class="grid-layout__column grid-layout__column--1-4">
-            <p><a>change</a></p>
-        </div>
-    </div>
-
-    <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
-        <div class="grid-layout__column grid-layout__column--1-4">
-            <p>@Messages("hts.register.declaration.contact-preference")</p>
-        </div>
-        <div class="grid-layout__column grid-layout__column--2-4">
-            <p>@(userDetails.contactPreference.show)</p>
         </div>
         <div class="grid-layout__column grid-layout__column--1-4">
             <p><a>change</a></p>
