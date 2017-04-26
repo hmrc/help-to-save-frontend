@@ -107,10 +107,10 @@ hts.core.eligibility-help-to-save.uk-residency.list-2=are a mariner
 hts.core.eligibility-help-to-save.uk-residency.list-3=are an oil worker based on the continental shelf
 hts.core.eligibility-help-to-save.uk-residency.list-4=are out of the UK because your partner, child or close relative has died
 
-hts.partials.header-page=Help To Save
-hts.partials.link-1=1.About Help to Save
-hts.partials.link-2=2.Eligibility
-hts.partials.link-3=3.Apply
+hts.helpers.header-page=Help To Save
+hts.helpers.link-1=1.About Help to Save
+hts.helpers.link-2=2.Eligibility
+hts.helpers.link-3=3.Apply
 
 
 hts.core.about-help-to-save.next=Next
@@ -124,11 +124,11 @@ hts.core.not-eligible.par-2=You must also be a UK resident. Or a Crown servant o
 hts.core.not-eligible.par-3=Find out more about
 hts.core.not-eligible.link=Help to Save
 
-hts.partials.sidebar.header=Elsewhere on GOV.UK
-hts.partials.sidebar.goverment-gateway=Government Gateway
-hts.partials.sidebar.universal-credit=Universal Credit
-hts.partials.sidebar.apply-for-universal-credit=Apply for Universal Credit
-hts.partials.sidebar.working-tax-credit=Working Tax Credit
+hts.helpers.sidebar.header=Elsewhere on GOV.UK
+hts.helpers.sidebar.goverment-gateway=Government Gateway
+hts.helpers.sidebar.universal-credit=Universal Credit
+hts.helpers.sidebar.apply-for-universal-credit=Apply for Universal Credit
+hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 
 hts.register.declaration.title=Help to Save
 hts.register.declaration.header-page=Confirm your contact details
