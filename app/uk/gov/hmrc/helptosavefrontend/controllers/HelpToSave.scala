@@ -21,14 +21,12 @@ import javax.inject.Singleton
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
-import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class HelpToSave @Inject()(val messagesApi: MessagesApi,
@@ -65,6 +63,10 @@ class HelpToSave @Inject()(val messagesApi: MessagesApi,
     }
     //todo figure out what do to do if nino is not returned via signin
     getNino(authContext.principal.accounts)
+  }
+
+  def identityCheckFailed = Action.async { implicit request ⇒
+    Future.successful(Ok(views.html.exceptions.identityCheckFailed()))
   }
 
 }

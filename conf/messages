@@ -35,3 +35,8 @@ hts.register.declaration.contact-preference=Contact preference
 hts.register.declaration.create-your-account-header=Create your account
 hts.register.declaration.text=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
 hts.register.declaration.lable=Accept and create account
+
+hts.identitycheck.header.page=HMRC Help to Save Identity verification
+hts.identitycheck.failed=You need 2-step verification to use Help to Save Account
+hts.login.if_you_have_query_contact_HMRC=If you have a query you can <a href="{0}" target="_blank">contact HM Revenue and Customs (opens in a new window)</a> to get help.
+hts.login.back_to_2step_verification=Back to 2-step verification

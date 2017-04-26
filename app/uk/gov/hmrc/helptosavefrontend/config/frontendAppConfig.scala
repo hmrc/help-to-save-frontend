@@ -37,15 +37,14 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   private val companyAuthFrontend = getConfString("company-auth.url", throw new RuntimeException("Company auth url required"))
   private val companyAuthSignInPath = getConfString("company-auth.sign-in-path", "")
+  val companySignInUrl: String = companyAuthFrontend + companyAuthSignInPath
 
   val twoFactorUrl: String = getConfString("two-factor.url", "")
   val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
-
-  val perTaxFrontendHost: String = getConfString("pertax-frontend.url", "")
+  val verifySignIn = getConfString("verify-sign-in.url", "")
   val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
 
-  val perTaxIdentityCheckFailedUrl: String = s"$perTaxFrontendHost/identity-check-failed"
-  val companySignInUrl: String = companyAuthFrontend + companyAuthSignInPath
+  val identityCheckFailedUrl = getConfString("identity-check-failed.url", "")
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")

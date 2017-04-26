@@ -3,3 +3,5 @@
 GET        /declaration         @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.declaration
 GET        /not-eligible        @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.notEligible
 GET        /                    @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.start
+
+GET        /identity-check-failed   @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.identityCheckFailed
