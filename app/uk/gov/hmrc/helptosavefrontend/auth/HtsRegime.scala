@@ -28,6 +28,6 @@ object HtsRegime extends TaxRegime {
   override def authenticationType: AuthenticationProvider = HtsAuthenticationProvider
 
   override def unauthorisedLandingPage: Option[String] = {
-    Some(routes.HelpToSave.identityCheckFailed().url)
+    Some(routes.Register.identityCheckFailed().url)
   }
 }
