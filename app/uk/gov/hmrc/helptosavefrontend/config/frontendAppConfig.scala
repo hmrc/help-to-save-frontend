@@ -33,7 +33,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   private val contactHost = configuration.getString(s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
-  val loginCallbackURL = getConfString("login-callback.url", "")
+  val HtsDeclarationUrl = getConfString("help-to-save-declaration.url", "")
 
   private val companyAuthFrontend = getConfString("company-auth.url", throw new RuntimeException("Company auth url required"))
   private val companyAuthSignInPath = getConfString("company-auth.sign-in-path", "")
@@ -44,7 +44,11 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   val verifySignIn = getConfString("verify-sign-in.url", "")
   val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
 
-  val identityCheckFailedUrl = getConfString("identity-check-failed.url", "")
+  val TwoFactorFailedUrl = getConfString("two-factor-failed.url", "")
+
+  val IdentityVerificationURL = getConfString("identity-verification-frontend.url", "")
+
+  val IdentityCallbackUrl = getConfString("identity-callback.url", "")
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")

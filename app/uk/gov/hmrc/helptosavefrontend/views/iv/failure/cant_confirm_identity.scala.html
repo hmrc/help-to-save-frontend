@@ -1,0 +1,35 @@
+@*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@(retryUrl: String, allowContinue: Boolean)(implicit request: Request[_], messages: Messages)
+
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+
+    <div class="grid-layout grid-layout--stacked">
+        <div class="grid-layout__column grid-layout__column--2-3">
+            <header class="page-header text">
+                <h1>@Messages("hts.iv.cant_confirm_your_identity")</h1>
+            </header>
+
+            @if(allowContinue) {
+                <p class="margin-bottom">@Html(Messages("hts.iv.try_confirm_identity_again", retryUrl))</p>
+                <a href="@retryUrl" class="button" id="continue" role="button">@Messages("hts.iv.continue_button")</a>
+            } else {
+                <p class="margin-bottom">@Html(Messages("hts.iv.failed_contact_HMRC", "https://www.gov.uk/contact-hmrc"))</p>
+            }
+        </div>
+    </div>
+}

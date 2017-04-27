@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.auth
+package uk.gov.hmrc.helptosavefrontend.models
 
-import uk.gov.hmrc.helptosavefrontend.controllers.routes
-import uk.gov.hmrc.play.frontend.auth.{AuthenticationProvider, TaxRegime}
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
-
-object HtsRegime extends TaxRegime {
-
-  //todo find out what to do here ????
-  override def isAuthorised(accounts: Accounts): Boolean = true
-
-  override def authenticationType: AuthenticationProvider = HtsAuthenticationProvider
-
-  override def unauthorisedLandingPage: Option[String] = {
-    Some(routes.Register.failedTwoFactor().url)
-  }
-}
+//Holder of Identity Verification response token param
+case class JourneyId(Id: String) extends AnyVal

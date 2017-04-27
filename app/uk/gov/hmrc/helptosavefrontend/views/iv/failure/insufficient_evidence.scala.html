@@ -16,12 +16,14 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.identitycheck.header.page"), bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+    <div class="grid-layout grid-layout--stacked">
+        <div class="grid-layout__column grid-layout__column--2-3">
+            <header class="page-header text">
+                <h1>@Messages("hts.iv.were_unable_to_confirm_your_identity")</h1>
+            </header>
 
-    <header class="page-header text">
-        <h2>@Messages("hts.identitycheck.failed")</h2>
-    </header>
-
-    <p class="margin-bottom">@Html(Messages("hts.login.if_you_have_query_contact_HMRC", "https://www.gov.uk/contact-hmrc"))</p>
-    <a href="">@Messages("hts.login.back_to_2step_verification")</a>
+            <p>@Html(Messages("hts.iv.you_cant_access_this_service_because_hmrc_doesnt_know_enough_", "https://www.gov.uk/contact-hmrc"))</p>
+        </div>
+    </div>
 }

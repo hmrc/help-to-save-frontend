@@ -24,6 +24,7 @@ import com.google.inject.Inject
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
+import uk.gov.hmrc.helptosavefrontend.auth.HtsCompositePageVisibilityPredicate.twoFactorURI
 import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
@@ -37,30 +38,28 @@ import scala.concurrent.Future
 
 @Singleton
 class Register @Inject()(val messagesApi: MessagesApi,
-                          eligibilityConnector: EligibilityConnector,
-                          citizenDetailsConnector: CitizenDetailsConnector) extends HelpToSaveController with I18nSupport {
+                         eligibilityConnector: EligibilityConnector,
+                         citizenDetailsConnector: CitizenDetailsConnector) extends HelpToSaveController with I18nSupport {
 
   val userInfoService = new UserInfoService(authConnector, citizenDetailsConnector)
 
-  def declaration  =
-    authorisedHtsUser { implicit authContext ⇒ implicit request ⇒
-      validateUser(authContext).fold(
-        error ⇒ {
-          Logger.error(s"Could not perform eligibility check: $error")
-          InternalServerError("")
-        }, _.fold(
-          Ok(views.html.core.not_eligible()))(
-          userDetails ⇒ Ok(views.html.register.declaration(userDetails))
+  def declaration =
+    authorisedHtsUser { implicit authContext ⇒
+      implicit request ⇒
+        validateUser(authContext).fold(
+          error ⇒ {
+            Logger.error(s"Could not perform eligibility check: $error")
+            InternalServerError("")
+          }, _.fold(
+            Ok(views.html.core.not_eligible()))(
+            userDetails ⇒ Ok(views.html.register.declaration(userDetails))
+          )
         )
-      )
     }
 
-  def  getCreateAccountHelpToSave = authorisedHtsUser { implicit authContext =>implicit request ⇒
-    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
-  }
-
-  def identityCheckFailed = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.exceptions.identityCheckFailed()))
+  def getCreateAccountHelpToSave = authorisedHtsUser { implicit authContext =>
+    implicit request ⇒
+      Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
   }
 
   /**
@@ -74,22 +73,25 @@ class Register @Inject()(val messagesApi: MessagesApi,
     * if all the above has successfully been performed and the eligibility check is negative.
     */
   private def validateUser(authContext: AuthContext)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
-    nino     ← EitherT.fromOption[Future](retrieveNino(authContext), "Unable to retrieve NINO")
+    nino ← EitherT.fromOption[Future](retrieveNino(authContext), "Unable to retrieve NINO")
     userInfo ← userInfoService.getUserInfo(authContext, nino)
     eligible ← eligibilityConnector.checkEligibility(nino)
   } yield eligible.fold(None, Some(userInfo))
 
 
-
   private def retrieveNino(authContext: AuthContext): Option[String] = {
-    def getNino(accounts:Accounts):Option[String] = (accounts.paye,accounts.tai,accounts.tcs,accounts.iht) match {
-      case (Some(paye),_,_,_) => Some(paye.nino.nino)
-      case (_,Some(tai),_,_) => Some(tai.nino.nino)
-      case (_,_,Some(tcs),_) => Some(tcs.nino.nino)
-      case (_,_,_,Some(iht)) => Some(iht.nino.nino)
-      case _ =>  None
+    def getNino(accounts: Accounts): Option[String] = (accounts.paye, accounts.tai, accounts.tcs, accounts.iht) match {
+      case (Some(paye), _, _, _) => Some(paye.nino.nino)
+      case (_, Some(tai), _, _) => Some(tai.nino.nino)
+      case (_, _, Some(tcs), _) => Some(tcs.nino.nino)
+      case (_, _, _, Some(iht)) => Some(iht.nino.nino)
+      case _ => None
     }
+
     getNino(authContext.principal.accounts)
   }
 
+  def failedTwoFactor = Action.async { implicit request ⇒
+    Future.successful(Ok(views.html.twofactor.you_need_two_factor(twoFactorURI.toString)))
+  }
 }

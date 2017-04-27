@@ -27,7 +27,7 @@ object HtsGovernmentGateway extends GovernmentGateway {
 
   override def redirectToLogin(implicit request: Request[_]): Future[FailureResult] = ggRedirect
 
-  override def continueURL: String = loginCallbackURL
+  override def continueURL: String = HtsDeclarationUrl
 
   override def loginURL: String = companySignInUrl
 
