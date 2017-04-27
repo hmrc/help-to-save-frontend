@@ -15,9 +15,10 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.user_details
-@import uk.gov.hmrc.helptosavefrontend.models.UserDetails
+@import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@(userDetails: UserDetails)(implicit request: Request[_], messages: Messages)
+
+@(userDetails: UserInfo)(implicit request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.declaration.header-page"), bodyClasses = None) {
  <header class="page-header text">
@@ -30,6 +31,7 @@
  </header>
  @user_details(userDetails)
  <header>
+  <h2>@Messages("hts.register.declaration.create-your-account-header")</h2>
   <p>@Messages("hts.register.declaration.text")</p>
  </header>
  <a href=@routes.Register.getCreateAccountHelpToSave() class="button">@Messages("hts.register.declaration.label")</a>

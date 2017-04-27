@@ -18,31 +18,63 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.util.UUID
 
+import cats.data.EitherT
 import cats.syntax.show._
+import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.Result
+import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.domain.Nino
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
-import uk.gov.hmrc.helptosavefrontend.models.UserDetails.localDateShow
+import uk.gov.hmrc.helptosavefrontend.models.UserInfo.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
+import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
+import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
+import uk.gov.hmrc.play.frontend.auth.{AuthContext, AuthenticationProviderIds}
+import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.frontend.auth.connectors.domain._
 import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils.now
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
+  implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
+
   val fakeNino = "WM123456C"
+
+  val authority = Authority(uri = s"/path/to/authority",
+    accounts = Accounts(
+      paye = Some(PayeAccount(s"/taxcalc/$fakeNino", Nino(fakeNino))),
+      tai = Some(TaxForIndividualsAccount(s"/tai/$fakeNino", Nino(fakeNino)))),
+    loggedInAt = None,
+    previouslyLoggedInAt = None,
+    credentialStrength = CredentialStrength.Strong,
+    confidenceLevel = ConfidenceLevel.L200,
+    userDetailsLink = Some("/user-details/mockuser"),
+    enrolments = Some("/auth/oid/mockuser/enrolments"),
+    ids = Some("/auth/oid/mockuser/ids"),
+    legacyOid = "mockuser")
+
+  val authContext = AuthContext(authority)
 
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
 
-  val register = new Register(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector) {
-    override lazy val authConnector = MockAuthConnector
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+
+  val mockUserInfoService: UserInfoService = mock[UserInfoService]
+
+  val register = new Register(
+    fakeApplication.injector.instanceOf[MessagesApi],
+    mockEligibilityConnector,
+    mockUserInfoService) {
+    override lazy val authConnector = mockAuthConnector
   }
 
   private def authenticatedFakeRequest =
@@ -53,20 +85,34 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
     )
 
-  def doRequest(): Future[Result] = register.declaration(authenticatedFakeRequest)
+  def doRequest(): Future[PlayResult] = register.declaration(authenticatedFakeRequest)
 
-  def mockEligibilityResult(nino: String, result: Option[UserDetails]): Unit =
+  def mockEligibilityResult(nino: String)(result: Boolean): Unit =
     (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
       .expects(nino, *)
-      .returning(Future.successful(EligibilityResult(result)))
+      .returning(EitherT.pure[Future,String,EligibilityResult](EligibilityResult(result)))
+
+  def mockAuthConnector(authority: Authority): Unit =
+    (mockAuthConnector.currentAuthority(_: HeaderCarrier))
+      .expects(*)
+      .returning(Future.successful(Some(authority)))
+
+  def mockUserInfo(authContext: AuthContext, nino: NINO)(userInfo: UserInfo): Unit =
+    (mockUserInfoService.getUserInfo(_: AuthContext, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(authContext, nino, *, *)
+      .returning(EitherT.pure[Future,String,UserInfo](userInfo))
 
   "GET /" should {
 
     "return 200 if the eligibility check is successful" in {
       val user = randomUserDetails()
-      mockEligibilityResult(fakeNino, Some(user))
+      inSequence {
+        mockAuthConnector(authority)
+        mockUserInfo(authContext, fakeNino)(user)
+        mockEligibilityResult(fakeNino)(true)
+      }
 
-      val result: Future[Result] = doRequest()
+      val result: Future[PlayResult] = doRequest()
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
@@ -75,7 +121,6 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       val html = contentAsString(result)
 
       html should include(user.name)
-      html should include(user.dateOfBirth.show)
       html should include(user.email)
       html should include(user.NINO)
       html should include(user.address.mkString(","))
@@ -83,7 +128,12 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     }
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
-      mockEligibilityResult(fakeNino, None)
+      inSequence{
+        mockAuthConnector(authority)
+        mockUserInfo(authContext, fakeNino)(randomUserDetails())
+        mockEligibilityResult(fakeNino)(false)
+      }
+
       val result = doRequest()
       val html = contentAsString(result)
 
@@ -91,11 +141,13 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       html should include("To be eligible for an account")
     }
     "the getCreateAccountHelpToSave return 200" in {
+      mockAuthConnector(authority)
       val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
       status(result) shouldBe Status.OK
     }
 
     "the getCreateAccountHelpToSave return HTML" in {
+      mockAuthConnector(authority)
       val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")

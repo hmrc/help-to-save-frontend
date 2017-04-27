@@ -18,17 +18,15 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-import play.api.libs.json.{JsError, JsSuccess}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityResult
+import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
-
-import scala.concurrent.Future
 
 @ImplementedBy(classOf[EligibilityConnectorImpl])
 trait EligibilityConnector {
-  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Future[EligibilityResult]
+  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
 }
 
 @Singleton
@@ -41,11 +39,7 @@ class EligibilityConnectorImpl extends EligibilityConnector with ServicesConfig 
 
   private val http = WSHttp
 
-  override def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Future[EligibilityResult] =
-    http.GET(s"$helpToSaveEligibilityURL/${serviceURL(nino)}").flatMap{
-      _.json.validate[EligibilityResult] match {
-        case JsSuccess(result, _) ⇒ Future.successful(result)
-        case JsError(_)         ⇒ Future.failed[EligibilityResult](new Exception("Could not parse eligibility result"))
-      }
-    }
+  override def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
+    getResult(s"$helpToSaveEligibilityURL/${serviceURL(nino)}")
+
 }

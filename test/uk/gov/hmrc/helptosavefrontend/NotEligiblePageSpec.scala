@@ -29,7 +29,9 @@ class NotEligiblePageSpec extends UnitSpec with WithFakeApplication with MockFac
 
   val mockEligibilityConnector = mock[EligibilityConnector]
 
-  val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector)
+  val helpToSave = new HelpToSave(
+    fakeApplication.injector.instanceOf[MessagesApi],
+    mockEligibilityConnector)
 
   val fakeRequest = FakeRequest("GET", "/")
   

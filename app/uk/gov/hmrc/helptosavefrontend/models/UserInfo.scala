@@ -23,19 +23,17 @@ import cats.Show
 import play.api.libs.json._
 
 /** Details of the user */
-case class UserDetails(name: String,
-                       NINO: String,
-                       dateOfBirth: LocalDate,
-                       email: String,
-                       phoneNumber: String,
-                       address: List[String],
-                       contactPreference: ContactPreference)
+case class UserInfo(name: String,
+                    NINO: String,
+                    dateOfBirth: LocalDate,
+                    email: String,
+                    address: List[String])
 
-object UserDetails {
+object UserInfo {
 
   implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")))
 
-  implicit val userDetailsFormat: Format[UserDetails] = Json.format[UserDetails]
+  implicit val userDetailsFormat: Format[UserInfo] = Json.format[UserInfo]
 }
 
 

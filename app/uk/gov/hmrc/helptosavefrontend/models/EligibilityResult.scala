@@ -17,28 +17,18 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.{Format, JsResult, JsValue, Json}
-import uk.gov.hmrc.helptosavefrontend.models.UserDetails.userDetailsFormat
+import uk.gov.hmrc.helptosavefrontend.models.UserInfo.userDetailsFormat
 
 /**
   * The result of an eligibility check.
   *
-  * @param value `None` corresponds to a result indicating the user is not eligible,
-  *              whereas the `Some` case corresponds to the case when  the user is
-  *              eligible and contains the necessary data to create the account on NS&I.
+  * @param eligible Whether or not the applicant is eligible for HTS
   */
 // implemented as a value case class to get rid of runtime allocation overhead
-case class EligibilityResult(value: Option[UserDetails]) extends AnyVal {
-  def fold[A](ineligible: ⇒ A, eligible: UserDetails ⇒ A): A = value.fold(ineligible)(eligible)
+case class EligibilityResult(eligible: Boolean) extends AnyVal {
+  def fold[A](whenIneligible: ⇒ A, whenEligible: ⇒ A): A = if(eligible) whenEligible else whenIneligible
 }
 
 object EligibilityResult {
-  implicit val format: Format[EligibilityResult] = new Format[EligibilityResult]{
-    implicit val optionUserFormat: Format[Option[UserDetails]] = Format.optionWithNull[UserDetails]
-
-    override def writes(o: EligibilityResult): JsValue =
-      Json.toJson(o.value)
-
-    override def reads(json: JsValue): JsResult[EligibilityResult] =
-      Json.fromJson[Option[UserDetails]](json).map(new EligibilityResult(_))
-  }
+  implicit val format: Format[EligibilityResult] = Json.format[EligibilityResult]
 }
