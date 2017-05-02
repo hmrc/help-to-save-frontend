@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.auth
 
 import play.api.mvc.Results._
 import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig.{loginCallbackURL, sosOrigin, verifySignIn}
+import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig.{IdentityCallbackUrl, sosOrigin, verifySignIn}
 import uk.gov.hmrc.play.frontend.auth.Verify
 import uk.gov.hmrc.play.http.SessionKeys
 
@@ -35,7 +35,7 @@ object HtsIVerify extends Verify {
 
     Future.successful(Redirect(idaSignIn).withSession(
       SessionKeys.loginOrigin -> sosOrigin,
-      SessionKeys.redirect -> loginCallbackURL
+      SessionKeys.redirect -> IdentityCallbackUrl
     ))
   }
 }

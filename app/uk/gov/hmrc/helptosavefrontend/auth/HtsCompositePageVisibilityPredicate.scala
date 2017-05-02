@@ -32,19 +32,18 @@ object HtsCompositePageVisibilityPredicate extends CompositePageVisibilityPredic
     new UpliftingIdentityConfidencePredicate(L200, ivUpliftURI)
   )
 
-  private val ivUpliftURI: URI =
+  val ivUpliftURI: URI =
     new URI(s"$ivUpliftUrl?origin=$sosOrigin&" +
-      s"completionURL=${URLEncoder.encode(loginCallbackURL, "UTF-8")}&" +
-      s"failureURL=${URLEncoder.encode(identityCheckFailedUrl, "UTF-8")}" +
+      s"completionURL=${URLEncoder.encode(IdentityCallbackUrl, "UTF-8")}&" +
+      s"failureURL=${URLEncoder.encode(IdentityCallbackUrl, "UTF-8")}" +
       s"&confidenceLevel=200")
 
-  private val twoFactorURI: URI =
+  val twoFactorURI: URI =
     new URI(s"$twoFactorUrl?" +
-      s"continue=${URLEncoder.encode(loginCallbackURL, "UTF-8")}&" +
-      s"failure=${URLEncoder.encode(identityCheckFailedUrl, "UTF-8")}")
+      s"continue=${URLEncoder.encode(HtsDeclarationUrl, "UTF-8")}&" +
+      s"failure=${URLEncoder.encode(TwoFactorFailedUrl, "UTF-8")}")
 
   class UpliftingIdentityConfidencePredicate(requiredConfidenceLevel: ConfidenceLevel, upliftConfidenceUri: URI)
     extends IdentityConfidencePredicate(requiredConfidenceLevel, Future.successful(Redirect(upliftConfidenceUri.toString)))
-
 
 }
