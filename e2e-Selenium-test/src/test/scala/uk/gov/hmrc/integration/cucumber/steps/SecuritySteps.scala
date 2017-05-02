@@ -1,4 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.stepdefs
+package uk.gov.hmrc.integration.cucumber.steps
 
 import cucumber.api.scala.{EN, ScalaDsl}
 import uk.gov.hmrc.integration.cucumber.flows.LoginUsingGG

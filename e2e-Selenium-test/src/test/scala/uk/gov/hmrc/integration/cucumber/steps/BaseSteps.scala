@@ -1,4 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.stepdefs.generic
+package uk.gov.hmrc.integration.cucumber.steps
 
 import java.util.Calendar
 
