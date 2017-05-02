@@ -40,16 +40,16 @@ trait CitizenDetailsConnector {
 object CitizenDetailsConnector {
 
   case class Person(firstName: Option[String],
-                                        lastName: Option[String],
-                                        dateOfBirth: Option[LocalDate])
+                    lastName: Option[String],
+                    dateOfBirth: Option[LocalDate])
 
   case class Address(line1: Option[String],
-                                         line2: Option[String],
-                                         line3: Option[String],
-                                         line4: Option[String],
-                                         line5: Option[String],
-                                         postcode: Option[String],
-                                         country: Option[String])
+                     line2: Option[String],
+                     line3: Option[String],
+                     line4: Option[String],
+                     line5: Option[String],
+                     postcode: Option[String],
+                     country: Option[String])
 
   case class CitizenDetailsResponse(person: Option[Person], address: Option[Address])
 
