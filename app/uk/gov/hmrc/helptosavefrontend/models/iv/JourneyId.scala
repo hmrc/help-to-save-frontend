@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.models.iv
 
 //Holder of Identity Verification response token param
 case class JourneyId(Id: String) extends AnyVal

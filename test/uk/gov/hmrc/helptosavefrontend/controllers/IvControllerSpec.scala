@@ -28,7 +28,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
-import uk.gov.hmrc.helptosavefrontend.models.{IvSuccessResponse, JourneyId}
+import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.auth.connectors.domain._
 import uk.gov.hmrc.play.frontend.auth.{AuthContext, AuthenticationProviderIds}
@@ -74,7 +74,7 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
 
   def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
     (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
-      .returning(Future.successful(IvSuccessResponse(ivServiceResponse)))
+      .returning(Future.successful(IvSuccessResponse.fromString(ivServiceResponse)))
 
   val ivController = new IvController(ivConnector, fakeApplication.injector.instanceOf[MessagesApi]) {
     override lazy val authConnector: AuthConnector = mockAuthConnector

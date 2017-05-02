@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.Logger
 import play.mvc.Http.Status.OK
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.iv._
 import uk.gov.hmrc.helptosavefrontend.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -28,7 +28,7 @@ import scala.concurrent.Future
 
 @ImplementedBy(classOf[IvConnectorImpl])
 trait IvConnector {
-  def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[IvResponse]
+  def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]]
 }
 
 @Singleton
@@ -38,21 +38,21 @@ class IvConnectorImpl extends IvConnector {
 
   val http = WSHttp
 
-  override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[IvResponse] = {
+  override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]] = {
 
     http.GET(s"$identityVerificationURL/${journeyId.Id}").flatMap {
 
       case r if r.status == OK ⇒
         val result = (r.json \ "result").as[String]
-        Future.successful(IvSuccessResponse(result))
+        Future.successful(IvSuccessResponse.fromString(result))
 
       case r =>
         Logger.warn(s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service")
-        Future.successful(IvUnexpectedResponse(r))
+        Future.successful(Some(IvUnexpectedResponse(r)))
 
     }.recoverWith { case e: Exception =>
       Logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
-      Future.successful(IvErrorResponse(e))
+      Future.successful(Some(IvErrorResponse(e)))
     }
   }
 }
