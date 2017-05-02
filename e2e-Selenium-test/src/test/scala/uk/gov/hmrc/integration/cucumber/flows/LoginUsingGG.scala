@@ -1,7 +1,7 @@
 package uk.gov.hmrc.integration.cucumber.flows
 
 import org.scalatest.selenium.WebBrowser
-import uk.gov.hmrc.integration.cucumber.pages.generic.{AuthorityWizardPage, GovernmentGatewayPage}
+import uk.gov.hmrc.integration.cucumber.pages.{AuthorityWizardPage, GovernmentGatewayPage}
 import uk.gov.hmrc.integration.cucumber.utils.{Env, SingletonDriver}
 
 

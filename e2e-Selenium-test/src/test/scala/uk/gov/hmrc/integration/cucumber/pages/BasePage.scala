@@ -1,4 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.pages.generic
+package uk.gov.hmrc.integration.cucumber.pages
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

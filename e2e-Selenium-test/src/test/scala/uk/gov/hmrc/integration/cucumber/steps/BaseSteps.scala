@@ -7,7 +7,7 @@ import cucumber.api.scala.{EN, ScalaDsl}
 import cucumber.api.{DataTable, Scenario}
 import org.openqa.selenium._
 import uk.gov.hmrc.integration.cucumber.flows.LoginUsingGG
-import uk.gov.hmrc.integration.cucumber.pages.generic.BasePage
+import uk.gov.hmrc.integration.cucumber.pages.BasePage
 
 class BaseSteps extends BasePage {
 

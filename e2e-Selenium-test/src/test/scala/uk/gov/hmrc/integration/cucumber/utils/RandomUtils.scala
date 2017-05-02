@@ -1,6 +1,6 @@
 package uk.gov.hmrc.integration.cucumber.utils
 
-import uk.gov.hmrc.integration.cucumber.pages.generic.BasePage
+import uk.gov.hmrc.integration.cucumber.pages.BasePage
 
 import scala.util.Random
 

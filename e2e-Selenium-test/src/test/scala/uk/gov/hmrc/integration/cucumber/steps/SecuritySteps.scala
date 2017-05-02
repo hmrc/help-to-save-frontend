@@ -2,10 +2,10 @@ package uk.gov.hmrc.integration.cucumber.steps
 
 import cucumber.api.scala.{EN, ScalaDsl}
 import uk.gov.hmrc.integration.cucumber.flows.LoginUsingGG
-import uk.gov.hmrc.integration.cucumber.pages._
-import uk.gov.hmrc.integration.cucumber.pages.generic.{BasePage, GovernmentGatewayPage}
+import uk.gov.hmrc.integration.cucumber._
+import uk.gov.hmrc.integration.cucumber.pages.{BasePage, GovernmentGatewayPage}
 import org.scalatest.Assertions._
-import uk.gov.hmrc.integration.cucumber.pages.generic.{AuthorityWizardPage, GovernmentGatewayPage}
+import uk.gov.hmrc.integration.cucumber.pages.{AuthorityWizardPage, GovernmentGatewayPage}
 
 class SecuritySteps extends BasePage{
 

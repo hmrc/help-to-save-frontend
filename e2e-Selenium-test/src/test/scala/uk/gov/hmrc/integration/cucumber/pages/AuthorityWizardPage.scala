@@ -1,9 +1,5 @@
-package uk.gov.hmrc.integration.cucumber.pages.generic
+package uk.gov.hmrc.integration.cucumber.pages
 
-//import uk.gov.hmrc.integration.cucumber.pages.sicAndCompliance.BusinessActivityDescriptionPage
-//import uk.gov.hmrc.integration.cucumber.pages.vatFinancials.vatBankAccount.CompanyBankDetailsPage
-//import uk.gov.hmrc.integration.cucumber.pages.vatTradingDetails.vatChoice.StartDatePage
-//import uk.gov.hmrc.integration.cucumber.pages.vatFinancials.{EstimateVatTurnoverPage, EstimateZeroRatedSalesPage}
 import util.Random
 
 object AuthorityWizardPage extends BasePage{

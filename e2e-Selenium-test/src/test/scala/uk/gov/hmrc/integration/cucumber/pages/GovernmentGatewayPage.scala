@@ -1,10 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.pages.generic
-
-//import uk.gov.hmrc.integration.cucumber.pages.sicAndCompliance.BusinessActivityDescriptionPage
-//import uk.gov.hmrc.integration.cucumber.pages.vatFinancials.vatBankAccount.CompanyBankDetailsPage
-//import uk.gov.hmrc.integration.cucumber.pages.vatTradingDetails.vatChoice.StartDatePage
-//import uk.gov.hmrc.integration.cucumber.pages.vatFinancials.{EstimateVatTurnoverPage, EstimateZeroRatedSalesPage}
-
+package uk.gov.hmrc.integration.cucumber.pages
 
 object GovernmentGatewayPage extends BasePage{
 
