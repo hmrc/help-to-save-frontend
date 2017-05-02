@@ -24,7 +24,7 @@ class HelpToSaveStep extends BasePage{
     AuthorityWizardPage.submit()
   }
 
-  Then("""^they are forced into undergoing 2SV and CANNOT proceed with their HtS application$"""){ () =>
+  Then("""^they are forced into going through 2SV and CANNOT proceed with their HtS application$"""){ () =>
     val url = BasePage.getCurrentUrl
     url should include("one-time-password")
   }

@@ -11,14 +11,14 @@ import uk.gov.hmrc.integration.cucumber.pages.generic.BasePage
 
 class BaseStepDef extends BasePage {
 
-  @Before(Array("@AuthenticatedLogIn"))
-  def AuthenticatedLogIn(): Unit = {
-    LoginUsingGG.login("authenticated")
-  }
-  @Before(Array("@UnauthenticatedLogIn"))
-  def UnauthenticatedLogIn(): Unit = {
-    LoginUsingGG.login("unauthenticated")
-  }
+//  @Before(Array("@AuthenticatedLogIn"))
+//  def AuthenticatedLogIn(): Unit = {
+//    LoginUsingGG.login("authenticated")
+//  }
+//  @Before(Array("@UnauthenticatedLogIn"))
+//  def UnauthenticatedLogIn(): Unit = {
+//    LoginUsingGG.login("unauthenticated")
+//  }
 
   @After
   def screenshots(result: Scenario) {
@@ -34,5 +34,6 @@ class BaseStepDef extends BasePage {
           }
         }
     }
+    driver.quit()
   }
 }
