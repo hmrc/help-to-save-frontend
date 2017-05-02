@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.util
 
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.JsError
 
-class UserDetailsSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks{
+object JsErrorOps {
 
-  "UserDetails" must {
-    "have a JSON Format instance" in {
-      forAll{ user: UserInfo ⇒
-        val json = Json.toJson(user)
-        Json.fromJson[UserInfo](json) shouldBe JsSuccess(user)
-      }
-    }
-  }
+  implicit def jsErrorOps(error: JsError): JsErrorOps = new JsErrorOps(error)
+
+}
+
+class JsErrorOps(val error: JsError) extends AnyVal {
+
+  /**
+    * Create a legible string describing the error suitable for debugging purposes
+    */
+  def prettyPrint(): String = error.errors.map{ case (jsPath, validationErrors) ⇒
+    jsPath.toString + ": [" + validationErrors.map(_.message).mkString(",") + "]"
+  }.mkString("; ")
+
 }

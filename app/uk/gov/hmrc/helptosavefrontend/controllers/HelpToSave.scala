@@ -23,8 +23,6 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -33,19 +31,18 @@ import scala.concurrent.Future
 class HelpToSave @Inject()(val messagesApi: MessagesApi,
                            eligibilityConnector: EligibilityConnector)   extends FrontendController with I18nSupport  {
 
-
   val notEligible = Action.async { implicit request ⇒
-    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligible()))
+    Future.successful(Ok(views.html.core.not_eligible()))
   }
 
   def getApplyHelpToSave = Action.async { implicit request ⇒
-    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.apply_help_to_save()))
+    Future.successful(Ok(views.html.core.apply_help_to_save()))
   }
   def  getAboutHelpToSave =  Action.async { implicit request ⇒
-    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.about_help_to_save()))
+    Future.successful(Ok(views.html.core.about_help_to_save()))
   }
   def  getEligibilityHelpToSave =  Action.async { implicit request ⇒
-    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.eligibility_help_to_save()))
+    Future.successful(Ok(views.html.core.eligibility_help_to_save()))
   }
 
 }

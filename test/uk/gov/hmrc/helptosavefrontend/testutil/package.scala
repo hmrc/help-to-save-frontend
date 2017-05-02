@@ -14,20 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend
 
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsSuccess, Json}
+import org.scalacheck.Arbitrary
 
-class UserDetailsSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks{
+import scala.reflect.ClassTag
+import scala.reflect._
 
-  "UserDetails" must {
-    "have a JSON Format instance" in {
-      forAll{ user: UserInfo ⇒
-        val json = Json.toJson(user)
-        Json.fromJson[UserInfo](json) shouldBe JsSuccess(user)
-      }
-    }
-  }
+
+package object testutil {
+
+  def sample[A: ClassTag](arb: Arbitrary[A]): A = arb.arbitrary
+      .sample
+      .getOrElse(sys.error(s"Could not generate type ${classTag[A].runtimeClass.getSimpleName}"))
 }

@@ -17,30 +17,27 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsSuccess, Json}
+import play.api.libs.json.{JsPath, JsSuccess, Json}
 
 
 class EligibilityResultSpec extends WordSpec with Matchers {
 
   "An EligibilityResult" must {
 
-    val success = new EligibilityResult(Some(randomUserDetails()))
-    val failure = new EligibilityResult(None)
+    val success = EligibilityResult(true)
+    val failure = EligibilityResult(false)
 
     "have a fold method" in {
-      def f(result: EligibilityResult): Boolean = result.fold(false, _ ⇒ true)
+      def f(result: EligibilityResult): String = result.fold("Nay", "Yay")
 
-      val success = new EligibilityResult(Some(randomUserDetails()))
-      val failure = new EligibilityResult(None)
-
-      f(success) shouldBe true
-      f(failure) shouldBe false
+      f(success) shouldBe "Yay"
+      f(failure) shouldBe "Nay"
     }
 
     "have a JSON format instance" in {
       List(success, failure).foreach{ result ⇒
         val json = Json.toJson(result)
-        Json.fromJson[EligibilityResult](json) shouldBe JsSuccess(result)
+        Json.fromJson[EligibilityResult](json) shouldBe JsSuccess(result, JsPath \ "eligible")
       }
     }
 
