@@ -7,7 +7,7 @@ import cucumber.api.scala.{EN, ScalaDsl}
 import cucumber.api.{DataTable, Scenario}
 import org.openqa.selenium._
 import uk.gov.hmrc.integration.cucumber.flows.LoginUsingGG
-import uk.gov.hmrc.integration.cucumber.pages.generic.{BasePage, TestSetupPage}
+import uk.gov.hmrc.integration.cucumber.pages.generic.BasePage
 
 class BaseStepDef extends BasePage {
 
@@ -35,25 +35,4 @@ class BaseStepDef extends BasePage {
         }
     }
   }
-
-  Then("""^I continue$"""){ () =>
-    clickContinue()
-  }
-
-  And("""^I save and continue$""") { () =>
-    clickSaveAndContinue()
-  }
-
-  And("""^I attempt to continue without making a selection$"""){ () =>
-    clickSaveAndContinue()
-  }
-
-  Then("""^I prime the application$"""){ (data: DataTable) =>
-    go to TestSetupPage
-    BasePage.waitForPageToBeLoaded(TestSetupPage.checkBodyTitle(), "Failed to load Test Setup Page")
-    TestSetupPage.enterData(data)
-    submit()
-    BasePage.waitForPageToBeLoaded(TestSetupPage.checkBodyPreText(), "Failed to submit Test Setup Page")
-  }
-
 }

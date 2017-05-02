@@ -1,9 +1,9 @@
 package uk.gov.hmrc.integration.cucumber.pages.generic
 
-import uk.gov.hmrc.integration.cucumber.pages.sicAndCompliance.BusinessActivityDescriptionPage
-import uk.gov.hmrc.integration.cucumber.pages.vatFinancials.vatBankAccount.CompanyBankDetailsPage
-import uk.gov.hmrc.integration.cucumber.pages.vatTradingDetails.vatChoice.StartDatePage
-import uk.gov.hmrc.integration.cucumber.pages.vatFinancials.{EstimateVatTurnoverPage, EstimateZeroRatedSalesPage}
+//import uk.gov.hmrc.integration.cucumber.pages.sicAndCompliance.BusinessActivityDescriptionPage
+//import uk.gov.hmrc.integration.cucumber.pages.vatFinancials.vatBankAccount.CompanyBankDetailsPage
+//import uk.gov.hmrc.integration.cucumber.pages.vatTradingDetails.vatChoice.StartDatePage
+//import uk.gov.hmrc.integration.cucumber.pages.vatFinancials.{EstimateVatTurnoverPage, EstimateZeroRatedSalesPage}
 
 
 object GovernmentGatewayPage extends BasePage{
@@ -28,14 +28,14 @@ object GovernmentGatewayPage extends BasePage{
                                 password.value = ""
                                 submit()
     }
-    goToStartPage()
-    goToDbTeardown()
-    goToS4lTeardown()
-    goToStartPage()
-    StartDatePage.initialise()
-    BusinessActivityDescriptionPage.initialise()
-    CompanyBankDetailsPage.initialise()
-    EstimateZeroRatedSalesPage.initialise()
-    EstimateVatTurnoverPage.initialise()
+//    goToStartPage()
+//    goToDbTeardown()
+//    goToS4lTeardown()
+//    goToStartPage()
+//    StartDatePage.initialise()
+//    BusinessActivityDescriptionPage.initialise()
+//    CompanyBankDetailsPage.initialise()
+//    EstimateZeroRatedSalesPage.initialise()
+//    EstimateVatTurnoverPage.initialise()
   }
 }
