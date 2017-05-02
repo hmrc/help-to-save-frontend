@@ -24,7 +24,7 @@ import com.google.inject.Inject
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
-import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
 import uk.gov.hmrc.helptosavefrontend.util.Result
@@ -35,18 +35,19 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-
 @Singleton
 class Register @Inject()(val messagesApi: MessagesApi,
                           eligibilityConnector: EligibilityConnector,
-                          userInfoService: UserInfoService) extends HelpToSaveController with I18nSupport {
+                          citizenDetailsConnector: CitizenDetailsConnector) extends HelpToSaveController with I18nSupport {
+
+  val userInfoService = new UserInfoService(authConnector, citizenDetailsConnector)
 
   def declaration  =
     authorisedHtsUser { implicit authContext ⇒ implicit request ⇒
       validateUser(authContext).fold(
         error ⇒ {
           Logger.error(s"Could not perform eligibility check: $error")
-          InternalServerError()
+          InternalServerError("")
         }, _.fold(
           Ok(views.html.core.not_eligible()))(
           userDetails ⇒ Ok(views.html.register.declaration(userDetails))

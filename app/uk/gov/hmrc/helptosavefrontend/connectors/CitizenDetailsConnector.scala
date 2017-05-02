@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import java.time.LocalDate
+
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.CitizenDetailsResponse
@@ -37,15 +39,29 @@ trait CitizenDetailsConnector {
 
 object CitizenDetailsConnector {
 
-  case class Address(line1: String, line2: String, line3: String, line4: String,
-                     line5: String, postcode: String, country: String)
+  private[connectors] case class Person(firstName: Option[String],
+                                        lastName: Option[String],
+                                        dateOfBirth: Option[LocalDate])
 
-  case class CitizenDetailsResponse(address: Address)
+  private[connectors] case class Address(line1: Option[String],
+                                         line2: Option[String],
+                                         line3: Option[String],
+                                         line4: Option[String],
+                                         line5: Option[String],
+                                         postcode: Option[String],
+                                         country: Option[String])
+
+  case class CitizenDetailsResponse(person: Option[Person], address: Option[Address])
 
   implicit class AddressOps(val a: Address) extends AnyVal {
     def toList(): List[String] =
-      List(a.line1, a.line2, a.line3, a.line4, a.line5, a.postcode, a.country).map(_.trim).filter(_.nonEmpty)
+      List(a.line1, a.line2, a.line3, a.line4, a.line5, a.postcode, a.country)
+        .collect{ case Some(s) ⇒ s }
+        .map(_.trim)
+        .filter(_.nonEmpty)
   }
+
+  implicit val personReads: Reads[Person] = Json.reads[Person]
 
   implicit val addressReads: Reads[Address] = Json.reads[Address]
 
@@ -58,7 +74,7 @@ class CitizenDetailsConnectorImpl extends CitizenDetailsConnector with ServicesC
 
   private val citizenDetailsBaseURL: String = baseUrl("citizen-details")
 
-  private def citizenDetailsURI(nino: NINO): String = s"$citizenDetailsBaseURL/$nino/designatory-details"
+  private def citizenDetailsURI(nino: NINO): String = s"$citizenDetailsBaseURL/citizen-details/$nino/designatory-details"
 
   override def getDetails(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[CitizenDetailsResponse] =
     getResult[CitizenDetailsResponse](citizenDetailsURI(nino))

@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.services.userinfo
 
 import java.time.LocalDate
 
-import cats.data.EitherT
+import cats.data.{EitherT, ValidatedNel}
+import cats.syntax.cartesian._
+import cats.syntax.option._
 import cats.instances.future._
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector
@@ -52,8 +54,9 @@ class UserInfoService(authConnector: ⇒ AuthConnector,
     for {
       userDetails    ← queryUserDetails(authContext)
       citizenDetails ← citizenDetailsConnector.getDetails(nino)
-    } yield toUserInfo(userDetails, citizenDetails, nino)
-
+      userInfo       ← EitherT.fromEither[Future](toUserInfo(userDetails, citizenDetails, nino).toEither).leftMap(
+        errors ⇒ s"Could not create user info: ${errors.toList.mkString(",")}")
+    } yield userInfo
 
   private def queryUserDetails(authContext: AuthContext)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserDetailsResponse] =
     EitherT.right[Future, String, UserDetailsResponse](
@@ -61,20 +64,35 @@ class UserInfoService(authConnector: ⇒ AuthConnector,
 
   private def toUserInfo(u: UserDetailsResponse,
                          c: CitizenDetailsResponse,
-                         nino: NINO): UserInfo =
-    UserInfo(
-      u.name + " " + u.lastName,
-      nino,
-      u.dateOfBirth,
-      u.email,
-      c.address.toList()
-    )
+                         nino: NINO): ValidatedNel[String, UserInfo] = {
+    val surnameValidation =
+      u.lastName.orElse(c.person.flatMap(_.lastName))
+        .toValidNel("Could not find last name")
+
+    val dateOfBirthValidation =
+      u.dateOfBirth.orElse(c.person.flatMap(_.dateOfBirth))
+        .toValidNel("Could not find date of birth")
+
+    val emailValidation =
+      u.email.toValidNel("Could not find email address")
+
+    val addressValidation = c.address.map(_.toList()).filter(_.nonEmpty)
+      .toValidNel("Could not find address")
+
+    (surnameValidation |@| dateOfBirthValidation |@| emailValidation |@| addressValidation)
+      .map((surname, dateOfBirth, email, address) ⇒
+        UserInfo(u.name + " " + surname, nino, dateOfBirth, email, address)
+      )
+  }
 
 }
 
 object UserInfoService {
 
-  case class UserDetailsResponse(name: String, lastName: String, email: String, dateOfBirth: LocalDate)
+  case class UserDetailsResponse(name: String,
+                                 lastName: Option[String],
+                                 email: Option[String],
+                                 dateOfBirth: Option[LocalDate])
 
   implicit val userDetailsResponseReads: Reads[UserDetailsResponse] = Json.reads[UserDetailsResponse]
 
