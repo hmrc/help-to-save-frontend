@@ -13,10 +13,7 @@ class HelpToSaveStep extends BasePage{
 
   Given("""^an applicant has a confidence level of (.*)$"""){ (level : String) =>
     println("Hello!!!")
-    //    assert(true == false)
-    //    AuthorityWizardPage.signIn("authenticated user")
     AuthorityWizardPage.goToAuthWizardPage()
-    //    AuthorityWizardPage.redirect("/register/declaration")
     AuthorityWizardPage.redirect
     AuthorityWizardPage.confidenceLevel(level)
   }
