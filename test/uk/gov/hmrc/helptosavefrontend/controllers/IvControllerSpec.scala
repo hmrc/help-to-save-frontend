@@ -26,15 +26,17 @@ import play.api.http.Status._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
 import uk.gov.hmrc.helptosavefrontend.models.{IvSuccessResponse, JourneyId}
-import uk.gov.hmrc.play.frontend.auth.AuthenticationProviderIds
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import uk.gov.hmrc.play.frontend.auth.connectors.domain._
+import uk.gov.hmrc.play.frontend.auth.{AuthContext, AuthenticationProviderIds}
 import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils.now
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
@@ -44,8 +46,38 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
 
   val journeyId = JourneyId(jId)
 
+  implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
+
+  val fakeNino = "WM123456C"
+
+  val authority = Authority(uri = s"/path/to/authority",
+    accounts = Accounts(
+      paye = Some(PayeAccount(s"/taxcalc/$fakeNino", Nino(fakeNino))),
+      tai = Some(TaxForIndividualsAccount(s"/tai/$fakeNino", Nino(fakeNino)))),
+    loggedInAt = None,
+    previouslyLoggedInAt = None,
+    credentialStrength = CredentialStrength.Strong,
+    confidenceLevel = ConfidenceLevel.L200,
+    userDetailsLink = Some("/user-details/mockuser"),
+    enrolments = Some("/auth/oid/mockuser/enrolments"),
+    ids = Some("/auth/oid/mockuser/ids"),
+    legacyOid = "mockuser")
+
+  val authContext = AuthContext(authority)
+
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+
+  def mockAuthConnector(authority: Authority): Unit =
+    (mockAuthConnector.currentAuthority(_: HeaderCarrier))
+      .expects(*)
+      .returning(Future.successful(Some(authority)))
+
+  def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
+    (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
+      .returning(Future.successful(IvSuccessResponse(ivServiceResponse)))
+
   val ivController = new IvController(ivConnector, fakeApplication.injector.instanceOf[MessagesApi]) {
-    override lazy val authConnector: AuthConnector = MockAuthConnector
+    override lazy val authConnector: AuthConnector = mockAuthConnector
   }
 
   private def authenticatedFakeRequest =
@@ -79,8 +111,8 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
 
       forAll(validCases) { (ivServiceResponse: String, htsStatus: Int) ⇒
 
-        (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
-          .returning(Future.successful(IvSuccessResponse(ivServiceResponse)))
+        mockAuthConnector(authority)
+        mockIvConnector(journeyId, ivServiceResponse)
 
         val response: Future[Result] = doRequest(jId)
 
