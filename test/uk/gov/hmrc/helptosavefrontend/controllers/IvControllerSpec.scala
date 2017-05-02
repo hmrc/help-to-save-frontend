@@ -22,7 +22,7 @@ import java.util.UUID.randomUUID
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.prop.Tables.Table
-import play.api.http.Status
+import play.api.http.Status._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -65,16 +65,16 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
       val validCases =
         Table(
           ("IV Journey Result", "hts response to the user"),
-          ("Success", Status.OK),
-          ("Incomplete", Status.INTERNAL_SERVER_ERROR),
-          ("FailedIV", Status.UNAUTHORIZED),
-          ("InsufficientEvidence", Status.UNAUTHORIZED),
-          ("UserAborted", Status.UNAUTHORIZED),
-          ("LockedOut", Status.UNAUTHORIZED),
-          ("PreconditionFailed", Status.UNAUTHORIZED),
-          ("TechnicalIssue", Status.UNAUTHORIZED),
-          ("Timeout", Status.UNAUTHORIZED),
-          ("blah-blah", Status.INTERNAL_SERVER_ERROR)
+          ("Success", OK),
+          ("Incomplete", INTERNAL_SERVER_ERROR),
+          ("FailedIV", UNAUTHORIZED),
+          ("InsufficientEvidence", UNAUTHORIZED),
+          ("UserAborted", UNAUTHORIZED),
+          ("LockedOut", UNAUTHORIZED),
+          ("PreconditionFailed", UNAUTHORIZED),
+          ("TechnicalIssue", UNAUTHORIZED),
+          ("Timeout", UNAUTHORIZED),
+          ("blah-blah", INTERNAL_SERVER_ERROR)
         )
 
       forAll(validCases) { (ivServiceResponse: String, htsStatus: Int) ⇒
