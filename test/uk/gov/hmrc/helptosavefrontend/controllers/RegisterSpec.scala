@@ -134,9 +134,12 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
       val html = contentAsString(result)
 
-      html should include(user.name)
+      html should include(user.forename)
+      html should include(user.surname)
       html should include(user.email)
       html should include(user.NINO)
+      html should include(user.address.line1.getOrElse(sys.error("Could not get first line of address")))
+
     }
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
