@@ -39,11 +39,11 @@ trait CitizenDetailsConnector {
 
 object CitizenDetailsConnector {
 
-  private[connectors] case class Person(firstName: Option[String],
+  case class Person(firstName: Option[String],
                                         lastName: Option[String],
                                         dateOfBirth: Option[LocalDate])
 
-  private[connectors] case class Address(line1: Option[String],
+  case class Address(line1: Option[String],
                                          line2: Option[String],
                                          line3: Option[String],
                                          line4: Option[String],

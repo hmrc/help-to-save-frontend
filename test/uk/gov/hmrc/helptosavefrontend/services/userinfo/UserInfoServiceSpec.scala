@@ -20,11 +20,10 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
-
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.{Address, CitizenDetailsResponse}
+import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.{Address, CitizenDetailsResponse, Person}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoServiceSpec._
@@ -104,14 +103,76 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
           mockCitizenDetailsConnector(nino, citizenDetailsResponse)
         }
 
+        // test if user details has all the info needed
         val result = service.getUserInfo(authContext, nino)
         Await.result(result.value, 3.seconds) shouldBe Right(UserInfo(
-          userDetailsResponse.name + " " + userDetailsResponse.lastName,
+          userDetailsResponse.name + " " + userDetailsResponse.lastName.getOrElse("Could not find surname"),
           nino,
-          userDetailsResponse.dateOfBirth,
-          userDetailsResponse.email,
-          citizenDetailsResponse.address.toList()
+          userDetailsResponse.dateOfBirth.getOrElse(sys.error("Could not find date of birth")),
+          userDetailsResponse.email.getOrElse(sys.error("Could not find email")),
+          citizenDetailsResponse.address.map(_.toList()).getOrElse(sys.error("Could not find address"))
         ))
+
+        // test if user details does not have the surname
+        inSequence{
+          mockAuthConnector(authContext, userDetailsResponse.copy(lastName = None))
+          mockCitizenDetailsConnector(nino, citizenDetailsResponse)
+        }
+
+        // test if user details does not have the last name
+        val result2 = service.getUserInfo(authContext, nino)
+        Await.result(result2.value, 3.seconds) shouldBe Right(UserInfo(
+          userDetailsResponse.name + " " + citizenDetailsResponse.person.flatMap(_.lastName).getOrElse("Could not find surname"),
+          nino,
+          userDetailsResponse.dateOfBirth.getOrElse(sys.error("Could not find date of birth")),
+          userDetailsResponse.email.getOrElse(sys.error("Could not find email")),
+          citizenDetailsResponse.address.map(_.toList()).getOrElse(sys.error("Could not find address"))
+        ))
+
+        // test if user details does not have the date of birth
+        inSequence{
+          mockAuthConnector(authContext, userDetailsResponse.copy(dateOfBirth = None))
+          mockCitizenDetailsConnector(nino, citizenDetailsResponse)
+        }
+
+        val result3 = service.getUserInfo(authContext, nino)
+        Await.result(result3.value, 3.seconds) shouldBe Right(UserInfo(
+          userDetailsResponse.name + " " + userDetailsResponse.lastName.getOrElse("Could not find surname"),
+          nino,
+          citizenDetailsResponse.person.flatMap(_.dateOfBirth).getOrElse(sys.error("Could not find date of birth")),
+          userDetailsResponse.email.getOrElse(sys.error("Could not find email")),
+          citizenDetailsResponse.address.map(_.toList()).getOrElse(sys.error("Could not find address"))
+        ))
+      }
+
+      "return an error if some user information is not available" in new TestApparatus{
+        def test(userDetailsResponse: UserDetailsResponse,
+                citizenDetailsResponse: CitizenDetailsResponse): Unit = {
+          inSequence{
+            mockAuthConnector(authContext, userDetailsResponse)
+            mockCitizenDetailsConnector(nino, citizenDetailsResponse)
+          }
+
+          val result = service.getUserInfo(authContext, nino)
+          Await.result(result.value, 3.seconds).isLeft shouldBe true
+        }
+
+        test(
+          userDetailsResponse.copy(lastName = None),
+          citizenDetailsResponse.copy(person = citizenDetailsResponse.person.map(_.copy(lastName = None))))
+
+        test(
+          userDetailsResponse.copy(dateOfBirth = None),
+          citizenDetailsResponse.copy(person = citizenDetailsResponse.person.map(_.copy(dateOfBirth = None))))
+
+        test(
+          userDetailsResponse.copy(email = None),
+          citizenDetailsResponse)
+
+        test(
+          userDetailsResponse,
+          citizenDetailsResponse.copy(address = None))
+
       }
     }
   }
@@ -120,12 +181,20 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
 
 object UserInfoServiceSpec {
 
+  val dateGen = Gen.choose(0L,100L).map(LocalDate.ofEpochDay)
   val userDetailsResponseArb: Arbitrary[UserDetailsResponse] = Arbitrary(for{
     name ← Gen.identifier
     lastName ← Gen.identifier
     email ← Gen.alphaNumStr
-    dateOfBirth ← Gen.choose(0L,100L).map(LocalDate.ofEpochDay)
-  } yield UserDetailsResponse(name, lastName, email, dateOfBirth))
+    dateOfBirth ← dateGen
+  } yield UserDetailsResponse(name, Some(lastName), Some(email), Some(dateOfBirth)))
+
+
+  val personArb: Arbitrary[Person] = Arbitrary(for{
+    firstName ← Gen.identifier
+    lastName ← Gen.identifier
+    dateOfBirth ← dateGen
+  } yield Person(Some(firstName), Some(lastName), Some(dateOfBirth)))
 
   val addressArb: Arbitrary[Address] = Arbitrary(for{
     line1 ← Gen.identifier
@@ -135,11 +204,14 @@ object UserInfoServiceSpec {
     line5 ← Gen.identifier
     postcode ← Gen.identifier
     country ← Gen.identifier
-  } yield Address(line1, line2, line3, line4, line5, postcode, country)
+  } yield Address(Some(line1), Some(line2), Some(line3), Some(line4), Some(line5), Some(postcode), Some(country))
   )
 
   val citizenDetailsResponseArb: Arbitrary[CitizenDetailsResponse] =
-    Arbitrary(addressArb.arbitrary.map(CitizenDetailsResponse.apply))
+    Arbitrary(for{
+      person ← personArb.arbitrary
+      address ← addressArb.arbitrary
+    } yield CitizenDetailsResponse(Some(person), Some(address)))
 
   def randomUserDetailsResponse(): UserDetailsResponse =
     sample(userDetailsResponseArb)

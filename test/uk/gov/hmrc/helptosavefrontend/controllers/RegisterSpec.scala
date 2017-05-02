@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
 import play.api.test.Helpers.{contentType, _}
-import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
@@ -70,11 +70,15 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val mockUserInfoService: UserInfoService = mock[UserInfoService]
 
+  val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
+
   val register = new Register(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockEligibilityConnector,
-    mockUserInfoService) {
+    mockCitizenDetailsConnector){
     override lazy val authConnector = mockAuthConnector
+    override val userInfoService = mockUserInfoService
+
   }
 
   private def authenticatedFakeRequest =
