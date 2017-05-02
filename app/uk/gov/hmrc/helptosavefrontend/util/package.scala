@@ -44,7 +44,7 @@ package object util {
           )
         } else {
           // response didn't come back OK - something went wrong
-          Left(s"Could not obtain result from $url - [HTTP status $status, body: '${response.body}'")
+          Left(s"Could not obtain result from $url - [HTTP status $status, body: '${response.body}']")
         }
       })
 
