@@ -9,16 +9,7 @@ import org.openqa.selenium._
 import uk.gov.hmrc.integration.cucumber.flows.LoginUsingGG
 import uk.gov.hmrc.integration.cucumber.pages.generic.BasePage
 
-class BaseStepDef extends BasePage {
-
-//  @Before(Array("@AuthenticatedLogIn"))
-//  def AuthenticatedLogIn(): Unit = {
-//    LoginUsingGG.login("authenticated")
-//  }
-//  @Before(Array("@UnauthenticatedLogIn"))
-//  def UnauthenticatedLogIn(): Unit = {
-//    LoginUsingGG.login("unauthenticated")
-//  }
+class BaseSteps extends BasePage {
 
   @After
   def screenshots(result: Scenario) {

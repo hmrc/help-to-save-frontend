@@ -12,7 +12,7 @@ object LoginUsingGG extends WebBrowser {
   def login(id: String): Unit = {
     deleteAllCookies()
     go to GovernmentGatewayPage
-    if (Env.isQA(Env.baseUrl) || Env.isQA(currentUrl))  GovernmentGatewayPage.signIn(id) //else AuthorityWizardPage.signIn(id)
+    if (Env.isQA(Env.baseUrl) || Env.isQA(currentUrl))  GovernmentGatewayPage.signIn(id)
 
   }
 }

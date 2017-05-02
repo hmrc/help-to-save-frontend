@@ -67,10 +67,6 @@ trait BasePage extends Matchers
 
   def verifyValueUsingElementId(elementId: String, expectedValue: String) : Boolean = driver.findElement(By.id(elementId)).getText == expectedValue
 
-//  def ShutdownTest(): Unit = driver.quit()
-//
-//  def closeBrowser(): Unit = driver.close()
-
   def secondsWait(secs: Int): Unit = Thread.sleep(secs.*(1000))
 
   // Page Helpers

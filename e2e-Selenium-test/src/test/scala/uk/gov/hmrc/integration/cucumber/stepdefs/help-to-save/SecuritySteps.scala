@@ -7,12 +7,9 @@ import uk.gov.hmrc.integration.cucumber.pages.generic.{BasePage, GovernmentGatew
 import org.scalatest.Assertions._
 import uk.gov.hmrc.integration.cucumber.pages.generic.{AuthorityWizardPage, GovernmentGatewayPage}
 
-
-
-class HelpToSaveStep extends BasePage{
+class SecuritySteps extends BasePage{
 
   Given("""^an applicant has a confidence level of (.*)$"""){ (level : String) =>
-    println("Hello!!!")
     AuthorityWizardPage.goToAuthWizardPage()
     AuthorityWizardPage.redirect
     AuthorityWizardPage.confidenceLevel(level)
@@ -28,6 +25,4 @@ class HelpToSaveStep extends BasePage{
     val url = BasePage.getCurrentUrl
     url should include("one-time-password")
   }
-
-
 }

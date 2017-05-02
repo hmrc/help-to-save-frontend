@@ -15,7 +15,6 @@ object AuthorityWizardPage extends BasePage{
     BasePage.waitForPageToBeLoaded(checkBodyTitle(getMessage("awp.body.header")), "Failed to load Authority Wizard page")
 
     deleteAllCookies()
-//    credId.value = "cred-id-543212300016"
     credId.value = getRandomCredentials
 
   }
@@ -28,32 +27,6 @@ object AuthorityWizardPage extends BasePage{
   def affinityGroup: SingleSel = singleSel("affinityGroup")
   def submit(): Unit = clickOn(cssSelector("input.button"))
   def presets: SingleSel = singleSel("presets-dropdown")
-
-//  def signIn(id: String): Unit = {
-//    deleteAllCookies()
-//    goToAuthWizardPage()
-////    credId.value = "cred-id-543212900016"
-//    redirectUrl.value = basePageUrl
-//    credentialStrength.value = "strong"
-//    confidenceLevel.value = "300"
-//    id match {
-//      case "authenticated"     => affinityGroup.value = "Organisation"
-//                                  submit()
-//
-//      case "unauthenticated"   => affinityGroup.value = "Individual"
-//                                  submit()
-//    }
-//    goToCurrentProfileSetup()
-////    goToStartPage()
-//    goToDbTeardown()
-//    goToS4lTeardown()
-//    goToStartPage()
-//    StartDatePage.initialise()
-//    BusinessActivityDescriptionPage.initialise()
-//    CompanyBankDetailsPage.initialise()
-//    EstimateZeroRatedSalesPage.initialise()
-//    EstimateVatTurnoverPage.initialise()
-//  }
 
   private def checkTitle() : Boolean = {
     findById("content").getText shouldBe "Authority Wizard"

@@ -28,14 +28,5 @@ object GovernmentGatewayPage extends BasePage{
                                 password.value = ""
                                 submit()
     }
-//    goToStartPage()
-//    goToDbTeardown()
-//    goToS4lTeardown()
-//    goToStartPage()
-//    StartDatePage.initialise()
-//    BusinessActivityDescriptionPage.initialise()
-//    CompanyBankDetailsPage.initialise()
-//    EstimateZeroRatedSalesPage.initialise()
-//    EstimateVatTurnoverPage.initialise()
   }
 }
