@@ -16,29 +16,18 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import play.api.libs.json.{Format, Json}
 
-import cats.Show
-import play.api.libs.json._
+case class Address(line1: Option[String],
+                   line2: Option[String],
+                   line3: Option[String],
+                   line4: Option[String],
+                   line5: Option[String],
+                   postcode: Option[String],
+                   country: Option[String])
 
-/** Details of the user obtained from HMRC services */
-case class UserInfo(forename: String,
-                    surname: String,
-                    NINO: String,
-                    dateOfBirth: LocalDate,
-                    email: String,
-                    address: Address)
+object Address {
 
-object UserInfo {
+  implicit val addressFormat: Format[Address] = Json.format[Address]
 
-  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")))
-
-  implicit val userDetailsFormat: Format[UserInfo] = Json.format[UserInfo]
 }
-
-
-
-
-
-

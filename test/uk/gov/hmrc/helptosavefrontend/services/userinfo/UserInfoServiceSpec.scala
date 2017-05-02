@@ -23,7 +23,8 @@ import cats.instances.future._
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.{Address, CitizenDetailsResponse, Person}
+import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.{CitizenDetailsResponse, CitizenDetailsPerson}
+import uk.gov.hmrc.helptosavefrontend.models.addressArb
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoServiceSpec._
@@ -106,11 +107,12 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
         // test if user details has all the info needed
         val result = service.getUserInfo(authContext, nino)
         Await.result(result.value, 3.seconds) shouldBe Right(UserInfo(
-          userDetailsResponse.name + " " + userDetailsResponse.lastName.getOrElse("Could not find surname"),
+          userDetailsResponse.name,
+          userDetailsResponse.lastName.getOrElse("Could not find surname"),
           nino,
           userDetailsResponse.dateOfBirth.getOrElse(sys.error("Could not find date of birth")),
           userDetailsResponse.email.getOrElse(sys.error("Could not find email")),
-          citizenDetailsResponse.address.map(_.toList()).getOrElse(sys.error("Could not find address"))
+          citizenDetailsResponse.address.getOrElse(sys.error("Could not find address"))
         ))
 
         // test if user details does not have the surname
@@ -122,11 +124,12 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
         // test if user details does not have the last name
         val result2 = service.getUserInfo(authContext, nino)
         Await.result(result2.value, 3.seconds) shouldBe Right(UserInfo(
-          userDetailsResponse.name + " " + citizenDetailsResponse.person.flatMap(_.lastName).getOrElse("Could not find surname"),
+          userDetailsResponse.name,
+          citizenDetailsResponse.person.flatMap(_.lastName).getOrElse("Could not find surname"),
           nino,
           userDetailsResponse.dateOfBirth.getOrElse(sys.error("Could not find date of birth")),
           userDetailsResponse.email.getOrElse(sys.error("Could not find email")),
-          citizenDetailsResponse.address.map(_.toList()).getOrElse(sys.error("Could not find address"))
+          citizenDetailsResponse.address.getOrElse(sys.error("Could not find address"))
         ))
 
         // test if user details does not have the date of birth
@@ -137,11 +140,12 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
 
         val result3 = service.getUserInfo(authContext, nino)
         Await.result(result3.value, 3.seconds) shouldBe Right(UserInfo(
-          userDetailsResponse.name + " " + userDetailsResponse.lastName.getOrElse("Could not find surname"),
+          userDetailsResponse.name,
+          userDetailsResponse.lastName.getOrElse("Could not find surname"),
           nino,
           citizenDetailsResponse.person.flatMap(_.dateOfBirth).getOrElse(sys.error("Could not find date of birth")),
           userDetailsResponse.email.getOrElse(sys.error("Could not find email")),
-          citizenDetailsResponse.address.map(_.toList()).getOrElse(sys.error("Could not find address"))
+          citizenDetailsResponse.address.getOrElse(sys.error("Could not find address"))
         ))
       }
 
@@ -182,6 +186,7 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
 object UserInfoServiceSpec {
 
   val dateGen = Gen.choose(0L,100L).map(LocalDate.ofEpochDay)
+
   val userDetailsResponseArb: Arbitrary[UserDetailsResponse] = Arbitrary(for{
     name ← Gen.identifier
     lastName ← Gen.identifier
@@ -190,22 +195,11 @@ object UserInfoServiceSpec {
   } yield UserDetailsResponse(name, Some(lastName), Some(email), Some(dateOfBirth)))
 
 
-  val personArb: Arbitrary[Person] = Arbitrary(for{
+  val personArb: Arbitrary[CitizenDetailsPerson] = Arbitrary(for{
     firstName ← Gen.identifier
     lastName ← Gen.identifier
     dateOfBirth ← dateGen
-  } yield Person(Some(firstName), Some(lastName), Some(dateOfBirth)))
-
-  val addressArb: Arbitrary[Address] = Arbitrary(for{
-    line1 ← Gen.identifier
-    line2 ← Gen.identifier
-    line3 ← Gen.identifier
-    line4 ← Gen.identifier
-    line5 ← Gen.identifier
-    postcode ← Gen.identifier
-    country ← Gen.identifier
-  } yield Address(Some(line1), Some(line2), Some(line3), Some(line4), Some(line5), Some(postcode), Some(country))
-  )
+  } yield CitizenDetailsPerson(Some(firstName), Some(lastName), Some(dateOfBirth)))
 
   val citizenDetailsResponseArb: Arbitrary[CitizenDetailsResponse] =
     Arbitrary(for{

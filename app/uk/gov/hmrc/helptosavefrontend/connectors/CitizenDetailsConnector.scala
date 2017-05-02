@@ -21,6 +21,7 @@ import java.time.LocalDate
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.CitizenDetailsResponse
+import uk.gov.hmrc.helptosavefrontend.models.Address
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -39,29 +40,13 @@ trait CitizenDetailsConnector {
 
 object CitizenDetailsConnector {
 
-  case class Person(firstName: Option[String],
-                    lastName: Option[String],
-                    dateOfBirth: Option[LocalDate])
+  case class CitizenDetailsPerson(firstName: Option[String],
+                                  lastName: Option[String],
+                                  dateOfBirth: Option[LocalDate])
 
-  case class Address(line1: Option[String],
-                     line2: Option[String],
-                     line3: Option[String],
-                     line4: Option[String],
-                     line5: Option[String],
-                     postcode: Option[String],
-                     country: Option[String])
+  case class CitizenDetailsResponse(person: Option[CitizenDetailsPerson], address: Option[Address])
 
-  case class CitizenDetailsResponse(person: Option[Person], address: Option[Address])
-
-  implicit class AddressOps(val a: Address) extends AnyVal {
-    def toList(): List[String] =
-      List(a.line1, a.line2, a.line3, a.line4, a.line5, a.postcode, a.country)
-        .collect{ case Some(s) ⇒ s }
-        .map(_.trim)
-        .filter(_.nonEmpty)
-  }
-
-  implicit val personReads: Reads[Person] = Json.reads[Person]
+  implicit val personReads: Reads[CitizenDetailsPerson] = Json.reads[CitizenDetailsPerson]
 
   implicit val addressReads: Reads[Address] = Json.reads[Address]
 
