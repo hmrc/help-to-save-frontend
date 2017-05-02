@@ -24,13 +24,14 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsValue, Writes}
-import play.api.mvc.{Result => PlayResult}
+import play.api.libs.json.{JsValue, Reads, Writes}
+import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
 import play.api.test.Helpers.{contentType, _}
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
@@ -42,6 +43,7 @@ import uk.gov.hmrc.play.frontend.auth.connectors.domain._
 import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils.now
+import uk.gov.hmrc.helptosavefrontend.models._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -64,6 +66,8 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     ids = Some("/auth/oid/mockuser/ids"),
     legacyOid = "mockuser")
 
+  val mockHtsSession: HTSSession = HTSSession(Some(validUserInfo))
+
   val authContext = AuthContext(authority)
 
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
@@ -71,7 +75,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   val mockUserInfoService: UserInfoService = mock[UserInfoService]
-
+  val mockNsAndIConnector: NSIConnector = mock[NSIConnector]
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
@@ -79,7 +83,8 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     mockSessionCacheConnector,
     fakeApplication.injector.instanceOf[MessagesApi],
     mockEligibilityConnector,
-    mockCitizenDetailsConnector) {
+    mockCitizenDetailsConnector,
+    mockNsAndIConnector) {
     override lazy val authConnector = mockAuthConnector
     override val userInfoService = mockUserInfoService
 
@@ -95,10 +100,15 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   def doRequest(): Future[PlayResult] = register.declaration(authenticatedFakeRequest)
 
-  def mockSessionCacheConnectorPut(cacheMap:CacheMap):Unit =
-    (mockSessionCacheConnector.put(_:HTSSession)(_:Writes[HTSSession],_: HeaderCarrier))
-      .expects(*,*,*)
+  def mockSessionCacheConnectorPut(cacheMap: CacheMap): Unit =
+    (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
+      .expects(*, *, *)
       .returning(Future.successful(cacheMap))
+
+  def mockSessionCacheConnectorGet(mockHtsSession:Option[HTSSession]): Unit =
+    (mockSessionCacheConnector.get(_: HeaderCarrier, _: Reads[HTSSession]))
+      .expects(*, *)
+      .returning(Future.successful(mockHtsSession))
 
   def mockEligibilityResult(nino: String)(result: Boolean): Unit =
     (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
@@ -115,7 +125,12 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       .expects(authContext, nino, *, *)
       .returning(EitherT.pure[Future, String, UserInfo](userInfo))
 
-  "GET /" should {
+  def mockCreateAccount(nsiResponse: SubmissionResult): Unit =
+    (mockNsAndIConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(validNSIUserInfo, *, *)
+      .returning(Future.successful(nsiResponse))
+
+  "GET /register/declaration " should {
 
     "return 200 if the eligibility check is successful" in {
       val user = randomUserDetails()
@@ -123,7 +138,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
         mockAuthConnector(authority)
         mockUserInfo(authContext, fakeNino)(user)
         mockEligibilityResult(fakeNino)(true)
-        mockSessionCacheConnectorPut(CacheMap("1",Map.empty[String,JsValue]))
+        mockSessionCacheConnectorPut(CacheMap("1", Map.empty[String, JsValue]))
       }
 
       val result: Future[PlayResult] = doRequest()
@@ -155,18 +170,73 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       html should include("not eligible")
       html should include("To be eligible for an account")
     }
-    "the getCreateAccountHelpToSave return 200" in {
-      mockAuthConnector(authority)
-      val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
-      status(result) shouldBe Status.OK
-    }
-
-    "the getCreateAccountHelpToSave return HTML" in {
-      mockAuthConnector(authority)
-      val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
   }
+    "GET  /register/create-a-account" should {
+      "the getCreateAccountHelpToSave return 200" in {
+        mockAuthConnector(authority)
+        val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
+        status(result) shouldBe Status.OK
+      }
+
+      "the getCreateAccountHelpToSave return HTML" in {
+        mockAuthConnector(authority)
+        val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+      }
+    }
+    "POST /register/create-a-account  " should {
+      "the postCreateAccountHelpToSave return the nsi stub in" in {
+        mockAuthConnector(authority)
+        mockSessionCacheConnectorGet(Some(mockHtsSession))
+        mockCreateAccount(SubmissionSuccess)
+        val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("This is a stub for nsi")
+      }
+      "the postCreateAccountHelpToSave return the errors if ns and I fail in" in {
+        mockAuthConnector(authority)
+        mockSessionCacheConnectorGet(Some(mockHtsSession))
+        mockCreateAccount(SubmissionFailure(Some("401"), "Fail", "Fail"))
+        val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("Fail")
+      }
+
+      "the postCreateAccountHelpToSave return the errors if the session cache returns none" in {
+        mockAuthConnector(authority)
+        mockSessionCacheConnectorGet(None)
+
+        val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("Session cache did not contain user info")
+      }
+
+      "the postCreateAccountHelpToSave return the errors if the UserInfo Is Invalid" in {
+        mockAuthConnector(authority)
+        mockSessionCacheConnectorGet(
+          Some(mockHtsSession.copy(userInfo = Some(validUserInfo.copy(email = "")))))
+
+        val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("Invalid user details")
+      }
+    }
 }
 
