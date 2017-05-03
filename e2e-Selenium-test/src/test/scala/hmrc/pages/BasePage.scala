@@ -1,4 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.pages
+package hmrc.pages
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -11,8 +11,8 @@ import org.openqa.selenium._
 import org.openqa.selenium.support.ui.{ExpectedConditions, FluentWait, Wait}
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.{Assertion, Inside, Matchers}
-import uk.gov.hmrc.integration.cucumber.utils.BaseUtil._
-import uk.gov.hmrc.integration.cucumber.utils.{Env, SingletonDriver}
+import hmrc.utils.BaseUtil._
+import hmrc.utils.{Env, SingletonDriver}
 
 object BasePage extends BasePage
 trait BasePage extends Matchers

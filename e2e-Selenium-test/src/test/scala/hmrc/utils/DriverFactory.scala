@@ -17,7 +17,7 @@
  *
  * Contributor(s): Stephen de Vries
  */
-package uk.gov.hmrc.integration.cucumber.utils
+package hmrc.utils
 
 import org.openqa.selenium.Proxy
 import org.openqa.selenium.WebDriver

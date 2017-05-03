@@ -1,4 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.utils
+package hmrc.utils
 
 
 object Env {

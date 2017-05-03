@@ -1,4 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.utils
+package hmrc.utils
 
 import java.io.{FileNotFoundException, IOException, File}
 import java.net.URL

@@ -1,4 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.pages
+package hmrc.pages
 
 object GovernmentGatewayPage extends BasePage{
 

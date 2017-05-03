@@ -1,4 +1,4 @@
-package uk.gov.hmrc.integration.cucumber.pages
+package hmrc.pages
 
 import util.Random
 
@@ -6,7 +6,7 @@ object AuthorityWizardPage extends BasePage{
 
   override val url: String = baseAuthWizardPageUrl
 
-  def goToAuthWizardPage(): Unit = {
+  def goToAuthWizardPage : Unit = {
     go to AuthorityWizardPage
     BasePage.waitForPageToBeLoaded(checkBodyTitle(getMessage("awp.body.header")), "Failed to load Authority Wizard page")
 
@@ -21,7 +21,7 @@ object AuthorityWizardPage extends BasePage{
   def credentialStrength: SingleSel = singleSel("credentialStrength")
   def confidenceLevel: SingleSel = singleSel("confidenceLevel")
   def affinityGroup: SingleSel = singleSel("affinityGroup")
-  def submit(): Unit = clickOn(cssSelector("input.button"))
+  def submit : Unit = clickOn(cssSelector("input.button"))
   def presets: SingleSel = singleSel("presets-dropdown")
 
   private def checkTitle() : Boolean = {
