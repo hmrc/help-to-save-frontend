@@ -34,11 +34,7 @@ libraryDependencies ++= Seq(
   "junit" % "junit" % "4.12" % "test",
   "com.novocode" % "junit-interface" % "0.10" % "test",
   "com.fasterxml.jackson.core" % "jackson-databind" % "2.7.2",
-  "com.fasterxml.jackson.module" % "jackson-module-scala_2.10" % "2.7.2",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.2",
   "log4j" % "log4j" % "1.2.17",
   "com.github.mifmif" % "generex" % "1.0.2"
 )
-
-unmanagedJars in Compile += file("libs/harlib-1.1.1.jar")
-unmanagedJars in Compile += file("libs/proxy-2.4.2-SNAPSHOT.jar")
-unmanagedJars in Compile += file("libs/zap-api-2.4-v6.jar")
