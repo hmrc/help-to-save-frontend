@@ -170,8 +170,7 @@ class Driver {
       // set additional generic capabilities
       desCaps.setCapability("browserstack.debug", "true")
       desCaps.setCapability("browserstack.local", "true")
-      desCaps.setCapability("project", "SCRS VAT")
-      desCaps.setCapability("build", "Vat Registration Acceptance Tests")
+      desCaps.setCapability("build", "E2E Selenium Tests for Help to Save")
 
 
       val bsUrl = s"http://$userName:$automateKey@hub-cloud.browserstack.com/wd/hub"

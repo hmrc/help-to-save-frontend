@@ -1,4 +1,4 @@
-vat-registration-acceptance-tests
+e2e-Selenium-test
 =================================
     
     

@@ -8,7 +8,8 @@ import org.junit.runner.RunWith
 @CucumberOptions(
   features = Array("src/test/resources/features"),
   glue = Array("uk.gov.hmrc.integration.cucumber.steps"),
-  format = Array ("pretty", "html:target/cucumber", "json:target/cucumber.json")
+  format = Array ("pretty", "html:target/cucumber", "json:target/cucumber.json"),
+  tags = Array("@wip")
 )
-class Runner {
+class RunnerWip {
 }

@@ -1,4 +1,4 @@
-name := "vat-registration-acceptance-tests"
+name := "e2e-Selenium-test"
 
 version := "0.1.0"
 
