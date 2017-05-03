@@ -19,8 +19,9 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.Logger
 import play.mvc.Http.Status.OK
+import uk.gov.hmrc.helptosavefrontend.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.iv._
-import uk.gov.hmrc.helptosavefrontend.{FrontendAppConfig, WSHttp}
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,15 +33,16 @@ trait IvConnector {
 }
 
 @Singleton
-class IvConnectorImpl extends IvConnector {
+class IvConnectorImpl extends IvConnector with ServicesConfig {
 
-  val identityVerificationURL: String = FrontendAppConfig.IdentityVerificationURL
 
-  val http = WSHttp
+  private val ivUrl = baseUrl("identity-verification-frontend")
+
+  private val http = WSHttp
 
   override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]] = {
 
-    http.GET(s"$identityVerificationURL/${journeyId.Id}").flatMap {
+    http.GET(s"$ivUrl/mdtp/journey/journeyId/${journeyId.Id}").flatMap {
 
       case r if r.status == OK ⇒
         val result = (r.json \ "result").as[String]
