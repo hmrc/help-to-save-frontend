@@ -29,8 +29,6 @@ import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.remote.DesiredCapabilities
 import java.io.File
 
-
-
 object DriverFactory {
 
   private val CHROME: String = "chrome"

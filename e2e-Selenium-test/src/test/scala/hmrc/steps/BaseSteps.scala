@@ -8,8 +8,14 @@ import cucumber.api.{DataTable, Scenario}
 import org.openqa.selenium._
 import hmrc.flows.LoginUsingGG
 import hmrc.pages.BasePage
+import hmrc.utils.SingletonDriver
 
 class BaseSteps extends BasePage {
+
+  @Before
+  def setUpDriver: Unit = {
+    driver = SingletonDriver.getInstance()
+  }
 
   @After
   def screenshots(result: Scenario) {
