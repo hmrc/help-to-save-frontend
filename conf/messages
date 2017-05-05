@@ -136,7 +136,6 @@ hts.register.declaration.date-of-birth=Date of Birth:
 hts.register.declaration.contact-details=Contact details
 hts.register.declaration.email=Email:
 hts.register.declaration.phone-number=Phone number:
-hts.register.declaration.address=Address:
 hts.register.declaration.change=Change
 hts.register.declaration.contact-preference=Contact preference
 hts.register.declaration.create-your-account-header=Create your account
