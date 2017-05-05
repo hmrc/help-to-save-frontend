@@ -36,17 +36,12 @@
     <meta name="format-detection" content="telephone=no" />
 }
 
-@headerNavLinks = {
-  <li><a id="homeNavHref" href="http://www.google.com"
-         data-journey-click="primary-navigation:Click:Home">@Messages("hts.register.declaration.title")</a></li>
-}
-
 @insideHeader = {
     @uiLayouts.header_nav(
       navTitle = None,
       navTitleLink = None,
       showBetaLink = false,
-      navLinks = Some(headerNavLinks))
+      navLinks = None)
 }
 
 @afterHeader = {}
