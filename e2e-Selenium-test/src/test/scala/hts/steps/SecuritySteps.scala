@@ -6,7 +6,7 @@ class SecuritySteps extends Steps {
 
   Given("^an applicant has a confidence level of (.*)$") { (level: Int) =>
     AuthorityWizardPage.goToPage
-    AuthorityWizardPage.credentials
+    AuthorityWizardPage.credId
     AuthorityWizardPage.redirect("https://www-dev.tax.service.gov.uk/help-to-save/register/declaration")
     AuthorityWizardPage.confidenceLevel(level)
   }
@@ -23,7 +23,7 @@ class SecuritySteps extends Steps {
 
   Given("""^an applicant's credential strength is (.*)$"""){ (strength : String) =>
     AuthorityWizardPage.goToPage
-    AuthorityWizardPage.credentials
+    AuthorityWizardPage.credId
     AuthorityWizardPage.credentialStrength(strength)
     AuthorityWizardPage.nino("JA553215D")
   }
