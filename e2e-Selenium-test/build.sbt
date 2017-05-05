@@ -1,4 +1,4 @@
-name := "residence-nil-rate-band-calculator-acceptance-tests"
+name := "help-to-save-e2e-Selenium-tests"
 
 version := "1.0"
 

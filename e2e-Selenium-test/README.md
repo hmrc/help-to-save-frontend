@@ -1,5 +1,2 @@
-
-# Residence Nil-rate Band Calculator Acceptance Tests
-
-Acceptance tests for the residence nil-rate band calculator.
+E2E Selenium tests for the MDTP part of Help to Save.
     
