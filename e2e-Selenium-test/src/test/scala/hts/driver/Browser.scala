@@ -81,7 +81,6 @@ object Browser extends StartUpTearDown {
     val capabilities = DesiredCapabilities.chrome()
     val options = new ChromeOptions()
 
-//    options.addArguments("--ignore-certificate-errors")
     options.addArguments("test-type")
     options.addArguments("--disable-gpu")
     if (isJsDisabled)
@@ -97,11 +96,6 @@ object Browser extends StartUpTearDown {
     catch {
       case e: WebDriverException => //Swallow exception
     }
-
-//    System.setProperty("webdriver.chrome.driver", "drivers/chromedriver")
-//    val driver:ChromeDriver  = new ChromeDriver
-//    driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS)
-//    driver.manage().window().maximize()
     driver
   }
 

@@ -111,18 +111,6 @@ trait Page extends StartUpTearDown with Matchers with ShouldMatchers {
 
   //endregion
 
-  //region Navigation
-
-//  def goToPage(page: String) = {
-//    val url = UrlHelper.getFullUrl(page)
-//    if (driver.getCurrentUrl != url) {
-//      driver.navigate().to(url)
-//      urlShouldMatch(page)
-//    }
-//  }
-
-  //endregion Navigation
-
   //region Whole page interactions
 
   def submitDatePage(page: String, day: String, month: String, year: String) = {
