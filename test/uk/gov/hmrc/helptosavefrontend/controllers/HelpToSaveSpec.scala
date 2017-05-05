@@ -22,6 +22,7 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentType, _}
 import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
+import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class HelpToSaveSpec extends UnitSpec with WithFakeApplication with MockFactory{
@@ -29,7 +30,9 @@ class HelpToSaveSpec extends UnitSpec with WithFakeApplication with MockFactory{
   val mockEligibilityConnector = mock[EligibilityConnector]
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new HelpToSave(fakeApplication.injector.instanceOf[MessagesApi], mockEligibilityConnector)
+  val helpToSave = new HelpToSave(
+    fakeApplication.injector.instanceOf[MessagesApi],
+    mockEligibilityConnector)
 
   "GET /" should {
     "the getApplyHelpToSave should  return 200" in {

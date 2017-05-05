@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form, button, submit,start_nav,link,sidebar}
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form, button, submit, start_nav, link, sidebar}
 @()(implicit request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.apply-help-to-save.header-page"),
@@ -31,19 +31,17 @@
             <ul class="bullets">
                 <li>
                     @Messages("hts.core.apply-help-to-save.par-3")
-                    @link(routes.HelpToSave.getEligibilityHelpToSave().url,Messages("hts.core.apply-help-to-save.link-4"))
+                    @link(routes.HelpToSave.getEligibilityHelpToSave().url, Messages("hts.core.apply-help-to-save.link-4"))
                 </li>
                 <li>
                     @Messages("hts.core.apply-help-to-save.par-4")
                     <a href="https://www.gov.uk/government-gateway">
-                    @Messages("hts.core.apply-help-to-save.link-5")
-                    </a>
+                    @Messages("hts.core.apply-help-to-save.link-5")</a>
                     @Messages("hts.core.apply-help-to-save.par-5")
                 </li>
             </ul>
             <p> @Messages("hts.core.apply-help-to-save.par-6") </p>
             <p> @Messages("hts.core.apply-help-to-save.par-7") </p>
-            @* TODO: link to login page when implemented *@
             @form(routes.Register.declaration(), 'class -> "group") {
                 @submit('_buttonClass -> "button--get-started") {
                     @Messages("hts.core.apply-help-to-save.button")

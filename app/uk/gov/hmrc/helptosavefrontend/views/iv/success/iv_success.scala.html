@@ -14,24 +14,20 @@
  * limitations under the License.
  *@
 
-@()(implicit request: Request[_], messages: Messages)
+@(continueUrl: String)(implicit request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = Messages("hts.core.not-eligible.header-page"),
-    bodyClasses = None){
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h1>@Messages("hts.core.not-eligible.header")</h1>
+                <h1>@Messages("hts.iv.we_ve_confirmed_your_identity")</h1>
             </header>
-                &nbsp;
-            <p> @Messages("hts.core.not-eligible.par-1") </p>
-            <ul class="bullets">
-                <li>@Messages("hts.core.not-eligible.benefit.working.tax.credit")</li>
-                <li> @Messages("hts.core.not-eligible.benefit.universal.credit")</li>
-            </ul>
-            <p> @Messages("hts.core.not-eligible.par-2")</p>
-            <p> @Messages("hts.core.not-eligible.par-3") <a href="#">@Messages("hts.core.not-eligible.link")</a>.</p>
+
+            <h3>@Messages("hts.iv.you_now_access_hts_account")</h3>
+
+            <a href="@continueUrl" class="button" id="continue" role="button">@Messages("hts.iv.continue_button")</a>
+
         </div>
     </div>
 }

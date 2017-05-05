@@ -29,7 +29,7 @@ trait HelpToSaveController extends FrontendController with Actions {
 
   protected type AsyncPlayUserRequest = AuthContext => Request[AnyContent] => Future[Result]
 
-  override lazy val authConnector: AuthConnector = FrontendAuthConnector
+  override def authConnector: AuthConnector = FrontendAuthConnector
 
   def authorisedHtsUser(body: AsyncPlayUserRequest): Action[AnyContent] =
     AuthorisedFor(HtsRegime, HtsCompositePageVisibilityPredicate).async(body)

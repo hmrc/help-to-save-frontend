@@ -14,20 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.models.iv
 
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsSuccess, Json}
-
-class UserDetailsSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks{
-
-  "UserDetails" must {
-    "have a JSON Format instance" in {
-      forAll{ user: UserInfo ⇒
-        val json = Json.toJson(user)
-        Json.fromJson[UserInfo](json) shouldBe JsSuccess(user)
-      }
-    }
-  }
-}
+//Holder of Identity Verification response token param
+case class JourneyId(Id: String) extends AnyVal

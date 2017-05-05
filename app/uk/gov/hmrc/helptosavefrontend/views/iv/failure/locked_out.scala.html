@@ -16,22 +16,16 @@
 
 @()(implicit request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = Messages("hts.core.not-eligible.header-page"),
-    bodyClasses = None){
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h1>@Messages("hts.core.not-eligible.header")</h1>
+                <h2>@Messages("hts.iv.youve_tried_to_complete_your_identity_too_many_times")</h2>
             </header>
-                &nbsp;
-            <p> @Messages("hts.core.not-eligible.par-1") </p>
-            <ul class="bullets">
-                <li>@Messages("hts.core.not-eligible.benefit.working.tax.credit")</li>
-                <li> @Messages("hts.core.not-eligible.benefit.universal.credit")</li>
-            </ul>
-            <p> @Messages("hts.core.not-eligible.par-2")</p>
-            <p> @Messages("hts.core.not-eligible.par-3") <a href="#">@Messages("hts.core.not-eligible.link")</a>.</p>
+
+            <p class="margin-bottom">@Messages("hts.iv.try_again_in_24_hours")</p>
+            <p class="margin-bottom">@Html(Messages("hts.iv.failed_contact_HMRC", "https://www.gov.uk/contact-hmrc"))</p>
         </div>
     </div>
 }

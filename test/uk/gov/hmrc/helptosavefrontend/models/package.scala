@@ -17,15 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import java.time.LocalDate
-
 import org.scalacheck.{Arbitrary, Gen}
+
+import uk.gov.hmrc.helptosavefrontend.testutil._
 
 
 package object models {
-
-  implicit val contactPreferenceArb =
-    Arbitrary(Gen.oneOf[ContactPreference](ContactPreference.Email, ContactPreference.SMS))
-
 
   implicit val userDetailsArb =
     Arbitrary(for{
@@ -33,12 +30,8 @@ package object models {
       nino ← Gen.alphaNumStr
       dob ← Gen.choose(0L,100L).map(LocalDate.ofEpochDay)
       email ← Gen.alphaNumStr
-      phone ← Gen.choose(0,100).map(_.toString)
       address ← Gen.listOf(Gen.alphaStr)
-      contactPreference ← contactPreferenceArb.arbitrary
-    } yield UserDetails(name, nino, dob, email, phone, address, contactPreference))
+    } yield UserInfo(name, nino, dob, email, address))
 
-  def randomUserDetails(): UserDetails =
-    userDetailsArb.arbitrary.sample.getOrElse(sys.error("Could not generate user details"))
-
+  def randomUserDetails(): UserInfo = sample(userDetailsArb)
 }
