@@ -1,40 +1,43 @@
-name := "e2e-Selenium-test"
+name := "residence-nil-rate-band-calculator-acceptance-tests"
 
-version := "0.1.0"
+version := "1.0"
 
-scalaVersion := "2.11.7"
-
-credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
+scalaVersion := "2.11.8"
 
 val hmrcRepoHost = java.lang.System.getProperty("hmrc.repo.host", "https://nexus-preview.tax.service.gov.uk")
-
-scalacOptions ++= Seq("-unchecked", "-deprecation")
 
 resolvers ++= Seq(
   "hmrc-snapshots" at hmrcRepoHost + "/content/repositories/hmrc-snapshots",
   "hmrc-releases" at hmrcRepoHost + "/content/repositories/hmrc-releases",
-  "hmrc-releases" at hmrcRepoHost + "/content/repositories/hmrc-releases",
   "typesafe-releases" at hmrcRepoHost + "/content/repositories/typesafe-releases")
 
-//resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
-//resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
+resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+
+resolvers += "HMRC Bintray" at "https://dl.bintray.com/hmrc/releases"
+
+resolvers += "HMRC Bintray RCs" at "https://dl.bintray.com/hmrc/release-candidates"
 
 libraryDependencies ++= Seq(
-  "com.github.detro.ghostdriver" % "phantomjsdriver" % "1.1.0" % "test",
-  "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % "test",
-  "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1",
-  "org.seleniumhq.selenium" % "selenium-chrome-driver" % "2.53.1",
-  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.52.0" % "test",
-  "com.typesafe.play" %% "play-json" % "2.3.0",
-  "org.scalatest" %% "scalatest" % "3.0.1" % "test",
-  "org.pegdown" % "pegdown" % "1.1.0" % "test",
-  "info.cukes" %% "cucumber-scala" % "1.2.4" % "test",
-  "info.cukes" % "cucumber-junit" % "1.2.2" % "test",
-  "info.cukes" % "cucumber-picocontainer" % "1.2.2" % "test",
+  "com.codeborne" % "phantomjsdriver" % "1.2.1",
+  "org.scala-lang" % "scala-library" % "2.11.8",
+  "info.cukes" % "cucumber-junit" % "1.2.4",
+  "info.cukes" % "cucumber-picocontainer" % "1.2.4",
   "junit" % "junit" % "4.12" % "test",
-  "com.novocode" % "junit-interface" % "0.10" % "test",
-  "com.fasterxml.jackson.core" % "jackson-databind" % "2.7.2",
-  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.7.2",
+  "com.novocode" % "junit-interface" % "0.11" % "test",
+  "uk.gov.hmrc" %% "scala-webdriver" % "5.4.0",
+  "org.apache.poi" % "poi-ooxml" % "3.13",
+  "org.apache.poi" % "poi-ooxml-schemas" % "3.13",
   "log4j" % "log4j" % "1.2.17",
-  "com.github.mifmif" % "generex" % "1.0.2"
+  "org.seleniumhq.selenium" % "selenium-java" % "2.53.1",
+  "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1",
+  "com.typesafe.play" %% "play-iteratees" % "2.4.6",
+  "org.mongodb" %% "casbah" % "3.1.0",
+  "com.typesafe.play" %% "play-json" % "2.4.6",
+  "info.cukes" % "cucumber-scala_2.11" % "1.2.2",
+  "org.pegdown" % "pegdown" % "1.6.0" % "test",
+  "org.scalatest" %% "scalatest" % "2.2.4",
+  "uk.gov.hmrc" %% "accessibility-driver" % "1.6.0",
+  "com.netaporter" %% "scala-uri" % "0.4.14"
 )
+
+

@@ -1,0 +1,49 @@
+package rnrb.steps
+
+import cucumber.api.DataTable
+import rnrb.pages.{CheckAnswersPage, Page, ThresholdCalculationResultPage}
+
+class OLDSecuritySteps extends Steps {
+
+//  Given("""^an applicant has a confidence level of (.*)$"""){ (level : String) =>
+//    println("Hello!")
+//    AuthorityWizardPage.goToPage
+//    AuthorityWizardPage.redirect()
+//    confidenceLevel(level)
+//  }
+
+//  @Given("^an applicant has a confidence level of (\\d+)$")
+//  public void an_applicant_has_a_confidence_level_of(int level) throws Throwable {
+//    println("Hello!")
+//  }
+
+//  Given("^an applicant has a confidence level of (\\d+)$") { (level: Int) =>
+//    println("Hello!")
+//  }
+
+//  Given("""^their confidence level is (.*)$"""){ (level : String) =>
+//    AuthorityWizardPage.redirect
+//    AuthorityWizardPage.confidenceLevel(level)
+//    AuthorityWizardPage.submit
+//  }
+//
+//  Given("""^their credential strength is (.*)$"""){ (strength : String) =>
+//    credentialStrength(strength)
+//    nino("JA553215D")
+//    submit
+//  }
+//
+//  Given("""^an applicant's credential strength is (.*)$"""){ (strength : String) =>
+//    AuthorityWizardPage.goToAuthWizardPage
+//    AuthorityWizardPage.credentialStrength(strength)
+//    AuthorityWizardPage.nino("JA553215D")
+//  }
+//
+//  Then("""^they are forced into going through 2SV before being able to proceed with their HtS application$"""){ () =>
+//    BasePage.getCurrentUrl should include("one-time-password")
+//  }
+//
+//  Then("""^they are forced into going through IV before being able to proceed with their HtS application$"""){ () =>
+//    BasePage.getCurrentUrl should include("identity-verification")
+//  }
+}

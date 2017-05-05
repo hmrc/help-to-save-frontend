@@ -1,0 +1,33 @@
+package rnrb.pages
+
+import cucumber.api.DataTable
+import org.openqa.selenium.By
+import rnrb.models.ResultsItem
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+
+object OLD2AuthorityWizardPage extends Page {
+
+//  def shouldContainAnRnrbAmountOf(amount: String) = {
+//    webDriver.findElement(By.className("data-item")).getText shouldBe amount
+//  }
+//
+//  def shouldContainResults(dataTable: DataTable) = {
+//    val expectedResults = dataTable.asList[ResultsItem](classOf[ResultsItem]).asScala
+//    val listElements = webDriver.findElements(By.cssSelector(".tabular-data__entry")).map {
+//      element => {
+//        val children = element.findElements(By.tagName("div"))
+//        ResultsItem(children.get(0).getText, children.get(1).getText)
+//      }
+//    }
+//    for (expectedResult <- expectedResults) {
+//      listElements should contain(expectedResult)
+//    }
+//  }
+//
+//  def clickReveal = {
+//    webDriver.findElement(By.tagName("summary")).click()
+//  }
+
+}
