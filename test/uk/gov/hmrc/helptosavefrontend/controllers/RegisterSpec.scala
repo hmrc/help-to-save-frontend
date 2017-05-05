@@ -127,8 +127,6 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       html should include(user.name)
       html should include(user.email)
       html should include(user.NINO)
-      html should include(user.address.mkString(","))
-
     }
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
