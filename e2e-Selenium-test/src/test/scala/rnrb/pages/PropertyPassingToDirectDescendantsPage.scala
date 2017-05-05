@@ -1,4 +1,4 @@
-package rnrb.pages
+package hts.pages
 
 import org.openqa.selenium.By
 

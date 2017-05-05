@@ -1,8 +1,8 @@
-package rnrb.pages
+package hts.pages
 
 import cucumber.api.DataTable
 import org.openqa.selenium.By
-import rnrb.models.ResultsItem
+import hts.models.ResultsItem
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._

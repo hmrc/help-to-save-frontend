@@ -1,6 +1,6 @@
-package rnrb.steps
+package hts.steps
 
-import rnrb.pages.PropertyPassingToDirectDescendantsPage
+import hts.pages.PropertyPassingToDirectDescendantsPage
 
 class PropertyPassingToDirectDescendantsSteps extends Steps {
 

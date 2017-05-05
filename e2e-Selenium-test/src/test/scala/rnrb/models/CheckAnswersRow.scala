@@ -1,4 +1,4 @@
-package rnrb.models
+package hts.models
 
 import org.openqa.selenium.{By, WebElement}
 

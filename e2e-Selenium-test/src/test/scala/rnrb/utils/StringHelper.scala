@@ -1,4 +1,4 @@
-package rnrb.utils
+package hts.utils
 
 object StringHelper {
   def cleanGherkinInput(input: String) = input.replace("’", "")

@@ -1,6 +1,6 @@
-package rnrb.steps
+package hts.steps
 
-import rnrb.pages.{CheckAnswersPage, Page, AuthorityWizardPage}
+import hts.pages.{CheckAnswersPage, Page, AuthorityWizardPage}
 
 class SecuritySteps extends Steps {
 

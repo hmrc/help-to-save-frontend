@@ -1,4 +1,4 @@
-package rnrb.utils
+package hts.utils
 
 object UrlHelper {
 
@@ -17,6 +17,6 @@ object UrlHelper {
 
   def getFullUrl(slug: String, preserveCase: Boolean = false) = {
     val convertedSlug = convertToUrlSlug(slug, preserveCase)
-    s"${Configuration.settings.rnrbUrl}/$convertedSlug"
+    s"${Configuration.settings.htsUrl}/$convertedSlug"
   }
 }

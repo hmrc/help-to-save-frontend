@@ -1,8 +1,8 @@
-package rnrb.steps
+package hts.steps
 
 import cucumber.api.scala.{EN, ScalaDsl}
 import org.scalatest.Matchers
-import rnrb.driver.StartUpTearDown
+import hts.driver.StartUpTearDown
 
 trait Steps extends ScalaDsl with EN with Matchers with StartUpTearDown {
 

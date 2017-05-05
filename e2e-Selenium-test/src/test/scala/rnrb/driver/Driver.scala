@@ -1,10 +1,10 @@
-package rnrb.driver
+package hts.driver
 
 import java.util.concurrent.TimeUnit
 
 import org.apache.commons.lang3.StringUtils
 import org.openqa.selenium.WebDriver
-import rnrb.driver.Browser._
+import hts.driver.Browser._
 
 import scala.util.Try
 

@@ -1,4 +1,4 @@
-package rnrb.driver
+package hts.driver
 
 trait StartUpTearDown  {
   def isJsDisabled: Boolean = false

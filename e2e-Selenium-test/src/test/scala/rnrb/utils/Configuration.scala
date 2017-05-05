@@ -1,6 +1,6 @@
-package rnrb.utils
+package hts.utils
 
-case class Configuration (rnrbUrl: String, timeout: Int)
+case class Configuration (htsUrl: String, timeout: Int)
 
 object Configuration {
 

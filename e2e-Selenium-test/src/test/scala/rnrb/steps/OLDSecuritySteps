@@ -1,7 +1,7 @@
-package rnrb.steps
+package hts.steps
 
 import cucumber.api.DataTable
-import rnrb.pages.{CheckAnswersPage, Page, ThresholdCalculationResultPage}
+import hts.pages.{CheckAnswersPage, Page, ThresholdCalculationResultPage}
 
 class OLDSecuritySteps extends Steps {
 

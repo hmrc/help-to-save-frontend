@@ -1,14 +1,14 @@
-package rnrb.pages
+package hts.pages
 
 import cucumber.api.DataTable
 import org.joda.time.LocalDate
 import org.openqa.selenium.support.ui.{ExpectedCondition, ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest._
-import rnrb.driver.StartUpTearDown
-import rnrb.models.ResultsItem
-import rnrb.utils.{Configuration, UrlHelper}
-import rnrb.utils.StringHelper._
+import hts.driver.StartUpTearDown
+import hts.models.ResultsItem
+import hts.utils.{Configuration, UrlHelper}
+import hts.utils.StringHelper._
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
