@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.auth
+package uk.gov.hmrc.helptosavefrontend.models
 
-import uk.gov.hmrc.helptosavefrontend.controllers.routes
-import uk.gov.hmrc.play.frontend.auth.{AuthenticationProvider, TaxRegime}
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
+import play.api.libs.json.{Format, Json}
 
-object HtsRegime extends TaxRegime {
-
-  //todo find out what to do here ????
-  override def isAuthorised(accounts: Accounts): Boolean = true
-
-  override def authenticationType: AuthenticationProvider = HtsAuthenticationProvider
-
-  override def unauthorisedLandingPage: Option[String] = {
-    Some(routes.RegisterController.failedTwoFactor().url)
-  }
+case class HTSSession(userInfo: Option[UserInfo] = None)
+object HTSSession{
+  implicit val htsSessionFormat: Format[HTSSession] = Json.format[HTSSession]
 }

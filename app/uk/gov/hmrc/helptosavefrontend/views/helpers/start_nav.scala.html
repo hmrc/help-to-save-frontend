@@ -22,27 +22,27 @@
 </header>
 <ul class="divider--bottom">
     <li>
-        @{if(routes.HelpToSave.getAboutHelpToSave().url == currentPageUrl){
+        @{if(routes.StartPagesController.getAboutHelpToSave().url == currentPageUrl){
             Messages("hts.helpers.link-1")
         }
     else {
-            link(routes.HelpToSave.getAboutHelpToSave().url, Messages("hts.helpers.link-1"))
+            link(routes.StartPagesController.getAboutHelpToSave().url, Messages("hts.helpers.link-1"))
         }}
     </li>
     <li>
-    @{if(routes.HelpToSave.getEligibilityHelpToSave().url == currentPageUrl){
+    @{if(routes.StartPagesController.getEligibilityHelpToSave().url == currentPageUrl){
         Messages("hts.helpers.link-2")
     }
     else {
-        link(routes.HelpToSave.getEligibilityHelpToSave().url, Messages("hts.helpers.link-2"))
+        link(routes.StartPagesController.getEligibilityHelpToSave().url, Messages("hts.helpers.link-2"))
     }}
     </li>
     <li>
-    @{if(routes.HelpToSave.getApplyHelpToSave().url == currentPageUrl){
+    @{if(routes.StartPagesController.getApplyHelpToSave().url == currentPageUrl){
         Messages("hts.helpers.link-3")
     }
     else {
-        link(routes.HelpToSave.getApplyHelpToSave().url, Messages("hts.helpers.link-3"))
+        link(routes.StartPagesController.getApplyHelpToSave().url, Messages("hts.helpers.link-3"))
     }}
     </li>
         &nbsp;

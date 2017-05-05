@@ -28,8 +28,8 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 @Singleton
-class HelpToSave @Inject()(val messagesApi: MessagesApi,
-                           eligibilityConnector: EligibilityConnector) extends FrontendController with I18nSupport {
+class StartPagesController @Inject()(val messagesApi: MessagesApi,
+                                     eligibilityConnector: EligibilityConnector) extends FrontendController with I18nSupport {
 
   val notEligible = Action.async { implicit request ⇒
     Future.successful(Ok(views.html.core.not_eligible()))

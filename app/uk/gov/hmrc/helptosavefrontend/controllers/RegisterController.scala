@@ -25,8 +25,8 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
 import uk.gov.hmrc.helptosavefrontend.auth.HtsCompositePageVisibilityPredicate.twoFactorURI
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
-import uk.gov.hmrc.helptosavefrontend.models.UserInfo
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
@@ -37,14 +37,15 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class Register @Inject()(val messagesApi: MessagesApi,
-                         eligibilityConnector: EligibilityConnector,
-                         citizenDetailsConnector: CitizenDetailsConnector) extends HelpToSaveController with I18nSupport {
+class RegisterController @Inject()( val sessionCacheConnector: SessionCacheConnector,
+                                    val messagesApi: MessagesApi,
+                                   eligibilityConnector: EligibilityConnector,
+                                   citizenDetailsConnector: CitizenDetailsConnector) extends HelpToSaveController with I18nSupport {
 
   val userInfoService = new UserInfoService(authConnector, citizenDetailsConnector)
 
   def declaration =
-    authorisedHtsUser { implicit authContext ⇒
+    AuthorisedHtsUserAction { implicit authContext ⇒
       implicit request ⇒
         validateUser(authContext).fold(
           error ⇒ {
@@ -52,14 +53,18 @@ class Register @Inject()(val messagesApi: MessagesApi,
             InternalServerError("")
           }, _.fold(
             Ok(views.html.core.not_eligible()))(
-            userDetails ⇒ Ok(views.html.register.declaration(userDetails))
+            userDetails ⇒ {
+              sessionCacheConnector.put(HTSSession(Option(userDetails)))
+              Ok(views.html.register.declaration(userDetails))
+            }
           )
         )
     }
 
-  def getCreateAccountHelpToSave = authorisedHtsUser { implicit authContext =>
+
+  def getCreateAccountHelpToSave = AuthorisedHtsUserAction { implicit authContext =>
     implicit request ⇒
-      Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
+        Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
   }
 
   /**

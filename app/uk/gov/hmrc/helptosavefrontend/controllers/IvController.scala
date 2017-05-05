@@ -23,7 +23,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig.HtsDeclarationUrl
 import uk.gov.hmrc.helptosavefrontend.auth.HtsCompositePageVisibilityPredicate
-import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.views.html.iv.failure._
@@ -32,11 +32,11 @@ import uk.gov.hmrc.helptosavefrontend.views.html.twofactor.you_need_two_factor
 
 import scala.concurrent.Future
 
-class IvController @Inject()(ivConnector: IvConnector, val messagesApi: MessagesApi)
+class IvController @Inject()(val sessionCacheConnector:SessionCacheConnector,ivConnector: IvConnector, val messagesApi: MessagesApi)
   extends HelpToSaveController with I18nSupport {
 
   def showUpliftJourneyOutcome: Action[AnyContent] =
-    authorisedHtsUser { implicit authContext ⇒
+    AuthorisedHtsUserAction { implicit authContext ⇒
       implicit request ⇒
         //Will be populated if we arrived here because of an IV success/failure
         val journeyId = request.getQueryString("token").orElse(request.getQueryString("journeyId"))
