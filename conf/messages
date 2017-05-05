@@ -11,6 +11,7 @@ hts.core.apply-help-to-save.par-7=If you’'re eligible, you'’ll have instant 
 hts.core.apply-help-to-save.link-4=eligible
 hts.core.apply-help-to-save.link-5=Goverment Gateway
 hts.core.apply-help-to-save.button=Apply now
+
 hts.core.about-help-to-save.header-page=About help to save
 hts.core.about-help-to-save.header-1=1. About Help to Save
 hts.core.about-help-to-save.par-1=Help to Save is a savings account that lets you earn a 50% government bonus on money you''ve saved. You can only open one account in your lifetime.
@@ -104,13 +105,14 @@ hts.core.eligibility-help-to-save.uk-residency.list-1=or your partner, or child,
 hts.core.eligibility-help-to-save.uk-residency.list-2=are a mariner
 hts.core.eligibility-help-to-save.uk-residency.list-3=are an oil worker based on the continental shelf
 hts.core.eligibility-help-to-save.uk-residency.list-4=are out of the UK because your partner, child or close relative has died
-hts.helpers.header-page=Help To Save
+
+hts.helpers.header-page=Help to Save
 hts.helpers.link-1=1. About Help to Save
 hts.helpers.link-2=2. Eligibility
 hts.helpers.link-3=3. Apply
 hts.core.about-help-to-save.next=Next
 hts.core.about-help-to-save.eligibility=Eligibility
-hts.core.not-eligible.header-page=Help To Save
+hts.core.not-eligible.header-page=Help to Save
 hts.core.not-eligible.header=You''re not eligible for Help to Save
 hts.core.not-eligible.par-1=To be eligible for an account you, or your spouse or civil partner, need to be getting one of these benefits:
 hts.core.not-eligible.benefit.working.tax.credit=Working Tax Credit
