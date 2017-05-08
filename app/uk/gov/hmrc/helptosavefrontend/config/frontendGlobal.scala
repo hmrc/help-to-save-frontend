@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend
+package uk.gov.hmrc.helptosavefrontend.config
 
 import java.util.UUID
 
@@ -23,6 +23,7 @@ import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
 import play.api.mvc._
+import play.api.mvc.Request
 import play.api.{Application, Configuration, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto

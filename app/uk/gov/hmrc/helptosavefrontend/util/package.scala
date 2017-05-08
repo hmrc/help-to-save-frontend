@@ -22,6 +22,7 @@ import play.mvc.Http
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 
 package object util {
 

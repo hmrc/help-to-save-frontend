@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend
+package uk.gov.hmrc.helptosavefrontend.config
 
 import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig

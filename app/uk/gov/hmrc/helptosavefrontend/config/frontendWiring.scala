@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend
+package uk.gov.hmrc.helptosavefrontend.config
 
+import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
@@ -29,3 +30,7 @@ object WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName wi
   override val hooks = NoneRequired
 }
 
+object FrontendAuthConnector extends PlayAuthConnector with ServicesConfig {
+  val serviceUrl = baseUrl("auth")
+  lazy val http = WSHttp
+}
