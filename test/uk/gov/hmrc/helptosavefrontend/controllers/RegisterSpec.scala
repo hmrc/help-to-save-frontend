@@ -16,30 +16,20 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.util.UUID
-
 import cats.data.EitherT
-import cats.syntax.show._
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
-import uk.gov.hmrc.domain.Nino
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
-import uk.gov.hmrc.helptosavefrontend.models.UserInfo.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
-import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
-import uk.gov.hmrc.play.frontend.auth.{AuthContext, AuthenticationProviderIds}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.domain._
-import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
+import uk.gov.hmrc.helptosavefrontend.util.NINO
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.time.DateTimeUtils.now
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,24 +39,8 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val fakeNino = "WM123456C"
 
-  val authority = Authority(uri = s"/path/to/authority",
-    accounts = Accounts(
-      paye = Some(PayeAccount(s"/taxcalc/$fakeNino", Nino(fakeNino))),
-      tai = Some(TaxForIndividualsAccount(s"/tai/$fakeNino", Nino(fakeNino)))),
-    loggedInAt = None,
-    previouslyLoggedInAt = None,
-    credentialStrength = CredentialStrength.Strong,
-    confidenceLevel = ConfidenceLevel.L200,
-    userDetailsLink = Some("/user-details/mockuser"),
-    enrolments = Some("/auth/oid/mockuser/enrolments"),
-    ids = Some("/auth/oid/mockuser/ids"),
-    legacyOid = "mockuser")
-
-  val authContext = AuthContext(authority)
-
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
 
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   val mockUserInfoService: UserInfoService = mock[UserInfoService]
 
@@ -75,44 +49,29 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
   val register = new Register(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockEligibilityConnector,
-    mockCitizenDetailsConnector){
-    override lazy val authConnector = mockAuthConnector
+    mockCitizenDetailsConnector) {
     override val userInfoService = mockUserInfoService
 
   }
 
-  private def authenticatedFakeRequest =
-    FakeRequest().withSession(
-      SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
-      SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
-      SessionKeys.userId -> s"/path/to/authority",
-      SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
-    )
-
-  def doRequest(): Future[PlayResult] = register.declaration(authenticatedFakeRequest)
+  def doRequest(): Future[PlayResult] = register.declaration(FakeRequest())
 
   def mockEligibilityResult(nino: String)(result: Boolean): Unit =
     (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
       .expects(nino, *)
-      .returning(EitherT.pure[Future,String,EligibilityResult](EligibilityResult(result)))
+      .returning(EitherT.pure[Future, String, EligibilityResult](EligibilityResult(result)))
 
-  def mockAuthConnector(authority: Authority): Unit =
-    (mockAuthConnector.currentAuthority(_: HeaderCarrier))
-      .expects(*)
-      .returning(Future.successful(Some(authority)))
-
-  def mockUserInfo(authContext: AuthContext, nino: NINO)(userInfo: UserInfo): Unit =
-    (mockUserInfoService.getUserInfo(_: AuthContext, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(authContext, nino, *, *)
-      .returning(EitherT.pure[Future,String,UserInfo](userInfo))
+  def mockUserInfo(nino: NINO)(userInfo: UserInfo): Unit =
+    (mockUserInfoService.getUserInfo(_: NINO)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *)
+      .returning(EitherT.pure[Future, String, UserInfo](userInfo))
 
   "GET /" should {
 
     "return 200 if the eligibility check is successful" in {
       val user = randomUserDetails()
       inSequence {
-        mockAuthConnector(authority)
-        mockUserInfo(authContext, fakeNino)(user)
+        mockUserInfo(fakeNino)(user)
         mockEligibilityResult(fakeNino)(true)
       }
 
@@ -130,9 +89,8 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     }
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
-      inSequence{
-        mockAuthConnector(authority)
-        mockUserInfo(authContext, fakeNino)(randomUserDetails())
+      inSequence {
+        mockUserInfo(fakeNino)(randomUserDetails())
         mockEligibilityResult(fakeNino)(false)
       }
 
@@ -143,14 +101,12 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       html should include("To be eligible for an account")
     }
     "the getCreateAccountHelpToSave return 200" in {
-      mockAuthConnector(authority)
-      val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
+      val result = register.getCreateAccountHelpToSave(FakeRequest())
       status(result) shouldBe Status.OK
     }
 
     "the getCreateAccountHelpToSave return HTML" in {
-      mockAuthConnector(authority)
-      val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
+      val result = register.getCreateAccountHelpToSave(FakeRequest())
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }

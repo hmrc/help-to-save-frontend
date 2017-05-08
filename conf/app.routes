@@ -7,6 +7,3 @@ GET        /eligibility                           @uk.gov.hmrc.helptosavefronten
 
 GET        /register/create-a-account             @uk.gov.hmrc.helptosavefrontend.controllers.Register.getCreateAccountHelpToSave
 GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.Register.declaration
-
-GET        /register/two-factor-failed            @uk.gov.hmrc.helptosavefrontend.controllers.Register.failedTwoFactor
-GET        /register/identity-check-complete      @uk.gov.hmrc.helptosavefrontend.controllers.IvController.showUpliftJourneyOutcome
