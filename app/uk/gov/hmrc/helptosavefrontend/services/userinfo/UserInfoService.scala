@@ -42,15 +42,15 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class UserInfoService(citizenDetailsConnector: CitizenDetailsConnector) extends ServicesConfig {
 
-  def getUserInfo(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserInfo] =
+  def getUserInfo(userDetailsUri: Option[String], nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserInfo] =
     for {
-      userDetails ← queryUserDetails()
+      userDetails ← queryUserDetails(userDetailsUri)
       citizenDetails ← citizenDetailsConnector.getDetails(nino)
       userInfo ← EitherT.fromEither[Future](toUserInfo(userDetails, citizenDetails, nino).toEither).leftMap(
         errors ⇒ s"Could not create user info: ${errors.toList.mkString(",")}")
     } yield userInfo
 
-  private def queryUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserDetailsResponse] =
+  private def queryUserDetails(userDetailsUri: Option[String])(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserDetailsResponse] =
     EitherT.right[Future, String, UserDetailsResponse](
       Future.successful(UserDetailsResponse("test", Some("last"), Some("test@test.com"), Some(LocalDate.now()))))
 

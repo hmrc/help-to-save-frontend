@@ -31,6 +31,6 @@ object WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName wi
 }
 
 object FrontendAuthConnector extends PlayAuthConnector with ServicesConfig {
-  val serviceUrl = baseUrl("auth")
-  lazy val http = WSHttp
+  override val serviceUrl: String = baseUrl("auth")
+  override def http = WSHttp
 }
