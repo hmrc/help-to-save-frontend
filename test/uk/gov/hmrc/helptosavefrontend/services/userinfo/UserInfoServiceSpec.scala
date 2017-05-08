@@ -64,10 +64,11 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
       val userDetailsResponse = UserDetailsResponse("test", Some("last"), Some("test@test.com"), Some(LocalDate.now()))
       val citizenDetailsResponse = cdResponse
       val nino = "WM123456C"
+      val userDetailsUri = Some("/test/user/uri")
 
 
       "use the auth connector to get user details from the user-details service" in new TestApparatus {
-        service.getUserInfo(nino)
+        service.getUserInfo(userDetailsUri, nino)
       }
 
       "use the citizen details connector to get further user details from the citizen-details service" in new TestApparatus {
@@ -75,7 +76,7 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
           mockCitizenDetailsConnector(nino, citizenDetailsResponse)
         }
 
-        val result = service.getUserInfo(nino)
+        val result = service.getUserInfo(userDetailsUri, nino)
         Await.result(result.value, 3.seconds)
       }
 
@@ -86,7 +87,7 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
         }
 
         // test if user details has all the info needed
-        val result = service.getUserInfo(nino)
+        val result = service.getUserInfo(userDetailsUri, nino)
         Await.result(result.value, 3.seconds) shouldBe Right(UserInfo(
           "test last",
           nino,
@@ -101,7 +102,7 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
         }
 
         // test if user details does not have the last name
-        val result2 = service.getUserInfo(nino)
+        val result2 = service.getUserInfo(userDetailsUri, nino)
         Await.result(result2.value, 3.seconds) shouldBe Right(UserInfo(
           userDetailsResponse.name + " " + citizenDetailsResponse.person.flatMap(_.lastName).getOrElse("Could not find surname"),
           nino,
@@ -115,7 +116,7 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
           mockCitizenDetailsConnector(nino, citizenDetailsResponse)
         }
 
-        val result3 = service.getUserInfo(nino)
+        val result3 = service.getUserInfo(userDetailsUri, nino)
         Await.result(result3.value, 3.seconds) shouldBe Right(UserInfo(
           userDetailsResponse.name + " " + userDetailsResponse.lastName.getOrElse("Could not find surname"),
           nino,

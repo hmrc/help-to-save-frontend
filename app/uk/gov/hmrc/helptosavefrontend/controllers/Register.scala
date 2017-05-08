@@ -24,6 +24,10 @@ import com.google.inject.Inject
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core.Retrievals.userDetailsUri
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisedFunctions, Enrolment}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
@@ -37,20 +41,26 @@ import scala.concurrent.Future
 @Singleton
 class Register @Inject()(val messagesApi: MessagesApi,
                          eligibilityConnector: EligibilityConnector,
-                         citizenDetailsConnector: CitizenDetailsConnector) extends FrontendController with I18nSupport {
+                         citizenDetailsConnector: CitizenDetailsConnector)
+  extends FrontendController with I18nSupport with AuthorisedFunctions {
+
+  override def authConnector: AuthConnector = FrontendAuthConnector
 
   val userInfoService = new UserInfoService(citizenDetailsConnector)
 
   def declaration = Action.async { implicit request ⇒
-    validateUser().fold(
-      error ⇒ {
-        Logger.error(s"Could not perform eligibility check: $error")
-        InternalServerError("")
-      }, _.fold(
-        Ok(views.html.core.not_eligible()))(
-        userDetails ⇒ Ok(views.html.register.declaration(userDetails))
+
+    authorised(Enrolment("IR-SA") and AuthProviders(GovernmentGateway)).retrieve(userDetailsUri) { uri =>
+      validateUser(uri).fold(
+        error ⇒ {
+          Logger.error(s"Could not perform eligibility check: $error")
+          InternalServerError("")
+        }, _.fold(
+          Ok(views.html.core.not_eligible()))(
+          userDetails ⇒ Ok(views.html.register.declaration(userDetails))
+        )
       )
-    )
+    }
   }
 
   def getCreateAccountHelpToSave = Action.async { implicit request ⇒
@@ -67,9 +77,9 @@ class Register @Inject()(val messagesApi: MessagesApi,
     * been performed and the eligibility check is positive. This returns [[None]]
     * if all the above has successfully been performed and the eligibility check is negative.
     */
-  private def validateUser()(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
+  private def validateUser(userDetailsUri: Option[String])(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
     nino ← EitherT.fromOption[Future](retrieveNino(), "Unable to retrieve NINO")
-    userInfo ← userInfoService.getUserInfo(nino)
+    userInfo ← userInfoService.getUserInfo(userDetailsUri, nino)
     eligible ← eligibilityConnector.checkEligibility(nino)
   } yield eligible.fold(None, Some(userInfo))
 
