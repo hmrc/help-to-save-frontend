@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package hts.steps
+package hts.suites
 
-import cucumber.api.scala.{EN, ScalaDsl}
-import org.scalatest.Matchers
-import hts.driver.StartUpTearDown
+import cucumber.api.CucumberOptions
+import cucumber.api.junit.Cucumber
+import org.junit.runner.RunWith
 
-trait Steps extends ScalaDsl with EN with Matchers with StartUpTearDown
+@RunWith(classOf[Cucumber])
+@CucumberOptions(
+  features = Array("e2e-Selenium-test/src/test/resources/features"),
+  glue = Array("hts.steps"),
+  format = Array ("pretty", "html:target/cucumber", "json:target/cucumber.json")
+)
+class RunnerE2ESeleniumTest {}

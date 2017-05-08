@@ -23,6 +23,10 @@ trait MicroService {
   lazy val plugins : Seq[Plugins] = Seq.empty
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
+  def seleniumTestFilter(name: String): Boolean = name.endsWith("E2ESeleniumTest")
+  def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name)
+
+  lazy val SeleniumTest = config("selenium") extend(Test)
 
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(Seq(play.sbt.PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins : _*)
@@ -48,6 +52,14 @@ trait MicroService {
         Resolver.bintrayRepo("hmrc", "releases"),
         Resolver.jcenterRepo
       ))
+    .configs(SeleniumTest)
+    .settings(
+      inConfig(SeleniumTest)(Defaults.testTasks),
+      unmanagedSourceDirectories in Test += baseDirectory.value / "e2e-Selenium-test",
+      testOptions in Test := Seq(Tests.Filter(unitTestFilter)),
+      testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter),
+        Tests.Argument("-Dbrowser=chrome", "-Dhost=https://www-dev.tax.service.gov.uk"))
+    )
 }
 
 private object TestPhases {

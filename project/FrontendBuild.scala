@@ -30,7 +30,27 @@ object FrontendBuild extends Build with MicroService {
     "org.pegdown" % "pegdown" % "1.6.0" % scope,
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-    "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope,
+    // below for selenium tests
+    "com.codeborne" % "phantomjsdriver" % "1.2.1" % scope,
+    "org.scala-lang" % "scala-library" % "2.11.8" % scope,
+    "info.cukes" % "cucumber-junit" % "1.2.4" % scope,
+    "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
+    "junit" % "junit" % "4.12" % scope,
+    "com.novocode" % "junit-interface" % "0.11" % scope,
+    // "uk.gov.hmrc" %% "scala-webdriver" % "5.4.0" % scope,
+    "org.apache.poi" % "poi-ooxml" % "3.13" % scope,
+    "org.apache.poi" % "poi-ooxml-schemas" % "3.13" % scope,
+    // "log4j" % "log4j" % "1.2.17" % scope,
+    "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % scope,
+    "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1" % scope,
+    "com.typesafe.play" %% "play-iteratees" % "2.4.6" % scope,
+    "org.mongodb" %% "casbah" % "3.1.0" % scope,
+    "com.typesafe.play" %% "play-json" % "2.4.6" % scope,
+    "info.cukes" %% "cucumber-scala" % "1.2.2" % scope,
+    "org.pegdown" % "pegdown" % "1.6.0"  % scope,
+    "uk.gov.hmrc" %% "accessibility-driver" % "1.6.0" % scope,
+    "com.netaporter" %% "scala-uri" % "0.4.14" % scope
   )
 
 }
