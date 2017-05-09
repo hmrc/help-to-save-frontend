@@ -42,7 +42,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
 
-  val authConnector: AuthConnector = mock[AuthConnector]
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   val mockUserInfoService: UserInfoService = mock[UserInfoService]
 
@@ -54,7 +54,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     mockCitizenDetailsConnector) {
     override val userInfoService = mockUserInfoService
 
-    override def authConnector = authConnector
+    override def authConnector = mockAuthConnector
   }
 
   def doRequest(): Future[PlayResult] = register.declaration(FakeRequest())
