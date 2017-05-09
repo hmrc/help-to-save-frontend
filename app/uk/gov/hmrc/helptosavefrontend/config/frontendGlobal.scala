@@ -22,10 +22,9 @@ import akka.util.ByteString
 import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
-
 import play.api.mvc._
 import play.api.mvc.Request
-import play.api.{Application, Configuration, Play}
+import play.api.{Application, Configuration, Environment, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
@@ -36,18 +35,30 @@ import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
 import play.api.libs.streams.Accumulator
+import uk.gov.hmrc.auth.core.NoActiveSession
+import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
 import scala.concurrent.ExecutionContext
 
 object FrontendGlobal
-  extends DefaultFrontendGlobal {
+  extends DefaultFrontendGlobal with Redirects {
 
   override val auditConnector = FrontendAuditConnector
   override val loggingFilter = LoggingFilter
   override val frontendAuditFilter = AuditFilter
   lazy val sessionFilter =
     new SessionFilter(Results.Redirect(routes.StartPagesController.getAboutHelpToSave()))
+
+  lazy val config = Play.current.configuration
+  lazy val env = Environment(Play.current.path, Play.current.classloader, Play.current.mode)
+
+  override def resolveError(rh: RequestHeader, ex: Throwable) = ex match {
+    case _: NoActiveSession => {
+      val originatingUrl = "http://" + rh.host + rh.uri
+      toGGLogin(originatingUrl)
+    }
+  }
 
   override def onStart(app: Application) {
     super.onStart(app)
