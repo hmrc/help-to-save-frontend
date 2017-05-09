@@ -30,7 +30,7 @@ class HelpToSaveSpec extends UnitSpec with WithFakeApplication with MockFactory{
   val mockEligibilityConnector = mock[EligibilityConnector]
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new HelpToSave(
+  val helpToSave = new StartPagesController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockEligibilityConnector)
 

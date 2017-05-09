@@ -1,9 +1,9 @@
 # microservice specific routes
 
-GET        /not-eligible                          @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.notEligible
-GET        /apply                                 @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.getApplyHelpToSave
-GET        /about                                 @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.getAboutHelpToSave
-GET        /eligibility                           @uk.gov.hmrc.helptosavefrontend.controllers.HelpToSave.getEligibilityHelpToSave
+GET        /apply                                 @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getApplyHelpToSave
+GET        /about                                 @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave
+GET        /eligibility                           @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getEligibilityHelpToSave
 
 GET        /register/create-a-account             @uk.gov.hmrc.helptosavefrontend.controllers.Register.getCreateAccountHelpToSave
 GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.Register.declaration
+
