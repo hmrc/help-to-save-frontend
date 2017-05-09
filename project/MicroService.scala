@@ -23,7 +23,8 @@ trait MicroService {
   lazy val plugins : Seq[Plugins] = Seq.empty
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
-  def seleniumTestFilter(name: String): Boolean = name.endsWith("E2ESeleniumTest")
+  def seleniumTestFilter(name: String): Boolean = name.endsWith("E2ESeleniumTest") && !name.contains("WIP")
+  def seleniumWIPTestFilter(name: String): Boolean = name.endsWith("E2ESeleniumTest") && name.contains("WIP")
   def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name)
 
   lazy val SeleniumTest = config("selenium") extend(Test)

@@ -16,8 +16,18 @@
 
 package hts.steps
 
+import cats.syntax.either._
 import cucumber.api.scala.{EN, ScalaDsl}
+import hts.driver.Driver
+import org.openqa.selenium.WebDriver
 import org.scalatest.Matchers
-import hts.driver.StartUpTearDown
 
-trait Steps extends ScalaDsl with EN with Matchers with StartUpTearDown
+trait Steps extends ScalaDsl with EN with Matchers {
+
+  def newDriver(): Either[String, WebDriver] = Driver.webDriver
+
+  var driver: Either[String, WebDriver] = Left("Driver not instantiated yet")
+
+  implicit def wd: WebDriver = driver.getOrElse(sys.error("Could not find driver"))
+
+}

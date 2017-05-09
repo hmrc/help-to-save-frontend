@@ -18,15 +18,19 @@ package hts.driver
 
 import java.util.concurrent.TimeUnit
 
-import org.apache.commons.lang3.StringUtils
 import cats.syntax.either._
-import org.openqa.selenium.WebDriver
-import hts.driver.Browser._
+import org.openqa.selenium.{WebDriver, WebDriverException}
+import org.openqa.selenium.WebDriver.Window
+import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
+import org.openqa.selenium.firefox.{FirefoxDriver, MarionetteDriver}
+import org.openqa.selenium.phantomjs.{PhantomJSDriver, PhantomJSDriverService}
+import org.openqa.selenium.remote.{BrowserType, DesiredCapabilities}
 
 object Driver {
-  val systemProperties = System.getProperties
 
-  val webDriver: Either[String,WebDriver] = {
+  private val systemProperties = System.getProperties
+
+  def webDriver: Either[String,WebDriver] = {
     val selectedDriver: Either[String,WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
         case Some("firefox")                  ⇒ Right(createFirefoxDriver())
         case Some("chrome")                   ⇒ Right(createChromeDriver())
@@ -37,9 +41,112 @@ object Driver {
       }
 
     selectedDriver.map{ driver ⇒
-      sys.addShutdownHook(driver.quit())
+     sys.addShutdownHook(driver.quit())
       driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
     }
     selectedDriver
   }
+
+  private val os: String = systemProperties.getProperty("os.name")
+  private val isMac: Boolean = os.startsWith("Mac")
+  private val isLinux: Boolean = os.startsWith("Linux")
+  private val linuxArch: String = systemProperties.getProperty("os.arch")
+  private val isJsEnabled: Boolean = true
+
+  private val driverDirectory: String = "e2e-Selenium-test/drivers"
+
+  private def maximizeWindow(window: Window): Unit = {
+    try {
+      window.maximize()
+    }
+    catch {
+      case _: WebDriverException => // Swallow exception
+    }
+  }
+
+  private def createGeckoDriver(): WebDriver = {
+    if (isMac) {
+      systemProperties.setProperty("webdriver.gecko.driver", driverDirectory + "/geckodriver_mac")
+    }
+    else if (isLinux) {
+      systemProperties.setProperty("webdriver.gecko.driver", driverDirectory + "/geckodriver_linux64")
+    }
+    else {
+      systemProperties.setProperty("webdriver.gecko.driver", driverDirectory + "/geckodriver.exe")
+    }
+
+    val capabilities = DesiredCapabilities.firefox()
+    capabilities.setJavascriptEnabled(isJsEnabled)
+
+    val driver = new MarionetteDriver()
+    maximizeWindow(driver.manage().window())
+
+    driver
+  }
+
+  private def createFirefoxDriver(): WebDriver = {
+    val capabilities = DesiredCapabilities.firefox()
+    capabilities.setJavascriptEnabled(true)
+    capabilities.setBrowserName(BrowserType.FIREFOX)
+
+    val driver = new FirefoxDriver(capabilities)
+    maximizeWindow(driver.manage().window())
+    driver
+  }
+
+  private def createChromeDriver(): WebDriver = {
+    if (isMac) {
+      systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
+    }
+    else if (isLinux && linuxArch == "amd32") {
+      systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")
+    }
+    else if (isLinux) {
+      systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver")
+    }
+    else {
+      systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
+    }
+
+    val capabilities = DesiredCapabilities.chrome()
+    val options = new ChromeOptions()
+
+    options.addArguments("test-type")
+    options.addArguments("--disable-gpu")
+
+    capabilities.setJavascriptEnabled(isJsEnabled)
+    capabilities.setCapability(ChromeOptions.CAPABILITY, options)
+
+    val driver = new ChromeDriver(capabilities)
+    maximizeWindow(driver.manage().window())
+    driver
+  }
+
+
+  private def createPhantomJsDriver(): WebDriver = {
+    if (isMac) {
+      systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs")
+    }
+    else if (isLinux && linuxArch == "amd32") {
+      systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs_linux32")
+    }
+    else {
+      systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs_linux64")
+    }
+
+    val capabilities = new DesiredCapabilities
+
+    capabilities.setJavascriptEnabled(isJsEnabled)
+    capabilities.setCapability(
+      PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
+      systemProperties.getProperty("webdriver.phantomjs.binary"))
+
+    capabilities.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, Array("--ignore-ssl-errors=yes", "--web-security=false", "--ssl-protocol=any"))
+
+    val phantomJs = new PhantomJSDriver(capabilities)
+    maximizeWindow(phantomJs.manage().window())
+
+    phantomJs
+  }
+
 }

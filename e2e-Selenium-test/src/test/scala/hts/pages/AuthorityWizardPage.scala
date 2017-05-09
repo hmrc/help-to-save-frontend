@@ -16,23 +16,24 @@
 
 package hts.pages
 
-import org.openqa.selenium.By
+import org.openqa.selenium.{By, WebDriver}
+
 import util.Random
 
-object AuthorityWizardPage extends Page {
+object AuthorityWizardPage {
 
   // TODO: read URI from config
-  def goToPage: Unit = driver.navigate().to("https://www-dev.tax.service.gov.uk/auth-login-stub/gg-sign-in")
+  def goToPage()(implicit driver: WebDriver): Unit = driver.navigate().to("https://www-dev.tax.service.gov.uk/auth-login-stub/gg-sign-in")
 
-  def credId: Unit = driver.findElement(By.name("authorityId")).sendKeys(Random.nextInt(999999).toString)
+  def credId()(implicit driver: WebDriver): Unit = driver.findElement(By.name("authorityId")).sendKeys(Random.nextInt(999999).toString)
 
-  def redirect(url : String): Unit = driver.findElement(By.name("redirectionUrl")).sendKeys(url)
+  def redirect(url : String)(implicit driver: WebDriver): Unit = driver.findElement(By.name("redirectionUrl")).sendKeys(url)
 
-  def nino(number : String): Unit = driver.findElement(By.name("nino")).sendKeys(number)
+  def nino(number : String)(implicit driver: WebDriver): Unit = driver.findElement(By.name("nino")).sendKeys(number)
 
-  def credentialStrength(strength : String): Unit = driver.findElement(By.name("credentialStrength")).sendKeys(strength)
+  def credentialStrength(strength : String)(implicit driver: WebDriver): Unit = driver.findElement(By.name("credentialStrength")).sendKeys(strength)
 
-  def confidenceLevel(level : Int): Unit = driver.findElement(By.name("confidenceLevel")).sendKeys(level.toString)
+  def confidenceLevel(level : Int)(implicit driver: WebDriver): Unit = driver.findElement(By.name("confidenceLevel")).sendKeys(level.toString)
 
-  def submit: Unit = driver.findElement(By.cssSelector("input.button")).click
+  def submit()(implicit driver: WebDriver): Unit = driver.findElement(By.cssSelector("input.button")).click()
 }

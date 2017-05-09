@@ -20,11 +20,11 @@ case class Configuration (htsUrl: String, timeout: Int)
 
 object Configuration {
 
-  private  val basePath = "help-to-save"
+  private val basePath = "help-to-save"
 
   private val host = System.getProperty("host", "https://www-dev.tax.service.gov.uk")
 
- private  val timeout = System.getProperty("timeout", "5")
+  private val timeout = System.getProperty("timeout", "5")
 
   val settings: Configuration = new Configuration(s"$host/$basePath", timeout.toInt)
 

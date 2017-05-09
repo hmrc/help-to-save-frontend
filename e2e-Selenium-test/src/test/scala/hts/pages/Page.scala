@@ -16,53 +16,10 @@
 
 package hts.pages
 
-import org.openqa.selenium.support.ui.{ExpectedCondition, WebDriverWait}
-import org.openqa.selenium.{By, WebDriver}
-import org.scalatest._
-import hts.driver.StartUpTearDown
-import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
-object Page extends Page
+object Page {
 
-trait Page extends StartUpTearDown with Matchers {
+  def getCurrentUrl()(implicit driver: WebDriver): String = driver.getCurrentUrl
 
-  def pageTitle = driver.getTitle
-
-  protected def waitFor(predicate: WebDriver => Boolean): Boolean = {
-    new WebDriverWait(driver, Configuration.settings.timeout).until {
-      new ExpectedCondition[Boolean] {
-        override def apply(wd: WebDriver) = predicate(wd)
-      }
-    }
-  }
-
-  //region Methods to click links, buttons etc.
-
-  def click(by: By) = driver.findElement(by).click()
-
-  def clickById(id: String) = click(By.id(id))
-
-  def clickByLinkText(linkText: String) = click(By.linkText(linkText))
-
-  def clickSubmit() = click(By.id("submit"))
-
-  //endregion
-
-  //region Methods to fill in text boxes, selects etc.
-
-  def fillInput(by: By, text: String): Unit = {
-    val input = driver.findElement(by)
-    input.clear()
-    if (text != null && text.nonEmpty) input.sendKeys(text)
-  }
-
-  def fillInputById(id: String, text: String): Unit = fillInput(By.id(id), text)
-
-
-  //endregion
-
-  //region Whole page interactions
-  def getCurrentUrl = driver.getCurrentUrl
-
-  //endregion Whole page interactions
 }
