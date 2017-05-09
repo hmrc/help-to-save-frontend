@@ -25,13 +25,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 @ImplementedBy(classOf[UserDetailsConnectorImpl])
 trait UserDetailsConnector {
-
   def getUserDetails(userDetailsUri: String)(implicit hc: HeaderCarrier): Result[UserDetailsResponse]
 }
 
 @Singleton
 class UserDetailsConnectorImpl extends UserDetailsConnector with ServicesConfig {
-
   override def getUserDetails(userDetailsUri: String)(implicit hc: HeaderCarrier): Result[UserDetailsResponse] = {
     getResult[UserDetailsResponse](userDetailsUri)
   }

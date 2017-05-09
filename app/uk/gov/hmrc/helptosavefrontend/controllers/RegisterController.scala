@@ -47,11 +47,12 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
-  val userInfoService = new UserInfoService(userDetailsConnector,citizenDetailsConnector)
+  val userInfoService = new UserInfoService(userDetailsConnector, citizenDetailsConnector)
 
   def declaration = Action.async { implicit request ⇒
 
-    authorised(/* Enrolment("IR-SA") and */ AuthProviders(GovernmentGateway)).retrieve(userDetailsUri) { uri =>
+    authorised(Enrolment("HMRC-NI") and AuthProviders(GovernmentGateway)).retrieve(userDetailsUri) { uri => {
+
       validateUser(uri).fold(
         error ⇒ {
           Logger.error(s"Could not perform eligibility check: $error")
@@ -60,7 +61,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           Ok(views.html.core.not_eligible()))(
           userDetails ⇒ Ok(views.html.register.declaration(userDetails))
         )
-      )
+      )}
     }
   }
 
