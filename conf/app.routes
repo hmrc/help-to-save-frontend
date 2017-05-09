@@ -6,4 +6,5 @@ GET        /eligibility                           @uk.gov.hmrc.helptosavefronten
 
 GET        /register/create-a-account             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSave
 GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.declaration
+GET        /register/insufficient-enrolments      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.insufficientEnrolments
 

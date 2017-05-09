@@ -46,9 +46,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   val userInfoService = new UserInfoService(userDetailsConnector, citizenDetailsConnector)
 
   def declaration = Action.async { implicit request ⇒
-
     authorisedForHts { (uri, nino) =>
       validateUser(uri, nino).fold(
+
         error ⇒ {
           Logger.error(s"Could not perform eligibility check: $error")
           InternalServerError("")
@@ -81,5 +81,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   def failedTwoFactor = Action.async { implicit request ⇒
     Future.successful(Ok(views.html.twofactor.you_need_two_factor("twoFactorURI")))
+  }
+
+  def insufficientEnrolments = Action.async { implicit request =>
+    Future.successful(Ok("Insufficient enrolment"))
   }
 }

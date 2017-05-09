@@ -35,10 +35,25 @@ import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
 import play.api.libs.streams.Accumulator
-import uk.gov.hmrc.auth.core.NoActiveSession
+import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
 import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
-
+import com.typesafe.config.Config
+import net.ceedubs.ficus.Ficus._
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
+import play.api.mvc.Results._
+import play.api.mvc.{Request, RequestHeader}
+import play.api.{Application, Configuration, Environment, Play}
+import play.twirl.api.Html
+import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
+import uk.gov.hmrc.auth.frontend.Redirects
+import uk.gov.hmrc.crypto.ApplicationCrypto
+import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
+import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
+import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
+import uk.gov.hmrc.play.http.logging.filters.FrontendLoggingFilter
 import scala.concurrent.ExecutionContext
 
 object FrontendGlobal
@@ -57,6 +72,10 @@ object FrontendGlobal
     case _: NoActiveSession => {
       val originatingUrl = "http://" + rh.host + rh.uri
       toGGLogin(originatingUrl)
+    }
+    case _: InsufficientEnrolments => {
+      println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INSUFFICIENT ENROLMENTS")
+      Redirect(uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.insufficientEnrolments().absoluteURL()(rh))
     }
   }
 
