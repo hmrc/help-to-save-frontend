@@ -39,9 +39,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class Register @Inject()(val messagesApi: MessagesApi,
-                         eligibilityConnector: EligibilityConnector,
-                         citizenDetailsConnector: CitizenDetailsConnector)
+class RegisterController @Inject()(val messagesApi: MessagesApi,
+                                   eligibilityConnector: EligibilityConnector,
+                                   citizenDetailsConnector: CitizenDetailsConnector)
   extends FrontendController with I18nSupport with AuthorisedFunctions {
 
   override def authConnector: AuthConnector = FrontendAuthConnector

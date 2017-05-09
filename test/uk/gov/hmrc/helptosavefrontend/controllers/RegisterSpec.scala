@@ -48,7 +48,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
 
-  val register = new Register(
+  val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockEligibilityConnector,
     mockCitizenDetailsConnector) {
