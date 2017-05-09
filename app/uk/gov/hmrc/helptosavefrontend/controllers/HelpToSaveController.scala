@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import java.util.UUID
+
+import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.{HtsCompositePageVisibilityPredicate, HtsRegime}
 import uk.gov.hmrc.play.frontend.auth._
@@ -25,12 +27,13 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-trait HelpToSaveController extends FrontendController with Actions {
+trait HelpToSaveController extends FrontendController with Actions with AuthActions
 
+trait AuthActions  { self: Actions =>
   protected type AsyncPlayUserRequest = AuthContext => Request[AnyContent] => Future[Result]
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
-  def authorisedHtsUser(body: AsyncPlayUserRequest): Action[AnyContent] =
+  def AuthorisedHtsUserAction(body: AsyncPlayUserRequest): Action[AnyContent] =
     AuthorisedFor(HtsRegime, HtsCompositePageVisibilityPredicate).async(body)
 }

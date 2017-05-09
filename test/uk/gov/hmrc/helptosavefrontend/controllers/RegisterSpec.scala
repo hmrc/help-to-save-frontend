@@ -24,16 +24,18 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.libs.json.{JsValue, Writes}
+import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
 import play.api.test.Helpers.{contentType, _}
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.frontend.auth.{AuthContext, AuthenticationProviderIds}
 import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.frontend.auth.connectors.domain._
@@ -71,11 +73,13 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
   val mockUserInfoService: UserInfoService = mock[UserInfoService]
 
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
+  val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
-  val register = new Register(
+  val register = new RegisterController(
+    mockSessionCacheConnector,
     fakeApplication.injector.instanceOf[MessagesApi],
     mockEligibilityConnector,
-    mockCitizenDetailsConnector){
+    mockCitizenDetailsConnector) {
     override lazy val authConnector = mockAuthConnector
     override val userInfoService = mockUserInfoService
 
@@ -91,10 +95,15 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   def doRequest(): Future[PlayResult] = register.declaration(authenticatedFakeRequest)
 
+  def mockSessionCacheConnectorPut(cacheMap:CacheMap):Unit =
+    (mockSessionCacheConnector.put(_:HTSSession)(_:Writes[HTSSession],_: HeaderCarrier))
+      .expects(*,*,*)
+      .returning(Future.successful(cacheMap))
+
   def mockEligibilityResult(nino: String)(result: Boolean): Unit =
     (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
       .expects(nino, *)
-      .returning(EitherT.pure[Future,String,EligibilityResult](EligibilityResult(result)))
+      .returning(EitherT.pure[Future, String, EligibilityResult](EligibilityResult(result)))
 
   def mockAuthConnector(authority: Authority): Unit =
     (mockAuthConnector.currentAuthority(_: HeaderCarrier))
@@ -104,7 +113,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
   def mockUserInfo(authContext: AuthContext, nino: NINO)(userInfo: UserInfo): Unit =
     (mockUserInfoService.getUserInfo(_: AuthContext, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
       .expects(authContext, nino, *, *)
-      .returning(EitherT.pure[Future,String,UserInfo](userInfo))
+      .returning(EitherT.pure[Future, String, UserInfo](userInfo))
 
   "GET /" should {
 
@@ -114,6 +123,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
         mockAuthConnector(authority)
         mockUserInfo(authContext, fakeNino)(user)
         mockEligibilityResult(fakeNino)(true)
+        mockSessionCacheConnectorPut(CacheMap("1",Map.empty[String,JsValue]))
       }
 
       val result: Future[PlayResult] = doRequest()
@@ -129,11 +139,10 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       html should include(user.email)
       html should include(user.NINO)
       html should include(user.address.line1.getOrElse(sys.error("Could not get first line of address")))
-
     }
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
-      inSequence{
+      inSequence {
         mockAuthConnector(authority)
         mockUserInfo(authContext, fakeNino)(randomUserDetails())
         mockEligibilityResult(fakeNino)(false)

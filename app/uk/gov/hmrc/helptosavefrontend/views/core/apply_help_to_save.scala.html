@@ -31,7 +31,7 @@
             <ul class="bullets">
                 <li>
                     @Messages("hts.core.apply-help-to-save.par-3")
-                    @link(routes.HelpToSave.getEligibilityHelpToSave().url, Messages("hts.core.apply-help-to-save.link-4"))
+                    @link(routes.StartPagesController.getEligibilityHelpToSave().url, Messages("hts.core.apply-help-to-save.link-4"))
                 </li>
                 <li>
                     @Messages("hts.core.apply-help-to-save.par-4")
@@ -42,13 +42,13 @@
             </ul>
             <p> @Messages("hts.core.apply-help-to-save.par-6") </p>
             <p> @Messages("hts.core.apply-help-to-save.par-7") </p>
-            @form(routes.Register.declaration(), 'class -> "group") {
+            @form(routes.RegisterController.declaration(), 'class -> "group") {
                 @submit('_buttonClass -> "button--get-started") {
                     @Messages("hts.core.apply-help-to-save.button")
                 }
             }
             <a class="page-nav__link page-nav__link--previous"
-            title="Navigate to previous part" rel="prev" href=@routes.HelpToSave.getEligibilityHelpToSave()>
+            title="Navigate to previous part" rel="prev" href=@routes.StartPagesController.getEligibilityHelpToSave()>
                 <span class="page-nav__label">Previous</span>
                 <span class="page-nav__title">Eligibility</span>
             </a>

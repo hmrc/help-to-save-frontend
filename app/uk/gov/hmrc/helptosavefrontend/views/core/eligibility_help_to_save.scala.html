@@ -26,7 +26,7 @@
             @start_nav(request.uri)
             <h2>@Messages("hts.core.eligibility-help-to-save.header-1")  </h2>
             <p> @Messages("hts.core.eligibility-help-to-save.par-1")
-                @link(routes.HelpToSave.getApplyHelpToSave().url, Messages("hts.core.eligibility-help-to-save.link-1"))
+                @link(routes.StartPagesController.getApplyHelpToSave().url, Messages("hts.core.eligibility-help-to-save.link-1"))
                 @Messages("hts.core.eligibility-help-to-save.par-3")</p>
 
             <ul class="bullets">
@@ -70,7 +70,7 @@
             <div class="grid-layout grid-layout--stacked">
                 <div class="grid-layout__column grid-layout__column--1-2">
                     <a class="page-nav__link page-nav__link--previous"
-                    title="Navigate to previous part" rel="prev" href=@routes.HelpToSave.getAboutHelpToSave()>
+                    title="Navigate to previous part" rel="prev" href=@routes.StartPagesController.getAboutHelpToSave()>
                         <span class="page-nav__label">Previous</span>
                         <span class="page-nav__title">About Help to Save</span>
                     </a>
@@ -78,7 +78,7 @@
                 <div class="grid-layout__column grid-layout__column--1-2">
                     @* TODO:fix this on the front end *@
                     <a class=" page-nav__link page-nav__link--next"
-                    title="Navigate to next part" rel="next" href=@routes.HelpToSave.getApplyHelpToSave()>
+                    title="Navigate to next part" rel="next" href=@routes.StartPagesController.getApplyHelpToSave()>
                         <span class="page-nav__label">Next</span>
                         <span class="page-nav__title">Apply</span>
                     </a>
