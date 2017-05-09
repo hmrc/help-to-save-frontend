@@ -68,8 +68,8 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       .returning(EitherT.pure[Future, String, EligibilityResult](EligibilityResult(result)))
 
   def mockUserInfo(nino: NINO)(userInfo: UserInfo): Unit =
-    (mockUserInfoService.getUserInfo(_: Option[String], _: NINO)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(Some("/user/details/uri"), nino, *, *)
+    (mockUserInfoService.getUserInfo(_: String, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
+      .expects("/user/details/uri", nino, *, *)
       .returning(EitherT.pure[Future, String, UserInfo](userInfo))
 
   "GET /" should {

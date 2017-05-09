@@ -42,7 +42,7 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 class UserInfoService(userDetailsConnector: UserDetailsConnector, citizenDetailsConnector: CitizenDetailsConnector) extends ServicesConfig {
 
-  def getUserInfo(userDetailsUri: Option[String], nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserInfo] =
+  def getUserInfo(userDetailsUri: String, nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserInfo] =
     for {
       userDetails ← queryUserDetails(userDetailsUri)
       citizenDetails ← citizenDetailsConnector.getDetails(nino)
@@ -50,8 +50,8 @@ class UserInfoService(userDetailsConnector: UserDetailsConnector, citizenDetails
         errors ⇒ s"Could not create user info: ${errors.toList.mkString(",")}")
     } yield userInfo
 
-  private def queryUserDetails(userDetailsUri: Option[String])(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserDetailsResponse] =
-    userDetailsConnector.getUserDetails(userDetailsUri.getOrElse("blah blah"))
+  private def queryUserDetails(userDetailsUri: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserDetailsResponse] =
+    userDetailsConnector.getUserDetails(userDetailsUri)
 
   private def toUserInfo(u: UserDetailsResponse,
                          c: CitizenDetailsResponse,

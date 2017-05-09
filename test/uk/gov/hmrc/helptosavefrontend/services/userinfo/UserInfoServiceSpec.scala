@@ -66,7 +66,7 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
       val userDetailsResponse = UserDetailsResponse("test", Some("last"), Some("test@test.com"), Some(LocalDate.now()))
       val citizenDetailsResponse = cdResponse
       val nino = "WM123456C"
-      val userDetailsUri = Some("/test/user/uri")
+      val userDetailsUri = "/test/user/uri"
 
 
       "use the auth connector to get user details from the user-details service" in new TestApparatus {
@@ -135,7 +135,7 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
             mockCitizenDetailsConnector(nino, citizenDetailsResponse)
           }
 
-          val result = service.getUserInfo(Some("/user/details/uri"), nino)
+          val result = service.getUserInfo(userDetailsUri, nino)
           Await.result(result.value, 3.seconds).isLeft shouldBe true
         }
 

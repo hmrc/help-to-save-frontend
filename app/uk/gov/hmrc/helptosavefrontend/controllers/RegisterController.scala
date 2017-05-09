@@ -18,22 +18,18 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
 
-import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.Inject
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.Retrievals.userDetailsUri
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisedFunctions, Enrolment}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, UserDetailsConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -43,7 +39,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    eligibilityConnector: EligibilityConnector,
                                    citizenDetailsConnector: CitizenDetailsConnector,
                                    userDetailsConnector: UserDetailsConnector)
-  extends FrontendController with I18nSupport with AuthorisedFunctions {
+  extends HelpToSaveBaseController with I18nSupport {
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
@@ -51,9 +47,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   def declaration = Action.async { implicit request ⇒
 
-    authorised(Enrolment("HMRC-NI") and AuthProviders(GovernmentGateway)).retrieve(userDetailsUri) { uri => {
-
-      validateUser(uri).fold(
+    authorisedForHts { (uri, nino) =>
+      validateUser(uri, nino).fold(
         error ⇒ {
           Logger.error(s"Could not perform eligibility check: $error")
           InternalServerError("")
@@ -61,7 +56,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           Ok(views.html.core.not_eligible()))(
           userDetails ⇒ Ok(views.html.register.declaration(userDetails))
         )
-      )}
+      )
     }
   }
 
@@ -79,16 +74,10 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     * been performed and the eligibility check is positive. This returns [[None]]
     * if all the above has successfully been performed and the eligibility check is negative.
     */
-  private def validateUser(userDetailsUri: Option[String])(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
-    nino ← EitherT.fromOption[Future](retrieveNino(), "Unable to retrieve NINO")
+  private def validateUser(userDetailsUri: String, nino: String)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
     userInfo ← userInfoService.getUserInfo(userDetailsUri, nino)
     eligible ← eligibilityConnector.checkEligibility(nino)
   } yield eligible.fold(None, Some(userInfo))
-
-
-  private def retrieveNino(): Option[String] = {
-    Some("WM123456C")
-  }
 
   def failedTwoFactor = Action.async { implicit request ⇒
     Future.successful(Ok(views.html.twofactor.you_need_two_factor("twoFactorURI")))
