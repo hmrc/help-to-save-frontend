@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package hts.suites
+package hts.utils
 
-import cucumber.api.CucumberOptions
-import cucumber.api.junit.Cucumber
-import org.junit.runner.RunWith
+case class Configuration (htsUrl: String, timeout: Int)
 
-@RunWith(classOf[Cucumber])
-@CucumberOptions(
-  features = Array("e2e-Selenium-test/src/test/resources/features"),
-  glue = Array("hts.steps"),
-  format = Array ("pretty", "html:target/cucumber", "json:target/cucumber.json")
-)
-class RunnerE2ESeleniumTest {}
+object Configuration {
+
+  private val basePath = "help-to-save"
+
+  val host = System.getProperty("host")
+
+  private val timeout = System.getProperty("timeout", "5")
+
+  val settings: Configuration = new Configuration(s"$host/$basePath", timeout.toInt)
+
+}

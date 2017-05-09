@@ -25,9 +25,11 @@ trait MicroService {
 
   def seleniumTestFilter(name: String): Boolean = name.endsWith("E2ESeleniumTest") && !name.contains("WIP")
   def seleniumWIPTestFilter(name: String): Boolean = name.endsWith("E2ESeleniumTest") && name.contains("WIP")
-  def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name)
+  def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name) && !seleniumWIPTestFilter(name)
 
   lazy val SeleniumTest = config("selenium") extend(Test)
+  lazy val SeleniumTestWIP = config("selenium-wip") extend(Test)
+
 
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(Seq(play.sbt.PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins : _*)
@@ -54,12 +56,14 @@ trait MicroService {
         Resolver.jcenterRepo
       ))
     .configs(SeleniumTest)
+    .configs(SeleniumTestWIP)
     .settings(
       inConfig(SeleniumTest)(Defaults.testTasks),
-      unmanagedSourceDirectories in Test += baseDirectory.value / "e2e-Selenium-test",
+      inConfig(SeleniumTestWIP)(Defaults.testTasks),
+      unmanagedSourceDirectories in Test += baseDirectory.value / "e2e-selenium-test",
       testOptions in Test := Seq(Tests.Filter(unitTestFilter)),
-      testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter),
-        Tests.Argument("-Dbrowser=chrome", "-Dhost=https://www-dev.tax.service.gov.uk"))
+      testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter)),
+      testOptions in SeleniumTestWIP := Seq(Tests.Filter(seleniumWIPTestFilter))
     )
 }
 

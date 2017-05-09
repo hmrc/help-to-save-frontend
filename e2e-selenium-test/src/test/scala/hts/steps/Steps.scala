@@ -30,4 +30,13 @@ trait Steps extends ScalaDsl with EN with Matchers {
 
   implicit def wd: WebDriver = driver.getOrElse(sys.error("Could not find driver"))
 
+  Before { _ ⇒
+    driver = newDriver()
+  }
+
+  After { _ ⇒
+    driver.foreach(_.quit())
+    Thread.sleep(2000L)
+  }
+
 }

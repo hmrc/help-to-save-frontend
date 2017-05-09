@@ -16,14 +16,14 @@
 
 package hts.pages
 
+import hts.utils.Configuration
 import org.openqa.selenium.{By, WebDriver}
 
 import util.Random
 
 object AuthorityWizardPage {
 
-  // TODO: read URI from config
-  def goToPage()(implicit driver: WebDriver): Unit = driver.navigate().to("https://www-dev.tax.service.gov.uk/auth-login-stub/gg-sign-in")
+  def goToPage()(implicit driver: WebDriver): Unit = driver.navigate().to(Configuration.host + "/auth-login-stub/gg-sign-in")
 
   def credId()(implicit driver: WebDriver): Unit = driver.findElement(By.name("authorityId")).sendKeys(Random.nextInt(999999).toString)
 

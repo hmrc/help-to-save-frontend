@@ -16,16 +16,15 @@
 
 package hts.steps
 
-import cats.syntax.either._
 import hts.pages.{AuthorityWizardPage, Page}
+import hts.utils.Configuration
 
 class SecuritySteps extends Steps {
-
 
   Given("^an applicant has a confidence level of (.*)$") { (level: Int) =>
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.credId()
-    AuthorityWizardPage.redirect("https://www-dev.tax.service.gov.uk/help-to-save/register/declaration")
+    AuthorityWizardPage.redirect(Configuration.host + "/help-to-save/register/declaration")
     AuthorityWizardPage.confidenceLevel(level)
   }
 
@@ -48,22 +47,13 @@ class SecuritySteps extends Steps {
   }
 
   Given("""^their confidence level is (.*)$"""){ (level : Int) =>
-    AuthorityWizardPage.redirect("https://www-dev.tax.service.gov.uk/help-to-save/register/declaration")
+    AuthorityWizardPage.redirect(Configuration.host + "/help-to-save/register/declaration")
     AuthorityWizardPage.confidenceLevel(level)
     AuthorityWizardPage.submit
   }
 
   Then("""^they are forced into going through IV before being able to proceed with their HtS application$"""){ () =>
     Page.getCurrentUrl() should include("identity-verification")
-  }
-
-  Before { _ ⇒
-    driver = newDriver()
-  }
-
-  After { _ ⇒
-    driver.foreach(_.quit())
-    Thread.sleep(2000L)
   }
 
 }

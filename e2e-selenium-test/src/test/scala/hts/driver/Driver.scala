@@ -53,7 +53,7 @@ object Driver {
   private val linuxArch: String = systemProperties.getProperty("os.arch")
   private val isJsEnabled: Boolean = true
 
-  private val driverDirectory: String = "e2e-Selenium-test/drivers"
+  private val driverDirectory: String = "e2e-selenium-test/drivers"
 
   private def maximizeWindow(window: Window): Unit = {
     try {
