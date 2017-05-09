@@ -37,8 +37,6 @@ class EligibilityConnectorImpl extends EligibilityConnector with ServicesConfig 
   // TODO: read from config?
   private def serviceURL(nino: String) = s"help-to-save-eligibility-check/eligibilitycheck/$nino"
 
-  private val http = WSHttp
-
   override def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
     getResult(s"$helpToSaveEligibilityURL/${serviceURL(nino)}")
 

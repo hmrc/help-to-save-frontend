@@ -28,7 +28,7 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.Retrievals.userDetailsUri
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisedFunctions, Enrolment}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, UserDetailsConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
 import uk.gov.hmrc.helptosavefrontend.util.Result
@@ -41,12 +41,13 @@ import scala.concurrent.Future
 @Singleton
 class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    eligibilityConnector: EligibilityConnector,
-                                   citizenDetailsConnector: CitizenDetailsConnector)
+                                   citizenDetailsConnector: CitizenDetailsConnector,
+                                   userDetailsConnector: UserDetailsConnector)
   extends FrontendController with I18nSupport with AuthorisedFunctions {
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
-  val userInfoService = new UserInfoService(citizenDetailsConnector)
+  val userInfoService = new UserInfoService(userDetailsConnector,citizenDetailsConnector)
 
   def declaration = Action.async { implicit request ⇒
 

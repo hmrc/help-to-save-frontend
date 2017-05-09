@@ -23,8 +23,8 @@ import cats.instances.future._
 import cats.syntax.cartesian._
 import cats.syntax.option._
 import play.api.libs.json.{Json, Reads}
-import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.CitizenDetailsResponse
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, UserDetailsConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService._
 import uk.gov.hmrc.helptosavefrontend.util._
@@ -40,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * email and `citizen-details` is used to obtain the address.
   *
   */
-class UserInfoService(citizenDetailsConnector: CitizenDetailsConnector) extends ServicesConfig {
+class UserInfoService(userDetailsConnector: UserDetailsConnector, citizenDetailsConnector: CitizenDetailsConnector) extends ServicesConfig {
 
   def getUserInfo(userDetailsUri: Option[String], nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserInfo] =
     for {
@@ -51,8 +51,7 @@ class UserInfoService(citizenDetailsConnector: CitizenDetailsConnector) extends 
     } yield userInfo
 
   private def queryUserDetails(userDetailsUri: Option[String])(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserDetailsResponse] =
-    EitherT.right[Future, String, UserDetailsResponse](
-      Future.successful(UserDetailsResponse("test", Some("last"), Some("test@test.com"), Some(LocalDate.now()))))
+    userDetailsConnector.getUserDetails(userDetailsUri.getOrElse("blah blah"))
 
   private def toUserInfo(u: UserDetailsResponse,
                          c: CitizenDetailsResponse,

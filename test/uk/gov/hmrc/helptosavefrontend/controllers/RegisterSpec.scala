@@ -25,7 +25,7 @@ import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, UserDetailsConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
@@ -46,12 +46,15 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val mockUserInfoService: UserInfoService = mock[UserInfoService]
 
+  val mockUserDetailsConnector: UserDetailsConnector = mock[UserDetailsConnector]
+
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
 
   val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockEligibilityConnector,
-    mockCitizenDetailsConnector) {
+    mockCitizenDetailsConnector,
+    mockUserDetailsConnector) {
     override val userInfoService = mockUserInfoService
 
     override def authConnector = mockAuthConnector

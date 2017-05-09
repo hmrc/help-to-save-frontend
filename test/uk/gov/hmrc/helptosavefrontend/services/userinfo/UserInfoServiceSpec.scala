@@ -21,8 +21,8 @@ import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.{Address, CitizenDetailsResponse, Person}
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, UserDetailsConnector}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.util.NINO
@@ -48,13 +48,15 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
   class TestApparatus {
     val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
 
+    val mockUserDetailsConnector: UserDetailsConnector = mock[UserDetailsConnector]
+
     def mockCitizenDetailsConnector(nino: NINO,
                                     citizenDetailsResponse: CitizenDetailsResponse): Unit =
       (mockCitizenDetailsConnector.getDetails(_: NINO)(_: HeaderCarrier, _: ExecutionContext))
         .expects(nino, *, *)
         .returning(EitherT.pure[Future, String, CitizenDetailsResponse](cdResponse))
 
-    val service = new UserInfoService(mockCitizenDetailsConnector)
+    val service = new UserInfoService(mockUserDetailsConnector, mockCitizenDetailsConnector)
   }
 
   "The HTSUserInfoService" when {
@@ -126,34 +128,34 @@ class UserInfoServiceSpec extends UnitSpec with WithFakeApplication with MockFac
         ))
       }
 
-      //      "return an error if some user information is not available" in new TestApparatus {
-      //        def test(userDetailsResponse: UserDetailsResponse,
-      //                 citizenDetailsResponse: CitizenDetailsResponse): Unit = {
-      //          inSequence {
-      //            mockCitizenDetailsConnector(nino, citizenDetailsResponse)
-      //          }
-      //
-      //          val result = service.getUserInfo(nino)
-      //          Await.result(result.value, 3.seconds).isLeft shouldBe true
-      //        }
-      //
-      //        test(
-      //          userDetailsResponse.copy(lastName = None),
-      //          citizenDetailsResponse.copy(person = citizenDetailsResponse.person.map(_.copy(lastName = None))))
-      //
-      //        test(
-      //          userDetailsResponse.copy(dateOfBirth = None),
-      //          citizenDetailsResponse.copy(person = citizenDetailsResponse.person.map(_.copy(dateOfBirth = None))))
-      //
-      //        test(
-      //          userDetailsResponse.copy(email = None),
-      //          citizenDetailsResponse)
-      //
-      //        test(
-      //          userDetailsResponse,
-      //          citizenDetailsResponse.copy(address = None))
-      //
-      //      }
+      "return an error if some user information is not available" in new TestApparatus {
+        def test(userDetailsResponse: UserDetailsResponse,
+                 citizenDetailsResponse: CitizenDetailsResponse): Unit = {
+          inSequence {
+            mockCitizenDetailsConnector(nino, citizenDetailsResponse)
+          }
+
+          val result = service.getUserInfo(Some("/user/details/uri"), nino)
+          Await.result(result.value, 3.seconds).isLeft shouldBe true
+        }
+
+        test(
+          userDetailsResponse.copy(lastName = None),
+          citizenDetailsResponse.copy(person = citizenDetailsResponse.person.map(_.copy(lastName = None))))
+
+        test(
+          userDetailsResponse.copy(dateOfBirth = None),
+          citizenDetailsResponse.copy(person = citizenDetailsResponse.person.map(_.copy(dateOfBirth = None))))
+
+        test(
+          userDetailsResponse.copy(email = None),
+          citizenDetailsResponse)
+
+        test(
+          userDetailsResponse,
+          citizenDetailsResponse.copy(address = None))
+
+      }
     }
   }
 }
