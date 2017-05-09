@@ -24,12 +24,14 @@ import org.scalatest.Matchers
 
 trait Steps extends ScalaDsl with EN with Matchers {
 
-  def newDriver(): Either[String, WebDriver] = Driver.webDriver
+  private def newDriver(): Either[String, WebDriver] = Driver.webDriver
 
-  var driver: Either[String, WebDriver] = Left("Driver not instantiated yet")
+  private var driver: Either[String, WebDriver] = Left("Driver not instantiated yet")
 
-  implicit def wd: WebDriver = driver.getOrElse(sys.error("Could not find driver"))
+  /** Tries to get the value of [[driver]] - will throw an exception if it doesn't exist */
+  implicit def getDriverUnsafe(): WebDriver = driver.getOrElse(sys.error("Could not find driver"))
 
+  // create a new driver for each scenario
   Before { _ ⇒
     driver = newDriver()
   }
