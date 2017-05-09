@@ -50,7 +50,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   def declaration = Action.async { implicit request ⇒
 
-    authorised(Enrolment("IR-SA") and AuthProviders(GovernmentGateway)).retrieve(userDetailsUri) { uri =>
+    authorised(/* Enrolment("IR-SA") and */ AuthProviders(GovernmentGateway)).retrieve(userDetailsUri) { uri =>
       validateUser(uri).fold(
         error ⇒ {
           Logger.error(s"Could not perform eligibility check: $error")
