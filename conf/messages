@@ -9,7 +9,7 @@ hts.core.apply-help-to-save.par-5=account
 hts.core.apply-help-to-save.par-6=To get any bonuses or withdraw money, you’ll need a UK bank account.
 hts.core.apply-help-to-save.par-7=If you’'re eligible, you'’ll have instant access to your account as soon as you’ve applied.
 hts.core.apply-help-to-save.link-4=eligible
-hts.core.apply-help-to-save.link-5=Goverment Gateway
+hts.core.apply-help-to-save.link-5=Government Gateway
 hts.core.apply-help-to-save.button=Apply now
 
 hts.core.about-help-to-save.header-page=About help to save
@@ -165,3 +165,6 @@ hts.iv.to_help_protect_data_you_can_access_HTS_once_confirmed_identity=To help p
 hts.iv.two_factor_authentication_title=Help to Save two factor authentication
 hts.iv.we_ve_confirmed_your_identity=We''ve now confirmed your identity
 hts.iv.you_now_access_hts_account=You can now access your help to save account.
+
+hts.access.denied.header=Access Denied
+hts.access.denied.message=You are not allowed to access this service

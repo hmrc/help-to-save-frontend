@@ -32,7 +32,7 @@ trait MicroService {
     .settings(defaultSettings(): _*)
     .settings(
       libraryDependencies ++= appDependencies,
-      //retrieveManaged := true,
+      retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
       routesGenerator := StaticRoutesGenerator
     )

@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+@()(implicit request: Request[_], messages: Messages)
 
-/**
-  * Created by jackie on 08/05/17.
-  */
-class ProtectedController {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.access.denied.header")) {
+
+    <div class="grid-layout grid-layout--stacked">
+        <div class="grid-layout__column grid-layout__column--2-3">
+            <header class="page-header text">
+                <h2>Messages("hts.access.denied.message")</h2>
+            </header>
+        </div>
+    </div>
 
 }

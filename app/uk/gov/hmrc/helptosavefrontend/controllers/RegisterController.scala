@@ -18,40 +18,26 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
 
-import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.Inject
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.Retrievals.userDetailsUri
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthProviders, AuthorisedFunctions, Enrolment}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector}
+import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 @Singleton
-class RegisterController @Inject()(val messagesApi: MessagesApi,
-                                   eligibilityConnector: EligibilityConnector,
-                                   citizenDetailsConnector: CitizenDetailsConnector)
-  extends FrontendController with I18nSupport with AuthorisedFunctions {
+class RegisterController @Inject()(val messagesApi: MessagesApi, htsService: HelpToSaveService)
+  extends HelpToSaveController with I18nSupport {
 
-  override def authConnector: AuthConnector = FrontendAuthConnector
-
-  val userInfoService = new UserInfoService(citizenDetailsConnector)
-
-  def declaration = Action.async { implicit request ⇒
-
-    authorised(Enrolment("IR-SA") and AuthProviders(GovernmentGateway)).retrieve(userDetailsUri) { uri =>
-      validateUser(uri).fold(
+  def declaration: Action[AnyContent] = Action.async { implicit request ⇒
+    authorisedForHts { (uri, nino) =>
+      validateUser(uri, nino).fold(
         error ⇒ {
           Logger.error(s"Could not perform eligibility check: $error")
           InternalServerError("")
@@ -63,8 +49,10 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  def getCreateAccountHelpToSave = Action.async { implicit request ⇒
-    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
+  def getCreateAccountHelpToSave: Action[AnyContent] = Action.async { implicit request ⇒
+    authorisedForHts {
+      Future.successful(Ok(views.html.register.create_account_help_to_save()))
+    }
   }
 
   /**
@@ -77,18 +65,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     * been performed and the eligibility check is positive. This returns [[None]]
     * if all the above has successfully been performed and the eligibility check is negative.
     */
-  private def validateUser(userDetailsUri: Option[String])(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
-    nino ← EitherT.fromOption[Future](retrieveNino(), "Unable to retrieve NINO")
-    userInfo ← userInfoService.getUserInfo(userDetailsUri, nino)
-    eligible ← eligibilityConnector.checkEligibility(nino)
+  private def validateUser(userDetailsUri: String, nino: String)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
+    userInfo ← htsService.getUserInfo(userDetailsUri, nino)
+    eligible ← htsService.checkEligibility(nino)
   } yield eligible.fold(None, Some(userInfo))
 
-
-  private def retrieveNino(): Option[String] = {
-    Some("WM123456C")
-  }
-
-  def failedTwoFactor = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.twofactor.you_need_two_factor("twoFactorURI")))
-  }
 }

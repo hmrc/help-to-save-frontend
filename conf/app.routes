@@ -4,6 +4,7 @@ GET        /apply                                 @uk.gov.hmrc.helptosavefronten
 GET        /about                                 @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave
 GET        /eligibility                           @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getEligibilityHelpToSave
 
-GET        /register/create-a-account             @uk.gov.hmrc.helptosavefrontend.controllers.Register.getCreateAccountHelpToSave
-GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.Register.declaration
+GET        /register/create-a-account             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSave
+GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.declaration
+GET        /register/identity-check-complete      @uk.gov.hmrc.helptosavefrontend.controllers.IvController.showUpliftJourneyOutcome
 
