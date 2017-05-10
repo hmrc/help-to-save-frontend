@@ -27,6 +27,7 @@
         <div class="grid-layout__column grid-layout__column--2-4">
             <p>@Messages("hts.register.declaration.name") @(userDetails.name)</p>
             <p>@Messages("hts.register.declaration.national-insurance-number") @(userDetails.NINO)</p>
+            <p>@Messages("hts.register.declaration.date-of-birth") @(userDetails.dateOfBirth.show)</p>
         </div>
     </div>
     <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
