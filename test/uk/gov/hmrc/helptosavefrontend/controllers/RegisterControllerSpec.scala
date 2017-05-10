@@ -24,6 +24,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
@@ -56,11 +57,20 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       .expects(nino, *)
       .returning(EitherT.pure[Future, String, EligibilityResult](EligibilityResult(result)))
 
+  val mockAuthConnector = mock[PlayAuthConnector]
+
+  def mockAuthConnectorResult() = {
+    Enrolment("HMRC-NI").withConfidenceLevel(ConfidenceLevel.L200)
+    (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
+      .expects(*, *, *).returning(Future.successful())
+  }
+
   "GET /" should {
 
-    "return 200 if the eligibility check is successful" in {
+    "return user details if the user is eligible for help-to-save" in {
       val user = randomUserDetails()
       inSequence {
+        mockAuthConnectorResult()
         mockUserInfo(userDetailsUri, fakeNino)(randomUserDetails())
         mockEligibilityResult(fakeNino)(result = true)
       }
@@ -80,6 +90,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
       inSequence {
+        mockAuthConnectorResult
         mockUserInfo(userDetailsUri, fakeNino)(randomUserDetails())
         mockEligibilityResult(fakeNino)(result = false)
       }

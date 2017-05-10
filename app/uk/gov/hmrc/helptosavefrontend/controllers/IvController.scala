@@ -36,7 +36,7 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector, i
   extends HelpToSaveController with I18nSupport {
 
   def showUpliftJourneyOutcome: Action[AnyContent] = Action.async { implicit request ⇒
-    authorisedForHts { () ⇒
+    authorisedForHts {
       //Will be populated if we arrived here because of an IV success/failure
       val journeyId = request.getQueryString("token").orElse(request.getQueryString("journeyId"))
       val allowContinue = true

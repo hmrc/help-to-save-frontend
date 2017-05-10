@@ -50,7 +50,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi, htsService: Hel
   }
 
   def getCreateAccountHelpToSave: Action[AnyContent] = Action.async { implicit request ⇒
-    authorisedForHts { () ⇒ Future.successful(Ok(views.html.register.create_account_help_to_save()))
+    authorisedForHts {
+      Future.successful(Ok(views.html.register.create_account_help_to_save()))
     }
   }
 

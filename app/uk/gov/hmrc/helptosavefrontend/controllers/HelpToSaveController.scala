@@ -40,8 +40,9 @@ class HelpToSaveController extends FrontendController with AuthorisedFunctions w
   def authorisedForHts(body: (String, String) => Future[Result])(implicit request: Request[AnyContent]): Future[Result] = {
 
     def authorisedWithNino = authorised(Enrolment("HMRC-NI").withConfidenceLevel(ConfidenceLevel.L200))
+    val compositeRetrieval = userDetailsUri and allEnrolments
 
-    authorisedWithNino.retrieve(userDetailsUri and allEnrolments) {
+    authorisedWithNino.retrieve(compositeRetrieval) {
       case userUri ~ allEnrols =>
 
         val nino =
@@ -58,9 +59,9 @@ class HelpToSaveController extends FrontendController with AuthorisedFunctions w
     }
   }
 
-  def authorisedForHts(callback: () ⇒ Future[Result])(implicit request: Request[AnyContent]): Future[Result] = {
+  def authorisedForHts(body: => Future[Result])(implicit request: Request[AnyContent]): Future[Result] = {
     authorised(AuthProviders(GovernmentGateway)) {
-      callback()
+      body
     } recoverWith {
       handleFailure
     }

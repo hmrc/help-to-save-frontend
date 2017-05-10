@@ -23,18 +23,22 @@ import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.prop.Tables.Table
 import play.api.http.Status._
 import play.api.i18n.MessagesApi
+import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val ivConnector: IvConnector = mock[IvConnector]
 
-  val jId = randomUUID().toString
+  private val jId = randomUUID().toString
 
   val journeyId = JourneyId(jId)
 
@@ -48,9 +52,20 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
 
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
-  lazy val ivController = new IvController(mockSessionCacheConnector, ivConnector, fakeApplication.injector.instanceOf[MessagesApi])
+  private val mockAuthConnector = mock[PlayAuthConnector]
 
-  private def doRequest(jId: String) = ivController.showUpliftJourneyOutcome
+  private def mockAuthConnectorResult() = {
+    (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
+      .expects(AuthProviders(GovernmentGateway), EmptyRetrieval, *).returning(Future.successful(()))
+  }
+
+  lazy val ivController = new IvController(mockSessionCacheConnector, ivConnector, fakeApplication.injector.instanceOf[MessagesApi]) {
+    override def authConnector: AuthConnector = mockAuthConnector
+  }
+
+  private def fakeRequest(jId: String) = FakeRequest("GET", s"/register/identity-check-complete?journeyId=$jId")
+
+  private def doRequest(jId: String) = ivController.showUpliftJourneyOutcome()(fakeRequest(jId))
 
   "GET /identity-check-complete" should {
 
@@ -72,10 +87,14 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
         )
 
       forAll(validCases) { (ivServiceResponse: String, htsStatus: Int) ⇒
-
+        mockAuthConnectorResult()
         mockIvConnector(journeyId, ivServiceResponse)
 
-        val response = doRequest(jId)
+        val responseFuture = doRequest(jId)
+
+        val result = Await.result(responseFuture, 3.seconds)
+
+        status(result) should be(htsStatus)
       }
     }
   }
