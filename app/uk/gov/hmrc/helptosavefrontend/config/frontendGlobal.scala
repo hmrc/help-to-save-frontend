@@ -19,65 +19,31 @@ package uk.gov.hmrc.helptosavefrontend.config
 import java.util.UUID
 
 import akka.util.ByteString
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.Singleton
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
-import play.api.mvc._
-import play.api.mvc.Request
-import play.api.{Application, Configuration, Environment, Play}
-import play.twirl.api.Html
-import uk.gov.hmrc.crypto.ApplicationCrypto
-import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
-import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
-import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
-import uk.gov.hmrc.play.http.logging.filters.FrontendLoggingFilter
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
 import play.api.libs.streams.Accumulator
-import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
-import uk.gov.hmrc.auth.frontend.Redirects
-import uk.gov.hmrc.helptosavefrontend.controllers.routes
-import com.typesafe.config.Config
-import net.ceedubs.ficus.Ficus._
-import play.api.Play.current
-import play.api.i18n.Messages.Implicits._
-import play.api.mvc.Results._
-import play.api.mvc.{Request, RequestHeader}
-import play.api.{Application, Configuration, Environment, Play}
+import play.api.mvc.{Request, RequestHeader, _}
+import play.api.{Application, Configuration, Play}
 import play.twirl.api.Html
-import uk.gov.hmrc.auth.core.{InsufficientEnrolments, NoActiveSession}
-import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.crypto.ApplicationCrypto
+import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
 import uk.gov.hmrc.play.http.logging.filters.FrontendLoggingFilter
+
 import scala.concurrent.ExecutionContext
 
-object FrontendGlobal
-  extends DefaultFrontendGlobal with Redirects {
+object FrontendGlobal extends DefaultFrontendGlobal {
 
   override val auditConnector = FrontendAuditConnector
   override val loggingFilter = LoggingFilter
   override val frontendAuditFilter = AuditFilter
-  lazy val sessionFilter =
-    new SessionFilter(Results.Redirect(routes.StartPagesController.getAboutHelpToSave()))
-
-  lazy val config = Play.current.configuration
-  lazy val env = Environment(Play.current.path, Play.current.classloader, Play.current.mode)
-
-  override def resolveError(rh: RequestHeader, ex: Throwable) = ex match {
-    case _: NoActiveSession => {
-      val originatingUrl = "http://" + rh.host + rh.uri
-      toGGLogin(originatingUrl)
-    }
-    case _: InsufficientEnrolments => {
-      println("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% INSUFFICIENT ENROLMENTS")
-      Redirect(uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.insufficientEnrolments().absoluteURL()(rh))
-    }
-  }
+  lazy val sessionFilter = new SessionFilter(Results.Redirect(routes.StartPagesController.getAboutHelpToSave()))
 
   override def onStart(app: Application) {
     super.onStart(app)
@@ -125,7 +91,7 @@ class SessionFilter[A](whenNoSession: => Result)(implicit app: Application) exte
 
   override def apply(next: EssentialAction): EssentialAction = new EssentialAction {
     override def apply(requestHeader: RequestHeader): Accumulator[ByteString, Result] = {
-      next(requestHeader).map{ response =>
+      next(requestHeader).map { response =>
         requestHeader.cookies.find(_.name == sessionIdKey).fold(
           whenNoSession.withCookies(createHtsCookie())
         ) { _ => response }

@@ -16,16 +16,30 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import java.time.LocalDate
+
 import com.google.inject.{ImplementedBy, Singleton}
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService.UserDetailsResponse
+import play.api.libs.json.{Json, Reads}
+import uk.gov.hmrc.helptosavefrontend.connectors.UserDetailsConnector.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @ImplementedBy(classOf[UserDetailsConnectorImpl])
 trait UserDetailsConnector {
   def getUserDetails(userDetailsUri: String)(implicit hc: HeaderCarrier): Result[UserDetailsResponse]
+}
+
+object UserDetailsConnector {
+
+  case class UserDetailsResponse(name: String,
+                                 lastName: Option[String],
+                                 email: Option[String],
+                                 dateOfBirth: Option[LocalDate])
+
+  implicit val userDetailsResponseReads: Reads[UserDetailsResponse] = Json.reads[UserDetailsResponse]
 }
 
 @Singleton

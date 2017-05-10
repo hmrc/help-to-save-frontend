@@ -17,38 +17,50 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.mvc.{AnyContent, Request, Result}
-import play.api.{Configuration, Environment, Play}
-import uk.gov.hmrc.auth.core.AuthProvider.{GovernmentGateway, Verify}
+import play.api.{Configuration, Environment, Logger, Play}
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.Retrievals.{allEnrolments, userDetailsUri}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.frontend.Redirects
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.HtsDeclarationUrl
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-class HelpToSaveBaseController extends FrontendController with AuthorisedFunctions with Redirects {
+class HelpToSaveController extends FrontendController with AuthorisedFunctions with Redirects {
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
   val config: Configuration = Play.current.configuration
   val env: Environment = Environment(Play.current.path, Play.current.classloader, Play.current.mode)
 
-  def authorisedForHts(callback: (String, String) => Future[Result])(implicit request: Request[AnyContent]): Future[Result] = {
-    authorised(AuthProviders(GovernmentGateway, Verify)).retrieve(allEnrolments and userDetailsUri) {
-      case allEnrols ~ userUri =>
+  case class HelpToSaveException(message: String) extends RuntimeException(message)
 
-        val uDetailsUri = userUri.getOrElse(throw new RuntimeException("No user details uri found for logged in user"))
+  def authorisedForHts(body: (String, String) => Future[Result])(implicit request: Request[AnyContent]): Future[Result] = {
 
-        val nino = {
+    def authorisedWithNino = authorised(Enrolment("HMRC-NI").withConfidenceLevel(ConfidenceLevel.L200))
+
+    authorisedWithNino.retrieve(userDetailsUri and allEnrolments) {
+      case userUri ~ allEnrols =>
+
+        val nino =
           allEnrols.enrolments.find(enrol ⇒ enrol.key == "HMRC-NI")
-            .getOrElse(throw new RuntimeException("No HMRC-NI enrolment for logged in user"))
+            .getOrElse(throw HelpToSaveException("No HMRC-NI enrolment found for logged in user"))
             .getIdentifier("NINO")
-            .getOrElse(throw new RuntimeException("No NINO found for logged in user"))
+            .getOrElse(throw HelpToSaveException("No NINO found for logged in user"))
             .value
-        }
 
-        callback(uDetailsUri, nino)
+        body(userUri.get, nino)
+
+    } recoverWith {
+      handleFailure
+    }
+  }
+
+  def authorisedForHts(callback: () ⇒ Future[Result])(implicit request: Request[AnyContent]): Future[Result] = {
+    authorised(AuthProviders(GovernmentGateway)) {
+      callback()
     } recoverWith {
       handleFailure
     }
@@ -56,10 +68,12 @@ class HelpToSaveBaseController extends FrontendController with AuthorisedFunctio
 
   def handleFailure(implicit request: Request[_]): PartialFunction[Throwable, Future[Result]] =
     PartialFunction[Throwable, Future[Result]] {
-      case _: NoActiveSession => Future.successful(toGGLogin("/help-to-save/register/declaration"))
-      case _: InsufficientConfidenceLevel => Future.successful(toPersonalIV("/help-to-save/register/declaration", ConfidenceLevel.L200))
+      case _: NoActiveSession => Future.successful(toGGLogin(HtsDeclarationUrl))
+      case _: InsufficientConfidenceLevel => Future.successful(toPersonalIV(HtsDeclarationUrl, ConfidenceLevel.L200))
       //    case _: AuthorisationException => //Implement
-      case _ => Future.successful(InternalServerError("blah blah"))
+      case ex =>
+        Logger.error(s"Could not perform authentication: $ex")
+        Future.successful(InternalServerError(""))
     }
-
 }
+

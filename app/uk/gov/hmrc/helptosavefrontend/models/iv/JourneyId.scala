@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+package uk.gov.hmrc.helptosavefrontend.models.iv
 
-/**
-  * Created by jackie on 08/05/17.
-  */
-class ProtectedController {
-
-}
+//Holder of Identity Verification response token param
+case class JourneyId(Id: String) extends AnyVal

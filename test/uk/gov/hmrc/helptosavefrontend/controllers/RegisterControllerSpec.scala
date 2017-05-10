@@ -24,61 +24,45 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
-import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, UserDetailsConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
+class RegisterControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
   val fakeNino = "WM123456C"
 
-  val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
+  val userDetailsUri = "/user/details/uri"
 
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val mockHtsService = mock[HelpToSaveService]
 
-  val mockUserInfoService: UserInfoService = mock[UserInfoService]
-
-  val mockUserDetailsConnector: UserDetailsConnector = mock[UserDetailsConnector]
-
-  val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
-
-  val register = new RegisterController(
-    fakeApplication.injector.instanceOf[MessagesApi],
-    mockEligibilityConnector,
-    mockCitizenDetailsConnector,
-    mockUserDetailsConnector) {
-    override val userInfoService = mockUserInfoService
-
-    override def authConnector = mockAuthConnector
-  }
+  lazy val register = new RegisterController(fakeApplication.injector.instanceOf[MessagesApi], mockHtsService)
 
   def doRequest(): Future[PlayResult] = register.declaration(FakeRequest())
 
+  def mockUserInfo(uDetailsUri: String, nino: NINO)(userInfo: UserInfo): Unit =
+    (mockHtsService.getUserInfo(_: String, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(uDetailsUri, nino, *, *)
+      .returning(EitherT.pure[Future, String, UserInfo](userInfo))
+
   def mockEligibilityResult(nino: String)(result: Boolean): Unit =
-    (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
+    (mockHtsService.checkEligibility(_: String)(_: HeaderCarrier))
       .expects(nino, *)
       .returning(EitherT.pure[Future, String, EligibilityResult](EligibilityResult(result)))
-
-  def mockUserInfo(nino: NINO)(userInfo: UserInfo): Unit =
-    (mockUserInfoService.getUserInfo(_: String, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
-      .expects("/user/details/uri", nino, *, *)
-      .returning(EitherT.pure[Future, String, UserInfo](userInfo))
 
   "GET /" should {
 
     "return 200 if the eligibility check is successful" in {
       val user = randomUserDetails()
       inSequence {
-        mockUserInfo(fakeNino)(user)
-        mockEligibilityResult(fakeNino)(true)
+        mockUserInfo(userDetailsUri, fakeNino)(randomUserDetails())
+        mockEligibilityResult(fakeNino)(result = true)
       }
 
       val result: Future[PlayResult] = doRequest()
@@ -96,8 +80,8 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
       inSequence {
-        mockUserInfo(fakeNino)(randomUserDetails())
-        mockEligibilityResult(fakeNino)(false)
+        mockUserInfo(userDetailsUri, fakeNino)(randomUserDetails())
+        mockEligibilityResult(fakeNino)(result = false)
       }
 
       val result = doRequest()
