@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,13 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.helptosavefrontend.models
+@(stubMessage: String)(implicit request: Request[_],messages: Messages)
 
-import play.api.libs.json.{Format, Json}
-
-case class HTSSession(nSIUserInfo: Option[UserInfo] = None)
-object HTSSession{
-  implicit val htsSessionFormat: Format[HTSSession] = Json.format[HTSSession]
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+    title = "My Stub page",
+    bodyClasses = None){
+    <div class="grid-layout grid-layout--stacked">
+        <p>@stubMessage</p>
+    </div>
 }
