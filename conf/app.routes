@@ -11,5 +11,3 @@ GET        /register/declaration                  @uk.gov.hmrc.helptosavefronten
 GET        /register/two-factor-failed            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.failedTwoFactor
 GET        /register/identity-check-complete      @uk.gov.hmrc.helptosavefrontend.controllers.IvController.showUpliftJourneyOutcome
 
-
-GET        /register/identity-check-complete      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getStubPage
