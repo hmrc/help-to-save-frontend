@@ -23,7 +23,7 @@ import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.domain.{Generator, Nino}
-import uk.gov.hmrc.helptosavefrontend.connectors.SubmissionSuccess
+import uk.gov.hmrc.helptosavefrontend.connectors.{SubmissionError, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfoSpec._
 class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -380,6 +380,7 @@ object NSIUserInfoSpec{
 
   val userInfo = UserInfo(forename, surname, nino, dateOfBirth, email, address)
   val  nSAndIResponseSuccess = SubmissionSuccess
+  def  nSAndIResponseFailure(code:Int,errorMessages:String) = SubmissionError(code,errorMessages)
   val nsiUserInfo = NSIUserInfo(
     forename, surname, dateOfBirth, addressLine1, addressLine2, Some(addressLine3),
     None, None, postcode, Some(country), nino, "02", None, email, "online")
