@@ -25,8 +25,9 @@ import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
 import uk.gov.hmrc.helptosavefrontend.auth.HtsCompositePageVisibilityPredicate.twoFactorURI
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, SessionCacheConnector}
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.connectors._
+import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
@@ -37,10 +38,11 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class RegisterController @Inject()( val sessionCacheConnector: SessionCacheConnector,
-                                    val messagesApi: MessagesApi,
+class RegisterController @Inject()(val sessionCacheConnector: SessionCacheConnector,
+                                   val messagesApi: MessagesApi,
                                    eligibilityConnector: EligibilityConnector,
-                                   citizenDetailsConnector: CitizenDetailsConnector) extends HelpToSaveController with I18nSupport {
+                                   citizenDetailsConnector: CitizenDetailsConnector,
+                                   nSAndIConnector: NSAndIConnector) extends HelpToSaveController with I18nSupport {
 
   val userInfoService = new UserInfoService(authConnector, citizenDetailsConnector)
 
@@ -54,18 +56,47 @@ class RegisterController @Inject()( val sessionCacheConnector: SessionCacheConne
           }, _.fold(
             Ok(views.html.core.not_eligible()))(
             userDetails ⇒ {
-              sessionCacheConnector.put(HTSSession(Option(userDetails)))
+              sessionCacheConnector.put(HTSSession(Some(userDetails)))
               Ok(views.html.register.declaration(userDetails))
             }
           )
         )
     }
 
+  def getStubPage = Action.async { implicit request ⇒
+    Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
+  }
 
   def getCreateAccountHelpToSave = AuthorisedHtsUserAction { implicit authContext =>
     implicit request ⇒
-        Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
+      Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
   }
+
+
+  def postCreateAccountHelpToSave = AuthorisedHtsUserAction { implicit authContext =>
+    implicit request ⇒
+      sessionCacheConnector.get.flatMap({
+        case Some(session) ⇒
+          session.nSIUserInfo match {
+            case Some(userInfo) ⇒
+              NSIUserInfo(userInfo).fold(
+                errors ⇒
+                  Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(errors.toList.mkString(",")))),
+                success ⇒
+                  nSAndIConnector.createAccount(success).flatMap(_.fold
+                  (errors ⇒ Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(errors.message))),
+                    success ⇒ Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("This is a stub for nsi")))
+                  ))
+              )
+            case None ⇒
+              Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("No user Info :(")))
+          }
+        case None ⇒
+          Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("No session :(")))
+      }
+      )
+  }
+
 
   /**
     * Does the following:

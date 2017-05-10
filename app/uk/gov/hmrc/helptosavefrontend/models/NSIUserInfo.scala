@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.syntax.cartesian._
-import play.api.libs.json.{JsString, JsValue, Json, Writes}
+import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 
 import scala.annotation.tailrec
@@ -72,8 +72,7 @@ object NSIUserInfo {
     override def writes(o: LocalDate): JsValue = JsString(o.format(DateTimeFormatter.ofPattern("YYYYMMdd")))
   }
 
-  implicit val nsiUserInfoWrites: Writes[NSIUserInfo] = Json.writes[NSIUserInfo]
-
+  implicit val nsiUserInfoFormat: Format[NSIUserInfo] = Json.format[NSIUserInfo]
   private case class ValidatedAddressLines(line1: String,
                                            line2: String,
                                            line3: Option[String],
@@ -144,7 +143,7 @@ object NSIUserInfo {
 
       val regexCheck = regexValidation(p)(postcodeRegex, "Invalid postcode format")
 
-      (lengthCheck |@| regexCheck).tupled.map(_ ⇒ p)
+      lengthCheck.map(_ ⇒ p)
   }
 
   private def countryCodeValidation(countryCode: Option[String]): ValidatedNel[String, Option[String]] =
