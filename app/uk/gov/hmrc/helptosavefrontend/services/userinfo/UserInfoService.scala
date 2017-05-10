@@ -76,12 +76,12 @@ class UserInfoService(authConnector: ⇒ AuthConnector,
     val emailValidation =
       u.email.toValidNel("Could not find email address")
 
-    val addressValidation = c.address.map(_.toList()).filter(_.nonEmpty)
-      .toValidNel("Could not find address")
+    val addressValidation =
+      c.address.toValidNel("Could not find address")
 
     (surnameValidation |@| dateOfBirthValidation |@| emailValidation |@| addressValidation)
       .map((surname, dateOfBirth, email, address) ⇒
-        UserInfo(u.name + " " + surname, nino, dateOfBirth, email, address)
+        UserInfo(u.name, surname, nino, dateOfBirth, email, address)
       )
   }
 

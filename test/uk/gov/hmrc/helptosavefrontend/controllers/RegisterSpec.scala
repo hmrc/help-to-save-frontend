@@ -24,13 +24,13 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{JsValue, Writes}
-import play.api.mvc.{Result => PlayResult}
+import play.api.libs.json.{JsValue, Reads, Writes}
+import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
 import play.api.test.Helpers.{contentType, _}
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
@@ -42,6 +42,7 @@ import uk.gov.hmrc.play.frontend.auth.connectors.domain._
 import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils.now
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfoSpec._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -64,6 +65,8 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     ids = Some("/auth/oid/mockuser/ids"),
     legacyOid = "mockuser")
 
+  val mockHtsSession:HTSSession = HTSSession(Option(userInfo))
+
   val authContext = AuthContext(authority)
 
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
@@ -71,7 +74,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   val mockUserInfoService: UserInfoService = mock[UserInfoService]
-
+  val mockNsAndIConnector : NSAndIConnector = mock[NSAndIConnector]
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
@@ -79,7 +82,8 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     mockSessionCacheConnector,
     fakeApplication.injector.instanceOf[MessagesApi],
     mockEligibilityConnector,
-    mockCitizenDetailsConnector) {
+    mockCitizenDetailsConnector,
+    mockNsAndIConnector) {
     override lazy val authConnector = mockAuthConnector
     override val userInfoService = mockUserInfoService
 
@@ -100,6 +104,11 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       .expects(*,*,*)
       .returning(Future.successful(cacheMap))
 
+  def mockSessionCacheConnectorGet:Unit =
+    (mockSessionCacheConnector.get(_: HeaderCarrier,_:Reads[HTSSession]))
+      .expects(*,*)
+      .returning(Future.successful(Option(mockHtsSession)))
+
   def mockEligibilityResult(nino: String)(result: Boolean): Unit =
     (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
       .expects(nino, *)
@@ -114,6 +123,11 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     (mockUserInfoService.getUserInfo(_: AuthContext, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
       .expects(authContext, nino, *, *)
       .returning(EitherT.pure[Future, String, UserInfo](userInfo))
+  type NSAndIResponse = Either[SubmissionError, SubmissionSuccess]
+  def mockCreateAccount(nsAndIResponse:NSAndIResponse): Unit =
+    (mockNsAndIConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier))
+        .expects(nsiUserInfo, *)
+      .returning(Future.successful(nsAndIResponse))
 
   "GET /" should {
 
@@ -134,9 +148,11 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
       val html = contentAsString(result)
 
-      html should include(user.name)
+      html should include(user.forename)
+      html should include(user.surname)
       html should include(user.email)
       html should include(user.NINO)
+      html should include(user.address.line1.getOrElse(sys.error("Could not get first line of address")))
     }
 
     "display a 'Not Eligible' page if the eligibility check is negative" in {
@@ -163,6 +179,30 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+    }
+    "the postCreateAccountHelpToSave return the nsi stub in" in {
+      mockAuthConnector(authority)
+      mockSessionCacheConnectorGet
+      mockCreateAccount(Right(nSAndIResponseSuccess()))
+      val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val html = contentAsString(result)
+
+      html should include("This is a stub for nsi")
+    }
+    "the postCreateAccountHelpToSave return the errors if ns and I fail in" in {
+      mockAuthConnector(authority)
+      mockSessionCacheConnectorGet
+      mockCreateAccount(Left(nSAndIResponseFailure(401,"Fail")))
+      val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+
+      val html = contentAsString(result)
+
+      html should include("Fail")
     }
   }
 }
