@@ -66,7 +66,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     ids = Some("/auth/oid/mockuser/ids"),
     legacyOid = "mockuser")
 
-  val mockHtsSession: HTSSession = HTSSession(Option(validUserInfo))
+  val mockHtsSession: HTSSession = HTSSession(Some(validUserInfo))
 
   val authContext = AuthContext(authority)
 
@@ -130,7 +130,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       .expects(validNSIUserInfo, *, *)
       .returning(Future.successful(nsiResponse))
 
-  "GET /" should {
+  "GET /register/declaration " should {
 
     "return 200 if the eligibility check is successful" in {
       val user = randomUserDetails()
@@ -170,20 +170,22 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       html should include("not eligible")
       html should include("To be eligible for an account")
     }
-    "the getCreateAccountHelpToSave return 200" in {
-      mockAuthConnector(authority)
-      val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
-      status(result) shouldBe Status.OK
-    }
-
-    "the getCreateAccountHelpToSave return HTML" in {
-      mockAuthConnector(authority)
-      val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-    }
   }
-    "POST /" should {
+    "GET  /register/create-a-account" should {
+      "the getCreateAccountHelpToSave return 200" in {
+        mockAuthConnector(authority)
+        val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
+        status(result) shouldBe Status.OK
+      }
+
+      "the getCreateAccountHelpToSave return HTML" in {
+        mockAuthConnector(authority)
+        val result = register.getCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+      }
+    }
+    "POST /register/create-a-account  " should {
       "the postCreateAccountHelpToSave return the nsi stub in" in {
         mockAuthConnector(authority)
         mockSessionCacheConnectorGet(Some(mockHtsSession))

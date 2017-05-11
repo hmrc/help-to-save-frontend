@@ -35,7 +35,7 @@ class NSAndIConnectorImplSpec  extends UnitSpec with WithFakeApplication with Mo
 
   val mockHTTPPost = mock[WSPost]
 
-  lazy val testNSAndIConnectorImpl = new NSAndIConnectorImpl{
+  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl{
     override val http = mockHTTPPost
   }
    implicit  val hc = HeaderCarrier()

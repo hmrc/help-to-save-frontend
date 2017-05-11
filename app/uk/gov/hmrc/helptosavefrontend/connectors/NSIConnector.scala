@@ -35,7 +35,7 @@ import uk.gov.hmrc.play.http.ws.WSPost
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[NSAndIConnectorImpl])
+@ImplementedBy(classOf[NSIConnectorImpl])
 trait NSIConnector {
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier,ex :ExecutionContext): Future[SubmissionResult]
 }
@@ -51,7 +51,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSAndIConnectorImpl extends NSIConnector with ServicesConfig {
+class NSIConnectorImpl extends NSIConnector with ServicesConfig {
 
   val nsiUrl: String = baseUrl("nsi")
   val nsiUrlEnd: String = getString("microservice.services.nsi.url")
