@@ -38,13 +38,14 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class HelpToSaveControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
-
+  val mockAuthConnector = mock[AuthConnector]
   lazy val htsController = new HelpToSaveController {
-    override def authConnector: AuthConnector = mockPlayAuth
+    override def authConnector: AuthConnector = mockAuthConnector
   }
 
+  import play.api.mvc.Results.Ok
   def doSomething(uri: String, nino: String): Future[PlayResult] = {
-          Future.successful(Ok)
+          Future.successful(Ok())
   }
 
   def doRequest(caseUri: String, nino: String): Future[PlayResult] = htsController.authorisedForHts(doSomething(caseUri, nino))(FakeRequest())
