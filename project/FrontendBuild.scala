@@ -31,7 +31,14 @@ object FrontendBuild extends Build with MicroService {
     "org.pegdown" % "pegdown" % "1.6.0" % scope,
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-    "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope,
+    // below for selenium tests
+    "com.codeborne" % "phantomjsdriver" % "1.2.1" % scope,
+    "info.cukes" % "cucumber-junit" % "1.2.4" % scope,
+    "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
+    "info.cukes" %% "cucumber-scala" % "1.2.2" % scope,
+    "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % scope,
+    "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1" % scope
   )
 
 }
