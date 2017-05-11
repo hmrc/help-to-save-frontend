@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import play.api.i18n.MessagesApi
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.{Configuration, Environment, Logger, Play}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
@@ -25,6 +26,11 @@ import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.HtsDeclarationUrl
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{HtsDeclarationUrl, IdentityCallbackUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.play.frontend.controller.FrontendController
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
 
 import scala.concurrent.Future
 
@@ -67,11 +73,11 @@ class HelpToSaveController extends FrontendController with AuthorisedFunctions w
     }
   }
 
-  def handleFailure(implicit request: Request[_]): PartialFunction[Throwable, Future[Result]] =
+  def handleFailure(implicit request: Request[_], messagesApi: MessagesApi): PartialFunction[Throwable, Future[Result]] =
     PartialFunction[Throwable, Future[Result]] {
       case _: NoActiveSession => Future.successful(toGGLogin(HtsDeclarationUrl))
-      case _: InsufficientConfidenceLevel => Future.successful(toPersonalIV(HtsDeclarationUrl, ConfidenceLevel.L200))
-      //    case _: AuthorisationException => //Implement
+      case _: InsufficientConfidenceLevel => Future.successful(toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200))
+      case _: AuthorisationException => Future.successful(Forbidden(uk.gov.hmrc.helptosavefrontend.views.html.access_denied()))
       case ex =>
         Logger.error(s"Could not perform authentication: $ex")
         Future.successful(InternalServerError(""))
