@@ -16,7 +16,23 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import scala.concurrent.{ExecutionContext, Future}
+
+import org.scalamock.scalatest.MockFactory
+import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.prop.Tables.Table
+import play.api.http.Status
+import play.api.i18n.MessagesApi
+import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
+import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import play.api.mvc.{Result => PlayResult}
+
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 
 class HelpToSaveControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
@@ -27,19 +43,31 @@ class HelpToSaveControllerSpec extends UnitSpec with WithFakeApplication with Mo
     override def authConnector: AuthConnector = mockPlayAuth
   }
 
-  def doRequest(): Future[Result] = htsController.authorisedForHts(FakeRequest())
+  def doSomething(uri: String, nino: String): Future[PlayResult] = {
+          Future.successful(Ok)
+  }
+
+  def doRequest(caseUri: String, nino: String): Future[PlayResult] = htsController.authorisedForHts(doSomething(caseUri, nino))(FakeRequest())
+
 
   "authorisedForHts" should {
     "return a 200 result ???????????" in {
+      val caseUri = "/some-page"
+      val nino = "WM123456C"
+
+      val result = doRequest(caseUri, nino)
+      status(result) shouldBe Status.OK
 
     }
   }
 
-  "handleFailure" should {
-    "redirect the user to the GGLogin page when there is currently no active session so they are not logged in" in {
-      //do a request that returns a NoActiveSession
+//  "handleFailure" should {
+//    "redirect the user to the GGLogin page when there is currently no active session so they are not logged in" in {
+//      //do a request that returns a NoActiveSession
+//
+//    }
+//  }
 
-    }
-  }
+
 }
 
