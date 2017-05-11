@@ -14,53 +14,45 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.services.userinfo
+package uk.gov.hmrc.helptosavefrontend.services
 
-import java.time.LocalDate
+import javax.inject.Singleton
 
 import cats.data.{EitherT, ValidatedNel}
-import cats.syntax.cartesian._
-import cats.syntax.option._
 import cats.instances.future._
-import play.api.libs.json.{Json, Reads}
-import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector
+import cats.syntax.all._
+import com.google.inject.Inject
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.CitizenDetailsResponse
-import uk.gov.hmrc.helptosavefrontend.models.UserInfo
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService._
+import uk.gov.hmrc.helptosavefrontend.connectors.UserDetailsConnector.UserDetailsResponse
+import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, UserDetailsConnector}
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-
 
 /**
   * Queries the `user-details` and the `citizen-details` microservices to obtain
   * the required user information. `user-details` is used to obtain name, date of birth,
   * email and `citizen-details` is used to obtain the address.
   *
-  * The input to this service requires an [[AuthContext]] and a [[NINO]].
-  *
-  * @param authConnector The [[AuthConnector]] which will be used to obtain user details
-  *                      from the user-details service. It is evaluated lazily since it
-  *                      is declared lazy in [[AuthConnector]]
   */
-class UserInfoService(authConnector: ⇒ AuthConnector,
-                      citizenDetailsConnector: CitizenDetailsConnector) extends ServicesConfig{
+@Singleton
+class HelpToSaveService @Inject()(userDetailsConnector: UserDetailsConnector,
+                                  citizenDetailsConnector: CitizenDetailsConnector,
+                                  eligibilityConnector: EligibilityConnector) extends ServicesConfig {
 
-  def getUserInfo(authContext: AuthContext, nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserInfo] =
+  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
+    eligibilityConnector.checkEligibility(nino)
+
+  def getUserInfo(userDetailsUri: String, nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserInfo] =
     for {
-      userDetails    ← queryUserDetails(authContext)
+      userDetails ← userDetailsConnector.getUserDetails(userDetailsUri)
       citizenDetails ← citizenDetailsConnector.getDetails(nino)
-      userInfo       ← EitherT.fromEither[Future](toUserInfo(userDetails, citizenDetails, nino).toEither).leftMap(
+      userInfo ← EitherT.fromEither[Future](toUserInfo(userDetails, citizenDetails, nino).toEither).leftMap(
         errors ⇒ s"Could not create user info: ${errors.toList.mkString(",")}")
     } yield userInfo
-
-  private def queryUserDetails(authContext: AuthContext)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserDetailsResponse] =
-    EitherT.right[Future, String, UserDetailsResponse](
-      authConnector.getUserDetails[UserDetailsResponse](authContext))
 
   private def toUserInfo(u: UserDetailsResponse,
                          c: CitizenDetailsResponse,
@@ -87,15 +79,3 @@ class UserInfoService(authConnector: ⇒ AuthConnector,
 
 }
 
-object UserInfoService {
-
-  case class UserDetailsResponse(name: String,
-                                 lastName: Option[String],
-                                 email: Option[String],
-                                 dateOfBirth: Option[LocalDate])
-
-  implicit val userDetailsResponseReads: Reads[UserDetailsResponse] = Json.reads[UserDetailsResponse]
-
-
-
-}

@@ -16,24 +16,69 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.util.UUID
-
-import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.auth.{HtsCompositePageVisibilityPredicate, HtsRegime}
-import uk.gov.hmrc.play.frontend.auth._
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
+import play.api.i18n.MessagesApi
+import play.api.mvc.{AnyContent, Request, Result}
+import play.api.{Configuration, Environment, Logger, Play}
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core.Retrievals.{allEnrolments, userDetailsUri}
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.frontend.Redirects
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{HtsDeclarationUrl, IdentityCallbackUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.play.frontend.controller.FrontendController
+import play.api.Play.current
+import play.api.i18n.Messages.Implicits._
 
 import scala.concurrent.Future
 
-trait HelpToSaveController extends FrontendController with Actions with AuthActions
-
-trait AuthActions  { self: Actions =>
-  protected type AsyncPlayUserRequest = AuthContext => Request[AnyContent] => Future[Result]
+class HelpToSaveController extends FrontendController with AuthorisedFunctions with Redirects {
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
-  def AuthorisedHtsUserAction(body: AsyncPlayUserRequest): Action[AnyContent] =
-    AuthorisedFor(HtsRegime, HtsCompositePageVisibilityPredicate).async(body)
+  val config: Configuration = Play.current.configuration
+  val env: Environment = Environment(Play.current.path, Play.current.classloader, Play.current.mode)
+
+  case class HelpToSaveException(message: String) extends RuntimeException(message)
+
+  def authorisedForHts(body: (String, String) => Future[Result])(implicit request: Request[AnyContent]): Future[Result] = {
+
+    def authorisedWithNino = authorised(Enrolment("HMRC-NI").withConfidenceLevel(ConfidenceLevel.L200))
+
+    val compositeRetrieval = userDetailsUri and allEnrolments
+
+    authorisedWithNino.retrieve(compositeRetrieval) {
+      case userUri ~ allEnrols =>
+
+        val nino =
+          allEnrols.enrolments.find(enrol ⇒ enrol.key == "HMRC-NI")
+            .getOrElse(throw HelpToSaveException("No HMRC-NI enrolment found for logged in user"))
+            .getIdentifier("NINO")
+            .getOrElse(throw HelpToSaveException("No NINO found for logged in user"))
+            .value
+
+        body(userUri.get, nino)
+
+    } recoverWith {
+      handleFailure
+    }
+  }
+
+  def authorisedForHts(body: => Future[Result])(implicit request: Request[AnyContent]): Future[Result] = {
+    authorised(AuthProviders(GovernmentGateway)) {
+      body
+    } recoverWith {
+      handleFailure
+    }
+  }
+
+  def handleFailure(implicit request: Request[_], messagesApi: MessagesApi): PartialFunction[Throwable, Future[Result]] =
+    PartialFunction[Throwable, Future[Result]] {
+      case _: NoActiveSession => Future.successful(toGGLogin(HtsDeclarationUrl))
+      case _: InsufficientConfidenceLevel => Future.successful(toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200))
+      case _: AuthorisationException => Future.successful(Forbidden(uk.gov.hmrc.helptosavefrontend.views.html.access_denied()))
+      case ex =>
+        Logger.error(s"Could not perform authentication: $ex")
+        Future.successful(InternalServerError(""))
+    }
 }
+
