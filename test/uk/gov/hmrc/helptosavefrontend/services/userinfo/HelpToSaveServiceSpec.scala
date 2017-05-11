@@ -42,10 +42,6 @@ class HelpToSaveServiceSpec extends UnitSpec with WithFakeApplication with MockF
 
   implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
 
-  val cdResponse = CitizenDetailsResponse(Some(Person(Some("test"), Some("last"), Some(LocalDate.now()))),
-    Some(Address(Some("line1"), Some("line2"), Some("line3"), Some("line4"), Some("line5"), Some("POSTCODE"), Some("uk"))))
-
-
   /**
     * Contains fresh instances of mocks for each test
     */
@@ -61,7 +57,7 @@ class HelpToSaveServiceSpec extends UnitSpec with WithFakeApplication with MockF
     def mockCitizenDetailsConnector(nino: NINO, citizenDetailsResponse: CitizenDetailsResponse): Unit =
       (mockCitizenDetailsConnector.getDetails(_: NINO)(_: HeaderCarrier, _: ExecutionContext))
         .expects(nino, *, *)
-        .returning(EitherT.pure[Future, String, CitizenDetailsResponse](cdResponse))
+        .returning(EitherT.pure[Future, String, CitizenDetailsResponse](citizenDetailsResponse))
 
     def mockUserDetailsConnector(uDetailsUri: String, userDetailsResponse: UserDetailsResponse): Unit =
       (mockUserDetailsConnector.getUserDetails(_: String)(_: HeaderCarrier))
