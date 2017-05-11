@@ -61,7 +61,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
     "return user details if the user is eligible for help-to-save" in {
       val user = randomUserDetails()
       inSequence {
-        mockUserInfo(userDetailsUri, nino)(randomUserDetails())
+        mockUserInfo(userDetailsUri, nino)(user)
         mockEligibilityResult(nino)(result = true)
       }
 
