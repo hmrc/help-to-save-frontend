@@ -143,7 +143,7 @@ object NSIUserInfo {
 
       val regexCheck = regexValidation(p)(postcodeRegex, "Invalid postcode format")
 
-      lengthCheck.map(_ ⇒ p)
+      (lengthCheck |@| regexCheck).tupled.map(_ ⇒ p)
   }
 
   private def countryCodeValidation(countryCode: Option[String]): ValidatedNel[String, Option[String]] =

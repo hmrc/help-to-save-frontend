@@ -18,13 +18,15 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
 
-import cats.data.EitherT
+import cats.data.{EitherT, OptionT, ValidatedNel}
 import cats.instances.future._
+import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.Action
 import uk.gov.hmrc.helptosavefrontend.auth.HtsCompositePageVisibilityPredicate.twoFactorURI
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
@@ -35,14 +37,14 @@ import uk.gov.hmrc.play.frontend.auth.AuthContext
 import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegisterController @Inject()(val sessionCacheConnector: SessionCacheConnector,
                                    val messagesApi: MessagesApi,
                                    eligibilityConnector: EligibilityConnector,
                                    citizenDetailsConnector: CitizenDetailsConnector,
-                                   nSAndIConnector: NSAndIConnector) extends HelpToSaveController with I18nSupport {
+                                   nSAndIConnector: NSIConnector) extends HelpToSaveController with I18nSupport {
 
   val userInfoService = new UserInfoService(authConnector, citizenDetailsConnector)
 
@@ -69,30 +71,49 @@ class RegisterController @Inject()(val sessionCacheConnector: SessionCacheConnec
   }
 
 
+
   def postCreateAccountHelpToSave = AuthorisedHtsUserAction { implicit authContext =>
     implicit request ⇒
-      sessionCacheConnector.get.flatMap({
-        case Some(session) ⇒
-          session.nSIUserInfo match {
-            case Some(userInfo) ⇒
-              NSIUserInfo(userInfo).fold(
-                errors ⇒
-                  Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(errors.toList.mkString(",")))),
-                success ⇒
-                  nSAndIConnector.createAccount(success).flatMap(_.fold
-                  (errors ⇒ Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(errors.message))),
-                    success ⇒ Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("This is a stub for nsi")))
-                  ))
-              )
-            case None ⇒
-              Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("No user Info :(")))
-          }
-        case None ⇒
-          Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("No session :(")))
+
+      val submissionResult = for{
+        session  ← retrieveUserInfo()
+        userInfo ← validateUserInfo(session)
+        submissionResult        ← postToNSI(userInfo)
+      //todo update our backend with a boolean value letting hmrc know a hts account was created.
+      } yield submissionResult
+
+      submissionResult.value.map {
+          case Right(SubmissionSuccess) ⇒
+            Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("This is a stub for nsi"))
+          case Right(sf: SubmissionFailure) ⇒
+            Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(prettyPrintSubmissionFailure(sf)))
+          case Left(l) ⇒ Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(l))
       }
-      )
   }
 
+  private def prettyPrintSubmissionFailure(failure: SubmissionFailure): String =
+    s"Submission to NSI failed: ${failure.errorMessage}: ${failure.errorDetail} (id: ${failure.errorMessageId.getOrElse("-")})"
+
+  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future,String,HTSSession] =
+    EitherT[Future,String,HTSSession](
+      sessionCacheConnector.get.map(_.fold[Either[String,HTSSession]](Left("Ohno!!"))(Right.apply))
+    )
+
+
+  private def validateUserInfo(session: HTSSession)(implicit ex: ExecutionContext): EitherT[Future, String, NSIUserInfo] =  {
+    val userInfo: Option[ValidatedNel[String, NSIUserInfo]] =
+      session.userInfo.map(NSIUserInfo(_))
+
+    val nsiUserInfo: Either[String, NSIUserInfo] =
+      userInfo.fold[Either[String,NSIUserInfo]](
+        Left("No UserInfo In session :("))(
+        _.toEither.leftMap(e ⇒ s"Invalid user details: ${e.toList.mkString(", ")}")
+      )
+    EitherT.fromEither[Future](nsiUserInfo)
+  }
+
+  private def postToNSI(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier): EitherT[Future,String,SubmissionResult] =
+    EitherT[Future,String,SubmissionResult](nSAndIConnector.createAccount(userInfo).map(Right(_)))
 
   /**
     * Does the following:

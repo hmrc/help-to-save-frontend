@@ -30,6 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
 import play.api.test.Helpers.{contentType, _}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo.localDateShow
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -65,7 +66,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     ids = Some("/auth/oid/mockuser/ids"),
     legacyOid = "mockuser")
 
-  val mockHtsSession:HTSSession = HTSSession(Option(userInfo))
+  val mockHtsSession: HTSSession = HTSSession(Option(userInfo))
 
   val authContext = AuthContext(authority)
 
@@ -74,7 +75,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   val mockUserInfoService: UserInfoService = mock[UserInfoService]
-  val mockNsAndIConnector : NSAndIConnector = mock[NSAndIConnector]
+  val mockNsAndIConnector: NSIConnector = mock[NSIConnector]
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
@@ -99,14 +100,14 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   def doRequest(): Future[PlayResult] = register.declaration(authenticatedFakeRequest)
 
-  def mockSessionCacheConnectorPut(cacheMap:CacheMap):Unit =
-    (mockSessionCacheConnector.put(_:HTSSession)(_:Writes[HTSSession],_: HeaderCarrier))
-      .expects(*,*,*)
+  def mockSessionCacheConnectorPut(cacheMap: CacheMap): Unit =
+    (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
+      .expects(*, *, *)
       .returning(Future.successful(cacheMap))
 
-  def mockSessionCacheConnectorGet:Unit =
-    (mockSessionCacheConnector.get(_: HeaderCarrier,_:Reads[HTSSession]))
-      .expects(*,*)
+  def mockSessionCacheConnectorGet: Unit =
+    (mockSessionCacheConnector.get(_: HeaderCarrier, _: Reads[HTSSession]))
+      .expects(*, *)
       .returning(Future.successful(Option(mockHtsSession)))
 
   def mockEligibilityResult(nino: String)(result: Boolean): Unit =
@@ -123,11 +124,11 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     (mockUserInfoService.getUserInfo(_: AuthContext, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
       .expects(authContext, nino, *, *)
       .returning(EitherT.pure[Future, String, UserInfo](userInfo))
-  type NSAndIResponse = Either[SubmissionError, SubmissionSuccess]
-  def mockCreateAccount(nsAndIResponse:NSAndIResponse): Unit =
-    (mockNsAndIConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier))
-        .expects(nsiUserInfo, *)
-      .returning(Future.successful(nsAndIResponse))
+
+  def mockCreateAccount(nsiResponse: SubmissionResult): Unit =
+    (mockNsAndIConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nsiUserInfo, *, *)
+      .returning(Future.successful(nsiResponse))
 
   "GET /" should {
 
@@ -137,7 +138,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
         mockAuthConnector(authority)
         mockUserInfo(authContext, fakeNino)(user)
         mockEligibilityResult(fakeNino)(true)
-        mockSessionCacheConnectorPut(CacheMap("1",Map.empty[String,JsValue]))
+        mockSessionCacheConnectorPut(CacheMap("1", Map.empty[String, JsValue]))
       }
 
       val result: Future[PlayResult] = doRequest()
@@ -184,7 +185,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     "the postCreateAccountHelpToSave return the nsi stub in" in {
       mockAuthConnector(authority)
       mockSessionCacheConnectorGet
-      mockCreateAccount(Right(nSAndIResponseSuccess()))
+      mockCreateAccount(SubmissionSuccess)
       val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
@@ -196,7 +197,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     "the postCreateAccountHelpToSave return the errors if ns and I fail in" in {
       mockAuthConnector(authority)
       mockSessionCacheConnectorGet
-      mockCreateAccount(Left(nSAndIResponseFailure(401,"Fail")))
+      mockCreateAccount(SubmissionFailure(Some("401"), "Fail", "FAil"))
       val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
