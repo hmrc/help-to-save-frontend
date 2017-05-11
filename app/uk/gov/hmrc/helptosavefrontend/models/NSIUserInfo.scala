@@ -139,12 +139,13 @@ object NSIUserInfo {
       Invalid(NonEmptyList.of("Postcode undefined"))
 
     case Some(p) ⇒
+      val trimmedPostcode = p.replaceAllLiterally(" ", "")
       val lengthCheck =
-        validatedFromBoolean(p)(_.length <= 10, "Postcode was longer thn 10 characters")
+        validatedFromBoolean(trimmedPostcode)(_.length <= 10, "Postcode was longer thn 10 characters")
 
-      val regexCheck = regexValidation(p)(postcodeRegex, "Invalid postcode format")
+      val regexCheck = regexValidation(trimmedPostcode)(postcodeRegex, "Invalid postcode format")
 
-      (lengthCheck |@| regexCheck).tupled.map(_ ⇒ p)
+      (lengthCheck |@| regexCheck).tupled.map(_ ⇒ trimmedPostcode)
   }
 
   private def countryCodeValidation(countryCode: Option[String]): ValidatedNel[String, Option[String]] =
@@ -236,7 +237,7 @@ object NSIUserInfo {
     * characters found which are contained in `ignore` are not returned
     */
   private def specialCharacters(s: String, ignore: List[Char] = List.empty[Char]): List[Char] =
-    s.trim.filter(isSpecial(_, ignore)).toList.distinct
+    s.replaceAllLiterally(" ","").filter(isSpecial(_, ignore)).toList.distinct
 
   /** Does the given string contain `n` or more consecutive special characters? */
   private def containsNConsecutiveSpecialCharacters(s: String, n: Int): Boolean =
