@@ -4,8 +4,8 @@ GET        /apply                                 @uk.gov.hmrc.helptosavefronten
 GET        /about                                 @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave
 GET        /eligibility                           @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getEligibilityHelpToSave
 
-GET        /register/create-a-account             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSave
-POST       /register/create-a-account            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.postCreateAccountHelpToSave
+GET        /register/create-an-account             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSave
+POST       /register/create-an-account            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.postCreateAccountHelpToSave
 
 GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.declaration
 GET        /register/two-factor-failed            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.failedTwoFactor

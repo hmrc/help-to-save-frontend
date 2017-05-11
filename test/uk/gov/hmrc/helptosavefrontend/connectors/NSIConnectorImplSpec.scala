@@ -31,7 +31,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 
-class NSAndIConnectorImplSpec  extends UnitSpec with WithFakeApplication with MockFactory {
+class NSIConnectorImplSpec  extends UnitSpec with WithFakeApplication with MockFactory {
 
   val mockHTTPPost = mock[WSPost]
 

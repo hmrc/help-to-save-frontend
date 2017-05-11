@@ -85,8 +85,8 @@ class RegisterController @Inject()(val sessionCacheConnector: SessionCacheConnec
           Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("This is a stub for nsi"))
         case Right(sf: SubmissionFailure) ⇒
           Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(prettyPrintSubmissionFailure(sf)))
-        case Left(l) ⇒
-          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(l))
+        case Left(error) ⇒
+          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error))
       }
   }
 
