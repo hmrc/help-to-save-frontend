@@ -71,49 +71,49 @@ class RegisterController @Inject()(val sessionCacheConnector: SessionCacheConnec
   }
 
 
-
   def postCreateAccountHelpToSave = AuthorisedHtsUserAction { implicit authContext =>
     implicit request ⇒
-
-      val submissionResult = for{
-        session  ← retrieveUserInfo()
+      val submissionResult = for {
+        session ← retrieveUserInfo()
         userInfo ← validateUserInfo(session)
-        submissionResult        ← postToNSI(userInfo)
+        submissionResult ← postToNSI(userInfo)
       //todo update our backend with a boolean value letting hmrc know a hts account was created.
       } yield submissionResult
 
       submissionResult.value.map {
-          case Right(SubmissionSuccess) ⇒
-            Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("This is a stub for nsi"))
-          case Right(sf: SubmissionFailure) ⇒
-            Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(prettyPrintSubmissionFailure(sf)))
-          case Left(l) ⇒ Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(l))
+        case Right(SubmissionSuccess) ⇒
+          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("This is a stub for nsi"))
+        case Right(sf: SubmissionFailure) ⇒
+          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(prettyPrintSubmissionFailure(sf)))
+        case Left(l) ⇒
+          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(l))
       }
   }
 
   private def prettyPrintSubmissionFailure(failure: SubmissionFailure): String =
     s"Submission to NSI failed: ${failure.errorMessage}: ${failure.errorDetail} (id: ${failure.errorMessageId.getOrElse("-")})"
 
-  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future,String,HTSSession] =
-    EitherT[Future,String,HTSSession](
-      sessionCacheConnector.get.map(_.fold[Either[String,HTSSession]](Left("Ohno!!"))(Right.apply))
+  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, HTSSession] =
+    EitherT[Future, String, HTSSession](
+      sessionCacheConnector.get.map(_.fold[Either[String, HTSSession]](
+        Left("Session cache did not contain user info :("))(Right.apply))
     )
 
 
-  private def validateUserInfo(session: HTSSession)(implicit ex: ExecutionContext): EitherT[Future, String, NSIUserInfo] =  {
+  private def validateUserInfo(session: HTSSession)(implicit ex: ExecutionContext): EitherT[Future, String, NSIUserInfo] = {
     val userInfo: Option[ValidatedNel[String, NSIUserInfo]] =
       session.userInfo.map(NSIUserInfo(_))
 
     val nsiUserInfo: Either[String, NSIUserInfo] =
-      userInfo.fold[Either[String,NSIUserInfo]](
+      userInfo.fold[Either[String, NSIUserInfo]](
         Left("No UserInfo In session :("))(
         _.toEither.leftMap(e ⇒ s"Invalid user details: ${e.toList.mkString(", ")}")
       )
     EitherT.fromEither[Future](nsiUserInfo)
   }
 
-  private def postToNSI(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier): EitherT[Future,String,SubmissionResult] =
-    EitherT[Future,String,SubmissionResult](nSAndIConnector.createAccount(userInfo).map(Right(_)))
+  private def postToNSI(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier): EitherT[Future, String, SubmissionResult] =
+    EitherT[Future, String, SubmissionResult](nSAndIConnector.createAccount(userInfo).map(Right(_)))
 
   /**
     * Does the following:

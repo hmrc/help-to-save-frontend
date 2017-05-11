@@ -43,7 +43,7 @@ import uk.gov.hmrc.play.frontend.auth.connectors.domain._
 import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.time.DateTimeUtils.now
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfoSpec._
+import uk.gov.hmrc.helptosavefrontend.models._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -66,7 +66,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
     ids = Some("/auth/oid/mockuser/ids"),
     legacyOid = "mockuser")
 
-  val mockHtsSession: HTSSession = HTSSession(Option(userInfo))
+  val mockHtsSession: HTSSession = HTSSession(Option(validUserInfo))
 
   val authContext = AuthContext(authority)
 
@@ -105,10 +105,10 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       .expects(*, *, *)
       .returning(Future.successful(cacheMap))
 
-  def mockSessionCacheConnectorGet: Unit =
+  def mockSessionCacheConnectorGet(mockHtsSession:Option[HTSSession]): Unit =
     (mockSessionCacheConnector.get(_: HeaderCarrier, _: Reads[HTSSession]))
       .expects(*, *)
-      .returning(Future.successful(Option(mockHtsSession)))
+      .returning(Future.successful(mockHtsSession))
 
   def mockEligibilityResult(nino: String)(result: Boolean): Unit =
     (mockEligibilityConnector.checkEligibility(_: String)(_: HeaderCarrier))
@@ -127,7 +127,7 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   def mockCreateAccount(nsiResponse: SubmissionResult): Unit =
     (mockNsAndIConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nsiUserInfo, *, *)
+      .expects(validNSIUserInfo, *, *)
       .returning(Future.successful(nsiResponse))
 
   "GET /" should {
@@ -182,30 +182,59 @@ class RegisterSpec extends UnitSpec with WithFakeApplication with MockFactory {
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
-    "the postCreateAccountHelpToSave return the nsi stub in" in {
-      mockAuthConnector(authority)
-      mockSessionCacheConnectorGet
-      mockCreateAccount(SubmissionSuccess)
-      val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-
-      val html = contentAsString(result)
-
-      html should include("This is a stub for nsi")
-    }
-    "the postCreateAccountHelpToSave return the errors if ns and I fail in" in {
-      mockAuthConnector(authority)
-      mockSessionCacheConnectorGet
-      mockCreateAccount(SubmissionFailure(Some("401"), "Fail", "FAil"))
-      val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-
-      val html = contentAsString(result)
-
-      html should include("Fail")
-    }
   }
+    "POST /" should {
+      "the postCreateAccountHelpToSave return the nsi stub in" in {
+        mockAuthConnector(authority)
+        mockSessionCacheConnectorGet(Some(mockHtsSession))
+        mockCreateAccount(SubmissionSuccess)
+        val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("This is a stub for nsi")
+      }
+      "the postCreateAccountHelpToSave return the errors if ns and I fail in" in {
+        mockAuthConnector(authority)
+        mockSessionCacheConnectorGet(Some(mockHtsSession))
+        mockCreateAccount(SubmissionFailure(Some("401"), "Fail", "Fail"))
+        val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("Fail")
+      }
+
+      "the postCreateAccountHelpToSave return the errors if the session cache returns none" in {
+        mockAuthConnector(authority)
+        mockSessionCacheConnectorGet(None)
+
+        val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("Session cache did not contain user info")
+      }
+
+      "the postCreateAccountHelpToSave return the errors if the UserInfo Is Invalid" in {
+        mockAuthConnector(authority)
+        mockSessionCacheConnectorGet(
+          Some(mockHtsSession.copy(userInfo = Some(validUserInfo.copy(email = "")))))
+
+        val result = register.postCreateAccountHelpToSave(authenticatedFakeRequest)
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("Invalid user details")
+      }
+    }
 }
 
