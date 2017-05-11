@@ -25,25 +25,24 @@ import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserInfo, randomUserDetails}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
+import scala.concurrent.{Await, ExecutionContext, Future}
 
-class RegisterControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
+class RegisterControllerSpec extends UnitSpec with WithFakeApplication with MockFactory with MockAuthSupport {
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
-  val fakeNino = "WM123456C"
-
-  val userDetailsUri = "/user/details/uri"
-
   val mockHtsService = mock[HelpToSaveService]
 
-  lazy val register = new RegisterController(fakeApplication.injector.instanceOf[MessagesApi], mockHtsService)
+  lazy val register = new RegisterController(fakeApplication.injector.instanceOf[MessagesApi], mockHtsService) {
+    override def authConnector: AuthConnector = mockPlayAuth
+  }
 
   def doRequest(): Future[PlayResult] = register.declaration(FakeRequest())
 
@@ -57,25 +56,19 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       .expects(nino, *)
       .returning(EitherT.pure[Future, String, EligibilityResult](EligibilityResult(result)))
 
-  val mockAuthConnector = mock[PlayAuthConnector]
-
-  def mockAuthConnectorResult() = {
-    Enrolment("HMRC-NI").withConfidenceLevel(ConfidenceLevel.L200)
-    (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
-      .expects(*, *, *).returning(Future.successful())
-  }
-
   "GET /" should {
 
     "return user details if the user is eligible for help-to-save" in {
       val user = randomUserDetails()
       inSequence {
-        mockAuthConnectorResult()
-        mockUserInfo(userDetailsUri, fakeNino)(randomUserDetails())
-        mockEligibilityResult(fakeNino)(result = true)
+        mockUserInfo(userDetailsUri, nino)(randomUserDetails())
+        mockEligibilityResult(nino)(result = true)
       }
 
-      val result: Future[PlayResult] = doRequest()
+      val responseFuture: Future[PlayResult] = doRequest()
+
+      val result = Await.result(responseFuture, 3.seconds)
+
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
@@ -88,11 +81,10 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       html should include(user.NINO)
     }
 
-    "display a 'Not Eligible' page if the eligibility check is negative" in {
+    "display a 'Not Eligible' page if the user is not eligibility" in {
       inSequence {
-        mockAuthConnectorResult
-        mockUserInfo(userDetailsUri, fakeNino)(randomUserDetails())
-        mockEligibilityResult(fakeNino)(result = false)
+        mockUserInfo(userDetailsUri, nino)(randomUserDetails())
+        mockEligibilityResult(nino)(result = false)
       }
 
       val result = doRequest()
@@ -101,13 +93,10 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       html should include("not eligible")
       html should include("To be eligible for an account")
     }
+
     "the getCreateAccountHelpToSave return 200" in {
       val result = register.getCreateAccountHelpToSave(FakeRequest())
       status(result) shouldBe Status.OK
-    }
-
-    "the getCreateAccountHelpToSave return HTML" in {
-      val result = register.getCreateAccountHelpToSave(FakeRequest())
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
