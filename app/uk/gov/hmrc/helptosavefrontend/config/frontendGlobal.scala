@@ -91,18 +91,19 @@ class SessionFilter[A](whenNoSession: => Result)(implicit app: Application) exte
   private def createHtsCookie() = {
     Cookie(name = sessionIdKey, value = s"hts-session-${UUID.randomUUID}")
   }
+
   override def apply(next: EssentialAction): EssentialAction = new EssentialAction {
     override def apply(requestHeader: RequestHeader): Accumulator[ByteString, Result] = {
-      next(requestHeader).map{ response =>
+      next(requestHeader).map { response =>
         requestHeader.cookies.find(_.name == sessionIdKey).fold(
           whenNoSession.withCookies(createHtsCookie())
         ) { _ =>
-          response }
-      }.recover{case ex ⇒
-        Logger.error(s"adding the cookie has failed $ex")
-          throw new Exception(ex.printStackTrace().toString)
+          response
         }
-
+      }.recover { case ex ⇒
+        Logger.error(s"adding the cookie has failed $ex")
+        throw new Exception(ex.printStackTrace().toString)
+      }
     }
   }
 }
