@@ -25,7 +25,8 @@ import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.{CitizenDetailsPerson, CitizenDetailsResponse}
 import uk.gov.hmrc.helptosavefrontend.models.{UserInfo, addressArb}
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService.UserDetailsResponse
+import uk.gov.hmrc.helptosavefrontend.services.UserInfoService
+import uk.gov.hmrc.helptosavefrontend.services.UserInfoService.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoServiceSpec._
 import uk.gov.hmrc.helptosavefrontend.testutil._
 import uk.gov.hmrc.helptosavefrontend.util.NINO

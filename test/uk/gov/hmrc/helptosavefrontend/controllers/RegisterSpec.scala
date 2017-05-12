@@ -30,8 +30,8 @@ import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService.UserDetailsResponse
+import uk.gov.hmrc.helptosavefrontend.services.UserInfoService
+import uk.gov.hmrc.helptosavefrontend.services.UserInfoService.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier

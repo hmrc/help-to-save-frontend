@@ -21,7 +21,7 @@ import javax.inject.Inject
 import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.helptosavefrontend.FrontendAppConfig.{HtsDeclarationUrl, IvUpliftUrl, TwoFactorUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{HtsDeclarationUrl, IvUpliftUrl, TwoFactorUrl}
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId

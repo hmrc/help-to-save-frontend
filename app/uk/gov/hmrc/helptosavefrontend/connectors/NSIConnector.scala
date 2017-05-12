@@ -24,7 +24,7 @@ import com.google.common.io.BaseEncoding
 import com.google.inject.ImplementedBy
 import play.api.http.Status
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.Result

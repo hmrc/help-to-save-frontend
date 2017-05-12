@@ -29,8 +29,8 @@ import play.api.mvc.Action
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService.UserDetailsResponse
+import uk.gov.hmrc.helptosavefrontend.services.UserInfoService
+import uk.gov.hmrc.helptosavefrontend.services.UserInfoService.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.frontend.controller.FrontendController

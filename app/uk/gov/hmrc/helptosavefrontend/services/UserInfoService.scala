@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.services.userinfo
+package uk.gov.hmrc.helptosavefrontend.services
 
 import java.time.LocalDate
 
@@ -26,7 +26,7 @@ import play.api.libs.json.{Json, Reads}
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.CitizenDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService._
+import uk.gov.hmrc.helptosavefrontend.services.UserInfoService.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
