@@ -98,9 +98,10 @@ class SessionFilter[A](whenNoSession: => Result)(implicit app: Application) exte
           whenNoSession.withCookies(createHtsCookie())
         ) { _ =>
           response }
-      }.recover{case x ⇒
-        Logger.error("adding th cookie has failed " + x)
-        throw new Exception(x.printStackTrace().toString)}
+      }.recover{case ex ⇒
+        Logger.error(s"adding the cookie has failed $ex")
+          throw new Exception(ex.printStackTrace().toString)
+        }
 
     }
   }
