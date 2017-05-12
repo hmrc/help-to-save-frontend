@@ -42,13 +42,17 @@ trait SessionCacheConnector extends SessionCache with ServicesConfig {
 @Singleton
 class SessionCacheConnectorImpl extends SessionCacheConnector with AppName with ServicesConfig {
 
-  val sessionKey: String = getString("microservice.services.keystore.session-key")
-
   override def defaultSource: String = appName
 
-  override def baseUri: String = baseUrl("keystore")
+  val sessionKey: String = getString("microservice.services.keystore.session-key")
 
-  override def domain: String = getString("microservice.services.keystore.domain")
+  private val _baseUri = baseUrl("keystore")
+
+  private val _domain = getString("microservice.services.keystore.domain")
+
+  override def baseUri: String = _baseUri
+
+  override def domain: String = _domain
 
   override def http: HttpGet with HttpPut with HttpDelete = WSHttp
 }

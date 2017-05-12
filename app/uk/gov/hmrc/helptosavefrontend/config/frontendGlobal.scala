@@ -23,7 +23,7 @@ import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
 import play.api.mvc._
-import play.api.{Application, Configuration, Play}
+import play.api.{Application, Configuration, Logger, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
@@ -85,19 +85,28 @@ object AuditFilter extends FrontendAuditFilter with RunMode with AppName with Mi
   */
 @Singleton
 class SessionFilter[A](whenNoSession: => Result)(implicit app: Application) extends EssentialFilter {
-
+  Logger.info("I have been created 1234567890343 \n\n\n\n")
   implicit val ex = app.injector.instanceOf[ExecutionContext]
   val sessionIdKey = app.configuration.underlying.getString("microservice.services.keystore.session-key")
 
-  private def createHtsCookie() = Cookie(name = sessionIdKey, value = s"hts-session-${UUID.randomUUID}")
-
+  private def createHtsCookie() = {
+    Logger.info("I am the cookie 1234567890343 \n\n\n\n")
+    Cookie(name = sessionIdKey, value = s"hts-session-${UUID.randomUUID}")
+  }
   override def apply(next: EssentialAction): EssentialAction = new EssentialAction {
     override def apply(requestHeader: RequestHeader): Accumulator[ByteString, Result] = {
+      Logger.info("I am the apply 1234567890343 \n\n\n\n")
       next(requestHeader).map{ response =>
+        Logger.info("I am the response " + response)
         requestHeader.cookies.find(_.name == sessionIdKey).fold(
           whenNoSession.withCookies(createHtsCookie())
-        ) { _ => response }
-      }
+        ) { _ =>
+          Logger.info("I am not a cookie " + response)
+          response }
+      }.recover{case x ⇒
+        Logger.error("I am a error " + x)
+        throw new Exception(x.printStackTrace().toString)}
+
     }
   }
 }
