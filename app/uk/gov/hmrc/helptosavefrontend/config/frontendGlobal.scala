@@ -99,7 +99,7 @@ class SessionFilter[A](whenNoSession: => Result)(implicit app: Application) exte
         ) { _ =>
           response }
       }.recover{case x ⇒
-        Logger.error("adding th cookie has failed " + x)
+        Logger.error("adding the cookie has failed " + x)
         throw new Exception(x.printStackTrace().toString)}
 
     }
