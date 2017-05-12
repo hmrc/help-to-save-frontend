@@ -52,9 +52,8 @@ class HelpToSaveController(configuration: Configuration, environment: Environmen
           allEnrols.enrolments.find(enrol ⇒ enrol.key == "HMRC-NI")
             .flatMap(enrolment ⇒ enrolment.getIdentifier("NINO"))
             .map(ninoIdentifier ⇒ ninoIdentifier.value)
-            .get
 
-        body(UserUrlWithNino(userUri.get, nino))
+        body(UserUrlWithNino(userUri.get, nino.get))
 
     } recover {
       case _: NoActiveSession => toGGLogin(HtsDeclarationUrl)
@@ -73,7 +72,7 @@ class HelpToSaveController(configuration: Configuration, environment: Environmen
   } recover {
     case _: NoActiveSession => toGGLogin(HtsDeclarationUrl)
     case _: InsufficientConfidenceLevel => toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
-    case _: AuthorisationException => Forbidden("") //TODO
+    case _: AuthorisationException | _: InsufficientEnrolments ⇒  Forbidden("") //TODO
     case ex =>
       Logger.error(s"Could not perform authentication: $ex")
       InternalServerError("") //TODO

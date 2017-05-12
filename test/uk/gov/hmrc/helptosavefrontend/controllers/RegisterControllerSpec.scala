@@ -58,12 +58,10 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
   private val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
   private val enrolments = Enrolments(Set(enrolment))
 
-  lazy val mockAuthConnector = mock[PlayAuthConnector]
-
+  val mockAuthConnector = mock[PlayAuthConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
-
   val mockNsAndIConnector: NSIConnector = mock[NSIConnector]
 
   val register = new RegisterController(

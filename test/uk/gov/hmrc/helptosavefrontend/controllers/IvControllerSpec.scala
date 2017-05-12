@@ -66,9 +66,9 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
     override def authConnector: AuthConnector = mockAuthConnector
   }
 
-  private def fakeRequest(jId: String) = FakeRequest("GET", s"/register/identity-check-complete?journeyId=${journeyId.Id}")
+  private val fakeRequest = FakeRequest("GET", s"/register/identity-check-complete?journeyId=${journeyId.Id}")
 
-  private def doRequest(jId: String) = ivController.showUpliftJourneyOutcome()(fakeRequest(jId))
+  private def doRequest() = ivController.showUpliftJourneyOutcome()(fakeRequest)
 
   "GET /identity-check-complete" should {
 
@@ -93,7 +93,7 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
         mockAuthConnectorResult()
         mockIvConnector(journeyId, ivServiceResponse)
 
-        val responseFuture = doRequest(journeyId.Id)
+        val responseFuture = doRequest()
 
         val result = Await.result(responseFuture, 3.seconds)
 
