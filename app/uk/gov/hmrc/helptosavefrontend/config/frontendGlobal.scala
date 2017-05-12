@@ -44,15 +44,13 @@ object FrontendGlobal
   override val auditConnector = FrontendAuditConnector
   override val loggingFilter = LoggingFilter
   override val frontendAuditFilter = AuditFilter
-  lazy val sessionFilter =
-    new SessionFilter(Results.Redirect(routes.StartPagesController.getAboutHelpToSave()))
 
   override def onStart(app: Application) {
     super.onStart(app)
     ApplicationCrypto.verifyConfiguration()
   }
 
-  override def filters = super.filters :+ sessionFilter
+  override def filters = super.filters
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit rh: Request[_]): Html =
     uk.gov.hmrc.helptosavefrontend.views.html.error_template(pageTitle, heading, message)
@@ -85,6 +83,7 @@ object AuditFilter extends FrontendAuditFilter with RunMode with AppName with Mi
   */
 @Singleton
 class SessionFilter[A](whenNoSession: => Result)(implicit app: Application) extends EssentialFilter {
+
   implicit val ex = app.injector.instanceOf[ExecutionContext]
   val sessionIdKey = app.configuration.underlying.getString("microservice.services.keystore.session-key")
 
