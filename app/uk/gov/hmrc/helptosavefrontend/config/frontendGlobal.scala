@@ -16,14 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend
 
-import java.util.UUID
 
-import akka.util.ByteString
-import com.google.inject.{Inject, Singleton}
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
 import play.api.mvc._
-import play.api.{Application, Configuration, Logger, Play}
+import play.api.{Application, Configuration, Play}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
@@ -33,10 +30,7 @@ import uk.gov.hmrc.play.http.logging.filters.FrontendLoggingFilter
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import play.api.i18n.Messages.Implicits._
 import play.api.Play.current
-import play.api.libs.streams.Accumulator
-import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
-import scala.concurrent.ExecutionContext
 
 object FrontendGlobal
   extends DefaultFrontendGlobal {
@@ -75,34 +69,4 @@ object AuditFilter extends FrontendAuditFilter with RunMode with AppName with Mi
   override lazy val auditConnector = FrontendAuditConnector
 
   override def controllerNeedsAuditing(controllerName: String) = ControllerConfiguration.paramsForController(controllerName).needsAuditing
-}
-
-/**
-  * Checks if the request has cookie with a HTS session ID in it - if not, the filter creates one and
-  * performs `whenNoSession` with the new session ID in it
-  */
-@Singleton
-class SessionFilter[A](whenNoSession: => Result)(implicit app: Application) extends EssentialFilter {
-
-  implicit val ex = app.injector.instanceOf[ExecutionContext]
-  val sessionIdKey = app.configuration.underlying.getString("microservice.services.keystore.session-key")
-
-  private def createHtsCookie() = {
-    Cookie(name = sessionIdKey, value = s"hts-session-${UUID.randomUUID}")
-  }
-
-  override def apply(next: EssentialAction): EssentialAction = new EssentialAction {
-    override def apply(requestHeader: RequestHeader): Accumulator[ByteString, Result] = {
-      next(requestHeader).map { response =>
-        requestHeader.cookies.find(_.name == sessionIdKey).fold(
-          whenNoSession.withCookies(createHtsCookie())
-        ) { _ =>
-          response
-        }
-      }.recover { case ex ⇒
-        Logger.error(s"adding the cookie has failed $ex")
-        throw new Exception(ex.printStackTrace().toString)
-      }
-    }
-  }
 }
