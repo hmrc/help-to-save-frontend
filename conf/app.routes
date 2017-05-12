@@ -8,6 +8,5 @@ GET        /register/create-an-account             @uk.gov.hmrc.helptosavefronte
 POST       /register/create-an-account            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.postCreateAccountHelpToSave
 
 GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.declaration
-GET        /register/two-factor-failed            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.failedTwoFactor
 GET        /register/identity-check-complete      @uk.gov.hmrc.helptosavefrontend.controllers.IvController.showUpliftJourneyOutcome
 

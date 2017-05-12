@@ -24,7 +24,7 @@ import play.api.mvc.Results.Ok
 import play.api.mvc.{Action, Headers}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, cookies}
-import uk.gov.hmrc.helptosavefrontend.SessionFilter
+import uk.gov.hmrc.helptosavefrontend.config.SessionFilter
 import uk.gov.hmrc.play.test.WithFakeApplication
 import scala.concurrent.duration._
 

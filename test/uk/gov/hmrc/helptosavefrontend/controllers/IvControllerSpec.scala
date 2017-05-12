@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.util.UUID
 import java.util.UUID.randomUUID
 
 import org.scalamock.scalatest.MockFactory
@@ -26,15 +25,10 @@ import play.api.http.Status._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
-import uk.gov.hmrc.play.frontend.auth.connectors.AuthConnector
-import uk.gov.hmrc.play.frontend.auth.connectors.domain._
-import uk.gov.hmrc.play.frontend.auth.{AuthContext, AuthenticationProviderIds}
-import uk.gov.hmrc.play.http.{HeaderCarrier, SessionKeys}
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.time.DateTimeUtils.now
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,53 +36,23 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
 
   val ivConnector: IvConnector = mock[IvConnector]
 
-  val jId = randomUUID().toString
-
-  val journeyId = JourneyId(jId)
+  val journeyId = JourneyId(randomUUID().toString)
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
   val fakeNino = "WM123456C"
 
-  val authority = Authority(uri = s"/path/to/authority",
-    accounts = Accounts(
-      paye = Some(PayeAccount(s"/taxcalc/$fakeNino", Nino(fakeNino))),
-      tai = Some(TaxForIndividualsAccount(s"/tai/$fakeNino", Nino(fakeNino)))),
-    loggedInAt = None,
-    previouslyLoggedInAt = None,
-    credentialStrength = CredentialStrength.Strong,
-    confidenceLevel = ConfidenceLevel.L200,
-    userDetailsLink = Some("/user-details/mockuser"),
-    enrolments = Some("/auth/oid/mockuser/enrolments"),
-    ids = Some("/auth/oid/mockuser/ids"),
-    legacyOid = "mockuser")
-
-  val authContext = AuthContext(authority)
-
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
-
-  def mockAuthConnector(authority: Authority): Unit =
-    (mockAuthConnector.currentAuthority(_: HeaderCarrier))
-      .expects(*)
-      .returning(Future.successful(Some(authority)))
-
   def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
     (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
       .returning(Future.successful(IvSuccessResponse.fromString(ivServiceResponse)))
+
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
-  val ivController = new IvController(mockSessionCacheConnector,ivConnector, fakeApplication.injector.instanceOf[MessagesApi]) {
-    override lazy val authConnector: AuthConnector = mockAuthConnector
-  }
 
-  private def authenticatedFakeRequest =
-    FakeRequest("GET", s"/register/identity-check-complete?journeyId=$jId").withSession(
-      SessionKeys.sessionId -> s"session-${UUID.randomUUID()}",
-      SessionKeys.lastRequestTimestamp -> now.getMillis.toString,
-      SessionKeys.userId -> s"/path/to/authority",
-      SessionKeys.authProvider -> AuthenticationProviderIds.VerifyProviderId
-    )
+  val ivController = new IvController(mockSessionCacheConnector, ivConnector, fakeApplication.injector.instanceOf[MessagesApi])
 
-  private def doRequest(jId: String) = ivController.showUpliftJourneyOutcome(authenticatedFakeRequest)
+  private def authenticatedFakeRequest = FakeRequest("GET", s"/register/identity-check-complete?journeyId=${journeyId.Id}")
+
+  private def doRequest() = ivController.showUpliftJourneyOutcome(authenticatedFakeRequest)
 
   "GET /identity-check-complete" should {
 
@@ -111,10 +75,9 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
 
       forAll(validCases) { (ivServiceResponse: String, htsStatus: Int) ⇒
 
-        mockAuthConnector(authority)
         mockIvConnector(journeyId, ivServiceResponse)
 
-        val response: Future[Result] = doRequest(jId)
+        val response: Future[Result] = doRequest()
 
         status(response) shouldBe htsStatus
       }
