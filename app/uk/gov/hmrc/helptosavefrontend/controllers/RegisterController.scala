@@ -27,6 +27,7 @@ import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.HtsAuthRule
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Result
@@ -36,39 +37,35 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegisterController @Inject()(val messagesApi: MessagesApi,
-                                   val configuration: Configuration,
-                                   val environment: Environment,
+class RegisterController @Inject()(override val messagesApi: MessagesApi,
                                    htsService: HelpToSaveService,
                                    nSAndIConnector: NSIConnector,
                                    val sessionCacheConnector: SessionCacheConnector)
-  extends HelpToSaveController(configuration, environment) with I18nSupport {
+  extends HelpToSaveAuth with I18nSupport {
 
-  def declaration: Action[AnyContent] = Action.async { implicit request ⇒
-    authorisedForHts { userUrlWithNino ⇒
-      validateUser(userUrlWithNino.uri, userUrlWithNino.nino).fold(
-        error ⇒ {
-          Logger.error(s"Could not perform eligibility check: $error")
-          InternalServerError("")
-        }, _.fold(
-          Ok(views.html.core.not_eligible())) {
-          userDetails ⇒
-            sessionCacheConnector.put(HTSSession(Some(userDetails)))
-            Ok(views.html.register.declaration(userDetails))
-        }
-      )
-    }
-  }
-
-  def getCreateAccountHelpToSave: Action[AnyContent] = Action.async {
+  def declaration: Action[AnyContent] = authorisedForHtsWithEnrolments(HtsAuthRule) {
     implicit request ⇒
-      authorisedForHts {
-        Future.successful(Ok(views.html.register.create_account_help_to_save()))
-      }
+      implicit userUrlWithNino ⇒
+        validateUser(userUrlWithNino.path.get, userUrlWithNino.nino.get).fold(
+          error ⇒ {
+            Logger.error(s"Could not perform eligibility check: $error")
+            InternalServerError("")
+          }, _.fold(
+            Ok(views.html.core.not_eligible())) {
+            userDetails ⇒
+              sessionCacheConnector.put(HTSSession(Some(userDetails)))
+              Ok(views.html.register.declaration(userDetails))
+          }
+        )
   }
 
-  def postCreateAccountHelpToSave: Action[AnyContent] = Action.async { implicit request ⇒
-    authorisedForHts {
+  def getCreateAccountHelpToSave: Action[AnyContent] = authorisedForHts {
+    implicit request ⇒
+      Future.successful(Ok(views.html.register.create_account_help_to_save()))
+  }
+
+  def postCreateAccountHelpToSave: Action[AnyContent] = authorisedForHts {
+    implicit request ⇒
       val submissionResult = for {
         session ← retrieveUserInfo()
         userInfo ← validateUserInfo(session)
@@ -84,7 +81,11 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         case Left(error) ⇒
           Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error))
       }
-    }
+  }
+
+  def accessDenied: Action[AnyContent] = Action.async {
+    implicit request ⇒
+      Future.successful(Ok(views.html.access_denied()))
   }
 
   private def prettyPrintSubmissionFailure(failure: SubmissionFailure): String =

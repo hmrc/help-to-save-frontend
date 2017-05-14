@@ -18,9 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 
+import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
@@ -34,13 +34,11 @@ import scala.concurrent.Future
 @Singleton
 class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
                              ivConnector: IvConnector,
-                             val messagesApi: MessagesApi,
-                             val configuration: Configuration,
-                             val environment: Environment)
-  extends HelpToSaveController(configuration, environment) with I18nSupport {
+                             val messagesApi: MessagesApi)
+  extends HelpToSaveAuth with I18nSupport {
 
-  def showUpliftJourneyOutcome: Action[AnyContent] = Action.async { implicit request ⇒
-    authorisedForHts {
+  def showUpliftJourneyOutcome: Action[AnyContent] = authorisedForHts {
+    implicit request ⇒
       //Will be populated if we arrived here because of an IV success/failure
       val journeyId = request.getQueryString("token").orElse(request.getQueryString("journeyId"))
       val allowContinue = true
@@ -103,6 +101,5 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
           Logger.warn(s"response from identityVerificationFrontendService did not contain token or journeyId param")
           Future.successful(Unauthorized(you_need_two_factor(TwoFactorUrl)))
       }
-    }
   }
 }

@@ -10,3 +10,4 @@ POST       /register/create-an-account             @uk.gov.hmrc.helptosavefronte
 GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.declaration
 GET        /register/identity-check-complete      @uk.gov.hmrc.helptosavefrontend.controllers.IvController.showUpliftJourneyOutcome
 
+GET        /register/access-denied                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.accessDenied

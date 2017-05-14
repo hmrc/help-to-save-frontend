@@ -25,12 +25,11 @@ import play.api.libs.json.{JsValue, Reads, Writes}
 import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
-import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.Retrievals.{allEnrolments, userDetailsUri}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionResult
 import uk.gov.hmrc.helptosavefrontend.connectors._
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
@@ -53,8 +52,6 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
   val uDetailsUri = "/dummy/user/details/uri"
   val nino = "WM123456C"
 
-  private val ninoEnrolment = Enrolment("HMRC-NI").withConfidenceLevel(ConfidenceLevel.L200)
-  private val compositeRetrieval = userDetailsUri and allEnrolments
   private val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
   private val enrolments = Enrolments(Set(enrolment))
 
@@ -66,8 +63,6 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
 
   val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
-    fakeApplication.injector.instanceOf[Configuration],
-    fakeApplication.injector.instanceOf[Environment],
     mockHtsService,
     mockNsAndIConnector,
     mockSessionCacheConnector) {
@@ -116,7 +111,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
     "return user details if the user is eligible for help-to-save" in {
       val user = randomUserDetails()
       inSequence {
-        mockPlayAuthWithRetrievals(ninoEnrolment, compositeRetrieval)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
+        mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
         mockUserInfo(uDetailsUri, nino)(user)
         mockEligibilityResult(nino)(result = true)
         mockSessionCacheConnectorPut(CacheMap("1", Map.empty[String, JsValue]))
@@ -139,7 +134,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
 
     "display a 'Not Eligible' page if the user is not eligible" in {
       inSequence {
-        mockPlayAuthWithRetrievals(ninoEnrolment, compositeRetrieval)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
+        mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
         mockUserInfo(uDetailsUri, nino)(randomUserDetails())
         mockEligibilityResult(nino)(result = false)
       }
