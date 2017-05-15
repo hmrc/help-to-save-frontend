@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.{Application, Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core._
@@ -61,11 +60,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
             action(request)(userUrlWithNino)
 
         }.recover {
-        case _: NoActiveSession ⇒ toGGLogin(HtsDeclarationUrl)
-        case _: InsufficientConfidenceLevel ⇒ toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
-        case ex ⇒
-          Logger.warn(s"couldnot authenticate user due to: $ex")
-          SeeOther(routes.RegisterController.accessDenied().url)
+        case e ⇒ handleFailure(e)
       }
     }
   }
@@ -75,12 +70,18 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
       authorised(HtsAuthProvider) {
         action(request)
       }.recover {
-        case _: NoActiveSession ⇒ toGGLogin(HtsDeclarationUrl)
-        case ex ⇒
-          Logger.warn(s"could not authenticate user due to: $ex")
-          SeeOther(routes.RegisterController.accessDenied().url)
+        case e ⇒ handleFailure(e)
       }
     }
   }
+
+  def handleFailure(e: Throwable):  Result =
+    e match {
+      case _: NoActiveSession ⇒ toGGLogin(HtsDeclarationUrl)
+      case _: InsufficientConfidenceLevel ⇒ toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
+      case ex ⇒
+        Logger.warn(s"could not authenticate user due to: $ex")
+        SeeOther(routes.RegisterController.accessDenied().url)
+    }
 }
 
