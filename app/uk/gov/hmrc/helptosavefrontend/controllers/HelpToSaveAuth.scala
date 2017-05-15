@@ -30,7 +30,7 @@ import scala.concurrent.Future
 
 case class UserDetailsUrlWithNino(path: String, nino: String)
 
-class HelpToSaveAuth @Inject()(app: Application) extends FrontendController with AuthorisedFunctions with Redirects {
+class HelpToSaveAuth(app: Application) extends FrontendController with AuthorisedFunctions with Redirects {
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
