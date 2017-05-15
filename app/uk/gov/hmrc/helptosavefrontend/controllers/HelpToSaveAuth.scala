@@ -16,36 +16,57 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.{Application, Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.frontend.Redirects
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{HtsDeclarationUrl, IdentityCallbackUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{UserDetailsUrlWithAllEnrolments, AuthProvider => HtsAuthProvider}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments, AuthProvider => HtsAuthProvider}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-case class UserDetailsUrlWithNino(path: Option[String], nino: Option[String])
+case class UserDetailsUrlWithNino(path: String, nino: String)
 
-trait HelpToSaveAuth extends FrontendController with AuthorisedFunctions {
+class HelpToSaveAuth @Inject()(app: Application) extends FrontendController with AuthorisedFunctions with Redirects {
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
-  private type HtsAction = Request[AnyContent] => Future[Result]
-  private type HtsActionWithEnrolments = Request[AnyContent] => UserDetailsUrlWithNino => Future[Result]
+  override def config: Configuration = app.configuration
 
-  def authorisedForHtsWithEnrolments(htsRule: Predicate)(action: HtsActionWithEnrolments): Action[AnyContent] = {
+  override def env: Environment = Environment(app.path, app.classloader, app.mode)
+
+  private type HtsAction = Request[AnyContent] => Future[Result]
+  private type HtsActionWithEnrolments = Request[AnyContent] => Option[UserDetailsUrlWithNino] => Future[Result]
+
+  def authorisedForHtsWithEnrolments(action: HtsActionWithEnrolments): Action[AnyContent] = {
     Action.async { implicit request =>
-      authorised(htsRule)
+      authorised(HtsAuthRule)
         .retrieve(UserDetailsUrlWithAllEnrolments) {
           case userDetailsUrl ~ allEnrols =>
             val nino =
-              allEnrols.enrolments
-                .find(enrolment ⇒ enrolment.key == "HMRC-NI")
-                .flatMap(enrolment ⇒ enrolment.getIdentifier("NINO"))
-                .map(identifier ⇒ identifier.value)
+              allEnrols
+                .enrolments
+                .find(_.key == "HMRC-NI")
+                .flatMap(_.getIdentifier("NINO"))
+                .map(_.value)
 
-            action(request)(UserDetailsUrlWithNino(userDetailsUrl, nino))
-        }
+            val userUrlWithNino = (userDetailsUrl, nino) match {
+              case (Some(url), Some(ni)) ⇒ Some(UserDetailsUrlWithNino(url, ni))
+              case _ ⇒ None
+            }
+
+            action(request)(userUrlWithNino)
+
+        }.recover {
+        case _: NoActiveSession ⇒ toGGLogin(HtsDeclarationUrl)
+        case _: InsufficientConfidenceLevel ⇒ toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
+        case ex ⇒
+          Logger.warn(s"couldnot authenticate user due to: $ex")
+          SeeOther(routes.RegisterController.accessDenied().url)
+      }
     }
   }
 
@@ -53,6 +74,11 @@ trait HelpToSaveAuth extends FrontendController with AuthorisedFunctions {
     Action.async { implicit request =>
       authorised(HtsAuthProvider) {
         action(request)
+      }.recover {
+        case _: NoActiveSession ⇒ toGGLogin(HtsDeclarationUrl)
+        case ex ⇒
+          Logger.warn(s"could not authenticate user due to: $ex")
+          SeeOther(routes.RegisterController.accessDenied().url)
       }
     }
   }

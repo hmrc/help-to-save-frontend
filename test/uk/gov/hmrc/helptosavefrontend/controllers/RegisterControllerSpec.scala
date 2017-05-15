@@ -65,7 +65,8 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
     mockNsAndIConnector,
-    mockSessionCacheConnector) {
+    mockSessionCacheConnector,
+    fakeApplication) {
     override lazy val authConnector = mockAuthConnector
   }
 

@@ -60,7 +60,8 @@ class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactor
 
   lazy val ivController = new IvController(mockSessionCacheConnector,
     ivConnector,
-    fakeApplication.injector.instanceOf[MessagesApi]) {
+    fakeApplication.injector.instanceOf[MessagesApi],
+    fakeApplication) {
     override def authConnector: AuthConnector = mockAuthConnector
   }
 

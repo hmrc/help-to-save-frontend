@@ -24,10 +24,9 @@ import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Application, Logger}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.HtsAuthRule
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Result
@@ -40,13 +39,19 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegisterController @Inject()(override val messagesApi: MessagesApi,
                                    htsService: HelpToSaveService,
                                    nSAndIConnector: NSIConnector,
-                                   val sessionCacheConnector: SessionCacheConnector)
-  extends HelpToSaveAuth with I18nSupport {
+                                   val sessionCacheConnector: SessionCacheConnector,
+                                   implicit val app: Application)
+  extends HelpToSaveAuth(app) with I18nSupport {
 
-  def declaration: Action[AnyContent] = authorisedForHtsWithEnrolments(HtsAuthRule) {
+  def declaration: Action[AnyContent] = authorisedForHtsWithEnrolments {
     implicit request ⇒
       implicit userUrlWithNino ⇒
-        validateUser(userUrlWithNino.path.get, userUrlWithNino.nino.get).fold(
+        val userInfo = for {
+          userUrlWithNino <- EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
+          result <- checkEligibility(userUrlWithNino.path, userUrlWithNino.nino)
+        } yield result
+
+        userInfo.fold(
           error ⇒ {
             Logger.error(s"Could not perform eligibility check: $error")
             InternalServerError("")
@@ -123,9 +128,10 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
     * been performed and the eligibility check is positive. This returns [[None]]
     * if all the above has successfully been performed and the eligibility check is negative.
     */
-  private def validateUser(userDetailsUri: String, nino: String)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
-    userInfo ← htsService.getUserInfo(userDetailsUri, nino)
-    eligible ← htsService.checkEligibility(nino)
-  } yield eligible.fold(None, Some(userInfo))
+  private def checkEligibility(userDetailsUri: String, nino: String)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] =
+    for {
+      userInfo ← htsService.getUserInfo(userDetailsUri, nino)
+      eligible ← htsService.checkEligibility(nino)
+    } yield eligible.fold(None, Some(userInfo))
 
 }

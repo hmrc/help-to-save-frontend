@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.Logger
+import play.api.{Application, Logger}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
@@ -34,8 +34,9 @@ import scala.concurrent.Future
 @Singleton
 class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
                              ivConnector: IvConnector,
-                             val messagesApi: MessagesApi)
-  extends HelpToSaveAuth with I18nSupport {
+                             val messagesApi: MessagesApi,
+                             implicit val app: Application)
+  extends HelpToSaveAuth(app) with I18nSupport {
 
   def showUpliftJourneyOutcome: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
