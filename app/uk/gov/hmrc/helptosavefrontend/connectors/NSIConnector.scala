@@ -18,16 +18,14 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import javax.inject.Singleton
 
-import cats.data.EitherT
 import com.google.common.base.Charsets
 import com.google.common.io.BaseEncoding
 import com.google.inject.ImplementedBy
 import play.api.http.Status
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._

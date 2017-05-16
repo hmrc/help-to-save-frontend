@@ -18,60 +18,58 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
 
-import cats.data.{EitherT, OptionT, ValidatedNel}
+import cats.data.{EitherT, ValidatedNel}
 import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.Inject
-import play.api.Logger
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
-import uk.gov.hmrc.helptosavefrontend.auth.HtsCompositePageVisibilityPredicate.twoFactorURI
+import play.api.mvc.{Action, AnyContent}
+import play.api.{Application, Logger}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.models.UserInfo
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.frontend.auth.AuthContext
-import uk.gov.hmrc.play.frontend.auth.connectors.domain.Accounts
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegisterController @Inject()(val sessionCacheConnector: SessionCacheConnector,
-                                   val messagesApi: MessagesApi,
-                                   eligibilityConnector: EligibilityConnector,
-                                   citizenDetailsConnector: CitizenDetailsConnector,
-                                   nSAndIConnector: NSIConnector) extends HelpToSaveController with I18nSupport {
+class RegisterController @Inject()(override val messagesApi: MessagesApi,
+                                   htsService: HelpToSaveService,
+                                   nSAndIConnector: NSIConnector,
+                                   val sessionCacheConnector: SessionCacheConnector,
+                                   implicit val app: Application)
+  extends HelpToSaveAuth(app) with I18nSupport {
 
-  val userInfoService = new UserInfoService(authConnector, citizenDetailsConnector)
+  def declaration: Action[AnyContent] = authorisedForHtsWithEnrolments {
+    implicit request ⇒
+      implicit userUrlWithNino ⇒
+        val userInfo = for {
+          userUrlWithNino <- EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
+          result <- checkEligibility(userUrlWithNino.path, userUrlWithNino.nino)
+        } yield result
 
-  def declaration =
-    AuthorisedHtsUserAction { implicit authContext ⇒
-      implicit request ⇒
-        validateUser(authContext).fold(
+        userInfo.fold(
           error ⇒ {
             Logger.error(s"Could not perform eligibility check: $error")
             InternalServerError("")
           }, _.fold(
-            Ok(views.html.core.not_eligible()))(
-            userDetails ⇒ {
+            Ok(views.html.core.not_eligible())) {
+            userDetails ⇒
               sessionCacheConnector.put(HTSSession(Some(userDetails)))
               Ok(views.html.register.declaration(userDetails))
-            }
-          )
+          }
         )
-    }
-
-  def getCreateAccountHelpToSave = AuthorisedHtsUserAction { implicit authContext =>
-    implicit request ⇒
-      Future.successful(Ok(uk.gov.hmrc.helptosavefrontend.views.html.register.create_account_help_to_save()))
   }
 
+  def getCreateAccountHelpToSave: Action[AnyContent] = authorisedForHts {
+    implicit request ⇒
+      Future.successful(Ok(views.html.register.create_account_help_to_save()))
+  }
 
-  def postCreateAccountHelpToSave = AuthorisedHtsUserAction { implicit authContext =>
+  def postCreateAccountHelpToSave: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
       val submissionResult = for {
         session ← retrieveUserInfo()
@@ -88,6 +86,11 @@ class RegisterController @Inject()(val sessionCacheConnector: SessionCacheConnec
         case Left(error) ⇒
           Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error))
       }
+  }
+
+  def accessDenied: Action[AnyContent] = Action.async {
+    implicit request ⇒
+      Future.successful(Ok(views.html.access_denied()))
   }
 
   private def prettyPrintSubmissionFailure(failure: SubmissionFailure): String =
@@ -125,26 +128,10 @@ class RegisterController @Inject()(val sessionCacheConnector: SessionCacheConnec
     * been performed and the eligibility check is positive. This returns [[None]]
     * if all the above has successfully been performed and the eligibility check is negative.
     */
-  private def validateUser(authContext: AuthContext)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] = for {
-    nino ← EitherT.fromOption[Future](retrieveNino(authContext), "Unable to retrieve NINO")
-    userInfo ← userInfoService.getUserInfo(authContext, nino)
-    eligible ← eligibilityConnector.checkEligibility(nino)
-  } yield eligible.fold(None, Some(userInfo))
+  private def checkEligibility(userDetailsUri: String, nino: String)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] =
+    for {
+      userInfo ← htsService.getUserInfo(userDetailsUri, nino)
+      eligible ← htsService.checkEligibility(nino)
+    } yield eligible.fold(None, Some(userInfo))
 
-
-  private def retrieveNino(authContext: AuthContext): Option[String] = {
-    def getNino(accounts: Accounts): Option[String] = (accounts.paye, accounts.tai, accounts.tcs, accounts.iht) match {
-      case (Some(paye), _, _, _) => Some(paye.nino.nino)
-      case (_, Some(tai), _, _) => Some(tai.nino.nino)
-      case (_, _, Some(tcs), _) => Some(tcs.nino.nino)
-      case (_, _, _, Some(iht)) => Some(iht.nino.nino)
-      case _ => None
-    }
-
-    getNino(authContext.principal.accounts)
-  }
-
-  def failedTwoFactor = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.twofactor.you_need_two_factor(twoFactorURI.toString)))
-  }
 }

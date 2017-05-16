@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,16 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages)
+package uk.gov.hmrc.helptosavefrontend.models
 
-@contentHeader = {
-  <h1>@heading</h1>
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core.ConfidenceLevel.L200
+import uk.gov.hmrc.auth.core.{AuthProviders, Enrolment}
+import uk.gov.hmrc.auth.core.Retrievals.{allEnrolments, userDetailsUri}
+
+object HtsAuth {
+
+  val NinoEnrolmentWithConfidence = Enrolment("HMRC-NI").withConfidenceLevel(L200)
+
+  val AuthProvider = AuthProviders(GovernmentGateway)
+
+  val HtsAuthRule = NinoEnrolmentWithConfidence and AuthProvider
+
+  val UserDetailsUrlWithAllEnrolments = userDetailsUri and allEnrolments
+
 }
-
-@mainContent = {
-  <p>@message</p>
-}
-
-@govuk_wrapper(appConfig = uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig, title = pageTitle, contentHeader = Some(contentHeader), mainContent = mainContent)

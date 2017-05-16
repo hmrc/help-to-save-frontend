@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.helptosavefrontend.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityResult
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -36,8 +36,6 @@ class EligibilityConnectorImpl extends EligibilityConnector with ServicesConfig 
 
   // TODO: read from config?
   private def serviceURL(nino: String) = s"help-to-save-eligibility-check/eligibilitycheck/$nino"
-
-  private val http = WSHttp
 
   override def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
     getResult(s"$helpToSaveEligibilityURL/${serviceURL(nino)}")
