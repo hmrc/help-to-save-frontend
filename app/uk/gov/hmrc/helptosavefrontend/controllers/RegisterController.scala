@@ -20,7 +20,9 @@ import javax.inject.Singleton
 
 import cats.data.{EitherT, ValidatedNel}
 import cats.instances.future._
+import cats.instances.option._
 import cats.syntax.either._
+import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
@@ -31,6 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -47,8 +50,9 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
     implicit request ⇒
       implicit userUrlWithNino ⇒
         val userInfo = for {
-          userUrlWithNino <- EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
-          result <- checkEligibility(userUrlWithNino.path, userUrlWithNino.nino)
+          userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
+          result ← checkEligibility(userUrlWithNino.path, userUrlWithNino.nino)
+          _      ← writeToKeyStore(result)
         } yield result
 
         userInfo.fold(
@@ -56,11 +60,8 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
             Logger.error(s"Could not perform eligibility check: $error")
             InternalServerError("")
           }, _.fold(
-            Ok(views.html.core.not_eligible())) {
-            userDetails ⇒
-              sessionCacheConnector.put(HTSSession(Some(userDetails)))
-              Ok(views.html.register.declaration(userDetails))
-          }
+            Ok(views.html.core.not_eligible())) (
+            userDetails ⇒ Ok(views.html.register.declaration(userDetails)))
         )
   }
 
@@ -113,6 +114,26 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
         _.toEither.leftMap(e ⇒ s"Invalid user details: ${e.toList.mkString(", ")}")
       )
     EitherT.fromEither[Future](nsiUserInfo)
+  }
+
+  /**
+    * Writes the user info to key-store if it exists and returns the associated [[CacheMap]]. If the user info
+    * is not defined, don't do anything and return [[None]]. Any errors during writing to key-store are
+    * captured as a [[String]] in the [[Either]].
+    */
+  def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future,String,Option[CacheMap]] = {
+    // write to key-store
+    val cacheMapOption: Option[Future[CacheMap]] =
+      userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details)))}
+
+    // use traverse to swap the option and future
+    val cacheMapFuture: Future[Option[CacheMap]] =
+      cacheMapOption.traverse[Future,CacheMap](identity)
+
+    EitherT(
+      cacheMapFuture.map[Either[String,Option[CacheMap]]](Right(_))
+        .recover{ case e ⇒ Left(s"Could not write to key-store: ${e.getMessage}")}
+    )
   }
 
   private def postToNSI(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier): EitherT[Future, String, SubmissionResult] =
