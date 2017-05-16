@@ -22,9 +22,8 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
-  features = Array("e2e-selenium-test/src/test/resources/features"),
+  features = Array("selenium-system-test/src/test/resources/features"),
   glue = Array("hts.steps"),
-  plugin = Array ("pretty", "html:target/cucumber", "json:target/cucumber.json"),
-  tags = Array("@wip")
+  plugin = Array ("pretty", "html:target/cucumber", "json:target/cucumber.json")
 )
-class Runner_WIP_E2ESeleniumTest {}
+class RunnerSeleniumSystemTest {}

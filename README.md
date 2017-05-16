@@ -7,8 +7,8 @@
 Frontend for application process for Help to Save. Runs on port 7000 when started locally by the service manager.
 
 ## Testing
-End-to-end Selenium tests are distinguished from unit tests by having `E2ESeleniumTest` in the relevant runner name. Selenium
-runners which are marked as WIP should contain string `WIP` in their name in addition to ending with `E2ESeleniumTest` .
+Selenium system tests are distinguished from unit tests by having `SeleniumSystemTest` in the relevant runner name. Selenium
+runners which are marked as WIP should contain string `WIP` in their name in addition to ending with `SeleniumSystemTest`.
 
 The unit tests can be run by running
 ```
@@ -26,5 +26,7 @@ tests marked as `WIP` run
  ```
  sbt -Dhost=${HOST} -Dbrowser=${BROWSER} 'selenium-wip:test'
 ```
-instead. The Selenium tests can also be run using the `run_e2e_selenium_test.sh` script
-provided (see script for details).
+instead. The Selenium tests can also be run using the `run_selenium_system_test.sh` script
+provided (see script for details). Here's an example:
+
+./run_selenium_system_test.sh dev phantomjs

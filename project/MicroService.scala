@@ -23,8 +23,8 @@ trait MicroService {
   lazy val plugins : Seq[Plugins] = Seq.empty
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
-  def seleniumTestFilter(name: String): Boolean = name.endsWith("E2ESeleniumTest") && !name.contains("WIP")
-  def seleniumWIPTestFilter(name: String): Boolean = name.endsWith("E2ESeleniumTest") && name.contains("WIP")
+  def seleniumTestFilter(name: String): Boolean = name.endsWith("SeleniumSystemTest") && !name.contains("WIP")
+  def seleniumWIPTestFilter(name: String): Boolean = name.endsWith("SeleniumSystemTest") && name.contains("WIP")
   def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name) && !seleniumWIPTestFilter(name)
 
   lazy val SeleniumTest = config("selenium") extend(Test)
@@ -60,7 +60,7 @@ trait MicroService {
     .settings(
       inConfig(SeleniumTest)(Defaults.testTasks),
       inConfig(SeleniumTestWIP)(Defaults.testTasks),
-      unmanagedSourceDirectories in Test += baseDirectory.value / "e2e-selenium-test",
+      unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test",
       testOptions in Test := Seq(Tests.Filter(unitTestFilter)),
       testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter)),
       testOptions in SeleniumTestWIP := Seq(Tests.Filter(seleniumWIPTestFilter))

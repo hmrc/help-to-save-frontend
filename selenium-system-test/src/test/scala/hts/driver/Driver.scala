@@ -60,7 +60,7 @@ object Driver {
 
   private val isJsEnabled: Boolean = true
 
-  private val driverDirectory: String = "e2e-selenium-test/drivers"
+  private val driverDirectory: String = "selenium-system-test/drivers"
 
   private def createGeckoDriver(): WebDriver = {
     if (isMac) {
