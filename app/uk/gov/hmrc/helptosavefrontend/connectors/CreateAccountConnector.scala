@@ -21,24 +21,25 @@ import javax.inject.Singleton
 import com.google.common.base.Charsets
 import com.google.common.io.BaseEncoding
 import com.google.inject.ImplementedBy
+import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.WSHttp
+import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.models.UserInfo
+import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
 import uk.gov.hmrc.play.http.ws.WSPost
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[NSIConnectorImpl])
-trait NSIConnector {
-  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier,ex :ExecutionContext): Future[SubmissionResult]
+@ImplementedBy(classOf[CreateAccountConnectorImpl])
+trait CreateAccountConnector {
+  def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier,ex :ExecutionContext): Future[SubmissionResult]
 }
 
-object NSIConnector {
+object CreateAccountConnector {
 
   sealed trait SubmissionResult
   case object SubmissionSuccess extends SubmissionResult
@@ -49,32 +50,29 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl extends NSIConnector with ServicesConfig {
+class CreateAccountConnectorImpl extends CreateAccountConnector with ServicesConfig {
 
-  val nsiUrl: String = baseUrl("nsi")
-  val nsiUrlEnd: String = getString("microservice.services.nsi.url")
-
-  val encodedAuthorisation: String = {
-    val userName: String = getString("microservice.services.nsi.username")
-    val password: String = getString("microservice.services.nsi.password")
-    BaseEncoding.base64().encode((userName + ":" + password).getBytes(Charsets.UTF_8))
-  }
-
+  val helpToSaveUrl: String = baseUrl("help-to-save-eligibility")
+  val createAccountUrlEnd: String = getString("microservice.services.help-to-save-eligibility.url")
   val http: WSPost = WSHttp
-
-  override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier,ex : ExecutionContext): Future[SubmissionResult]= {
-      http.POST[NSIUserInfo, HttpResponse](s"$nsiUrl/$nsiUrlEnd", userInfo,
-        headers = Seq(("Authorization", encodedAuthorisation))).map { response =>
+  val url = s"$helpToSaveUrl/$createAccountUrlEnd"
+  override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier,ex : ExecutionContext): Future[SubmissionResult]= {
+    Logger.debug("Creating NSI Account " + url)
+      http.POST[UserInfo, HttpResponse](url, userInfo).map { response =>
         response.status match {
           case Status.CREATED ⇒
             SubmissionSuccess
-
           case Status.BAD_REQUEST  ⇒
+            Logger.error("Submission Failure to NSI")
             Json.fromJson[SubmissionFailure](response.json) match {
-            case JsSuccess(failure, _) ⇒ failure
-            case e: JsError ⇒ SubmissionFailure(None, s"Could not NSI errors",e.prettyPrint())
+            case JsSuccess(failure, _) ⇒
+              failure
+            case e: JsError ⇒
+              SubmissionFailure(None, s"Could not NSI errors",e.prettyPrint())
           }
-          case other ⇒ SubmissionFailure(None, s"Bad Status", other.toString)
+          case other ⇒
+            Logger.warn("Failed post to NSI " + other.toString)
+            SubmissionFailure(None, s"Bad Status", other.toString)
         }
       }
   }
