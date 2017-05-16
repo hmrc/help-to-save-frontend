@@ -65,12 +65,12 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
         )
   }
 
-  def getCreateAccountHelpToSave: Action[AnyContent] = authorisedForHts {
+  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
       Future.successful(Ok(views.html.register.create_account_help_to_save()))
   }
 
-  def postCreateAccountHelpToSave: Action[AnyContent] = authorisedForHts {
+  def createAccountHelpToSave: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
       val submissionResult = for {
         session ← retrieveUserInfo()

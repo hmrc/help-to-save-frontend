@@ -15,24 +15,26 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form, button, submit}
 @()(implicit request: Request[_], messages: Messages)
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.create_account_help_to_save.title"), bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.create_account_help_to_save.title"), bodyClasses = None) {
     <header class="page-header text">
         <h1>@Messages("hts.register.create_account_help_to_save.header-page")</h1>
     </header>
-    <p>@Messages("hts.register.create_account_help_to_save.par-1")<p>
+    <p>
+    @Messages("hts.register.create_account_help_to_save.par-1") <p>
 <ul class="bullets">
     <li>
-        @Messages("hts.register.create_account_help_to_save.bullet-1")
+    @Messages("hts.register.create_account_help_to_save.bullet-1")
     </li>
     <li>
-        @Messages("hts.register.create_account_help_to_save.bullet-2")
+    @Messages("hts.register.create_account_help_to_save.bullet-2")
     </li>
-</ul>
-    @form(routes.RegisterController.postCreateAccountHelpToSave()){
-        @submit(){@Messages("hts.register.create_account_help_to_save.accept-label")}
-    }
-    <a href=@routes.RegisterController.postCreateAccountHelpToSave() class="button">@Messages("hts.register.create_account_help_to_save.accept-label")</a>
-    <a href="https://www.gov.uk/" class="button button--secondary">@Messages("hts.register.create_account_help_to_save.cancel-label")</a>
+</ul> <div class="grid-layout grid-layout--stacked">
+        <div class="grid-layout__column grid-layout__column--1-2">
+            <a href=@routes.RegisterController.createAccountHelpToSave.url class="button">@Messages("hts.register.create_account_help_to_save.accept-label")</a>
+        </div>
+        <div class="grid-layout__column grid-layout__column--1-2">
+            <a href="https://www.gov.uk/" class="button button--secondary">@Messages("hts.register.create_account_help_to_save.cancel-label")</a>
+        </div>
+    </div>
 }

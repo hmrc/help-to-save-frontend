@@ -149,7 +149,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
 
     "the getCreateAccountHelpToSave return 200" in {
       mockPlayAuthWithNoRetrievals()
-      val result = register.getCreateAccountHelpToSave(FakeRequest())
+      val result = register.getCreateAccountHelpToSavePage(FakeRequest())
       status(result) shouldBe Status.OK
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
