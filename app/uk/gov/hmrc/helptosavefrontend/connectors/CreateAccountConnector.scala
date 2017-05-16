@@ -34,14 +34,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[CreateAccountConnectorImpl])
 trait CreateAccountConnector {
-  def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier,ex :ExecutionContext): Future[SubmissionResult]
+  def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult]
 }
 
 object CreateAccountConnector {
 
   sealed trait SubmissionResult
+
   case object SubmissionSuccess extends SubmissionResult
-  case class SubmissionFailure(errorMessageId:Option[String], errorMessage:String, errorDetail:String)  extends SubmissionResult
+
+  case class SubmissionFailure(errorMessageId: Option[String], errorMessage: String, errorDetail: String) extends SubmissionResult
 
   implicit val submissionFailureFormat: Format[SubmissionFailure] = Json.format[SubmissionFailure]
 
@@ -54,24 +56,25 @@ class CreateAccountConnectorImpl extends CreateAccountConnector with ServicesCon
   val createAccountUrlEnd: String = getString("microservice.services.help-to-save-eligibility.url")
   val http: WSPost = WSHttp
   val url = s"$helpToSaveUrl/$createAccountUrlEnd"
-  override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier,ex : ExecutionContext): Future[SubmissionResult]= {
-    Logger.debug("Creating NSI Account " + url)
-      http.POST[UserInfo, HttpResponse](url, userInfo).map { response =>
-        response.status match {
-          case Status.CREATED ⇒
-            SubmissionSuccess
-          case Status.BAD_REQUEST  ⇒
-            Logger.error("Submission Failure to NSI")
-            Json.fromJson[SubmissionFailure](response.json) match {
+
+  override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
+    Logger.debug("Creating NSI Account for user " + userInfo.email)
+    http.POST[UserInfo, HttpResponse](url, userInfo).map { response =>
+      response.status match {
+        case Status.CREATED ⇒
+          SubmissionSuccess
+        case Status.BAD_REQUEST ⇒
+          Logger.error("Submission Failure to NSI")
+          Json.fromJson[SubmissionFailure](response.json) match {
             case JsSuccess(failure, _) ⇒
               failure
             case e: JsError ⇒
-              SubmissionFailure(None, s"Could not NSI errors",e.prettyPrint())
+              SubmissionFailure(None, s"Could not create NSI account", e.prettyPrint())
           }
-          case other ⇒
-            Logger.warn("Failed post to NSI " + other.toString)
-            SubmissionFailure(None, s"Bad Status", other.toString)
-        }
+        case other ⇒
+          Logger.warn("Failed post to NSI " + other.toString)
+          SubmissionFailure(None, s"Bad Status", other.toString)
       }
+    }
   }
 }

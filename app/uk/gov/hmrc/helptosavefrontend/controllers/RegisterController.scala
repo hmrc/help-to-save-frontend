@@ -51,7 +51,7 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
         val userInfo = for {
           userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
           result ← checkEligibility(userUrlWithNino.path, userUrlWithNino.nino)
-          _      ← writeToKeyStore(result)
+          _ ← writeToKeyStore(result)
         } yield result
 
         userInfo.fold(
@@ -59,7 +59,7 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
             Logger.error(s"Could not perform eligibility check: $error")
             InternalServerError("")
           }, _.fold(
-            Ok(views.html.core.not_eligible())) (
+            Ok(views.html.core.not_eligible()))(
             userDetails ⇒ Ok(views.html.register.declaration(userDetails)))
         )
   }
@@ -72,7 +72,7 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
   def postCreateAccountHelpToSave: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
       val submissionResult = for {
-        userInfo ← retrieveUserInfo().map(_.userInfo).subflatMap(_.fold[Either[String,UserInfo]](Left("No User INfo"))(Right(_)))
+        userInfo ← retrieveUserInfo()
         submissionResult ← postToNSI(userInfo)
       //todo update our backend with a boolean value letting hmrc know a hts account was created.
       } yield submissionResult
@@ -95,30 +95,33 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
   private def prettyPrintSubmissionFailure(failure: SubmissionFailure): String =
     s"Submission to NSI failed: ${failure.errorMessage}: ${failure.errorDetail} (id: ${failure.errorMessageId.getOrElse("-")})"
 
-  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, HTSSession] =
-    EitherT[Future, String, HTSSession](
-      sessionCacheConnector.get.map(_.fold[Either[String, HTSSession]](
-        Left("Session cache did not contain user info :("))(Right.apply))
-    )
 
+  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, UserInfo] = {
+    val session = sessionCacheConnector.get
+    val userInfo = session.map(_.flatMap(_.userInfo))
+
+    EitherT(
+      userInfo.map(_.fold[Either[String, UserInfo]](
+        Left("Session cache did not contain session data"))(Right(_))))
+  }
 
   /**
     * Writes the user info to key-store if it exists and returns the associated [[CacheMap]]. If the user info
     * is not defined, don't do anything and return [[None]]. Any errors during writing to key-store are
     * captured as a [[String]] in the [[Either]].
     */
-  def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future,String,Option[CacheMap]] = {
+  def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
     // write to key-store
     val cacheMapOption: Option[Future[CacheMap]] =
-      userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details)))}
+      userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
 
     // use traverse to swap the option and future
     val cacheMapFuture: Future[Option[CacheMap]] =
-      cacheMapOption.traverse[Future,CacheMap](identity)
+      cacheMapOption.traverse[Future, CacheMap](identity)
 
     EitherT(
-      cacheMapFuture.map[Either[String,Option[CacheMap]]](Right(_))
-        .recover{ case e ⇒ Left(s"Could not write to key-store: ${e.getMessage}")}
+      cacheMapFuture.map[Either[String, Option[CacheMap]]](Right(_))
+        .recover { case e ⇒ Left(s"Could not write to key-store: ${e.getMessage}") }
     )
   }
 

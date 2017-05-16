@@ -59,12 +59,12 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
-  val mockNsAndIConnector: CreateAccountConnector = mock[CreateAccountConnector]
+  val mockCreateAccountConnector: CreateAccountConnector = mock[CreateAccountConnector]
 
   val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
-    mockNsAndIConnector,
+    mockCreateAccountConnector,
     mockSessionCacheConnector,
     fakeApplication) {
     override lazy val authConnector = mockAuthConnector
@@ -87,13 +87,13 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       .expects(*, *, *)
       .returning(Future.successful(cacheMap))
 
-  def mockSessionCacheConnectorGet(mockHtsSession:Option[HTSSession]): Unit =
+  def mockSessionCacheConnectorGet(mockHtsSession: Option[HTSSession]): Unit =
     (mockSessionCacheConnector.get(_: HeaderCarrier, _: Reads[HTSSession]))
       .expects(*, *)
       .returning(Future.successful(mockHtsSession))
 
   def mockCreateAccount(nsiResponse: SubmissionResult): Unit =
-    (mockNsAndIConnector.createAccount(_: UserInfo)(_: HeaderCarrier, _: ExecutionContext))
+    (mockCreateAccountConnector.createAccount(_: UserInfo)(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *, *)
       .returning(Future.successful(nsiResponse))
 
