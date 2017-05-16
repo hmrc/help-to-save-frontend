@@ -19,22 +19,16 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import cats.data.EitherT
-import cats.data.{EitherT, ValidatedNel}
 import cats.instances.future._
 import cats.instances.option._
-import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.Action
-import uk.gov.hmrc.helptosavefrontend.auth.HtsCompositePageVisibilityPredicate.twoFactorURI
-import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}
+import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.UserInfoService
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
@@ -106,10 +100,6 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
       sessionCacheConnector.get.map(_.fold[Either[String, HTSSession]](
         Left("Session cache did not contain user info :("))(Right.apply))
     )
-
-
-  private def postToNSI(userInfo: UserInfo)(implicit hc: HeaderCarrier): EitherT[Future, String, SubmissionResult] =
-    EitherT[Future, String, SubmissionResult](nSAndIConnector.createAccount(userInfo).map(Right(_)))
 
 
   /**
