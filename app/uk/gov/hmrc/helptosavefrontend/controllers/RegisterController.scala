@@ -110,7 +110,7 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
     * is not defined, don't do anything and return [[None]]. Any errors during writing to key-store are
     * captured as a [[String]] in the [[Either]].
     */
-  def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
+  private def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
     // write to key-store
     val cacheMapOption: Option[Future[CacheMap]] =
       userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
@@ -128,17 +128,6 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
   private def postToNSI(userInfo: UserInfo)(implicit hc: HeaderCarrier): EitherT[Future, String, SubmissionResult] =
     EitherT[Future, String, SubmissionResult](nSAndIConnector.createAccount(userInfo).map(Right(_)))
 
-
-  /**
-    * Does the following:
-    * - get the user's NINO
-    * - get the user's information
-    * - check's if the user is eligible for HTS
-    *
-    * This returns a defined [[UserInfo]] if all of the above has successfully
-    * been performed and the eligibility check is positive. This returns [[None]]
-    * if all the above has successfully been performed and the eligibility check is negative.
-    */
   private def checkEligibility(userDetailsUri: String, nino: String)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] =
     for {
       userInfo ← htsService.getUserInfo(userDetailsUri, nino)
