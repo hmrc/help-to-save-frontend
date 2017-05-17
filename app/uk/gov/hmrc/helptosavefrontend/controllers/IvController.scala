@@ -18,16 +18,16 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.{Application, Logger}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
+import play.api.{Application, Logger}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
+import uk.gov.hmrc.helptosavefrontend.views.html.access_denied
 import uk.gov.hmrc.helptosavefrontend.views.html.iv.failure._
 import uk.gov.hmrc.helptosavefrontend.views.html.iv.success
-import uk.gov.hmrc.helptosavefrontend.views.html.twofactor.you_need_two_factor
 
 import scala.concurrent.Future
 
@@ -100,7 +100,7 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
         case None =>
           // No journeyId signifies subsequent 2FA failure
           Logger.warn(s"response from identityVerificationFrontendService did not contain token or journeyId param")
-          Future.successful(Unauthorized(you_need_two_factor(TwoFactorUrl)))
+          Future.successful(Unauthorized(access_denied()))
       }
   }
 }

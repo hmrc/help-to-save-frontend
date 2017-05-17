@@ -37,18 +37,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val HtsDeclarationUrl = getConfString("help-to-save-declaration.url", "")
 
-  private val companyAuthFrontend = getConfString("company-auth.url", throw new RuntimeException("Company auth url required"))
-  private val companyAuthSignInPath = getConfString("company-auth.sign-in-path", "")
-  val companySignInUrl: String = companyAuthFrontend + companyAuthSignInPath
-
-  val twoFactorUrl: String = getConfString("two-factor.url", "")
   val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
-  val verifySignIn = getConfString("verify-sign-in.url", "")
   val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
-
-  val TwoFactorFailedUrl = getConfString("two-factor-failed.url", "")
-
-  val IdentityVerificationURL = getConfString("identity-verification-frontend.url", "")
 
   val IdentityCallbackUrl = getConfString("identity-callback.url", "")
 
@@ -57,12 +47,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
       s"completionURL=${URLEncoder.encode(IdentityCallbackUrl, "UTF-8")}&" +
       s"failureURL=${URLEncoder.encode(IdentityCallbackUrl, "UTF-8")}" +
       s"&confidenceLevel=200")
-      .toString
-
-  val TwoFactorUrl: String =
-    new URI(s"$twoFactorUrl?" +
-      s"continue=${URLEncoder.encode(HtsDeclarationUrl, "UTF-8")}&" +
-      s"failure=${URLEncoder.encode(TwoFactorFailedUrl, "UTF-8")}")
       .toString
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
