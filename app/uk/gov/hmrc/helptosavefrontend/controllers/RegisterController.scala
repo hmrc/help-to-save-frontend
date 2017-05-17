@@ -18,30 +18,29 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
 
-import cats.data.{EitherT, ValidatedNel}
+import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
-import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class RegisterController @Inject()(override val messagesApi: MessagesApi,
                                    htsService: HelpToSaveService,
-                                   nSAndIConnector: NSIConnector,
+                                   nSAndIConnector: CreateAccountConnector,
                                    val sessionCacheConnector: SessionCacheConnector,
                                    implicit val app: Application)
   extends HelpToSaveAuth(app) with I18nSupport {
@@ -52,7 +51,7 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
         val userInfo = for {
           userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
           result ← checkEligibility(userUrlWithNino.path, userUrlWithNino.nino)
-          _      ← writeToKeyStore(result)
+          _ ← writeToKeyStore(result)
         } yield result
 
         userInfo.fold(
@@ -60,7 +59,7 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
             Logger.error(s"Could not perform eligibility check: $error")
             InternalServerError("")
           }, _.fold(
-            Ok(views.html.core.not_eligible())) (
+            Ok(views.html.core.not_eligible()))(
             userDetails ⇒ Ok(views.html.register.declaration(userDetails)))
         )
   }
@@ -73,8 +72,7 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
   def postCreateAccountHelpToSave: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
       val submissionResult = for {
-        session ← retrieveUserInfo()
-        userInfo ← validateUserInfo(session)
+        userInfo ← retrieveUserInfo()
         submissionResult ← postToNSI(userInfo)
       //todo update our backend with a boolean value letting hmrc know a hts account was created.
       } yield submissionResult
@@ -97,23 +95,14 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
   private def prettyPrintSubmissionFailure(failure: SubmissionFailure): String =
     s"Submission to NSI failed: ${failure.errorMessage}: ${failure.errorDetail} (id: ${failure.errorMessageId.getOrElse("-")})"
 
-  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, HTSSession] =
-    EitherT[Future, String, HTSSession](
-      sessionCacheConnector.get.map(_.fold[Either[String, HTSSession]](
-        Left("Session cache did not contain user info :("))(Right.apply))
-    )
 
+  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, UserInfo] = {
+    val session = sessionCacheConnector.get
+    val userInfo = session.map(_.flatMap(_.userInfo))
 
-  private def validateUserInfo(session: HTSSession)(implicit ex: ExecutionContext): EitherT[Future, String, NSIUserInfo] = {
-    val userInfo: Option[ValidatedNel[String, NSIUserInfo]] =
-      session.userInfo.map(NSIUserInfo(_))
-
-    val nsiUserInfo: Either[String, NSIUserInfo] =
-      userInfo.fold[Either[String, NSIUserInfo]](
-        Left("No UserInfo In session :("))(
-        _.toEither.leftMap(e ⇒ s"Invalid user details: ${e.toList.mkString(", ")}")
-      )
-    EitherT.fromEither[Future](nsiUserInfo)
+    EitherT(
+      userInfo.map(_.fold[Either[String, UserInfo]](
+        Left("Session cache did not contain session data"))(Right(_))))
   }
 
   /**
@@ -121,23 +110,24 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
     * is not defined, don't do anything and return [[None]]. Any errors during writing to key-store are
     * captured as a [[String]] in the [[Either]].
     */
-  def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future,String,Option[CacheMap]] = {
+  def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
     // write to key-store
     val cacheMapOption: Option[Future[CacheMap]] =
-      userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details)))}
+      userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
 
     // use traverse to swap the option and future
     val cacheMapFuture: Future[Option[CacheMap]] =
-      cacheMapOption.traverse[Future,CacheMap](identity)
+      cacheMapOption.traverse[Future, CacheMap](identity)
 
     EitherT(
-      cacheMapFuture.map[Either[String,Option[CacheMap]]](Right(_))
-        .recover{ case e ⇒ Left(s"Could not write to key-store: ${e.getMessage}")}
+      cacheMapFuture.map[Either[String, Option[CacheMap]]](Right(_))
+        .recover { case e ⇒ Left(s"Could not write to key-store: ${e.getMessage}") }
     )
   }
 
-  private def postToNSI(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier): EitherT[Future, String, SubmissionResult] =
+  private def postToNSI(userInfo: UserInfo)(implicit hc: HeaderCarrier): EitherT[Future, String, SubmissionResult] =
     EitherT[Future, String, SubmissionResult](nSAndIConnector.createAccount(userInfo).map(Right(_)))
+
 
   /**
     * Does the following:
@@ -154,5 +144,4 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
       userInfo ← htsService.getUserInfo(userDetailsUri, nino)
       eligible ← htsService.checkEligibility(nino)
     } yield eligible.fold(None, Some(userInfo))
-
 }

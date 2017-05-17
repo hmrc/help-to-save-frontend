@@ -16,13 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import com.google.common.base.Charsets
-import com.google.common.io.BaseEncoding
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.models.validUserInfo
 import uk.gov.hmrc.play.http.ws.WSPost
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
@@ -31,56 +29,52 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 
-class NSIConnectorImplSpec  extends UnitSpec with WithFakeApplication with MockFactory {
+class CreateAccountConnectorSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   val mockHTTPPost = mock[WSPost]
 
-  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl{
+  lazy val testCreateAccountConnectorImpl = new CreateAccountConnectorImpl {
     override val http = mockHTTPPost
   }
-   implicit  val hc = HeaderCarrier()
-    implicit val ex = fakeApplication.injector.instanceOf[ExecutionContext]
-   val  config = fakeApplication.configuration.underlying
+  implicit val hc = HeaderCarrier()
+  implicit val ex = fakeApplication.injector.instanceOf[ExecutionContext]
+  val config = fakeApplication.configuration.underlying
 
-  val encodedAuthorisation: String = {
-    val userName: String = config.getString("microservice.services.nsi.username")
-    val password: String = config.getString("microservice.services.nsi.password")
-    BaseEncoding.base64().encode((userName + ":" + password).getBytes(Charsets.UTF_8))
-  }
+
   val baseUrl: String = {
-    val port =config.getString("microservice.services.nsi.port")
-    val host = config.getString("microservice.services.nsi.host")
+    val port = config.getString("microservice.services.help-to-save-eligibility.port")
+    val host = config.getString("microservice.services.help-to-save-eligibility.host")
     s"http://$host:$port"
   }
-  val nsiUrlEnd: String = config.getString("microservice.services.nsi.url")
- val url = s"$baseUrl/$nsiUrlEnd"
+  val nsiUrlEnd: String = config.getString("microservice.services.help-to-save-eligibility.url")
+  val url = s"$baseUrl/$nsiUrlEnd"
 
   def mockCreateAccount[I](body: I)(result: HttpResponse): Unit =
-    (mockHTTPPost.POST[I,HttpResponse](
-      _:String, _: I,_:Seq[(String,String)]
-    )( _: Writes[I],_ : HttpReads[HttpResponse],_:HeaderCarrier))
-      .expects(url, body,Seq(("Authorization", encodedAuthorisation)),*,*,*)
+    (mockHTTPPost.POST[I, HttpResponse](
+      _: String, _: I, _: Seq[(String, String)]
+    )(_: Writes[I], _: HttpReads[HttpResponse], _: HeaderCarrier))
+      .expects(url, body, *, *, *, *)
       .returning(Future.successful(result))
 
   "the createAccount Method" must {
     "Return a SubmissionSuccess when the status is Created" in {
-      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.CREATED))
-      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+      mockCreateAccount(validUserInfo)(HttpResponse(Status.CREATED))
+      val result = testCreateAccountConnectorImpl.createAccount(validUserInfo)
       Await.result(result, 3.seconds) shouldBe SubmissionSuccess
     }
 
     "Return a SubmissionFailure when the status is BAD_REQUEST" in {
-      val submissionFailure = SubmissionFailure(None,"I am a error message","I am a errorDetail")
-      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.BAD_REQUEST,
+      val submissionFailure = SubmissionFailure(None, "I am a error message", "I am a errorDetail")
+      mockCreateAccount(validUserInfo)(HttpResponse(Status.BAD_REQUEST,
         Some(Json.toJson(submissionFailure))))
-      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+      val result = testCreateAccountConnectorImpl.createAccount(validUserInfo)
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
 
     "Return a SubmissionFailure when the status is anything else" in {
       val submissionFailure = SubmissionFailure(None, s"Bad Status", Status.BAD_GATEWAY.toString)
-      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.BAD_GATEWAY))
-      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+      mockCreateAccount(validUserInfo)(HttpResponse(Status.BAD_GATEWAY))
+      val result = testCreateAccountConnectorImpl.createAccount(validUserInfo)
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
   }

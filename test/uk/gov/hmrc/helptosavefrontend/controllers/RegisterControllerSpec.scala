@@ -22,12 +22,12 @@ import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Reads, Writes}
-import play.api.mvc.{Result => PlayResult}
+import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionResult
+import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.SubmissionResult
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -59,12 +59,12 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
   val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
   val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
-  val mockNsAndIConnector: NSIConnector = mock[NSIConnector]
+  val mockCreateAccountConnector: CreateAccountConnector = mock[CreateAccountConnector]
 
   val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
-    mockNsAndIConnector,
+    mockCreateAccountConnector,
     mockSessionCacheConnector,
     fakeApplication) {
     override lazy val authConnector = mockAuthConnector
@@ -87,14 +87,14 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       .expects(*, *, *)
       .returning(Future.successful(cacheMap))
 
-  def mockSessionCacheConnectorGet(mockHtsSession:Option[HTSSession]): Unit =
+  def mockSessionCacheConnectorGet(mockHtsSession: Option[HTSSession]): Unit =
     (mockSessionCacheConnector.get(_: HeaderCarrier, _: Reads[HTSSession]))
       .expects(*, *)
       .returning(Future.successful(mockHtsSession))
 
   def mockCreateAccount(nsiResponse: SubmissionResult): Unit =
-    (mockNsAndIConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(validNSIUserInfo, *, *)
+    (mockCreateAccountConnector.createAccount(_: UserInfo)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *, *)
       .returning(Future.successful(nsiResponse))
 
   def mockPlayAuthWithRetrievals[A, B](predicate: Predicate, retrieval: Retrieval[A ~ B])(result: A ~ B): Unit =
