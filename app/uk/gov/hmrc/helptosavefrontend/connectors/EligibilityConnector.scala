@@ -35,7 +35,7 @@ class EligibilityConnectorImpl extends EligibilityConnector with ServicesConfig 
   private val helpToSaveEligibilityURL: String = baseUrl("help-to-save-eligibility")
 
   // TODO: read from config?
-  private def serviceURL(nino: String) = s"help-to-save-eligibility-check/eligibilitycheck/$nino"
+  private def serviceURL(nino: String) = s"help-to-save/eligibilitycheck/$nino"
 
   override def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
     getResult(s"$helpToSaveEligibilityURL/${serviceURL(nino)}")
