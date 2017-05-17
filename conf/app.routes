@@ -1,13 +1,12 @@
 # microservice specific routes
 
-GET        /apply                                 @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getApplyHelpToSave
-GET        /about                                 @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave
-GET        /eligibility                           @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getEligibilityHelpToSave
+GET        /apply                                   @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getApplyHelpToSave
+GET        /about                                   @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave
+GET        /eligibility                             @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getEligibilityHelpToSave
 
-GET        /register/create-an-account             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSave
-POST       /register/create-an-account             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.postCreateAccountHelpToSave
+GET        /register/create-an-account              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
+GET        /register/nsi                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
+GET        /register/declaration                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.declaration
+GET        /register/identity-check-complete        @uk.gov.hmrc.helptosavefrontend.controllers.IvController.showUpliftJourneyOutcome
 
-GET        /register/declaration                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.declaration
-GET        /register/identity-check-complete      @uk.gov.hmrc.helptosavefrontend.controllers.IvController.showUpliftJourneyOutcome
-
-GET        /register/access-denied                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.accessDenied
+GET        /register/access-denied                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.accessDenied
