@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.services.userinfo
+package uk.gov.hmrc.helptosavefrontend.services
 
 import java.time.LocalDate
 
@@ -26,8 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.{Citize
 import uk.gov.hmrc.helptosavefrontend.connectors.UserDetailsConnector.UserDetailsResponse
 import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, UserDetailsConnector}
 import uk.gov.hmrc.helptosavefrontend.models.{Address, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.services.userinfo.HelpToSaveServiceSpec.{randomCitizenDetailsResponse, randomUserDetailsResponse}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceSpec.{randomCitizenDetailsResponse, randomUserDetailsResponse}
 import uk.gov.hmrc.helptosavefrontend.testutil.sample
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.http.HeaderCarrier
