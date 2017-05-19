@@ -82,10 +82,10 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
       case _: InsufficientConfidenceLevel ⇒
         toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
       case ex: InternalError              ⇒
-        Logger.error(s"could not authenticate user due to: $ex")
+        Logger.error(s"could not authenticate user due to: ${ex.reason}")
         InternalServerError("")
       case ex: AuthorisationException     ⇒
-        Logger.warn(s"access denied to user due to: $ex")
+        Logger.error(s"access denied to user due to: ${ex.reason}")
         SeeOther(routes.RegisterController.accessDenied().url)
       case ex                             ⇒
         Logger.error(s"could not authenticate user due to: $ex")

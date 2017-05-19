@@ -26,8 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConne
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.views.html.access_denied
-import uk.gov.hmrc.helptosavefrontend.views.html.iv.failure._
-import uk.gov.hmrc.helptosavefrontend.views.html.iv.success
+import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 
 import scala.concurrent.Future
 
@@ -48,7 +47,7 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
         case Some(id) ⇒
           ivConnector.getJourneyStatus(JourneyId(id)).map {
             case Some(Success) ⇒
-              Ok(success.iv_success(HtsDeclarationUrl))
+              Ok(iv_success(HtsDeclarationUrl))
 
             case Some(Incomplete) ⇒
               //The journey has not been completed yet.
