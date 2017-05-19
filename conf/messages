@@ -145,9 +145,6 @@ hts.register.create_account_help_to_save.bullet-1=you’'re only allowed one acc
 hts.register.create_account_help_to_save.bullet-2=you’'ll need to enter your bank details to access your account
 hts.register.create_account_help_to_save.accept-label=Accept and create account
 hts.register.create_account_help_to_save.cancel-label=Exit without creating account
-hts.two_factor_failed=You need 2-step verification to use Help to Save Account
-hts.two_factor.back_to_2step_verification=Back to 2-step verification
-hts.two_factor_can_only_access_service_if_have_mobile_phone=You can only access this service if you have a mobile phone or have access to one.
 hts.iv.identity_verification.title=Help to Save Identity verification
 hts.iv.cant_confirm_your_identity=We can''t to confirm your identity
 hts.iv.were_unable_to_confirm_your_identity=We''re unable to confirm your identity
@@ -162,7 +159,6 @@ hts.iv.please_try_again_in_5_minutes=Please try again in 5 minutes
 hts.iv.try_again=Try again
 hts.iv.you_cant_access_this_service_because_hmrc_doesnt_know_enough_=You can''t access this service because HM Revenue and Customs (HMRC) doesn''t know enough about you to be able to confirm your identity.<br /><br />If you have a query you can <a href="{0}" target="_blank">contact HMRC (opens in a new window)</a> to get help.
 hts.iv.to_help_protect_data_you_can_access_HTS_once_confirmed_identity=To help protect your data, you can access your help to save account once we''ve confirmed who you are.
-hts.iv.two_factor_authentication_title=Help to Save two factor authentication
 hts.iv.we_ve_confirmed_your_identity=We''ve now confirmed your identity
 hts.iv.you_now_access_hts_account=You can now access your help to save account.
 
