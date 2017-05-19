@@ -36,7 +36,7 @@ package object models {
     } yield Address(Some(line1), Some(line2), Some(line3), Some(line4), Some(line5),
     Some(postcode), Some(country)))
 
-  implicit val userDetailsArb =
+  implicit val userInfoArb =
     Arbitrary(for{
       name ← Gen.alphaStr
       surname ← Gen.alphaStr
@@ -46,26 +46,6 @@ package object models {
       address ← addressArb.arbitrary
     } yield UserInfo(name, surname, nino, dob, email, address))
 
-  def randomUserDetails(): UserInfo = sample(userDetailsArb)
+  def randomUserInfo(): UserInfo = sample(userInfoArb)
 
-
-  /**
-    * Valid user details which will pass NSI validation checks
-    */
-  val validUserInfo = {
-    val (forename, surname) = "Tyrion" → "Lannister"
-    val dateOfBirth = LocalDate.ofEpochDay(0L)
-    val addressLine1 = "Casterly Rock"
-    val addressLine2 = "The Westerlands"
-    val addressLine3 = "Westeros"
-    val postcode = "BA148FY"
-    val country = "GB"
-    val address = Address(Some(addressLine1), Some(addressLine2), Some(addressLine3),
-      None, None, Some(postcode), Some(country))
-    val nino = "WM123456C"
-    val email = "tyrion_lannister@gmail.com"
-
-    val userInfo = UserInfo(forename, surname, nino, dateOfBirth, email, address)
-    userInfo
-  }
 }

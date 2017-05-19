@@ -18,63 +18,21 @@ package uk.gov.hmrc.helptosavefrontend.services
 
 import javax.inject.Singleton
 
-import cats.data.{EitherT, ValidatedNel}
-import cats.instances.future._
-import cats.syntax.all._
 import com.google.inject.Inject
-import uk.gov.hmrc.helptosavefrontend.connectors.CitizenDetailsConnector.CitizenDetailsResponse
-import uk.gov.hmrc.helptosavefrontend.connectors.UserDetailsConnector.UserDetailsResponse
-import uk.gov.hmrc.helptosavefrontend.connectors.{CitizenDetailsConnector, EligibilityConnector, UserDetailsConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
-
-/**
-  * Queries the `user-details` and the `citizen-details` microservices to obtain
-  * the required user information. `user-details` is used to obtain name, date of birth,
-  * email and `citizen-details` is used to obtain the address.
-  *
-  */
 @Singleton
-class HelpToSaveService @Inject()(userDetailsConnector: UserDetailsConnector,
-                                  citizenDetailsConnector: CitizenDetailsConnector,
-                                  eligibilityConnector: EligibilityConnector) extends ServicesConfig {
+class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector) extends ServicesConfig {
 
-  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
-    eligibilityConnector.checkEligibility(nino)
+  def checkEligibility(nino: String, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
+    helpToSaveConnector.getEligibilityStatus(nino, userDetailsURI)
 
-  def getUserInfo(userDetailsUri: String, nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserInfo] =
-    for {
-      userDetails ← userDetailsConnector.getUserDetails(userDetailsUri)
-      citizenDetails ← citizenDetailsConnector.getDetails(nino)
-      userInfo ← EitherT.fromEither[Future](toUserInfo(userDetails, citizenDetails, nino).toEither).leftMap(
-        errors ⇒ s"Could not create user info: ${errors.toList.mkString(",")}")
-    } yield userInfo
-
-  private def toUserInfo(u: UserDetailsResponse,
-                         c: CitizenDetailsResponse,
-                         nino: NINO): ValidatedNel[String, UserInfo] = {
-    val surnameValidation =
-      u.lastName.orElse(c.person.flatMap(_.lastName))
-        .toValidNel("Could not find last name")
-
-    val dateOfBirthValidation =
-      u.dateOfBirth.orElse(c.person.flatMap(_.dateOfBirth))
-        .toValidNel("Could not find date of birth")
-
-    val emailValidation =
-      u.email.toValidNel("Could not find email address")
-
-    val addressValidation = c.address.toValidNel("Could not find address")
-
-    (surnameValidation |@| dateOfBirthValidation |@| emailValidation |@| addressValidation)
-      .map((surname, dateOfBirth, email, address) ⇒
-        UserInfo(u.name, surname, nino, dateOfBirth, email, address)
-      )
-  }
+  def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[UserInfo] =
+    helpToSaveConnector.createAccount(userInfo)
 
 }
 

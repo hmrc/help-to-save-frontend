@@ -27,15 +27,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.SubmissionResult
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.ws.WSPost
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.duration._
@@ -47,9 +44,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
 
   private val mockHtsService = mock[HelpToSaveService]
 
-  private val mockHTTPPost = mock[WSPost]
-
-  val uDetailsUri = "/dummy/user/details/uri"
+  val userDetailsURI = "/dummy/user/details/uri"
   val nino = "WM123456C"
 
   private val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
@@ -57,29 +52,20 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
 
   val mockAuthConnector = mock[PlayAuthConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
-  val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
-  val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
-  val mockCreateAccountConnector: CreateAccountConnector = mock[CreateAccountConnector]
 
   val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
-    mockCreateAccountConnector,
-    mockSessionCacheConnector,
+    mockSessionCacheConnector)(
     fakeApplication) {
     override lazy val authConnector = mockAuthConnector
   }
 
   def doRequest(): Future[PlayResult] = register.declaration(FakeRequest())
 
-  def mockUserInfo(uDetailsUri: String, nino: NINO)(userInfo: UserInfo): Unit =
-    (mockHtsService.getUserInfo(_: String, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(uDetailsUri, nino, *, *)
-      .returning(EitherT.pure[Future, String, UserInfo](userInfo))
-
-  def mockEligibilityResult(nino: String)(result: Boolean): Unit =
-    (mockHtsService.checkEligibility(_: String)(_: HeaderCarrier))
-      .expects(nino, *)
+  def mockEligibilityResult(nino: String, userDetailsURI: String)(result: Option[UserInfo]): Unit =
+    (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
+      .expects(nino, userDetailsURI, *)
       .returning(EitherT.pure[Future, String, EligibilityResult](EligibilityResult(result)))
 
   def mockSessionCacheConnectorPut(cacheMap: CacheMap): Unit =
@@ -92,10 +78,10 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       .expects(*, *)
       .returning(Future.successful(mockHtsSession))
 
-  def mockCreateAccount(nsiResponse: SubmissionResult): Unit =
-    (mockCreateAccountConnector.createAccount(_: UserInfo)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *)
-      .returning(Future.successful(nsiResponse))
+  def mockCreateAccount(response: Either[String,UserInfo]): Unit =
+    (mockHtsService.createAccount(_: UserInfo)(_: HeaderCarrier))
+      .expects(*, *)
+      .returning(EitherT[Future,String,UserInfo](response))
 
   def mockPlayAuthWithRetrievals[A, B](predicate: Predicate, retrieval: Retrieval[A ~ B])(result: A ~ B): Unit =
     (mockAuthConnector.authorise[A ~ B](_: Predicate, _: Retrieval[uk.gov.hmrc.auth.core.~[A, B]])(_: HeaderCarrier))
@@ -110,11 +96,10 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
   "GET /" should {
 
     "return user details if the user is eligible for help-to-save" in {
-      val user = randomUserDetails()
+      val user = randomUserInfo()
       inSequence {
-        mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
-        mockUserInfo(uDetailsUri, nino)(user)
-        mockEligibilityResult(nino)(result = true)
+        mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+        mockEligibilityResult(nino, userDetailsURI)(Some(user))
         mockSessionCacheConnectorPut(CacheMap("1", Map.empty[String, JsValue]))
       }
 
@@ -136,8 +121,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
     "display a 'Not Eligible' page if the user is not eligible" in {
       inSequence {
         mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
-        mockUserInfo(uDetailsUri, nino)(randomUserDetails())
-        mockEligibilityResult(nino)(result = false)
+        mockEligibilityResult(nino, userDetailsURI)(None)
       }
 
       val result = doRequest()
