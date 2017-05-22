@@ -63,11 +63,19 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
         }
       }
 
+  def f(i: Int): Either[String,Long] = ???
+  val x: EitherT[Future,String,Int] = ???
+  val y = x.flatMap{ i =>
+    EitherT.fromEither[Future](f(i))
+  }
+  val z = x.subflatMap(f)
+
   override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[UserInfo] =
     EitherT.right[Future,String,HttpResponse](http.post(createAccountURL, Json.toJson(userInfo)))
       .subflatMap{ response ⇒
         if(response.status == 201){
           Right(userInfo)
+          EitherT.fromEither
         } else {
           Left(badResponseMessage(response, "Create account"))
         }
