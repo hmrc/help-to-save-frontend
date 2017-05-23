@@ -20,7 +20,7 @@ import java.net.URLEncoder
 
 import cats.data.EitherT
 import cats.instances.future._
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserInfo}
@@ -31,6 +31,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
   def getEligibilityStatus(nino: NINO, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
