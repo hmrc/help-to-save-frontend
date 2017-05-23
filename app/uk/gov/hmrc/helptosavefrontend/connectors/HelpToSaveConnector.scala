@@ -44,10 +44,10 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
 
-  val createAccountURL: String = s"$helpToSaveUrl/create-an-account"
+  val createAccountURL: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
   def eligibilityURL(nino: NINO, userDetailsURI: String): String =
-    s"$helpToSaveUrl/eligibility-check?nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}"
+    s"$helpToSaveUrl/help-to-save/eligibility-check?nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}"
 
   /**
     * @param response The HTTPResponse which came back with a bad status
