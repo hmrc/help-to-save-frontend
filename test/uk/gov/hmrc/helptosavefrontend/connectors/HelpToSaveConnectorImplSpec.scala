@@ -37,9 +37,9 @@ class HelpToSaveConnectorImplSpec extends TestSupport {
   }
 
   def eligibilityURL(nino: NINO, userDetailsURI: String): String =
-    s"$baseUrl/eligibility-check?nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}"
+    s"$baseUrl/help-to-save/eligibility-check?nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}"
 
-  val createAccountURL = baseUrl + "/create-an-account"
+  val createAccountURL = baseUrl + "/help-to-save/create-an-account"
 
   class TestApparatus {
     val mockHttp = mock[WSHttpExtension]
