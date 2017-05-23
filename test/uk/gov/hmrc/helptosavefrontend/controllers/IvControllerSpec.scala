@@ -18,30 +18,26 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.util.UUID.randomUUID
 
-import org.scalamock.scalatest.MockFactory
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.prop.Tables.Table
 import play.api.http.Status._
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future}
 
-class IvControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
+class IvControllerSpec extends TestSupport {
 
   val ivConnector: IvConnector = mock[IvConnector]
 
   val journeyId = JourneyId(randomUUID().toString)
-
-  implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
   val fakeNino = "WM123456C"
 
