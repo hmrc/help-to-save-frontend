@@ -27,7 +27,7 @@ object HttpResponseOps {
 
 class HttpResponseOps(val response: HttpResponse) extends AnyVal {
 
-  def parseJson[A](implicit reads: Reads[A]): Either[String,A] =
+  def parseJson[A](implicit reads: Reads[A]): Either[String, A] =
     Try(response.json) match {
       case Success(jsValue) ⇒
         jsValue.validate[A].fold(

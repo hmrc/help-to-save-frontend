@@ -67,10 +67,10 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
-     val result  = for{
-       userInfo ← retrieveUserInfo()
-       _        ← helpToSaveService.createAccount(userInfo)
-     } yield userInfo
+      val result = for {
+        userInfo ← retrieveUserInfo()
+        _ ← helpToSaveService.createAccount(userInfo)
+      } yield userInfo
 
       // TODO: plug in actual pages below
       result.fold(
@@ -78,10 +78,10 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           Logger.error(s"Could not create account: $error")
           Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
         },
-         info ⇒ {
-        Logger.debug(s"Successfully created account for ${info.NINO}")
-           Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
-         }
+        info ⇒ {
+          Logger.debug(s"Successfully created account for ${info.NINO}")
+          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
+        }
       )
   }
 

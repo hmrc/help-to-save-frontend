@@ -29,14 +29,14 @@ class EligibilityResultSpec extends WordSpec with Matchers {
     val failure = EligibilityResult(None)
 
     "have a fold method" in {
-      def f(result: EligibilityResult): String = result.fold("Nay",_ ⇒ "Yay")
+      def f(result: EligibilityResult): String = result.fold("Nay", _ ⇒ "Yay")
 
       f(success) shouldBe "Yay"
       f(failure) shouldBe "Nay"
     }
 
     "have a JSON format instance" in {
-      List(success, failure).foreach{ result ⇒
+      List(success, failure).foreach { result ⇒
         val json = Json.toJson(result)
         val eligibilityResult = Json.fromJson[EligibilityResult](json)
         eligibilityResult.isSuccess shouldBe true

@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait  HelpToSaveConnector {
+trait HelpToSaveConnector {
 
   def getEligibilityStatus(nino: NINO, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
 
@@ -39,7 +39,7 @@ trait  HelpToSaveConnector {
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector with ServicesConfig{
+class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector with ServicesConfig {
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
 
@@ -50,7 +50,7 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
 
   /**
     * @param response The HTTPResponse which came back with a bad status
-    * @param service The call we tried to make
+    * @param service  The call we tried to make
     * @return a string describing an error response from a HTTP call
     */
   def badResponseMessage(response: HttpResponse, service: String): String =
@@ -59,9 +59,9 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
   val http: WSHttpExtension = WSHttp
 
   override def getEligibilityStatus(nino: NINO, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
-    EitherT.right[Future,String,HttpResponse](http.get(eligibilityURL(nino, userDetailsURI)))
-      .subflatMap{ response ⇒
-        if(response.status == 200) {
+    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, userDetailsURI)))
+      .subflatMap { response ⇒
+        if (response.status == 200) {
           response.parseJson[EligibilityResult]
         } else {
           Left(badResponseMessage(response, "Eligibility check"))
@@ -69,9 +69,9 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
       }
 
   override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[Unit] =
-    EitherT.right[Future,String,HttpResponse](http.post(createAccountURL, Json.toJson(userInfo)))
-      .subflatMap{ response ⇒
-        if(response.status == 201){
+    EitherT.right[Future, String, HttpResponse](http.post(createAccountURL, Json.toJson(userInfo)))
+      .subflatMap { response ⇒
+        if (response.status == 201) {
           Right(())
         } else {
           Left(badResponseMessage(response, "Create account"))

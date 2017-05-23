@@ -11,7 +11,6 @@ hts.core.apply-help-to-save.par-7=If you’'re eligible, you'’ll have instant 
 hts.core.apply-help-to-save.link-4=eligible
 hts.core.apply-help-to-save.link-5=Government Gateway
 hts.core.apply-help-to-save.button=Apply now
-
 hts.core.about-help-to-save.header-page=About help to save
 hts.core.about-help-to-save.header-1=1. About Help to Save
 hts.core.about-help-to-save.par-1=Help to Save is a savings account that lets you earn a 50% government bonus on money you''ve saved. You can only open one account in your lifetime.
@@ -105,7 +104,6 @@ hts.core.eligibility-help-to-save.uk-residency.list-1=or your partner, or child,
 hts.core.eligibility-help-to-save.uk-residency.list-2=are a mariner
 hts.core.eligibility-help-to-save.uk-residency.list-3=are an oil worker based on the continental shelf
 hts.core.eligibility-help-to-save.uk-residency.list-4=are out of the UK because your partner, child or close relative has died
-
 hts.helpers.header-page=Help to Save
 hts.helpers.link-1=1. About Help to Save
 hts.helpers.link-2=2. Eligibility
@@ -162,6 +160,5 @@ hts.iv.you_cant_access_this_service_because_hmrc_doesnt_know_enough_=You can''t 
 hts.iv.to_help_protect_data_you_can_access_HTS_once_confirmed_identity=To help protect your data, you can access your help to save account once we''ve confirmed who you are.
 hts.iv.we_ve_confirmed_your_identity=We''ve now confirmed your identity
 hts.iv.you_now_access_hts_account=You can now access your help to save account.
-
 hts.access.denied.header=Access Denied
 hts.access.denied.message=You are not allowed to access this service

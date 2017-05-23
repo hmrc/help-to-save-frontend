@@ -24,14 +24,14 @@ import play.api.test.Helpers.{charset, contentType, _}
 import uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-class NotEligiblePageSpec extends UnitSpec with WithFakeApplication with MockFactory{
+class NotEligiblePageSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
 
   val helpToSave = new StartPagesController(
     fakeApplication.injector.instanceOf[MessagesApi])
 
   val fakeRequest = FakeRequest("GET", "/")
-  
+
   "GET /" should {
     "return 200" in {
       val result = helpToSave.notEligible(fakeRequest)

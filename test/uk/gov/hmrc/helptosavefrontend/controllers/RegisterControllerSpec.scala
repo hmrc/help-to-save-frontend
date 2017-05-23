@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class RegisterControllerSpec extends UnitSpec with WithFakeApplication with MockFactory with ScalaFutures{
+class RegisterControllerSpec extends UnitSpec with WithFakeApplication with MockFactory with ScalaFutures {
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
@@ -63,12 +63,12 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
   }
 
 
-  def mockEligibilityResult(nino: String, userDetailsURI: String)(result: Either[String,Option[UserInfo]]): Unit =
+  def mockEligibilityResult(nino: String, userDetailsURI: String)(result: Either[String, Option[UserInfo]]): Unit =
     (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
       .expects(nino, userDetailsURI, *)
       .returning(EitherT.fromEither[Future](result.map(EligibilityResult(_))))
 
-  def mockSessionCacheConnectorPut(result: Either[String,CacheMap]): Unit =
+  def mockSessionCacheConnectorPut(result: Either[String, CacheMap]): Unit =
     (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
       .expects(*, *, *)
       .returning(result.fold(
@@ -80,7 +80,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       .expects(*, *)
       .returning(Future.successful(mockHtsSession))
 
-  def mockCreateAccount(response: Either[String,Unit] = Right(())): Unit =
+  def mockCreateAccount(response: Either[String, Unit] = Right(())): Unit =
     (mockHtsService.createAccount(_: UserInfo)(_: HeaderCarrier))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](response))
@@ -195,14 +195,14 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       }
     }
 
-    "creating an account" must{
+    "creating an account" must {
       def doCreateAccountRequest(): Future[PlayResult] = register.createAccountHelpToSave(FakeRequest())
 
       val user = randomUserInfo()
 
       "retrieve the user info from session cache and post it using " +
         "the help to save service" in {
-        inSequence{
+        inSequence {
           mockPlayAuthWithNoRetrievals()
           mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
           mockCreateAccount()
@@ -212,9 +212,8 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       }
 
 
-
       "indicate to the user that the creation was successful if the creation was successful" in {
-        inSequence{
+        inSequence {
           mockPlayAuthWithNoRetrievals()
           mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
           mockCreateAccount()
@@ -228,7 +227,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       "indicate to the user that the creation was not successful " when {
 
         "the user details cannot be found in the session cache" in {
-          inSequence{
+          inSequence {
             mockPlayAuthWithNoRetrievals()
             mockSessionCacheConnectorGet(None)
           }
@@ -239,7 +238,7 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
         }
 
         "the help to save service returns with an error" in {
-          inSequence{
+          inSequence {
             mockPlayAuthWithNoRetrievals()
             mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
             mockCreateAccount(Left("Uh oh"))

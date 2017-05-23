@@ -77,17 +77,17 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
 
   def handleFailure(e: Throwable): Result =
     e match {
-      case _: NoActiveSession             ⇒
+      case _: NoActiveSession ⇒
         toGGLogin(HtsDeclarationUrl)
       case _: InsufficientConfidenceLevel ⇒
         toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
-      case ex: InternalError              ⇒
+      case ex: InternalError ⇒
         Logger.error(s"could not authenticate user due to: ${ex.reason}")
         InternalServerError("")
-      case ex: AuthorisationException     ⇒
+      case ex: AuthorisationException ⇒
         Logger.error(s"access denied to user due to: ${ex.reason}")
         SeeOther(routes.RegisterController.accessDenied().url)
-      case ex                             ⇒
+      case ex ⇒
         Logger.error(s"could not authenticate user due to: $ex")
         InternalServerError("")
 

@@ -31,13 +31,13 @@ object FrontendAuditConnector extends Auditing with AppName {
   override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
 }
 
-trait WSHttpExtension extends WSGet with WSPost{
+trait WSHttpExtension extends WSGet with WSPost {
 
   /**
     * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
     * to replace [[GET]] method provided by the hmrc library which will throw exceptions in such cases.
     */
-  def get(url: String)(implicit rhc: HeaderCarrier): Future[HttpResponse] = withTracing(GET_VERB, url){
+  def get(url: String)(implicit rhc: HeaderCarrier): Future[HttpResponse] = withTracing(GET_VERB, url) {
     val httpResponse = doGet(url)
     executeHooks(url, GET_VERB, None, httpResponse)
     httpResponse
@@ -49,15 +49,15 @@ trait WSHttpExtension extends WSGet with WSPost{
     */
   def post[A](url: String,
               body: A,
-              headers: Seq[(String,String)] = Seq.empty[(String,String)]
-             )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = withTracing(POST_VERB, url){
+              headers: Seq[(String, String)] = Seq.empty[(String, String)]
+             )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = withTracing(POST_VERB, url) {
     val httpResponse = doPost(url, body, headers)
     executeHooks(url, POST_VERB, None, httpResponse)
     httpResponse
   }
 }
 
-object WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName with RunMode with WSHttpExtension{
+object WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName with RunMode with WSHttpExtension {
 
   override val hooks = NoneRequired
 
@@ -65,5 +65,6 @@ object WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName wi
 
 object FrontendAuthConnector extends PlayAuthConnector with ServicesConfig {
   override val serviceUrl: String = baseUrl("auth")
+
   override def http = WSHttp
 }

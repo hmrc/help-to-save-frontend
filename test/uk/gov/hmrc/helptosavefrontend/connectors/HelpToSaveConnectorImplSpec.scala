@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
-class HelpToSaveConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFactory{
+class HelpToSaveConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFactory {
 
   implicit val hc = HeaderCarrier()
   implicit val ec = fakeApplication.injector.instanceOf[ExecutionContext]
@@ -74,22 +74,22 @@ class HelpToSaveConnectorImplSpec extends UnitSpec with WithFakeApplication with
       val nino = "nino"
       val userDetailsURI = "uri"
 
-      "perform a GET request to the help-to-save-service" in new TestApparatus{
+      "perform a GET request to the help-to-save-service" in new TestApparatus {
         mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(HttpResponse(200))
 
         connector.getEligibilityStatus(nino, userDetailsURI)
       }
 
-      "return an EligibilityResult if the call comes back with a 200 status with a positive result" in  new TestApparatus{
+      "return an EligibilityResult if the call comes back with a 200 status with a positive result" in new TestApparatus {
         val userInfo = randomUserInfo()
         mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(
           HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(Some(userInfo))))))
 
         val result = connector.getEligibilityStatus(nino, userDetailsURI)
         Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(Some(userInfo)))
-  }
+      }
 
-      "return an EligibilityResult if the call comes back with a 200 status with a negative result" in  new TestApparatus{
+      "return an EligibilityResult if the call comes back with a 200 status with a negative result" in new TestApparatus {
         mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(
           HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(None)))))
 
@@ -98,7 +98,7 @@ class HelpToSaveConnectorImplSpec extends UnitSpec with WithFakeApplication with
       }
 
 
-      "return an error if the call does not come back with a 200 status" in new TestApparatus{
+      "return an error if the call does not come back with a 200 status" in new TestApparatus {
         mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(HttpResponse(500))
 
         val result = connector.getEligibilityStatus(nino, userDetailsURI)
@@ -130,7 +130,6 @@ class HelpToSaveConnectorImplSpec extends UnitSpec with WithFakeApplication with
 
 
   }
-
 
 
 }

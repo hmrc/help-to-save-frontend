@@ -19,21 +19,23 @@ trait MicroService {
 
   val appName: String
 
-  lazy val appDependencies : Seq[ModuleID] = ???
-  lazy val plugins : Seq[Plugins] = Seq.empty
-  lazy val playSettings : Seq[Setting[_]] = Seq.empty
+  lazy val appDependencies: Seq[ModuleID] = ???
+  lazy val plugins: Seq[Plugins] = Seq.empty
+  lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
   def seleniumTestFilter(name: String): Boolean = name.endsWith("SeleniumSystemTest") && !name.contains("WIP")
+
   def seleniumWIPTestFilter(name: String): Boolean = name.endsWith("SeleniumSystemTest") && name.contains("WIP")
+
   def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name) && !seleniumWIPTestFilter(name)
 
-  lazy val SeleniumTest = config("selenium") extend(Test)
-  lazy val SeleniumTestWIP = config("selenium-wip") extend(Test)
+  lazy val SeleniumTest = config("selenium") extend (Test)
+  lazy val SeleniumTestWIP = config("selenium-wip") extend (Test)
 
 
   lazy val microservice = Project(appName, file("."))
-    .enablePlugins(Seq(play.sbt.PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins : _*)
-    .settings(playSettings : _*)
+    .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
+    .settings(playSettings: _*)
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
@@ -47,7 +49,7 @@ trait MicroService {
     .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
     .settings(
       Keys.fork in IntegrationTest := false,
-      unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest)(base => Seq(base / "it")),
+      unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base => Seq(base / "it")),
       addTestReportOption(IntegrationTest, "int-test-reports"),
       testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
       parallelExecution in IntegrationTest := false)
