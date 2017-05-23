@@ -78,10 +78,10 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       .expects(*, *)
       .returning(Future.successful(mockHtsSession))
 
-  def mockCreateAccount(response: Either[String,UserInfo]): Unit =
+  def mockCreateAccount(response: Option[String]): Unit =
     (mockHtsService.createAccount(_: UserInfo)(_: HeaderCarrier))
       .expects(*, *)
-      .returning(EitherT[Future,String,UserInfo](response))
+      .returning(EitherT.fromEither[Future](response.fold[Either[String,Unit]](Right(()))(Left(_))))
 
   def mockPlayAuthWithRetrievals[A, B](predicate: Predicate, retrieval: Retrieval[A ~ B])(result: A ~ B): Unit =
     (mockAuthConnector.authorise[A ~ B](_: Predicate, _: Retrieval[uk.gov.hmrc.auth.core.~[A, B]])(_: HeaderCarrier))

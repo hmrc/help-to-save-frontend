@@ -114,7 +114,7 @@ class HelpToSaveConnectorImplSpec extends UnitSpec with WithFakeApplication with
         mockCreateAccount(createAccountURL, Json.toJson(user))(HttpResponse(201))
 
         val result = connector.createAccount(user)
-        Await.result(result.value, 3.seconds) shouldBe Right(user)
+        Await.result(result.value, 3.seconds) shouldBe Right(())
       }
 
 

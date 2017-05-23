@@ -35,7 +35,7 @@ trait  HelpToSaveConnector {
 
   def getEligibilityStatus(nino: NINO, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
 
-  def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[UserInfo]
+  def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[Unit]
 }
 
 @Singleton
@@ -48,8 +48,13 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
   def eligibilityURL(nino: NINO, userDetailsURI: String): String =
     s"$helpToSaveUrl/eligibility-check?nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}"
 
-  def badResponseMessage(response: HttpResponse, description: String): String =
-    s"$description call returned with status ${response.status}. Response body was ${response.body}"
+  /**
+    * @param response The HTTPResponse which came back with a bad status
+    * @param service The call we tried to make
+    * @return a string describing an error response from a HTTP call
+    */
+  def badResponseMessage(response: HttpResponse, service: String): String =
+    s"$service call returned with status ${response.status}. Response body was ${response.body}"
 
   val http: WSHttpExtension = WSHttp
 
@@ -63,11 +68,11 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
         }
       }
 
-  override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[UserInfo] =
+  override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[Unit] =
     EitherT.right[Future,String,HttpResponse](http.post(createAccountURL, Json.toJson(userInfo)))
       .subflatMap{ response ⇒
         if(response.status == 201){
-          Right(userInfo)
+          Right(())
         } else {
           Left(badResponseMessage(response, "Create account"))
         }
