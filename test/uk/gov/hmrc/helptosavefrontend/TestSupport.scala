@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend
 
-import com.kenshoo.play.metrics.PlayModule
 import com.typesafe.config.Config
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Suite}
-import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Play}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
@@ -30,7 +29,10 @@ import scala.concurrent.ExecutionContext
 trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll {
   this: Suite =>
 
-  lazy val fakeApplication: Application = new GuiceApplicationBuilder().disable[PlayModule].build()
+  lazy val fakeApplication: Application =
+    new GuiceApplicationBuilder()
+      .configure("metrics.enabled" -> "false")
+      .build()
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
