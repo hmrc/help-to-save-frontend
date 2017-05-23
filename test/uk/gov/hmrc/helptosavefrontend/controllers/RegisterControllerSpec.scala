@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.either._
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Reads, Writes}
@@ -27,29 +29,23 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.SubmissionResult
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.ws.WSPost
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 
-class RegisterControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
+class RegisterControllerSpec extends UnitSpec with WithFakeApplication with MockFactory with ScalaFutures {
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
   private val mockHtsService = mock[HelpToSaveService]
 
-  private val mockHTTPPost = mock[WSPost]
-
-  val uDetailsUri = "/dummy/user/details/uri"
+  val userDetailsURI = "/dummy/user/details/uri"
   val nino = "WM123456C"
 
   private val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
@@ -57,45 +53,37 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
 
   val mockAuthConnector = mock[PlayAuthConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
-  val mockEligibilityConnector: EligibilityConnector = mock[EligibilityConnector]
-  val mockCitizenDetailsConnector: CitizenDetailsConnector = mock[CitizenDetailsConnector]
-  val mockCreateAccountConnector: CreateAccountConnector = mock[CreateAccountConnector]
 
   val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
-    mockCreateAccountConnector,
-    mockSessionCacheConnector,
+    mockSessionCacheConnector)(
     fakeApplication) {
     override lazy val authConnector = mockAuthConnector
   }
 
-  def doRequest(): Future[PlayResult] = register.declaration(FakeRequest())
 
-  def mockUserInfo(uDetailsUri: String, nino: NINO)(userInfo: UserInfo): Unit =
-    (mockHtsService.getUserInfo(_: String, _: NINO)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(uDetailsUri, nino, *, *)
-      .returning(EitherT.pure[Future, String, UserInfo](userInfo))
+  def mockEligibilityResult(nino: String, userDetailsURI: String)(result: Either[String, Option[UserInfo]]): Unit =
+    (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
+      .expects(nino, userDetailsURI, *)
+      .returning(EitherT.fromEither[Future](result.map(EligibilityResult(_))))
 
-  def mockEligibilityResult(nino: String)(result: Boolean): Unit =
-    (mockHtsService.checkEligibility(_: String)(_: HeaderCarrier))
-      .expects(nino, *)
-      .returning(EitherT.pure[Future, String, EligibilityResult](EligibilityResult(result)))
-
-  def mockSessionCacheConnectorPut(cacheMap: CacheMap): Unit =
+  def mockSessionCacheConnectorPut(result: Either[String, CacheMap]): Unit =
     (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
       .expects(*, *, *)
-      .returning(Future.successful(cacheMap))
+      .returning(result.fold(
+        e ⇒ Future.failed(new Exception(e)),
+        Future.successful))
 
   def mockSessionCacheConnectorGet(mockHtsSession: Option[HTSSession]): Unit =
     (mockSessionCacheConnector.get(_: HeaderCarrier, _: Reads[HTSSession]))
       .expects(*, *)
       .returning(Future.successful(mockHtsSession))
 
-  def mockCreateAccount(nsiResponse: SubmissionResult): Unit =
-    (mockCreateAccountConnector.createAccount(_: UserInfo)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *)
-      .returning(Future.successful(nsiResponse))
+  def mockCreateAccount(response: Either[String, Unit] = Right(())): Unit =
+    (mockHtsService.createAccount(_: UserInfo)(_: HeaderCarrier))
+      .expects(*, *)
+      .returning(EitherT.fromEither[Future](response))
 
   def mockPlayAuthWithRetrievals[A, B](predicate: Predicate, retrieval: Retrieval[A ~ B])(result: A ~ B): Unit =
     (mockAuthConnector.authorise[A ~ B](_: Predicate, _: Retrieval[uk.gov.hmrc.auth.core.~[A, B]])(_: HeaderCarrier))
@@ -107,52 +95,162 @@ class RegisterControllerSpec extends UnitSpec with WithFakeApplication with Mock
       .expects(AuthProviders(GovernmentGateway), *, *)
       .returning(Future.successful(()))
 
-  "GET /" should {
 
-    "return user details if the user is eligible for help-to-save" in {
-      val user = randomUserDetails()
-      inSequence {
-        mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
-        mockUserInfo(uDetailsUri, nino)(user)
-        mockEligibilityResult(nino)(result = true)
-        mockSessionCacheConnectorPut(CacheMap("1", Map.empty[String, JsValue]))
+  "The RegisterController" when {
+
+    "checking eligibility" must {
+
+      def doDeclarationRequest(): Future[PlayResult] = register.declaration(FakeRequest())
+
+      "return user details if the user is eligible for help-to-save" in {
+        val user = randomUserInfo()
+        inSequence {
+          mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+          mockEligibilityResult(nino, userDetailsURI)(Right(Some(user)))
+          mockSessionCacheConnectorPut(Right(CacheMap("1", Map.empty[String, JsValue])))
+        }
+
+        val responseFuture: Future[PlayResult] = doDeclarationRequest()
+        val result = responseFuture.futureValue
+
+        status(result) shouldBe Status.OK
+
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include(user.forename)
+        html should include(user.email)
+        html should include(user.NINO)
       }
 
-      val responseFuture: Future[PlayResult] = doRequest()
-      val result = Await.result(responseFuture, 3.seconds)
+      "display a 'Not Eligible' page if the user is not eligible" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
+          mockEligibilityResult(nino, userDetailsURI)(Right(None))
+        }
 
-      status(result) shouldBe Status.OK
+        val result = doDeclarationRequest()
+        val html = contentAsString(result)
 
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-
-      val html = contentAsString(result)
-
-      html should include(user.forename)
-      html should include(user.email)
-      html should include(user.NINO)
-    }
-
-    "display a 'Not Eligible' page if the user is not eligible" in {
-      inSequence {
-        mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
-        mockUserInfo(uDetailsUri, nino)(randomUserDetails())
-        mockEligibilityResult(nino)(result = false)
+        html should include("not eligible")
+        html should include("To be eligible for an account")
       }
 
-      val result = doRequest()
-      val html = contentAsString(result)
 
-      html should include("not eligible")
-      html should include("To be eligible for an account")
+      "return an error" when {
+
+        def isError(result: Future[PlayResult]): Boolean =
+          status(result) == 500
+
+        // test if the given mock actions result in an error when `declaration` is called
+        // on the controller
+        def test(mockActions: ⇒ Unit): Unit = {
+          mockActions
+          val result = doDeclarationRequest()
+          isError(result) shouldBe true
+        }
+
+        "the nino is not available" in {
+          test(
+            mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(
+              uk.gov.hmrc.auth.core.~(Some(userDetailsURI), Enrolments(Set.empty))))
+        }
+
+        "the user details URI is not available" in {
+          test(
+            mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(
+              uk.gov.hmrc.auth.core.~(None, enrolments)))
+        }
+
+        "the eligibility check call returns with an error" in {
+          test(
+            inSequence {
+              mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+              mockEligibilityResult(nino, userDetailsURI)(Left("Oh no"))
+            })
+        }
+
+        "there is an error writing to the session cache" in {
+          val user = randomUserInfo()
+          test(inSequence {
+            mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+            mockEligibilityResult(nino, userDetailsURI)(Right(Some(user)))
+            mockSessionCacheConnectorPut(Left("Bang"))
+          })
+        }
+      }
     }
 
-    "the getCreateAccountHelpToSave return 200" in {
-      mockPlayAuthWithNoRetrievals()
-      val result = register.getCreateAccountHelpToSavePage(FakeRequest())
-      status(result) shouldBe Status.OK
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
+
+    "handling a getCreateAccountHelpToSave" must {
+
+      "return 200" in {
+        mockPlayAuthWithNoRetrievals()
+        val result = register.getCreateAccountHelpToSavePage(FakeRequest())
+        status(result) shouldBe Status.OK
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+      }
     }
+
+    "creating an account" must {
+      def doCreateAccountRequest(): Future[PlayResult] = register.createAccountHelpToSave(FakeRequest())
+
+      val user = randomUserInfo()
+
+      "retrieve the user info from session cache and post it using " +
+        "the help to save service" in {
+        inSequence {
+          mockPlayAuthWithNoRetrievals()
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
+          mockCreateAccount()
+        }
+
+        doCreateAccountRequest().futureValue
+      }
+
+
+      "indicate to the user that the creation was successful if the creation was successful" in {
+        inSequence {
+          mockPlayAuthWithNoRetrievals()
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
+          mockCreateAccount()
+        }
+
+        val result = doCreateAccountRequest()
+        val html = contentAsString(result)
+        html should include("Successfully created account")
+      }
+
+      "indicate to the user that the creation was not successful " when {
+
+        "the user details cannot be found in the session cache" in {
+          inSequence {
+            mockPlayAuthWithNoRetrievals()
+            mockSessionCacheConnectorGet(None)
+          }
+
+          val result = doCreateAccountRequest()
+          val html = contentAsString(result)
+          html should include("Account creation failed")
+        }
+
+        "the help to save service returns with an error" in {
+          inSequence {
+            mockPlayAuthWithNoRetrievals()
+            mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
+            mockCreateAccount(Left("Uh oh"))
+          }
+
+          val result = doCreateAccountRequest()
+          val html = contentAsString(result)
+          html should include("Account creation failed")
+        }
+      }
+    }
+
   }
+
 }

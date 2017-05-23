@@ -16,7 +16,7 @@
 
 package hts.utils
 
-case class Configuration (htsUrl: String, timeout: Int)
+case class Configuration(htsUrl: String, timeout: Int)
 
 object Configuration {
 

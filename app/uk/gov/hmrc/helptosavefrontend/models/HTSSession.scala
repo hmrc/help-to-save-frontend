@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 import play.api.libs.json.{Format, Json}
 
 case class HTSSession(userInfo: Option[UserInfo] = None)
-object HTSSession{
+
+object HTSSession {
   implicit val htsSessionFormat: Format[HTSSession] = Json.format[HTSSession]
 }

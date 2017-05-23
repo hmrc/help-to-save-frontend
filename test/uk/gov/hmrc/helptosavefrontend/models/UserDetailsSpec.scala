@@ -20,11 +20,11 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsSuccess, Json}
 
-class UserDetailsSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks{
+class UserDetailsSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   "UserDetails" must {
     "have a JSON Format instance" in {
-      forAll{ user: UserInfo ⇒
+      forAll { user: UserInfo ⇒
         val json = Json.toJson(user)
         Json.fromJson[UserInfo](json) shouldBe JsSuccess(user)
       }

@@ -29,16 +29,16 @@ object AuthorityWizardPage {
   def setAuthorityId(id: String)(implicit driver: WebDriver): Unit =
     driver.findElement(By.name("authorityId")).sendKeys()
 
-  def setRedirect(url : String)(implicit driver: WebDriver): Unit =
+  def setRedirect(url: String)(implicit driver: WebDriver): Unit =
     driver.findElement(By.name("redirectionUrl")).sendKeys(url)
 
   def setNino(nino: String)(implicit driver: WebDriver): Unit =
     driver.findElement(By.name("nino")).sendKeys(nino)
 
-  def setCredentialStrength(strength : String)(implicit driver: WebDriver): Unit =
+  def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
     driver.findElement(By.name("credentialStrength")).sendKeys(strength)
 
-  def setConfidenceLevel(level : Int)(implicit driver: WebDriver): Unit =
+  def setConfidenceLevel(level: Int)(implicit driver: WebDriver): Unit =
     driver.findElement(By.name("confidenceLevel")).sendKeys(level.toString)
 
   def submit()(implicit driver: WebDriver): Unit =

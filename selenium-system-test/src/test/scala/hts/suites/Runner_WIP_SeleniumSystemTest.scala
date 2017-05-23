@@ -24,7 +24,7 @@ import org.junit.runner.RunWith
 @CucumberOptions(
   features = Array("selenium-system-test/src/test/resources/features"),
   glue = Array("hts.steps"),
-  plugin = Array ("pretty", "html:target/cucumber", "json:target/cucumber.json"),
+  plugin = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
   tags = Array("@wip")
 )
 class Runner_WIP_SeleniumSystemTest {}

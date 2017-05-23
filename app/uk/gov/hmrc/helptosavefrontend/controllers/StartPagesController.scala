@@ -21,15 +21,13 @@ import javax.inject.Singleton
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.connectors.EligibilityConnector
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 @Singleton
-class StartPagesController @Inject()(val messagesApi: MessagesApi,
-                                     eligibilityConnector: EligibilityConnector) extends FrontendController with I18nSupport {
+class StartPagesController @Inject()(val messagesApi: MessagesApi) extends FrontendController with I18nSupport {
 
   val notEligible = Action.async { implicit request ⇒
     Future.successful(Ok(views.html.core.not_eligible()))

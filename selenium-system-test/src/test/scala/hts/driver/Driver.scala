@@ -30,17 +30,17 @@ object Driver {
 
   private val systemProperties = System.getProperties
 
-  def newWebDriver(): Either[String,WebDriver] = {
-    val selectedDriver: Either[String,WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("firefox")                  ⇒ Right(createFirefoxDriver())
-      case Some("chrome")                   ⇒ Right(createChromeDriver())
-      case Some("phantomjs")                ⇒ Right(createPhantomJsDriver())
-      case Some("gecko")                    ⇒ Right(createGeckoDriver())
-      case Some(other)                      ⇒ Left(s"Unrecognised browser: $other")
-      case None                             ⇒ Left("No browser set")
+  def newWebDriver(): Either[String, WebDriver] = {
+    val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
+      case Some("firefox") ⇒ Right(createFirefoxDriver())
+      case Some("chrome") ⇒ Right(createChromeDriver())
+      case Some("phantomjs") ⇒ Right(createPhantomJsDriver())
+      case Some("gecko") ⇒ Right(createGeckoDriver())
+      case Some(other) ⇒ Left(s"Unrecognised browser: $other")
+      case None ⇒ Left("No browser set")
     }
 
-    selectedDriver.map{ driver ⇒
+    selectedDriver.map { driver ⇒
       sys.addShutdownHook(driver.quit())
       driver.manage().window().maximize()
       driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)

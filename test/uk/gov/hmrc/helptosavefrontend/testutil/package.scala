@@ -25,6 +25,6 @@ import scala.reflect._
 package object testutil {
 
   def sample[A: ClassTag](arb: Arbitrary[A]): A = arb.arbitrary
-      .sample
-      .getOrElse(sys.error(s"Could not generate type ${classTag[A].runtimeClass.getSimpleName}"))
+    .sample
+    .getOrElse(sys.error(s"Could not generate type ${classTag[A].runtimeClass.getSimpleName}"))
 }

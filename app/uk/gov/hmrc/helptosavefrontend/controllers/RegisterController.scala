@@ -26,11 +26,9 @@ import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}
-import uk.gov.hmrc.helptosavefrontend.connectors.CreateAccountConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -38,11 +36,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class RegisterController @Inject()(override val messagesApi: MessagesApi,
-                                   htsService: HelpToSaveService,
-                                   nSAndIConnector: CreateAccountConnector,
-                                   val sessionCacheConnector: SessionCacheConnector,
-                                   implicit val app: Application)
+class RegisterController @Inject()(val messagesApi: MessagesApi,
+                                   helpToSaveService: HelpToSaveService,
+                                   sessionCacheConnector: SessionCacheConnector)(implicit app: Application)
   extends HelpToSaveAuth(app) with I18nSupport {
 
   def declaration: Action[AnyContent] = authorisedForHtsWithEnrolments {
@@ -50,15 +46,15 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
       implicit userUrlWithNino ⇒
         val userInfo = for {
           userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
-          result ← checkEligibility(userUrlWithNino.path, userUrlWithNino.nino)
-          _ ← writeToKeyStore(result)
+          result ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path)
+          _ ← writeToKeyStore(result.eligible)
         } yield result
 
         userInfo.fold(
           error ⇒ {
             Logger.error(s"Could not perform eligibility check: $error")
             InternalServerError("")
-          }, _.fold(
+          }, _.eligible.fold(
             Ok(views.html.core.not_eligible()))(
             userDetails ⇒ Ok(views.html.register.declaration(userDetails)))
         )
@@ -71,29 +67,28 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
 
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
-      val submissionResult = for {
+      val result = for {
         userInfo ← retrieveUserInfo()
-        submissionResult ← postToNSI(userInfo)
-      //todo update our backend with a boolean value letting hmrc know a hts account was created.
-      } yield submissionResult
+        _ ← helpToSaveService.createAccount(userInfo)
+      } yield userInfo
 
-      submissionResult.value.map {
-        case Right(SubmissionSuccess) ⇒
-          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("This is a stub for nsi"))
-        case Right(sf: SubmissionFailure) ⇒
-          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(prettyPrintSubmissionFailure(sf)))
-        case Left(error) ⇒
-          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error))
-      }
+      // TODO: plug in actual pages below
+      result.fold(
+        error ⇒ {
+          Logger.error(s"Could not create account: $error")
+          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
+        },
+        info ⇒ {
+          Logger.debug(s"Successfully created account for ${info.NINO}")
+          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
+        }
+      )
   }
 
   def accessDenied: Action[AnyContent] = Action.async {
     implicit request ⇒
       Future.successful(Ok(views.html.access_denied()))
   }
-
-  private def prettyPrintSubmissionFailure(failure: SubmissionFailure): String =
-    s"Submission to NSI failed: ${failure.errorMessage}: ${failure.errorDetail} (id: ${failure.errorMessageId.getOrElse("-")})"
 
 
   private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, UserInfo] = {
@@ -125,12 +120,5 @@ class RegisterController @Inject()(override val messagesApi: MessagesApi,
     )
   }
 
-  private def postToNSI(userInfo: UserInfo)(implicit hc: HeaderCarrier): EitherT[Future, String, SubmissionResult] =
-    EitherT[Future, String, SubmissionResult](nSAndIConnector.createAccount(userInfo).map(Right(_)))
 
-  private def checkEligibility(userDetailsUri: String, nino: String)(implicit hc: HeaderCarrier): Result[Option[UserInfo]] =
-    for {
-      userInfo ← htsService.getUserInfo(userDetailsUri, nino)
-      eligible ← htsService.checkEligibility(nino)
-    } yield eligible.fold(None, Some(userInfo))
 }
