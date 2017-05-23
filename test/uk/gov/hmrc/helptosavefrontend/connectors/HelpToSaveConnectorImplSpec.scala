@@ -18,23 +18,17 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import java.net.URLEncoder
 
-import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{Json, Writes}
-import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpExtension
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.helptosavefrontend.models._
 
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
-class HelpToSaveConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFactory {
-
-  implicit val hc = HeaderCarrier()
-  implicit val ec = fakeApplication.injector.instanceOf[ExecutionContext]
-  val config = fakeApplication.configuration.underlying
+class HelpToSaveConnectorImplSpec extends TestSupport {
 
   val baseUrl: String = {
     val port = config.getString("microservice.services.help-to-save.port")
@@ -124,12 +118,6 @@ class HelpToSaveConnectorImplSpec extends UnitSpec with WithFakeApplication with
         val result = connector.createAccount(user)
         Await.result(result.value, 3.seconds).isLeft shouldBe true
       }
-
-
     }
-
-
   }
-
-
 }

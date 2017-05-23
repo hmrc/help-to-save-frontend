@@ -17,8 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsPath, JsSuccess, Json}
-
+import play.api.libs.json.Json
 
 class EligibilityResultSpec extends WordSpec with Matchers {
 
@@ -43,8 +42,5 @@ class EligibilityResultSpec extends WordSpec with Matchers {
         eligibilityResult.get shouldBe result
       }
     }
-
   }
-
-
 }

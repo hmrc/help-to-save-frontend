@@ -17,8 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import akka.util.Timeout
-import org.scalamock.scalatest.MockFactory
-import org.scalatest.OptionValues
 import play.api.http.Status
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
@@ -26,14 +24,14 @@ import play.api.test.Helpers.redirectLocation
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class HelpToSaveAuthSpec extends UnitSpec with WithFakeApplication with MockFactory with OptionValues {
+class HelpToSaveAuthSpec extends TestSupport {
 
   private val mockAuthConnector = mock[PlayAuthConnector]
 
@@ -103,7 +101,7 @@ class HelpToSaveAuthSpec extends UnitSpec with WithFakeApplication with MockFact
       redirectTo should include("/mdtp/uplift")
     }
 
-    "handle any other AuthorisationException and redirect user to IV Journey" in {
+    "handle any other AuthorisationException and display access denied to user" in {
 
       mockAuthWith("UnsupportedCredentialRole")
 

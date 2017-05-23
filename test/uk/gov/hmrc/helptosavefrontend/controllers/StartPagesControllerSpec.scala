@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentType, _}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 
-class StartPagesControllerSpec extends UnitSpec with WithFakeApplication with MockFactory {
+class StartPagesControllerSpec extends TestSupport {
 
   val fakeRequest = FakeRequest("GET", "/")
   val helpToSave = new StartPagesController(fakeApplication.injector.instanceOf[MessagesApi])
