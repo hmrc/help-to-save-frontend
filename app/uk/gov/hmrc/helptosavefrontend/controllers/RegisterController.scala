@@ -41,7 +41,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    sessionCacheConnector: SessionCacheConnector)(implicit app: Application)
   extends HelpToSaveAuth(app) with I18nSupport {
 
-  def declaration: Action[AnyContent] = authorisedForHtsWithEnrolments {
+  def userDetails: Action[AnyContent] = authorisedForHtsWithEnrolments {
     implicit request ⇒
       implicit userUrlWithNino ⇒
         val userInfo = for {
@@ -56,7 +56,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
             InternalServerError("")
           }, _.result.fold(
             Ok(views.html.core.not_eligible()))(
-            userDetails ⇒ Ok(views.html.register.declaration(userDetails)))
+            userDetails ⇒ Ok(views.html.register.userDetails(userDetails)))
         )
   }
 

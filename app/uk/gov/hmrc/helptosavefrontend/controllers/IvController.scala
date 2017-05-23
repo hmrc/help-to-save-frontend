@@ -37,7 +37,7 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
                              implicit val app: Application)
   extends HelpToSaveAuth(app) with I18nSupport {
 
-  def showUpliftJourneyOutcome: Action[AnyContent] = authorisedForHts {
+  def journeyResult: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
       //Will be populated if we arrived here because of an IV success/failure
       val journeyId = request.getQueryString("token").orElse(request.getQueryString("journeyId"))

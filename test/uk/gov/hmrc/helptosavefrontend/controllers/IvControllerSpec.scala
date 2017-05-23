@@ -63,7 +63,7 @@ class IvControllerSpec extends TestSupport {
 
   private val fakeRequest = FakeRequest("GET", s"/register/identity-check-complete?journeyId=${journeyId.Id}")
 
-  private def doRequest() = ivController.showUpliftJourneyOutcome()(fakeRequest)
+  private def doRequest() = ivController.journeyResult()(fakeRequest)
 
   "GET /identity-check-complete" should {
 
