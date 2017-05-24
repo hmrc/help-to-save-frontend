@@ -32,7 +32,7 @@ class SecuritySteps extends Steps {
   Given(s"""^an applicant has a confidence level of $confidenceLevelRegex$$""") { (level: Int) =>
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setAuthorityId(Random.nextString(5))
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/declaration")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
@@ -54,7 +54,7 @@ class SecuritySteps extends Steps {
   }
 
   Given(s"""^their confidence level is $confidenceLevelRegex$$""") { (level: Int) =>
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/declaration")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
     AuthorityWizardPage.setConfidenceLevel(level)
     AuthorityWizardPage.submit()
   }

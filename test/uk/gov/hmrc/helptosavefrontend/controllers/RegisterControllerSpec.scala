@@ -97,7 +97,7 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
 
     "checking eligibility" must {
 
-      def doDeclarationRequest(): Future[PlayResult] = register.declaration(FakeRequest())
+      def doUserDetailsRequest(): Future[PlayResult] = register.userDetails(FakeRequest())
 
       "return user details if the user is eligible for help-to-save" in {
         val user = randomUserInfo()
@@ -107,7 +107,7 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
           mockSessionCacheConnectorPut(Right(CacheMap("1", Map.empty[String, JsValue])))
         }
 
-        val responseFuture: Future[PlayResult] = doDeclarationRequest()
+        val responseFuture: Future[PlayResult] = doUserDetailsRequest()
         val result = responseFuture.futureValue
 
         status(result) shouldBe Status.OK
@@ -128,7 +128,7 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
           mockEligibilityResult(nino, userDetailsURI)(Right(None))
         }
 
-        val result = doDeclarationRequest()
+        val result = doUserDetailsRequest()
         val html = contentAsString(result)
 
         html should include("not eligible")
@@ -141,11 +141,11 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
         def isError(result: Future[PlayResult]): Boolean =
           status(result) == 500
 
-        // test if the given mock actions result in an error when `declaration` is called
+        // test if the given mock actions result in an error when `userDetails` is called
         // on the controller
         def test(mockActions: ⇒ Unit): Unit = {
           mockActions
-          val result = doDeclarationRequest()
+          val result = doUserDetailsRequest()
           isError(result) shouldBe true
         }
 

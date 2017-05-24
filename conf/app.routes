@@ -6,7 +6,7 @@ GET        /eligibility                             @uk.gov.hmrc.helptosavefront
 
 GET        /register/create-an-account              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 GET        /register/nsi                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
-GET        /register/declaration                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.declaration
-GET        /register/identity-check-complete        @uk.gov.hmrc.helptosavefrontend.controllers.IvController.showUpliftJourneyOutcome
+GET        /register/user-details                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.userDetails
+GET        /iv/journey-result                       @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
 
 GET        /register/access-denied                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.accessDenied
