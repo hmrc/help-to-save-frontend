@@ -35,6 +35,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   private val contactHost = configuration.getString(s"contact-frontend.host").getOrElse("")
   private val contactFormServiceIdentifier = "MyService"
 
+  val HtsUserInfoUrl = getConfString("help-to-save-user-info.url", "")
+
   val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
   val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
 

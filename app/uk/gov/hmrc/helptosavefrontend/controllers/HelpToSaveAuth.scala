@@ -20,7 +20,7 @@ import play.api.mvc._
 import play.api.{Application, Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.frontend.Redirects
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.IdentityCallbackUrl
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{HtsUserInfoUrl, IdentityCallbackUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments, AuthProvider => HtsAuthProvider}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -75,10 +75,10 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
     }
   }
 
-  def handleFailure(e: Throwable)(implicit request: RequestHeader): Result =
+  def handleFailure(e: Throwable): Result =
     e match {
       case _: NoActiveSession ⇒
-        toGGLogin(routes.RegisterController.userDetails().absoluteURL())
+        toGGLogin(HtsUserInfoUrl)
       case _: InsufficientConfidenceLevel ⇒
         toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
       case ex: InternalError ⇒
