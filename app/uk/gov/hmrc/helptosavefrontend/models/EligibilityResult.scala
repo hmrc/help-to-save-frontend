@@ -16,15 +16,12 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import play.api.libs.json.{Format, JsResult, JsValue, Json}
-import uk.gov.hmrc.helptosavefrontend.models.UserInfo.userDetailsFormat
+import play.api.libs.json.{Format, Json}
 
 /**
-  * The result of an eligibility check.
-  *
-  * @param result Whether or not the applicant is eligible for HTS
+  * The result of performing an eligibility check. If the user is eligible
+  * return their details, otherwise return [[None]]
   */
-// implemented as a value case class to get rid of runtime allocation overhead
 case class EligibilityResult(result: Option[UserInfo]) extends AnyVal {
   def fold[A](whenIneligible: ⇒ A, whenEligible: UserInfo ⇒ A): A = result.fold(whenIneligible)(whenEligible)
 }
