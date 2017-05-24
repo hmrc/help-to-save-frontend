@@ -22,11 +22,11 @@ import uk.gov.hmrc.helptosavefrontend.models.UserInfo.userDetailsFormat
 /**
   * The result of an eligibility check.
   *
-  * @param eligible Whether or not the applicant is eligible for HTS
+  * @param result Whether or not the applicant is eligible for HTS
   */
 // implemented as a value case class to get rid of runtime allocation overhead
-case class EligibilityResult(eligible: Option[UserInfo]) extends AnyVal {
-  def fold[A](whenIneligible: ⇒ A, whenEligible: UserInfo ⇒ A): A = eligible.fold(whenIneligible)(whenEligible)
+case class EligibilityResult(result: Option[UserInfo]) extends AnyVal {
+  def fold[A](whenIneligible: ⇒ A, whenEligible: UserInfo ⇒ A): A = result.fold(whenIneligible)(whenEligible)
 }
 
 object EligibilityResult {

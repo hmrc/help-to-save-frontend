@@ -46,15 +46,15 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       implicit userUrlWithNino ⇒
         val userInfo = for {
           userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
-          result ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path)
-          _ ← writeToKeyStore(result.eligible)
-        } yield result
+          eligible ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path)
+          _ ← writeToKeyStore(eligible.result)
+        } yield eligible
 
         userInfo.fold(
           error ⇒ {
             Logger.error(s"Could not perform eligibility check: $error")
             InternalServerError("")
-          }, _.eligible.fold(
+          }, _.result.fold(
             Ok(views.html.core.not_eligible()))(
             userDetails ⇒ Ok(views.html.register.declaration(userDetails)))
         )
