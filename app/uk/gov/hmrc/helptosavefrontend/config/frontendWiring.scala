@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import play.api.http.HttpVerbs.{GET ⇒ GET_VERB, POST ⇒ POST_VERB}
+import play.api.http.HttpVerbs.{GET => GET_VERB, POST => POST_VERB}
 import play.api.libs.json.Writes
 import uk.gov.hmrc.auth.core.PlayAuthConnector
+import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector ⇒ Auditing}
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.ws.{WSDelete, WSGet, WSPost, WSPut}
+import uk.gov.hmrc.play.http.ws._
 
 import scala.concurrent.Future
 
@@ -67,4 +68,23 @@ object FrontendAuthConnector extends PlayAuthConnector with ServicesConfig {
   override val serviceUrl: String = baseUrl("auth")
 
   override def http = WSHttp
+}
+
+
+//moved from backend
+class WSHttpProxy extends WSHttp with WSProxy with RunMode with HttpAuditing with ServicesConfig {
+  override lazy val appName = getString("appName")
+  override lazy val wsProxyServer = WSProxyConfiguration(s"proxy")
+  override val hooks = Seq(AuditingHook)
+  override lazy val auditConnector = FrontendAuditConnector
+
+  /**
+    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
+    * to replace [[POST]] method provided by the hmrc library which will throw exceptions in such cases.
+    */
+  def post[A](url: String,
+              body: A,
+              headers: Map[String,String] = Map.empty[String,String]
+             )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] =
+  doPost(url, body, headers.toSeq)
 }

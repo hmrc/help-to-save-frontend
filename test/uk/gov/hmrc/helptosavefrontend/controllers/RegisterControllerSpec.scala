@@ -23,11 +23,12 @@ import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Reads, Writes}
-import play.api.mvc.{Result => PlayResult}
+import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentType, _}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -35,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RegisterControllerSpec extends TestSupport with ScalaFutures {
 
@@ -54,10 +55,9 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
     mockSessionCacheConnector)(
-    fakeApplication) {
+    fakeApplication, ec) {
     override lazy val authConnector = mockAuthConnector
   }
-
 
   def mockEligibilityResult(nino: String, userDetailsURI: String)(result: Either[String, Option[UserInfo]]): Unit =
     (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
@@ -76,9 +76,9 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
       .expects(*, *)
       .returning(Future.successful(mockHtsSession))
 
-  def mockCreateAccount(response: Either[String, Unit] = Right(())): Unit =
-    (mockHtsService.createAccount(_: UserInfo)(_: HeaderCarrier))
-      .expects(*, *)
+  def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure,SubmissionSuccess] = Right(SubmissionSuccess())): Unit =
+    (mockHtsService.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nSIUserInfo, *, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockPlayAuthWithRetrievals[A, B](predicate: Predicate, retrieval: Retrieval[A ~ B])(result: A ~ B): Unit =
@@ -194,14 +194,12 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
     "creating an account" must {
       def doCreateAccountRequest(): Future[PlayResult] = register.createAccountHelpToSave(FakeRequest())
 
-      val user = randomUserInfo()
-
-      "retrieve the user info from session cache and post it using " +
+            "retrieve the user info from session cache and post it using " +
         "the help to save service" in {
         inSequence {
           mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
-          mockCreateAccount()
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+          mockCreateAccount(validNSIUserInfo)()
         }
 
         doCreateAccountRequest().futureValue
@@ -211,8 +209,8 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
       "indicate to the user that the creation was successful if the creation was successful" in {
         inSequence {
           mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
-          mockCreateAccount()
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+          mockCreateAccount(validNSIUserInfo)()
         }
 
         val result = doCreateAccountRequest()
@@ -233,11 +231,23 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
           html should include("Account creation failed")
         }
 
+        "the user details do not pass local NS&I validity checks" in {
+          inSequence {
+            mockPlayAuthWithWithConfidence()
+            mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo.copy(email = "")))))
+          }
+
+          val result = doCreateAccountRequest()
+          val html = contentAsString(result)
+          html should include("Account creation failed")
+        }
+
+
         "the help to save service returns with an error" in {
           inSequence {
             mockPlayAuthWithWithConfidence()
-            mockSessionCacheConnectorGet(Some(HTSSession(Some(user))))
-            mockCreateAccount(Left("Uh oh"))
+            mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+            mockCreateAccount(validNSIUserInfo)(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }
 
           val result = doCreateAccountRequest()

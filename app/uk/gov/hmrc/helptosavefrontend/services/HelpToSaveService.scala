@@ -18,21 +18,29 @@ package uk.gov.hmrc.helptosavefrontend.services
 
 import javax.inject.Singleton
 
+import cats.data.EitherT
 import com.google.inject.Inject
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 
+import scala.concurrent.{ExecutionContext, Future}
+
 @Singleton
-class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector) extends ServicesConfig {
+class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends ServicesConfig {
 
   def checkEligibility(nino: String, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
     helpToSaveConnector.getEligibilityStatus(nino, userDetailsURI)
 
-  def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[Unit] =
-    helpToSaveConnector.createAccount(userInfo)
+
+  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
+    EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]]{ _ match {
+      case success: SubmissionSuccess => Right(success)
+      case failure: SubmissionFailure => Left(failure)
+    }})
 
 }
 

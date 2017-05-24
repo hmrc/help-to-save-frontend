@@ -52,13 +52,6 @@ class HelpToSaveConnectorImplSpec extends TestSupport {
       (mockHttp.get(_: String)(_: HeaderCarrier))
         .expects(url, *)
         .returning(Future.successful(result))
-
-    def mockCreateAccount[I](url: String, body: I)(result: HttpResponse): Unit =
-      (mockHttp.post(
-        _: String, _: I, _: Seq[(String, String)]
-      )(_: Writes[I], _: HeaderCarrier))
-        .expects(url, body, *, *, *)
-        .returning(Future.successful(result))
   }
 
   "The HelpToSaveConnectorImpl" when {
@@ -99,25 +92,6 @@ class HelpToSaveConnectorImplSpec extends TestSupport {
         Await.result(result.value, 3.seconds).isLeft shouldBe true
       }
 
-    }
-
-    "creating an account" must {
-      val user = randomUserInfo()
-
-      "return the user info if the account creation was successful" in new TestApparatus {
-        mockCreateAccount(createAccountURL, Json.toJson(user))(HttpResponse(201))
-
-        val result = connector.createAccount(user)
-        Await.result(result.value, 3.seconds) shouldBe Right(())
-      }
-
-
-      "return an error if the account creation was not successful" in new TestApparatus {
-        mockCreateAccount(createAccountURL, Json.toJson(user))(HttpResponse(401))
-
-        val result = connector.createAccount(user)
-        Await.result(result.value, 3.seconds).isLeft shouldBe true
-      }
     }
   }
 }

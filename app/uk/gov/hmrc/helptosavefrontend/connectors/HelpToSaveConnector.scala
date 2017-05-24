@@ -36,7 +36,6 @@ trait HelpToSaveConnector {
 
   def getEligibilityStatus(nino: NINO, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
 
-  def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[Unit]
 }
 
 @Singleton
@@ -66,16 +65,6 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
           response.parseJson[EligibilityResult]
         } else {
           Left(badResponseMessage(response, "Eligibility check"))
-        }
-      }
-
-  override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[Unit] =
-    EitherT.right[Future, String, HttpResponse](http.post(createAccountURL, Json.toJson(userInfo)))
-      .subflatMap { response ⇒
-        if (response.status == 201) {
-          Right(())
-        } else {
-          Left(badResponseMessage(response, "Create account"))
         }
       }
 
