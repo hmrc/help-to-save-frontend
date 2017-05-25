@@ -24,6 +24,8 @@ object Configuration {
 
   val host = System.getProperty("host")
 
+  val authHost = System.getProperty("authHost")
+
   private val timeout = System.getProperty("timeout", "5")
 
   val settings: Configuration = new Configuration(s"$host/$basePath", timeout.toInt)

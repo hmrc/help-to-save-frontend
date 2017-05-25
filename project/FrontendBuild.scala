@@ -31,7 +31,7 @@ object FrontendBuild extends Build with MicroService {
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope,
     // below for selenium tests
-    "com.codeborne" % "phantomjsdriver" % "1.2.1" % scope,
+    "com.codeborne" % "phantomjsdriver" % "1.4.3" % scope,
     "info.cukes" % "cucumber-junit" % "1.2.4" % scope,
     "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
     "info.cukes" %% "cucumber-scala" % "1.2.2" % scope,

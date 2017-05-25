@@ -19,15 +19,11 @@ package hts.pages
 import hts.utils.Configuration
 import org.openqa.selenium.{By, WebDriver}
 
-import util.Random
-
 object AuthorityWizardPage {
 
   def goToPage()(implicit driver: WebDriver): Unit =
-    driver.navigate().to(Configuration.host + "/auth-login-stub/gg-sign-in")
+    driver.navigate().to(Configuration.authHost + "/auth-login-stub/gg-sign-in")
 
-  def setAuthorityId(id: String)(implicit driver: WebDriver): Unit =
-    driver.findElement(By.name("authorityId")).sendKeys()
 
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
     driver.findElement(By.name("redirectionUrl")).sendKeys(url)

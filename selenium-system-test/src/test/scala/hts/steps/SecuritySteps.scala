@@ -16,10 +16,9 @@
 
 package hts.steps
 
-import hts.pages.{AuthorityWizardPage, Page}
+import cucumber.api.java.en.Given
+import hts.pages.{AuthorityWizardPage, CreateAccountPage, Page, UserDetailsPage}
 import hts.utils.Configuration
-
-import scala.util.Random
 
 class SecuritySteps extends Steps {
 
@@ -31,36 +30,50 @@ class SecuritySteps extends Steps {
 
   Given(s"""^an applicant has a confidence level of $confidenceLevelRegex$$""") { (level: Int) =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setAuthorityId(Random.nextString(5))
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
+    println(Configuration.host + "/help-to-save/register/user-details")
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
-  Given(s"""^their credential strength is $credentialStrengthsRegex$$""") { (strength: String) =>
-    AuthorityWizardPage.setCredentialStrength(strength)
-    AuthorityWizardPage.setNino("JA553215D")
-    AuthorityWizardPage.submit()
-  }
-
-  Then("""^they are forced into going through 2SV before being able to proceed with their HtS application$""") { () =>
-    Page.getCurrentUrl() should include("one-time-password")
-  }
-
-  Given(s"""^an applicant's credential strength is $credentialStrengthsRegex$$""") { (strength: String) =>
-    AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setAuthorityId(Random.nextString(5))
-    AuthorityWizardPage.setCredentialStrength(strength)
-    AuthorityWizardPage.setNino("JA553215D")
-  }
-
   Given(s"""^their confidence level is $confidenceLevelRegex$$""") { (level: Int) =>
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
     AuthorityWizardPage.setConfidenceLevel(level)
     AuthorityWizardPage.submit()
   }
 
   Then("""^they are forced into going through IV before being able to proceed with their HtS application$""") { () =>
-    Page.getCurrentUrl() should include("identity-verification")
+    Page.getCurrentUrl() should include regex ("/iv/journey-result|iv%2Fjourney-result")
+  }
+
+  Given("""^an applicant has NOT logged in$""") { () =>
+    // Do nothing
+  }
+
+  Given("""^an applicant has logged in$""") { () =>
+    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.setCredentialStrength("strong")
+    AuthorityWizardPage.setNino("AE553215D")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
+  }
+
+  When("""^they try to view the user details page$""") { () =>
+    UserDetailsPage.goToPage()
+  }
+
+  When("""^they try to view the create-an-account page$""") { () =>
+    CreateAccountPage.goToPage()
+  }
+
+  Then("""^they are prompted to log in$""") { () =>
+    Page.getCurrentUrl() should include("gg/sign-in")
+  }
+
+  Given("""^an applicant has logged in and passed IV$""") { () =>
+    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
+    AuthorityWizardPage.setCredentialStrength("strong")
+    AuthorityWizardPage.setConfidenceLevel(200)
+    AuthorityWizardPage.setNino("AE553215D")
+    AuthorityWizardPage.submit()
   }
 
 }

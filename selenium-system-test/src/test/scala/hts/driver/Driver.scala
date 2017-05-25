@@ -19,8 +19,7 @@ package hts.driver
 import java.util.concurrent.TimeUnit
 
 import cats.syntax.either._
-import org.openqa.selenium.{WebDriver, WebDriverException}
-import org.openqa.selenium.WebDriver.Window
+import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.firefox.{FirefoxDriver, MarionetteDriver}
 import org.openqa.selenium.phantomjs.{PhantomJSDriver, PhantomJSDriverService}
