@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -102,7 +102,7 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
       "return user details if the user is eligible for help-to-save" in {
         val user = randomUserInfo()
         inSequence {
-          mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+          mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
           mockEligibilityResult(nino, userDetailsURI)(Right(Some(user)))
           mockSessionCacheConnectorPut(Right(CacheMap("1", Map.empty[String, JsValue])))
         }
@@ -124,7 +124,7 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
 
       "display a 'Not Eligible' page if the user is not eligible" in {
         inSequence {
-          mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
+          mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
           mockEligibilityResult(nino, userDetailsURI)(Right(None))
         }
 
@@ -151,20 +151,20 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
 
         "the nino is not available" in {
           test(
-            mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(
+            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(
               uk.gov.hmrc.auth.core.~(Some(userDetailsURI), Enrolments(Set.empty))))
         }
 
         "the user details URI is not available" in {
           test(
-            mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(
+            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(
               uk.gov.hmrc.auth.core.~(None, enrolments)))
         }
 
         "the eligibility check call returns with an error" in {
           test(
             inSequence {
-              mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+              mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
               mockEligibilityResult(nino, userDetailsURI)(Left("Oh no"))
             })
         }
@@ -172,7 +172,7 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
         "there is an error writing to the session cache" in {
           val user = randomUserInfo()
           test(inSequence {
-            mockPlayAuthWithRetrievals(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
             mockEligibilityResult(nino, userDetailsURI)(Right(Some(user)))
             mockSessionCacheConnectorPut(Left("Bang"))
           })

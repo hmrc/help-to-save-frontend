@@ -60,12 +60,12 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         )
   }
 
-  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHts {
+  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
       Future.successful(Ok(views.html.register.create_account_help_to_save()))
   }
 
-  def createAccountHelpToSave: Action[AnyContent] = authorisedForHts {
+  def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
       val result = for {
         userInfo ← retrieveUserInfo()

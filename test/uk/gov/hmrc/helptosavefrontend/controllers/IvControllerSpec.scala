@@ -61,13 +61,13 @@ class IvControllerSpec extends TestSupport {
     override def authConnector: AuthConnector = mockAuthConnector
   }
 
-  private val fakeRequest = FakeRequest("GET", s"/register/identity-check-complete?journeyId=${journeyId.Id}")
+  private val fakeRequest = FakeRequest("GET", s"/iv/journey-result?journeyId=${journeyId.Id}")
 
   private def doRequest() = ivController.journeyResult()(fakeRequest)
 
-  "GET /identity-check-complete" should {
+  "GET /iv/journey-result" should {
 
-    "handle different responses from Identity-verification-frontend" in {
+    "handle different responses from identity-verification-frontend" in {
 
       val validCases =
         Table(

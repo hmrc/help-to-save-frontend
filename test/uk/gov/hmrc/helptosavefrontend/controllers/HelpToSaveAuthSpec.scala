@@ -25,7 +25,7 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -60,7 +60,7 @@ class HelpToSaveAuthSpec extends TestSupport {
   }
 
   private def mockAuthWith(error: String) =
-    mockAuthWithRetrievalsWith(HtsAuthRule, UserDetailsUrlWithAllEnrolments)(fromString(error))
+    mockAuthWithRetrievalsWith(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(fromString(error))
 
   "HelpToSaveAuth" should {
 
