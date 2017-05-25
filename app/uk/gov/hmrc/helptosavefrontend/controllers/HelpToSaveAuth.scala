@@ -22,7 +22,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{HtsUserDetailsUrl, IdentityCallbackUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{HtsAuthRule, UserDetailsUrlWithAllEnrolments, AuthProvider => HtsAuthProvider}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments, AuthProvider => HtsAuthProvider}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -42,7 +42,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
 
   def authorisedForHtsWithEnrolments(action: HtsActionWithEnrolments): Action[AnyContent] = {
     Action.async { implicit request =>
-      authorised(HtsAuthRule)
+      authorised(AuthWithConfidence)
         .retrieve(UserDetailsUrlWithAllEnrolments) {
           case userDetailsUrl ~ allEnrols =>
             val nino =
@@ -68,6 +68,16 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def authorisedForHts(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(HtsAuthProvider) {
+        action(request)
+      }.recover {
+        case e ⇒ handleFailure(e)
+      }
+    }
+  }
+
+  def authorisedForHtsWithConfidence(action: HtsAction): Action[AnyContent] = {
+    Action.async { implicit request =>
+      authorised(AuthWithConfidence) {
         action(request)
       }.recover {
         case e ⇒ handleFailure(e)
