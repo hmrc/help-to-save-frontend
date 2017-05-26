@@ -63,12 +63,12 @@ class NSIConnectorImpl extends NSIConnector with ServicesConfig {
   val httpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
-    Logger.debug(s"We are trying to create a account for ${userInfo.NINO}")
+    Logger.info(s"We are trying to create a account for ${userInfo.NINO}")
     httpProxy.post(url, userInfo)
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
-            Logger.debug("We have successfully created a NSI account")
+            Logger.info("We have successfully created a NSI account")
             SubmissionSuccess()
 
           case Status.BAD_REQUEST ⇒

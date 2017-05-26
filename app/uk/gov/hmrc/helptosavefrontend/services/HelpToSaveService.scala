@@ -20,6 +20,7 @@ import javax.inject.Singleton
 
 import cats.data.EitherT
 import com.google.inject.Inject
+import play.api.Logger
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, NSIUserInfo, UserInfo}
@@ -38,8 +39,12 @@ class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIC
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]]{ _ match {
-      case success: SubmissionSuccess => Right(success)
-      case failure: SubmissionFailure => Left(failure)
+      case success: SubmissionSuccess =>
+        Logger.info(s"We have successfully created an account for ${userInfo.NINO}")
+        Right(success)
+      case failure: SubmissionFailure =>
+        Logger.error(s"We have not created an account for ${userInfo.NINO}")
+        Left(failure)
     }})
 
 }
