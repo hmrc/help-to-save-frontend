@@ -48,4 +48,30 @@ package object models {
 
   def randomUserInfo(): UserInfo = sample(userInfoArb)
 
+
+
+  /**
+    * Valid user details which will pass NSI validation checks
+    */
+  val (validUserInfo, validNSIUserInfo) = {
+    val (forename, surname) = "Tyrion" → "Lannister"
+    val dateOfBirth = LocalDate.ofEpochDay(0L)
+    val addressLine1 = "Casterly Rock"
+    val addressLine2 = "The Westerlands"
+    val addressLine3 = "Westeros"
+    val postcode = "BA148FY"
+    val country = "GB"
+    val address = Address(Some(addressLine1), Some(addressLine2), Some(addressLine3),
+      None, None, Some(postcode), Some(country))
+    val nino = "WM123456C"
+    val email = "tyrion_lannister@gmail.com"
+
+    val userInfo = UserInfo(forename, surname, nino, dateOfBirth, email, address)
+    val nsiUserInfo = NSIUserInfo(
+      forename, surname, dateOfBirth, addressLine1, addressLine2, Some(addressLine3),
+      None, None, postcode, Some(country), nino, "02", None, email, "online")
+
+    userInfo → nsiUserInfo
+  }
+
 }

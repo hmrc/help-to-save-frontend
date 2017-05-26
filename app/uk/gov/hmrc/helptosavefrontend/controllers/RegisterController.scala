@@ -21,24 +21,26 @@ import javax.inject.Singleton
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
+import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Result}
 import play.api.{Application, Logger}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    helpToSaveService: HelpToSaveService,
-                                   sessionCacheConnector: SessionCacheConnector)(implicit app: Application)
+                                   sessionCacheConnector: SessionCacheConnector)(implicit app: Application, ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
 
   def userDetails: Action[AnyContent] = authorisedForHtsWithEnrolments {
@@ -68,8 +70,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
       val result = for {
-        userInfo ← retrieveUserInfo()
-        _ ← helpToSaveService.createAccount(userInfo)
+        userInfo    ← retrieveUserInfo()
+        nsiUserInfo ← toNSIUserInfo(userInfo)
+        _ ← helpToSaveService.createAccount(nsiUserInfo).leftMap(submissionFailureToString)
       } yield userInfo
 
       // TODO: plug in actual pages below
@@ -84,6 +87,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         }
       )
   }
+
 
   def accessDenied: Action[AnyContent] = Action.async {
     implicit request ⇒
@@ -108,17 +112,27 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   private def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
     // write to key-store
     val cacheMapOption: Option[Future[CacheMap]] =
-      userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
+    userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
 
     // use traverse to swap the option and future
     val cacheMapFuture: Future[Option[CacheMap]] =
-      cacheMapOption.traverse[Future, CacheMap](identity)
+    cacheMapOption.traverse[Future, CacheMap](identity)
 
     EitherT(
       cacheMapFuture.map[Either[String, Option[CacheMap]]](Right(_))
         .recover { case e ⇒ Left(s"Could not write to key-store: ${e.getMessage}") }
     )
   }
+
+  private def toNSIUserInfo(userInfo: UserInfo): EitherT[Future,String,NSIUserInfo] =
+    EitherT.fromEither[Future](NSIUserInfo(userInfo)
+      .toEither
+      .leftMap(errors ⇒ s"User info validation failed: ${errors.toList.mkString(", ")}"))
+
+  private def submissionFailureToString(failure: SubmissionFailure): String =
+    s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")}, "+
+      s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
+
 
 
 }
