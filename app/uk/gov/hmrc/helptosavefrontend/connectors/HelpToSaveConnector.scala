@@ -68,4 +68,16 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
         }
       }
 
+
+//  override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[Unit] =
+//    EitherT.right[Future, String, HttpResponse](http.post(createAccountURL, Json.toJson(userInfo)))
+//       .subflatMap { response ⇒
+//           if (response.status == 201) {
+//             Right(())
+//              } else {
+//                Left(badResponseMessage(response, "Create account"))
+//             }
+//          }
+
+
 }
