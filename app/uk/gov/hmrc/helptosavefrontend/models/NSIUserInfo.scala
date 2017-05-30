@@ -83,41 +83,57 @@ object NSIUserInfo {
 
   private case class Email(local: String, domain: String)
 
-  private def forenameValidation(name: String): ValidatedNel[String, String] = {
-    val characterCountLowerBoundCheck = validatedFromBoolean(name)(_.nonEmpty, "forename did not have any characters")
-    val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 26, "forename was larger than 26 characters")
+  private val allowedNameSpecialCharacters = List('-', '&', '.')
 
-    (commonNameChecks(name, "forename") |@| characterCountLowerBoundCheck |@| characterCountUpperBoundCheck)
-      .tupled.map(_ ⇒ name)
+  private def forenameValidation(name: String): ValidatedNel[String, String] = {
+    val forbiddenSpecialCharacters = specialCharacters(name, allowedNameSpecialCharacters)
+
+    val specialCharacterCheck = validatedFromBoolean(forbiddenSpecialCharacters)(_.isEmpty,
+      s"forename contained invalid special characters: $name")
+
+    val firstCharacterNonSpecial = validatedFromBoolean(name)(!_.headOption.exists(isSpecial(_)), s"forename started with special character: $name")
+
+    val characterCountLowerBoundCheck = validatedFromBoolean(name)(_.nonEmpty, "forename did not have any characters")
+    val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 99, s"forename was larger than 99 characters: $name")
+
+    (commonNameChecks(name, "forename") |@| specialCharacterCheck |@| firstCharacterNonSpecial |@|
+      characterCountLowerBoundCheck |@| characterCountUpperBoundCheck)
+      .map{ case _ ⇒ name }
   }
 
   private def surnameValidation(name: String): ValidatedNel[String, String] = {
-    val characterCountLowerBoundCheck = validatedFromBoolean(name)(_.length > 1, "surname did not have at least 2 characters")
-    val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 300, "surname was larger than 300 characters")
+    val forbiddenSpecialCharacters = specialCharacters(name, allowedNameSpecialCharacters)
 
-    val consecutiveAlphaCharCheck = validatedFromBoolean(name)(containsNConsecutiveAlphaCharacters(_, 2),
-      "surname did not have at least 2 consecutive alphabetic characters")
+    val specialCharacterCheck = validatedFromBoolean(forbiddenSpecialCharacters)(_.isEmpty,
+      s"surname contained invalid special characters: $name")
 
-    (commonNameChecks(name, "surname") |@| characterCountLowerBoundCheck |@|
-      characterCountUpperBoundCheck |@| consecutiveAlphaCharCheck)
-      .tupled.map(_ ⇒ name)
+    val firstCharacterNonSpecial = validatedFromBoolean(name)(!_.headOption.exists(isSpecial(_)), s"surname started with special character: $name")
+
+    val lastCharacterNonSpecial = validatedFromBoolean(name)(!_.lastOption.exists(isSpecial(_)), s"surname ended with special character: $name")
+
+    val characterCountLowerBoundCheck = validatedFromBoolean(name)(_.nonEmpty, "surname did not have at least 1 character")
+    val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 300, s"surname was larger than 300 characters: $name")
+
+    (commonNameChecks(name, "surname") |@| specialCharacterCheck |@| firstCharacterNonSpecial |@|
+      lastCharacterNonSpecial |@| characterCountLowerBoundCheck |@| characterCountUpperBoundCheck)
+      .map{ case _ ⇒ name }
   }
 
   private def dateValidation(date: LocalDate): ValidatedNel[String, LocalDate] = {
     val lowerBoundCheck =
-      validatedFromBoolean(date)(_.isAfter(LocalDate.of(1800, 1, 1)), s"Birth date $date was before 01/01/1800")
+      validatedFromBoolean(date)(_.isAfter(LocalDate.of(1800, 1, 1)), s"Birth date $date was before 01/01/1800: $date")
     val upperBoundCheck =
-      validatedFromBoolean(date)(_.isBefore(LocalDate.now()), s"Birth date $date was in the future")
+      validatedFromBoolean(date)(_.isBefore(LocalDate.now()), s"Birth date was in the future: $date")
 
-    (lowerBoundCheck |@| upperBoundCheck).tupled.map(_ ⇒ date)
+    (lowerBoundCheck |@| upperBoundCheck).map{ case _ ⇒ date }
   }
 
   private def addressLineValidation(address: Address): ValidatedNel[String, ValidatedAddressLines] = {
     val list = List(address.line1, address.line2, address.line3,
       address.line4, address.line5).collect { case Some(s) ⇒ s }.filter(_.nonEmpty)
 
-    val lengthCheck = validatedFromBoolean(list)(!_.exists(_.length > 28),
-      "Address contained line greater than 28 characters")
+    val lengthCheck = validatedFromBoolean(list)(!_.exists(_.length > 35),
+      "Address contained line greater than 35 characters")
 
     val lineCheck = list match {
       case l1 :: l2 :: l3 :: l4 :: l5 :: Nil ⇒
@@ -144,13 +160,11 @@ object NSIUserInfo {
       val lengthCheck =
         validatedFromBoolean(trimmedPostcode)(_.length <= 10, s"Postcode was longer thn 10 characters: $trimmedPostcode")
 
-      val regexCheck = regexValidation(trimmedPostcode)(postcodeRegex, s"Invalid postcode format: $trimmedPostcode")
-
-      (lengthCheck |@| regexCheck).tupled.map(_ ⇒ trimmedPostcode)
+      lengthCheck.map(_ ⇒ trimmedPostcode)
   }
 
   private def countryCodeValidation(countryCode: Option[String]): ValidatedNel[String, Option[String]] =
-    validatedFromBoolean(countryCode.map(_.trim))(_.forall(_.length == 2), "Country code was not ")
+    validatedFromBoolean(countryCode.map(_.trim))(_.forall(_.length == 2), s"Country code was not 2 characters: ${countryCode.getOrElse("")}")
 
   private def ninoValidation(nino: String): ValidatedNel[String, String] = {
     val lengthCheck =
@@ -159,12 +173,11 @@ object NSIUserInfo {
     val regexCheck =
       regexValidation(nino)(ninoRegex, "Invalid NINO format")
 
-    (lengthCheck |@| regexCheck).tupled.map(_ ⇒ nino)
+    (lengthCheck |@| regexCheck).map{ case _ ⇒ nino }
   }
 
   private def emailValidation(email: String): ValidatedNel[String, String] = {
-    val lengthCheck = validatedFromBoolean(email)(_.length <= 56, "email was longer than 56 characters")
-    val whitespaceCheck = validatedFromBoolean(email)(!_.contains(' '), "email contained whitespace")
+    val lengthCheck = validatedFromBoolean(email)(_.length <= 254, "email was longer than 254 characters")
     val atCheck = validatedFromBoolean(email)(_.contains('@'), "email did not contain '@' symbol")
 
     // the domain is the part of the email after the last '@' symbol - this is
@@ -175,47 +188,23 @@ object NSIUserInfo {
     }
 
     val localCheck = validatedFromBoolean(maybeEmail)(
-      _.forall(!_.local.endsWith(".")), "local part ended with '.'")
+      _.forall(_.local.length < 65), "local part of email was longer than 64 characters")
 
-    val domainDotCheck1 = validatedFromBoolean(maybeEmail)(
-      _.forall(_.domain.contains('.')),
-      "domain did not contain '.' character")
+    val domainCheck = validatedFromBoolean(maybeEmail)(
+      _.forall(_.domain.length < 253), "domain part of email was longer than 252 characters")
 
-    val domainDotCheck2 = validatedFromBoolean(maybeEmail)(
-      _.forall(!_.domain.startsWith(".")), "domain started with '.'")
-
-    val domainLastPartCheck = validatedFromBoolean(maybeEmail)(
-      _.forall(_.domain.split('.').lastOption.forall(_.length > 2)),
-      "last part of domain did not have at least two characters")
-
-    (lengthCheck |@| whitespaceCheck |@| atCheck |@| localCheck |@|
-      domainDotCheck1 |@| domainDotCheck2 |@| domainLastPartCheck)
-      .tupled.map(_ ⇒ email)
+    (lengthCheck |@| atCheck |@| localCheck |@| domainCheck).map{ case _ ⇒ email }
   }
 
   private def commonNameChecks(name: String, nameType: String): ValidatedNel[String, String] = {
-    val allowedSpecialCharacters = List('-', '&')
-    val forbiddenSpecialCharacters = specialCharacters(name, allowedSpecialCharacters)
+    val leadingSpaceCheck = validatedFromBoolean(name)(!_.startsWith(" "), s"$nameType started with leading space: $name")
 
-    val leadingSpaceCheck = validatedFromBoolean(name)(!_.startsWith(" "), s"$nameType started with leading space")
-
-    val numericCheck = validatedFromBoolean(name)(!_.exists(_.isDigit), s"$nameType contained numeric characters")
-
-    val specialCharacterCheck = validatedFromBoolean(forbiddenSpecialCharacters)(_.isEmpty,
-      s"$nameType contained invalid special characters: ${forbiddenSpecialCharacters.mkString(", ")}")
-
-    val firstCharacterNonSpecial = validatedFromBoolean(name)(!_.headOption.exists(isSpecial(_)),
-      s"$nameType started with special character")
-
-    val lastCharacterNonSpecial = validatedFromBoolean(name)(!_.lastOption.exists(isSpecial(_)),
-      s"$nameType ended with special character")
+    val numericCheck = validatedFromBoolean(name)(!_.exists(_.isDigit), s"$nameType contained numeric characters: $name")
 
     val consecutiveSpecialCharacters = validatedFromBoolean(name)(!containsNConsecutiveSpecialCharacters(_, 2),
-      s"$nameType contained consecutive special characters")
+      s"$nameType contained consecutive special characters: $name")
 
-    (leadingSpaceCheck |@| numericCheck |@| specialCharacterCheck |@|
-      firstCharacterNonSpecial |@| lastCharacterNonSpecial |@| consecutiveSpecialCharacters)
-      .tupled.map(_ ⇒ name)
+    (leadingSpaceCheck |@| numericCheck |@| consecutiveSpecialCharacters).map{ case _ ⇒ name }
   }
 
   private def validatedFromBoolean[A](a: A)(isValid: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
@@ -243,9 +232,6 @@ object NSIUserInfo {
   /** Does the given string contain `n` or more consecutive special characters? */
   private def containsNConsecutiveSpecialCharacters(s: String, n: Int): Boolean =
     containsNConsecutive(s, n, isSpecial(_))
-
-  private def containsNConsecutiveAlphaCharacters(s: String, n: Int): Boolean =
-    containsNConsecutive(s, n, _.isLetter)
 
   /**
     * Does the given string contains `n` consecutive characters which satisfy the given predicate?
@@ -283,10 +269,6 @@ object NSIUserInfo {
 
   private[models] val ninoRegex = ("""^(([A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])([0-9]{2})([0-9]{2})""" +
     """([0-9]{2})([A-D]{1})|((XX)(99)(99)(99)(X)))$""").r
-
-  private[models] val postcodeRegex =
-    ("""^((GIR)(0AA)|([A-PR-UWYZ]([0-9]{1,2}|([A-HK-Y][0-9]|[A-HK-Y][0-9]([0-9]|[ABEHMNPRV-Y]))|""" +
-      """[0-9][A-HJKS-UW]))([0-9][ABD-HJLNP-UW-Z]{2})|(([A-Z]{1,4})(1ZZ))|((BFPO)([0-9]{1,4})))$""").r
 
 }
 
