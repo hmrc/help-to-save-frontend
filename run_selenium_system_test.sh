@@ -2,9 +2,7 @@
 
 USAGE="[env] [browser] where env=dev|qa|local, browser=chrome|phantomjs"
 
-echo $3
-
-if [ "$1" != 'dev' ] && [ "$1" != 'qa' ] && [ "$1" != 'local' ] || ([ "$2" != 'chrome' ] && [ "$2" != 'phantomjs' ])
+if [ "$1" != 'dev' ] && [ "$1" != 'qa' ] && [ "$1" != 'local' ] || ([ "$2" != 'chrome' ] && [ "$2" != 'phantomjs' ] && [ "$2" != 'firefox' ])
 then
   echo "Expected usage:"${USAGE}
   exit 1
@@ -20,16 +18,20 @@ fi
 if [ "$1" == 'dev' ]
 then
   HOST='https://www-dev.tax.service.gov.uk'
+  AUTH_HOST='https://www-dev.tax.service.gov.uk'
+
 elif [ "$1" == 'qa' ]
 then
   HOST='https://www-qa.tax.service.gov.uk'
+  AUTH_HOST='https://www-dev.tax.service.gov.uk'
 else
-  HOST='https://localhost:7000'
+  HOST='http://localhost:7000'
+  AUTH_HOST='http://localhost:9949'
 fi
 
-if [ "$TAG" == 'WIP' ]
+if [ "$TAG" == 'wip' ]
 then
-  sbt -Dhost=${HOST} -Dbrowser=$2 'selenium-wip:test'
+  sbt -Dhost=${HOST} -DauthHost=${AUTH_HOST} -Dbrowser=$2 'selenium-wip:test'
 else
-  sbt -Dhost=${HOST} -Dbrowser=$2 'selenium:test'
+  sbt -Dhost=${HOST} -DauthHost=${AUTH_HOST} -Dbrowser=$2 'selenium:test'
 fi

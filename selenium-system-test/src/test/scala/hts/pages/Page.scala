@@ -22,4 +22,5 @@ object Page {
 
   def getCurrentUrl()(implicit driver: WebDriver): String = driver.getCurrentUrl
 
+  def getPageContent()(implicit driver: WebDriver): String = driver.getPageSource
 }
