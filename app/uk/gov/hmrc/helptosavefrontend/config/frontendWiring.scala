@@ -59,9 +59,7 @@ trait WSHttpExtension extends WSGet with WSPost {
 }
 
 object WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName with RunMode with WSHttpExtension {
-
   override val hooks = NoneRequired
-
 }
 
 object FrontendAuthConnector extends PlayAuthConnector with ServicesConfig {
