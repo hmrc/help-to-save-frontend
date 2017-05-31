@@ -38,14 +38,14 @@ class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIC
 
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
-    EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]]{ _ match {
+    EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]] {
       case success: SubmissionSuccess =>
-        Logger.info(s"We have successfully created an account for ${userInfo.NINO}")
+        Logger.info(s"Successfully created an account for ${userInfo.NINO}")
         Right(success)
       case failure: SubmissionFailure =>
-        Logger.error(s"We have not created an account for ${userInfo.NINO}")
+        Logger.error(s"Could not create an account for ${userInfo.NINO} due to $failure")
         Left(failure)
-    }})
+    })
 
 }
 

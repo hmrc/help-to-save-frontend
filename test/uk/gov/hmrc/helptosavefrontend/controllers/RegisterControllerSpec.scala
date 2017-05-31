@@ -129,10 +129,10 @@ class RegisterControllerSpec extends TestSupport {
         }
 
         val result = doUserDetailsRequest()
-        val html = contentAsString(result)
 
-        html should include("not eligible")
-        html should include("To be eligible for an account")
+        status(result) shouldBe Status.SEE_OTHER
+
+        redirectLocation(result) shouldBe Some("/help-to-save/register/not-eligible")
       }
 
 

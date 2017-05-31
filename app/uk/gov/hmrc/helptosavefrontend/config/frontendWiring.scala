@@ -70,8 +70,6 @@ object FrontendAuthConnector extends PlayAuthConnector with ServicesConfig {
   override def http = WSHttp
 }
 
-
-//moved from backend
 class WSHttpProxy extends WSHttp with WSProxy with RunMode with HttpAuditing with ServicesConfig {
   override lazy val appName = getString("appName")
   override lazy val wsProxyServer = WSProxyConfiguration(s"proxy")

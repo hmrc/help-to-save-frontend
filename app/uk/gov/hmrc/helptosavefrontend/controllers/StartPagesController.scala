@@ -29,10 +29,6 @@ import scala.concurrent.Future
 @Singleton
 class StartPagesController @Inject()(val messagesApi: MessagesApi) extends FrontendController with I18nSupport {
 
-  val notEligible: Action[AnyContent] = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.core.not_eligible()))
-  }
-
   def getApplyHelpToSave: Action[AnyContent] = Action.async { implicit request ⇒
     Future.successful(Ok(views.html.core.apply_help_to_save()))
   }
