@@ -36,9 +36,10 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration._
 
-class RegisterControllerSpec extends TestSupport with ScalaFutures {
+class RegisterControllerSpec extends TestSupport  {
 
   private val mockHtsService = mock[HelpToSaveService]
 
@@ -107,7 +108,7 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
         }
 
         val responseFuture: Future[PlayResult] = doUserDetailsRequest()
-        val result = responseFuture.futureValue
+        val result = Await.result(responseFuture, 5.seconds)
 
         status(result) shouldBe Status.OK
 
@@ -202,7 +203,7 @@ class RegisterControllerSpec extends TestSupport with ScalaFutures {
           mockCreateAccount(validNSIUserInfo)()
         }
 
-        doCreateAccountRequest().futureValue
+        Await.result(doCreateAccountRequest(), 5.seconds)
       }
 
 
