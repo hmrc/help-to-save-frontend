@@ -10,3 +10,5 @@ GET        /register/user-details                   @uk.gov.hmrc.helptosavefront
 GET        /iv/journey-result                       @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
 
 GET        /register/access-denied                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.accessDenied
+
+GET        /register/not-eligible                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.notEligible

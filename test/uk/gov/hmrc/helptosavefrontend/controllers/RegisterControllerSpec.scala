@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
-class RegisterControllerSpec extends TestSupport  {
+class RegisterControllerSpec extends TestSupport {
 
   private val mockHtsService = mock[HelpToSaveService]
 
@@ -77,7 +77,7 @@ class RegisterControllerSpec extends TestSupport  {
       .expects(*, *)
       .returning(Future.successful(mockHtsSession))
 
-  def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure,SubmissionSuccess] = Right(SubmissionSuccess())): Unit =
+  def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess())): Unit =
     (mockHtsService.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
       .expects(nSIUserInfo, *, *)
       .returning(EitherT.fromEither[Future](response))
@@ -129,10 +129,10 @@ class RegisterControllerSpec extends TestSupport  {
         }
 
         val result = doUserDetailsRequest()
-        val html = contentAsString(result)
 
-        html should include("not eligible")
-        html should include("To be eligible for an account")
+        status(result) shouldBe Status.SEE_OTHER
+
+        redirectLocation(result) shouldBe Some("/help-to-save/register/not-eligible")
       }
 
 
@@ -195,7 +195,7 @@ class RegisterControllerSpec extends TestSupport  {
     "creating an account" must {
       def doCreateAccountRequest(): Future[PlayResult] = register.createAccountHelpToSave(FakeRequest())
 
-            "retrieve the user info from session cache and post it using " +
+      "retrieve the user info from session cache and post it using " +
         "the help to save service" in {
         inSequence {
           mockPlayAuthWithWithConfidence()

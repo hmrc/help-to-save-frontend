@@ -57,7 +57,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
             Logger.error(s"Could not perform eligibility check: $error")
             InternalServerError("")
           }, _.result.fold(
-            Ok(views.html.core.not_eligible()))(
+            SeeOther(routes.RegisterController.notEligible().url))(
             userDetails ⇒ Ok(views.html.register.userDetails(userDetails)))
         )
   }
@@ -88,12 +88,14 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       )
   }
 
-
   def accessDenied: Action[AnyContent] = Action.async {
     implicit request ⇒
       Future.successful(Ok(views.html.access_denied()))
   }
 
+  val notEligible: Action[AnyContent] = Action.async { implicit request ⇒
+    Future.successful(Ok(views.html.core.not_eligible()))
+  }
 
   private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, UserInfo] = {
     val session = sessionCacheConnector.get
