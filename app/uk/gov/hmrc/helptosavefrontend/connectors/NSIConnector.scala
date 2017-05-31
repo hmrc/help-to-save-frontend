@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-//moved from backend
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import javax.inject.Singleton
 
-import com.google.common.base.Charsets
-import com.google.common.io.BaseEncoding
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.http.Status
@@ -52,7 +49,6 @@ object NSIConnector {
 
 }
 
-
 @Singleton
 class NSIConnectorImpl extends NSIConnector with ServicesConfig {
 
@@ -63,20 +59,20 @@ class NSIConnectorImpl extends NSIConnector with ServicesConfig {
   val httpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
-    Logger.info(s"We are trying to create a account for ${userInfo.NINO}")
+    Logger.info(s"Trying to create an account for ${userInfo.NINO}")
     httpProxy.post(url, userInfo)
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
-            Logger.info("We have successfully created a NSI account")
+            Logger.info(s"Successfully created a NSI account for ${userInfo.NINO}")
             SubmissionSuccess()
 
           case Status.BAD_REQUEST ⇒
-            Logger.error("We have failed to make an account due to a bad request")
+            Logger.error(s"Failed to create an account for ${userInfo.NINO} due to bad request")
             handleBadRequestResponse(response)
 
           case other ⇒
-            Logger.warn(s"Something went wrong nsi ${userInfo.NINO}")
+            Logger.warn(s"Unexpected error during creating account for ${userInfo.NINO}, status:$other ")
             SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
         }
       }
