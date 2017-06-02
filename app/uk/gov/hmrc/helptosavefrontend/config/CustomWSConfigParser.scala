@@ -63,7 +63,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         case ("PEM", _, _) ⇒
           Logger.info("Adding PEM truststore")
           ts
-        case (_, None, Some(_)) ⇒
+        case (storeType, None, Some(_)) ⇒
+          Logger.info(s"Adding $storeType truststore")
           createTrustStoreConfig(ts)
 
         case other ⇒
@@ -105,12 +106,13 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     Logger.info("Creating key store config")
     Try(Base64.getDecoder.decode(data)) match {
       case Success(bytes) ⇒
-        Logger.info("Successfully decoded keystore data")
-        ks.copy(data = Some(new String(bytes, StandardCharsets.US_ASCII)), storeType = "PEM")
+        val string = new String(bytes, StandardCharsets.US_ASCII)
+        Logger.info(s"Successfully decoded keystore data: $string")
+        ks.copy(data = Some(string), storeType = "PEM")
 
       case Failure(error) ⇒
-        Logger.error(s"Could not keystore data: ${error.getMessage}", error)
-        sys.error(s"Could not keystore data: ${error.getMessage}")
+        Logger.error(s"Could not decode keystore data: ${error.getMessage}", error)
+        sys.error(s"Could not decode keystore data: ${error.getMessage}")
     }
 
   }
