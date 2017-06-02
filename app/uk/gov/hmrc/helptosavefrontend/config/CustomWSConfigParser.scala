@@ -106,9 +106,20 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     Logger.info("Creating key store config")
     Try(Base64.getDecoder.decode(data)) match {
       case Success(bytes) ⇒
-        val string = new String(bytes, StandardCharsets.UTF_8)
-        Logger.info(s"Successfully decoded keystore data: $string")
-        ks.copy(data = Some(string), storeType = "PEM")
+        val string1 = new String(bytes, StandardCharsets.UTF_8)
+        val string2 = new String(bytes, StandardCharsets.UTF_16)
+        val string3 = new String(bytes, StandardCharsets.UTF_16BE)
+        val string4 = new String(bytes, StandardCharsets.UTF_16LE)
+        val string5 = new String(bytes, StandardCharsets.ISO_8859_1)
+        val string6 = new String(bytes, StandardCharsets.US_ASCII)
+
+        Logger.info(s"Successfully decoded keystore data (UTF-8): $string1")
+        Logger.info(s"Successfully decoded keystore data (UTF-16): $string2")
+        Logger.info(s"Successfully decoded keystore data (UTF-16 BE): $string3")
+        Logger.info(s"Successfully decoded keystore data (UTF-16LE): $string4")
+        Logger.info(s"Successfully decoded keystore data (ISO 8859-1): $string5")
+        Logger.info(s"Successfully decoded keystore data (US ASCII): $string6")
+        ks.copy(data = Some(string5))
 
       case Failure(error) ⇒
         Logger.error(s"Could not decode keystore data: ${error.getMessage}", error)
