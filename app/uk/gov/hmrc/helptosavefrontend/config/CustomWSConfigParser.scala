@@ -25,31 +25,50 @@ import com.typesafe.config.{ConfigObject, ConfigValueFactory}
 import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
 import play.api.libs.ws.{WSClientConfig, WSConfigParser}
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logger}
+
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) {
 
+  Logger.info("Starting CustomWSConfigParser")
+
   override def parse(): WSClientConfig = {
+    Logger.info("Parsing WSClientConfig")
     val mergedConfiguration = mergeAllStores(configuration)
     val internalParser = new WSConfigParser(mergedConfiguration, env)
     val config = internalParser.parse()
+
     val keystores = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks ⇒
       (ks.storeType.toUpperCase, ks.filePath, ks.data) match {
         // it's a PEM, so we don't need to do anything
-        case ("PEM", _, _) ⇒ ks
+        case ("PEM", _, _) ⇒
+          Logger.info("Adding PEM keystore certificate")
+          ks
+
         // it is not a PEM and data has been provided but no file path given, therefore assume data is base64 encoded file
-        case (_, None, Some(data)) ⇒ createKeyStoreConfig(ks, data)
+        case (_, None, Some(data)) ⇒
+          createKeyStoreConfig(ks, data)
+
         // just because ...
-        case _ ⇒ ks
+        case other ⇒
+          Logger.info(s"Adding ${other._1} type keystore")
+          ks
       }
     }
 
     val truststores = config.ssl.trustManagerConfig.trustStoreConfigs.map { ts ⇒
       (ts.storeType.toUpperCase, ts.filePath, ts.data) match {
-        case ("PEM", _, _) ⇒ ts
-        case (_, None, Some(_)) ⇒ createTrustStoreConfig(ts)
-        case _ ⇒ ts
+        case ("PEM", _, _) ⇒
+          Logger.info("Adding PEM truststore")
+          ts
+        case (_, None, Some(_)) ⇒
+          createTrustStoreConfig(ts)
+
+        case other ⇒
+          Logger.info(s"Adding ${other._1} type truststore")
+          ts
       }
     }
 
@@ -83,8 +102,17 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
-    val decoded = Base64.getDecoder.decode(data)
-    ks.copy(data = Some(new String(decoded, StandardCharsets.US_ASCII)), storeType = "PEM")
+    Logger.info("Creating key store config")
+    Try(Base64.getDecoder.decode(data)) match {
+      case Success(bytes) ⇒
+        Logger.info("Successfully decoded keystore data")
+        ks.copy(data = Some(new String(bytes, StandardCharsets.US_ASCII)), storeType = "PEM")
+
+      case Failure(error) ⇒
+        Logger.error(s"Could not keystore data: ${error.getMessage}", error)
+        sys.error(s"Could not keystore data: ${error.getMessage}")
+    }
+
   }
 
   private def createTrustStoreConfig(ts: TrustStoreConfig): TrustStoreConfig = {
