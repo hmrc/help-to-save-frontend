@@ -36,8 +36,6 @@
         </div>
         <div class="grid-layout__column grid-layout__column--2-4">
             <p>@Messages("hts.register.userdetails.email"): @(userDetails.email) </p>
-            @*todo what if address is undefined? *@
-            <p>@Messages("hts.register.userdetails.address"): @(userDetails.address.line1.getOrElse(""))</p>
         </div>
         <div class="grid-layout__column grid-layout__column--1-4">
             <p><a>change</a></p>

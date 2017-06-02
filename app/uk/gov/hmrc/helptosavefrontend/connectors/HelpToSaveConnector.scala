@@ -21,7 +21,6 @@ import java.net.URLEncoder
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
@@ -67,17 +66,4 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
           Left(badResponseMessage(response, "Eligibility check"))
         }
       }
-
-//  override def createAccount(userInfo: UserInfo)(implicit hc: HeaderCarrier): Result[Unit] =
-//    EitherT.right[Future, String, HttpResponse](http.post(createAccountURL, Json.toJson(userInfo)))
-//       .subflatMap { response ⇒
-//           if (response.status == 201) {
-//             Right(())
-//              } else {
-//                Left(badResponseMessage(response, "Create account"))
-//             }
-//          }
-
-
-
 }
