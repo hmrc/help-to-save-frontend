@@ -17,10 +17,13 @@
 package hts.steps
 
 import cucumber.api.DataTable
+import gherkin.formatter.model.DataTableRow
 import hts.pages.{AuthorityWizardPage, Page}
 import hts.utils.Configuration
 
-import scala.collection.JavaConverters.mapAsScalaMapConverter
+import scala.collection.JavaConverters._
+import scala.collection.immutable.Seq
+import scala.collection.mutable
 
 class UserDetailsSteps extends Steps{
 
@@ -30,18 +33,23 @@ class UserDetailsSteps extends Steps{
   var email: Option[String] = None
 
   Given("""^an applicant has the following details:$"""){ (applicantDetails:DataTable) =>
-    val expectedData = applicantDetails.asMaps(classOf[String], classOf[String])
+    val data: List[mutable.Map[String, String]] = applicantDetails.asMaps(classOf[String], classOf[String])
+      .asScala
+      .toList
+      .map(_.asScala)
 
-    for (i <- 0 to applicantDetails.getGherkinRows.size() - 2) {
-      val row = expectedData.get(i).asScala.seq
-      val field = Option(row("field")).getOrElse("")
-      val value = Option(row("value"))
+    data.foreach{ row =>
+      row.get("field") -> row.get("value") match {
+        case (Some(field), value @ Some(_)) =>
+          field match {
+            case "name"          => name = value
+            case "NINO"          => nino = value
+            case "date of birth" => dateOfBirth = value
+            case "email address" => email = value
+            case other           => sys.error(s"Unexpected field: $other")
+          }
 
-      field match {
-        case "name" => name = value
-        case "NINO" => nino = value
-        case "date of birth" => dateOfBirth = value
-        case "email address" => email = value
+        case _ => sys.error("Could not parse table row. Field or value not found")
       }
     }
   }
@@ -51,15 +59,15 @@ class UserDetailsSteps extends Steps{
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
-    AuthorityWizardPage.setNino(nino.getOrElse(""))
+    AuthorityWizardPage.setNino(nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.submit()
   }
 
   Then("""^they see their details$"""){ () =>
-    Page.getPageContent() should include("Name: " + name.getOrElse(""))
-    Page.getPageContent() should include("National Insurance number: " + nino.getOrElse(""))
-    Page.getPageContent() should include("Date of Birth: " + dateOfBirth.getOrElse(""))
-    Page.getPageContent() should include("Email: " + email.getOrElse(""))
+    Page.getPageContent() should include("Name: " + name.getOrElse(sys.error("Could not find name")))
+    Page.getPageContent() should include("National Insurance number: " + nino.getOrElse(sys.error("Could not find NINO")))
+    Page.getPageContent() should include("Date of Birth: " + dateOfBirth.getOrElse(sys.error("Could not find DoB")))
+    Page.getPageContent() should include("Email: " + email.getOrElse(sys.error("Could not find email")))
   }
 
 }

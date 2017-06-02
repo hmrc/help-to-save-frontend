@@ -24,7 +24,6 @@ object AuthorityWizardPage {
   def goToPage()(implicit driver: WebDriver): Unit =
     driver.navigate().to(Configuration.authHost + "/auth-login-stub/gg-sign-in")
 
-
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
     driver.findElement(By.name("redirectionUrl")).sendKeys(url)
 
