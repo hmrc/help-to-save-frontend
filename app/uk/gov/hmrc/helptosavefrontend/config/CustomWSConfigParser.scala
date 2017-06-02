@@ -106,7 +106,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     Logger.info("Creating key store config")
     Try(Base64.getDecoder.decode(data)) match {
       case Success(bytes) ⇒
-        val string = new String(bytes, StandardCharsets.US_ASCII)
+        val string = new String(bytes, StandardCharsets.UTF_8)
         Logger.info(s"Successfully decoded keystore data: $string")
         ks.copy(data = Some(string), storeType = "PEM")
 
