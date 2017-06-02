@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
+import java.io.{File, FileOutputStream}
 import java.nio.charset.StandardCharsets
 import java.util
 import java.util.Base64
@@ -102,24 +103,31 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     } else config
   }
 
+
+  def writeToTempFile(data: Array[Byte]): Try[File] = Try{
+    val file = File.createTempFile(getClass.getSimpleName, ".tmp")
+    file.deleteOnExit()
+    val os = new FileOutputStream(file)
+    os.write(data)
+    os.flush()
+    os.close()
+    file
+  }
+
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     Logger.info("Creating key store config")
     Try(Base64.getDecoder.decode(data)) match {
       case Success(bytes) ⇒
-        val string1 = new String(bytes, StandardCharsets.UTF_8)
-        val string2 = new String(bytes, StandardCharsets.UTF_16)
-        val string3 = new String(bytes, StandardCharsets.UTF_16BE)
-        val string4 = new String(bytes, StandardCharsets.UTF_16LE)
-        val string5 = new String(bytes, StandardCharsets.ISO_8859_1)
-        val string6 = new String(bytes, StandardCharsets.US_ASCII)
+        Logger.info(s"Successfully decoded ${ks.storeType} keystore - writing to temporary file")
+        writeToTempFile(bytes) match {
+          case Success(file) ⇒
+            Logger.info("Successfully wrote keystore to file")
+            ks.copy(data = None, filePath = Some(file.getAbsolutePath))
 
-        Logger.info(s"Successfully decoded keystore data (UTF-8): $string1")
-        Logger.info(s"Successfully decoded keystore data (UTF-16): $string2")
-        Logger.info(s"Successfully decoded keystore data (UTF-16 BE): $string3")
-        Logger.info(s"Successfully decoded keystore data (UTF-16LE): $string4")
-        Logger.info(s"Successfully decoded keystore data (ISO 8859-1): $string5")
-        Logger.info(s"Successfully decoded keystore data (US ASCII): $string6")
-        ks.copy(data = Some(string5))
+          case Failure(error) ⇒
+            Logger.error(s"Could not write keystore to file: ${error.getMessage}", error)
+            sys.error(s"Could not write keystore to file: ${error.getMessage}")
+        }
 
       case Failure(error) ⇒
         Logger.error(s"Could not decode keystore data: ${error.getMessage}", error)
