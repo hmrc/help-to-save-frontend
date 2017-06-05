@@ -132,7 +132,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     result match {
       case Success(keyStoreFile) ⇒
         Logger.info(s"Successfully wrote keystore to file: ${keyStoreFile.getAbsolutePath}")
-        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = "PEM")
+        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = "PEM", password = ks.password.filter(_.nonEmpty))
 
       case Failure(error) ⇒
         Logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
