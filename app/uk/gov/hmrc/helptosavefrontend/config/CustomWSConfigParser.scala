@@ -64,9 +64,9 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         case ("PEM", _, _) ⇒
           Logger.info("Adding PEM truststore")
           ts
-        case (storeType, None, Some(_)) ⇒
+        case (storeType, None, Some(data)) ⇒
           Logger.info(s"Adding $storeType truststore")
-          createTrustStoreConfig(ts)
+          createTrustStoreConfig(ts, data)
 
         case other ⇒
           Logger.info(s"Adding ${other._1} type truststore")
@@ -114,30 +114,34 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     file
   }
 
+  private def decodePassword(password: Option[String]): Try[Option[String]] =
+    Try(password.map{ p ⇒
+      val bytes = Base64.getDecoder.decode(p)
+      new String(bytes)
+    })
+
+
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     Logger.info("Creating key store config")
-    Try(Base64.getDecoder.decode(data)) match {
-      case Success(bytes) ⇒
-        Logger.info(s"Successfully decoded ${ks.storeType} keystore - writing to temporary file")
-        writeToTempFile(bytes) match {
-          case Success(file) ⇒
-            Logger.info("Successfully wrote keystore to file")
-            ks.copy(data = None, filePath = Some(file.getAbsolutePath))
 
-          case Failure(error) ⇒
-            Logger.error(s"Could not write keystore to file: ${error.getMessage}", error)
-            sys.error(s"Could not write keystore to file: ${error.getMessage}")
-        }
+    val result = for {
+      dataBytes ← Try(Base64.getDecoder.decode(data))
+      file      ← writeToTempFile(dataBytes)
+    } yield file
+
+    result match {
+      case Success(keyStoreFile) ⇒
+        Logger.info(s"Successfully wrote keystore to file: ${keyStoreFile.getAbsolutePath}")
+        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = "PEM", password = ks.password.filter(_.nonEmpty))
 
       case Failure(error) ⇒
-        Logger.error(s"Could not decode keystore data: ${error.getMessage}", error)
-        sys.error(s"Could not decode keystore data: ${error.getMessage}")
+        Logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
+        sys.error(s"Error in keystore configuration: ${error.getMessage}")
     }
-
   }
 
-  private def createTrustStoreConfig(ts: TrustStoreConfig): TrustStoreConfig = {
-    val decoded = Base64.getDecoder.decode(ts.data.get)
+  private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
+    val decoded = Base64.getDecoder.decode(data)
     ts.storeType match {
       case "base64-PEM" => ts.copy(data = Some(new String(decoded)), storeType = "PEM")
       case _ => ts
