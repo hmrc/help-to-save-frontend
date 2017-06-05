@@ -120,6 +120,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       new String(bytes)
     })
 
+
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     Logger.info("Creating key store config")
 
@@ -131,8 +132,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     result match {
       case Success(keyStoreFile) ⇒
         Logger.info(s"Successfully wrote keystore to file: ${keyStoreFile.getAbsolutePath}")
-        val decryptedPass = ks.password.map(p ⇒ new String(Base64.getDecoder.decode(p)))
-        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = "PEM", password = decryptedPass)
+        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = "PEM", password = ks.password.filter(_.nonEmpty))
 
       case Failure(error) ⇒
         Logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
