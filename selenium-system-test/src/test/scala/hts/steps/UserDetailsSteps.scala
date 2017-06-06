@@ -56,7 +56,7 @@ class UserDetailsSteps extends Steps{
 
   When("""^an applicant passes the eligibility check$"""){ () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     AuthorityWizardPage.setNino(nino.getOrElse(sys.error("Could not find NINO")))

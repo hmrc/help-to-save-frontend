@@ -43,7 +43,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    sessionCacheConnector: SessionCacheConnector)(implicit app: Application, ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
 
-  def userDetails: Action[AnyContent] = authorisedForHtsWithEnrolments {
+  def confirmDetails: Action[AnyContent] = authorisedForHtsWithEnrolments {
     implicit request ⇒
       implicit userUrlWithNino ⇒
         val userInfo = for {
@@ -58,7 +58,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
             InternalServerError("")
           }, _.result.fold(
             SeeOther(routes.RegisterController.notEligible().url))(
-            userDetails ⇒ Ok(views.html.register.userDetails(userDetails)))
+            userDetails ⇒ Ok(views.html.register.confirm_details(userDetails)))
         )
   }
 

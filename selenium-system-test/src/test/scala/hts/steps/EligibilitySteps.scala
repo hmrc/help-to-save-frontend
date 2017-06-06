@@ -16,7 +16,7 @@
 
 package hts.steps
 
-import hts.pages.{AuthorityWizardPage, CreateAccountPage, Page, UserDetailsPage}
+import hts.pages.{AuthorityWizardPage, CreateAccountPage, Page, ConfirmDetailsPage}
 import hts.utils.Configuration
 
 class EligibilitySteps extends Steps{
@@ -29,7 +29,7 @@ class EligibilitySteps extends Steps{
 
   When("""^they apply for Help to Save$""") { () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     AuthorityWizardPage.setNino(nino.getOrElse(""))
