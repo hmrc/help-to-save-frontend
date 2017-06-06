@@ -22,17 +22,17 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.userdetails.header-page"), bodyClasses = None) {
  <header class="page-header text">
-  <h1>@Messages("hts.register.userdetails.header")</h1>
+  <h1>@Messages("hts.register.confirmdetails.header")</h1>
  </header>
   &nbsp;
   &nbsp;
  <header class="divider--bottom">
-  <h2>@Messages("hts.register.userdetails.your-details-header")</h2>
+  <h2>@Messages("hts.register.confirmdetails.your-details-header")</h2>
  </header>
  @user_details(userDetails)
  <header>
-  <h2>@Messages("hts.register.userdetails.create-your-account-header")</h2>
-  <p>@Messages("hts.register.userdetails.text")</p>
+  <h2>@Messages("hts.register.confirmdetails.create-your-account-header")</h2>
+  <p>@Messages("hts.register.confirmdetails.text")</p>
  </header>
  <a href=@routes.RegisterController.getCreateAccountHelpToSavePage() id="continue" class="button">@Messages("hts.register.userdetails.label")</a>
 }

@@ -97,7 +97,7 @@ class RegisterControllerSpec extends TestSupport {
 
     "checking eligibility" must {
 
-      def doUserDetailsRequest(): Future[PlayResult] = register.userDetails(FakeRequest())
+      def doConfirmDetailsRequest(): Future[PlayResult] = register.confirmDetails(FakeRequest())
 
       "return user details if the user is eligible for help-to-save" in {
         val user = randomUserInfo()
@@ -107,7 +107,7 @@ class RegisterControllerSpec extends TestSupport {
           mockSessionCacheConnectorPut(Right(CacheMap("1", Map.empty[String, JsValue])))
         }
 
-        val responseFuture: Future[PlayResult] = doUserDetailsRequest()
+        val responseFuture: Future[PlayResult] = doConfirmDetailsRequest()
         val result = Await.result(responseFuture, 5.seconds)
 
         status(result) shouldBe Status.OK
@@ -128,7 +128,7 @@ class RegisterControllerSpec extends TestSupport {
           mockEligibilityResult(nino, userDetailsURI)(Right(None))
         }
 
-        val result = doUserDetailsRequest()
+        val result = doConfirmDetailsRequest()
 
         status(result) shouldBe Status.SEE_OTHER
 
@@ -141,11 +141,11 @@ class RegisterControllerSpec extends TestSupport {
         def isError(result: Future[PlayResult]): Boolean =
           status(result) == 500
 
-        // test if the given mock actions result in an error when `userDetails` is called
+        // test if the given mock actions result in an error when `confirm_details` is called
         // on the controller
         def test(mockActions: ⇒ Unit): Unit = {
           mockActions
-          val result = doUserDetailsRequest()
+          val result = doConfirmDetailsRequest()
           isError(result) shouldBe true
         }
 

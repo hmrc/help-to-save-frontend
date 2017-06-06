@@ -17,7 +17,7 @@
 package hts.steps
 
 import cucumber.api.java.en.Given
-import hts.pages.{AuthorityWizardPage, CreateAccountPage, Page, UserDetailsPage}
+import hts.pages.{AuthorityWizardPage, CreateAccountPage, Page, ConfirmDetailsPage}
 import hts.utils.Configuration
 
 class SecuritySteps extends Steps {
@@ -30,8 +30,8 @@ class SecuritySteps extends Steps {
 
   Given(s"""^an applicant has a confidence level of $confidenceLevelRegex$$""") { (level: Int) =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
-    println(Configuration.host + "/help-to-save/register/user-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
+    println(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
@@ -52,11 +52,11 @@ class SecuritySteps extends Steps {
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setNino("AE553215D")
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
   }
 
   When("""^they try to view the user details page$""") { () =>
-    UserDetailsPage.goToPage()
+    ConfirmDetailsPage.goToPage()
   }
 
   When("""^they try to view the create-an-account page$""") { () =>
@@ -69,7 +69,7 @@ class SecuritySteps extends Steps {
 
   Given("""^an applicant has logged in and passed IV$""") { () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/user-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     AuthorityWizardPage.setNino("AE553215D")

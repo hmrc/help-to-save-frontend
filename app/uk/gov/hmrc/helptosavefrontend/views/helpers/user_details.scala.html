@@ -22,20 +22,20 @@
 <div>
     <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
         <div class="grid-layout__column grid-layout__column--1-4">
-            <p>@Messages("hts.register.userdetails.your-details")</p>
+            <p>@Messages("hts.register.confirmdetails.your-details")</p>
         </div>
         <div class="grid-layout__column grid-layout__column--2-4">
-            <p>@Messages("hts.register.userdetails.name"): @(userDetails.forename + " " + userDetails.surname)</p>
-            <p>@Messages("hts.register.userdetails.national-insurance-number"): @(userDetails.NINO)</p>
-            <p>@Messages("hts.register.userdetails.date-of-birth"): @(userDetails.dateOfBirth.show)</p>
+            <p>@Messages("hts.register.confirmdetails.name"): @(userDetails.forename + " " + userDetails.surname)</p>
+            <p>@Messages("hts.register.confirmdetails.national-insurance-number"): @(userDetails.NINO)</p>
+            <p>@Messages("hts.register.confirmdetails.date-of-birth"): @(userDetails.dateOfBirth.show)</p>
         </div>
     </div>
     <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
         <div class="grid-layout__column grid-layout__column--1-4">
-            <p>@Messages("hts.register.userdetails.contact-details")</p>
+            <p>@Messages("hts.register.confirmdetails.contact-details")</p>
         </div>
         <div class="grid-layout__column grid-layout__column--2-4">
-            <p>@Messages("hts.register.userdetails.email"): @(userDetails.email) </p>
+            <p>@Messages("hts.register.confirmdetails.email"): @(userDetails.email) </p>
         </div>
         <div class="grid-layout__column grid-layout__column--1-4">
             <p><a>change</a></p>

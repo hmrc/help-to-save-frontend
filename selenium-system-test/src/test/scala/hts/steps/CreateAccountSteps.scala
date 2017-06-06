@@ -16,12 +16,12 @@
 
 package hts.steps
 
-import hts.pages.{CreateAccountPage, UserDetailsPage, Page}
+import hts.pages.{CreateAccountPage, ConfirmDetailsPage, Page}
 
 class CreateAccountSteps extends Steps{
 
   When("""^they choose to create an account$""") { () =>
-    UserDetailsPage.continue()
+    ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
   }
 
