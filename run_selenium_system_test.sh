@@ -18,9 +18,9 @@ fi
 # and separated by a comma
 function get_tags {
  # convert the arguments into a string array
- rawTags=("$@")
+ local rawTags=("$@")
  # loop through the array and create a string which contains the tags each prepended with an '@' symbol
- modifiedTags=""
+ local modifiedTags=""
 
  for i in ${rawTags[@]}
    do
@@ -40,32 +40,36 @@ function get_tags {
 # Return the necessary java options as a single string. Each java option is surrounded by double quotes and
 # separated by a comma
 function get_java_opts {
+  local host
+  local auth_host
+  local tags
+
   # get the correct hosts
   if [ "$1" == 'dev' ]
   then
-    HOST='https://www-dev.tax.service.gov.uk'
-    AUTH_HOST='https://www-dev.tax.service.gov.uk'
+    host='https://www-dev.tax.service.gov.uk'
+    auth_host='https://www-dev.tax.service.gov.uk'
   elif [ "$1" == 'qa' ]
   then
-    HOST='https://www-qa.tax.service.gov.uk'
-    AUTH_HOST='https://www-dev.tax.service.gov.uk'
+    host='https://www-qa.tax.service.gov.uk'
+    auth_host='https://www-dev.tax.service.gov.uk'
   else
-    HOST='http://localhost:7000'
-    AUTH_HOST='http://localhost:9949'
+    host='http://localhost:7000'
+    auth_host='http://localhost:9949'
   fi
 
   # get the tags
   if [ ! -z $3 ]
   then
-   TAGS=$(get_tags ${@:3})
+   tags=$(get_tags ${@:3})
   fi
 
   # create an array with the java options
-  local opts=(-Dhost="${HOST}" -DauthHost="${AUTH_HOST}" -Dbrowser="${2}")
+  local opts=(-Dhost="${host}" -DauthHost="${auth_host}" -Dbrowser="${2}")
 
-  if [ ! -z "${TAGS}" ]
+  if [ ! -z "${tags}" ]
   then
-    opts+=("-Dcucumber.options=--tags ${TAGS}")
+    opts+=("-Dcucumber.options=--tags ${tags}")
   fi
 
   # wrap each element of the above array with double quotes
