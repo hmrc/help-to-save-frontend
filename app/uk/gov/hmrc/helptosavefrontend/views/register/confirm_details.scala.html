@@ -20,7 +20,7 @@
 
 @(userDetails: UserInfo)(implicit request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.userdetails.header-page"), bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.confirmdetails.header-page"), bodyClasses = None) {
  <header class="page-header text">
   <h1>@Messages("hts.register.confirmdetails.header")</h1>
  </header>
@@ -34,5 +34,5 @@
   <h2>@Messages("hts.register.confirmdetails.create-your-account-header")</h2>
   <p>@Messages("hts.register.confirmdetails.text")</p>
  </header>
- <a href=@routes.RegisterController.getCreateAccountHelpToSavePage() id="continue" class="button">@Messages("hts.register.userdetails.label")</a>
+ <a href=@routes.RegisterController.getCreateAccountHelpToSavePage() id="continue" class="button">@Messages("hts.register.confirmdetails.label")</a>
 }
