@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import java.util.Base64
 import javax.inject.Singleton
 
 import com.google.inject.ImplementedBy
@@ -56,11 +57,23 @@ class NSIConnectorImpl extends NSIConnector with ServicesConfig {
   val nsiUrlEnd: String = getString("microservice.services.nsi.url")
   val url = s"$nsiUrl/$nsiUrlEnd"
 
+  val authorisationHeaderKeys = getString("microservice.services.nsi.authorization.header-key")
+
+  val authorizationEncoding = getString("microservice.services.nsi.authorization.encoding")
+
+  val authorisationDetails = {
+    val user = getString("microservice.services.nsi.authorization.user")
+    val password = getString("microservice.services.nsi.authorization.password")
+    val encoded = Base64.getEncoder.encode(s"$user:$password".getBytes)
+    s"Basic: ${new String(encoded, authorizationEncoding)}"
+  }
+
   val httpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     Logger.info(s"Trying to create an account for ${userInfo.NINO} using NSI endpoint $url")
-    httpProxy.post(url, userInfo)
+    httpProxy.post(url, userInfo, Map(authorisationHeaderKeys → authorisationDetails))(
+      NSIUserInfo.nsiUserInfoWrites, hc.copy(authorization = None))
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
