@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import com.google.common.base.Charsets
-import com.google.common.io.BaseEncoding
+import java.util.Base64
+
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
@@ -38,7 +39,8 @@ class NSIConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFa
     override val httpProxy = mockHTTPProxy
   }
 
-  implicit val hc = HeaderCarrier()
+  // put in fake authorization details - these should be removed by the call to create an account
+  implicit val hc = HeaderCarrier(authorization = Some(Authorization("auth")))
   implicit val ex = fakeApplication.injector.instanceOf[ExecutionContext]
 
   val config = fakeApplication.configuration.underlying
@@ -48,6 +50,17 @@ class NSIConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFa
     val host = config.getString("microservice.services.nsi.host")
     s"http://$host:$port"
   }
+
+  val authorisationHeaderKeys = config.getString("microservice.services.nsi.authorization.header-key")
+  val authorizationEncoding = config.getString("microservice.services.nsi.authorization.encoding")
+
+  val authorisationDetails = {
+    val user = config.getString("microservice.services.nsi.authorization.user")
+    val password = config.getString("microservice.services.nsi.authorization.password")
+    val encoded = Base64.getEncoder.encode(s"$user:$password".getBytes)
+    s"Basic: ${new String(encoded, authorizationEncoding)}"
+  }
+
   val nsiUrlEnd: String = config.getString("microservice.services.nsi.url")
   val url = s"$baseUrl/$nsiUrlEnd"
 
@@ -55,7 +68,7 @@ class NSIConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFa
     (mockHTTPProxy.post(
       _: String, _: I, _: Map[String, String]
     )(_: Writes[I], _: HeaderCarrier))
-      .expects(url, body, Map.empty[String,String], *, *)
+      .expects(url, body, Map(authorisationHeaderKeys → authorisationDetails), *, hc.copy(authorization = None))
       .returning(Future.successful(result))
 
 
