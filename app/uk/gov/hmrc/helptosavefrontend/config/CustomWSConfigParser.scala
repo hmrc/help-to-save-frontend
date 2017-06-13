@@ -49,7 +49,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           ks
 
         // it is not a PEM and data has been provided but no file path given, therefore assume data is base64 encoded file
-        case (_, None, Some(data)) ⇒
+        case (storeType, None, Some(data)) ⇒
+          Logger.info(s"Adding $storeType keystore")
           createKeyStoreConfig(ks, data)
 
         // just because ...
