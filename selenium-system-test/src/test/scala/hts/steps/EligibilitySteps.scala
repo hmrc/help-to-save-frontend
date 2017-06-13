@@ -16,15 +16,28 @@
 
 package hts.steps
 
-import hts.pages.{AuthorityWizardPage, CreateAccountPage, Page, ConfirmDetailsPage}
+import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
 import hts.utils.Configuration
+import uk.gov.hmrc.domain.Generator
 
 class EligibilitySteps extends Steps{
 
   var nino: Option[String] = None
 
+  def generateEligibleNINO: String = {
+    val generator = new Generator()
+    val nino = generator.nextNino.toString()
+    "AE" + nino.slice(2, nino.length)
+  }
+
+  def generateIllegibleNINO: String = {
+    val generator = new Generator()
+    val nino = generator.nextNino.toString()
+    "NA" + nino.slice(2, nino.length)
+  }
+
   Given("""^an applicant is in receipt of working tax credit$""") { () =>
-    nino = Option("AE123456A")
+    nino = Option(generateEligibleNINO)
   }
 
   When("""^they apply for Help to Save$""") { () =>
@@ -41,7 +54,7 @@ class EligibilitySteps extends Steps{
   }
 
   Given("""^an applicant is NOT in receipt of working tax credit$""") { () =>
-    nino = Option("JA553215D")
+    nino = Option(generateIllegibleNINO)
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () =>
