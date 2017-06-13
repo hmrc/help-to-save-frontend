@@ -19,22 +19,12 @@ package hts.steps
 import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
 import hts.utils.Configuration
 import uk.gov.hmrc.domain.Generator
+import hts.utils
+import src.test.scala.hts.utils.NINOGenerator
 
-class EligibilitySteps extends Steps{
+class EligibilitySteps extends Steps with NINOGenerator{
 
   var nino: Option[String] = None
-
-  def generateEligibleNINO: String = {
-    val generator = new Generator()
-    val nino = generator.nextNino.toString()
-    "AE" + nino.slice(2, nino.length)
-  }
-
-  def generateIllegibleNINO: String = {
-    val generator = new Generator()
-    val nino = generator.nextNino.toString()
-    "NA" + nino.slice(2, nino.length)
-  }
 
   Given("""^an applicant is in receipt of working tax credit$""") { () =>
     nino = Option(generateEligibleNINO)
