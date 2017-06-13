@@ -36,7 +36,7 @@ trait SessionCacheConnector extends SessionCache with ServicesConfig {
 
   def get(implicit hc: HeaderCarrier, reads: Reads[HTSSession]): Future[Option[HTSSession]] =
     fetchAndGetEntry[HTSSession](sessionKey)(hc, reads)
-
+import io.netty.channel.nio.NioEventLoop
 }
 
 @Singleton

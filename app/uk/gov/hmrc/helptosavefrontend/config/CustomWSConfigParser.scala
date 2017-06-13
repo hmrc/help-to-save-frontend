@@ -144,26 +144,31 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   def f(file: File, password: Option[String]): Unit = {
     import scala.collection.JavaConverters._
-    try{
-      val inputStream = new FileInputStream(file)
-      val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
-      val pass = password.map(_.toCharArray).orNull
-      keystore.load(inputStream, pass)
+    val types = List("JKS", "JCEKS", "PKCS12", "PKCS11", "DKS", "Windows-MY", "BKS")
 
-      val aliases = keystore.aliases().asScala
-      Logger.info(s"Reading contents of keystore: ${file.getAbsolutePath}. Aliases are ${aliases.mkString(";; ")}")
+    types.foreach{ t ⇒
+      try{
+        Logger.info(s"Trying keystore type: $t")
+        val inputStream = new FileInputStream(file)
+        val keystore = KeyStore.getInstance(t)
+        val pass = password.map(_.toCharArray).orNull
+        keystore.load(inputStream, pass)
 
-      aliases.foreach{ a ⇒
+        val aliases = keystore.aliases().asScala
+        Logger.info(s"Reading contents of keystore type $t: ${file.getAbsolutePath}. Aliases are ${aliases.mkString(";; ")}")
 
-        val key = keystore.getKey(a, pass)
-        val certificate = keystore.getCertificate(a)
-        val publicKey = certificate.getPublicKey
-        Logger.info(s"Alias $a has keytype ${key.getClass.getSimpleName}. Public key is ${new String(publicKey.getEncoded)}")
+        aliases.foreach{ a ⇒
+          val key = keystore.getKey(a, pass)
+          val certificate = keystore.getCertificate(a)
+          val publicKey = certificate.getPublicKey
+          Logger.info(s"Alias $a has keytype ${key.getClass.getSimpleName}. Public key is ${new String(publicKey.getEncoded)}")
+        }
+      } catch {
+        case e ⇒
+          Logger.error(s"Could not read keystore using type $t: ${e.getMessage}", e)
       }
-    } catch {
-      case e ⇒
-        Logger.error(s"Could not read keystore: ${e.getMessage}", e)
     }
+
   }
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
