@@ -18,11 +18,9 @@ package hts.steps
 
 import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
 import hts.utils.Configuration
-import uk.gov.hmrc.domain.Generator
-import hts.utils
 import src.test.scala.hts.utils.NINOGenerator
 
-class EligibilitySteps extends Steps with NINOGenerator{
+class EligibilitySteps extends Steps with NINOGenerator {
 
   var nino: Option[String] = None
 

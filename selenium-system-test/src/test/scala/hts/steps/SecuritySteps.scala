@@ -20,9 +20,8 @@ import cucumber.api.java.en.Given
 import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
 import hts.utils.Configuration
 import src.test.scala.hts.utils.NINOGenerator
-import uk.gov.hmrc.domain.Generator
 
-class SecuritySteps extends Steps with NINOGenerator{
+class SecuritySteps extends Steps with NINOGenerator {
 
   def oneOfRegex(options: Set[String]): String = s"(${options.mkString("|")})"
 
