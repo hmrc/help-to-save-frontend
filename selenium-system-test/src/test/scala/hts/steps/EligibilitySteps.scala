@@ -38,7 +38,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () =>
-    Page.getPageContent() should include("Check and confirms your details")
+    Page.getPageContent() should include("Check and confirm your details")
   }
 
   Given("""^an applicant is NOT in receipt of working tax credit$""") { () =>
