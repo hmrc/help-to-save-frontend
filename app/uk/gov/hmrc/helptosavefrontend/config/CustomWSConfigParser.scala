@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io.{File, FileInputStream, FileOutputStream}
-import java.nio.charset.StandardCharsets
 import java.security.KeyStore
 import java.util
 import java.util.Base64
@@ -60,7 +59,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       }
     }
 
-    val truststores = config.ssl.trustManagerConfig.trustStoreConfigs.map { ts ⇒
+    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.map { ts ⇒
       (ts.storeType.toUpperCase, ts.filePath, ts.data) match {
         case ("PEM", _, _) ⇒
           Logger.info("Adding PEM truststore")
@@ -81,7 +80,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           keyStoreConfigs = keystores
         ),
         trustManagerConfig = config.ssl.trustManagerConfig.copy(
-          trustStoreConfigs = truststores
+          trustStoreConfigs = trustStores
         )
       )
     )
