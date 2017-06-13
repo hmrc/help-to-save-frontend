@@ -90,8 +90,13 @@ class NSIConnectorImpl extends NSIConnector with ServicesConfig {
             SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
         }
       }
+      .recover{
+        case e ⇒
+          e.printStackTrace()
+          Logger.error(s"Create account failed: ${e.getMessage}. (Stack trace: ${e.getStackTrace.map(_.toString).mkString("; ")})", e)
+          SubmissionFailure(None, "Error during POST to NS&I", e.getMessage)
+      }
   }
-
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
     Try(response.json) match {
