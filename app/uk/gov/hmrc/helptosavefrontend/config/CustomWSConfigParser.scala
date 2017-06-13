@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import java.io.{File, FileOutputStream}
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.charset.StandardCharsets
+import java.security.KeyStore
 import java.util
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
@@ -132,12 +133,59 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     result match {
       case Success(keyStoreFile) ⇒
         Logger.info(s"Successfully wrote keystore to file: ${keyStoreFile.getAbsolutePath}")
+        f(keyStoreFile, ks.password)
         ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = "PEM", password = ks.password.filter(_.nonEmpty))
 
       case Failure(error) ⇒
         Logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
         sys.error(s"Error in keystore configuration: ${error.getMessage}")
     }
+  }
+
+  def f(file: File, password: Option[String]): Unit = {
+    import scala.collection.JavaConverters._
+
+    val inputStream = new FileInputStream(file)
+    val keystore = KeyStore.getInstance("PEM")
+    val pass = password.map(_.toCharArray).orNull
+    keystore.load(inputStream, pass)
+
+    val aliases = keystore.aliases().asScala
+    Logger.info(s"Reading contents of keystore: ${file.getAbsolutePath}. Aliases are ${aliases.mkString(";; ")}")
+
+    aliases.foreach{ a ⇒
+      try{
+        val key = keystore.getKey(a, pass)
+        val certificate = keystore.getCertificate(a)
+        val publicKey = certificate.getPublicKey
+        Logger.info(s"Alias $a has keytype ${key.getClass.getSimpleName}. Public key is ${new String(publicKey.getEncoded)}")
+      } catch {
+        case e ⇒
+          Logger.error(s"Could not read keystore alias $a: ${e.getMessage}", e)
+      }
+    }
+
+
+    /**
+      *   FileInputStream is = new FileInputStream("your.keystore");
+
+    KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
+    keystore.load(is, "my-keystore-password".toCharArray());
+
+    String alias = "myalias";
+
+    Key key = keystore.getKey(alias, "password".toCharArray());
+    if (key instanceof PrivateKey) {
+      // Get certificate of public key
+      Certificate cert = keystore.getCertificate(alias);
+
+      // Get public key
+      PublicKey publicKey = cert.getPublicKey();
+
+      // Return a key pair
+      new KeyPair(publicKey, (PrivateKey) key);
+    }
+      */
   }
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
