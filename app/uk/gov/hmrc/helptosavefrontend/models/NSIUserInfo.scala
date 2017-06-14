@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-//moved from backend
 package uk.gov.hmrc.helptosavefrontend.models
 
 import java.time.LocalDate
@@ -23,15 +22,11 @@ import java.time.format.DateTimeFormatter
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.syntax.cartesian._
-
 import play.api.libs.json._
 
 import scala.annotation.tailrec
 import scala.util.matching.Regex
 
-/**
-  * The user information required by NS&I to create an account.
-  */
 case class NSIUserInfo private[models](forename: String,
                                        surname: String,
                                        birthDate: LocalDate,
@@ -98,7 +93,7 @@ object NSIUserInfo {
 
     (commonNameChecks(name, "forename") |@| specialCharacterCheck |@| firstCharacterNonSpecial |@|
       characterCountLowerBoundCheck |@| characterCountUpperBoundCheck)
-      .map{ case _ ⇒ name }
+      .map { case _ ⇒ name }
   }
 
   private def surnameValidation(name: String): ValidatedNel[String, String] = {
@@ -116,7 +111,7 @@ object NSIUserInfo {
 
     (commonNameChecks(name, "surname") |@| specialCharacterCheck |@| firstCharacterNonSpecial |@|
       lastCharacterNonSpecial |@| characterCountLowerBoundCheck |@| characterCountUpperBoundCheck)
-      .map{ case _ ⇒ name }
+      .map { case _ ⇒ name }
   }
 
   private def dateValidation(date: LocalDate): ValidatedNel[String, LocalDate] = {
@@ -125,7 +120,7 @@ object NSIUserInfo {
     val upperBoundCheck =
       validatedFromBoolean(date)(_.isBefore(LocalDate.now()), s"Birth date was in the future: $date")
 
-    (lowerBoundCheck |@| upperBoundCheck).map{ case _ ⇒ date }
+    (lowerBoundCheck |@| upperBoundCheck).map { case _ ⇒ date }
   }
 
   private def addressLineValidation(address: Address): ValidatedNel[String, ValidatedAddressLines] = {
@@ -173,7 +168,7 @@ object NSIUserInfo {
     val regexCheck =
       regexValidation(nino)(ninoRegex, "Invalid NINO format")
 
-    (lengthCheck |@| regexCheck).map{ case _ ⇒ nino }
+    (lengthCheck |@| regexCheck).map { case _ ⇒ nino }
   }
 
   private def emailValidation(email: String): ValidatedNel[String, String] = {
@@ -193,7 +188,7 @@ object NSIUserInfo {
     val domainCheck = validatedFromBoolean(maybeEmail)(
       _.forall(_.domain.length < 253), "domain part of email was longer than 252 characters")
 
-    (lengthCheck |@| atCheck |@| localCheck |@| domainCheck).map{ case _ ⇒ email }
+    (lengthCheck |@| atCheck |@| localCheck |@| domainCheck).map { case _ ⇒ email }
   }
 
   private def commonNameChecks(name: String, nameType: String): ValidatedNel[String, String] = {
@@ -204,7 +199,7 @@ object NSIUserInfo {
     val consecutiveSpecialCharacters = validatedFromBoolean(name)(!containsNConsecutiveSpecialCharacters(_, 2),
       s"$nameType contained consecutive special characters: $name")
 
-    (leadingSpaceCheck |@| numericCheck |@| consecutiveSpecialCharacters).map{ case _ ⇒ name }
+    (leadingSpaceCheck |@| numericCheck |@| consecutiveSpecialCharacters).map { case _ ⇒ name }
   }
 
   private def validatedFromBoolean[A](a: A)(isValid: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =

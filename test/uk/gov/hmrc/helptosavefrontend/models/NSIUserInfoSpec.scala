@@ -81,7 +81,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
         "contains consecutive special characters" in {
           val combos = List('-', '.', '&').combinations(2).map(_.mkString("")).toList
-          combos.foreach( c ⇒
+          combos.foreach(c ⇒
             NSIUserInfo(validUserInfo.copy(forename = s"Tyr${c}ion")).isInvalid shouldBe true
           )
         }
@@ -138,7 +138,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
         "contains consecutive special characters" in {
           val combos = List('-', '.', '&').combinations(2).map(_.mkString("")).toList
-          combos.foreach( c ⇒
+          combos.foreach(c ⇒
             NSIUserInfo(validUserInfo.copy(surname = s"Lann${c}ister")).isInvalid shouldBe true
           )
         }
@@ -273,7 +273,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
       "mark as invalid postcodes" which {
 
         "are longer than 10 characters when trimmed" in {
-          forAll{ p: String ⇒
+          forAll { p: String ⇒
             whenever(p.replaceAllLiterally(" ", "").length > 10) {
               NSIUserInfo(validUserInfo.copy(address = address.copy(postcode = Some(p)))).isInvalid shouldBe true
             }
@@ -314,14 +314,14 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
         }
 
         "has a local part greater than 64 characters" in {
-          forAll{ s: String ⇒
-            whenever(s.length <= 64){
+          forAll { s: String ⇒
+            whenever(s.length <= 64) {
               NSIUserInfo(validUserInfo.copy(email = s + "@test.com")).isValid shouldBe true
             }
           }
 
-          forAll{ s: String ⇒
-            whenever(s.length > 64){
+          forAll { s: String ⇒
+            whenever(s.length > 64) {
               NSIUserInfo(validUserInfo.copy(email = s + "@test.com")).isInvalid shouldBe true
             }
           }
@@ -329,14 +329,14 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
 
         "has a domain part greater than 252 characters" in {
-          forAll{ s: String ⇒
-            whenever(s.length <= 252){
+          forAll { s: String ⇒
+            whenever(s.length <= 252) {
               NSIUserInfo(validUserInfo.copy(email = "a@" + s)).isValid shouldBe true
             }
           }
 
-          forAll{ s: String ⇒
-            whenever(s.filter(_ != '@').length > 252){
+          forAll { s: String ⇒
+            whenever(s.filter(_ != '@').length > 252) {
               NSIUserInfo(validUserInfo.copy(email = "a@" + s.filter(_ != '@'))).isInvalid shouldBe true
             }
           }
@@ -365,6 +365,4 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
     }
   }
-
-
 }
