@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io.{File, FileOutputStream}
-import java.nio.charset.StandardCharsets
 import java.util
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
@@ -41,7 +40,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     val internalParser = new WSConfigParser(mergedConfiguration, env)
     val config = internalParser.parse()
 
-    val keystores = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks ⇒
+    val keyStores = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks ⇒
       (ks.storeType.toUpperCase, ks.filePath, ks.data) match {
         // it's a PEM, so we don't need to do anything
         case ("PEM", _, _) ⇒
@@ -59,7 +58,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       }
     }
 
-    val truststores = config.ssl.trustManagerConfig.trustStoreConfigs.map { ts ⇒
+    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.map { ts ⇒
       (ts.storeType.toUpperCase, ts.filePath, ts.data) match {
         case ("PEM", _, _) ⇒
           Logger.info("Adding PEM truststore")
@@ -77,10 +76,10 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     val modded = config.copy(
       ssl = config.ssl.copy(
         keyManagerConfig = config.ssl.keyManagerConfig.copy(
-          keyStoreConfigs = keystores
+          keyStoreConfigs = keyStores
         ),
         trustManagerConfig = config.ssl.trustManagerConfig.copy(
-          trustStoreConfigs = truststores
+          trustStoreConfigs = trustStores
         )
       )
     )
@@ -104,7 +103,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
 
-  def writeToTempFile(data: Array[Byte]): Try[File] = Try{
+  def writeToTempFile(data: Array[Byte]): Try[File] = Try {
     val file = File.createTempFile(getClass.getSimpleName, ".tmp")
     file.deleteOnExit()
     val os = new FileOutputStream(file)
@@ -114,25 +113,23 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     file
   }
 
-  private def decodePassword(password: Option[String]): Try[Option[String]] =
-    Try(password.map{ p ⇒
-      val bytes = Base64.getDecoder.decode(p)
-      new String(bytes)
-    })
-
-
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     Logger.info("Creating key store config")
 
     val result = for {
       dataBytes ← Try(Base64.getDecoder.decode(data))
-      file      ← writeToTempFile(dataBytes)
+      file ← writeToTempFile(dataBytes)
     } yield file
 
     result match {
       case Success(keyStoreFile) ⇒
         Logger.info(s"Successfully wrote keystore to file: ${keyStoreFile.getAbsolutePath}")
-        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = "PEM", password = ks.password.filter(_.nonEmpty))
+
+        val decryptedPass = ks.password
+          .map(pass ⇒ Base64.getDecoder.decode(pass))
+          .map(bytes ⇒ new String(bytes))
+
+        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
 
       case Failure(error) ⇒
         Logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
