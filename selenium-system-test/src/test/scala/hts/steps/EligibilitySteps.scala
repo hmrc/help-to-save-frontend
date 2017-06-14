@@ -16,15 +16,16 @@
 
 package hts.steps
 
-import hts.pages.{AuthorityWizardPage, CreateAccountPage, Page, ConfirmDetailsPage}
+import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
 import hts.utils.Configuration
+import src.test.scala.hts.utils.NINOGenerator
 
-class EligibilitySteps extends Steps{
+class EligibilitySteps extends Steps with NINOGenerator {
 
   var nino: Option[String] = None
 
   Given("""^an applicant is in receipt of working tax credit$""") { () =>
-    nino = Option("AE123456A")
+    nino = Option(generateEligibleNINO)
   }
 
   When("""^they apply for Help to Save$""") { () =>
@@ -37,11 +38,11 @@ class EligibilitySteps extends Steps{
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () =>
-    Page.getPageContent() should include("Check and confirms your details")
+    Page.getPageContent() should include("Check and confirm your details")
   }
 
   Given("""^an applicant is NOT in receipt of working tax credit$""") { () =>
-    nino = Option("JA553215D")
+    nino = Option(generateIllegibleNINO)
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () =>
