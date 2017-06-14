@@ -20,7 +20,8 @@ object FrontendBuild extends Build with MicroService {
     "uk.gov.hmrc" %% "play-ui" % "7.2.1",
     "org.typelevel" %% "cats" % "0.9.0",
     "uk.gov.hmrc" %% "play-auth" % "1.1.0",
-    "uk.gov.hmrc" %% "domain" % "4.1.0"
+    "uk.gov.hmrc" %% "domain" % "4.1.0",
+    "com.github.kxbmap" %% "configs" % "0.4.4"
   )
 
   def test(scope: String = "test") = Seq(

@@ -25,11 +25,15 @@ import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.Inject
+import configs.syntax._
+import play.api.http.HeaderNames.LOCATION
+import play.api.http.Status.SEE_OTHER
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, HTSSession, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.views
@@ -44,25 +48,63 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    sessionCacheConnector: SessionCacheConnector)(implicit app: Application, ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
 
-  def confirmDetails: Action[AnyContent] = authorisedForHtsWithEnrolments {
-    implicit request ⇒
-      implicit userUrlWithNino ⇒
-        val userInfo = for {
-          userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
-          eligible ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path)
-          nsiUserInfo ← toNSIUserInfo(eligible)
-          _ ← writeToKeyStore(nsiUserInfo)
-        } yield eligible
+  private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
 
-        userInfo.fold(
-          error ⇒ {
-            Logger.error(s"Could not perform eligibility check: $error")
-            InternalServerError("")
-          }, _.result.fold(
-            SeeOther(routes.RegisterController.notEligible().url))(
-            userDetails ⇒ Ok(views.html.register.confirm_details(userDetails)))
-        )
-  }
+
+  def getAuthorisation: Action[AnyContent] = authorisedForHtsWithConfidence {
+    implicit request ⇒
+      Logger.info("Received request to get user details: redirecting to obtain authorisation code")
+
+      // we need to get an authorisation token from OAuth - redirect to OAuth here. When the authorisation
+      // is done they'll redirect to the callback url we give them
+        Future.successful(Redirect(
+          oauthConfig.url,
+          Map(
+            "client_id" -> Seq(oauthConfig.clientID),
+            "scope" -> oauthConfig.scopes,
+            "response_type" -> Seq("code"),
+            "redirect_uri" -> Seq(oauthConfig.callbackURL)
+          )))
+    }
+
+  def confirmDetails(code: Option[String],
+                     error: Option[String],
+                     error_description: Option[String],
+                     error_code: Option[String]): Action[AnyContent] =
+    (code, error) match {
+      case (Some(authorisationCode), _) ⇒
+        authorisedForHtsWithEnrolments {
+          implicit request ⇒
+            implicit userUrlWithNino ⇒
+              val userInfo = for {
+                userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
+                eligible ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path, authorisationCode)
+                nsiUserInfo ← toNSIUserInfo(eligible)
+                _ ← writeToKeyStore(nsiUserInfo)
+              } yield eligible
+
+              userInfo.fold(
+                error ⇒ {
+                  Logger.error(s"Could not perform eligibility check: $error")
+                  InternalServerError("")
+                }, _.result.fold(
+                  SeeOther(routes.RegisterController.notEligible().url))(
+                  userDetails ⇒ Ok(views.html.register.confirm_details(userDetails)))
+              )
+        }
+
+      case (_, Some(e)) ⇒
+        Logger.error(s"Could not get authorisation code: $e. Error description was" +
+          s"${error_description.getOrElse("-")}, error code was ${error_code.getOrElse("-")}")
+        // TODO: do something better
+        Action { InternalServerError(s"Could not get authorisation code: $e") }
+
+      case _ ⇒
+        // we should never reach here - we shouldn't have a successful code and an error at the same time
+        Logger.error("Inconsistent result found when attempting to retrieve an authorisation code")
+        Action { InternalServerError("") }
+
+    }
 
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
@@ -115,18 +157,17 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   private def writeToKeyStore(userDetails: Option[NSIUserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
     // write to key-store
     val cacheMapOption: Option[Future[CacheMap]] =
-    userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
+      userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
 
     // use traverse to swap the option and future
     val cacheMapFuture: Future[Option[CacheMap]] =
-    cacheMapOption.traverse[Future, CacheMap](identity)
+      cacheMapOption.traverse[Future, CacheMap](identity)
 
     EitherT(
       cacheMapFuture.map[Either[String, Option[CacheMap]]](Right(_))
         .recover { case e ⇒ Left(s"Could not write to key-store: ${e.getMessage}") }
     )
   }
-
 
   private type EitherOrString[A] = Either[String,A]
 
@@ -148,6 +189,11 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")}, " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
 
+}
 
+object RegisterController {
+
+  // details required to get an authorisation token from OAuth
+  private[controllers] case class OAuthConfiguration(url: String, clientID: String, callbackURL: String, scopes: List[String])
 
 }

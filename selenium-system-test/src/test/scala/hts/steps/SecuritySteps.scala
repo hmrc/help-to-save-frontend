@@ -32,7 +32,6 @@ class SecuritySteps extends Steps with NINOGenerator {
   Given(s"""^an applicant has a confidence level of $confidenceLevelRegex$$""") { (level: Int) =>
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
-    println(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 

@@ -34,7 +34,7 @@ package object models {
       line5 ← Gen.alphaNumStr
       postcode ← Gen.alphaNumStr
       country ← Gen.alphaStr
-    } yield Address(Some(line1), Some(line2), Some(line3), Some(line4), Some(line5),
+    } yield Address(List(line1, line2, line3, line4, line5),
       Some(postcode), Some(country)))
 
   implicit val userInfoArb =
@@ -62,8 +62,8 @@ package object models {
     val addressLine3 = "Westeros"
     val postcode = "BA148FY"
     val country = "GB"
-    val address = Address(Some(addressLine1), Some(addressLine2), Some(addressLine3),
-      None, None, Some(postcode), Some(country))
+    val address = Address(List(addressLine1, addressLine2, addressLine3),
+      Some(postcode), Some(country))
     val nino = "WM123456C"
     val email = "tyrion_lannister@gmail.com"
 

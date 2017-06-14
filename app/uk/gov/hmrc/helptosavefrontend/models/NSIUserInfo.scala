@@ -54,7 +54,7 @@ object NSIUserInfo {
     (forenameValidation(userInfo.forename) |@|
       surnameValidation(userInfo.surname) |@|
       dateValidation(userInfo.dateOfBirth) |@|
-      addressLineValidation(userInfo.address) |@|
+      addressLineValidation(userInfo.address.lines) |@|
       postcodeValidation(userInfo.address.postcode) |@|
       countryCodeValidation(userInfo.address.country) |@|
       ninoValidation(userInfo.nino) |@|
@@ -120,9 +120,8 @@ object NSIUserInfo {
     (lowerBoundCheck |@| upperBoundCheck).map { case _ ⇒ date }
   }
 
-  private def addressLineValidation(address: Address): ValidatedNel[String, List[String]] = {
-    val list = List(address.line1, address.line2, address.line3,
-      address.line4, address.line5).collect { case Some(s) ⇒ s }.filter(_.nonEmpty)
+  private def addressLineValidation(address: List[String]): ValidatedNel[String, List[String]] = {
+    val list = address.filter(_.nonEmpty)
 
     val lengthCheck = validatedFromBoolean(list)(!_.exists(_.length > 35),
       "Address contained line greater than 35 characters")

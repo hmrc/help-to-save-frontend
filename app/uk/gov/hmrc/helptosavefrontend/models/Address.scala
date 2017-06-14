@@ -18,11 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.{Format, Json}
 
-case class Address(line1: Option[String],
-                   line2: Option[String],
-                   line3: Option[String],
-                   line4: Option[String],
-                   line5: Option[String],
+case class Address(lines: List[String],
                    postcode: Option[String],
                    country: Option[String])
 
