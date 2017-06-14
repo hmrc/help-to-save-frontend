@@ -85,6 +85,64 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
       }
       result shouldBe 1
     }
+
+    "otherwise can be applied to an Right value" in {
+      val r = Right(0)
+      val result: Int = r.otherwise {
+        10
+      }
+      result shouldBe 0
+    }
+
+    "otherwise can be applied to a Left value" in {
+      val r = Left(0)
+      val result: Int = r.otherwise {
+        10
+      }
+      result shouldBe 10
+    }
+
+    "it is possible to use otherwise to execute the configured branch in the form of a DSL" in {
+      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature0.enabled").returning(Some(true))
+      val result = FEATURE("test-feature0", mockConfiguration, 0) enabled() thenDo {
+        10
+      } otherwise {
+        11
+      }
+      result shouldBe 10
+    }
+
+    "it is possible to use otherwise to execute the unconfigured branch in the form of a DSL" in {
+      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature1.enabled").returning(Some(false))
+      val result = FEATURE("test-feature1", mockConfiguration, 0) enabled() thenDo {
+        10
+      } otherwise {
+        11
+      }
+      result shouldBe 11
+    }
+
+    "side effect type actions are possible with an otherwise executing the configured branch" in {
+      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature0.enabled").returning(Some(true))
+      var result = 0
+      FEATURE("test-feature0", mockConfiguration, ()) enabled() thenDo {
+        result = 1
+      } otherwise {
+        result = 2
+      }
+      result shouldBe 1
+    }
+
+    "side effect type actions are possible with an otherwise executing the unconfigured branch" in {
+      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature1.enabled").returning(Some(false))
+      var result = 0
+      FEATURE("test-feature1", mockConfiguration, ()) enabled() thenDo {
+        result = 1
+      } otherwise {
+        result = 2
+      }
+      result shouldBe 2
+    }
   }
 }
 

@@ -16,44 +16,48 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import javax.inject.{Inject, Singleton}
-
 import play.api.{Configuration, Logger}
-import com.google.inject.{AbstractModule, Guice}
 
 object Toggles {
-//  val injector = play.api.Play.current.injector
-//  val cc = injector.instanceOf[Configuration]
-//
-//  }
   case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: A, logger: Logger = Logger("FEATURE")) {
     def enabled(): FEATURE_THEN[A] = {
       conf.getBoolean(s"toggles.$name.enabled") match {
-        case Some(b) => {
-          FEATURE_THEN(name, b, unconfiguredVal)
-        }
+        case Some(b) => FEATURE_THEN(name, b, unconfiguredVal)
         case None => throw new RuntimeException(s"FEATURE($name) is not present in configuration file - misconfigured")
       }
     }
+
+    def enabledWith(additional: String): FEATURE_THEN_KEY[A] = ???
   }
   object FEATURE
 
-  case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfigured: A) {
+  case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: A) {
     def thenDo(action: => A): Either[A, A] = {
       if (enabled) {
         val result = action
         Right(result)
       } else {
-        Left(unconfigured)
+        Left(unconfiguredVal)
       }
     }
   }
   object FEATURE_THEN
+
+  case class FEATURE_THEN_KEY[A](name: String, key: String, enabled: Boolean, hasKey: Boolean, unconfiguredVal: A)
+  object FEATURE_THEN_KEY
 
   implicit def eitherPop[A](e: Either[A, A]): A = {
     e match {
       case Right(a) => a
       case Left(a) => a
     }
+  }
+
+  implicit class EitherExtend[A](e: Either[A, A]) {
+    def otherwise(action: => A) = e match {
+      case Right(a) => a
+      case Left(a) => action
+    }
+
   }
 }
