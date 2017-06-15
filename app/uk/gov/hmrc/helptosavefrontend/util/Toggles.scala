@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.util
 import play.api.{Configuration, Logger}
 
 object Toggles {
-  case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: A, logger: Logger = Logger("FEATURE")) {
+  case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: Option[A] = None, logger: Logger = Logger("FEATURE")) {
     def enabled(): FEATURE_THEN[A] = {
       conf.getBoolean(s"toggles.$name.enabled") match {
         case Some(b) => FEATURE_THEN(name, b, unconfiguredVal)
@@ -29,10 +29,9 @@ object Toggles {
 
     def enabledWith(additional: String): FEATURE_THEN_KEY[A] = ???
   }
-  object FEATURE
 
-  case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: A) {
-    def thenDo(action: => A): Either[A, A] = {
+  case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: Option[A]) {
+    def thenDo(action: => A): Either[Option[A], A] = {
       if (enabled) {
         val result = action
         Right(result)
@@ -46,10 +45,11 @@ object Toggles {
   case class FEATURE_THEN_KEY[A](name: String, key: String, enabled: Boolean, hasKey: Boolean, unconfiguredVal: A)
   object FEATURE_THEN_KEY
 
-  implicit def eitherPop[A](e: Either[A, A]): A = {
+  implicit def eitherPop[A](e: Either[Option[A], A]): A = {
     e match {
       case Right(a) => a
-      case Left(a) => a
+      case Left(Some(a)) => a
+      case Left(None) => throw new RuntimeException(s"FEATURE has no otherwise branch and no default value")
     }
   }
 
