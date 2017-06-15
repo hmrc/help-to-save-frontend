@@ -70,7 +70,7 @@ package object models {
     val userInfo = UserInfo(forename, surname, nino, dateOfBirth, email, address)
     val nsiUserInfo =
       NSIUserInfo(forename, surname, dateOfBirth, nino,
-        ContactDetails(List(addressLine1, addressLine2, addressLine3), postcode, Some(country), email)
+        ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
       )
 
     userInfo → nsiUserInfo
