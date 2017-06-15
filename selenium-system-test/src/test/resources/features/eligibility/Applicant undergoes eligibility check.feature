@@ -1,6 +1,5 @@
 Feature: Applicant undergoes eligibility check
 
-  @wip
   Scenario: Applicant is in receipt of working tax credit and so is eligible
     Given an applicant is in receipt of working tax credit
     When they apply for Help to Save

@@ -25,7 +25,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   var nino: Option[String] = None
 
   Given("""^an applicant is in receipt of working tax credit$""") { () =>
-    nino = Option(generateEligibleNINO)
+    nino = Some(generateEligibleNINO)
   }
 
   When("""^they apply for Help to Save$""") { () =>
@@ -42,7 +42,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   Given("""^an applicant is NOT in receipt of working tax credit$""") { () =>
-    nino = Option(generateIllegibleNINO)
+    nino = Some(generateIllegibleNINO)
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () =>
