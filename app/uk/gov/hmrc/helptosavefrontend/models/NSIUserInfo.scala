@@ -281,8 +281,12 @@ object NSIUserInfo {
     }
   }
 
-  private[models] val ninoRegex = ("""^(([A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])([0-9]{2})([0-9]{2})""" +
+  private[models] val ninoRegexOriginal = ("""^(([A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])([0-9]{2})([0-9]{2})""" +
     """([0-9]{2})([A-D]{1})|((XX)(99)(99)(99)(X)))$""").r
+
+  private[models] val ninoRegex = (
+    """^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-Z](D|F|I|O|Q|U|V))[A-Z]""" +
+      """{2})[0-9]{6}[A-D]$""").r
 
   private[models] val postcodeRegex =
     ("""^((GIR)(0AA)|([A-PR-UWYZ]([0-9]{1,2}|([A-HK-Y][0-9]|[A-HK-Y][0-9]([0-9]|[ABEHMNPRV-Y]))|""" +

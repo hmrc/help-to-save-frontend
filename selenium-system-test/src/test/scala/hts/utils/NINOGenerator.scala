@@ -16,23 +16,58 @@
 
 package src.test.scala.hts.utils
 
+import cats.data._
 import uk.gov.hmrc.domain.Generator
+
+import scala.util.matching.Regex
+
+import scala.annotation.tailrec
+import cats.syntax.cartesian._
 
 trait NINOGenerator {
 
+  val ninoRegexOriginal = ("""^(([A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])([0-9]{2})([0-9]{2})""" +
+    """([0-9]{2})([A-D]{1})|((XX)(99)(99)(99)(X)))$""").r
+
   def generateNINO: String = {
     val generator = new Generator()
-    generator.nextNino.toString()
+    val nino = generator.nextNino.toString()
+    println("########### nino generated: " + nino)
+    println("######### nino validated? " + ninoValidation(nino))
+    nino
   }
 
   def generateEligibleNINO: String = {
     val nino = generateNINO
+    println("########### eligible nino used: AE" + nino.slice(2, nino.length))
+    val nino2 = "AE" + nino.slice(2, nino.length)
+    println("######## nino2: " + nino2)
+    println("######### nino validated? " + ninoValidation(nino2))
     "AE" + nino.slice(2, nino.length)
   }
 
   def generateIllegibleNINO: String = {
     val nino = generateNINO
+    println("########### illegible nino used: NA" + nino.slice(2, nino.length))
+    val nino2 = "AE" + nino.slice(2, nino.length)
+    println("######### nino validated? " + ninoValidation(nino2))
     "NA" + nino.slice(2, nino.length)
+  }
+
+  def validatedFromBoolean[A](a: A)(isValid: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
+    if (isValid(a)) Validated.Valid(a) else Validated.Invalid(NonEmptyList.of(ifFalse))
+
+  def regexValidation(s: String)(regex: Regex, ifInvalid: ⇒ String): ValidatedNel[String, String] =
+    validatedFromBoolean(s)(regex.pattern.matcher(_).matches(), ifInvalid)
+
+  def ninoValidation(nino: String): ValidatedNel[String, String] = {
+    val lengthCheck =
+      validatedFromBoolean(nino)(_.length <= 9, "NINO was longer thn 9 characters")
+
+    val regexCheck =
+      regexValidation(nino)(ninoRegexOriginal, "Invalid NINO format")
+
+    (lengthCheck |@| regexCheck).tupled.map(_ ⇒ nino)
   }
 
 }
