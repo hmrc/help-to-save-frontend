@@ -17,23 +17,34 @@
 package uk.gov.hmrc.helptosavefrontend.util
 
 import play.api.{Configuration, Logger}
+import java.time.Instant
 
 object Toggles {
-  case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: Option[A] = None, logger: Logger = Logger("FEATURE")) {
+  case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: Option[A], logger: Logger) {
     def enabled(): FEATURE_THEN[A] = {
       conf.getBoolean(s"toggles.$name.enabled") match {
-        case Some(b) => FEATURE_THEN(name, b, unconfiguredVal)
+        case Some(b) =>
+          logger.info("FEATURE: " + name + " enabled")
+          FEATURE_THEN(name, b, unconfiguredVal, logger)
         case None => throw new RuntimeException(s"FEATURE($name) is not present in configuration file - misconfigured")
       }
     }
 
     def enabledWith(additional: String): FEATURE_THEN_KEY[A] = ???
   }
+  object FEATURE {
+    def apply[A](name: String, conf: Configuration): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, None, Logger(name))
+    def apply[A](name: String, conf: Configuration, unconfiguredVal: A): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, Some(unconfiguredVal), Logger(name))
+  }
 
-  case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: Option[A]) {
+
+  case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: Option[A], logger: Logger) {
     def thenDo(action: => A): Either[Option[A], A] = {
       if (enabled) {
+        val startTime = Instant.now.toEpochMilli
         val result = action
+        val endTime = Instant.now.toEpochMilli
+        Logger.info("FEATURE: " + name + " executed in " + (endTime - startTime).toString + " milliseconds.")
         Right(result)
       } else {
         Left(unconfiguredVal)
@@ -58,6 +69,5 @@ object Toggles {
       case Right(a) => a
       case Left(a) => action
     }
-
   }
 }
