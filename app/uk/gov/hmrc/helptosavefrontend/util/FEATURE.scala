@@ -36,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.util.FEATURE.LogLevel._
   * @param log This type signature is used to facilitate testing of logging. (mocking frameworks do not
   *            currently seem to support by-name parameters very well)
   * @param t Enables conversion of internal HList to a tuple
-  * @tparam L The HList represting the list of extra parameters
+  * @tparam L The HList representing the list of extra parameters
   * @tparam T The tuple corresponding to the list of extra parameters
   */
 case class FEATURE[L <: HList,T] private(name: String,
