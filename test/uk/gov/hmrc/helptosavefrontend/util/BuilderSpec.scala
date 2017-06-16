@@ -116,7 +116,6 @@ class BuilderSpec extends WordSpec with Matchers{
         i.isInstanceOf[Int] shouldBe true
         "b"
       }
-      lastLogMessage shouldBe Some(LogLevel.INFO → "hello")
       result1 shouldBe "a"
 
       val f2 = FEATURE("my-feature", config(false), log _).withAn[Int]("int").withA[Data]("data")
@@ -132,8 +131,29 @@ class BuilderSpec extends WordSpec with Matchers{
       result2 shouldBe "b"
     }
 
+
+    def testLogging(b: Boolean, logContext: LogContext): Unit = {
+      val regex = s"""Feature my-feature \\(enabled: $b\\) executed in \\d+ ns""".r
+
+      val f = FEATURE("my-feature", config(b), logContext.log _)
+
+      logContext.lastLogMessage.isEmpty shouldBe true
+      f.thenOrElse{ _ ⇒ () }{ _ ⇒ () }
+
+      logContext.lastLogMessage.isEmpty shouldBe false
+      logContext.lastLogMessage.get._1 shouldBe LogLevel.INFO
+
+      regex.pattern.matcher(logContext.lastLogMessage.get._2).matches() shouldBe true
+    }
+
+    "must log elapsed time when executing a feature that is enabled" in new LogContext {
+      testLogging(true, this)
+    }
+
+
+    "must log elapsed time when executing a feature that is disabled" in new LogContext {
+      testLogging(false, this)
+    }
+
   }
-
-
-
 }

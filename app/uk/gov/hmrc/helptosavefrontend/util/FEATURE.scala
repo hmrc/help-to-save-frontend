@@ -46,7 +46,10 @@ case class FEATURE[L <: HList,T] private(name: String,
   import LogLevel._
 
   private def log(level: LogLevel, message: String): Unit = log(level, message, None)
+
   private def log(level: LogLevel, message: String, error: Throwable): Unit = log(level, message, Some(error))
+
+  private def time(): Long = System.nanoTime()
 
   private def withInternal[A] =  new {
     // convert the name into something of type A by reading it from the config. Return a new FEATURE with
@@ -66,13 +69,17 @@ case class FEATURE[L <: HList,T] private(name: String,
 
   def withAn[A] = withInternal[A]
 
-  def thenOrElse[A](ifTrue: T ⇒ A)(ifFalse: T ⇒ A): A =
-    if(enabled){
-      log(INFO, "hello")
+  def thenOrElse[A](ifTrue: T ⇒ A)(ifFalse: T ⇒ A): A = {
+    val start = time()
+    val result = if (enabled) {
       ifTrue(extraParams.tupled)
     } else {
       ifFalse(extraParams.tupled)
     }
+    val end = time()
+    log(INFO, s"Feature $name (enabled: $enabled) executed in ${end-start} ns")
+    result
+  }
 
 }
 
@@ -85,9 +92,9 @@ object FEATURE {
     def apply(l : A::HNil): Out = l match { case a::HNil => a }
   }
 
-  sealed trait LogLevel
+ private[util] sealed trait LogLevel
 
-  object LogLevel {
+ private[util] object LogLevel {
     case object TRACE extends LogLevel
     case object DEBUG extends LogLevel
     case object INFO extends LogLevel
