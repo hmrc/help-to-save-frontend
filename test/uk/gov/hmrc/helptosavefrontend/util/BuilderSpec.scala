@@ -22,7 +22,7 @@ import play.api.Configuration
 import shapeless.HNil
 import uk.gov.hmrc.helptosavefrontend.util.FEATURE.LogLevel
 
-class BuilderSpec extends WordSpec with Matchers{
+class FeatureSpec extends WordSpec with Matchers{
 
   case class InnerData(s: String)
 
