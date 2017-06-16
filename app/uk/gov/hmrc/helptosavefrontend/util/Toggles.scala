@@ -39,7 +39,7 @@ object Toggles {
 
 
   case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: Option[A], logger: Logger) {
-    def thenDo(action: => A): Either[Option[A], A] = {
+    def thenDoOrElse(action: => A, ifFalse: ⇒ A): A = {
       if (enabled) {
         val startTime = Instant.now.toEpochMilli
         val result = action
