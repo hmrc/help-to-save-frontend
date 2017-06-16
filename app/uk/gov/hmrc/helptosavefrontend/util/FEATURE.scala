@@ -27,15 +27,17 @@ import uk.gov.hmrc.helptosavefrontend.util.FEATURE.LogLevel._
 
 /**
   *
-  * @param name
-  * @param config
-  * @param enabled
-  * @param extraParams
+  * @param name Name of the feature. Configuration of the feature will be looked for in the path
+  *             'feature-toggles.$name'
+  * @param config The global configuration
+  * @param enabled Whether or not the feature should be enabled
+  * @param extraParams Extra parameters read from the config file. Use `addA` or `addAn` to accumulate
+  *                    parameters
   * @param log This type signature is used to facilitate testing of logging. (mocking frameworks do not
   *            currently seem to support by-name parameters very well)
-  * @param t
-  * @tparam L
-  * @tparam T
+  * @param t Enables conversion of internal HList to a tuple
+  * @tparam L The HList represting the list of extra parameters
+  * @tparam T The tuple corresponding to the list of extra parameters
   */
 case class FEATURE[L <: HList,T] private(name: String,
                                          config: Config,
@@ -53,7 +55,9 @@ case class FEATURE[L <: HList,T] private(name: String,
 
   private def withInternal[A] =  new {
     // convert the name into something of type A by reading it from the config. Return a new FEATURE with
-    // the new parameter appended to the extraParams list
+    // the new parameter appended to the extraParams list. Use an anonymous class here to be able to
+    // 'curry' the types (see http://caryrobbins.com/dev/scala-type-curry/) - we want to specify the type
+    // A, but we want L2 and T2 below to be calculated
     def apply[L2 <: HList, T2](name: String)(
       implicit
       configs: Configs[A],
@@ -105,12 +109,18 @@ object FEATURE {
   private def getConfig(name: String, configuration: Configuration): Config =
     configuration.underlying.getConfig(s"feature-toggles.$name")
 
-
+  // this apply is used for testing
   private[util] def apply  (name: String, configuration: Configuration, log:  (LogLevel,String,Option[Throwable]) ⇒ Unit): FEATURE[HNil,Unit] = {
     val config = getConfig(name, configuration)
     FEATURE(name, config, config.getBoolean("enabled"), HNil, log)
   }
 
+  /**
+    * @param name Name of the feature. Configuration of the feature will be looked for in the path
+    *             'feature-toggles.$name'
+    * @param configuration The global configuration
+    * @param log The logger to be used by the feature
+    */
   def apply  (name: String, configuration: Configuration, log: Logger): FEATURE[HNil,Unit] = {
     def logFunction(l: Logger): ((LogLevel,String,Option[Throwable]) ⇒ Unit) = {
       case (level: LogLevel, message: String, error: Option[Throwable]) ⇒
@@ -126,6 +136,5 @@ object FEATURE {
     val config = getConfig(name, configuration)
     FEATURE(name, config, config.getBoolean("enabled"), HNil, logFunction(log))
   }
-
 
 }
