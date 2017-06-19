@@ -370,12 +370,12 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
         "are invalid" in {
           val generator = new Generator()
           forAll(Gen.function0(generator.nextNino.nino)) { nino ⇒
-            NSIUserInfo(validUserInfo.copy(NINO = nino())).isValid shouldBe true
+            NSIUserInfo(validUserInfo.copy(nino = nino())).isValid shouldBe true
           }
 
           forAll { s: String ⇒
             whenever(!Nino.isValid(s)) {
-              NSIUserInfo(validUserInfo.copy(NINO = s)).isInvalid shouldBe true
+              NSIUserInfo(validUserInfo.copy(nino = s)).isInvalid shouldBe true
             }
           }
         }

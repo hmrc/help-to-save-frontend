@@ -82,7 +82,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
         },
         info ⇒ {
-          Logger.debug(s"Successfully created account for ${info.NINO}")
+          Logger.debug(s"Successfully created account for ${info.nino}")
           Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
         }
       )

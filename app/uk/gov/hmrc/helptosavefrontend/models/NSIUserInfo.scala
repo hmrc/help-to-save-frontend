@@ -32,7 +32,7 @@ import scala.util.matching.Regex
 case class NSIUserInfo (forename: String,
                         surname: String,
                         dateOfBirth: LocalDate,
-                        NINO: String,
+                        nino: String,
                         contactDetails: ContactDetails,
                         registrationChannel: String = "online")
 
@@ -56,7 +56,7 @@ object NSIUserInfo {
       addressLineValidation(userInfo.address) |@|
       postcodeValidation(userInfo.address.postcode) |@|
       countryCodeValidation(userInfo.address.country) |@|
-      ninoValidation(userInfo.NINO) |@|
+      ninoValidation(userInfo.nino) |@|
       emailValidation(userInfo.email)).map(
       (forename, surname, dateOfBirth, addressLines, postcode, countryCode, nino, email) ⇒
         NSIUserInfo(forename, surname, dateOfBirth, nino,
@@ -88,6 +88,7 @@ object NSIUserInfo {
   private val allowedNameSpecialCharacters = List('-', '&', '.')
 
   private def forenameValidation(name: String): ValidatedNel[String, String] = {
+
     val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 26, s"forename was larger than 26 characters")
 
     (commonNameChecks(name, "forename") |@| characterCountUpperBoundCheck)

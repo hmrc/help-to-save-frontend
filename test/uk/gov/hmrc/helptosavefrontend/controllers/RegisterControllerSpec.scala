@@ -119,7 +119,7 @@ class RegisterControllerSpec extends TestSupport {
 
         html should include(user.forename)
         html should include(user.email)
-        html should include(user.NINO)
+        html should include(user.nino)
       }
 
       "display a 'Not Eligible' page if the user is not eligible" in {
