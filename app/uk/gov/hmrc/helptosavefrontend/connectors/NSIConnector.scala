@@ -16,18 +16,17 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.util.Base64
 import javax.inject.Singleton
 
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.{Format, JsError, JsSuccess, Json}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{authDetails, authHeaderKey, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,29 +50,13 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl extends NSIConnector with ServicesConfig {
-
-  val nsiUrl: String = baseUrl("nsi")
-  val nsiUrlEnd: String = getString("microservice.services.nsi.url")
-  val url = s"$nsiUrl/$nsiUrlEnd"
-
-  val authorisationHeaderKey = getString("microservice.services.nsi.authorization.header-key")
-
-
-  val authorisationDetails = {
-    val user = getString("microservice.services.nsi.authorization.user")
-    val password = getString("microservice.services.nsi.authorization.password")
-    val encoding = getString("microservice.services.nsi.authorization.encoding")
-
-    val encoded = Base64.getEncoder.encode(s"$user:$password".getBytes)
-    s"Basic: ${new String(encoded, encoding)}"
-  }
+class NSIConnectorImpl extends NSIConnector {
 
   val httpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
-    Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $url")
-    httpProxy.post(url, userInfo, Map(authorisationHeaderKey → authorisationDetails))(
+    Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
+    httpProxy.post(nsiUrl, userInfo, Map(authHeaderKey → authDetails))(
       NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
       .map { response ⇒
         response.status match {
@@ -97,17 +80,13 @@ class NSIConnectorImpl extends NSIConnector with ServicesConfig {
     Try(response.json) match {
       case Success(jsValue) ⇒
         Json.fromJson[SubmissionFailure](jsValue) match {
-          case JsSuccess(submissionFailure, _) ⇒
-            submissionFailure
-
+          case JsSuccess(submissionFailure, _) ⇒ submissionFailure
           case e: JsError ⇒
             SubmissionFailure(None, s"Could not create NSI account errors; response body: ${response.body}", e.prettyPrint())
         }
 
       case Failure(error) ⇒
         SubmissionFailure(None, s"Could not read submission failure JSON response: ${response.body}", error.getMessage)
-
     }
-
   }
 }
