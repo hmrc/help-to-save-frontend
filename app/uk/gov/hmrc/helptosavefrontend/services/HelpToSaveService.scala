@@ -36,7 +36,6 @@ class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIC
   def checkEligibility(nino: String, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
     helpToSaveConnector.getEligibilityStatus(nino, userDetailsURI)
 
-
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]] {
       case success: SubmissionSuccess =>
