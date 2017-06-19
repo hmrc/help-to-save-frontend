@@ -65,14 +65,14 @@ object NSIUserInfo {
 
 
   implicit val dateFormat: Format[LocalDate] = new Format[LocalDate] {
-    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("YYYYMMdd")
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 
     override def writes(o: LocalDate): JsValue = JsString(o.format(formatter))
 
     override def reads(json: JsValue): JsResult[LocalDate] = json match {
       case JsString(s) ⇒ Try(LocalDate.parse(s, formatter)) match {
         case Success(date) ⇒ JsSuccess(date)
-        case Failure(error) ⇒ JsError(s"Could not parse date as YYYMMdd: ${error.getMessage}")
+        case Failure(error) ⇒ JsError(s"Could not parse date as yyyyMMdd: ${error.getMessage}")
       }
 
       case other ⇒ JsError(s"Expected string but got $other")
