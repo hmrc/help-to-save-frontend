@@ -24,6 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.{TestSupport, models}
 import uk.gov.hmrc.play.http.HeaderCarrier
+import cats.instances.future._
 
 import scala.concurrent.{ExecutionContext, Future}
 
