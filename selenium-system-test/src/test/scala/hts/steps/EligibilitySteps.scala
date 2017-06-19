@@ -42,7 +42,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   Given("""^an applicant is NOT in receipt of working tax credit$""") { () =>
-    nino = Some(generateIllegibleNINO)
+    nino = Some(generateIneligibleNINO)
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () =>

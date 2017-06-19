@@ -32,7 +32,7 @@ trait NINOGenerator {
     "AE" + nino.drop(2)
   }
 
-  def generateIllegibleNINO: String = {
+  def generateIneligibleNINO: String = {
     val nino = generateNINO
     "NA" + nino.drop(2)
   }
