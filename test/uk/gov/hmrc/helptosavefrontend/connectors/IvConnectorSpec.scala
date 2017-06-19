@@ -54,7 +54,7 @@ class IvConnectorSpec extends TestSupport with ScalaFutures {
 
       "handle successful response" in new TestApparatus {
 
-        val httpResponse = HttpResponse.apply(200, Some(Json.parse("""{"result": "Success"}""")))
+        val httpResponse = HttpResponse(200, Some(Json.parse("""{"result": "Success"}""")))
 
         mockHttpResponse((httpResponse))
 
@@ -65,7 +65,7 @@ class IvConnectorSpec extends TestSupport with ScalaFutures {
 
       "handle unexpected non-successful response" in new TestApparatus {
 
-        val httpResponse = HttpResponse.apply(600)
+        val httpResponse = HttpResponse(600)
 
         mockHttpResponse((httpResponse))
 

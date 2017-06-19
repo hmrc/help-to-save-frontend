@@ -47,7 +47,7 @@ class HelpToSaveServiceSpec extends TestSupport with ScalaFutures {
 
         val eligResult = EligibilityResult(Some(user))
 
-        val eligStatus: Result[EligibilityResult] = EitherT[Future, String, EligibilityResult](Right(eligResult))
+        val eligStatus: Result[EligibilityResult] = EitherT.pure[Future, String, EligibilityResult](eligResult)
 
         (htsConnector.getEligibilityStatus(_: String, _: String)(_: HeaderCarrier)).expects(nino, userDetailsURI, *)
           .returning(eligStatus)
