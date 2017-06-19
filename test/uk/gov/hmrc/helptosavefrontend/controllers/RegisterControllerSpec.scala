@@ -100,7 +100,7 @@ class RegisterControllerSpec extends TestSupport {
       def doConfirmDetailsRequest(): Future[PlayResult] = register.confirmDetails(FakeRequest())
 
       "return user details if the user is eligible for help-to-save" in {
-        val user = randomUserInfo()
+        val user = validUserInfo
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
           mockEligibilityResult(nino, userDetailsURI)(Right(Some(user)))
@@ -169,11 +169,18 @@ class RegisterControllerSpec extends TestSupport {
             })
         }
 
-        "there is an error writing to the session cache" in {
-          val user = randomUserInfo()
+        "if the user details fo not pass NS&I validation checks" in {
+          val user = validUserInfo.copy(forename = " space-at-beginning")
           test(inSequence {
             mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
             mockEligibilityResult(nino, userDetailsURI)(Right(Some(user)))
+          })
+        }
+
+        "there is an error writing to the session cache" in {
+          test(inSequence {
+            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+            mockEligibilityResult(nino, userDetailsURI)(Right(Some(validUserInfo)))
             mockSessionCacheConnectorPut(Left("Bang"))
           })
         }
@@ -199,7 +206,7 @@ class RegisterControllerSpec extends TestSupport {
         "the help to save service" in {
         inSequence {
           mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
           mockCreateAccount(validNSIUserInfo)()
         }
         val result = Await.result(doCreateAccountRequest(), 5.seconds)
@@ -210,7 +217,7 @@ class RegisterControllerSpec extends TestSupport {
       "indicate to the user that the creation was successful if the creation was successful" in {
         inSequence {
           mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
           mockCreateAccount(validNSIUserInfo)()
         }
 
@@ -232,22 +239,10 @@ class RegisterControllerSpec extends TestSupport {
           html should include("Account creation failed")
         }
 
-        "the user details do not pass local NS&I validity checks" in {
-          inSequence {
-            mockPlayAuthWithWithConfidence()
-            mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo.copy(email = "")))))
-          }
-
-          val result = doCreateAccountRequest()
-          val html = contentAsString(result)
-          html should include("Account creation failed")
-        }
-
-
         "the help to save service returns with an error" in {
           inSequence {
             mockPlayAuthWithWithConfidence()
-            mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+            mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
             mockCreateAccount(validNSIUserInfo)(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }
 

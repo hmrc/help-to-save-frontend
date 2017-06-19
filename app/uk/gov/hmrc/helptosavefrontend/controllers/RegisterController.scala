@@ -25,11 +25,11 @@ import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, HTSSession, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -49,7 +49,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         val userInfo = for {
           userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
           eligible ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path)
-          _ ← writeToKeyStore(eligible.result)
+          nsiUserInfo ← toNSIUserInfo(eligible)
+          _ ← writeToKeyStore(nsiUserInfo)
         } yield eligible
 
         userInfo.fold(
@@ -71,8 +72,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     implicit request ⇒
       val result = for {
         userInfo    ← retrieveUserInfo()
-        nsiUserInfo ← toNSIUserInfo(userInfo)
-        _ ← helpToSaveService.createAccount(nsiUserInfo).leftMap(submissionFailureToString)
+        _ ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
       } yield userInfo
 
       // TODO: plug in actual pages below
@@ -97,12 +97,12 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     Future.successful(Ok(views.html.core.not_eligible()))
   }
 
-  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, UserInfo] = {
+  private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, NSIUserInfo] = {
     val session = sessionCacheConnector.get
     val userInfo = session.map(_.flatMap(_.userInfo))
 
     EitherT(
-      userInfo.map(_.fold[Either[String, UserInfo]](
+      userInfo.map(_.fold[Either[String, NSIUserInfo]](
         Left("Session cache did not contain session data"))(Right(_))))
   }
 
@@ -111,7 +111,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     * is not defined, don't do anything and return [[None]]. Any errors during writing to key-store are
     * captured as a [[String]] in the [[Either]].
     */
-  private def writeToKeyStore(userDetails: Option[UserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
+  private def writeToKeyStore(userDetails: Option[NSIUserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
     // write to key-store
     val cacheMapOption: Option[Future[CacheMap]] =
     userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
@@ -126,10 +126,18 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  private def toNSIUserInfo(userInfo: UserInfo): EitherT[Future,String,NSIUserInfo] =
-    EitherT.fromEither[Future](NSIUserInfo(userInfo)
-      .toEither
-      .leftMap(errors ⇒ s"User info validation failed: ${errors.toList.mkString(", ")}"))
+  private def toNSIUserInfo(eligibilityResult: EligibilityResult): EitherT[Future,String, Option[NSIUserInfo]] = {
+    val conversion: Option[Either[String, NSIUserInfo]] = eligibilityResult.result.map{ result ⇒
+      val validation = NSIUserInfo(result)
+      validation.toEither.leftMap(
+        errors ⇒ s"User info did not pass NS&I validity checks: ${errors.toList.mkString("; ")}"
+      )
+    }
+
+    EitherT.fromEither[Future](
+      conversion.fold[Either[String,Option[NSIUserInfo]]](Right(None))(_.map(info ⇒ Some(info)))
+    )
+  }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")}, "+
