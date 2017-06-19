@@ -17,8 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import java.time.LocalDate
-import org.scalacheck.{Arbitrary, Gen}
 
+import org.scalacheck.{Arbitrary, Gen}
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.testutil._
 
 
@@ -67,9 +68,10 @@ package object models {
     val email = "tyrion_lannister@gmail.com"
 
     val userInfo = UserInfo(forename, surname, nino, dateOfBirth, email, address)
-    val nsiUserInfo = NSIUserInfo(
-      forename, surname, dateOfBirth, addressLine1, addressLine2, Some(addressLine3),
-      None, None, postcode, Some(country), nino, "02", None, email, "online")
+    val nsiUserInfo =
+      NSIUserInfo(forename, surname, dateOfBirth, nino,
+        ContactDetails(List(addressLine1, addressLine2, addressLine3), postcode, Some(country), email)
+      )
 
     userInfo → nsiUserInfo
   }

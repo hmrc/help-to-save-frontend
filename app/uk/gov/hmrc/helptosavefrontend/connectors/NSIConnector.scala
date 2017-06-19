@@ -74,7 +74,7 @@ class NSIConnectorImpl extends NSIConnector with ServicesConfig {
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     Logger.info(s"Trying to create an account for ${userInfo.NINO} using NSI endpoint $url")
     httpProxy.post(url, userInfo, Map(authorisationHeaderKey → authorisationDetails))(
-      NSIUserInfo.nsiUserInfoWrites, hc.copy(authorization = None))
+      NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
@@ -86,7 +86,7 @@ class NSIConnectorImpl extends NSIConnector with ServicesConfig {
             handleBadRequestResponse(response)
 
           case other ⇒
-            Logger.warn(s"Unexpected error during creating account for ${userInfo.NINO}, status:$other ")
+            Logger.warn(s"Unexpected error during creating account for ${userInfo.NINO}, status: $other")
             SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
         }
       }
