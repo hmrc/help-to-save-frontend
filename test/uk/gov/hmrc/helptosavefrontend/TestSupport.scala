@@ -16,10 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend
 
+import java.util.UUID
+
 import com.typesafe.config.Config
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.{Headers, Session}
 import play.api.{Application, Play}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
@@ -36,7 +39,8 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll {
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
-  implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
+  implicit val headerCarrier: HeaderCarrier =
+    HeaderCarrier.fromHeadersAndSession(Headers(), Some(Session(Map("sessionId" -> UUID.randomUUID().toString))))
 
   val config: Config = fakeApplication.configuration.underlying
 

@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.Logger
 import play.mvc.Http.Status.OK
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
 import uk.gov.hmrc.helptosavefrontend.models.iv._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -37,7 +37,7 @@ class IvConnectorImpl extends IvConnector with ServicesConfig {
 
   private val ivUrl = baseUrl("identity-verification-frontend")
 
-  private val http = WSHttp
+  val http: WSHttpExtension = WSHttp
 
   override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]] = {
 

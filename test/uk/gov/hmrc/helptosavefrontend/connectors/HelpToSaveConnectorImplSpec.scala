@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import java.net.URLEncoder
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpExtension
 import uk.gov.hmrc.helptosavefrontend.models._
