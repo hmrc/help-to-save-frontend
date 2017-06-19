@@ -26,7 +26,7 @@ import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
-import play.api.{Application, Logger}
+import play.api.{Application, Configuration, Logger}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, NSIUserInfo, UserInfo}
@@ -68,11 +68,19 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       Future.successful(Ok(views.html.register.create_account_help_to_save()))
   }
 
+  def f(userInfo: NSIUserInfo, conf: Configuration): Either[String,NSIUserInfo] = {
+    FEATURE("outgoing-json-validation", conf, Logger("outgoing-json-validation")) thenOrElse (
+      _ => Right(userInfo),
+      _ => Right(userInfo))
+  }
+
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
-      val result = for {
+      val conf = app.configuration
+      val result: EitherT[Future, String, UserInfo] = for {
         userInfo    ← retrieveUserInfo()
         nsiUserInfo ← toNSIUserInfo(userInfo)
+        _          <- EitherT.fromEither[Future](f(nsiUserInfo, conf))
         _ ← helpToSaveService.createAccount(nsiUserInfo).leftMap(submissionFailureToString)
       } yield userInfo
 

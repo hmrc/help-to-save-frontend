@@ -73,7 +73,7 @@ case class FEATURE[L <: HList,T] private(name: String,
 
   def withAn[A] = withInternal[A]
 
-  def thenOrElse[A](ifTrue: T ⇒ A)(ifFalse: T ⇒ A): A = {
+  def thenOrElse[A](ifTrue: T ⇒ A, ifFalse: T ⇒ A): A = {
     val start = time()
     val result = if (enabled) {
       ifTrue(extraParams.tupled)

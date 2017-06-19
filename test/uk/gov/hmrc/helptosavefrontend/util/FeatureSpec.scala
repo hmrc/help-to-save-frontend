@@ -109,25 +109,25 @@ class FeatureSpec extends WordSpec with Matchers{
       import FEATURE._
 
       val f1 = FEATURE("my-feature", config(true), log _).withAn[Int]("int")
-      val result1= f1.thenOrElse{i ⇒
+      val result1= f1.thenOrElse({i ⇒
         i.isInstanceOf[Int] shouldBe true
         "a"
-      }{ i ⇒
+      },{ i ⇒
         i.isInstanceOf[Int] shouldBe true
         "b"
-      }
+      })
       result1 shouldBe "a"
 
       val f2 = FEATURE("my-feature", config(false), log _).withAn[Int]("int").withA[Data]("data")
-      val result2 = f2.thenOrElse{ case (i,d) ⇒
+      val result2 = f2.thenOrElse({ case (i,d) ⇒
         i.isInstanceOf[Int] shouldBe true
         d.isInstanceOf[Data] shouldBe true
         "a"
-      }{ case (i,d) ⇒
+      },{ case (i,d) ⇒
         i.isInstanceOf[Int] shouldBe true
         d.isInstanceOf[Data] shouldBe true
         "b"
-      }
+      })
       result2 shouldBe "b"
     }
 
@@ -138,7 +138,7 @@ class FeatureSpec extends WordSpec with Matchers{
       val f = FEATURE("my-feature", config(b), logContext.log _)
 
       logContext.lastLogMessage.isEmpty shouldBe true
-      f.thenOrElse{ _ ⇒ () }{ _ ⇒ () }
+      f.thenOrElse({ _ ⇒ () },{ _ ⇒ () })
 
       logContext.lastLogMessage.isEmpty shouldBe false
       logContext.lastLogMessage.get._1 shouldBe LogLevel.INFO
