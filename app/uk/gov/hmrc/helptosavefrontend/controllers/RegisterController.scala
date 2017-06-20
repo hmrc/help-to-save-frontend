@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import cats.data.EitherT
+import cats.instances.either._
 import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.either._
