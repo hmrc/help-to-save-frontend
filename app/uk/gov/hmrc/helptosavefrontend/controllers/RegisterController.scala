@@ -126,6 +126,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
+
+  private type EitherOrString[A] = Either[String,A]
+
   private def toNSIUserInfo(eligibilityResult: EligibilityResult): EitherT[Future,String, Option[NSIUserInfo]] = {
     val conversion: Option[Either[String, NSIUserInfo]] = eligibilityResult.result.map{ result ⇒
       val validation = NSIUserInfo(result)
@@ -134,13 +137,14 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       )
     }
 
-    EitherT.fromEither[Future](
-      conversion.fold[Either[String,Option[NSIUserInfo]]](Right(None))(_.map(info ⇒ Some(info)))
-    )
+    // use sequence to push the option into the either
+    val result: Either[String, Option[NSIUserInfo]] = conversion.sequence[EitherOrString,NSIUserInfo]
+
+    EitherT.fromEither[Future](result)
   }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
-    s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")}, "+
+    s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")}, " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
 
 

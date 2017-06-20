@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter
 
 import cats.data.Validated.Invalid
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import cats.syntax.CartesianBuilder
 import cats.syntax.cartesian._
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
@@ -49,7 +50,7 @@ object NSIUserInfo {
     * Performs validation checks on the given [[UserInfo]] and converts to [[NSIUserInfo]]
     * if successful.
     */
-  def apply(userInfo: UserInfo): ValidatedNel[String, NSIUserInfo] =
+  def apply(userInfo: UserInfo): ValidatedNel[String, NSIUserInfo] = {
     (forenameValidation(userInfo.forename) |@|
       surnameValidation(userInfo.surname) |@|
       dateValidation(userInfo.dateOfBirth) |@|
@@ -62,6 +63,7 @@ object NSIUserInfo {
         NSIUserInfo(forename, surname, dateOfBirth, nino,
           ContactDetails(addressLines, postcode, countryCode, email))
     )
+  }
 
 
   implicit val dateFormat: Format[LocalDate] = new Format[LocalDate] {
