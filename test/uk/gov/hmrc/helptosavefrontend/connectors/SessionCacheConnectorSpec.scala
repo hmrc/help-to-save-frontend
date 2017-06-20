@@ -18,8 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.helptosavefrontend.models.HTSSession
-import uk.gov.hmrc.helptosavefrontend.{TestSupport, models}
+import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
@@ -29,9 +29,7 @@ class SessionCacheConnectorSpec extends TestSupport with ScalaFutures {
   class TestApparatus {
     val mockWsHttp = mock[WSHttp]
 
-    val user = models.randomUserInfo()
-
-    val htsSession = HTSSession(Some(user))
+    val htsSession = HTSSession(Some(validNSIUserInfo))
 
     val cacheMap = CacheMap("1", Map("htsSession" -> Json.toJson(htsSession)))
 
