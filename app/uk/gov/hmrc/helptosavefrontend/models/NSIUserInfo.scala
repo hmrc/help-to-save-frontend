@@ -19,131 +19,117 @@ package uk.gov.hmrc.helptosavefrontend.models
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import cats.data.Validated.{Invalid, Valid}
+import cats.data.Validated.Invalid
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import cats.syntax.CartesianBuilder
 import cats.syntax.cartesian._
 import play.api.libs.json._
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 
 import scala.annotation.tailrec
+import scala.util.{Failure, Success, Try}
 import scala.util.matching.Regex
 
-case class NSIUserInfo private[models](forename: String,
-                                       surname: String,
-                                       birthDate: LocalDate,
-                                       address1: String,
-                                       address2: String,
-                                       address3: Option[String],
-                                       address4: Option[String],
-                                       address5: Option[String],
-                                       postcode: String,
-                                       countryCode: Option[String],
-                                       NINO: String,
-                                       communicationPreference: String,
-                                       phoneNumber: Option[String],
-                                       emailAddress: String,
-                                       registrationChannel: String)
+case class NSIUserInfo (forename: String,
+                        surname: String,
+                        dateOfBirth: LocalDate,
+                        nino: String,
+                        contactDetails: ContactDetails,
+                        registrationChannel: String = "online")
 
 object NSIUserInfo {
+
+  case class ContactDetails(address: List[String],
+                            postCode: String,
+                            countryCode: Option[String],
+                            email: String,
+                            phoneNumber: Option[String] = None,
+                            communicationPreference: String = "02")
 
   /**
     * Performs validation checks on the given [[UserInfo]] and converts to [[NSIUserInfo]]
     * if successful.
     */
-  def apply(userInfo: UserInfo): ValidatedNel[String, NSIUserInfo] =
+  def apply(userInfo: UserInfo): ValidatedNel[String, NSIUserInfo] = {
     (forenameValidation(userInfo.forename) |@|
       surnameValidation(userInfo.surname) |@|
       dateValidation(userInfo.dateOfBirth) |@|
       addressLineValidation(userInfo.address) |@|
       postcodeValidation(userInfo.address.postcode) |@|
       countryCodeValidation(userInfo.address.country) |@|
-      ninoValidation(userInfo.NINO) |@|
+      ninoValidation(userInfo.nino) |@|
       emailValidation(userInfo.email)).map(
       (forename, surname, dateOfBirth, addressLines, postcode, countryCode, nino, email) ⇒
-        NSIUserInfo(forename, surname, dateOfBirth, addressLines.line1, addressLines.line2,
-          addressLines.line3, addressLines.line4, addressLines.line5, postcode, countryCode,
-          nino, communicationPreference = "02", phoneNumber = None, email, registrationChannel = "online")
+        NSIUserInfo(forename, surname, dateOfBirth, nino,
+          ContactDetails(addressLines, postcode, countryCode, email))
     )
-
-  implicit val dateWrites: Writes[LocalDate] = new Writes[LocalDate] {
-    override def writes(o: LocalDate): JsValue = JsString(o.format(DateTimeFormatter.ofPattern("YYYYMMdd")))
   }
 
-  implicit val nsiUserInfoWrites: Format[NSIUserInfo] = Json.format[NSIUserInfo]
 
-  private case class ValidatedAddressLines(line1: String,
-                                           line2: String,
-                                           line3: Option[String],
-                                           line4: Option[String],
-                                           line5: Option[String])
+  implicit val dateFormat: Format[LocalDate] = new Format[LocalDate] {
+    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+
+    override def writes(o: LocalDate): JsValue = JsString(o.format(formatter))
+
+    override def reads(json: JsValue): JsResult[LocalDate] = json match {
+      case JsString(s) ⇒ Try(LocalDate.parse(s, formatter)) match {
+        case Success(date) ⇒ JsSuccess(date)
+        case Failure(error) ⇒ JsError(s"Could not parse date as yyyyMMdd: ${error.getMessage}")
+      }
+
+      case other ⇒ JsError(s"Expected string but got $other")
+    }
+  }
+
+  implicit val contactDetailsFormat: Format[ContactDetails] = Json.format[ContactDetails]
+
+  implicit val nsiUserInfoFormat: Format[NSIUserInfo] = Json.format[NSIUserInfo]
 
   private case class Email(local: String, domain: String)
 
   private val allowedNameSpecialCharacters = List('-', '&', '.')
 
   private def forenameValidation(name: String): ValidatedNel[String, String] = {
-    val forbiddenSpecialCharacters = specialCharacters(name, allowedNameSpecialCharacters)
 
-    val specialCharacterCheck = validatedFromBoolean(forbiddenSpecialCharacters)(_.isEmpty,
-      s"forename contained invalid special characters: $name")
+    val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 26, s"forename was larger than 26 characters")
 
-    val firstCharacterNonSpecial = validatedFromBoolean(name)(!_.headOption.exists(isSpecial(_)), s"forename started with special character: $name")
-
-    val characterCountLowerBoundCheck = validatedFromBoolean(name)(_.nonEmpty, "forename did not have any characters")
-    val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 99, s"forename was larger than 99 characters: $name")
-
-    (commonNameChecks(name, "forename") |@| specialCharacterCheck |@| firstCharacterNonSpecial |@|
-      characterCountLowerBoundCheck |@| characterCountUpperBoundCheck)
+    (commonNameChecks(name, "forename") |@| characterCountUpperBoundCheck)
       .map { case _ ⇒ name }
   }
 
   private def surnameValidation(name: String): ValidatedNel[String, String] = {
-    val forbiddenSpecialCharacters = specialCharacters(name, allowedNameSpecialCharacters)
+    val firstCharacterNonSpecial = validatedFromBoolean(name)(!_.headOption.exists(isSpecial(_)), s"surname started with special character")
 
-    val specialCharacterCheck = validatedFromBoolean(forbiddenSpecialCharacters)(_.isEmpty,
-      s"surname contained invalid special characters: $name")
-
-    val firstCharacterNonSpecial = validatedFromBoolean(name)(!_.headOption.exists(isSpecial(_)), s"surname started with special character: $name")
-
-    val lastCharacterNonSpecial = validatedFromBoolean(name)(!_.lastOption.exists(isSpecial(_)), s"surname ended with special character: $name")
+    val lastCharacterNonSpecial = validatedFromBoolean(name)(!_.lastOption.exists(isSpecial(_)), s"surname ended with special character")
 
     val characterCountLowerBoundCheck = validatedFromBoolean(name)(_.nonEmpty, "surname did not have at least 1 character")
-    val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 300, s"surname was larger than 300 characters: $name")
+    val characterCountUpperBoundCheck = validatedFromBoolean(name)(_.length <= 300, s"surname was larger than 300 characters")
 
-    (commonNameChecks(name, "surname") |@| specialCharacterCheck |@| firstCharacterNonSpecial |@|
+    (commonNameChecks(name, "surname") |@| firstCharacterNonSpecial |@|
       lastCharacterNonSpecial |@| characterCountLowerBoundCheck |@| characterCountUpperBoundCheck)
       .map { case _ ⇒ name }
   }
 
   private def dateValidation(date: LocalDate): ValidatedNel[String, LocalDate] = {
     val lowerBoundCheck =
-      validatedFromBoolean(date)(_.isAfter(LocalDate.of(1800, 1, 1)), s"Birth date $date was before 01/01/1800: $date")
+      validatedFromBoolean(date)(_.isAfter(LocalDate.of(1800, 1, 1)), s"Birth date was before 01/01/1800") // scalastyle:ignore magic.number
+
     val upperBoundCheck =
-      validatedFromBoolean(date)(_.isBefore(LocalDate.now()), s"Birth date was in the future: $date")
+      validatedFromBoolean(date)(_.isBefore(LocalDate.now()), s"Birth date was in the future")
 
     (lowerBoundCheck |@| upperBoundCheck).map { case _ ⇒ date }
   }
 
-  private def addressLineValidation(address: Address): ValidatedNel[String, ValidatedAddressLines] = {
+  private def addressLineValidation(address: Address): ValidatedNel[String, List[String]] = {
     val list = List(address.line1, address.line2, address.line3,
       address.line4, address.line5).collect { case Some(s) ⇒ s }.filter(_.nonEmpty)
 
     val lengthCheck = validatedFromBoolean(list)(!_.exists(_.length > 35),
       "Address contained line greater than 35 characters")
 
-    val lineCheck = list match {
-      case l1 :: l2 :: l3 :: l4 :: l5 :: Nil ⇒
-        Valid(ValidatedAddressLines(l1, l2, Some(l3), Some(l4), Some(l5)))
-      case l1 :: l2 :: l3 :: l4 :: Nil ⇒
-        Valid(ValidatedAddressLines(l1, l2, Some(l3), Some(l4), None))
-      case l1 :: l2 :: l3 :: Nil ⇒
-        Valid(ValidatedAddressLines(l1, l2, Some(l3), None, None))
-      case l1 :: l2 :: Nil ⇒
-        Valid(ValidatedAddressLines(l1, l2, None, None, None))
-      case _ ⇒
-        Invalid(NonEmptyList.of("Could not find two lines of address"))
-    }
+    val twoLinesCheck = validatedFromBoolean(list)(_.length > 1, "At least two lines of address not found")
 
-    (lengthCheck |@| lineCheck).map((_, lines) ⇒ lines)
+    (lengthCheck |@| twoLinesCheck).map{ case _ ⇒ list }
   }
 
   private def postcodeValidation(postcode: Option[String]): ValidatedNel[String, String] = postcode match {
@@ -153,13 +139,14 @@ object NSIUserInfo {
     case Some(p) ⇒
       val trimmedPostcode = p.replaceAllLiterally(" ", "")
       val lengthCheck =
-        validatedFromBoolean(trimmedPostcode)(_.length <= 10, s"Postcode was longer thn 10 characters: $trimmedPostcode")
+        validatedFromBoolean(trimmedPostcode)(_.length <= 10, s"Postcode was longer thn 10 characters")
 
       lengthCheck.map(_ ⇒ trimmedPostcode)
   }
 
+  // TODO: Do we want to check that the country code is in the ISO 3166 list?
   private def countryCodeValidation(countryCode: Option[String]): ValidatedNel[String, Option[String]] =
-    validatedFromBoolean(countryCode.map(_.trim))(_.forall(_.length == 2), s"Country code was not 2 characters: ${countryCode.getOrElse("")}")
+    validatedFromBoolean(countryCode)(_.forall(_.length == 2), s"Country code was not 2 characters")
 
   private def ninoValidation(nino: String): ValidatedNel[String, String] = {
     val lengthCheck =
@@ -192,14 +179,24 @@ object NSIUserInfo {
   }
 
   private def commonNameChecks(name: String, nameType: String): ValidatedNel[String, String] = {
-    val leadingSpaceCheck = validatedFromBoolean(name)(!_.startsWith(" "), s"$nameType started with leading space: $name")
+    val forbiddenSpecialCharacters = specialCharacters(name, allowedNameSpecialCharacters)
 
-    val numericCheck = validatedFromBoolean(name)(!_.exists(_.isDigit), s"$nameType contained numeric characters: $name")
+    val atLeastOneCharacterCheck = validatedFromBoolean(name)(_.exists(_.isLetter), s"$nameType did not contain any characters")
+
+    val leadingSpaceCheck = validatedFromBoolean(name)(!_.startsWith(" "), s"$nameType started with leading space")
+
+    val numericCheck = validatedFromBoolean(name)(!_.exists(_.isDigit), s"$nameType contained numeric characters")
+
+    val specialCharacterCheck = validatedFromBoolean(forbiddenSpecialCharacters)(_.isEmpty,
+      s"$nameType contained invalid special characters")
+
+    val firstCharacterNonSpecial = validatedFromBoolean(name)(!_.headOption.forall(c ⇒ isSpecial(c)), s"$nameType started with special character")
 
     val consecutiveSpecialCharacters = validatedFromBoolean(name)(!containsNConsecutiveSpecialCharacters(_, 2),
-      s"$nameType contained consecutive special characters: $name")
+      s"$nameType contained consecutive special characters")
 
-    (leadingSpaceCheck |@| numericCheck |@| consecutiveSpecialCharacters).map { case _ ⇒ name }
+    (atLeastOneCharacterCheck |@| leadingSpaceCheck |@| numericCheck |@| specialCharacterCheck |@|
+      firstCharacterNonSpecial |@| consecutiveSpecialCharacters).map { case _ ⇒ name }
   }
 
   private def validatedFromBoolean[A](a: A)(isValid: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
@@ -230,11 +227,15 @@ object NSIUserInfo {
 
   /**
     * Does the given string contains `n` consecutive characters which satisfy the given predicate?
-    * `n` should be two or greater.
+    * `n` should be one or greater.
     */
-  private def containsNConsecutive(s: String, n: Int, predicate: Char ⇒ Boolean): Boolean = {
+  private def containsNConsecutive(s: String,
+                                   n: Int,
+                                   predicate: Char ⇒ Boolean): Boolean = {
     @tailrec
-    def loop(s: List[Char], previous: Char, count: Int): Boolean = s match {
+    def loop(s: List[Char],
+             previous: Char,
+             count: Int): Boolean = s match {
       case Nil ⇒
         false
 
@@ -251,13 +252,15 @@ object NSIUserInfo {
         }
     }
 
-    if (n > 1) {
+    if(n == 1) {
+      s.exists(predicate)
+    } else if (n > 1) {
       s.toList match {
         // only loop over strings that have length two or greater
-        case head :: (tail@(_ :: _)) ⇒ loop(tail, head, 0)
+        case head :: tail ⇒ loop(tail, head, 0)
         case _ ⇒ false
       }
-    } else {
+    } else{
       false
     }
   }
