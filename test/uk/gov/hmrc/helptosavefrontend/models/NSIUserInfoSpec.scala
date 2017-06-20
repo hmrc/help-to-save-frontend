@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import java.time.LocalDate
 
-import cats.data.Validated.{Invalid, Valid}
+import cats.data.Validated.Valid
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
@@ -36,10 +36,6 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
   "The NSIUSerInfo" when {
 
-    Valid(1)
-    Invalid("string")
-
-    Valdiated()
     "validating validUserInfo" must {
 
       "mark as valid valid user information" in {
