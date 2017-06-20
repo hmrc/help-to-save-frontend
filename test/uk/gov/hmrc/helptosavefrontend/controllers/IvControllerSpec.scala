@@ -95,5 +95,16 @@ class IvControllerSpec extends TestSupport {
         status(result) should be(htsStatus)
       }
     }
+
+    "handles the case where no iv response for a given journeyId" in {
+
+      mockAuthConnectorResult()
+
+      val responseFuture = ivController.journeyResult()(FakeRequest("GET", s"/iv/journey-result"))
+
+      val result = Await.result(responseFuture, 3.seconds)
+
+      status(result) should be(UNAUTHORIZED)
+    }
   }
 }

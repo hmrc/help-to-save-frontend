@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class HelpToSaveConnectorImplSpec extends TestSupport {
+class HelpToSaveConnectorSpec extends TestSupport {
 
   val baseUrl: String = {
     val port = config.getString("microservice.services.help-to-save.port")
