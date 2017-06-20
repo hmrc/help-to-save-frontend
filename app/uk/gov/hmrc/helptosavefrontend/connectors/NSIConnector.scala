@@ -21,16 +21,15 @@ import javax.inject.Singleton
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.http.Status
-import play.api.libs.json.{Format, JsError, JsSuccess, Json}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{authDetails, authHeaderKey, nsiUrl}
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
+import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[NSIConnectorImpl])
 trait NSIConnector {
@@ -56,7 +55,7 @@ class NSIConnectorImpl extends NSIConnector {
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
-    httpProxy.post(nsiUrl, userInfo, Map(authHeaderKey → authDetails))(
+    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
       NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
       .map { response ⇒
         response.status match {
@@ -76,16 +75,9 @@ class NSIConnectorImpl extends NSIConnector {
   }
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
-    Try(response.json) match {
-      case Success(jsValue) ⇒
-        Json.fromJson[SubmissionFailure](jsValue) match {
-          case JsSuccess(submissionFailure, _) ⇒ submissionFailure
-          case e: JsError ⇒
-            SubmissionFailure(None, s"Could not create NSI account errors; response body: ${response.body}", e.prettyPrint())
-        }
-
-      case Failure(error) ⇒
-        SubmissionFailure(None, s"Could not read submission failure JSON response: ${response.body}", error.getMessage)
+    response.parseJson[SubmissionFailure] match {
+      case Right(submissionFailure) ⇒ submissionFailure
+      case Left(error) ⇒ SubmissionFailure(None, "", error)
     }
   }
 }

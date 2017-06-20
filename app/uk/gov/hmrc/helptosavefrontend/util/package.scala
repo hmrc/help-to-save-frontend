@@ -29,24 +29,4 @@ package object util {
   type NINO = String
 
   type Result[A] = EitherT[Future, String, A]
-
-  /**
-    * Perform a GET request to the given URL then validate the resulting JSON to type `A`. If validation is not
-    * possible, return an error. If the GET request does not come back with a HTTP status 200, return an error
-    */
-  def getResult[A](url: String)(implicit reads: Reads[A], hc: HeaderCarrier, ec: ExecutionContext): Result[A] =
-    EitherT[Future, String, A](
-      WSHttp.GET(url).map { response ⇒
-        val status = response.status
-        if (status == Http.Status.OK) {
-          response.json.validate[A].fold(
-            errors ⇒ Left(s"Could not parse response from $url: ${JsError(errors).prettyPrint()}"),
-            Right(_)
-          )
-        } else {
-          // response didn't come back OK - something went wrong
-          Left(s"Could not obtain result from $url - [HTTP status $status, body: '${response.body}']")
-        }
-      })
-
 }

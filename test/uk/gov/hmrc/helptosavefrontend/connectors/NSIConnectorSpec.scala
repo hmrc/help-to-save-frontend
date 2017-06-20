@@ -20,7 +20,7 @@ import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{authDetails, authHeaderKey, nsiUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiBasicAuth, nsiAuthHeaderKey, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -45,7 +45,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
     (mockHTTPProxy.post(
       _: String, _: I, _: Map[String, String]
     )(_: Writes[I], _: HeaderCarrier))
-      .expects(nsiUrl, body, Map(authHeaderKey → authDetails), *, hc.copy(authorization = None))
+      .expects(nsiUrl, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, hc.copy(authorization = None))
       .returning(Future.successful(result))
 
   "the createAccount Method" must {

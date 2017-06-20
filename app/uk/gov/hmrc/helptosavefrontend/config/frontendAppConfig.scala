@@ -50,9 +50,9 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
       s"&confidenceLevel=200")
       .toString
 
-  val authHeaderKey = getString("microservice.services.nsi.authorization.header-key")
+  val nsiAuthHeaderKey = getString("microservice.services.nsi.authorization.header-key")
 
-  val authDetails = {
+  val nsiBasicAuth = {
     val user = getString("microservice.services.nsi.authorization.user")
     val password = getString("microservice.services.nsi.authorization.password")
     val encoding = getString("microservice.services.nsi.authorization.encoding")
