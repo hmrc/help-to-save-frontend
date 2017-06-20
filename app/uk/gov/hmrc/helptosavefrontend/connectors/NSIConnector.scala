@@ -75,7 +75,6 @@ class NSIConnectorImpl extends NSIConnector {
       }
   }
 
-
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
     Try(response.json) match {
       case Success(jsValue) ⇒
