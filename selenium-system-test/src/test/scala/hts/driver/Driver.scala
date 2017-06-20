@@ -42,7 +42,7 @@ object Driver {
     selectedDriver.map { driver ⇒
       sys.addShutdownHook(driver.quit())
       driver.manage().window().maximize()
-      driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS)
+      driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
     }
     selectedDriver
   }

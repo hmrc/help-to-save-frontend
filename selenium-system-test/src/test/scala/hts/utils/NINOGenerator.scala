@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-package hts.suites
+package src.test.scala.hts.utils
 
-import cucumber.api.CucumberOptions
-import cucumber.api.junit.Cucumber
-import org.junit.runner.RunWith
+import uk.gov.hmrc.domain.Generator
 
-@RunWith(classOf[Cucumber])
-@CucumberOptions(
-  features = Array("selenium-system-test/src/test/resources/features"),
-  glue = Array("hts.steps"),
-  plugin = Array("pretty", "html:target/cucumber", "json:target/cucumber.json")
-)
-class RunnerSeleniumSystemTest {}
+trait NINOGenerator {
+
+  private val generator = new Generator()
+
+  def generateNINO: String = {
+    val nino = generator.nextNino.value
+    nino
+  }
+
+  def generateEligibleNINO: String = {
+    val nino = generateNINO
+    "AE" + nino.drop(2)
+  }
+
+  def generateIneligibleNINO: String = {
+    val nino = generateNINO
+    "NA" + nino.drop(2)
+  }
 
 
+}
