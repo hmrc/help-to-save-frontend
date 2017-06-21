@@ -82,14 +82,14 @@ class HelpToSaveAuthSpec extends TestSupport {
       }
     }
 
-    "handle InsufficientEnrolments exception and display access denied to user" in {
+    "handle InsufficientEnrolments exception and redirect user to IV Journey" in {
 
       mockAuthWith("InsufficientEnrolments")
 
       val result = actionWithEnrols(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
       val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
-      redirectTo should include("/help-to-save/register/access-denied")
+      redirectTo should include("/mdtp/uplift")
     }
 
     "handle InsufficientConfidenceLevel exception and redirect user to IV Journey" in {

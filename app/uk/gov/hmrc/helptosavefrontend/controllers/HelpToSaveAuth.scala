@@ -89,7 +89,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
     e match {
       case _: NoActiveSession ⇒
         toGGLogin(s"$HtsConfirmDetailsUrl&accountType=individual")
-      case _: InsufficientConfidenceLevel ⇒
+      case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
         toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
       case ex: InternalError ⇒
         Logger.error(s"could not authenticate user due to: ${ex.reason}")
