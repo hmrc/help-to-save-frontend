@@ -61,7 +61,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
     s"Basic: ${new String(encoded, encoding)}"
   }
 
-  val nsiUrl = s"${baseUrl("nsi")}/${getString("microservice.services.nsi.url")}"
+  val nsiUrl = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")
