@@ -88,7 +88,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def handleFailure(e: Throwable): Result =
     e match {
       case _: NoActiveSession ⇒
-        toGGLogin(HtsConfirmDetailsUrl)
+        toGGLogin(s"$HtsConfirmDetailsUrl&accountType=individual")
       case _: InsufficientConfidenceLevel ⇒
         toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
       case ex: InternalError ⇒
