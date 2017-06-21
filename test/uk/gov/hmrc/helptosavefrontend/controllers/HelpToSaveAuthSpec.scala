@@ -78,6 +78,7 @@ class HelpToSaveAuthSpec extends TestSupport {
         status(result) shouldBe Status.SEE_OTHER
         val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
+        redirectTo should include("accountType%3Dindividual")
       }
     }
 
