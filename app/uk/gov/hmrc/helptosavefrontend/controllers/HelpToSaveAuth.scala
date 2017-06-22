@@ -87,8 +87,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
 
   def handleFailure(e: Throwable): Result =
     e match {
-      case _: NoActiveSession ⇒
-        toGGLogin(s"$HtsConfirmDetailsUrl&accountType=individual")
+      case _: NoActiveSession ⇒ redirectToLogin
       case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
         toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
       case ex: InternalError ⇒
@@ -101,5 +100,11 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
         Logger.error(s"could not authenticate user due to: $ex")
         InternalServerError("")
     }
+
+  def redirectToLogin = Redirect(ggLoginUrl, Map(
+    "continue" -> Seq(HtsConfirmDetailsUrl),
+    "accountType" -> Seq("individual"),
+    "origin" -> Seq(origin)
+  ))
 }
 
