@@ -63,26 +63,29 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(forename = "Tyrion2")).isInvalid shouldBe true
         }
 
-        "contains special characters which aren't '-', '.' or '&'" in {
+        "contains special characters which aren't ''', '-', '.' or '&'" in {
           NSIUserInfo(validUserInfo.copy(forename = "Tyr&ion")).isValid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "Tyr-ion")).isValid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "Tyr.ion")).isValid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = "Tyr'ion")).isValid shouldBe true
+
 
           forAll(Gen.oneOf(specialCharacters)) { c: Char ⇒
-            whenever(c != '&' && c != '-' && c != '.') {
+            whenever(c != '&' && c != '-' && c != '.' && c != ''') {
               NSIUserInfo(validUserInfo.copy(forename = s"Tyr${c}ion")).isInvalid shouldBe true
             }
           }
         }
 
-        "starts with '-', '.' or '&'" in {
+        "starts with ''', '-', '.' or '&'" in {
           NSIUserInfo(validUserInfo.copy(forename = "-Tyrion")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "&Tyrion")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = ".Tyrion")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = "'Tyrion")).isInvalid shouldBe true
         }
 
         "contains consecutive special characters" in {
-          val combos = List('-', '.', '&').combinations(2).map(_.mkString("")).toList
+          val combos = List('-', '.', '&', ''').combinations(2).map(_.mkString("")).toList
           combos.foreach(c ⇒
             NSIUserInfo(validUserInfo.copy(forename = s"Tyr${c}ion")).isInvalid shouldBe true
           )
@@ -121,10 +124,11 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(surname = "Lannister3")).isInvalid shouldBe true
         }
 
-        "contains special characters which aren't '-', '.', or '&'" in {
+        "contains special characters which aren't ''', '-', '.', or '&'" in {
           NSIUserInfo(validUserInfo.copy(surname = "Lann&ister")).isValid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "Lann-ister")).isValid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "Lann.ister")).isValid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "Lann'ister")).isValid shouldBe true
 
           forAll(Gen.oneOf(specialCharacters)) { c: Char ⇒
             whenever(c != '&' && c != '-' && c != '.') {
@@ -133,18 +137,21 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           }
         }
 
-        "starts or ends with '-', '.' or '&'" in {
+        "starts or ends with ''', '-', '.' or '&'" in {
           NSIUserInfo(validUserInfo.copy(surname = "-Lannister")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "&Lannister")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = ".Lannister")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "'Lannister")).isInvalid shouldBe true
+
 
           NSIUserInfo(validUserInfo.copy(surname = "Lannister-")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "Lannister&")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "Lannister.")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "Lannister'")).isInvalid shouldBe true
         }
 
         "contains consecutive special characters" in {
-          val combos = List('-', '.', '&').combinations(2).map(_.mkString("")).toList
+          val combos = List('-', '.', '&', ''').combinations(2).map(_.mkString("")).toList
           combos.foreach(c ⇒
             NSIUserInfo(validUserInfo.copy(surname = s"Lann${c}ister")).isInvalid shouldBe true
           )
