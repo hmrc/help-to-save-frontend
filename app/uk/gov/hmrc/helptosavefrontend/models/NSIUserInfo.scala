@@ -87,7 +87,7 @@ object NSIUserInfo {
 
   private case class Email(local: String, domain: String)
 
-  private val allowedNameSpecialCharacters = List('-', '&', '.')
+  private val allowedNameSpecialCharacters = List('-', '&', '.', ''')
 
   private def forenameValidation(name: String): ValidatedNel[String, String] = {
 
