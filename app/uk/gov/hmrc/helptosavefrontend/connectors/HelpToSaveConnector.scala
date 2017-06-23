@@ -33,7 +33,9 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibilityStatus(nino: NINO, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
+  def getEligibilityStatus(nino: NINO,
+                           userDetailsURI: String,
+                           oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
 
 }
 
@@ -44,8 +46,9 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
 
   val createAccountURL: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
-  def eligibilityURL(nino: NINO, userDetailsURI: String): String =
-    s"$helpToSaveUrl/help-to-save/eligibility-check?nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}"
+  def eligibilityURL(nino: NINO, userDetailsURI: String, oauthAuthorisationCode: String): String =
+    s"$helpToSaveUrl/help-to-save/eligibility-check?" +
+      s"nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}&oauthAuthorisationCode=$oauthAuthorisationCode"
 
   /**
     * @param response The HTTPResponse which came back with a bad status
@@ -57,8 +60,10 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
 
   val http: WSHttpExtension = WSHttp
 
-  override def getEligibilityStatus(nino: NINO, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
-    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, userDetailsURI)))
+  override def getEligibilityStatus(nino: NINO,
+                                    userDetailsURI: String,
+                                    oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
+    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, userDetailsURI, oauthAuthorisationCode)))
       .subflatMap { response ⇒
         if (response.status == 200) {
           response.parseJson[EligibilityResult]

@@ -41,6 +41,7 @@ class HelpToSaveServiceSpec extends TestSupport with ScalaFutures {
 
       val userDetailsURI = "/dummy/user/details/uri"
       val nino = "WM123456C"
+      val oauthAuthorisationCode = "authoirsation"
 
       "return a successful response" in {
 
@@ -50,10 +51,10 @@ class HelpToSaveServiceSpec extends TestSupport with ScalaFutures {
 
         val eligStatus: Result[EligibilityResult] = EitherT.pure[Future, String, EligibilityResult](eligResult)
 
-        (htsConnector.getEligibilityStatus(_: String, _: String)(_: HeaderCarrier)).expects(nino, userDetailsURI, *)
+        (htsConnector.getEligibilityStatus(_: String, _: String, _: String)(_: HeaderCarrier)).expects(nino, userDetailsURI, oauthAuthorisationCode, *)
           .returning(eligStatus)
 
-        val result = htsService.checkEligibility(nino, userDetailsURI)
+        val result = htsService.checkEligibility(nino, userDetailsURI, oauthAuthorisationCode)
 
         result.value.futureValue should be(Right(eligResult))
       }

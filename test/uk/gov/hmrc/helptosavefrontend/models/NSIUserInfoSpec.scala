@@ -194,7 +194,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
     "validating addresses" should {
 
       "mark as invalid addresses" which {
-        val emptyAddress = Address(None, None, None, None, None, Some(postcode), None)
+        val emptyAddress = Address(List.empty[String], Some(postcode), None)
 
 
         "do not have at least two lines" in {
@@ -203,80 +203,21 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
           // test one line addresses are invalid
           NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line1 = Some("1 the Street")))).isInvalid shouldBe true
+            address = emptyAddress.copy(lines = List("1 the Street")))).isInvalid shouldBe true
 
           NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line2 = Some("1 the Street")))).isInvalid shouldBe true
+            address = emptyAddress.copy(lines = List("1 the Street", "")))).isInvalid shouldBe true
 
           NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line3 = Some("1 the Street")))).isInvalid shouldBe true
-
-          NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line4 = Some("1 the Street")))).isInvalid shouldBe true
-
-          NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line5 = Some("1 the Street")))).isInvalid shouldBe true
+            address = emptyAddress.copy(lines = List("", "1 the Street")))).isInvalid shouldBe true
 
           // test two line addresses are valid
-          def test(validUserInfo: UserInfo): Unit = {
-            val info = NSIUserInfo(validUserInfo.copy(
-              address = emptyAddress.copy(
-                line1 = Some("1 the Street"),
-                line2 = Some("The Place")))
-            ).getOrElse(sys.error("Expected valid NSIUserInformation"))
-
-            info.contactDetails.address shouldBe List("1 the Street", "The Place")
-          }
-
-          test(validUserInfo.copy(
+          val info = NSIUserInfo(validUserInfo.copy(
             address = emptyAddress.copy(
-              line1 = Some("1 the Street"),
-              line2 = Some("The Place"))))
+              List("1 the Street", "The Place")))
+          ).getOrElse(sys.error("Expected valid NSIUserInformation"))
 
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line1 = Some("1 the Street"),
-              line3 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line1 = Some("1 the Street"),
-              line4 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line1 = Some("1 the Street"),
-              line5 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line2 = Some("1 the Street"),
-              line3 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line2 = Some("1 the Street"),
-              line4 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line2 = Some("1 the Street"),
-              line5 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line3 = Some("1 the Street"),
-              line4 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line3 = Some("1 the Street"),
-              line5 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line4 = Some("1 the Street"),
-              line5 = Some("The Place"))))
+          info.contactDetails.address shouldBe List("1 the Street", "The Place")
         }
 
         "contain lines which are longer than 35 characters" in {
@@ -284,8 +225,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
             whenever(s.length > 35) {
               NSIUserInfo(validUserInfo.copy(
                 address = emptyAddress.copy(
-                  line1 = Some(s),
-                  line2 = Some(s)
+                  lines = List(s,s)
                 ))).isInvalid shouldBe true
             }
           }
@@ -354,15 +294,20 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
 
         "has a domain part greater than 252 characters" in {
+          val maxLength = 252
+
           forAll { s: String ⇒
-            whenever(s.length <= 252) {
+            whenever(s.length <= maxLength) {
               NSIUserInfo(validUserInfo.copy(email = "a@" + s)).isValid shouldBe true
             }
           }
 
           forAll { s: String ⇒
-            whenever(s.filter(_ != '@').length > 252) {
-              NSIUserInfo(validUserInfo.copy(email = "a@" + s.filter(_ != '@'))).isInvalid shouldBe true
+            // create a bigger string here so that the property check below
+            // is more likely to succeed
+            val t = List.fill(10)(s).mkString("") // scalastyle:ignore magic.number
+            whenever(t.filter(_ != '@').length > maxLength) {
+              NSIUserInfo(validUserInfo.copy(email = "a@" + t.filter(_ != '@'))).isInvalid shouldBe true
             }
           }
         }
