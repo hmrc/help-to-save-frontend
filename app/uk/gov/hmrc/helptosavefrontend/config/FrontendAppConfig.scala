@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.config
 import java.net.{URI, URLEncoder}
 import java.util.Base64
 
-import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -31,9 +30,7 @@ trait AppConfig {
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
 
-  private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
-
-  private val contactHost = configuration.getString(s"contact-frontend.host").getOrElse("")
+  private val contactHost = getString(s"contact-frontend.host")
   private val contactFormServiceIdentifier = "MyService"
 
   val HtsConfirmDetailsUrl = getConfString("help-to-save-confirm-details.url", "")
@@ -63,8 +60,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val nsiUrl = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
 
-  override lazy val analyticsToken = loadConfig(s"google-analytics.token")
-  override lazy val analyticsHost = loadConfig(s"google-analytics.host")
+  override lazy val analyticsToken = getString(s"google-analytics.token")
+  override lazy val analyticsHost = getString(s"google-analytics.host")
   override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 

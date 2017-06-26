@@ -26,8 +26,6 @@ import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import configs.syntax._
-import play.api.http.HeaderNames.LOCATION
-import play.api.http.Status.SEE_OTHER
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Application, Logger}

@@ -15,7 +15,7 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
 val compile = Seq(
   ws,
-  "uk.gov.hmrc" %% "frontend-bootstrap" % "7.22.0",
+  "uk.gov.hmrc" %% "frontend-bootstrap" % "7.26.0",
   "uk.gov.hmrc" %% "play-partials" % "5.3.0",
   "uk.gov.hmrc" %% "play-config" % "4.3.0",
   "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
@@ -99,7 +99,7 @@ lazy val microservice = Project(appName, file("."))
     testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter))
   )
 
-private def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
+def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
   tests map {
     test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq("-Dtest.name=" + test.name))))
   }
