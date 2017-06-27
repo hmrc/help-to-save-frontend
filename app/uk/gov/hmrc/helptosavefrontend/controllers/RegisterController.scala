@@ -26,10 +26,8 @@ import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import configs.syntax._
-import play.api.http.HeaderNames.LOCATION
-import play.api.http.Status.SEE_OTHER
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, Request}
 import play.api.{Application, Logger}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -50,22 +48,11 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
 
-
-  def getAuthorisation: Action[AnyContent] = authorisedForHtsWithConfidence {
+  def getAuthorisation: Action[AnyContent] =  authorisedForHtsWithEnrolments {
     implicit request ⇒
-      Logger.info("Received request to get user details: redirecting to obtain authorisation code")
-
-      // we need to get an authorisation token from OAuth - redirect to OAuth here. When the authorisation
-      // is done they'll redirect to the callback url we give them
-        Future.successful(Redirect(
-          oauthConfig.url,
-          Map(
-            "client_id" -> Seq(oauthConfig.clientID),
-            "scope" -> oauthConfig.scopes,
-            "response_type" -> Seq("code"),
-            "redirect_uri" -> Seq(oauthConfig.callbackURL)
-          )))
-    }
+      implicit userUrlWithNino ⇒
+        Future.successful(redirectForAuthorisationCode(request, userUrlWithNino))
+  }
 
   def confirmDetails(code: Option[String],
                      error: Option[String],
@@ -189,11 +176,45 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")}, " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
 
+
+  private lazy val redirectForAuthorisationCode =
+    if(oauthConfig.enabled) {
+      { (_: Request[AnyContent], _: Option[UserDetailsUrlWithNino]) ⇒
+        Logger.info("Received request to get user details: redirecting to oauth obtain authorisation code")
+
+        // we need to get an authorisation token from OAuth - redirect to OAuth here. When the authorisation
+        // is done they'll redirect to the callback url we give them
+        Redirect(
+          oauthConfig.url,
+          Map(
+            "client_id" -> Seq(oauthConfig.clientID),
+            "scope" -> oauthConfig.scopes,
+            "response_type" -> Seq("code"),
+            "redirect_uri" -> Seq(oauthConfig.callbackURL)
+          ))
+      }
+    } else {
+      { (request: Request[AnyContent], userDetailsUrlWithNino: Option[UserDetailsUrlWithNino]) ⇒
+        // if the redirect to oauth is not enabled redirect straight to our 'confirm-details' endpoint
+        // using the NINO as the authorisation code
+        implicit val r = request
+
+        userDetailsUrlWithNino.fold {
+          Logger.error("NINO or user details URI not available")
+          Redirect(routes.RegisterController.notEligible().absoluteURL())
+        }{ u ⇒
+          val nino = u.nino
+          Logger.info(s"Received request to get user details: redirecting to get user details using NINO $nino as authorisation code")
+          Redirect(routes.RegisterController.confirmDetails(Some(nino), None, None, None).absoluteURL())
+        }
+      }
+    }
+
 }
 
 object RegisterController {
 
   // details required to get an authorisation token from OAuth
-  private[controllers] case class OAuthConfiguration(url: String, clientID: String, callbackURL: String, scopes: List[String])
+  private[controllers] case class OAuthConfiguration(enabled: Boolean, url: String, clientID: String, callbackURL: String, scopes: List[String])
 
 }
