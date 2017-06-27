@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
-import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Reads, Writes}
@@ -52,7 +51,7 @@ class RegisterControllerSpec extends TestSupport {
 
   private val mockAuthConnector = mock[PlayAuthConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
-  val testOAuthConfiguration = OAuthConfiguration("url", "client-ID", "callback", List("scope1", "scope2"))
+  val testOAuthConfiguration = OAuthConfiguration(true, "url", "client-ID", "callback", List("scope1", "scope2"))
 
   val oauthAuthorisationCode = "authorisation-code"
 
@@ -107,8 +106,26 @@ class RegisterControllerSpec extends TestSupport {
         register.confirmDetails(Some(authorisationCode), None, None, None)(FakeRequest())
 
 
-      "redirect to OAuth to get an access token" in {
-        mockPlayAuthWithWithConfidence()
+      "redirect to confirm-details with the NINO as the authorisation code if redirects to OAUTH are disabled" in {
+        val register = new RegisterController(
+          fakeApplication.injector.instanceOf[MessagesApi],
+          mockHtsService,
+          mockSessionCacheConnector)(
+          fakeApplication, ec) {
+          override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
+          override lazy val authConnector = mockAuthConnector
+        }
+
+        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+
+        implicit val request = FakeRequest()
+        val result = register.getAuthorisation(request)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.confirmDetails(Some(nino), None,None,None).absoluteURL())
+      }
+
+      "redirect to OAuth to get an access token if enabled" in {
+        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
 
         val result = doConfirmDetailsRequest()
         status(result) shouldBe Status.SEE_OTHER
