@@ -124,6 +124,25 @@ class RegisterControllerSpec extends TestSupport {
         redirectLocation(result) shouldBe Some(routes.RegisterController.confirmDetails(Some(nino), None,None,None).absoluteURL())
       }
 
+      "return an if redirects to OAUTH are disabled and a NINO is not available" in {
+        val register = new RegisterController(
+          fakeApplication.injector.instanceOf[MessagesApi],
+          mockHtsService,
+          mockSessionCacheConnector)(
+          fakeApplication, ec) {
+          override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
+          override lazy val authConnector = mockAuthConnector
+        }
+
+        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(
+          uk.gov.hmrc.auth.core.~(Some(userDetailsURI), Enrolments(Set.empty[Enrolment])))
+
+        implicit val request = FakeRequest()
+        val result = register.getAuthorisation(request)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.notEligible().absoluteURL())
+      }
+
       "redirect to OAuth to get an access token if enabled" in {
         mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
 
