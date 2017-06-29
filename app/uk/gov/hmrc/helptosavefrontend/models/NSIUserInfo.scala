@@ -77,10 +77,6 @@ object NSIUserInfo {
     )
   }
 
-  private case class AddressLines(line1: String, line2: String, line3: Option[String], line4: Option[String], line5: Option[String])
-
-
-
   implicit val dateFormat: Format[LocalDate] = new Format[LocalDate] {
     val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
 
@@ -101,6 +97,8 @@ object NSIUserInfo {
   implicit val nsiUserInfoFormat: Format[NSIUserInfo] = Json.format[NSIUserInfo]
 
   private case class Email(local: String, domain: String)
+
+  private case class AddressLines(line1: String, line2: String, line3: Option[String], line4: Option[String], line5: Option[String])
 
   private val allowedNameSpecialCharacters = List('-', '&', '.', ''')
 
