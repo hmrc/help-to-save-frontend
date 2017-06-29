@@ -16,22 +16,21 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.util.Base64
-
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
+import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiBasicAuth, nsiAuthHeaderKey, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
-import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
-class NSIConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFactory {
+class NSIConnectorSpec extends TestSupport with MockFactory {
 
   lazy val mockHTTPProxy = mock[WSHttpProxy]
 
@@ -41,36 +40,13 @@ class NSIConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFa
 
   // put in fake authorization details - these should be removed by the call to create an account
   implicit val hc = HeaderCarrier(authorization = Some(Authorization("auth")))
-  implicit val ex = fakeApplication.injector.instanceOf[ExecutionContext]
-
-  val config = fakeApplication.configuration.underlying
-
-  val baseUrl: String = {
-    val port = config.getString("microservice.services.nsi.port")
-    val host = config.getString("microservice.services.nsi.host")
-    s"http://$host:$port"
-  }
-
-  val authorisationHeaderKeys = config.getString("microservice.services.nsi.authorization.header-key")
-  val authorizationEncoding = config.getString("microservice.services.nsi.authorization.encoding")
-
-  val authorisationDetails = {
-    val user = config.getString("microservice.services.nsi.authorization.user")
-    val password = config.getString("microservice.services.nsi.authorization.password")
-    val encoded = Base64.getEncoder.encode(s"$user:$password".getBytes)
-    s"Basic: ${new String(encoded, authorizationEncoding)}"
-  }
-
-  val nsiUrlEnd: String = config.getString("microservice.services.nsi.url")
-  val url = s"$baseUrl/$nsiUrlEnd"
 
   def mockCreateAccount[I](body: I)(result: HttpResponse): Unit =
     (mockHTTPProxy.post(
       _: String, _: I, _: Map[String, String]
     )(_: Writes[I], _: HeaderCarrier))
-      .expects(url, body, Map(authorisationHeaderKeys → authorisationDetails), *, hc.copy(authorization = None))
+      .expects(nsiUrl, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, hc.copy(authorization = None))
       .returning(Future.successful(result))
-
 
   "the createAccount Method" must {
     "Return a SubmissionSuccess when the status is Created" in {
@@ -87,6 +63,12 @@ class NSIConnectorImplSpec extends UnitSpec with WithFakeApplication with MockFa
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
 
+    "Return a SubmissionFailure in case there is an invalid json" in {
+      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.BAD_REQUEST,
+        Some(Json.parse("""{"invalidJson":"foo"}"""))))
+      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+      Await.result(result, 3.seconds).isInstanceOf[SubmissionFailure] shouldBe true
+    }
 
     "Return a SubmissionFailure when the status is anything else" in {
       mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.BAD_GATEWAY))

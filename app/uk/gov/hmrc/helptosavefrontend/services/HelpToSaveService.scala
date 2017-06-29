@@ -33,17 +33,18 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends ServicesConfig {
 
-  def checkEligibility(nino: String, userDetailsURI: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
-    helpToSaveConnector.getEligibilityStatus(nino, userDetailsURI)
-
+  def checkEligibility(nino: String,
+                       userDetailsURI: String,
+                       oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
+    helpToSaveConnector.getEligibilityStatus(nino, userDetailsURI, oauthAuthorisationCode)
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]] {
       case success: SubmissionSuccess =>
-        Logger.info(s"Successfully created an account for ${userInfo.NINO}")
+        Logger.info(s"Successfully created an account for ${userInfo.nino}")
         Right(success)
       case failure: SubmissionFailure =>
-        Logger.error(s"Could not create an account for ${userInfo.NINO} due to $failure")
+        Logger.error(s"Could not create an account for ${userInfo.nino} due to $failure")
         Left(failure)
     })
 

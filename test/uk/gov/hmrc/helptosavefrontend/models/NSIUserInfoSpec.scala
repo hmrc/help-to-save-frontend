@@ -20,19 +20,19 @@ import java.time.LocalDate
 
 import cats.data.Validated.Valid
 import org.scalacheck.Gen
-import org.scalatest.{Matchers, WordSpec}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.domain.{Generator, Nino}
 
 class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   val specialCharacters: List[Char] = (Char.MinValue to Char.MaxValue).toList.filter(!_.isLetterOrDigit)
 
-  val address = validUserInfo.address
-  val postcode = validNSIUserInfo.postcode
-  val forename = validNSIUserInfo.forename
-  val surname = validNSIUserInfo.surname
-  val email = validNSIUserInfo.emailAddress
+  val address: Address = validUserInfo.address
+  val postcode: String = validNSIUserInfo.contactDetails.postCode
+  val forename: String = validNSIUserInfo.forename
+  val surname: String = validNSIUserInfo.surname
+  val email: String = validNSIUserInfo.contactDetails.email
 
   "The NSIUSerInfo" when {
 
@@ -50,6 +50,9 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
         "are empty" in {
           NSIUserInfo(validUserInfo.copy(forename = "")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = ".")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = "-")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = "&")).isInvalid shouldBe true
         }
 
         "start with whitespace" in {
@@ -60,37 +63,42 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(forename = "Tyrion2")).isInvalid shouldBe true
         }
 
-        "contains special characters which aren't '-' or '&'" in {
+        "contains special characters which aren't ''', '-', '.' or '&'" in {
           NSIUserInfo(validUserInfo.copy(forename = "Tyr&ion")).isValid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "Tyr-ion")).isValid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = "Tyr.ion")).isValid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = "Tyr'ion")).isValid shouldBe true
 
-          forAll(Gen.oneOf(specialCharacters)){ c: Char ⇒
-            whenever(c != '&' && c != '-'){
+
+          forAll(Gen.oneOf(specialCharacters)) { c: Char ⇒
+            whenever(c != '&' && c != '-' && c != '.' && c != ''') {
               NSIUserInfo(validUserInfo.copy(forename = s"Tyr${c}ion")).isInvalid shouldBe true
             }
           }
         }
 
-        "starts or ends with '-' or '&'" in {
+        "starts with ''', '-', '.' or '&'" in {
           NSIUserInfo(validUserInfo.copy(forename = "-Tyrion")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "&Tyrion")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "Tyrion-")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "Tyrion&")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = ".Tyrion")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(forename = "'Tyrion")).isInvalid shouldBe true
         }
 
         "contains consecutive special characters" in {
-          NSIUserInfo(validUserInfo.copy(forename = "Tyr--ion")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "Tyr-&ion")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "Tyr-&ion")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "Tyr&&ion")).isInvalid shouldBe true
+          val combos = List('-', '.', '&', ''').combinations(2).map(_.mkString("")).toList
+          combos.foreach(c ⇒
+            NSIUserInfo(validUserInfo.copy(forename = s"Tyr${c}ion")).isInvalid shouldBe true
+          )
         }
 
         "are longer than 26 characters" in {
-          forAll(Gen.alphaStr.map(_.take(26)).filter(_.nonEmpty)){ s ⇒
+          val maxLength = 26
+
+          forAll(Gen.alphaStr.map(_.take(maxLength)).filter(_.nonEmpty)) { s ⇒
             NSIUserInfo(validUserInfo.copy(forename = s)).isValid shouldBe true
           }
 
-          forAll(Gen.alphaStr.filter(s ⇒ s.length > 26)){ s ⇒
+          forAll(Gen.alphaStr.filter(s ⇒ s.length > maxLength)) { s ⇒
             NSIUserInfo(validUserInfo.copy(forename = s)).isInvalid shouldBe true
           }
         }
@@ -101,10 +109,11 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
       "mark as invalid surnames" which {
 
-        "do not have at least two characters" in {
-          forAll{ c: Char ⇒
-            NSIUserInfo(validUserInfo.copy(surname = c.toString)).isInvalid shouldBe true
-          }
+        "do not have at least one character" in {
+          NSIUserInfo(validUserInfo.copy(surname = "")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = ".")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "-")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "&")).isInvalid shouldBe true
         }
 
         "start with whitespace" in {
@@ -115,42 +124,46 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(surname = "Lannister3")).isInvalid shouldBe true
         }
 
-        "contains special characters which aren't '-' or '&'" in {
+        "contains special characters which aren't ''', '-', '.', or '&'" in {
           NSIUserInfo(validUserInfo.copy(surname = "Lann&ister")).isValid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "Lann-ister")).isValid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "Lann.ister")).isValid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "Lann'ister")).isValid shouldBe true
 
-          forAll(Gen.oneOf(specialCharacters)){ c: Char ⇒
-            whenever(c != '&' && c != '-'){
+          forAll(Gen.oneOf(specialCharacters)) { c: Char ⇒
+            whenever(c != '&' && c != '-' && c != '.') {
               NSIUserInfo(validUserInfo.copy(surname = s"Lann${c}ister")).isInvalid shouldBe true
             }
           }
         }
 
-        "starts or ends with '-' or '&'" in {
+        "starts or ends with ''', '-', '.' or '&'" in {
           NSIUserInfo(validUserInfo.copy(surname = "-Lannister")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "&Lannister")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = ".Lannister")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "'Lannister")).isInvalid shouldBe true
+
+
           NSIUserInfo(validUserInfo.copy(surname = "Lannister-")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "Lannister&")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "Lannister.")).isInvalid shouldBe true
+          NSIUserInfo(validUserInfo.copy(surname = "Lannister'")).isInvalid shouldBe true
         }
 
         "contains consecutive special characters" in {
-          NSIUserInfo(validUserInfo.copy(surname = "Lann--ister")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lann-&ister")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lann&-ister")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lann&&ister")).isInvalid shouldBe true
-        }
-
-        "not not contain at least two consecutive alphabetic characters" in {
-          NSIUserInfo(validUserInfo.copy(surname = "L&L")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "L-L")).isInvalid shouldBe true
+          val combos = List('-', '.', '&', ''').combinations(2).map(_.mkString("")).toList
+          combos.foreach(c ⇒
+            NSIUserInfo(validUserInfo.copy(surname = s"Lann${c}ister")).isInvalid shouldBe true
+          )
         }
 
         "are longer than 300 characters" in {
-          forAll(Gen.alphaStr.map(_.take(300)).filter(_.length > 1)){ s ⇒
+          val maxLength = 300
+          forAll(Gen.alphaStr.map(_.take(maxLength)).filter(_.length > 1)) { s ⇒
             NSIUserInfo(validUserInfo.copy(surname = s)).isValid shouldBe true
           }
 
-          forAll(Gen.alphaStr.map(s ⇒ s + s).filter(s ⇒ s.length > 300)){ s ⇒
+          forAll(Gen.alphaStr.map(s ⇒ s + s).filter(s ⇒ s.length > maxLength)) { s ⇒
             NSIUserInfo(validUserInfo.copy(surname = s)).isInvalid shouldBe true
           }
         }
@@ -162,14 +175,15 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
       "mark as invalid date of births" which {
 
         "are before 1st January 1800" in {
-          forAll(Gen.choose(1L, 1000L)){ d ⇒
+          forAll(Gen.choose(1L, 1000L)) { d ⇒ // scalastyle:ignore magic.number
             // 1st Jan 1880 is 62,091 days before Epoch
-            NSIUserInfo(validUserInfo.copy(dateOfBirth = LocalDate.ofEpochDay(-62091 - d))).isInvalid shouldBe true
+            NSIUserInfo(validUserInfo.copy(dateOfBirth = LocalDate.ofEpochDay(-62091 - d))).isInvalid shouldBe true // scalastyle:ignore magic.number
+
           }
         }
 
         "are in the future" in {
-          forAll(Gen.choose(1L, 1000L)){ d ⇒
+          forAll(Gen.choose(1L, 1000L)) { d ⇒ // scalastyle:ignore magic.number
             NSIUserInfo(validUserInfo.copy(dateOfBirth = LocalDate.now().plusDays(d))).isInvalid shouldBe true
           }
         }
@@ -180,92 +194,41 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
     "validating addresses" should {
 
       "mark as invalid addresses" which {
+        val emptyAddress = Address(List.empty[String], Some(postcode), None)
+
 
         "do not have at least two lines" in {
-          val emptyAddress = Address(None, None, None, None, None, Some(postcode), None)
 
           NSIUserInfo(validUserInfo.copy(address = emptyAddress)).isInvalid shouldBe true
 
           // test one line addresses are invalid
           NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line1 = Some("1 the Street")))).isInvalid shouldBe true
+            address = emptyAddress.copy(lines = List("1 the Street")))).isInvalid shouldBe true
 
           NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line2 = Some("1 the Street")))).isInvalid shouldBe true
+            address = emptyAddress.copy(lines = List("1 the Street", "")))).isInvalid shouldBe true
 
           NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line3 = Some("1 the Street")))).isInvalid shouldBe true
-
-          NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line4 = Some("1 the Street")))).isInvalid shouldBe true
-
-          NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(line5 = Some("1 the Street")))).isInvalid shouldBe true
+            address = emptyAddress.copy(lines = List("", "1 the Street")))).isInvalid shouldBe true
 
           // test two line addresses are valid
-          def test(validUserInfo: UserInfo): Unit = {
-            val info = NSIUserInfo(validUserInfo.copy(
-              address = emptyAddress.copy(
-                line1 = Some("1 the Street"),
-                line2 = Some("The Place")))
-            ).getOrElse(sys.error("Expected valid NSIUserInformation"))
-            info.address1 shouldBe "1 the Street"
-            info.address2 shouldBe "The Place"
-            info.address3 shouldBe None
-            info.address4 shouldBe None
-            info.address5 shouldBe None
+          val info = NSIUserInfo(validUserInfo.copy(
+            address = emptyAddress.copy(
+              List("1 the Street", "The Place")))
+          ).getOrElse(sys.error("Expected valid NSIUserInformation"))
+
+          info.contactDetails.address shouldBe List("1 the Street", "The Place")
+        }
+
+        "contain lines which are longer than 35 characters" in {
+          forAll { s: String ⇒
+            whenever(s.length > 35) {
+              NSIUserInfo(validUserInfo.copy(
+                address = emptyAddress.copy(
+                  lines = List(s,s)
+                ))).isInvalid shouldBe true
+            }
           }
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line1 = Some("1 the Street"),
-              line2 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line1 = Some("1 the Street"),
-              line3 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line1 = Some("1 the Street"),
-              line4 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line1 = Some("1 the Street"),
-              line5 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line2 = Some("1 the Street"),
-              line3 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line2 = Some("1 the Street"),
-              line4 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line2 = Some("1 the Street"),
-              line5 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line3 = Some("1 the Street"),
-              line4 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line3 = Some("1 the Street"),
-              line5 = Some("The Place"))))
-
-          test(validUserInfo.copy(
-            address = emptyAddress.copy(
-              line4 = Some("1 the Street"),
-              line5 = Some("The Place"))))
-
         }
       }
     }
@@ -274,28 +237,11 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
       "mark as invalid postcodes" which {
 
-        "do not match the correct format" in {
-          // examples taken from the NS&I Interface Control Document (ICD)
-          val postcodes = List(
-            "GIR0AA",
-            "A00AA",
-            "A000AA",
-            "AA00AA",
-            "AA000AA",
-            "AA0A0AA",
-            "A0A0AA",
-            "A1ZZ",
-            "AA1ZZ",
-            "AAA1ZZ",
-            "AAAA1ZZ",
-            "BFPO0",
-            "BFPO00",
-            "BFPO000",
-            "BFPO0000"
-          )
-
-          postcodes.foreach{ p ⇒
-            NSIUserInfo(validUserInfo.copy(address = address.copy(postcode = Some(p)))).isValid shouldBe true
+        "are longer than 10 characters when trimmed" in {
+          forAll { p: String ⇒
+            whenever(p.replaceAllLiterally(" ", "").length > 10) {
+              NSIUserInfo(validUserInfo.copy(address = address.copy(postcode = Some(p)))).isInvalid shouldBe true
+            }
           }
         }
       }
@@ -310,7 +256,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(address = address.copy(country = None))).isValid shouldBe true
 
           // two letters should be allowed
-          forAll{ (c1: Char, c2: Char) ⇒
+          forAll { (c1: Char, c2: Char) ⇒
             val code = c1.toString + c2.toString
             NSIUserInfo(validUserInfo.copy(address = address.copy(country = Some(code)))).isValid shouldBe true
           }
@@ -328,22 +274,43 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
       "mark as invalid emails" which {
 
-        "which contain whitespace" in {
-          NSIUserInfo(validUserInfo.copy(email = email + " ")).isInvalid shouldBe true
-        }
-
         "which do not contain an '@' sign" in {
           NSIUserInfo(validUserInfo.copy(email = email.filterNot(_ == '@'))).isInvalid shouldBe true
         }
 
-        "which have a '.' sign immediately before the '@' sign" in {
-          NSIUserInfo(validUserInfo.copy(email = "tyrion_lannister.@gmail.com")).isInvalid shouldBe true
+        "has a local part greater than 64 characters" in {
+          forAll { s: String ⇒
+            whenever(s.length <= 64) {
+              NSIUserInfo(validUserInfo.copy(email = s + "@test.com")).isValid shouldBe true
+            }
+          }
+
+          forAll { s: String ⇒
+            whenever(s.length > 64) {
+              NSIUserInfo(validUserInfo.copy(email = s + "@test.com")).isInvalid shouldBe true
+            }
+          }
         }
 
-        "which do not finish with at least 2 characters after the last '.'" in {
-          NSIUserInfo(validUserInfo.copy(email = "tyrion_lannister@gmail.c")).isInvalid shouldBe true
-        }
 
+        "has a domain part greater than 252 characters" in {
+          val maxLength = 252
+
+          forAll { s: String ⇒
+            whenever(s.length <= maxLength) {
+              NSIUserInfo(validUserInfo.copy(email = "a@" + s)).isValid shouldBe true
+            }
+          }
+
+          forAll { s: String ⇒
+            // create a bigger string here so that the property check below
+            // is more likely to succeed
+            val t = List.fill(10)(s).mkString("") // scalastyle:ignore magic.number
+            whenever(t.filter(_ != '@').length > maxLength) {
+              NSIUserInfo(validUserInfo.copy(email = "a@" + t.filter(_ != '@'))).isInvalid shouldBe true
+            }
+          }
+        }
       }
     }
 
@@ -354,13 +321,13 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
         "are invalid" in {
           val generator = new Generator()
-          forAll(Gen.function0(generator.nextNino.nino)){ nino ⇒
-            NSIUserInfo(validUserInfo.copy(NINO = nino())).isValid shouldBe true
+          forAll(Gen.function0(generator.nextNino.nino)) { nino ⇒
+            NSIUserInfo(validUserInfo.copy(nino = nino())).isValid shouldBe true
           }
 
-          forAll{ s: String ⇒
-            whenever(!Nino.isValid(s)){
-              NSIUserInfo(validUserInfo.copy(NINO = s)).isInvalid shouldBe true
+          forAll { s: String ⇒
+            whenever(!Nino.isValid(s)) {
+              NSIUserInfo(validUserInfo.copy(nino = s)).isInvalid shouldBe true
             }
           }
         }
@@ -368,5 +335,4 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
     }
   }
-
 }

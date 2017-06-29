@@ -19,17 +19,17 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
-import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Reads, Writes}
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentType, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
@@ -51,18 +51,22 @@ class RegisterControllerSpec extends TestSupport {
 
   private val mockAuthConnector = mock[PlayAuthConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
+  val testOAuthConfiguration = OAuthConfiguration(true, "url", "client-ID", "callback", List("scope1", "scope2"))
+
+  val oauthAuthorisationCode = "authorisation-code"
 
   val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
     mockSessionCacheConnector)(
     fakeApplication, ec) {
+    override val oauthConfig = testOAuthConfiguration
     override lazy val authConnector = mockAuthConnector
   }
 
-  def mockEligibilityResult(nino: String, userDetailsURI: String)(result: Either[String, Option[UserInfo]]): Unit =
-    (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
-      .expects(nino, userDetailsURI, *)
+  def mockEligibilityResult(nino: String, userDetailsURI: String, authorisationCode: String)(result: Either[String, Option[UserInfo]]): Unit =
+    (mockHtsService.checkEligibility(_: String, _: String, _: String)(_: HeaderCarrier))
+      .expects(nino, userDetailsURI, authorisationCode, *)
       .returning(EitherT.fromEither[Future](result.map(EligibilityResult(_))))
 
   def mockSessionCacheConnectorPut(result: Either[String, CacheMap]): Unit =
@@ -96,18 +100,90 @@ class RegisterControllerSpec extends TestSupport {
   "The RegisterController" when {
 
     "checking eligibility" must {
+      def doConfirmDetailsRequest(): Future[PlayResult] = register.getAuthorisation(FakeRequest())
 
-      def doConfirmDetailsRequest(): Future[PlayResult] = register.confirmDetails(FakeRequest())
+      def doConfirmDetailsCallbackRequest(authorisationCode: String): Future[PlayResult] =
+        register.confirmDetails(Some(authorisationCode), None, None, None)(FakeRequest())
+
+
+      "redirect to confirm-details with the NINO as the authorisation code if redirects to OAUTH are disabled" in {
+        val register = new RegisterController(
+          fakeApplication.injector.instanceOf[MessagesApi],
+          mockHtsService,
+          mockSessionCacheConnector)(
+          fakeApplication, ec) {
+          override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
+          override lazy val authConnector = mockAuthConnector
+        }
+
+        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+
+        implicit val request = FakeRequest()
+        val result = register.getAuthorisation(request)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.confirmDetails(Some(nino), None,None,None).absoluteURL())
+      }
+
+      "return an if redirects to OAUTH are disabled and a NINO is not available" in {
+        val register = new RegisterController(
+          fakeApplication.injector.instanceOf[MessagesApi],
+          mockHtsService,
+          mockSessionCacheConnector)(
+          fakeApplication, ec) {
+          override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
+          override lazy val authConnector = mockAuthConnector
+        }
+
+        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(
+          uk.gov.hmrc.auth.core.~(Some(userDetailsURI), Enrolments(Set.empty[Enrolment])))
+
+        implicit val request = FakeRequest()
+        val result = register.getAuthorisation(request)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.notEligible().absoluteURL())
+      }
+
+      "redirect to OAuth to get an access token if enabled" in {
+        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+
+        val result = doConfirmDetailsRequest()
+        status(result) shouldBe Status.SEE_OTHER
+
+        val (url, params) = redirectLocation(result).get.split('?').toList match {
+          case u :: p :: Nil ⇒
+            val paramList = p.split('&').toList
+            val keyValueSet = paramList.map(_.split('=').toList match {
+              case key:: value :: Nil ⇒ key → value
+              case  _                 ⇒ fail(s"Could not parse query parameters: $p")
+            }).toSet
+
+            u → keyValueSet
+
+          case _ ⇒ fail("Could not parse URL with query parameters")
+        }
+
+        url shouldBe testOAuthConfiguration.url
+        params shouldBe (testOAuthConfiguration.scopes.map("scope" → _).toSet ++ Set(
+          "client_id" -> testOAuthConfiguration.clientID,
+          "response_type" -> "code",
+          "redirect_uri" -> testOAuthConfiguration.callbackURL
+        ))
+      }
+
+      "return a 500 if there is an error while getting the authorisation token" in {
+        val result = register.confirmDetails(None, Some("uh oh"), None, None)(FakeRequest())
+        status(result) shouldBe 500
+      }
 
       "return user details if the user is eligible for help-to-save" in {
-        val user = randomUserInfo()
+        val user = validUserInfo
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
-          mockEligibilityResult(nino, userDetailsURI)(Right(Some(user)))
+          mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Right(Some(user)))
           mockSessionCacheConnectorPut(Right(CacheMap("1", Map.empty[String, JsValue])))
         }
 
-        val responseFuture: Future[PlayResult] = doConfirmDetailsRequest()
+        val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
         val result = Await.result(responseFuture, 5.seconds)
 
         status(result) shouldBe Status.OK
@@ -119,16 +195,16 @@ class RegisterControllerSpec extends TestSupport {
 
         html should include(user.forename)
         html should include(user.email)
-        html should include(user.NINO)
+        html should include(user.nino)
       }
 
       "display a 'Not Eligible' page if the user is not eligible" in {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
-          mockEligibilityResult(nino, userDetailsURI)(Right(None))
+          mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Right(None))
         }
 
-        val result = doConfirmDetailsRequest()
+        val result = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
 
         status(result) shouldBe Status.SEE_OTHER
 
@@ -136,7 +212,7 @@ class RegisterControllerSpec extends TestSupport {
       }
 
 
-      "return an error" when {
+      "return an error" must {
 
         def isError(result: Future[PlayResult]): Boolean =
           status(result) == 500
@@ -145,7 +221,7 @@ class RegisterControllerSpec extends TestSupport {
         // on the controller
         def test(mockActions: ⇒ Unit): Unit = {
           mockActions
-          val result = doConfirmDetailsRequest()
+          val result = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
           isError(result) shouldBe true
         }
 
@@ -165,15 +241,22 @@ class RegisterControllerSpec extends TestSupport {
           test(
             inSequence {
               mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
-              mockEligibilityResult(nino, userDetailsURI)(Left("Oh no"))
+              mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Left("Oh no"))
             })
         }
 
-        "there is an error writing to the session cache" in {
-          val user = randomUserInfo()
+        "if the user details fo not pass NS&I validation checks" in {
+          val user = validUserInfo.copy(forename = " space-at-beginning")
           test(inSequence {
             mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
-            mockEligibilityResult(nino, userDetailsURI)(Right(Some(user)))
+            mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Right(Some(user)))
+          })
+        }
+
+        "there is an error writing to the session cache" in {
+          test(inSequence {
+            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+            mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Right(Some(validUserInfo)))
             mockSessionCacheConnectorPut(Left("Bang"))
           })
         }
@@ -199,7 +282,7 @@ class RegisterControllerSpec extends TestSupport {
         "the help to save service" in {
         inSequence {
           mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
           mockCreateAccount(validNSIUserInfo)()
         }
         val result = Await.result(doCreateAccountRequest(), 5.seconds)
@@ -210,7 +293,7 @@ class RegisterControllerSpec extends TestSupport {
       "indicate to the user that the creation was successful if the creation was successful" in {
         inSequence {
           mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
           mockCreateAccount(validNSIUserInfo)()
         }
 
@@ -232,22 +315,10 @@ class RegisterControllerSpec extends TestSupport {
           html should include("Account creation failed")
         }
 
-        "the user details do not pass local NS&I validity checks" in {
-          inSequence {
-            mockPlayAuthWithWithConfidence()
-            mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo.copy(email = "")))))
-          }
-
-          val result = doCreateAccountRequest()
-          val html = contentAsString(result)
-          html should include("Account creation failed")
-        }
-
-
         "the help to save service returns with an error" in {
           inSequence {
             mockPlayAuthWithWithConfidence()
-            mockSessionCacheConnectorGet(Some(HTSSession(Some(validUserInfo))))
+            mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
             mockCreateAccount(validNSIUserInfo)(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }
 

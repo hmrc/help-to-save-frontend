@@ -17,10 +17,11 @@
 package hts.steps
 
 import cucumber.api.java.en.Given
-import hts.pages.{AuthorityWizardPage, CreateAccountPage, Page, ConfirmDetailsPage}
+import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
 import hts.utils.Configuration
+import src.test.scala.hts.utils.NINOGenerator
 
-class SecuritySteps extends Steps {
+class SecuritySteps extends Steps with NINOGenerator {
 
   def oneOfRegex(options: Set[String]): String = s"(${options.mkString("|")})"
 
@@ -31,7 +32,6 @@ class SecuritySteps extends Steps {
   Given(s"""^an applicant has a confidence level of $confidenceLevelRegex$$""") { (level: Int) =>
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
-    println(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
@@ -51,7 +51,7 @@ class SecuritySteps extends Steps {
   Given("""^an applicant has logged in$""") { () =>
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setCredentialStrength("strong")
-    AuthorityWizardPage.setNino("AE553215D")
+    AuthorityWizardPage.setNino(generateNINO)
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
   }
 
@@ -72,7 +72,7 @@ class SecuritySteps extends Steps {
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
-    AuthorityWizardPage.setNino("AE553215D")
+    AuthorityWizardPage.setNino(generateNINO)
     AuthorityWizardPage.submit()
   }
 

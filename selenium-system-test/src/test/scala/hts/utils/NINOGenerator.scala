@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend
+package src.test.scala.hts.utils
 
-import cats.data.EitherT
-import play.api.libs.json.{JsError, Reads}
-import play.mvc.Http
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.domain.Generator
 
-package object util {
+trait NINOGenerator {
 
-  type NINO = String
+  private val generator = new Generator()
 
-  type Result[A] = EitherT[Future, String, A]
+  def generateNINO: String = {
+    val nino = generator.nextNino.value
+    nino
+  }
+
+  def generateEligibleNINO: String = {
+    val nino = generateNINO
+    "AE" + nino.drop(2)
+  }
+
+  def generateIneligibleNINO: String = {
+    val nino = generateNINO
+    "NA" + nino.drop(2)
+  }
+
+
 }

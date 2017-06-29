@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.net.{URI, URLEncoder}
+import java.util.Base64
 
 import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -48,6 +49,19 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
       s"failureURL=${URLEncoder.encode(IdentityCallbackUrl, "UTF-8")}" +
       s"&confidenceLevel=200")
       .toString
+
+  val nsiAuthHeaderKey = getString("microservice.services.nsi.authorization.header-key")
+
+  val nsiBasicAuth = {
+    val user = getString("microservice.services.nsi.authorization.user")
+    val password = getString("microservice.services.nsi.authorization.password")
+    val encoding = getString("microservice.services.nsi.authorization.encoding")
+
+    val encoded = Base64.getEncoder.encode(s"$user:$password".getBytes)
+    s"Basic: ${new String(encoded, encoding)}"
+  }
+
+  val nsiUrl = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
 
   override lazy val analyticsToken = loadConfig(s"google-analytics.token")
   override lazy val analyticsHost = loadConfig(s"google-analytics.host")

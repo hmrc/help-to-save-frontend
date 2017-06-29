@@ -16,22 +16,20 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.util.Base64
 import javax.inject.Singleton
 
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.http.Status
-import play.api.libs.json.{Format, JsError, JsSuccess, Json}
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[NSIConnectorImpl])
 trait NSIConnector {
@@ -51,63 +49,36 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl extends NSIConnector with ServicesConfig {
-
-  val nsiUrl: String = baseUrl("nsi")
-  val nsiUrlEnd: String = getString("microservice.services.nsi.url")
-  val url = s"$nsiUrl/$nsiUrlEnd"
-
-  val authorisationHeaderKey = getString("microservice.services.nsi.authorization.header-key")
-
-
-  val authorisationDetails = {
-    val user = getString("microservice.services.nsi.authorization.user")
-    val password = getString("microservice.services.nsi.authorization.password")
-    val encoding = getString("microservice.services.nsi.authorization.encoding")
-
-    val encoded = Base64.getEncoder.encode(s"$user:$password".getBytes)
-    s"Basic: ${new String(encoded, encoding)}"
-  }
+class NSIConnectorImpl extends NSIConnector {
 
   val httpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
-    Logger.info(s"Trying to create an account for ${userInfo.NINO} using NSI endpoint $url")
-    httpProxy.post(url, userInfo, Map(authorisationHeaderKey → authorisationDetails))(
-      NSIUserInfo.nsiUserInfoWrites, hc.copy(authorization = None))
+    Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
+    Logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
+    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
+      NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
-            Logger.info(s"Successfully created a NSI account for ${userInfo.NINO}")
+            Logger.info(s"Successfully created a NSI account for ${userInfo.nino}")
             SubmissionSuccess()
 
           case Status.BAD_REQUEST ⇒
-            Logger.error(s"Failed to create an account for ${userInfo.NINO} due to bad request")
+            Logger.error(s"Failed to create an account for ${userInfo.nino} due to bad request")
             handleBadRequestResponse(response)
 
           case other ⇒
-            Logger.warn(s"Unexpected error during creating account for ${userInfo.NINO}, status:$other ")
+            Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status: $other")
             SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
         }
       }
   }
 
-
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
-    Try(response.json) match {
-      case Success(jsValue) ⇒
-        Json.fromJson[SubmissionFailure](jsValue) match {
-          case JsSuccess(submissionFailure, _) ⇒
-            submissionFailure
-
-          case e: JsError ⇒
-            SubmissionFailure(None, s"Could not create NSI account errors; response body: ${response.body}", e.prettyPrint())
-        }
-
-      case Failure(error) ⇒
-        SubmissionFailure(None, s"Could not read submission failure JSON response: ${response.body}", error.getMessage)
-
+    response.parseJson[SubmissionFailure] match {
+      case Right(submissionFailure) ⇒ submissionFailure
+      case Left(error) ⇒ SubmissionFailure(None, "", error)
     }
-
   }
 }
