@@ -17,15 +17,13 @@
 package hts.steps
 
 import cucumber.api.DataTable
-import gherkin.formatter.model.DataTableRow
 import hts.pages.{AuthorityWizardPage, Page}
 import hts.utils.Configuration
-
 import scala.collection.JavaConverters._
-import scala.collection.immutable.Seq
 import scala.collection.mutable
+import src.test.scala.hts.utils.NINOGenerator
 
-class UserDetailsSteps extends Steps{
+class UserDetailsSteps extends Steps with NINOGenerator{
 
   var name: Option[String] = None
   var nino: Option[String] = None
@@ -43,7 +41,7 @@ class UserDetailsSteps extends Steps{
         case (Some(field), value @ Some(_)) =>
           field match {
             case "name"          => name = value
-            case "NINO"          => nino = value
+            case "NINO"          =>
             case "date of birth" => dateOfBirth = value
             case "email address" => email = value
             case other           => sys.error(s"Unexpected field: $other")
@@ -59,6 +57,8 @@ class UserDetailsSteps extends Steps{
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
+    nino = Some(generateEligibleNINO)
+    println("NINO: " + nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.setNino(nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.submit()
   }

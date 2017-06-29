@@ -51,7 +51,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   Given("""^an applicant has logged in$""") { () =>
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setCredentialStrength("strong")
-    AuthorityWizardPage.setNino(generateNINO)
+    AuthorityWizardPage.setNino(generateEligibleNINO)
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
   }
 
@@ -72,7 +72,7 @@ class SecuritySteps extends Steps with NINOGenerator {
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
-    AuthorityWizardPage.setNino(generateNINO)
+    AuthorityWizardPage.setNino(generateEligibleNINO)
     AuthorityWizardPage.submit()
   }
 
