@@ -40,7 +40,7 @@ case class NSIUserInfo (forename: String,
 object NSIUserInfo {
 
   case class ContactDetails(address: List[String],
-                            postCode: String,
+                            postcode: String,
                             countryCode: Option[String],
                             email: String,
                             phoneNumber: Option[String] = None,

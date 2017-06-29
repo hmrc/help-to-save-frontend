@@ -24,9 +24,13 @@ import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.traverse._
+import com.github.fge.jackson.JsonLoader
+import com.github.fge.jsonschema.core.report.ProcessingReport
+import com.github.fge.jsonschema.main.{JsonSchemaFactory, JsonValidator}
 import com.google.inject.Inject
 import configs.syntax._
 import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.libs.json.Json
 import play.api.{Application, Configuration, Logger}
 import play.api.mvc.{Action, AnyContent, Request}
 import play.api.{Application, Logger}
@@ -48,6 +52,102 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    sessionCacheConnector: SessionCacheConnector)(implicit app: Application, ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
 
+  //For ICD v 1.2
+  private[controllers] lazy val validationSchema =
+    """
+      |{
+      |  "$schema": "http://json-schema.org/schema#",
+      |  "description": "A JSON schema to validate JSON as described in PPM-30048-UEM009-ICD001-HTS-HMRC-Interfaces v1.2.docx",
+      |
+      |  "type" : "object",
+      |  "additionalProperties": false,
+      |  "required": ["forename", "surname", "dateOfBirth", "contactDetails", "registrationChannel", "nino"],
+      |  "properties" : {
+      |    "forename" : {
+      |      "type" : "string",
+      |      "minLength": 1,
+      |      "maxLength": 26,
+      |      "pattern": "^[a-zA-Z][,a-zA-Z\\s\\.\\&\\-]*$"
+      |    },
+      |    "surname": {
+      |      "type": "string",
+      |      "minLength": 1,
+      |      "maxLength": 300,
+      |      "pattern": "^[a-zA-Z][`,'a-zA-Z\\s\\.\\&\\-]*$"
+      |    },
+      |    "dateOfBirth": {
+      |      "type": "string",
+      |      "minLength": 8,
+      |      "maxLength": 8,
+      |      "pattern": "^[0-9]{4}01|02|03|04|05|06|07|08|09|10|11|12[0-9]{2}$"
+      |    },
+      |    "contactDetails": {
+      |      "type": "object",
+      |      "additionalProperties": false,
+      |      "required": ["address1", "address2", "postcode", "communicationPreference"],
+      |      "properties": {
+      |        "countryCode": {
+      |          "type": "string",
+      |          "minLength": 2,
+      |          "maxLength": 2,
+      |          "pattern": "[A-Z][A-Z]"
+      |        },
+      |        "address1": {
+      |          "type": "string",
+      |          "maxLength": 35
+      |        },
+      |        "address2": {
+      |          "type": "string",
+      |          "maxLength": 35
+      |        },
+      |        "address3": {
+      |          "type": "string",
+      |          "maxLength": 35
+      |        },
+      |        "address4": {
+      |          "type": "string",
+      |          "maxLength": 35
+      |        },
+      |        "address5": {
+      |          "type": "string",
+      |          "maxLength": 35
+      |        },
+      |        "postcode": {
+      |          "type": "string",
+      |          "maxLength": 10
+      |        },
+      |        "communicationPreference": {
+      |          "type": "string",
+      |          "minLength": 2,
+      |          "maxLength": 2,
+      |          "pattern": "00|02"
+      |        },
+      |        "phoneNumber": {
+      |          "type": "string",
+      |          "maxLength": 15
+      |        },
+      |        "email": {
+      |          "type": "string",
+      |          "maxLength": 254,
+      |          "pattern": "^.{1,64}@.{1,252}$"
+      |        }
+      |      }
+      |    },
+      |    "registrationChannel": {
+      |      "type": "string",
+      |      "maxLength": 10,
+      |      "pattern": "^online$|^callCentre$"
+      |    },
+      |    "nino" : {
+      |      "type" : "string",
+      |      "minLength": 9,
+      |      "maxLength": 9,
+      |      "pattern": "^(([A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])([0-9]{2})([0-9]{2})([0-9]{2})([A-D]{1})|((XX)(99)(99)(99)(X)))$"
+      |    }
+      |  }
+      |}
+    """.stripMargin
+
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
 
   def getAuthorisation: Action[AnyContent] =  authorisedForHtsWithEnrolments {
@@ -65,10 +165,11 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         authorisedForHtsWithEnrolments {
           implicit request ⇒
             implicit userUrlWithNino ⇒
-              val userInfo = for {
+              val userInfo: EitherT[Future, String, EligibilityResult] = for {
                 userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
                 eligible ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path, authorisationCode)
                 nsiUserInfo ← toNSIUserInfo(eligible)
+                _  <- EitherT.fromEither[Future](validateOutGoingUserInfo(nsiUserInfo))
                 _ ← writeToKeyStore(nsiUserInfo)
               } yield eligible
 
@@ -100,15 +201,25 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       Future.successful(Ok(views.html.register.create_account_help_to_save()))
   }
 
-  def f(userInfo: NSIUserInfo, conf: Configuration): Either[String,NSIUserInfo] = {
-    FEATURE("outgoing-json-validation", conf, Logger("outgoing-json-validation")) thenOrElse (
-      _ => Right(userInfo),
-      _ => Right(userInfo))
+  def validateOutGoingUserInfo(userInfo: Option[NSIUserInfo]): Either[String,Option[NSIUserInfo]] = {
+    val conf = app.configuration
+    userInfo match {
+      case None => Right(None)
+      case Some(ui) =>
+        FEATURE("outgoing-json-validation", conf, Logger("outgoing-json-validation")) thenOrElse(
+          _ => validateJsonAgainstSchema(Json.toJson(ui).toString(), validationSchema) match {
+            case None => Right(userInfo)
+            case Some(errors) => {
+              println(">>>>>>>>>>>>>>>>>>> ERRORS IN VALIDATION " + errors)
+              Left(errors)
+            }
+          },
+          _ => Right(userInfo))
+    }
   }
 
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
-      val conf = app.configuration
       val result: EitherT[Future, String, NSIUserInfo] = for {
         userInfo    ← retrieveUserInfo()
         _ ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
@@ -138,7 +249,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, NSIUserInfo] = {
     val session = sessionCacheConnector.get
-    val userInfo = session.map(_.flatMap(_.userInfo))
+    val userInfo: Future[Option[NSIUserInfo]] = session.map(_.flatMap(_.userInfo))
 
     EitherT(
       userInfo.map(_.fold[Either[String, NSIUserInfo]](
@@ -219,6 +330,19 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
+    //None represents sucessfully validated
+    private[controllers] def validateJsonAgainstSchema(userInfoJson: String, schema: String): Option[String] = {
+      val schemaJsonNode = JsonLoader.fromString(schema)
+      val jsonJsonNode = JsonLoader.fromString(userInfoJson)
+
+      val validator: JsonValidator = JsonSchemaFactory.byDefault().getValidator
+      val report: ProcessingReport = validator.validate(schemaJsonNode, jsonJsonNode)
+      if (report.isSuccess) {
+        None
+      } else {
+        Some(report.toString)
+      }
+    }
 }
 
 object RegisterController {

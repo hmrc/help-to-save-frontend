@@ -19,10 +19,12 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
+import com.fasterxml.jackson.databind.JsonNode
+import com.github.fge.jackson.JsonLoader
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Reads, Writes}
-import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
@@ -209,6 +211,33 @@ class RegisterControllerSpec extends TestSupport {
         status(result) shouldBe Status.SEE_OTHER
 
         redirectLocation(result) shouldBe Some("/help-to-save/register/not-eligible")
+      }
+
+      "use the validate function to check empty JSON against empty schemas" in {
+        val json = "{}"
+        val schema = "{}"
+
+        register.validateJsonAgainstSchema(json, schema) shouldBe None
+      }
+
+      "use the validate function to check arbitrary JSON against arbitrary schemas (example 1)" in {
+        val json = """{"name": "Garfield", "food": "Lasagne"}"""
+        val schema = """{"type": "object", "properties": {"name": {"type": "string"}, "food": {"type": "string"}}}"""
+
+        register.validateJsonAgainstSchema(json, schema) shouldBe None
+      }
+
+      "use the validate function to check arbitrary JSON against arbitrary schemas (example 2)" in {
+        val json = """{"name": 2, "food": 3}"""
+        val schema = """{"type": "object", "properties": {"name": {"type": "string"}, "food": {"type": "string"}}}"""
+
+        register.validateJsonAgainstSchema(json, schema).isDefined shouldBe true
+      }
+
+      "the validation schema value s a schema as defined by json-schema.org" in {
+        val schemaJsonNode: JsonNode = JsonLoader.fromString(register.validationSchema)
+
+        schemaJsonNode.isObject shouldBe true
       }
 
 
