@@ -39,7 +39,11 @@ case class NSIUserInfo (forename: String,
 
 object NSIUserInfo {
 
-  case class ContactDetails(address: List[String],
+  case class ContactDetails(address1: String,
+                            address2: String,
+                            address3: Option[String],
+                            address4: Option[String],
+                            address5: Option[String],
                             postcode: String,
                             countryCode: Option[String],
                             email: String,
@@ -61,9 +65,20 @@ object NSIUserInfo {
       emailValidation(userInfo.email)).map(
       (forename, surname, dateOfBirth, addressLines, postcode, countryCode, nino, email) ⇒
         NSIUserInfo(forename, surname, dateOfBirth, nino,
-          ContactDetails(addressLines, postcode, countryCode, email))
+          ContactDetails(
+            addressLines.line1,
+            addressLines.line2,
+            addressLines.line3,
+            addressLines.line4,
+            addressLines.line5,
+            postcode,
+            countryCode,
+            email))
     )
   }
+
+  private case class AddressLines(line1: String, line2: String, line3: Option[String], line4: Option[String], line5: Option[String])
+
 
 
   implicit val dateFormat: Format[LocalDate] = new Format[LocalDate] {
@@ -120,15 +135,29 @@ object NSIUserInfo {
     (lowerBoundCheck |@| upperBoundCheck).map { case _ ⇒ date }
   }
 
-  private def addressLineValidation(address: List[String]): ValidatedNel[String, List[String]] = {
+  private def addressLineValidation(address: List[String]): ValidatedNel[String, AddressLines] = {
     val list = address.filter(_.nonEmpty)
 
     val lengthCheck = validatedFromBoolean(list)(!_.exists(_.length > 35),
       "Address contained line greater than 35 characters")
 
-    val twoLinesCheck = validatedFromBoolean(list)(_.length > 1, "At least two lines of address not found")
+    val twoLinesCheck = list match {
+      case line1 :: line2 :: line3 :: line4 :: other ⇒
+        Validated.Valid(AddressLines(line1, line2, Some(line3), Some(line4), Some(other.mkString(", "))))
 
-    (lengthCheck |@| twoLinesCheck).map{ case _ ⇒ list }
+      case line1 :: line2 :: line3 :: line4  :: Nil ⇒
+        Validated.Valid(AddressLines(line1, line2, Some(line3), Some(line4), None))
+
+      case line1 :: line2 :: line3  :: Nil ⇒
+        Validated.Valid(AddressLines(line1, line2, Some(line3), None, None))
+
+      case line1 :: line2 :: Nil ⇒
+        Validated.Valid(AddressLines(line1, line2, None, None, None))
+
+      case _ ⇒
+        Validated.Invalid(NonEmptyList.of("Could not find two lines of address"))
+    }
+    (lengthCheck |@| twoLinesCheck).map{ case (_,l) ⇒ l }
   }
 
   private def postcodeValidation(postcode: Option[String]): ValidatedNel[String, String] = postcode match {

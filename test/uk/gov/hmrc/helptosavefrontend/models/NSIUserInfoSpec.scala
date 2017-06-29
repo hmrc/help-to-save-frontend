@@ -217,7 +217,8 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
               List("1 the Street", "The Place")))
           ).getOrElse(sys.error("Expected valid NSIUserInformation"))
 
-          info.contactDetails.address shouldBe List("1 the Street", "The Place")
+          info.contactDetails.address1 shouldBe "1 the Street"
+          info.contactDetails.address2 shouldBe "The Place"
         }
 
         "contain lines which are longer than 35 characters" in {
