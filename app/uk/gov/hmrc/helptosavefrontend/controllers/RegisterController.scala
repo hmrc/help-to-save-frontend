@@ -24,6 +24,7 @@ import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.traverse._
+import com.fasterxml.jackson.databind.JsonNode
 import com.github.fge.jackson.JsonLoader
 import com.github.fge.jsonschema.core.report.ProcessingReport
 import com.github.fge.jsonschema.main.{JsonSchemaFactory, JsonValidator}
@@ -53,7 +54,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   extends HelpToSaveAuth(app) with I18nSupport {
 
   //For ICD v 1.2
-  private[controllers] lazy val validationSchema =
+  private[controllers] lazy val validationSchemaStr =
     """
       |{
       |  "$schema": "http://json-schema.org/schema#",
@@ -148,9 +149,13 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       |}
     """.stripMargin
 
+  lazy val validationSchema = JsonLoader.fromString(validationSchemaStr)
+  lazy val featureLogger = Logger("outgoing-json-validation")
+  lazy val jsonValidator: JsonValidator = JsonSchemaFactory.byDefault().getValidator
+
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
 
-  def getAuthorisation: Action[AnyContent] =  authorisedForHtsWithEnrolments {
+  def getAuthorisation: Action[AnyContent] = authorisedForHtsWithEnrolments {
     implicit request ⇒
       implicit userUrlWithNino ⇒
         Future.successful(redirectForAuthorisationCode(request, userUrlWithNino))
@@ -169,7 +174,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                 userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
                 eligible ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path, authorisationCode)
                 nsiUserInfo ← toNSIUserInfo(eligible)
-                _  <- EitherT.fromEither[Future](validateOutGoingUserInfo(nsiUserInfo))
+                _ <- EitherT.fromEither[Future](validateOutGoingUserInfo(nsiUserInfo))
                 _ ← writeToKeyStore(nsiUserInfo)
               } yield eligible
 
@@ -187,12 +192,16 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         Logger.error(s"Could not get authorisation code: $e. Error description was" +
           s"${error_description.getOrElse("-")}, error code was ${error_code.getOrElse("-")}")
         // TODO: do something better
-        Action { InternalServerError(s"Could not get authorisation code: $e") }
+        Action {
+          InternalServerError(s"Could not get authorisation code: $e")
+        }
 
       case _ ⇒
         // we should never reach here - we shouldn't have a successful code and an error at the same time
         Logger.error("Inconsistent result found when attempting to retrieve an authorisation code")
-        Action { InternalServerError("") }
+        Action {
+          InternalServerError("")
+        }
 
     }
 
@@ -201,18 +210,15 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       Future.successful(Ok(views.html.register.create_account_help_to_save()))
   }
 
-  def validateOutGoingUserInfo(userInfo: Option[NSIUserInfo]): Either[String,Option[NSIUserInfo]] = {
+  def validateOutGoingUserInfo(userInfo: Option[NSIUserInfo]): Either[String, Option[NSIUserInfo]] = {
     val conf = app.configuration
     userInfo match {
       case None => Right(None)
       case Some(ui) =>
-        FEATURE("outgoing-json-validation", conf, Logger("outgoing-json-validation")) thenOrElse(
+        FEATURE("outgoing-json-validation", conf, featureLogger) thenOrElse(
           _ => validateJsonAgainstSchema(Json.toJson(ui).toString(), validationSchema) match {
             case None => Right(userInfo)
-            case Some(errors) => {
-              println(">>>>>>>>>>>>>>>>>>> ERRORS IN VALIDATION " + errors)
-              Left(errors)
-            }
+            case Some(errors) => Left(errors)
           },
           _ => Right(userInfo))
     }
@@ -221,7 +227,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
       val result: EitherT[Future, String, NSIUserInfo] = for {
-        userInfo    ← retrieveUserInfo()
+        userInfo ← retrieveUserInfo()
         _ ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
       } yield userInfo
 
@@ -276,10 +282,10 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  private type EitherOrString[A] = Either[String,A]
+  private type EitherOrString[A] = Either[String, A]
 
-  private def toNSIUserInfo(eligibilityResult: EligibilityResult): EitherT[Future,String, Option[NSIUserInfo]] = {
-    val conversion: Option[Either[String, NSIUserInfo]] = eligibilityResult.result.map{ result ⇒
+  private def toNSIUserInfo(eligibilityResult: EligibilityResult): EitherT[Future, String, Option[NSIUserInfo]] = {
+    val conversion: Option[Either[String, NSIUserInfo]] = eligibilityResult.result.map { result ⇒
       val validation = NSIUserInfo(result)
       validation.toEither.leftMap(
         errors ⇒ s"User info did not pass NS&I validity checks: ${errors.toList.mkString("; ")}"
@@ -287,7 +293,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     }
 
     // use sequence to push the option into the either
-    val result: Either[String, Option[NSIUserInfo]] = conversion.sequence[EitherOrString,NSIUserInfo]
+    val result: Either[String, Option[NSIUserInfo]] = conversion.sequence[EitherOrString, NSIUserInfo]
 
     EitherT.fromEither[Future](result)
   }
@@ -298,7 +304,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
 
   private lazy val redirectForAuthorisationCode =
-    if(oauthConfig.enabled) {
+    if (oauthConfig.enabled) {
       { (_: Request[AnyContent], _: Option[UserDetailsUrlWithNino]) ⇒
         Logger.info("Received request to get user details: redirecting to oauth obtain authorisation code")
 
@@ -322,7 +328,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         userDetailsUrlWithNino.fold {
           Logger.error("NINO or user details URI not available")
           Redirect(routes.RegisterController.notEligible().absoluteURL())
-        }{ u ⇒
+        } { u ⇒
           val nino = u.nino
           Logger.info(s"Received request to get user details: redirecting to get user details using NINO $nino as authorisation code")
           Redirect(routes.RegisterController.confirmDetails(Some(nino), None, None, None).absoluteURL())
@@ -330,19 +336,10 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-    //None represents sucessfully validated
-    private[controllers] def validateJsonAgainstSchema(userInfoJson: String, schema: String): Option[String] = {
-      val schemaJsonNode = JsonLoader.fromString(schema)
-      val jsonJsonNode = JsonLoader.fromString(userInfoJson)
-
-      val validator: JsonValidator = JsonSchemaFactory.byDefault().getValidator
-      val report: ProcessingReport = validator.validate(schemaJsonNode, jsonJsonNode)
-      if (report.isSuccess) {
-        None
-      } else {
-        Some(report.toString)
-      }
-    }
+  private[controllers] def validateJsonAgainstSchema(userInfoJson: String, schema: JsonNode): Option[String] = {
+    val report: ProcessingReport = jsonValidator.validate(schema, JsonLoader.fromString(userInfoJson))
+    if (report.isSuccess) None else Some(report.toString)
+  }
 }
 
 object RegisterController {

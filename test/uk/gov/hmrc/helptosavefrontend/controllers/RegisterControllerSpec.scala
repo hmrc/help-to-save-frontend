@@ -215,27 +215,27 @@ class RegisterControllerSpec extends TestSupport {
 
       "use the validate function to check empty JSON against empty schemas" in {
         val json = "{}"
-        val schema = "{}"
+        val schema = JsonLoader.fromString("{}")
 
         register.validateJsonAgainstSchema(json, schema) shouldBe None
       }
 
       "use the validate function to check arbitrary JSON against arbitrary schemas (example 1)" in {
         val json = """{"name": "Garfield", "food": "Lasagne"}"""
-        val schema = """{"type": "object", "properties": {"name": {"type": "string"}, "food": {"type": "string"}}}"""
+        val schema = JsonLoader.fromString("""{"type": "object", "properties": {"name": {"type": "string"}, "food": {"type": "string"}}}""")
 
         register.validateJsonAgainstSchema(json, schema) shouldBe None
       }
 
       "use the validate function to check arbitrary JSON against arbitrary schemas (example 2)" in {
         val json = """{"name": 2, "food": 3}"""
-        val schema = """{"type": "object", "properties": {"name": {"type": "string"}, "food": {"type": "string"}}}"""
+        val schema = JsonLoader.fromString("""{"type": "object", "properties": {"name": {"type": "string"}, "food": {"type": "string"}}}""")
 
         register.validateJsonAgainstSchema(json, schema).isDefined shouldBe true
       }
 
       "the validation schema value s a schema as defined by json-schema.org" in {
-        val schemaJsonNode: JsonNode = JsonLoader.fromString(register.validationSchema)
+        val schemaJsonNode: JsonNode = JsonLoader.fromString(register.validationSchemaStr)
 
         schemaJsonNode.isObject shouldBe true
       }
