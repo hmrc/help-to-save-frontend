@@ -37,6 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.JSONValidationFeature._
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -213,31 +214,32 @@ class RegisterControllerSpec extends TestSupport {
         redirectLocation(result) shouldBe Some("/help-to-save/register/not-eligible")
       }
 
-      "use the validate function to check empty JSON against empty schemas" in {
-        val json = "{}"
+      "use the validate function to check user info against empty schemas" in {
         val schema = JsonLoader.fromString("{}")
 
-        register.validateJsonAgainstSchema(json, schema) shouldBe None
+        register.validateJsonAgainstSchema(validNSIUserInfo, schema) shouldBe Right(Some(validNSIUserInfo))
       }
 
-      "use the validate function to check arbitrary JSON against arbitrary schemas (example 1)" in {
-        val json = """{"name": "Garfield", "food": "Lasagne"}"""
-        val schema = JsonLoader.fromString("""{"type": "object", "properties": {"name": {"type": "string"}, "food": {"type": "string"}}}""")
+      "use the validate function to check user info against arbitrary schemas (example 1)" in {
+        val schema = JsonLoader.fromString("""{"type": "object", "properties": {"forename": {"type": "string"}, "surname": {"type": "string"}}}""")
 
-        register.validateJsonAgainstSchema(json, schema) shouldBe None
+        register.validateJsonAgainstSchema(validNSIUserInfo, schema) shouldBe Right(Some(validNSIUserInfo))
       }
 
       "use the validate function to check arbitrary JSON against arbitrary schemas (example 2)" in {
-        val json = """{"name": 2, "food": 3}"""
-        val schema = JsonLoader.fromString("""{"type": "object", "properties": {"name": {"type": "string"}, "food": {"type": "string"}}}""")
+        val schema = JsonLoader.fromString("""{"type": "object", "properties": {"forename": {"type": "number"}, "food": {"type": "string"}}}""")
 
-        register.validateJsonAgainstSchema(json, schema).isDefined shouldBe true
+        register.validateJsonAgainstSchema(validNSIUserInfo, schema).isLeft shouldBe true
       }
 
       "the validation schema value s a schema as defined by json-schema.org" in {
-        val schemaJsonNode: JsonNode = JsonLoader.fromString(register.validationSchemaStr)
+        val schemaJsonNode: JsonNode = JsonLoader.fromString(validationSchemaStr)
 
         schemaJsonNode.isObject shouldBe true
+      }
+
+      "if the validator issues an exception, a left with the exception message is produced" in {
+        register.validateJsonAgainstSchema(validNSIUserInfo, null).isLeft shouldBe true
       }
 
 
@@ -357,7 +359,5 @@ class RegisterControllerSpec extends TestSupport {
         }
       }
     }
-
   }
-
 }
