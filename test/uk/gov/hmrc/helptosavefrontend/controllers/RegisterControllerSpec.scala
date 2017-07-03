@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
@@ -38,6 +40,8 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.JSONValidationFeature._
+import java.time.format.DateTimeFormatter
+import java.time.LocalDate
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -217,31 +221,56 @@ class RegisterControllerSpec extends TestSupport {
       "use the validate function to check user info against empty schemas" in {
         val schema = JsonLoader.fromString("{}")
 
-        register.validateJsonAgainstSchema(validNSIUserInfo, schema) shouldBe Right(Some(validNSIUserInfo))
+        register.validateUserInfoAgainstSchema(validNSIUserInfo, schema) shouldBe Right(Some(validNSIUserInfo))
       }
 
       "use the validate function to check user info against arbitrary schemas (example 1)" in {
         val schema = JsonLoader.fromString("""{"type": "object", "properties": {"forename": {"type": "string"}, "surname": {"type": "string"}}}""")
 
-        register.validateJsonAgainstSchema(validNSIUserInfo, schema) shouldBe Right(Some(validNSIUserInfo))
+        register.validateUserInfoAgainstSchema(validNSIUserInfo, schema) shouldBe Right(Some(validNSIUserInfo))
       }
 
       "use the validate function to check arbitrary JSON against arbitrary schemas (example 2)" in {
         val schema = JsonLoader.fromString("""{"type": "object", "properties": {"forename": {"type": "number"}, "food": {"type": "string"}}}""")
 
-        register.validateJsonAgainstSchema(validNSIUserInfo, schema).isLeft shouldBe true
+        register.validateUserInfoAgainstSchema(validNSIUserInfo, schema).isLeft shouldBe true
       }
 
-      "the validation schema value s a schema as defined by json-schema.org" in {
+      "If the outgoing-json validation feature is a schema as defined by json-schema.org" in {
         val schemaJsonNode: JsonNode = JsonLoader.fromString(validationSchemaStr)
 
         schemaJsonNode.isObject shouldBe true
       }
 
-      "if the validator issues an exception, a left with the exception message is produced" in {
-        register.validateJsonAgainstSchema(validNSIUserInfo, null).isLeft shouldBe true
+      "If the outgoing-json validation feature detects an exception, a left with the exception message is produced" in {
+        register.validateUserInfoAgainstSchema(validNSIUserInfo, null).isLeft shouldBe true
       }
 
+      "If the outgoing-json validation feature detects a birth date prior to 1800 it returns a left" in {
+        val date = LocalDate.parse("17990505", DateTimeFormatter.BASIC_ISO_DATE)
+        val oldUser = validNSIUserInfo copy (dateOfBirth = date)
+        register.before1800(oldUser).isLeft shouldBe true
+      }
+
+      "If the outgoing-json validateOutGoingJson function detects a birth date prior to 1800 it returns a left" in {
+        val date = LocalDate.parse("17990505", DateTimeFormatter.BASIC_ISO_DATE)
+        val oldUser = validNSIUserInfo copy (dateOfBirth = date)
+        register.validateOutGoingUserInfo(Some(oldUser)).isLeft shouldBe true
+      }
+
+      "If the outgoing-json futureDate function detects a birth date in the future it returns a left " in {
+        val today = java.time.LocalDate.now()
+        val tomorrow = today.plus(1, java.time.temporal.ChronoUnit.DAYS)
+        val futureUser = validNSIUserInfo copy (dateOfBirth = tomorrow)
+        register.validateOutGoingUserInfo(Some(futureUser)).isLeft shouldBe true
+      }
+
+      "If the outgoing-json validateOutGoingJson function detects a birth date in the future it returns a left " in {
+        val today = java.time.LocalDate.now()
+        val tomorrow = today.plus(1, java.time.temporal.ChronoUnit.DAYS)
+        val futureUser = validNSIUserInfo copy (dateOfBirth = tomorrow)
+        register.futureDate(futureUser).isLeft shouldBe true
+      }
 
       "return an error" must {
 

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.time.format.DateTimeFormatter
 import javax.inject.Singleton
 
 import cats.data.EitherT
@@ -53,8 +54,6 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    helpToSaveService: HelpToSaveService,
                                    sessionCacheConnector: SessionCacheConnector)(implicit app: Application, ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
-
-
 
 
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
@@ -106,7 +105,6 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         Action {
           InternalServerError("")
         }
-
     }
 
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithConfidence {
@@ -120,7 +118,12 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       case None => Right(None)
       case Some(ui) =>
         FEATURE("outgoing-json-validation", conf, featureLogger) thenOrElse(
-          _ => validateJsonAgainstSchema(ui, validationSchema),
+//          _ => for {
+//              t0 <- validateUserInfoAgainstSchema(ui, validationSchema)
+//              t1 <- before1800(ui)
+//              t2 <- futureDate(ui)
+//            } yield t2,
+          _ => validateUserInfoAgainstSchema(ui, validationSchema),
           _ => Right(userInfo))
     }
   }
@@ -237,7 +240,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-  private[controllers] def validateJsonAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
+  private[controllers] def validateUserInfoAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
     val userInfoJson = JsonLoader.fromString(Json.toJson(userInfo).toString)
     try {
       val report: ProcessingReport = jsonValidator.validate(schema, userInfoJson)
@@ -246,9 +249,23 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       case e: Exception => Left(e.getMessage)
     }
   }
+
+  private[controllers] def validateUserInfoAdditional(userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] =
+    if (userInfo.forename.startsWith("a")) Left("FEATURE outgoing-json-validation: Forename starts with space") else Right(Some(userInfo))
+
+  private[controllers] def futureDate(userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] = {
+    val today = java.time.LocalDate.now()
+    if (userInfo.dateOfBirth.isAfter(today)) Left("FEATURE outgoing-json-validation: Date of birth in the future") else Right(Some(userInfo))
+  }
+
+  private[controllers] def before1800(userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] = {
+    val year = userInfo.dateOfBirth.getYear
+    if (year < 1800) Left("FEATURE outgoing-json-validation: Date of birth before 1800") else Right(Some(userInfo))
+  }
 }
 
 object RegisterController {
+
   object JSONValidationFeature {
     //For ICD v 1.2
     private[controllers] lazy val validationSchemaStr =
