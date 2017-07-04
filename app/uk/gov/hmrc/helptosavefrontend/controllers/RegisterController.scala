@@ -115,7 +115,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   def validateOutGoingUserInfo(userInfo: Option[NSIUserInfo]): Either[String, Option[NSIUserInfo]] = {
     val conf = app.configuration
     userInfo match {
-      case None => Right(None)
+      case None => Left("No user info to validate")
       case Some(ui) =>
         FEATURE("outgoing-json-validation", conf, featureLogger) thenOrElse(
           _ => for {
@@ -241,17 +241,23 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     }
 
   private[controllers] def validateUserInfoAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
+    import scala.collection.JavaConversions._
+
     val userInfoJson = JsonLoader.fromString(Json.toJson(userInfo).toString)
     try {
       val report: ProcessingReport = jsonValidator.validate(schema, userInfoJson)
+      for (m <- report.iterator()) {
+        println(">>>>>>>>>>>>>> MESSAGE " + m)
+        println(">>>>>>>>>>>>>> JSON " + m.asJson())
+        println(">>>>>>>>>>>>>> INSTANCE " + m.asJson().path("instance").path("pointer"))
+        println(">>>>>>>>>>>>>> KEYWORD " + m.asJson().path("keyword"))
+        println(">>>>>>>>>>>>>> FOUND " + m.asJson().path("found"))
+      }
       if (report.isSuccess) Right(Some(userInfo)) else Left(report.toString)
     } catch {
       case e: Exception => Left(e.getMessage)
     }
   }
-
-  private[controllers] def validateUserInfoAdditional(userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] =
-    if (userInfo.forename.startsWith("a")) Left("FEATURE outgoing-json-validation: Forename starts with space") else Right(Some(userInfo))
 
   private[controllers] def futureDate(userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] = {
     val today = java.time.LocalDate.now()
