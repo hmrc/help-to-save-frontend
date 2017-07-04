@@ -53,8 +53,8 @@ object Toggles {
   }
   object FEATURE_THEN
 
-  case class FEATURE_THEN_KEY[A](name: String, key: String, enabled: Boolean, hasKey: Boolean, unconfiguredVal: A)
-  object FEATURE_THEN_KEY
+//  case class FEATURE_THEN_KEY[A](name: String, key: String, enabled: Boolean, hasKey: Boolean, unconfiguredVal: A)
+//  object FEATURE_THEN_KEY
 
   implicit def eitherPop[A](e: Either[Option[A], A]): A = {
     e match {
