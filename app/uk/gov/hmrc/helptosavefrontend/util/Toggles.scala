@@ -30,7 +30,7 @@ object Toggles {
       }
     }
 
-    def enabledWith(additional: String): FEATURE_THEN_KEY[A] = ???
+    //def enabledWith(additional: String): FEATURE_THEN_KEY[A] = ???
   }
   object FEATURE {
     def apply[A](name: String, conf: Configuration): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, None, Logger(name))
@@ -39,7 +39,7 @@ object Toggles {
 
 
   case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: Option[A], logger: Logger) {
-    def thenDoOrElse(action: => A, ifFalse: ⇒ A): A = {
+    def thenDo(action: => A): Either[Option[A], A] = {
       if (enabled) {
         val startTime = Instant.now.toEpochMilli
         val result = action
@@ -53,8 +53,8 @@ object Toggles {
   }
   object FEATURE_THEN
 
-  case class FEATURE_THEN_KEY[A](name: String, key: String, enabled: Boolean, hasKey: Boolean, unconfiguredVal: A)
-  object FEATURE_THEN_KEY
+//  case class FEATURE_THEN_KEY[A](name: String, key: String, enabled: Boolean, hasKey: Boolean, unconfiguredVal: A)
+//  object FEATURE_THEN_KEY
 
   implicit def eitherPop[A](e: Either[Option[A], A]): A = {
     e match {

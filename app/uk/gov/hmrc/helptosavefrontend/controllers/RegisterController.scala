@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.time.format.DateTimeFormatter
 import javax.inject.Singleton
 
 import cats.data.EitherT
@@ -44,6 +45,7 @@ import uk.gov.hmrc.helptosavefrontend.util.FEATURE
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.JSONValidationFeature._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -53,105 +55,6 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    sessionCacheConnector: SessionCacheConnector)(implicit app: Application, ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
 
-  //For ICD v 1.2
-  private[controllers] lazy val validationSchemaStr =
-    """
-      |{
-      |  "$schema": "http://json-schema.org/schema#",
-      |  "description": "A JSON schema to validate JSON as described in PPM-30048-UEM009-ICD001-HTS-HMRC-Interfaces v1.2.docx",
-      |
-      |  "type" : "object",
-      |  "additionalProperties": false,
-      |  "required": ["forename", "surname", "dateOfBirth", "contactDetails", "registrationChannel", "nino"],
-      |  "properties" : {
-      |    "forename" : {
-      |      "type" : "string",
-      |      "minLength": 1,
-      |      "maxLength": 26,
-      |      "pattern": "^[a-zA-Z][,a-zA-Z\\s\\.\\&\\-]*$"
-      |    },
-      |    "surname": {
-      |      "type": "string",
-      |      "minLength": 1,
-      |      "maxLength": 300,
-      |      "pattern": "^[a-zA-Z][`,'a-zA-Z\\s\\.\\&\\-]*$"
-      |    },
-      |    "dateOfBirth": {
-      |      "type": "string",
-      |      "minLength": 8,
-      |      "maxLength": 8,
-      |      "pattern": "^[0-9]{4}01|02|03|04|05|06|07|08|09|10|11|12[0-9]{2}$"
-      |    },
-      |    "contactDetails": {
-      |      "type": "object",
-      |      "additionalProperties": false,
-      |      "required": ["address1", "address2", "postcode", "communicationPreference"],
-      |      "properties": {
-      |        "countryCode": {
-      |          "type": "string",
-      |          "minLength": 2,
-      |          "maxLength": 2,
-      |          "pattern": "[A-Z][A-Z]"
-      |        },
-      |        "address1": {
-      |          "type": "string",
-      |          "maxLength": 35
-      |        },
-      |        "address2": {
-      |          "type": "string",
-      |          "maxLength": 35
-      |        },
-      |        "address3": {
-      |          "type": "string",
-      |          "maxLength": 35
-      |        },
-      |        "address4": {
-      |          "type": "string",
-      |          "maxLength": 35
-      |        },
-      |        "address5": {
-      |          "type": "string",
-      |          "maxLength": 35
-      |        },
-      |        "postcode": {
-      |          "type": "string",
-      |          "maxLength": 10
-      |        },
-      |        "communicationPreference": {
-      |          "type": "string",
-      |          "minLength": 2,
-      |          "maxLength": 2,
-      |          "pattern": "00|02"
-      |        },
-      |        "phoneNumber": {
-      |          "type": "string",
-      |          "maxLength": 15
-      |        },
-      |        "email": {
-      |          "type": "string",
-      |          "maxLength": 254,
-      |          "pattern": "^.{1,64}@.{1,252}$"
-      |        }
-      |      }
-      |    },
-      |    "registrationChannel": {
-      |      "type": "string",
-      |      "maxLength": 10,
-      |      "pattern": "^online$|^callCentre$"
-      |    },
-      |    "nino" : {
-      |      "type" : "string",
-      |      "minLength": 9,
-      |      "maxLength": 9,
-      |      "pattern": "^(([A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])([0-9]{2})([0-9]{2})([0-9]{2})([A-D]{1})|((XX)(99)(99)(99)(X)))$"
-      |    }
-      |  }
-      |}
-    """.stripMargin
-
-  lazy val validationSchema = JsonLoader.fromString(validationSchemaStr)
-  lazy val featureLogger = Logger("outgoing-json-validation")
-  lazy val jsonValidator: JsonValidator = JsonSchemaFactory.byDefault().getValidator
 
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
 
@@ -202,7 +105,6 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         Action {
           InternalServerError("")
         }
-
     }
 
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithConfidence {
@@ -216,10 +118,12 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       case None => Right(None)
       case Some(ui) =>
         FEATURE("outgoing-json-validation", conf, featureLogger) thenOrElse(
-          _ => validateJsonAgainstSchema(Json.toJson(ui).toString(), validationSchema) match {
-            case None => Right(userInfo)
-            case Some(errors) => Left(errors)
-          },
+          _ => for {
+              t0 <- validateUserInfoAgainstSchema(ui, validationSchema)
+              t1 <- before1800(ui)
+              t2 <- futureDate(ui)
+            } yield t2,
+          //_ => validateUserInfoAgainstSchema(ui, validationSchema),
           _ => Right(userInfo))
     }
   }
@@ -336,13 +240,131 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-  private[controllers] def validateJsonAgainstSchema(userInfoJson: String, schema: JsonNode): Option[String] = {
-    val report: ProcessingReport = jsonValidator.validate(schema, JsonLoader.fromString(userInfoJson))
-    if (report.isSuccess) None else Some(report.toString)
+  private[controllers] def validateUserInfoAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
+
+    val userInfoJson = JsonLoader.fromString(Json.toJson(userInfo).toString)
+    try {
+      val report: ProcessingReport = jsonValidator.validate(schema, userInfoJson)
+      if (report.isSuccess) Right(Some(userInfo)) else Left(report.toString)
+    } catch {
+      case e: Exception => Left(e.getMessage)
+    }
+  }
+
+  private[controllers] def futureDate(userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] = {
+    val today = java.time.LocalDate.now()
+    if (userInfo.dateOfBirth.isAfter(today)) Left("FEATURE outgoing-json-validation: Date of birth in the future") else Right(Some(userInfo))
+  }
+
+  private[controllers] def before1800(userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] = {
+    val year = userInfo.dateOfBirth.getYear
+    if (year < 1800) Left("FEATURE outgoing-json-validation: Date of birth before 1800") else Right(Some(userInfo))
   }
 }
 
 object RegisterController {
+
+  object JSONValidationFeature {
+    //For ICD v 1.2
+    private[controllers] lazy val validationSchemaStr =
+      """
+        |{
+        |  "$schema": "http://json-schema.org/schema#",
+        |  "description": "A JSON schema to validate JSON as described in PPM-30048-UEM009-ICD001-HTS-HMRC-Interfaces v1.2.docx",
+        |
+        |  "type" : "object",
+        |  "additionalProperties": false,
+        |  "required": ["forename", "surname", "dateOfBirth", "contactDetails", "registrationChannel", "nino"],
+        |  "properties" : {
+        |    "forename" : {
+        |      "type" : "string",
+        |      "minLength": 1,
+        |      "maxLength": 26,
+        |      "pattern": "^[a-zA-Z][,a-zA-Z\\s\\.\\&\\-]*$"
+        |    },
+        |    "surname": {
+        |      "type": "string",
+        |      "minLength": 1,
+        |      "maxLength": 300,
+        |      "pattern": "^[a-zA-Z][`,'a-zA-Z\\s\\.\\&\\-]*$"
+        |    },
+        |    "dateOfBirth": {
+        |      "type": "string",
+        |      "minLength": 8,
+        |      "maxLength": 8,
+        |      "pattern": "^[0-9]{4}01|02|03|04|05|06|07|08|09|10|11|12[0-9]{2}$"
+        |    },
+        |    "contactDetails": {
+        |      "type": "object",
+        |      "additionalProperties": false,
+        |      "required": ["address1", "address2", "postcode", "communicationPreference"],
+        |      "properties": {
+        |        "countryCode": {
+        |          "type": "string",
+        |          "minLength": 2,
+        |          "maxLength": 2,
+        |          "pattern": "[A-Z][A-Z]"
+        |        },
+        |        "address1": {
+        |          "type": "string",
+        |          "maxLength": 35
+        |        },
+        |        "address2": {
+        |          "type": "string",
+        |          "maxLength": 35
+        |        },
+        |        "address3": {
+        |          "type": "string",
+        |          "maxLength": 35
+        |        },
+        |        "address4": {
+        |          "type": "string",
+        |          "maxLength": 35
+        |        },
+        |        "address5": {
+        |          "type": "string",
+        |          "maxLength": 35
+        |        },
+        |        "postcode": {
+        |          "type": "string",
+        |          "maxLength": 10
+        |        },
+        |        "communicationPreference": {
+        |          "type": "string",
+        |          "minLength": 2,
+        |          "maxLength": 2,
+        |          "pattern": "00|02"
+        |        },
+        |        "phoneNumber": {
+        |          "type": "string",
+        |          "maxLength": 15
+        |        },
+        |        "email": {
+        |          "type": "string",
+        |          "maxLength": 254,
+        |          "pattern": "^.{1,64}@.{1,252}$"
+        |        }
+        |      }
+        |    },
+        |    "registrationChannel": {
+        |      "type": "string",
+        |      "maxLength": 10,
+        |      "pattern": "^online$|^callCentre$"
+        |    },
+        |    "nino" : {
+        |      "type" : "string",
+        |      "minLength": 9,
+        |      "maxLength": 9,
+        |      "pattern": "^(([A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])([0-9]{2})([0-9]{2})([0-9]{2})([A-D]{1})|((XX)(99)(99)(99)(X)))$"
+        |    }
+        |  }
+        |}
+      """.stripMargin
+
+    lazy val validationSchema = JsonLoader.fromString(validationSchemaStr)
+    lazy val featureLogger = Logger("outgoing-json-validation")
+    lazy val jsonValidator: JsonValidator = JsonSchemaFactory.byDefault().getValidator
+  }
 
   // details required to get an authorisation token from OAuth
   private[controllers] case class OAuthConfiguration(enabled: Boolean, url: String, clientID: String, callbackURL: String, scopes: List[String])
