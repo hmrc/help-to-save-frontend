@@ -25,18 +25,17 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util._
-import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends ServicesConfig {
+class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) {
 
   def checkEligibility(nino: String,
                        userDetailsURI: String,
                        oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
-    helpToSaveConnector.getEligibilityStatus(nino, userDetailsURI, oauthAuthorisationCode)
+    helpToSaveConnector.getEligibility(nino, userDetailsURI, oauthAuthorisationCode)
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]] {

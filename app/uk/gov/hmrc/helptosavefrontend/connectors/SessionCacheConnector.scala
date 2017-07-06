@@ -18,11 +18,12 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.json.{Reads, Writes}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{keyStoreDomain, keyStoreUrl, sessionCacheKey}
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 
 import scala.concurrent.Future
 
@@ -40,19 +41,15 @@ trait SessionCacheConnector extends SessionCache with ServicesConfig {
 }
 
 @Singleton
-class SessionCacheConnectorImpl extends SessionCacheConnector with AppName with ServicesConfig {
+class SessionCacheConnectorImpl extends SessionCacheConnector with AppName {
 
   override def defaultSource: String = appName
 
-  val sessionKey: String = getString("microservice.services.keystore.session-key")
+  val sessionKey: String = sessionCacheKey
 
-  private val _baseUri = baseUrl("keystore")
+  override def baseUri: String = keyStoreUrl
 
-  private val _domain = getString("microservice.services.keystore.domain")
-
-  override def baseUri: String = _baseUri
-
-  override def domain: String = _domain
+  override def domain: String = keyStoreDomain
 
   override def http: HttpGet with HttpPut with HttpDelete = WSHttp
 }

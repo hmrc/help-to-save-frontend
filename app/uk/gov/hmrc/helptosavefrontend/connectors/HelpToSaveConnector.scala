@@ -16,16 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.net.URLEncoder
-
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
+import uk.gov.hmrc.helptosavefrontend.models.EligibilityResult
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,22 +31,17 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibilityStatus(nino: NINO,
-                           userDetailsURI: String,
-                           oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
-
+  def getEligibility(nino: NINO,
+                     userDetailsURI: String,
+                     oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector with ServicesConfig {
+class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
-  val helpToSaveUrl: String = baseUrl("help-to-save")
 
-  val createAccountURL: String = s"$helpToSaveUrl/help-to-save/create-an-account"
-
-  def eligibilityURL(nino: NINO, userDetailsURI: String, oauthAuthorisationCode: String): String =
-    s"$helpToSaveUrl/help-to-save/eligibility-check?" +
-      s"nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}&oauthAuthorisationCode=$oauthAuthorisationCode"
+  def eligibilityURL(nino: NINO, userDetailsURI: String, oauthCode: String): String =
+    s"$eligibilityCheckUrl?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}&oauthAuthorisationCode=$oauthCode"
 
   /**
     * @param response The HTTPResponse which came back with a bad status
@@ -60,10 +53,10 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
 
   val http: WSHttpExtension = WSHttp
 
-  override def getEligibilityStatus(nino: NINO,
-                                    userDetailsURI: String,
-                                    oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
-    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, userDetailsURI, oauthAuthorisationCode)))
+  override def getEligibility(nino: NINO,
+                              userDetailsURI: String,
+                              oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
+    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, userDetailsURI, oauthCode)))
       .subflatMap { response ⇒
         if (response.status == 200) {
           response.parseJson[EligibilityResult]

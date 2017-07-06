@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.net.URLEncoder
-
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{eligibilityCheckUrl, encoded}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpExtension
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.NINO
@@ -30,17 +29,8 @@ import scala.concurrent.{Await, Future}
 
 class HelpToSaveConnectorSpec extends TestSupport {
 
-  val baseUrl: String = {
-    val port = config.getString("microservice.services.help-to-save.port")
-    val host = config.getString("microservice.services.help-to-save.host")
-    s"http://$host:$port"
-  }
-
-  def eligibilityURL(nino: NINO, userDetailsURI: String,authorisationCode: String): String =
-    s"$baseUrl/help-to-save/eligibility-check?" +
-      s"nino=$nino&userDetailsURI=${URLEncoder.encode(userDetailsURI, "UTF-8")}&oauthAuthorisationCode=$authorisationCode"
-
-  val createAccountURL = baseUrl + "/help-to-save/create-an-account"
+  def eligibilityURL(nino: NINO, userDetailsURI: String, authorisationCode: String): String =
+    s"$eligibilityCheckUrl?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}&oauthAuthorisationCode=$authorisationCode"
 
   class TestApparatus {
     val mockHttp = mock[WSHttpExtension]
@@ -66,7 +56,7 @@ class HelpToSaveConnectorSpec extends TestSupport {
       "perform a GET request to the help-to-save-service" in new TestApparatus {
         mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI, authorisationCode))(HttpResponse(200))
 
-        connector.getEligibilityStatus(nino, userDetailsURI, authorisationCode)
+        connector.getEligibility(nino, userDetailsURI, authorisationCode)
       }
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result" in new TestApparatus {
@@ -74,7 +64,7 @@ class HelpToSaveConnectorSpec extends TestSupport {
         mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI, authorisationCode))(
           HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(Some(userInfo))))))
 
-        val result = connector.getEligibilityStatus(nino, userDetailsURI, authorisationCode)
+        val result = connector.getEligibility(nino, userDetailsURI, authorisationCode)
         Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(Some(userInfo)))
       }
 
@@ -82,7 +72,7 @@ class HelpToSaveConnectorSpec extends TestSupport {
         mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI, authorisationCode))(
           HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(None)))))
 
-        val result = connector.getEligibilityStatus(nino, userDetailsURI, authorisationCode)
+        val result = connector.getEligibility(nino, userDetailsURI, authorisationCode)
         Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(None))
       }
 
@@ -90,7 +80,7 @@ class HelpToSaveConnectorSpec extends TestSupport {
       "return an error if the call does not come back with a 200 status" in new TestApparatus {
         mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI, authorisationCode))(HttpResponse(500))
 
-        val result = connector.getEligibilityStatus(nino, userDetailsURI, authorisationCode)
+        val result = connector.getEligibility(nino, userDetailsURI, authorisationCode)
         Await.result(result.value, 3.seconds).isLeft shouldBe true
       }
 
