@@ -28,7 +28,7 @@ import cats.instances.future._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class HelpToSaveServiceSpec extends TestSupport with ScalaFutures {
+class HelpToSaveServiceSpec extends TestSupport {
 
   val htsConnector = mock[HelpToSaveConnector]
   val nsiConnector = mock[NSIConnector]
@@ -51,7 +51,7 @@ class HelpToSaveServiceSpec extends TestSupport with ScalaFutures {
 
         val eligStatus: Result[EligibilityResult] = EitherT.pure[Future, String, EligibilityResult](eligResult)
 
-        (htsConnector.getEligibilityStatus(_: String, _: String, _: String)(_: HeaderCarrier)).expects(nino, userDetailsURI, oauthAuthorisationCode, *)
+        (htsConnector.getEligibility(_: String, _: String, _: String)(_: HeaderCarrier)).expects(nino, userDetailsURI, oauthAuthorisationCode, *)
           .returning(eligStatus)
 
         val result = htsService.checkEligibility(nino, userDetailsURI, oauthAuthorisationCode)
