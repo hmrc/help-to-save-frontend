@@ -41,9 +41,9 @@ class HelpToSaveAuthSpec extends TestSupport {
       .expects(AuthProviders(GovernmentGateway), *, *)
       .returning(Future.failed(ex))
 
-  def mockAuthWithRetrievalsWith[A, B](predicate: Predicate, retrieval: Retrieval[A ~ B])(ex: Throwable): Unit =
-    (mockAuthConnector.authorise[A ~ B](_: Predicate, _: Retrieval[uk.gov.hmrc.auth.core.~[A, B]])(_: HeaderCarrier))
-      .expects(predicate, retrieval, *)
+  def mockAuthWithRetrievalsWith(predicate: Predicate)(ex: Throwable): Unit =
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier))
+      .expects(predicate, *, *)
       .returning(Future.failed(ex))
 
   val htsAuth = new HelpToSaveAuth(fakeApplication) {
@@ -61,7 +61,7 @@ class HelpToSaveAuthSpec extends TestSupport {
   }
 
   private def mockAuthWith(error: String) =
-    mockAuthWithRetrievalsWith(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(fromString(error))
+    mockAuthWithRetrievalsWith(AuthWithConfidence)(fromString(error))
 
   "HelpToSaveAuth" should {
 

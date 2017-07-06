@@ -34,6 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, HTSSession, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -62,10 +63,10 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       case (Some(authorisationCode), _) ⇒
         authorisedForHtsWithEnrolments {
           implicit request ⇒
-            implicit userUrlWithNino ⇒
+            implicit maybeNino ⇒
               val userInfo = for {
-                userUrlWithNino ← EitherT.fromOption[Future](userUrlWithNino, "could not retrieve either userDetailsUrl or NINO from auth")
-                eligible ← helpToSaveService.checkEligibility(userUrlWithNino.nino, userUrlWithNino.path, authorisationCode)
+                nino ← EitherT.fromOption[Future](maybeNino, "could not retrieve either userDetailsUrl or NINO from auth")
+                eligible ← helpToSaveService.checkEligibility(nino, authorisationCode)
                 nsiUserInfo ← toNSIUserInfo(eligible)
                 _ ← writeToKeyStore(nsiUserInfo)
               } yield eligible
@@ -179,7 +180,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   private lazy val redirectForAuthorisationCode =
     if(oauthConfig.enabled) {
-      { (_: Request[AnyContent], _: Option[UserDetailsUrlWithNino]) ⇒
+      { (_: Request[AnyContent], _: Option[NINO]) ⇒
         Logger.info("Received request to get user details: redirecting to oauth obtain authorisation code")
 
         // we need to get an authorisation token from OAuth - redirect to OAuth here. When the authorisation
@@ -194,7 +195,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           ))
       }
     } else {
-      { (request: Request[AnyContent], userDetailsUrlWithNino: Option[UserDetailsUrlWithNino]) ⇒
+      { (request: Request[AnyContent], userDetailsUrlWithNino: Option[NINO]) ⇒
         // if the redirect to oauth is not enabled redirect straight to our 'confirm-details' endpoint
         // using the NINO as the authorisation code
         implicit val r = request
@@ -202,8 +203,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         userDetailsUrlWithNino.fold {
           Logger.error("NINO or user details URI not available")
           Redirect(routes.RegisterController.notEligible().absoluteURL())
-        }{ u ⇒
-          val nino = u.nino
+        }{ nino ⇒
           Logger.info(s"Received request to get user details: redirecting to get user details using NINO $nino as authorisation code")
           Redirect(routes.RegisterController.confirmDetails(Some(nino), None, None, None).absoluteURL())
         }

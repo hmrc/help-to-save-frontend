@@ -33,9 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) {
 
   def checkEligibility(nino: String,
-                       userDetailsURI: String,
                        oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
-    helpToSaveConnector.getEligibility(nino, userDetailsURI, oauthAuthorisationCode)
+    helpToSaveConnector.getEligibility(nino, oauthAuthorisationCode)
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]] {

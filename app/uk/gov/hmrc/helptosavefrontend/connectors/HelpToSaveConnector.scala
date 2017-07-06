@@ -32,7 +32,6 @@ import scala.concurrent.{ExecutionContext, Future}
 trait HelpToSaveConnector {
 
   def getEligibility(nino: NINO,
-                     userDetailsURI: String,
                      oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
 }
 
@@ -40,8 +39,11 @@ trait HelpToSaveConnector {
 class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
 
-  def eligibilityURL(nino: NINO, userDetailsURI: String, oauthCode: String): String =
-    s"$eligibilityCheckUrl?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}&oauthAuthorisationCode=$oauthCode"
+  val createAccountURL: String = s"$helpToSaveUrl/help-to-save/create-an-account"
+
+  def eligibilityURL(nino: NINO, oauthCode: String): String =
+    s"$helpToSaveUrl/help-to-save/eligibility-check?" +
+      s"nino=$nino&oauthAuthorisationCode=$oauthCode"
 
   /**
     * @param response The HTTPResponse which came back with a bad status
@@ -54,9 +56,8 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
   val http: WSHttpExtension = WSHttp
 
   override def getEligibility(nino: NINO,
-                              userDetailsURI: String,
                               oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
-    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, userDetailsURI, oauthCode)))
+    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, oauthCode)))
       .subflatMap { response ⇒
         if (response.status == 200) {
           response.parseJson[EligibilityResult]

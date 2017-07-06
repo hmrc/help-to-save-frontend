@@ -29,8 +29,8 @@ import scala.concurrent.{Await, Future}
 
 class HelpToSaveConnectorSpec extends TestSupport {
 
-  def eligibilityURL(nino: NINO, userDetailsURI: String, authorisationCode: String): String =
-    s"$eligibilityCheckUrl?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}&oauthAuthorisationCode=$authorisationCode"
+  def eligibilityURL(nino: NINO, authorisationCode: String): String =
+    s"$eligibilityCheckUrl?nino=$nino&oauthAuthorisationCode=$authorisationCode"
 
   class TestApparatus {
     val mockHttp = mock[WSHttpExtension]
@@ -50,37 +50,35 @@ class HelpToSaveConnectorSpec extends TestSupport {
     "getting eligibility status" should {
 
       val nino = "nino"
-      val userDetailsURI = "uri"
       val authorisationCode = "authorisation-code"
 
       "perform a GET request to the help-to-save-service" in new TestApparatus {
-        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI, authorisationCode))(HttpResponse(200))
-
-        connector.getEligibility(nino, userDetailsURI, authorisationCode)
+        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(HttpResponse(200))
+        connector.getEligibility(nino, authorisationCode)
       }
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result" in new TestApparatus {
         val userInfo = randomUserInfo()
-        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI, authorisationCode))(
+        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
           HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(Some(userInfo))))))
 
-        val result = connector.getEligibility(nino, userDetailsURI, authorisationCode)
+        val result = connector.getEligibility(nino, authorisationCode)
         Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(Some(userInfo)))
       }
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result" in new TestApparatus {
-        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI, authorisationCode))(
+        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
           HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(None)))))
 
-        val result = connector.getEligibility(nino, userDetailsURI, authorisationCode)
+        val result = connector.getEligibility(nino, authorisationCode)
         Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(None))
       }
 
 
       "return an error if the call does not come back with a 200 status" in new TestApparatus {
-        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI, authorisationCode))(HttpResponse(500))
+        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(HttpResponse(500))
 
-        val result = connector.getEligibility(nino, userDetailsURI, authorisationCode)
+        val result = connector.getEligibility(nino, authorisationCode)
         Await.result(result.value, 3.seconds).isLeft shouldBe true
       }
 

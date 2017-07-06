@@ -29,6 +29,6 @@ object HtsAuth {
 
   val AuthWithConfidence: Predicate = NinoEnrolmentWithConfidence and AuthProvider
 
-  val UserDetailsUrlWithAllEnrolments: Retrieval[~[Option[String], Enrolments]] = userDetailsUri and allEnrolments
+  val UserDetailsUrlWithAllEnrolments: Retrieval[Enrolments] = allEnrolments
 
 }

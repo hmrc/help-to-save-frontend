@@ -43,7 +43,6 @@ class RegisterControllerSpec extends TestSupport {
 
   private val mockHtsService = mock[HelpToSaveService]
 
-  val userDetailsURI = "/dummy/user/details/uri"
   val nino = "WM123456C"
 
   private val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
@@ -64,9 +63,9 @@ class RegisterControllerSpec extends TestSupport {
     override lazy val authConnector = mockAuthConnector
   }
 
-  def mockEligibilityResult(nino: String, userDetailsURI: String, authorisationCode: String)(result: Either[String, Option[UserInfo]]): Unit =
-    (mockHtsService.checkEligibility(_: String, _: String, _: String)(_: HeaderCarrier))
-      .expects(nino, userDetailsURI, authorisationCode, *)
+  def mockEligibilityResult(nino: String, authorisationCode: String)(result: Either[String, Option[UserInfo]]): Unit =
+    (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
+      .expects(nino,authorisationCode, *)
       .returning(EitherT.fromEither[Future](result.map(EligibilityResult(_))))
 
   def mockSessionCacheConnectorPut(result: Either[String, CacheMap]): Unit =
@@ -86,9 +85,9 @@ class RegisterControllerSpec extends TestSupport {
       .expects(nSIUserInfo, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockPlayAuthWithRetrievals[A, B](predicate: Predicate, retrieval: Retrieval[A ~ B])(result: A ~ B): Unit =
-    (mockAuthConnector.authorise[A ~ B](_: Predicate, _: Retrieval[uk.gov.hmrc.auth.core.~[A, B]])(_: HeaderCarrier))
-      .expects(predicate, retrieval, *)
+  def mockPlayAuthWithRetrievals[A, B](predicate: Predicate)(result: Enrolments): Unit =
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier))
+      .expects(predicate, *, *)
       .returning(Future.successful(result))
 
   def mockPlayAuthWithWithConfidence(): Unit =
@@ -116,7 +115,7 @@ class RegisterControllerSpec extends TestSupport {
           override lazy val authConnector = mockAuthConnector
         }
 
-        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
 
         implicit val request = FakeRequest()
         val result = register.getAuthorisation(request)
@@ -124,7 +123,7 @@ class RegisterControllerSpec extends TestSupport {
         redirectLocation(result) shouldBe Some(routes.RegisterController.confirmDetails(Some(nino), None,None,None).absoluteURL())
       }
 
-      "return an if redirects to OAUTH are disabled and a NINO is not available" in {
+      "return the not eligible page if redirects to OAUTH are disabled and a NINO is not available" in {
         val register = new RegisterController(
           fakeApplication.injector.instanceOf[MessagesApi],
           mockHtsService,
@@ -134,8 +133,7 @@ class RegisterControllerSpec extends TestSupport {
           override lazy val authConnector = mockAuthConnector
         }
 
-        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(
-          uk.gov.hmrc.auth.core.~(Some(userDetailsURI), Enrolments(Set.empty[Enrolment])))
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(Enrolments(Set.empty[Enrolment]))
 
         implicit val request = FakeRequest()
         val result = register.getAuthorisation(request)
@@ -144,7 +142,7 @@ class RegisterControllerSpec extends TestSupport {
       }
 
       "redirect to OAuth to get an access token if enabled" in {
-        mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
 
         val result = doConfirmDetailsRequest()
         status(result) shouldBe Status.SEE_OTHER
@@ -178,8 +176,8 @@ class RegisterControllerSpec extends TestSupport {
       "return user details if the user is eligible for help-to-save" in {
         val user = validUserInfo
         inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
-          mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Right(Some(user)))
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
+          mockEligibilityResult(nino, oauthAuthorisationCode)(Right(Some(user)))
           mockSessionCacheConnectorPut(Right(CacheMap("1", Map.empty[String, JsValue])))
         }
 
@@ -200,8 +198,8 @@ class RegisterControllerSpec extends TestSupport {
 
       "display a 'Not Eligible' page if the user is not eligible" in {
         inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some("/dummy/user/details/uri"), enrolments))
-          mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Right(None))
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
+          mockEligibilityResult(nino, oauthAuthorisationCode)(Right(None))
         }
 
         val result = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
@@ -227,36 +225,30 @@ class RegisterControllerSpec extends TestSupport {
 
         "the nino is not available" in {
           test(
-            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(
-              uk.gov.hmrc.auth.core.~(Some(userDetailsURI), Enrolments(Set.empty))))
-        }
-
-        "the user details URI is not available" in {
-          test(
-            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(
-              uk.gov.hmrc.auth.core.~(None, enrolments)))
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(Enrolments(Set.empty[Enrolment]))
+          )
         }
 
         "the eligibility check call returns with an error" in {
           test(
             inSequence {
-              mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
-              mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Left("Oh no"))
+              mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
+              mockEligibilityResult(nino, oauthAuthorisationCode)(Left("Oh no"))
             })
         }
 
         "if the user details fo not pass NS&I validation checks" in {
           val user = validUserInfo.copy(forename = " space-at-beginning")
           test(inSequence {
-            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
-            mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Right(Some(user)))
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
+            mockEligibilityResult(nino, oauthAuthorisationCode)(Right(Some(user)))
           })
         }
 
         "there is an error writing to the session cache" in {
           test(inSequence {
-            mockPlayAuthWithRetrievals(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(uk.gov.hmrc.auth.core.~(Some(userDetailsURI), enrolments))
-            mockEligibilityResult(nino, userDetailsURI, oauthAuthorisationCode)(Right(Some(validUserInfo)))
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
+            mockEligibilityResult(nino, oauthAuthorisationCode)(Right(Some(validUserInfo)))
             mockSessionCacheConnectorPut(Left("Bang"))
           })
         }
