@@ -118,13 +118,13 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       case None => Right(None)
       case Some(ui) =>
         FEATURE("outgoing-json-validation", conf, featureLogger) thenOrElse(
-          _ => for {
-              t0 <- validateUserInfoAgainstSchema(ui, validationSchema)
-              t1 <- before1800(ui)
-              t2 <- futureDate(ui)
-            } yield t2,
+          for {
+            t0 <- validateUserInfoAgainstSchema(ui, validationSchema)
+            t1 <- before1800(ui)
+            t2 <- futureDate(ui)
+          } yield t2,
           //_ => validateUserInfoAgainstSchema(ui, validationSchema),
-          _ => Right(userInfo))
+          Right(userInfo))
     }
   }
 

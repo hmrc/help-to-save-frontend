@@ -24,28 +24,14 @@ import uk.gov.hmrc.helptosavefrontend.util.FEATURE.LogLevel
 
 class FeatureSpec extends WordSpec with Matchers{
 
-  case class InnerData(s: String)
-
-  case class Data(ints: List[Int], inner: InnerData)
-
-  val testData = Data(List(1,2,3,4,5), InnerData("hello")) // scalastyle:ignore magic.number
-
   def config(enabled: Boolean) = Configuration(ConfigFactory.parseString(
     s"""
        |feature-toggles{
        |  my-feature {
        |    enabled = ${if(enabled) "true" else "false"}
-       |    int = 1
-       |    data {
-       |      ints = [${testData.ints.mkString(",")}]
-       |      inner {
-       |        s = "${testData.inner.s}"
-       |      }
-       |    }
        |  }
        |}
     """.stripMargin))
-
 
   class LogContext {
     var lastLogMessage: Option[(LogLevel,String)] = None
@@ -57,11 +43,9 @@ class FeatureSpec extends WordSpec with Matchers{
 
     "must have an apply method which does not take a HList" in new LogContext{
       val f1 = FEATURE("my-feature", config(true), log _)
-      f1.extraParams shouldBe HNil
       f1.enabled shouldBe true
 
       val f2 = FEATURE("my-feature", config(false), log _)
-      f2.extraParams shouldBe HNil
       f2.enabled shouldBe false
     }
 
@@ -78,56 +62,14 @@ class FeatureSpec extends WordSpec with Matchers{
       a[ConfigException] shouldBe thrownBy(FEATURE("nonexistent", config(true), log _))
     }
 
-    "be able to accumulate data from the config" in new LogContext{
-      val f1 = FEATURE("my-feature", config(true), log _).withAn[Int]("int")
-      f1.extraParams shouldBe (1 :: HNil)
-
-      val f2 = FEATURE("my-feature", config(true), log _).withA[Data]("data")
-      f2.extraParams shouldBe (testData :: HNil)
-
-      val f3 = FEATURE("my-feature", config(true), log _).withAn[Int]("int").withA[Data]("data")
-      f3.extraParams shouldBe (1 :: testData :: HNil)
-    }
-
-    "throw a runtime exception if a parameter does not exist" in new LogContext{
-      a[ConfigException] shouldBe thrownBy(FEATURE("my-feature", config(true), log _).withAn[Int]("nonexistent"))
-    }
-
-    "must have a value which returns the accumulated data" in new LogContext{
-      import FEATURE._
-
-      val f1 = FEATURE("my-feature", config(true), log _).withA[Data]("data")
-      f1.extraParams shouldBe testData :: HNil
-
-      val f2 = FEATURE("my-feature", config(true), log _).withAn[Int]("int").withA[Data]("data")
-      f2.extraParams shouldBe 1 :: testData :: HNil
-    }
-
-
     "must have a method which performs one action if the boolean is true " +
       "and another if false using the accumulated data" in new LogContext{
-      import FEATURE._
-
-      val f1 = FEATURE("my-feature", config(true), log _).withAn[Int]("int")
-      val result1= f1.thenOrElse({i ⇒
-        i.isInstanceOf[Int] shouldBe true
-        "a"
-      },{ i ⇒
-        i.isInstanceOf[Int] shouldBe true
-        "b"
-      })
+      val f1 = FEATURE("my-feature", config(true), log _)
+      val result1= f1.thenOrElse("a","b")
       result1 shouldBe "a"
 
-      val f2 = FEATURE("my-feature", config(false), log _).withAn[Int]("int").withA[Data]("data")
-      val result2 = f2.thenOrElse({ case (i,d) ⇒
-        i.isInstanceOf[Int] shouldBe true
-        d.isInstanceOf[Data] shouldBe true
-        "a"
-      },{ case (i,d) ⇒
-        i.isInstanceOf[Int] shouldBe true
-        d.isInstanceOf[Data] shouldBe true
-        "b"
-      })
+      val f2 = FEATURE("my-feature", config(false), log _)
+      val result2 = f2.thenOrElse("a", "b")
       result2 shouldBe "b"
     }
 
@@ -138,7 +80,7 @@ class FeatureSpec extends WordSpec with Matchers{
       val f = FEATURE("my-feature", config(b), logContext.log _)
 
       logContext.lastLogMessage.isEmpty shouldBe true
-      f.thenOrElse({ _ ⇒ () },{ _ ⇒ () })
+      f.thenOrElse((),())
 
       logContext.lastLogMessage.isEmpty shouldBe false
       logContext.lastLogMessage.get._1 shouldBe LogLevel.INFO

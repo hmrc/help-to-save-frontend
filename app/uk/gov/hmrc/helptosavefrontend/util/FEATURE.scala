@@ -15,6 +15,7 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.util
+
 import com.typesafe.config.Config
 import configs.Configs
 import configs.syntax._
@@ -31,55 +32,25 @@ import uk.gov.hmrc.helptosavefrontend.util.FEATURE.LogLevel._
   *             'feature-toggles.$name'
   * @param config The global configuration
   * @param enabled Whether or not the feature should be enabled
-  * @param extraParams Extra parameters read from the config file. Use `addA` or `addAn` to accumulate
-  *                    parameters
   * @param log This type signature is used to facilitate testing of logging. (mocking frameworks do not
   *            currently seem to support by-name parameters very well)
-  * @param t Enables conversion of internal HList to a tuple
-  * @tparam L The HList representing the list of extra parameters
-  * @tparam T The tuple corresponding to the list of extra parameters
   */
-case class FEATURE[L <: HList,T] private(name: String,
-                                         config: Config,
-                                         enabled: Boolean,
-                                         private[util] val extraParams: L,
-                                         log:  (LogLevel,String,Option[Throwable]) ⇒ Unit)(implicit t: Tupler.Aux[L,T]) {
+case class FEATURE private(name: String,
+                           config: Config,
+                           enabled: Boolean,
+                           log:  (LogLevel, String, Option[Throwable]) ⇒ Unit) {
 
   import LogLevel._
 
-  private def log(level: LogLevel, message: String): Unit = log(level, message, None)
+  @inline private def log(level: LogLevel, message: String): Unit = log(level, message, None)
 
-  private def log(level: LogLevel, message: String, error: Throwable): Unit = log(level, message, Some(error))
+  @inline private def log(level: LogLevel, message: String, error: Throwable): Unit = log(level, message, Some(error))
 
-  private def time(): Long = System.nanoTime()
+  @inline private def time(): Long = System.nanoTime()
 
-  private def withInternal[A] =  new {
-    // convert the name into something of type A by reading it from the config. Return a new FEATURE with
-    // the new parameter appended to the extraParams list. Use an anonymous class here to be able to
-    // 'curry' the types (see http://caryrobbins.com/dev/scala-type-curry/) - we want to specify the type
-    // A, but we want L2 and T2 below to be calculated
-    def apply[L2 <: HList, T2](name: String)(
-      implicit
-      configs: Configs[A],
-      p: Prepend.Aux[L, A :: HNil, L2],
-      t: Tupler.Aux[L2,T2]
-    ): FEATURE[L2,T2] = {
-      val param = config.get[A](name).value
-      copy(extraParams = extraParams ::: (param :: HNil))
-    }
-  }
-
-  def withA[A] = withInternal[A]
-
-  def withAn[A] = withInternal[A]
-
-  def thenOrElse[A](ifTrue: T ⇒ A, ifFalse: T ⇒ A): A = {
+  def thenOrElse[A](ifTrue: ⇒ A, ifFalse: ⇒ A): A = {
     val start = time()
-    val result = if (enabled) {
-      ifTrue(extraParams.tupled)
-    } else {
-      ifFalse(extraParams.tupled)
-    }
+    val result = if (enabled) ifTrue else ifFalse
     val end = time()
     log(INFO, s"Feature $name (enabled: $enabled) executed in ${end-start} ns")
     result
@@ -89,16 +60,9 @@ case class FEATURE[L <: HList,T] private(name: String,
 
 object FEATURE {
 
-  // converts a HList with a single element to the element itself rather than
-  // a Tuple1 containing the element
-  implicit def hlistTupler1[A]: Tupler.Aux[A::HNil, A] = new Tupler[A::HNil] {
-    type Out = A
-    def apply(l : A::HNil): Out = l match { case a::HNil => a }
-  }
+  private[util] sealed trait LogLevel
 
- private[util] sealed trait LogLevel
-
- private[util] object LogLevel {
+  private[util] object LogLevel {
     case object TRACE extends LogLevel
     case object DEBUG extends LogLevel
     case object INFO extends LogLevel
@@ -110,9 +74,9 @@ object FEATURE {
     configuration.underlying.getConfig(s"feature-toggles.$name")
 
   // this apply is used for testing
-  private[util] def apply  (name: String, configuration: Configuration, log:  (LogLevel,String,Option[Throwable]) ⇒ Unit): FEATURE[HNil,Unit] = {
+  private[util] def apply(name: String, configuration: Configuration, log: (LogLevel, String, Option[Throwable]) ⇒ Unit): FEATURE = {
     val config = getConfig(name, configuration)
-    FEATURE(name, config, config.getBoolean("enabled"), HNil, log)
+    FEATURE(name, config, config.getBoolean("enabled"), log)
   }
 
   /**
@@ -121,20 +85,20 @@ object FEATURE {
     * @param configuration The global configuration
     * @param log The logger to be used by the feature
     */
-  def apply  (name: String, configuration: Configuration, log: Logger): FEATURE[HNil,Unit] = {
+  def apply(name: String, configuration: Configuration, log: Logger): FEATURE = {
     def logFunction(l: Logger): ((LogLevel,String,Option[Throwable]) ⇒ Unit) = {
       case (level: LogLevel, message: String, error: Option[Throwable]) ⇒
         level match {
-        case TRACE ⇒ error.fold(log.trace(message))(log.trace(message,_))
-        case DEBUG ⇒ error.fold(log.debug(message))(log.debug(message,_))
-        case INFO  ⇒ error.fold(log.info(message))(log.info(message,_))
-        case WARN  ⇒ error.fold(log.warn(message))(log.warn(message,_))
-        case ERROR ⇒ error.fold(log.error(message))(log.error(message,_))
-      }
+          case TRACE ⇒ error.fold(log.trace(message))(log.trace(message,_))
+          case DEBUG ⇒ error.fold(log.debug(message))(log.debug(message,_))
+          case INFO  ⇒ error.fold(log.info(message))(log.info(message,_))
+          case WARN  ⇒ error.fold(log.warn(message))(log.warn(message,_))
+          case ERROR ⇒ error.fold(log.error(message))(log.error(message,_))
+        }
     }
 
     val config = getConfig(name, configuration)
-    FEATURE(name, config, config.getBoolean("enabled"), HNil, logFunction(log))
+    FEATURE(name, config, config.getBoolean("enabled"), logFunction(log))
   }
 
 }
