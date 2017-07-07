@@ -17,12 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.util
 
 import com.typesafe.config.Config
-import configs.Configs
-import configs.syntax._
 import play.api.{Configuration, Logger}
-import shapeless.ops.hlist.Prepend
-import shapeless.{::, HList, HNil}
-import shapeless.ops.hlist._
 import uk.gov.hmrc.helptosavefrontend.util.FEATURE.LogLevel
 import uk.gov.hmrc.helptosavefrontend.util.FEATURE.LogLevel._
 
