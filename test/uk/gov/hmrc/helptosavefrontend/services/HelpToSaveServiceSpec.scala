@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.services
 import cats.data.EitherT
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckResult, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.{TestSupport, models}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -45,9 +45,9 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val user = models.randomUserInfo()
 
-        val eligResult = EligibilityResult(Some(user))
+        val eligResult = EligibilityCheckResult(Right(Some(user)))
 
-        val eligStatus: Result[EligibilityResult] = EitherT.pure[Future, String, EligibilityResult](eligResult)
+        val eligStatus: Result[EligibilityCheckResult] = EitherT.pure[Future, String, EligibilityCheckResult](eligResult)
 
         (htsConnector.getEligibility(_: String,  _: String)(_: HeaderCarrier)).expects(nino, oauthAuthorisationCode, *)
           .returning(eligStatus)

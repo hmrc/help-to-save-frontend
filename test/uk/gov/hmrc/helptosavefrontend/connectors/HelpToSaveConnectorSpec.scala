@@ -60,18 +60,18 @@ class HelpToSaveConnectorSpec extends TestSupport {
       "return an EligibilityResult if the call comes back with a 200 status with a positive result" in new TestApparatus {
         val userInfo = randomUserInfo()
         mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
-          HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(Some(userInfo))))))
+          HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResult(Right(Some(userInfo)))))))
 
         val result = connector.getEligibility(nino, authorisationCode)
-        Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(Some(userInfo)))
+        Await.result(result.value, 3.seconds) shouldBe Right(EligibilityCheckResult(Right(Some(userInfo))))
       }
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result" in new TestApparatus {
         mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
-          HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(None)))))
+          HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResult(Right(None))))))
 
         val result = connector.getEligibility(nino, authorisationCode)
-        Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(None))
+        Await.result(result.value, 3.seconds) shouldBe Right(EligibilityCheckResult(Right(None)))
       }
 
 

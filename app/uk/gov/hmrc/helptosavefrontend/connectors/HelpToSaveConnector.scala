@@ -21,7 +21,7 @@ import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
-import uk.gov.hmrc.helptosavefrontend.models.EligibilityResult
+import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -31,19 +31,14 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibility(nino: NINO,
-                     oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult]
+  def getEligibility(nino: NINO, oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult]
 }
 
 @Singleton
 class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
 
-  val createAccountURL: String = s"$helpToSaveUrl/help-to-save/create-an-account"
-
-  def eligibilityURL(nino: NINO, oauthCode: String): String =
-    s"$helpToSaveUrl/help-to-save/eligibility-check?" +
-      s"nino=$nino&oauthAuthorisationCode=$oauthCode"
+  def eligibilityURL(nino: NINO, oauthCode: String) = s"$eligibilityCheckUrl?nino=$nino&oauthAuthorisationCode=$oauthCode"
 
   /**
     * @param response The HTTPResponse which came back with a bad status
@@ -56,11 +51,11 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
   val http: WSHttpExtension = WSHttp
 
   override def getEligibility(nino: NINO,
-                              oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
+                              oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult] =
     EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, oauthCode)))
       .subflatMap { response ⇒
         if (response.status == 200) {
-          response.parseJson[EligibilityResult]
+          response.parseJson[EligibilityCheckResult]
         } else {
           Left(badResponseMessage(response, "Eligibility check"))
         }

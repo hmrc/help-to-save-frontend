@@ -23,7 +23,7 @@ import com.google.inject.Inject
 import play.api.Logger
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckResult, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -33,7 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) {
 
   def checkEligibility(nino: String,
-                       oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityResult] =
+                       oauthAuthorisationCode: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult] =
+  
     helpToSaveConnector.getEligibility(nino, oauthAuthorisationCode)
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
