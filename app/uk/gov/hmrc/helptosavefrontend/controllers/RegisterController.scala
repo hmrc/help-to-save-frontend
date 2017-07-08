@@ -76,8 +76,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                   InternalServerError("")
                 }, _.result.fold(
                   missingInfos ⇒ {
-                    Logger.error(s"user $maybeNino has missing information: ${missingInfos.infos.mkString(",")}")
-                    Ok(views.html.register.missing_user_info(missingInfos.infos))
+                    Logger.error(s"user ${maybeNino.get} has missing information: ${missingInfos.missingInfo.mkString(",")}")
+                    Ok(views.html.register.missing_user_info(missingInfos.missingInfo))
                   }, {
                     case Some(info) ⇒ Ok(views.html.register.confirm_details(info))
                     case _ ⇒ SeeOther(routes.RegisterController.notEligible().url)
@@ -164,8 +164,6 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         .recover { case e ⇒ Left(s"Could not write to key-store: ${e.getMessage}") }
     )
   }
-
-  private type EitherOrString[A] = Either[String, A]
 
   private def toNSIUserInfo(eligibilityResult: EligibilityCheckResult): EitherT[Future, String, Option[NSIUserInfo]] = {
 
