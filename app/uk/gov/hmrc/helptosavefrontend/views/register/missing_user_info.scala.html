@@ -14,9 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.controllers.routes
-
 @import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo
+
 @(missingInfos: Set[MissingUserInfo])(implicit request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.confirmdetails.header-page"), bodyClasses = None) {
@@ -24,7 +23,10 @@
         <h1>@Messages("hts.register.missinguserinfo.header")</h1>
     </header>
     <header class="divider--bottom">
-        <h2>@Messages("hts.register.missinguserinfo.info.header")</h2>
+        <h2>@Messages("hts.register.missinguserinfo")</h2>
     </header>
-    @{missingInfos.mkString(",")}
+
+    @for(info <- missingInfos) {
+        <li>@info</li>
+    }
 }
