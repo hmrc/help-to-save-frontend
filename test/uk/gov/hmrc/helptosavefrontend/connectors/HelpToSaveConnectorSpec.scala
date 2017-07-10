@@ -18,8 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{eligibilityCheckUrl, encoded}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.eligibilityCheckUrl
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpExtension
+import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, DateOfBirth, Email, GivenName, Surname}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -60,18 +61,28 @@ class HelpToSaveConnectorSpec extends TestSupport {
       "return an EligibilityResult if the call comes back with a 200 status with a positive result" in new TestApparatus {
         val userInfo = randomUserInfo()
         mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
-          HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(Some(userInfo))))))
+          HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResult(Right(Some(userInfo)))))))
 
         val result = connector.getEligibility(nino, authorisationCode)
-        Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(Some(userInfo)))
+        Await.result(result.value, 3.seconds) shouldBe Right(EligibilityCheckResult(Right(Some(userInfo))))
       }
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result" in new TestApparatus {
         mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
-          HttpResponse(200, responseJson = Some(Json.toJson(EligibilityResult(None)))))
+          HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResult(Right(None))))))
 
         val result = connector.getEligibility(nino, authorisationCode)
-        Await.result(result.value, 3.seconds) shouldBe Right(EligibilityResult(None))
+        Await.result(result.value, 3.seconds) shouldBe Right(EligibilityCheckResult(Right(None)))
+      }
+
+      "report to user if the eligibiity check comes back with any missing user info" in new TestApparatus {
+        val missingInfos = MissingUserInfos(Set(Surname, GivenName, Email, DateOfBirth, Contact))
+        val eligibilityResult = EligibilityCheckResult(Left(missingInfos))
+        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
+          HttpResponse(200, responseJson = Some(Json.toJson(eligibilityResult))))
+
+        val result = connector.getEligibility(nino, authorisationCode)
+        Await.result(result.value, 3.seconds) shouldBe Right(eligibilityResult)
       }
 
 

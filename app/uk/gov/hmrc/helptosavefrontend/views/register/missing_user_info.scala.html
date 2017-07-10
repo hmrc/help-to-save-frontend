@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.helptosavefrontend.models
+@import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo
 
-import play.api.libs.json.{Format, Json}
+@(missingInfos: Set[MissingUserInfo])(implicit request: Request[_], messages: Messages)
 
-/**
-  * The result of performing an eligibility check. If the user is eligible
-  * return their details, otherwise return [[None]]
-  */
-case class EligibilityResult(result: Option[UserInfo]) extends AnyVal {
-  def fold[A](whenIneligible: ⇒ A, whenEligible: UserInfo ⇒ A): A = result.fold(whenIneligible)(whenEligible)
-}
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.confirmdetails.header-page"), bodyClasses = None) {
+    <header class="page-header text">
+        <h1>@Messages("hts.register.missinguserinfo.header")</h1>
+    </header>
+    <header class="divider--bottom">
+        <h2>@Messages("hts.register.missinguserinfo")</h2>
+    </header>
 
-object EligibilityResult {
-  implicit val format: Format[EligibilityResult] = Json.format[EligibilityResult]
+    @for(info <- missingInfos) {
+        <li>@info</li>
+    }
 }
