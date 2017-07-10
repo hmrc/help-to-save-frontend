@@ -74,20 +74,17 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                 error ⇒ {
                   Logger.error(s"Could not perform eligibility check: $error")
                   InternalServerError("")
-                }, {
-                  case (nino, eligibility) ⇒
-                    eligibility.result.fold(
-                      missingInfos ⇒ {
-                        Logger.error(s"user $nino has missing information: ${missingInfos.missingInfo.mkString(",")}")
-                        Ok(views.html.register.missing_user_info(missingInfos.missingInfo))
-                      }, {
-                        case Some(info) ⇒ Ok(views.html.register.confirm_details(info))
-                        case _ ⇒ SeeOther(routes.RegisterController.notEligible().url)
-                      })
-
-                  case _ ⇒
-                    Logger.error(s"Could not retrieve logged in user's NINO or userDetails")
-                    SeeOther(routes.RegisterController.accessDenied().url)
+                }, { success ⇒
+                  val nino = success._1
+                  val eligibility = success._2
+                  eligibility.result.fold(
+                    infos ⇒ {
+                      Logger.error(s"user $nino has missing information: ${infos.missingInfo.mkString(",")}")
+                      Ok(views.html.register.missing_user_info(infos.missingInfo))
+                    }, {
+                      case Some(info) ⇒ Ok(views.html.register.confirm_details(info))
+                      case _ ⇒ SeeOther(routes.RegisterController.notEligible().url)
+                    })
                 }
               )
         }
