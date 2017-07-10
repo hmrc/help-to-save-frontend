@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.services
 
 import cats.data.EitherT
-import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityResult, NSIUserInfo}
@@ -28,7 +27,7 @@ import cats.instances.future._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class HelpToSaveServiceSpec extends TestSupport with ScalaFutures {
+class HelpToSaveServiceSpec extends TestSupport {
 
   val htsConnector = mock[HelpToSaveConnector]
   val nsiConnector = mock[NSIConnector]
@@ -39,9 +38,8 @@ class HelpToSaveServiceSpec extends TestSupport with ScalaFutures {
 
     "checking eligibility" must {
 
-      val userDetailsURI = "/dummy/user/details/uri"
       val nino = "WM123456C"
-      val oauthAuthorisationCode = "authoirsation"
+      val oauthAuthorisationCode = "authorisation"
 
       "return a successful response" in {
 
@@ -51,10 +49,10 @@ class HelpToSaveServiceSpec extends TestSupport with ScalaFutures {
 
         val eligStatus: Result[EligibilityResult] = EitherT.pure[Future, String, EligibilityResult](eligResult)
 
-        (htsConnector.getEligibilityStatus(_: String, _: String, _: String)(_: HeaderCarrier)).expects(nino, userDetailsURI, oauthAuthorisationCode, *)
+        (htsConnector.getEligibility(_: String,  _: String)(_: HeaderCarrier)).expects(nino, oauthAuthorisationCode, *)
           .returning(eligStatus)
 
-        val result = htsService.checkEligibility(nino, userDetailsURI, oauthAuthorisationCode)
+        val result = htsService.checkEligibility(nino, oauthAuthorisationCode)
 
         result.value.futureValue should be(Right(eligResult))
       }

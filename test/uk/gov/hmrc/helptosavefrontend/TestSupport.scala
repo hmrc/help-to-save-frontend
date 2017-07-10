@@ -20,6 +20,7 @@ import java.util.UUID
 
 import com.typesafe.config.Config
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{Headers, Session}
@@ -29,7 +30,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext
 
-trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll {
+trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with ScalaFutures {
   this: Suite =>
 
   lazy val fakeApplication: Application =

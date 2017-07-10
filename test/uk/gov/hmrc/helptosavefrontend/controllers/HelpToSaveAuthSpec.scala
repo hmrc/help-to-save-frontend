@@ -25,6 +25,7 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{UserInfoOAuthUrl, encoded}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -40,9 +41,9 @@ class HelpToSaveAuthSpec extends TestSupport {
       .expects(AuthProviders(GovernmentGateway), *, *)
       .returning(Future.failed(ex))
 
-  def mockAuthWithRetrievalsWith[A, B](predicate: Predicate, retrieval: Retrieval[A ~ B])(ex: Throwable): Unit =
-    (mockAuthConnector.authorise[A ~ B](_: Predicate, _: Retrieval[uk.gov.hmrc.auth.core.~[A, B]])(_: HeaderCarrier))
-      .expects(predicate, retrieval, *)
+  def mockAuthWithRetrievalsWith(predicate: Predicate)(ex: Throwable): Unit =
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier))
+      .expects(predicate, *, *)
       .returning(Future.failed(ex))
 
   val htsAuth = new HelpToSaveAuth(fakeApplication) {
@@ -60,7 +61,7 @@ class HelpToSaveAuthSpec extends TestSupport {
   }
 
   private def mockAuthWith(error: String) =
-    mockAuthWithRetrievalsWith(AuthWithConfidence, UserDetailsUrlWithAllEnrolments)(fromString(error))
+    mockAuthWithRetrievalsWith(AuthWithConfidence)(fromString(error))
 
   "HelpToSaveAuth" should {
 
@@ -79,6 +80,7 @@ class HelpToSaveAuthSpec extends TestSupport {
         val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
+        redirectTo should include(encoded(UserInfoOAuthUrl))
       }
     }
 

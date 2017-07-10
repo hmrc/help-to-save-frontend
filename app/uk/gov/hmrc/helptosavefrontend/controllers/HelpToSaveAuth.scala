@@ -20,14 +20,13 @@ import play.api.mvc._
 import play.api.{Application, Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.frontend.Redirects
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{HtsConfirmDetailsUrl, IdentityCallbackUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{IdentityCallbackUrl, UserInfoOAuthUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments, AuthProvider => HtsAuthProvider}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments, AuthProvider ⇒ HtsAuthProvider}
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
-
-case class UserDetailsUrlWithNino(path: String, nino: String)
 
 class HelpToSaveAuth(app: Application) extends FrontendController with AuthorisedFunctions with Redirects {
 
@@ -37,14 +36,15 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
 
   override def env: Environment = Environment(app.path, app.classloader, app.mode)
 
+
   private type HtsAction = Request[AnyContent] => Future[Result]
-  private type HtsActionWithEnrolments = Request[AnyContent] => Option[UserDetailsUrlWithNino] => Future[Result]
+  private type HtsActionWithEnrolments = Request[AnyContent] => Option[NINO] => Future[Result]
 
   def authorisedForHtsWithEnrolments(action: HtsActionWithEnrolments): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(AuthWithConfidence)
         .retrieve(UserDetailsUrlWithAllEnrolments) {
-          case userDetailsUrl ~ allEnrols =>
+          case allEnrols =>
             val nino =
               allEnrols
                 .enrolments
@@ -52,12 +52,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
                 .flatMap(_.getIdentifier("NINO"))
                 .map(_.value)
 
-            val userUrlWithNino = (userDetailsUrl, nino) match {
-              case (Some(url), Some(ni)) ⇒ Some(UserDetailsUrlWithNino(url, ni))
-              case _ ⇒ None
-            }
-
-            action(request)(userUrlWithNino)
+            action(request)(nino)
 
         }.recover {
         case e ⇒ handleFailure(e)
@@ -102,7 +97,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
     }
 
   def redirectToLogin = Redirect(ggLoginUrl, Map(
-    "continue" -> Seq(HtsConfirmDetailsUrl),
+    "continue" -> Seq(UserInfoOAuthUrl),
     "accountType" -> Seq("individual"),
     "origin" -> Seq(origin)
   ))

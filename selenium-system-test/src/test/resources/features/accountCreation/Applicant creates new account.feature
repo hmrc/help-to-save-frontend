@@ -1,6 +1,6 @@
+@ignore
 Feature: Applicant creates new account
 
-  #Issue HTS-216
   Scenario: Applicant creates new account
     Given an applicant has logged in and passed IV
     When they choose to create an account

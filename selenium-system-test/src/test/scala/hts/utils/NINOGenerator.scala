@@ -22,20 +22,20 @@ trait NINOGenerator {
 
   private val generator = new Generator()
 
-  def generateNINO: String = {
+  private def generateNINO: String = {
     val nino = generator.nextNino.value
     nino
   }
 
   def generateEligibleNINO: String = {
-    val nino = generateNINO
-    "AE" + nino.drop(2)
+    val eligibleNino = "AE" + generateNINO.drop(2)
+    eligibleNino
   }
 
   def generateIneligibleNINO: String = {
-    val nino = generateNINO
-    "NA" + nino.drop(2)
-  }
+    val ineligibleNino = "NA" + generateNINO.drop(2)
+    ineligibleNino
 
+  }
 
 }

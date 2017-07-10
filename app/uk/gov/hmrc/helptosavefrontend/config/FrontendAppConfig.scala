@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.config
 import java.net.{URI, URLEncoder}
 import java.util.Base64
 
-import play.api.Play.{configuration, current}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -31,14 +30,20 @@ trait AppConfig {
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
 
-  private def loadConfig(key: String) = configuration.getString(key).getOrElse(throw new Exception(s"Missing configuration key: $key"))
+  val helpToSaveUrl: String = baseUrl("help-to-save")
 
-  private val contactHost = configuration.getString(s"contact-frontend.host").getOrElse("")
-  private val contactFormServiceIdentifier = "MyService"
+  val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
-  val HtsConfirmDetailsUrl = getConfString("help-to-save-confirm-details.url", "")
+  val eligibilityCheckUrl = s"$helpToSaveUrl/help-to-save/eligibility-check"
+
+  val ivUrl = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
+
+  def encoded(url: String) = URLEncoder.encode(url, "UTF-8")
+
+  val UserInfoOAuthUrl = getConfString("user-info-oauth.url", "")
 
   val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
+
   val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
 
   val IdentityCallbackUrl = getConfString("identity-callback.url", "")
@@ -63,8 +68,18 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val nsiUrl = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
 
-  override lazy val analyticsToken = loadConfig(s"google-analytics.token")
-  override lazy val analyticsHost = loadConfig(s"google-analytics.host")
+  val sessionCacheKey = getString("microservice.services.keystore.session-key")
+
+  val keyStoreUrl = baseUrl("keystore")
+
+  val keyStoreDomain = getString("microservice.services.keystore.domain")
+
+  override lazy val analyticsToken = getString("google-analytics.token")
+  override lazy val analyticsHost = getString("google-analytics.host")
+
+  val contactHost = getString(s"contact-frontend.host")
+  val contactFormServiceIdentifier = "MyService"
+
   override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 

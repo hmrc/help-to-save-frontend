@@ -26,7 +26,6 @@ object FrontendBuild extends Build with MicroService {
     "com.github.java-json-tools" % "json-schema-validator" % "2.2.8",
     "com.github.fge" % "jackson-coreutils" % "1.8",
     "com.fasterxml.jackson.core" % "jackson-core" % "2.8.8"
-
   )
 
   def test(scope: String = "test") = Seq(

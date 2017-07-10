@@ -75,6 +75,7 @@ class IvControllerSpec extends TestSupport {
           ("Success", OK),
           ("Incomplete", INTERNAL_SERVER_ERROR),
           ("FailedIV", UNAUTHORIZED),
+          ("FailedMatching", UNAUTHORIZED),
           ("InsufficientEvidence", UNAUTHORIZED),
           ("UserAborted", UNAUTHORIZED),
           ("LockedOut", UNAUTHORIZED),

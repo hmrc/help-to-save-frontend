@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.util
 import com.typesafe.config.{ConfigException, ConfigFactory}
 import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
-import shapeless.HNil
 import uk.gov.hmrc.helptosavefrontend.util.FEATURE.LogLevel
 
 class FeatureSpec extends WordSpec with Matchers{
