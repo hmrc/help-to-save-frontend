@@ -63,25 +63,32 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         authorisedForHtsWithEnrolments {
           implicit request ⇒
             implicit maybeNino ⇒
-              val userInfo = for {
+              val result = for {
                 nino ← EitherT.fromOption[Future](maybeNino, "could not retrieve either userDetailsUrl or NINO from auth")
                 eligible ← helpToSaveService.checkEligibility(nino, authorisationCode)
                 nsiUserInfo ← toNSIUserInfo(eligible)
                 _ ← writeToKeyStore(nsiUserInfo)
-              } yield eligible
+              } yield (nino, eligible)
 
-              userInfo.fold(
+              result.fold(
                 error ⇒ {
                   Logger.error(s"Could not perform eligibility check: $error")
                   InternalServerError("")
-                }, _.result.fold(
-                  missingInfos ⇒ {
-                    Logger.error(s"user ${maybeNino.get} has missing information: ${missingInfos.missingInfo.mkString(",")}")
-                    Ok(views.html.register.missing_user_info(missingInfos.missingInfo))
-                  }, {
-                    case Some(info) ⇒ Ok(views.html.register.confirm_details(info))
-                    case _ ⇒ SeeOther(routes.RegisterController.notEligible().url)
-                  })
+                }, {
+                  case (nino, eligibility) ⇒
+                    eligibility.result.fold(
+                      missingInfos ⇒ {
+                        Logger.error(s"user $nino has missing information: ${missingInfos.missingInfo.mkString(",")}")
+                        Ok(views.html.register.missing_user_info(missingInfos.missingInfo))
+                      }, {
+                        case Some(info) ⇒ Ok(views.html.register.confirm_details(info))
+                        case _ ⇒ SeeOther(routes.RegisterController.notEligible().url)
+                      })
+
+                  case _ ⇒
+                    Logger.error(s"Could not retrieve logged in user's NINO or userDetails")
+                    SeeOther(routes.RegisterController.accessDenied().url)
+                }
               )
         }
 
@@ -170,9 +177,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     val mayBeNSIUserInfo: Either[String, Option[NSIUserInfo]] = eligibilityResult.result.fold(
       _ ⇒ Right(None), {
         case Some(info) ⇒
-          NSIUserInfo(info).toEither.leftMap(
-            errors ⇒ s"User info did not pass NS&I validity checks: ${errors.toList.mkString("; ")}"
-          ).map(info ⇒ Some(info))
+          NSIUserInfo(info).toEither.bimap(
+            errors ⇒ s"User info did not pass NS&I validity checks: ${errors.toList.mkString("; ")}",
+            info ⇒ Some(info))
         case _ ⇒ Right(None)
       }
     )
