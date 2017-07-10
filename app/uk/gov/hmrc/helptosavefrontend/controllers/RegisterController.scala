@@ -28,6 +28,7 @@ import configs.syntax._
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request}
 import play.api.{Application, Logger}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
@@ -80,7 +81,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                   eligibility.result.fold(
                     infos ⇒ {
                       Logger.error(s"user $nino has missing information: ${infos.missingInfo.mkString(",")}")
-                      Ok(views.html.register.missing_user_info(infos.missingInfo))
+                      Ok(views.html.register.missing_user_info(infos.missingInfo, personalAccountUrl))
                     }, {
                       case Some(info) ⇒ Ok(views.html.register.confirm_details(info))
                       case _ ⇒ SeeOther(routes.RegisterController.notEligible().url)

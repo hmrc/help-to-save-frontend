@@ -74,6 +74,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val keyStoreDomain = getString("microservice.services.keystore.domain")
 
+  val personalAccountUrl = getString("microservice.services.pertax-frontend.url")
+
   override lazy val analyticsToken = getString("google-analytics.token")
   override lazy val analyticsHost = getString("google-analytics.host")
 
