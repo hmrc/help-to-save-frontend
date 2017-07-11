@@ -29,6 +29,8 @@ import play.api.{Configuration, Environment, Logger}
 
 import scala.util.{Failure, Success, Try}
 
+import scala.collection.JavaConversions._
+
 @Singleton
 class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) {
 
@@ -83,6 +85,55 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         )
       )
     )
+
+    Logger.info("start printing aliases")
+
+    val passz = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks => ks.password.getOrElse("")}.head
+
+    val path = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks => ks.filePath.getOrElse("")}.head
+
+
+    val decryptedPass =  new String(Base64.getDecoder.decode(passz))
+
+
+
+    import java.io.File
+    import java.io.FileInputStream
+    import java.security.KeyStore
+    // Load the JDK's cacerts keystore file
+    val is = new FileInputStream(path)
+    val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
+    val password = decryptedPass.toCharArray
+    //keystore.load(is, password.toCharArray());
+    keystore.load(is, password)
+
+    keystore.aliases().foreach{
+      alias =>
+        Logger.info(s"keystore certificate for alias $alias is ${ keystore.getCertificate(alias)}")
+        Logger.info(s"keystore certificate chain for alias $alias is ${ keystore.getCertificateChain(alias)}")
+        Logger.info(s"keystore isCertificateEntry for alias $alias is ${ keystore.isCertificateEntry(alias)}")
+        Logger.info(s"keystore  isKeyEntry for alias $alias is ${ keystore.isKeyEntry(alias)}")
+
+    }
+
+
+
+    val filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar)
+
+    val iss = new FileInputStream(filename)
+    val trust = KeyStore.getInstance(KeyStore.getDefaultType)
+
+    trust.load(iss, "changeit".toCharArray)
+
+    trust.aliases().foreach{
+      alias =>
+        Logger.info(s"truststore certificate for alias $alias is ${ keystore.getCertificate(alias)}")
+        Logger.info(s"truststore certificate chain for alias $alias is ${ keystore.getCertificateChain(alias)}")
+        Logger.info(s"truststore isCertificateEntry for alias $alias is ${ keystore.isCertificateEntry(alias)}")
+        Logger.info(s"truststore isKeyEntry for alias $alias is ${ keystore.isKeyEntry(alias)}")
+
+    }
+
     modded
   }
 
