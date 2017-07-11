@@ -31,10 +31,8 @@ object Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("firefox") ⇒ Right(createFirefoxDriver())
       case Some("chrome") ⇒ Right(createChromeDriver())
       case Some("phantomjs") ⇒ Right(createPhantomJsDriver())
-      case Some("gecko") ⇒ Right(createGeckoDriver())
       case Some(other) ⇒ Left(s"Unrecognised browser: $other")
       case None ⇒ Left("No browser set")
     }
@@ -59,30 +57,7 @@ object Driver {
 
   private val isJsEnabled: Boolean = true
 
-  private val driverDirectory: String = "selenium-system-test/drivers"
-
-  private def createGeckoDriver(): WebDriver = {
-    if (isMac) {
-      systemProperties.setProperty("webdriver.gecko.driver", driverDirectory + "/geckodriver_mac")
-    } else if (isLinux) {
-      systemProperties.setProperty("webdriver.gecko.driver", driverDirectory + "/geckodriver_linux64")
-    } else {
-      systemProperties.setProperty("webdriver.gecko.driver", driverDirectory + "/geckodriver.exe")
-    }
-
-    val capabilities = DesiredCapabilities.firefox()
-    capabilities.setJavascriptEnabled(isJsEnabled)
-
-    new MarionetteDriver(capabilities)
-  }
-
-  private def createFirefoxDriver(): WebDriver = {
-    val capabilities = DesiredCapabilities.firefox()
-    capabilities.setJavascriptEnabled(true)
-    capabilities.setBrowserName(BrowserType.FIREFOX)
-
-    new FirefoxDriver(capabilities)
-  }
+  private val driverDirectory: String = systemProperties.getProperty("drivers")
 
   private def createChromeDriver(): WebDriver = {
     if (isMac) {
