@@ -237,8 +237,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   private[controllers] def validateUserInfoAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
 
-    val userInfoJson = JsonLoader.fromString(Json.toJson(userInfo).toString)
     try {
+      val userInfoJson = JsonLoader.fromString(Json.toJson(userInfo).toString)
       val report: ProcessingReport = jsonValidator.validate(schema, userInfoJson)
       if (report.isSuccess) Right(Some(userInfo)) else Left(report.toString)
     } catch {
