@@ -77,9 +77,6 @@ class WSHttpProxy extends WSHttp with WSProxy with RunMode with HttpAuditing wit
   override val hooks = Seq(AuditingHook)
   override lazy val auditConnector = FrontendAuditConnector
 
-  val wsClient = CustomWSClient()
-
-
   /**
     * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
     * to replace [[POST]] method provided by the hmrc library which will throw exceptions in such cases.
@@ -94,6 +91,8 @@ class WSHttpProxy extends WSHttp with WSProxy with RunMode with HttpAuditing wit
   override def buildRequest[A](url: String)(implicit hc: HeaderCarrier) = {
 
     Logger.info("handling request")
+
+    val wsClient = CustomWSClient()
 
     wsClient.url(nsiUrl).withProxyServer(wsProxyServer.get).withHeaders(nsiAuthHeaderKey → nsiBasicAuth)
   }

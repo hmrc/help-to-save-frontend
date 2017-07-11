@@ -61,10 +61,14 @@ object CustomWSClient {
           file ← writeToTempFile(dataBytes)
         } yield file
 
+        Logger.info(s"Successfully wrote keystore to file: ${result.get.getAbsolutePath}")
+
         val keyStoreStream = new FileInputStream(result.get)
-        val ks = KeyStore.getInstance(keyStoreType)
+        val ks = KeyStore.getInstance("jks")
 
         val decryptedPass = new String(Base64.getDecoder.decode(keyStorePassword)).toCharArray
+
+        ks.load(keyStoreStream, decryptedPass)
 
         val kmf = KeyManagerFactory.getInstance("SunX509")
         kmf.init(ks, decryptedPass)
