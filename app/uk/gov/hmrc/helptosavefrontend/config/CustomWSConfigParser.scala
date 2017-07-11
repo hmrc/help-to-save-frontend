@@ -29,6 +29,8 @@ import play.api.{Configuration, Environment, Logger}
 
 import scala.util.{Failure, Success, Try}
 
+import scala.collection.JavaConversions._
+
 @Singleton
 class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) {
 
@@ -49,6 +51,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
         // it is not a PEM and data has been provided but no file path given, therefore assume data is base64 encoded file
         case (_, None, Some(data)) ⇒
+          Logger.info(s"loading keystore from data")
           createKeyStoreConfig(ks, data)
 
         // just because ...
@@ -129,7 +132,31 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           .map(pass ⇒ Base64.getDecoder.decode(pass))
           .map(bytes ⇒ new String(bytes))
 
-        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
+        val updatedKs = ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
+
+        Logger.info("start printing aliases")
+        
+        import java.io.FileInputStream
+        import java.security.KeyStore
+        // Load the JDK's cacerts keystore file
+        val is = new FileInputStream(keyStoreFile)
+        val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
+        //keystore.load(is, password.toCharArray());
+        keystore.load(is, decryptedPass.getOrElse("").toCharArray)
+
+        keystore.aliases().foreach{
+          alias =>
+            Logger.info(s"keystore certificate for alias $alias is ${ keystore.getCertificate(alias)}")
+            Logger.info(s"printing certificate chain for alias $alias")
+            keystore.getCertificateChain(alias).foreach{
+              cert => Logger.info(s"$cert")
+            }
+            Logger.info(s"keystore isCertificateEntry for alias $alias is ${ keystore.isCertificateEntry(alias)}")
+            Logger.info(s"keystore  isKeyEntry for alias $alias is ${ keystore.isKeyEntry(alias)}")
+
+        }
+
+        updatedKs
 
       case Failure(error) ⇒
         Logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
