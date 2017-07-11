@@ -135,8 +135,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
         ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
 
-        Logger.info("start printing aliases")
-        
+        Logger.info("start printing keystore aliases")
+
         import java.io.FileInputStream
         import java.security.KeyStore
         // Load the JDK's cacerts keystore file
@@ -148,7 +148,12 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         keystore.aliases().foreach{
           alias =>
             Logger.info(s"keystore certificate for alias $alias is ${ keystore.getCertificate(alias)}")
-            Logger.info(s"keystore certificate chain for alias $alias is ${ keystore.getCertificateChain(alias)}")
+
+            Logger.info(s"printing certificate chain for alias $alias")
+            keystore.getCertificateChain(alias).foreach{
+              cert => Logger.info(s"$cert")
+            }
+
             Logger.info(s"keystore isCertificateEntry for alias $alias is ${ keystore.isCertificateEntry(alias)}")
             Logger.info(s"keystore  isKeyEntry for alias $alias is ${ keystore.isKeyEntry(alias)}")
 
@@ -169,11 +174,11 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       case _ => ts
     }
 
+    Logger.info("start printing truststore aliases")
 
-    val filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar)
 
+    val filename = "/app/.jdk/jre/lib/security/cacerts".replace('/', File.separatorChar)
 
-    import java.io.File
     import java.io.FileInputStream
     import java.security.KeyStore
     val iss = new FileInputStream(filename)
