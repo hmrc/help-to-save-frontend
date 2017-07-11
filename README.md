@@ -13,7 +13,9 @@ sm --start DATASTREAM CA_FRONTEND ASSETS_FRONTEND AUTH_LOGIN_STUB AUTH_LOGIN_API
 ```
 
 ## Testing
-Selenium system tests are distinguished from unit tests by having `SeleniumSystemTest` in the relevant runner name.
+Selenium system tests are distinguished from unit tests by having `SeleniumSystemTest` in the relevant runner name. Note
+that you will need to download Selenium drivers from http://docs.seleniumhq.org/download/. Mac users will have to rename
+the downloaded 'chromedriver' file to 'chromedriver_mac'.
 
 The unit tests can be run by running
 ```
