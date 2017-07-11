@@ -51,6 +51,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
         // it is not a PEM and data has been provided but no file path given, therefore assume data is base64 encoded file
         case (_, None, Some(data)) ⇒
+          Logger.info(s"loading keystore from data")
           createKeyStoreConfig(ks, data)
 
         // just because ...
@@ -85,54 +86,6 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         )
       )
     )
-
-    Logger.info("start printing aliases")
-
-    val passz = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks => ks.password.getOrElse("")}.head
-
-    val path = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks => ks.filePath.getOrElse("")}.head
-
-
-    val decryptedPass =  new String(Base64.getDecoder.decode(passz))
-
-
-
-    import java.io.File
-    import java.io.FileInputStream
-    import java.security.KeyStore
-    // Load the JDK's cacerts keystore file
-    val is = new FileInputStream(path)
-    val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
-    val password = decryptedPass.toCharArray
-    //keystore.load(is, password.toCharArray());
-    keystore.load(is, password)
-
-    keystore.aliases().foreach{
-      alias =>
-        Logger.info(s"keystore certificate for alias $alias is ${ keystore.getCertificate(alias)}")
-        Logger.info(s"keystore certificate chain for alias $alias is ${ keystore.getCertificateChain(alias)}")
-        Logger.info(s"keystore isCertificateEntry for alias $alias is ${ keystore.isCertificateEntry(alias)}")
-        Logger.info(s"keystore  isKeyEntry for alias $alias is ${ keystore.isKeyEntry(alias)}")
-
-    }
-
-
-
-    val filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar)
-
-    val iss = new FileInputStream(filename)
-    val trust = KeyStore.getInstance(KeyStore.getDefaultType)
-
-    trust.load(iss, "changeit".toCharArray)
-
-    trust.aliases().foreach{
-      alias =>
-        Logger.info(s"truststore certificate for alias $alias is ${ keystore.getCertificate(alias)}")
-        Logger.info(s"truststore certificate chain for alias $alias is ${ keystore.getCertificateChain(alias)}")
-        Logger.info(s"truststore isCertificateEntry for alias $alias is ${ keystore.isCertificateEntry(alias)}")
-        Logger.info(s"truststore isKeyEntry for alias $alias is ${ keystore.isKeyEntry(alias)}")
-
-    }
 
     modded
   }
@@ -182,6 +135,27 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
         ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
 
+        Logger.info("start printing aliases")
+        
+        import java.io.FileInputStream
+        import java.security.KeyStore
+        // Load the JDK's cacerts keystore file
+        val is = new FileInputStream(keyStoreFile)
+        val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
+        //keystore.load(is, password.toCharArray());
+        keystore.load(is, decryptedPass.getOrElse("").toCharArray)
+
+        keystore.aliases().foreach{
+          alias =>
+            Logger.info(s"keystore certificate for alias $alias is ${ keystore.getCertificate(alias)}")
+            Logger.info(s"keystore certificate chain for alias $alias is ${ keystore.getCertificateChain(alias)}")
+            Logger.info(s"keystore isCertificateEntry for alias $alias is ${ keystore.isCertificateEntry(alias)}")
+            Logger.info(s"keystore  isKeyEntry for alias $alias is ${ keystore.isKeyEntry(alias)}")
+
+        }
+
+        ks
+
       case Failure(error) ⇒
         Logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
         sys.error(s"Error in keystore configuration: ${error.getMessage}")
@@ -190,10 +164,33 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
     val decoded = Base64.getDecoder.decode(data)
-    ts.storeType match {
+   val x =  ts.storeType match {
       case "base64-PEM" => ts.copy(data = Some(new String(decoded)), storeType = "PEM")
       case _ => ts
     }
+
+
+    val filename = System.getProperty("java.home") + "/lib/security/cacerts".replace('/', File.separatorChar)
+
+
+    import java.io.File
+    import java.io.FileInputStream
+    import java.security.KeyStore
+    val iss = new FileInputStream(filename)
+    val trust = KeyStore.getInstance(KeyStore.getDefaultType)
+
+    trust.load(iss, "changeit".toCharArray)
+
+    trust.aliases().foreach{
+      alias =>
+        Logger.info(s"truststore certificate for alias $alias is ${ trust.getCertificate(alias)}")
+        Logger.info(s"truststore certificate chain for alias $alias is ${ trust.getCertificateChain(alias)}")
+        Logger.info(s"truststore isCertificateEntry for alias $alias is ${ trust.isCertificateEntry(alias)}")
+        Logger.info(s"truststore isKeyEntry for alias $alias is ${ trust.isKeyEntry(alias)}")
+
+    }
+
+    x
   }
 
 }
