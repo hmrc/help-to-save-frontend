@@ -49,9 +49,9 @@ object CustomWSClient {
   protected val sslContext = {
     Logger.info("initialising key/trust store")
     val config = ConfigFactory.load()
-    val maybeKeyStoreData = config.as[Option[String]]("play.ws.ssl.keyManager.stores.data")
-    val maybeKeyStorePassword = config.as[Option[String]]("play.ws.ssl.keyManager.stores.password")
-    val maybeKeyStoreType = config.as[Option[String]]("play.ws.ssl.keyManager.stores.type")
+    val maybeKeyStoreData = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.data")
+    val maybeKeyStorePassword = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.password")
+    val maybeKeyStoreType = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.type")
 
     (maybeKeyStoreData, maybeKeyStorePassword, maybeKeyStoreType) match {
       case (Some(keyStoreData), Some(keyStorePassword), Some(keyStoreType)) =>
