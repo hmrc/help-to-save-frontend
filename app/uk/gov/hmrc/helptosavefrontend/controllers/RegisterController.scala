@@ -75,9 +75,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                 error ⇒ {
                   Logger.error(s"Could not perform eligibility check: $error")
                   InternalServerError("")
-                }, { success ⇒
-                  val nino = success._1
-                  val eligibility = success._2
+                }, { case (nino, eligibility) ⇒
                   eligibility.result.fold(
                     infos ⇒ {
                       Logger.error(s"user $nino has missing information: ${infos.missingInfo.mkString(",")}")
