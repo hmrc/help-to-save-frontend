@@ -16,9 +16,12 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
+import play.api.{Logger, Play}
 import play.api.http.HttpVerbs.{GET => GET_VERB, POST => POST_VERB}
 import play.api.libs.json.Writes
+import play.api.libs.ws.WS
 import uk.gov.hmrc.auth.core.PlayAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector => Auditing}
@@ -74,13 +77,25 @@ class WSHttpProxy extends WSHttp with WSProxy with RunMode with HttpAuditing wit
   override val hooks = Seq(AuditingHook)
   override lazy val auditConnector = FrontendAuditConnector
 
+  val wsClient = CustomWSClient()
+
+
   /**
     * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
     * to replace [[POST]] method provided by the hmrc library which will throw exceptions in such cases.
     */
   def post[A](url: String,
               body: A,
-              headers: Map[String,String] = Map.empty[String,String]
+              headers: Map[String, String] = Map.empty[String, String]
              )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] =
-  doPost(url, body, headers.toSeq)
+    doPost(url, body, headers.toSeq)
+
+
+  override def buildRequest[A](url: String)(implicit hc: HeaderCarrier) = {
+
+    Logger.info("handling request")
+
+    wsClient.url(nsiUrl).withProxyServer(wsProxyServer.get).withHeaders(nsiAuthHeaderKey → nsiBasicAuth)
+  }
 }
+
