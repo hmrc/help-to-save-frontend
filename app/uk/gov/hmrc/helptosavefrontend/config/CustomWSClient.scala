@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import java.io.FileInputStream
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.security.{KeyStore, SecureRandom}
 import java.time.LocalDate
+import java.util.Base64
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
@@ -37,6 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
 
 /**
@@ -47,18 +49,25 @@ object CustomWSClient {
   protected val sslContext = {
     Logger.info("initialising key/trust store")
     val config = ConfigFactory.load()
-    val maybeKeyStoreData = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.data")
-    val maybeKeyStorePassword = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.password").map(_.toCharArray)
-    val maybeKeyStoreType = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.type")
+    val maybeKeyStoreData = config.as[Option[String]]("play.ws.ssl.keyManager.stores.data")
+    val maybeKeyStorePassword = config.as[Option[String]]("play.ws.ssl.keyManager.stores.password")
+    val maybeKeyStoreType = config.as[Option[String]]("play.ws.ssl.keyManager.stores.type")
 
     (maybeKeyStoreData, maybeKeyStorePassword, maybeKeyStoreType) match {
       case (Some(keyStoreData), Some(keyStorePassword), Some(keyStoreType)) =>
-        val keyStoreStream = new FileInputStream(keyStoreData)
+
+        val result = for {
+          dataBytes ← Try(Base64.getDecoder.decode(keyStoreData))
+          file ← writeToTempFile(dataBytes)
+        } yield file
+
+        val keyStoreStream = new FileInputStream(result.get)
         val ks = KeyStore.getInstance(keyStoreType)
-        ks.load(keyStoreStream, keyStorePassword)
+
+        val decryptedPass = new String(Base64.getDecoder.decode(keyStorePassword)).toCharArray
 
         val kmf = KeyManagerFactory.getInstance("SunX509")
-        kmf.init(ks, keyStorePassword)
+        kmf.init(ks, decryptedPass)
 
         val keyManagers = kmf.getKeyManagers
         val tmf = TrustManagerFactory
@@ -77,6 +86,16 @@ object CustomWSClient {
       case _ =>
         null
     }
+  }
+
+  def writeToTempFile(data: Array[Byte]): Try[File] = Try {
+    val file = File.createTempFile(getClass.getSimpleName, ".tmp")
+    file.deleteOnExit()
+    val os = new FileOutputStream(file)
+    os.write(data)
+    os.flush()
+    os.close()
+    file
   }
 
   def apply(): AhcWSClient = {
