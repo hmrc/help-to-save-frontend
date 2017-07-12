@@ -70,6 +70,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
         case other ⇒
           Logger.info(s"Adding ${other._1} type truststore")
+          Logger.info(s"java.home is ${sys.env.get("java.home")}")
           ts
       }
     }
