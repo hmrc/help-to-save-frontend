@@ -20,11 +20,10 @@ import javax.inject.Singleton
 
 import com.google.inject.{ImplementedBy, Inject}
 import play.api.Logger
-import play.api.http.Status
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.{CustomWSClient, FrontendAppConfig, WSHttpProxy}
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.play.http._
@@ -86,7 +85,11 @@ class NSIConnectorImpl @Inject()(customWsClient : CustomWSClient) extends NSICon
 //        }
 //      }
 
+    Future{
+
     SubmissionFailure(None, s"Something unexpected happened; response body: blah", "blah")
+
+    }
   }
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
