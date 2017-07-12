@@ -18,12 +18,12 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import javax.inject.Singleton
 
-import com.google.inject.ImplementedBy
+import com.google.inject.{ImplementedBy, Inject}
 import play.api.Logger
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
-import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
+import uk.gov.hmrc.helptosavefrontend.config.{CustomWSClient, FrontendAppConfig, WSHttpProxy}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
@@ -49,13 +49,25 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl extends NSIConnector {
+class NSIConnectorImpl @Inject()(customWsClient : CustomWSClient) extends NSIConnector {
 
   val httpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
     Logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
+
+    Logger.info("****************testing CustomWSClient************")
+    val response = customWsClient.getCLient()
+      .url(FrontendAppConfig.nsiUrl)
+        .withProxyServer(httpProxy.wsProxyServer.get)
+      .withHeaders(nsiAuthHeaderKey → nsiBasicAuth)
+     .post(Json.toJson(userInfo).toString())
+
+    response.map(wsResponse => Logger.info(s"response is xxxx = ${wsResponse.body}"))
+
+    Logger.info("****************done testing CustomWSClient****************")
+
     httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
       NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
       .map { response ⇒

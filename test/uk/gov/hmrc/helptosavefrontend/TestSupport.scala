@@ -33,7 +33,7 @@ import scala.concurrent.ExecutionContext
 trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with ScalaFutures {
   this: Suite =>
 
-  lazy val fakeApplication: Application =
+  implicit lazy val fakeApplication: Application =
     new GuiceApplicationBuilder()
       .configure("metrics.enabled" -> "false")
       .build()

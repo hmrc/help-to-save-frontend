@@ -20,12 +20,16 @@ import java.io.{File, FileInputStream, FileOutputStream}
 import java.security.{KeyStore, SecureRandom}
 import java.util
 import java.util.Base64
+import javax.inject.Singleton
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
+import com.google.inject.Inject
 import com.typesafe.config.{ConfigObject, ConfigValueFactory}
 import io.netty.handler.ssl.SslContextBuilder
+import org.asynchttpclient.DefaultAsyncHttpClientConfig
+import play.api._
 import play.api.libs.ws.WSConfigParser
-import play.api.{Configuration, Environment, Logger}
+import play.api.libs.ws.ahc.AhcWSClient
 
 import scala.util.Try
 
@@ -33,10 +37,15 @@ import scala.util.Try
 /**
   * Created by suresh on 11/07/17.
   */
-class CustomWSClient(configuration: Configuration, env: Environment) {
+@Singleton
+class CustomWSClient @Inject()(implicit app: Application) {
+
+  implicit val configuration = app.configuration
+
+  implicit val env = Environment(app.path, app.classloader, app.mode)
 
   val sslContext = {
-    
+
     Logger.info("initialising key/trust store")
 
     val mergedConfiguration = mergeAllStores(configuration)
@@ -101,6 +110,14 @@ class CustomWSClient(configuration: Configuration, env: Environment) {
     os.flush()
     os.close()
     file
+  }
+
+  def getCLient() = {
+    implicit val materializer = Play.current.materializer
+
+    val config = new DefaultAsyncHttpClientConfig.Builder().setSslContext(sslContext).build()
+
+    AhcWSClient(config)
   }
 
 }
