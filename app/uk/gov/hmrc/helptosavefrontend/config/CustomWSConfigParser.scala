@@ -87,15 +87,15 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     )
 
     Try {
-      val customWSClient = CustomWSClient()
-      Logger.info(s"customWSClient.apply().config =  ${customWSClient.config}")
+      val sslContext = CustomWSClient.sslContext
+      Logger.info(s"sslContext is =  ${sslContext}")
 
-      customWSClient
+      sslContext
     }.recover {
-      case e => Logger.error(s"CustomWSClient did not work, error is: $e")
+      case e => Logger.error(s"sslContext did not work, error is: $e")
     }.toOption match {
-      case Some(client) => Logger.info("CustomWSClient worked")
-      case _ => Logger.error("CustomWSClient did not work")
+      case Some(client) => Logger.info("sslContext worked")
+      case _ => Logger.error("sslContext did not work")
     }
     modded
   }

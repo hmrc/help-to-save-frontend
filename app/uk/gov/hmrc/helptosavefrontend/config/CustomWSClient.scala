@@ -24,12 +24,7 @@ import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 import com.typesafe.config.ConfigFactory
 import io.netty.handler.ssl.SslContextBuilder
 import net.ceedubs.ficus.Ficus._
-import org.asynchttpclient.DefaultAsyncHttpClientConfig
-import play.api.libs.json.{Format, Json}
-import play.api.libs.ws.ahc.AhcWSClient
-import play.api.{Logger, Play}
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import play.api.Logger
 
 import scala.util.Try
 
@@ -39,7 +34,7 @@ import scala.util.Try
   */
 object CustomWSClient {
 
-  protected val sslContext = {
+  val sslContext = {
     Logger.info("initialising key/trust store")
     val config = ConfigFactory.load()
     val maybeKeyStoreData = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.data")
@@ -94,21 +89,5 @@ object CustomWSClient {
     os.close()
     file
   }
-
-  def apply(): AhcWSClient = {
-
-    val contact = ContactDetails(List("sss", "dddd", "aaaa"), "post", Some("GB"), "test@email.com")
-    implicit val materializer = Play.current.materializer
-    implicit val nsiUserInfoFormat: Format[NSIUserInfo] = Json.format[NSIUserInfo]
-
-    val config = new DefaultAsyncHttpClientConfig.Builder().setSslContext(sslContext).build()
-
-    //    val response = AhcWSClient(config).url(FrontendAppConfig.nsiUrl).withHeaders(nsiAuthHeaderKey → nsiBasicAuth)
-    //      .post(Json.toJson(NSIUserInfo("sureshForename", "sureshSurname", LocalDate.now().minusYears(30), "AE123456C", contact)).toString())
-    //
-    //    response.map(wsResponse => Logger.info(s"response is xxxx = ${wsResponse.body}"))
-
-    AhcWSClient(config)
-  }
-
+  
 }
