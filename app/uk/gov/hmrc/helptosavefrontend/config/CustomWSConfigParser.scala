@@ -49,6 +49,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
         // it is not a PEM and data has been provided but no file path given, therefore assume data is base64 encoded file
         case (_, None, Some(data)) ⇒
+          Logger.info(s"loading keystore from data")
           createKeyStoreConfig(ks, data)
 
         // just because ...
