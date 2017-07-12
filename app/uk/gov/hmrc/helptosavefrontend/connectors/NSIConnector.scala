@@ -68,23 +68,25 @@ class NSIConnectorImpl @Inject()(customWsClient : CustomWSClient) extends NSICon
 
     Logger.info("****************done testing CustomWSClient****************")
 
-    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
-      NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
-      .map { response ⇒
-        response.status match {
-          case Status.CREATED ⇒
-            Logger.info(s"Successfully created a NSI account for ${userInfo.nino}")
-            SubmissionSuccess()
+//    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
+//      NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
+//      .map { response ⇒
+//        response.status match {
+//          case Status.CREATED ⇒
+//            Logger.info(s"Successfully created a NSI account for ${userInfo.nino}")
+//            SubmissionSuccess()
+//
+//          case Status.BAD_REQUEST ⇒
+//            Logger.error(s"Failed to create an account for ${userInfo.nino} due to bad request")
+//            handleBadRequestResponse(response)
+//
+//          case other ⇒
+//            Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status: $other")
+//            SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
+//        }
+//      }
 
-          case Status.BAD_REQUEST ⇒
-            Logger.error(s"Failed to create an account for ${userInfo.nino} due to bad request")
-            handleBadRequestResponse(response)
-
-          case other ⇒
-            Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status: $other")
-            SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
-        }
-      }
+    SubmissionFailure(None, s"Something unexpected happened; response body: blah", "blah")
   }
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
