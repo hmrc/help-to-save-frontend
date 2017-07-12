@@ -68,7 +68,7 @@ class CustomWSClient @Inject()(implicit app: Application) {
 
     ks.load(keyStoreStream, decryptedPass)
 
-    val kmf = KeyManagerFactory.getInstance("SunX509")
+    val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm)
     kmf.init(ks, decryptedPass)
 
     val keyManagers = kmf.getKeyManagers
