@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
         <file>logs/help-to-save-frontend.log</file>
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
@@ -49,6 +53,8 @@
     <logger name="com.ning.http.client.providers.netty" additivity="false">
         <appender-ref ref="STDOUT_IGNORE_NETTY"/>
     </logger>
+
+    <logger name="com.sun.org.apache.xml.internal.security.keys.keyresolver.implementations" level="DEBUG"/>
 
     <logger name="com.google.inject" level="INFO"/>
 

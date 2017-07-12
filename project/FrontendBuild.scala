@@ -21,7 +21,10 @@ object FrontendBuild extends Build with MicroService {
     "org.typelevel" %% "cats" % "0.9.0",
     "uk.gov.hmrc" %% "play-auth" % "1.1.0",
     "uk.gov.hmrc" %% "domain" % "4.1.0",
-    "com.github.kxbmap" %% "configs" % "0.4.4"
+    "com.github.kxbmap" %% "configs" % "0.4.4",
+    "org.slf4j" % "slf4j-api" % "1.7.25",
+    "org.slf4j" % "slf4j-simple" % "1.7.25",
+    "org.slf4j" %"jul-to-slf4j" % "1.7.25"
   )
 
   def test(scope: String = "test") = Seq(

@@ -17,6 +17,8 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 
+import java.util.logging.Level
+
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
 import play.api.Play.current
@@ -66,4 +68,16 @@ object AuditFilter extends FrontendAuditFilter with RunMode with AppName with Mi
   override lazy val auditConnector = FrontendAuditConnector
 
   override def controllerNeedsAuditing(controllerName: String) = ControllerConfiguration.paramsForController(controllerName).needsAuditing
+}
+
+object JULToSLF4J {
+
+  import java.util.logging.{LogManager, Logger}
+
+  import org.slf4j.bridge.SLF4JBridgeHandler
+
+  LogManager.getLogManager.reset()
+  SLF4JBridgeHandler.removeHandlersForRootLogger()
+  SLF4JBridgeHandler.install()
+  Logger.getGlobal.setLevel(Level.FINEST)
 }
