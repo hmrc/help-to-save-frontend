@@ -85,6 +85,18 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         )
       )
     )
+
+    Try {
+      val customWSClient = CustomWSClient()
+      Logger.info(s"customWSClient.apply().config =  ${customWSClient.config}")
+
+      customWSClient
+    }.recover {
+      case e => Logger.error(s"CustomWSClient did not work, error is: $e")
+    }.toOption match {
+      case Some(client) => Logger.info("CustomWSClient worked")
+      case _ => Logger.error("CustomWSClient did not work")
+    }
     modded
   }
 
