@@ -40,12 +40,6 @@ import scala.util.Try
 @Singleton
 class CustomWSClient @Inject()(implicit app: Application) {
 
-  import javax.net.ssl.SSLSession
-
-  HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier {
-    override def verify(s: String, sslSession: SSLSession): Boolean = true
-  })
-
   implicit val configuration = app.configuration
 
   implicit val env = Environment(app.path, app.classloader, app.mode)
@@ -80,7 +74,7 @@ class CustomWSClient @Inject()(implicit app: Application) {
     val keyManagers = kmf.getKeyManagers
     val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
     // Using null here initialises the TMF with the default trust store.
-    tmf.init(null: KeyStore)
+    tmf.init(ks)
     val secureRandom = new SecureRandom()
 
     val javaSslContext = SSLContext.getInstance("TLSv1.2")
