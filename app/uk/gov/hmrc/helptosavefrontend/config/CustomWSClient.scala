@@ -77,7 +77,7 @@ class CustomWSClient @Inject()(implicit app: Application) {
     tmf.init(null: KeyStore)
     val secureRandom = new SecureRandom()
 
-    val javaSslContext = SSLContext.getInstance("TLS")
+    val javaSslContext = SSLContext.getInstance("TLSv1.2")
     javaSslContext.init(keyManagers, tmf.getTrustManagers, secureRandom)
 
     SslContextBuilder.forClient()
