@@ -70,7 +70,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
         case other ⇒
           Logger.info(s"Adding ${other._1} type truststore")
-          Logger.info(s"java.home is ${sys.env.get("java.home")}")
+          Logger.info(s"truststore path is ${ts.filePath.getOrElse("non-existing blah")}")
           ts
       }
     }
@@ -87,14 +87,14 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     )
 
     Try {
-      val sslContext = CustomWSClient.sslContext
-      Logger.info(s"sslContext is =  ${sslContext}")
+      val customCLient = new CustomWSClient(configuration, env)
+      Logger.info(s"sslContext is =  ${customCLient.sslContext}")
 
-      sslContext
+      customCLient.sslContext
     }.recover {
-      case e => Logger.error(s"sslContext did not work, error is: $e")
+      case e => Logger.error(s"sslContext did not work, error is: ${e.printStackTrace()}")
     }.toOption match {
-      case Some(client) => Logger.info("sslContext worked")
+      case Some(client) => Logger.info(s"sslContext worked $client")
       case _ => Logger.error("sslContext did not work")
     }
     modded

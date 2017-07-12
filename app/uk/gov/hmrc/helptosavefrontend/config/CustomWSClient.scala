@@ -18,13 +18,14 @@ package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.security.{KeyStore, SecureRandom}
+import java.util
 import java.util.Base64
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{ConfigObject, ConfigValueFactory}
 import io.netty.handler.ssl.SslContextBuilder
-import net.ceedubs.ficus.Ficus._
-import play.api.Logger
+import play.api.libs.ws.WSConfigParser
+import play.api.{Configuration, Environment, Logger}
 
 import scala.util.Try
 
@@ -32,52 +33,64 @@ import scala.util.Try
 /**
   * Created by suresh on 11/07/17.
   */
-object CustomWSClient {
+class CustomWSClient(configuration: Configuration, env: Environment) {
 
   val sslContext = {
+    
     Logger.info("initialising key/trust store")
-    val config = ConfigFactory.load()
-    val maybeKeyStoreData = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.data")
-    val maybeKeyStorePassword = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.password")
-    val maybeKeyStoreType = config.as[Option[String]]("play.ws.ssl.keyManager.stores.0.type")
 
-    (maybeKeyStoreData, maybeKeyStorePassword, maybeKeyStoreType) match {
-      case (Some(keyStoreData), Some(keyStorePassword), Some(keyStoreType)) =>
+    val mergedConfiguration = mergeAllStores(configuration)
+    val internalParser = new WSConfigParser(mergedConfiguration, env)
+    val config = internalParser.parse()
 
-        val result = for {
-          dataBytes ← Try(Base64.getDecoder.decode(keyStoreData))
-          file ← writeToTempFile(dataBytes)
-        } yield file
+    val ksConfig = config.ssl.keyManagerConfig.keyStoreConfigs.head
 
-        Logger.info(s"Successfully wrote keystore to file: ${result.get.getAbsolutePath}")
+    val result = for {
+      dataBytes ← Try(Base64.getDecoder.decode(ksConfig.data.get))
+      file ← writeToTempFile(dataBytes)
+    } yield file
 
-        val keyStoreStream = new FileInputStream(result.get)
-        val ks = KeyStore.getInstance("jks")
+    Logger.info(s"CustomWSClient wrote keystore to file: ${result.get.getAbsolutePath}")
 
-        val decryptedPass = new String(Base64.getDecoder.decode(keyStorePassword)).toCharArray
+    val keyStoreStream = new FileInputStream(result.get)
+    val ks = KeyStore.getInstance("jks")
 
-        ks.load(keyStoreStream, decryptedPass)
+    val decryptedPass = new String(Base64.getDecoder.decode(ksConfig.password.get)).toCharArray
 
-        val kmf = KeyManagerFactory.getInstance("SunX509")
-        kmf.init(ks, decryptedPass)
+    ks.load(keyStoreStream, decryptedPass)
 
-        val keyManagers = kmf.getKeyManagers
-        val tmf = TrustManagerFactory
-          .getInstance(TrustManagerFactory.getDefaultAlgorithm)
-        // Using null here initialises the TMF with the default trust store.
-        tmf.init(null: KeyStore)
-        val secureRandom = new SecureRandom()
+    val kmf = KeyManagerFactory.getInstance("SunX509")
+    kmf.init(ks, decryptedPass)
 
-        val javaSslContext = SSLContext.getInstance("TLS")
-        javaSslContext.init(keyManagers, tmf.getTrustManagers, secureRandom)
+    val keyManagers = kmf.getKeyManagers
+    val tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm)
+    // Using null here initialises the TMF with the default trust store.
+    tmf.init(null: KeyStore)
+    val secureRandom = new SecureRandom()
 
-        SslContextBuilder.forClient()
-          .keyManager(kmf)
-          .trustManager(tmf)
-          .build()
-      case _ =>
-        null
-    }
+    val javaSslContext = SSLContext.getInstance("TLS")
+    javaSslContext.init(keyManagers, tmf.getTrustManagers, secureRandom)
+
+    SslContextBuilder.forClient()
+      .keyManager(kmf)
+      .trustManager(tmf)
+      .build()
+  }
+
+  private def mergeAllStores(config: Configuration): Configuration = {
+    mergeStores(mergeStores(config, "key"), "trust")
+  }
+
+  private def mergeStores(config: Configuration, name: String): Configuration = {
+    val under = config.underlying
+    if (under.hasPath(s"play.ws.ssl.${name}Manager.store")) {
+      val singleStore: ConfigObject = under.getObject(s"play.ws.ssl.${name}Manager.store")
+      val stores: util.List[AnyRef] = under.getList(s"play.ws.ssl.${name}Manager.stores").unwrapped()
+      if (singleStore != null) {
+        stores.add(singleStore)
+      }
+      config.copy(underlying = config.underlying.withValue(s"play.ws.ssl.${name}Manager.stores", ConfigValueFactory.fromIterable(stores)))
+    } else config
   }
 
   def writeToTempFile(data: Array[Byte]): Try[File] = Try {
@@ -89,5 +102,5 @@ object CustomWSClient {
     os.close()
     file
   }
-  
+
 }
