@@ -21,7 +21,7 @@ import java.security.{KeyStore, SecureRandom}
 import java.util
 import java.util.Base64
 import javax.inject.Singleton
-import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
+import javax.net.ssl._
 
 import com.google.inject.Inject
 import com.typesafe.config.{ConfigObject, ConfigValueFactory}
@@ -39,6 +39,12 @@ import scala.util.Try
   */
 @Singleton
 class CustomWSClient @Inject()(implicit app: Application) {
+
+  import javax.net.ssl.SSLSession
+
+  HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier {
+    override def verify(s: String, sslSession: SSLSession): Boolean = true
+  })
 
   implicit val configuration = app.configuration
 
