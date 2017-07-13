@@ -102,7 +102,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
 
   def writeToTempFile(data: Array[Byte]): Try[File] = Try {
-    val file = File.createTempFile(getClass.getSimpleName, "1111.tmp")
+    val file = File.createTempFile(getClass.getSimpleName, ".tmp")
     file.deleteOnExit()
     val os = new FileOutputStream(file)
     os.write(data)
@@ -145,7 +145,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       case Success(trustStoreFile) ⇒
         Logger.info(s"Successfully wrote truststore to file: ${trustStoreFile.getAbsolutePath}")
 
-        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath))
+        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath), data=None)
 
       case Failure(error) ⇒
         Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
