@@ -59,18 +59,14 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       }
     }
 
-    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.map { ts ⇒
-      (ts.storeType.toUpperCase, ts.filePath, ts.data) match {
-        case ("PEM", _, _) ⇒
-          Logger.info("Adding PEM truststore")
-          ts
-        case (storeType, None, Some(data)) ⇒
+    val trustStores =config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
+      (ts.storeType.toUpperCase, ts.data) match {
+        case (storeType, Some(data)) ⇒
           Logger.info(s"Adding $storeType truststore")
           createTrustStoreConfig(ts, data)
 
         case other ⇒
           Logger.info(s"Adding ${other._1} type truststore")
-          Logger.info(s"java.home is ${sys.env.get("java.home")}")
           ts
       }
     }
@@ -106,7 +102,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
 
   def writeToTempFile(data: Array[Byte]): Try[File] = Try {
-    val file = File.createTempFile(getClass.getSimpleName, ".tmp")
+    val file = File.createTempFile(getClass.getSimpleName, "1111.tmp")
     file.deleteOnExit()
     val os = new FileOutputStream(file)
     os.write(data)
@@ -140,10 +136,20 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
-    val decoded = Base64.getDecoder.decode(data)
-    ts.storeType match {
-      case "base64-PEM" => ts.copy(data = Some(new String(decoded)), storeType = "PEM")
-      case _ => ts
+    val result = for {
+      dataBytes ← Try(Base64.getDecoder.decode(data))
+      file ← writeToTempFile(dataBytes)
+    } yield file
+
+    result match {
+      case Success(trustStoreFile) ⇒
+        Logger.info(s"Successfully wrote truststore to file: ${trustStoreFile.getAbsolutePath}")
+
+        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath))
+
+      case Failure(error) ⇒
+        Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
+        sys.error(s"Error in truststore configuration: ${error.getMessage}")
     }
   }
 
