@@ -16,17 +16,24 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo
 
-@(missingInfos: Set[MissingUserInfo])(implicit request: Request[_], messages: Messages)
+@(missingInfos: Set[MissingUserInfo], personalAccountUrl: String)(implicit request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.confirmdetails.header-page"), bodyClasses = None) {
-    <header class="page-header text">
-        <h1>@Messages("hts.register.missinguserinfo.header")</h1>
-    </header>
-    <header class="divider--bottom">
-        <h2>@Messages("hts.register.missinguserinfo")</h2>
-    </header>
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.missinguserinfo.header.page.title"), bodyClasses = None) {
 
-    @for(info <- missingInfos) {
-        <li>@info</li>
-    }
+    <div class="grid-layout grid-layout--stacked">
+        <div class="grid-layout__column grid-layout__column--2-3">
+            <header class="page-header text">
+                <h2>@Messages("hts.register.missinguserinfo.header")</h2>
+            </header>
+
+            <ul class="bullets">
+            @for(info <- missingInfos) {
+                <li>@info</li>
+            }
+            </ul>
+
+            <p>@Html(Messages("hts.register.missinguserinfo.redirect.personal.account", personalAccountUrl))</p>
+            <p class="margin-bottom">@Html(Messages("hts.register.missinguserinfo.contact.hmrc", "https://www.gov.uk/contact-hmrc"))</p>
+        </div>
+    </div>
 }
