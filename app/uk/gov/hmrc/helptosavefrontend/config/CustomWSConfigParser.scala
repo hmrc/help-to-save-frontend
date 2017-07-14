@@ -62,6 +62,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       ts.data match {
         case Some(data) ⇒
           createTrustStoreConfig(ts, data)
+        case _ =>
+          ts
       }
     }
 
