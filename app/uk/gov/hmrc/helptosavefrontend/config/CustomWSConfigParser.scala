@@ -21,7 +21,7 @@ import java.util
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
-import com.typesafe.config.{ConfigObject, ConfigValueFactory}
+import com.typesafe.config.ConfigValueFactory
 import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
 import play.api.libs.ws.{WSClientConfig, WSConfigParser}
@@ -58,18 +58,10 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       }
     }
 
-    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.map { ts ⇒
-      (ts.storeType.toUpperCase, ts.filePath, ts.data) match {
-        case ("PEM", _, _) ⇒
-          Logger.info("Adding PEM truststore")
-          ts
-        case (storeType, None, Some(data)) ⇒
-          Logger.info(s"Adding $storeType truststore")
+    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
+      ts.data match {
+        case Some(data) ⇒
           createTrustStoreConfig(ts, data)
-
-        case other ⇒
-          Logger.info(s"Adding ${other._1} type truststore")
-          ts
       }
     }
 
@@ -93,13 +85,13 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   private def mergeStores(config: Configuration, name: String): Configuration = {
     val under = config.underlying
     if (under.hasPath(s"play.ws.ssl.${name}Manager.store")) {
-      val singleStore: ConfigObject = under.getObject(s"play.ws.ssl.${name}Manager.store")
+      val singleStore = Some(under.getObject(s"play.ws.ssl.${name}Manager.store"))
       val stores: util.List[AnyRef] = under.getList(s"play.ws.ssl.${name}Manager.stores").unwrapped()
-      if (singleStore != null) {
-        stores.add(singleStore)
-      }
+      singleStore.map(configObject => stores.add(configObject))
       config.copy(underlying = config.underlying.withValue(s"play.ws.ssl.${name}Manager.stores", ConfigValueFactory.fromIterable(stores)))
-    } else config
+    } else {
+      config
+    }
   }
 
 
@@ -139,12 +131,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
     val decoded = Base64.getDecoder.decode(data)
-    ts.storeType match {
-      case "base64-PEM" => ts.copy(data = Some(new String(decoded)), storeType = "PEM")
-      case _ => ts
-    }
+    ts.copy(data = Some(new String(decoded)))
   }
-
 }
 
 class CustomWSConfigParserModule extends Module {
