@@ -59,7 +59,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       }
     }
 
-    val trustStores =config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
+    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
       (ts.storeType.toUpperCase, ts.data) match {
         case (storeType, Some(data)) ⇒
           Logger.info(s"Adding $storeType truststore")
@@ -136,22 +136,27 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
-    val result = for {
-      dataBytes ← Try(Base64.getDecoder.decode(data))
-      file ← writeToTempFile(dataBytes)
-    } yield file
+    Try {
+      val result = for {
+        dataBytes ← Try(Base64.getDecoder.decode(data))
+        file ← writeToTempFile(dataBytes)
+      } yield file
 
-    result match {
-      case Success(trustStoreFile) ⇒
-        Logger.info(s"Successfully wrote truststore to file: ${trustStoreFile.getAbsolutePath}")
+      result match {
+        case Success(trustStoreFile) ⇒
+          Logger.info(s"Successfully wrote truststore to file: ${trustStoreFile.getAbsolutePath}")
 
-        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath), data=None)
+          ts.copy(filePath = Some(trustStoreFile.getAbsolutePath), data = None)
 
-      case Failure(error) ⇒
-        Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
-        sys.error(s"Error in truststore configuration: ${error.getMessage}")
+        case Failure(error) ⇒
+          Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
+          sys.error(s"Error in truststore configuration: ${error.getMessage}")
+      }
     }
-  }
+  }.recover {
+    case e => Logger.error(s"error during creating truststore config ${e.getStackTrace}")
+      ts
+  }.toOption.getOrElse(ts)
 
 }
 
