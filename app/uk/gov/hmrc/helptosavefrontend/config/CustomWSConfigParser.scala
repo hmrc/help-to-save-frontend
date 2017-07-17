@@ -143,7 +143,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     result match {
       case Success(trustStoreFile) ⇒
         Logger.info(s"Successfully wrote truststore to file: ${trustStoreFile.getAbsolutePath}")
-        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath))
+        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath), data = None)
 
       case Failure(error) ⇒
         Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
