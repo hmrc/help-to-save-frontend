@@ -61,7 +61,14 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
       ts.data match {
         case Some(data) ⇒
-          createTrustStoreConfig(ts, data)
+          val tsResponse = Try(createTrustStoreConfig(ts, data, "jks"))
+            .toOption
+            .getOrElse(Try(createTrustStoreConfig(ts, data, "pkcs12"))
+              .toOption
+              .getOrElse(createTrustStoreConfig(ts, data, "des")))
+          Logger.info(s"truststore config reading done=$tsResponse")
+          tsResponse
+
         case _ =>
           ts
       }
@@ -97,8 +104,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
 
-  def writeToTempFile(data: Array[Byte]): Try[File] = Try {
-    val file = File.createTempFile(getClass.getSimpleName, ".tmp")
+  def writeToTempFile(data: Array[Byte], ext: String = ".tmp"): Try[File] = Try {
+    val file = File.createTempFile(getClass.getSimpleName, ext)
     file.deleteOnExit()
     val os = new FileOutputStream(file)
     os.write(data)
@@ -131,19 +138,19 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     }
   }
 
-  private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
+  private def createTrustStoreConfig(ts: TrustStoreConfig, data: String, storeType: String): TrustStoreConfig = {
 
     Logger.info("Creating truststore config")
 
     val result = for {
       dataBytes ← Try(Base64.getDecoder.decode(data))
-      file ← writeToTempFile(dataBytes)
+      file ← writeToTempFile(dataBytes, ".cer")
     } yield file
 
     result match {
       case Success(trustStoreFile) ⇒
         Logger.info(s"Successfully wrote truststore to file: ${trustStoreFile.getAbsolutePath}")
-        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath), data = None)
+        ts.copy(storeType = storeType, filePath = Some(trustStoreFile.getAbsolutePath), data = None)
 
       case Failure(error) ⇒
         Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
