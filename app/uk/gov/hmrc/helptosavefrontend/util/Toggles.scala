@@ -22,7 +22,7 @@ import java.time.Instant
 object Toggles {
   case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: Option[A], logger: Logger) {
     def enabled(): FEATURE_THEN[A] = {
-      conf.getBoolean(s"toggles.$name.enabled") match {
+      conf.getBoolean(s"feature-toggles.$name.enabled") match {
         case Some(b) =>
           logger.info("FEATURE: " + name + " enabled")
           FEATURE_THEN(name, b, unconfiguredVal, logger)
@@ -30,7 +30,7 @@ object Toggles {
       }
     }
 
-    //def enabledWith(additional: String): FEATURE_THEN_KEY[A] = ???
+    //TODO: def enabledWith(additional: String): FEATURE_THEN_KEY[A] = ???
   }
   object FEATURE {
     def apply[A](name: String, conf: Configuration): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, None, Logger(name))

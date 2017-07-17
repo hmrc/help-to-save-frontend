@@ -40,7 +40,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.JSONValidat
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckResult, HTSSession, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{FEATURE, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -118,16 +118,21 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   }
 
   def validateOutGoingUserInfo(userInfo: Option[NSIUserInfo]): Either[String, Option[NSIUserInfo]] = {
+    import uk.gov.hmrc.helptosavefrontend.util.Toggles._
     userInfo match {
       case None => Right(None)
       case Some(ui) =>
-        FEATURE("outgoing-json-validation", app.configuration, featureLogger).thenOrElse(
-          for {
+        var toggleResult: Either[String, Option[NSIUserInfo]] = Right(userInfo)
+        FEATURE("outgoing-json-validation", app.configuration) enabled() thenDo {
+          toggleResult = for {
             t0 <- validateUserInfoAgainstSchema(ui, validationSchema)
             t1 <- before1800(ui)
             t2 <- futureDate(ui)
-          } yield t2,
-          Right(userInfo))
+          } yield t2
+        } otherwise {
+          toggleResult = Right(userInfo)
+        }
+        toggleResult
     }
   }
 

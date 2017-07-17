@@ -46,19 +46,19 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
 
   "toggles" must {
     "when testing find enabled in the config" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature0.enabled").returning(Some(true))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature0.enabled").returning(Some(true))
       val ftr = FEATURE("test-feature0", mockConfiguration, "")
       ftr.enabled() shouldBe FEATURE_THEN("test-feature0", true, Some(""), ftr.logger)
     }
 
     "when testing find not enabled in the config" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature1.enabled").returning(Some(false))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
       val ftr = FEATURE("test-feature1", mockConfiguration, "")
       ftr.enabled() shouldBe FEATURE_THEN("test-feature1", false, Some(""), ftr.logger)
     }
 
     "when testing find misconfigured config" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature2.enabled").returning(None)
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature2.enabled").returning(None)
       val ftr = FEATURE("test-feature2", mockConfiguration, "")
       an [Exception] should be thrownBy ftr.enabled()
     }
@@ -85,7 +85,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "given a FEATURE, the enabled and thenDo should be able to obtain an Either" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature0.enabled").returning(Some(true))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature0.enabled").returning(Some(true))
       def action = 1
       val result = FEATURE("test-feature0", mockConfiguration) enabled() thenDo {
         action
@@ -95,14 +95,14 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
 
     "throw an exception if the feature is not configured and no unconfigured value has been defined" in {
 
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature1.enabled").returning(Some(false))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
       var x: Int = 0
       def action = 1
       an [Exception] shouldBe thrownBy(x = FEATURE("test-feature1", mockConfiguration) enabled() thenDo {action})
     }
 
     "there is an implicit conversion that converts an Either[Option[A], A] to an A that works if the feature is configured" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature1.enabled").returning(Some(false))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
       def action = 1
       val result: Int = FEATURE("test-feature1", mockConfiguration, 0) enabled() thenDo {
         action
@@ -111,7 +111,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "There is an implicit conversion function that allows the unconfigured value to be returned if the feature is unconfigured and the unconfigured value is defined" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature1.enabled").returning(Some(false))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
       def action = 1
       val result: Int = FEATURE("test-feature1", mockConfiguration, 0) enabled() thenDo {
         action
@@ -120,7 +120,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "side effect type actions are possible" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature0.enabled").returning(Some(true))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature0.enabled").returning(Some(true))
       var result = 0
       FEATURE("test-feature0", mockConfiguration) enabled() thenDo {
         result = 1
@@ -145,7 +145,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "it is possible to use otherwise to execute the configured branch in the form of a DSL" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature0.enabled").returning(Some(true))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature0.enabled").returning(Some(true))
       val result = FEATURE("test-feature0", mockConfiguration) enabled() thenDo {
         10
       } otherwise {
@@ -155,7 +155,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "it is possible to use otherwise to execute the unconfigured branch in the form of a DSL" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature1.enabled").returning(Some(false))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
       val result = FEATURE("test-feature1", mockConfiguration) enabled() thenDo {
         10
       } otherwise {
@@ -165,7 +165,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "side effect type actions are possible with an otherwise executing the configured branch" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature0.enabled").returning(Some(true))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature0.enabled").returning(Some(true))
       var result = 0
       FEATURE("test-feature0", mockConfiguration) enabled() thenDo {
         result = 1
@@ -176,7 +176,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "side effect type actions are possible with an otherwise executing the unconfigured branch" in {
-      (mockConfiguration.getBoolean(_: String)).expects("toggles.test-feature1.enabled").returning(Some(false))
+      (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
       var result = 0
       FEATURE("test-feature1", mockConfiguration) enabled() thenDo {
         result = 1
