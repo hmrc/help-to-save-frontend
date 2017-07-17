@@ -20,9 +20,9 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.fge.jackson.JsonLoader
+
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Reads, Writes}
@@ -35,6 +35,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
+import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, Email}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -70,10 +71,15 @@ class RegisterControllerSpec extends TestSupport {
     override lazy val authConnector = mockAuthConnector
   }
 
-  def mockEligibilityResult(nino: String, authorisationCode: String)(result: Either[String, Option[UserInfo]]): Unit =
+  def mockEligibilityResult(nino: String, authorisationCode: String)(result: Either[MissingUserInfos, Option[UserInfo]]): Unit =
     (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
       .expects(nino,authorisationCode, *)
-      .returning(EitherT.fromEither[Future](result.map(EligibilityResult(_))))
+      .returning(EitherT.pure(EligibilityCheckResult(result)))
+
+  def failEligibilityResult(nino: String, authorisationCode: String): Unit =
+    (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
+      .expects(nino,authorisationCode, *)
+      .returning(EitherT.fromEither(Left("unexpected error during eligibility check")))
 
   def mockSessionCacheConnectorPut(result: Either[String, CacheMap]): Unit =
     (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
@@ -282,6 +288,26 @@ class RegisterControllerSpec extends TestSupport {
         register.futureDate(futureUser).isLeft shouldBe true
       }
 
+      "report missing user info back to the user" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
+          mockEligibilityResult(nino, oauthAuthorisationCode)(Left(MissingUserInfos(Set(Email, Contact))))
+        }
+
+        val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
+        val result = Await.result(responseFuture, 5.seconds)
+
+        status(result) shouldBe Status.OK
+
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("Email")
+        html should include("Contact")
+      }
+
       "return an error" must {
 
         def isError(result: Future[PlayResult]): Boolean =
@@ -305,7 +331,7 @@ class RegisterControllerSpec extends TestSupport {
           test(
             inSequence {
               mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-              mockEligibilityResult(nino, oauthAuthorisationCode)(Left("Oh no"))
+              failEligibilityResult(nino, oauthAuthorisationCode)
             })
         }
 

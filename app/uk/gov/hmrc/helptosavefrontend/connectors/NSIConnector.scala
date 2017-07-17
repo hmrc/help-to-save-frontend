@@ -54,8 +54,10 @@ class NSIConnectorImpl extends NSIConnector {
   val httpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
+
     Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
     Logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
+
     httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
       NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
       .map { response ⇒

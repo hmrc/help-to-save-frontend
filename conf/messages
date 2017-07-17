@@ -135,6 +135,10 @@ hts.register.confirmdetails.email=Email
 hts.register.confirmdetails.create-your-account-header=Create your account
 hts.register.confirmdetails.text=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
 hts.register.confirmdetails.label=Continue
+hts.register.missinguserinfo.header=We couldn''t retrieve the following details
+hts.register.missinguserinfo.header.page.title= Help-to-save: Missing UserInfo
+hts.register.missinguserinfo.redirect.personal.account= Please navigate to your <a href="{0}" target="_blank">Personal Account</a> and provide the missing information
+hts.register.missinguserinfo.contact.hmrc=If you have trouble getting in, please  <a href="{0}" target="_blank">Contact HMRC</a>
 hts.register.create_account_help_to_save.title=Create a account
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.par-1=Before opening an account, you’'ll need to confirm you accept these conditions:

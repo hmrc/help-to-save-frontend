@@ -1,9 +1,10 @@
 #!/bin/bash
 
-USAGE="run_selenium_system_test.sh [env] [browser] [tags: optional]
+USAGE="run_selenium_system_test.sh [env] [browser] [drivers] [tags: optional]
 
 env     - The environment to run the tests on [ dev | qa | local ]
 browser - The browser to run the tests on [ chrome | phantomjs ]
+drivers - The path to the folder containing Selenium driver files
 tags    - Space separated list of tags. Only run tests with the given
           tags. Not specifying any tags will run all tests.
           Tags with an '@' symbol."
@@ -59,13 +60,13 @@ function get_java_opts {
   fi
 
   # get the tags
-  if [ ! -z $3 ]
+  if [ ! -z $4 ]
   then
-   tags=$(get_tags ${@:3})
+   tags=$(get_tags ${@:4})
   fi
 
   # create an array with the java options
-  local opts=(-Dhost="${host}" -DauthHost="${auth_host}" -Dbrowser="${2}")
+  local opts=(-Dhost="${host}" -DauthHost="${auth_host}" -Dbrowser="${2}" -Ddrivers="${3}")
 
   if [ ! -z "${tags}" ]
   then
@@ -93,5 +94,5 @@ function join_by {
 # Doing `sbt -Doption1=value1 -Doption2="value2 with spaces" selenium:test` works on some
 # environments but doesn't work with others - here we run sbt and add java system properties
 # within the sbt session and then run the tests
-JAVA_OPTS=$(get_java_opts $1 $2 ${@:3})
+JAVA_OPTS=$(get_java_opts $1 $2 $3 ${@:4})
 sbt "; set javaOptions in SeleniumTest ++= Seq(${JAVA_OPTS}); selenium:test"

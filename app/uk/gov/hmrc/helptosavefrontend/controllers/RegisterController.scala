@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import cats.data.EitherT
-import cats.instances.either._
 import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.either._
@@ -34,11 +33,12 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request}
 import play.api.{Application, Logger}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.JSONValidationFeature._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckResult, HTSSession, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{FEATURE, NINO}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -71,21 +71,28 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         authorisedForHtsWithEnrolments {
           implicit request ⇒
             implicit maybeNino ⇒
-              val userInfo: EitherT[Future, String, EligibilityResult] = for {
+              val result = for {
                 nino ← EitherT.fromOption[Future](maybeNino, "could not retrieve either userDetailsUrl or NINO from auth")
                 eligible ← helpToSaveService.checkEligibility(nino, authorisationCode)
                 nsiUserInfo ← toNSIUserInfo(eligible)
                 _ <- EitherT.fromEither[Future](validateOutGoingUserInfo(nsiUserInfo))
                 _ ← writeToKeyStore(nsiUserInfo)
-              } yield eligible
+              } yield (nino, eligible)
 
-              userInfo.fold(
+              result.fold(
                 error ⇒ {
                   Logger.error(s"Could not perform eligibility check: $error")
                   InternalServerError("")
-                }, _.result.fold(
-                  SeeOther(routes.RegisterController.notEligible().url))(
-                  userDetails ⇒ Ok(views.html.register.confirm_details(userDetails)))
+                }, { case (nino, eligibility) ⇒
+                  eligibility.result.fold(
+                    infos ⇒ {
+                      Logger.error(s"user $nino has missing information: ${infos.missingInfo.mkString(",")}")
+                      Ok(views.html.register.missing_user_info(infos.missingInfo, personalAccountUrl))
+                    }, {
+                      case Some(info) ⇒ Ok(views.html.register.confirm_details(info))
+                      case _ ⇒ SeeOther(routes.RegisterController.notEligible().url)
+                    })
+                }
               )
         }
 
@@ -100,7 +107,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       case _ ⇒
         // we should never reach here - we shouldn't have a successful code and an error at the same time
         Logger.error("Inconsistent result found when attempting to retrieve an authorisation code")
-        Action { InternalServerError("")
+        Action {
+          InternalServerError("")
         }
     }
 
@@ -119,7 +127,6 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
             t1 <- before1800(ui)
             t2 <- futureDate(ui)
           } yield t2,
-          //_ => validateUserInfoAgainstSchema(ui, validationSchema),
           Right(userInfo))
     }
   }
@@ -182,20 +189,19 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  private type EitherOrString[A] = Either[String, A]
+  private def toNSIUserInfo(eligibilityResult: EligibilityCheckResult): EitherT[Future, String, Option[NSIUserInfo]] = {
 
-  private def toNSIUserInfo(eligibilityResult: EligibilityResult): EitherT[Future, String, Option[NSIUserInfo]] = {
-    val conversion: Option[Either[String, NSIUserInfo]] = eligibilityResult.result.map { result ⇒
-      val validation = NSIUserInfo(result)
-      validation.toEither.leftMap(
-        errors ⇒ s"User info did not pass NS&I validity checks: ${errors.toList.mkString("; ")}"
-      )
-    }
+    val mayBeNSIUserInfo: Either[String, Option[NSIUserInfo]] = eligibilityResult.result.fold(
+      _ ⇒ Right(None), {
+        case Some(info) ⇒
+          NSIUserInfo(info).toEither.bimap(
+            errors ⇒ s"User info did not pass NS&I validity checks: ${errors.toList.mkString("; ")}",
+            info ⇒ Some(info))
+        case _ ⇒ Right(None)
+      }
+    )
 
-    // use sequence to push the option into the either
-    val result: Either[String, Option[NSIUserInfo]] = conversion.sequence[EitherOrString, NSIUserInfo]
-
-    EitherT.fromEither[Future](result)
+    EitherT.fromEither[Future](mayBeNSIUserInfo)
   }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
@@ -228,7 +234,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         userDetailsUrlWithNino.fold {
           Logger.error("NINO or user details URI not available")
           Redirect(routes.RegisterController.notEligible().absoluteURL())
-         } { nino ⇒
+        } { nino ⇒
           Logger.info(s"Received request to get user details: redirecting to get user details using NINO $nino as authorisation code")
           Redirect(routes.RegisterController.confirmDetails(Some(nino), None, None, None).absoluteURL())
         }
