@@ -132,8 +132,23 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
-    val decoded = Base64.getDecoder.decode(data)
-    ts.copy(data = Some(new String(decoded)))
+
+    Logger.info("Creating truststore config")
+
+    val result = for {
+      dataBytes ← Try(Base64.getDecoder.decode(data))
+      file ← writeToTempFile(dataBytes)
+    } yield file
+
+    result match {
+      case Success(trustStoreFile) ⇒
+        Logger.info(s"Successfully wrote truststore to file: ${trustStoreFile.getAbsolutePath}")
+        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath))
+
+      case Failure(error) ⇒
+        Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
+        sys.error(s"Error in truststore configuration: ${error.getMessage}")
+    }
   }
 }
 
