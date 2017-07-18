@@ -70,49 +70,53 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
   private def updateTruststore(config: Configuration) = {
-    val under = config.underlying
-    val stores: util.List[_ <: Config] = under.getConfigList("play.ws.ssl.trustManager.stores")
+    Try {
+      val under = config.underlying
+      val stores: util.List[_ <: Config] = under.getConfigList("play.ws.ssl.trustManager.stores")
 
-    val cacerts = stores.filter(c => c.hasPath("storePath")).head
-    val cacaertsPath = cacerts.getString("storePath")
-    val cacertsPass = cacerts.getString("password")
+      val cacerts = stores.filter(c => c.hasPath("storePath")).head
+      val cacaertsPath = cacerts.getString("storePath")
+      val cacertsPass = cacerts.getString("password")
 
-    val decryptedPass = new String(Base64.getDecoder.decode(cacertsPass))
+      val decryptedPass = new String(Base64.getDecoder.decode(cacertsPass))
 
-    val customTrust = stores.filter(c => c.hasPath("data")).head
-    val trustData = cacerts.getString("data")
+      val customTrust = stores.filter(c => c.hasPath("data")).head
+      val trustData = customTrust.getString("data")
 
-    val result = for {
-      dataBytes ← Try(Base64.getDecoder.decode(trustData))
-      file ← writeToTempFile(dataBytes, ".cer")
-    } yield file
+      val result = for {
+        dataBytes ← Try(Base64.getDecoder.decode(trustData))
+        file ← writeToTempFile(dataBytes, ".cer")
+      } yield file
 
-    result match {
-      case Success(customTrustFile) ⇒
-        Logger.info(s"Successfully wrote custom truststore to file: ${customTrustFile.getAbsolutePath}")
-        val is = new FileInputStream(cacaertsPath)
+      result match {
+        case Success(customTrustFile) ⇒
+          Logger.info(s"Successfully wrote custom truststore to file: ${customTrustFile.getAbsolutePath}")
+          val is = new FileInputStream(cacaertsPath)
 
-        val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
-        keystore.load(is, decryptedPass.toCharArray)
+          val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
+          keystore.load(is, decryptedPass.toCharArray)
 
-        val cf = CertificateFactory.getInstance("X.509")
-        val fis = new FileInputStream(customTrustFile)
-        val dis = new DataInputStream(fis)
-        val bytes = new Array[Byte](dis.available)
-        dis.readFully(bytes)
-        val bais = new ByteArrayInputStream(bytes)
-        val certs = cf.generateCertificate(bais)
+          val cf = CertificateFactory.getInstance("X.509")
+          val fis = new FileInputStream(customTrustFile)
+          val dis = new DataInputStream(fis)
+          val bytes = new Array[Byte](dis.available)
+          dis.readFully(bytes)
+          val bais = new ByteArrayInputStream(bytes)
+          val certs = cf.generateCertificate(bais)
 
-        // Add the certificate
-        keystore.setCertificateEntry("nsandi.hmrc.hts.esit.client", certs)
+          // Add the certificate
+          keystore.setCertificateEntry("nsandi.hmrc.hts.esit.client", certs)
 
-        // Save the new keystore contents
-        val out = new FileOutputStream(cacaertsPath)
-        keystore.store(out, decryptedPass.toCharArray)
+          // Save the new keystore contents
+          val out = new FileOutputStream(cacaertsPath)
+          keystore.store(out, decryptedPass.toCharArray)
 
-      case Failure(error) ⇒
-        Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
-        sys.error(s"Error in truststore configuration: ${error.getMessage}")
+        case Failure(error) ⇒
+          Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
+          sys.error(s"Error in truststore configuration: ${error.getMessage}")
+      }
+    }.recover{
+      case e => Logger.error(s"error during truststore setup $e")
     }
 
   }
