@@ -315,7 +315,7 @@ class RegisterControllerSpec extends TestSupport {
         val userInfoJson = JsonLoader.fromString(Json.toJson(nsiWithShortForename).toString)
         val report: ProcessingReport = jsonValidator.validate(validationSchema, userInfoJson)
         val messages = report.iterator().toSeq
-        messages.length shouldBe 2
+        messages.length shouldBe 1
         register.classify(messages(0), nsiWithShortForename).isLeft shouldBe true
         register.classify(messages(0), nsiWithShortForename).fold(identity, _ => "") shouldBe "For NINO WM123456C: forename is less than 1 char, needs to be at least 1 char"
       }
@@ -330,18 +330,6 @@ class RegisterControllerSpec extends TestSupport {
         messages.length shouldBe 1
         register.classify(messages(0), nsiWithLongForename).isLeft shouldBe true
         register.classify(messages(0), nsiWithLongForename).fold(identity, _ => "") shouldBe "For NINO WM123456C: forename is greater than 26 chars"
-      }
-
-      "when given a NSIUserInfo that the json validation schema reports that the forename is too does not meet the regex pattern, return a message" in {
-        import scala.collection.JavaConversions._
-
-        val nsiWithBadForename = validNSIUserInfo copy (forename = "    --wibble--wobble")
-        val userInfoJson = JsonLoader.fromString(Json.toJson(nsiWithBadForename).toString)
-        val report: ProcessingReport = jsonValidator.validate(validationSchema, userInfoJson)
-        val messages = report.iterator().toSeq
-        messages.length shouldBe 1
-        register.classify(messages(0), nsiWithBadForename).isLeft shouldBe true
-        register.classify(messages(0), nsiWithBadForename).fold(identity, _ => "") shouldBe "For NINO WM123456C: forename contained an unrecognised char sequence"
       }
 
       "when given a NSIUserInfo that the json validation schema reports that the forename is missing" in {
@@ -375,7 +363,7 @@ class RegisterControllerSpec extends TestSupport {
         val userInfoJson = JsonLoader.fromString(Json.toJson(nsiWithShortSurname).toString)
         val report: ProcessingReport = jsonValidator.validate(validationSchema, userInfoJson)
         val messages = report.iterator().toSeq
-        messages.length shouldBe 2
+        messages.length shouldBe 1
         register.classify(messages(0), nsiWithShortSurname).isLeft shouldBe true
         register.classify(messages(0), nsiWithShortSurname).fold(identity, _ => "") shouldBe "For NINO WM123456C: surname is less than 1 char, needs to be at least 1 char"
       }
@@ -390,18 +378,6 @@ class RegisterControllerSpec extends TestSupport {
         messages.length shouldBe 1
         register.classify(messages(0), nsiWithLongSurname).isLeft shouldBe true
         register.classify(messages(0), nsiWithLongSurname).fold(identity, _ => "") shouldBe "For NINO WM123456C: surname is greater than 300 chars"
-      }
-
-      "when given a NSIUserInfo that the json validation schema reports that the surname is too does not meet the regex pattern, return a message" in {
-        import scala.collection.JavaConversions._
-
-        val nsiWithBadSurname = validNSIUserInfo copy (surname = "    --wibble--wobble")
-        val userInfoJson = JsonLoader.fromString(Json.toJson(nsiWithBadSurname).toString)
-        val report: ProcessingReport = jsonValidator.validate(validationSchema, userInfoJson)
-        val messages = report.iterator().toSeq
-        messages.length shouldBe 1
-        register.classify(messages(0), nsiWithBadSurname).isLeft shouldBe true
-        register.classify(messages(0), nsiWithBadSurname).fold(identity, _ => "") shouldBe "For NINO WM123456C: surname contained an unrecognised char sequence"
       }
 
       "when given a NSIUserInfo that the json validation schema reports that the surname is missing" in {
