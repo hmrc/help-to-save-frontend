@@ -17,11 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io.{File, FileOutputStream}
-import java.util
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
-import com.typesafe.config.ConfigValueFactory
 import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
 import play.api.libs.ws.{WSClientConfig, WSConfigParser}
@@ -36,8 +34,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   override def parse(): WSClientConfig = {
     Logger.info("Parsing WSClientConfig")
-    val mergedConfiguration = mergeAllStores(configuration)
-    val internalParser = new WSConfigParser(mergedConfiguration, env)
+    val internalParser = new WSConfigParser(configuration, env)
     val config = internalParser.parse()
 
     val keyStores = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks ⇒
@@ -58,47 +55,12 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       }
     }
 
-    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
-      ts.data match {
-        case Some(data) ⇒
-          val tsResponse = createTrustStoreConfig(ts, data, "p7b")
-          Logger.info(s"truststore config reading done=$tsResponse")
-          tsResponse
+    val updatedKeyManagerConfig = config.ssl.keyManagerConfig.copy(keyStoreConfigs = keyStores)
 
-        case _ =>
-          ts
-      }
-    }
+    val wsClientConfig = config.copy(ssl = config.ssl.copy(keyManagerConfig = updatedKeyManagerConfig))
 
-    val modded = config.copy(
-      ssl = config.ssl.copy(
-        keyManagerConfig = config.ssl.keyManagerConfig.copy(
-          keyStoreConfigs = keyStores
-        ),
-        trustManagerConfig = config.ssl.trustManagerConfig.copy(
-          trustStoreConfigs = trustStores
-        )
-      )
-    )
-    modded
+    wsClientConfig
   }
-
-  private def mergeAllStores(config: Configuration): Configuration = {
-    mergeStores(mergeStores(config, "key"), "trust")
-  }
-
-  private def mergeStores(config: Configuration, name: String): Configuration = {
-    val under = config.underlying
-    if (under.hasPath(s"play.ws.ssl.${name}Manager.store")) {
-      val singleStore = Some(under.getObject(s"play.ws.ssl.${name}Manager.store"))
-      val stores: util.List[AnyRef] = under.getList(s"play.ws.ssl.${name}Manager.stores").unwrapped()
-      singleStore.map(configObject => stores.add(configObject))
-      config.copy(underlying = config.underlying.withValue(s"play.ws.ssl.${name}Manager.stores", ConfigValueFactory.fromIterable(stores)))
-    } else {
-      config
-    }
-  }
-
 
   def writeToTempFile(data: Array[Byte], ext: String = ".tmp"): Try[File] = Try {
     val file = File.createTempFile(getClass.getSimpleName, ext)
@@ -134,19 +96,19 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     }
   }
 
-  private def createTrustStoreConfig(ts: TrustStoreConfig, data: String, storeType: String): TrustStoreConfig = {
+  private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
 
     Logger.info("Creating truststore config")
 
     val result = for {
       dataBytes ← Try(Base64.getDecoder.decode(data))
-      file ← writeToTempFile(dataBytes, ".cer")
+      file ← writeToTempFile(dataBytes, ".p7b")
     } yield file
 
     result match {
       case Success(trustStoreFile) ⇒
         Logger.info(s"Successfully wrote truststore to file: ${trustStoreFile.getAbsolutePath}")
-        ts.copy(storeType = storeType, filePath = Some(trustStoreFile.getAbsolutePath), data = None)
+        ts.copy(filePath = Some(trustStoreFile.getAbsolutePath), data = None)
 
       case Failure(error) ⇒
         Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
