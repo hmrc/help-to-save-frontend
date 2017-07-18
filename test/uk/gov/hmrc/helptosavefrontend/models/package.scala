@@ -54,7 +54,7 @@ package object models {
   /**
     * Valid user details which will pass NSI validation checks
     */
-  val (validUserInfo, validNSIUserInfo) = {
+  val (validUserInfo, nsiValidContactDetails, validNSIUserInfo) = {
     val (forename, surname) = "Tyrion" → "Lannister"
     val dateOfBirth = LocalDate.ofEpochDay(0L)
     val addressLine1 = "Casterly Rock"
@@ -68,12 +68,12 @@ package object models {
     val email = "tyrion_lannister@gmail.com"
 
     val userInfo = UserInfo(forename, surname, nino, dateOfBirth, email, address)
+    val nsiValidContactDetails = ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
     val nsiUserInfo =
       NSIUserInfo(forename, surname, dateOfBirth, nino,
         ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
       )
 
-    userInfo → nsiUserInfo
+    (userInfo, nsiValidContactDetails, nsiUserInfo)
   }
-
 }

@@ -25,7 +25,7 @@ import cats.syntax.either._
 import cats.syntax.traverse._
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.fge.jackson.JsonLoader
-import com.github.fge.jsonschema.core.report.ProcessingReport
+import com.github.fge.jsonschema.core.report.{ProcessingReport, ProcessingMessage}
 import com.github.fge.jsonschema.main.{JsonSchemaFactory, JsonValidator}
 import com.google.inject.Inject
 import configs.syntax._
@@ -242,12 +242,33 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-  private[controllers] def validateUserInfoAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
+  private def anError(json: JsonNode) = json.path("level").asText() == "error"
 
+  private def instanceIs(json: JsonNode, s: String): Boolean = json.path("instance").path("pointer").asText() == s
+
+  private def keywordIs(json: JsonNode, s: String): Boolean = json.path("keyword").asText() == s
+
+  private def messageContains(json: JsonNode, s: Option[String]): Boolean = s.fold(true) { contents => json.path("message").asText().contains(contents) }
+
+  def classify(message: ProcessingMessage, userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] =  {
+    val json: JsonNode = message.asJson()
+    if (anError(json)) {
+      val firingRule = logClassificationKeys.find(rule => instanceIs(json, rule.instance) && keywordIs(json, rule.keyword) && messageContains(json, rule.messageContains))
+      firingRule.fold(Right(Some(userInfo)): Either[String, Option[NSIUserInfo]]) { firedRule => Left(logClassificationRules.getOrElse(firedRule, "").format(userInfo.nino)) }
+    } else {
+      Right(Some(userInfo))
+    }
+  }
+
+  private[controllers] def validateUserInfoAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
+    import scala.collection.JavaConversions._
     try {
       val userInfoJson = JsonLoader.fromString(Json.toJson(userInfo).toString)
       val report: ProcessingReport = jsonValidator.validate(schema, userInfoJson)
-      if (report.isSuccess) Right(Some(userInfo)) else Left(report.toString)
+      val classification = report.iterator().toIterable.map(msg => classify(msg, userInfo)).find(_.isLeft)
+      classification.fold(Right(Some(userInfo)): Either[String, Option[NSIUserInfo]]) {
+        identity
+      }
     } catch {
       case e: Exception => Left(e.getMessage)
     }
@@ -291,7 +312,7 @@ object RegisterController {
           "type": "string",
           "minLength": 8,
           "maxLength": 8,
-          "pattern": "^[0-9]{4}01|02|03|04|05|06|07|08|09|10|11|12[0-9]{2}$"
+          "pattern": "^[0-9]{4}(01|02|03|04|05|06|07|08|09|10|11|12)[0-9]{2}$"
         },
         "contactDetails": {
           "type": "object",
@@ -359,9 +380,84 @@ object RegisterController {
       }
     }""".stripMargin
 
+    val minNameLen = 1
+    val maxForenameLen = 26
+    val maxSurnameLen = 300
+    val dateLen = 8
+    val countryCodeLen = 2
+    val addressLineLen = 35
+    val maxPostcodeLen = 10
+    val maxPhoneNmberLen = 15
+    val commsPreflen = 2
+    val maxEmailLen = 254
+    val maxRegistrationChannel = 10
+    val maxNinoLen = 9
     lazy val validationSchema = JsonLoader.fromString(validationSchemaStr)
     lazy val featureLogger = Logger("outgoing-json-validation")
     lazy val jsonValidator: JsonValidator = JsonSchemaFactory.byDefault().getValidator
+
+    case class LogClassificationRule(instance: String, keyword: String, messageContains: Option[String])
+
+    object LogClassificationRule {
+      def apply(instance: String, keyword: String): LogClassificationRule = LogClassificationRule(instance, keyword, None)
+
+      def apply(instance: String, keyword: String, contains: String): LogClassificationRule = LogClassificationRule(instance, keyword, Some(contains))
+    }
+
+    // NOTE: These rules work with the json-schema-validator library version 2.2.8 from github.com/java-json-tools.
+    // They depend very specifically on the library verion. This section of code will have to be revisited if the
+    // library is changed.
+    val logClassificationRules = Map[LogClassificationRule, String](
+      LogClassificationRule("/forename", "type") -> "For NINO %s: forename is wrong type, needs to be a string",
+      LogClassificationRule("/forename", "minLength") -> ("For NINO %s: forename is less than " + minNameLen + " char, needs to be at least " + minNameLen + " char"),
+      LogClassificationRule("/forename", "maxLength") -> ("For NINO %s: forename is greater than "+ maxForenameLen + " chars"),
+      LogClassificationRule("", "required", "forename") -> "For NINO %s: forename was mandatory but not supplied",
+      LogClassificationRule("/surname", "type") -> "For NINO %s: surname is wrong type, needs to be a string",
+      LogClassificationRule("/surname", "minLength") -> ("For NINO %s: surname is less than " + minNameLen + " char, needs to be at least " + minNameLen + " char"),
+      LogClassificationRule("/surname", "maxLength") -> ("For NINO %s: surname is greater than " + maxSurnameLen + " chars"),
+      LogClassificationRule("", "required", "surname") -> "For NINO %s: surname was mandatory but not supplied",
+      LogClassificationRule("/dateOfBirth", "type") -> "For NINO %s: date of birth is wrong type, needs to be a string",
+      LogClassificationRule("/dateOfBirth", "minLength") -> ("For NINO %s: date of birth is less than " + dateLen + " chars, needs to be " + dateLen + " chars"),
+      LogClassificationRule("/dateOfBirth", "maxLength") -> ("For NINO %s: date of birth is greater than " + dateLen + " chars, needs to be " + dateLen + " chars"),
+      LogClassificationRule("/dateOfBirth", "pattern") -> "For NINO %s: date of birth contained an unrecognised char sequence",
+      LogClassificationRule("", "required", "dateOfBirth") -> "For NINO %s: date of birth was mandatory but not supplied",
+      LogClassificationRule("/contactDetails/countryCode", "type") -> "For NINO %s: country code is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/countryCode", "minLength") -> ("For NINO %s: country code is less than " + countryCodeLen + " chars, needs to be " + countryCodeLen + " chars"),
+      LogClassificationRule("/contactDetails/countryCode", "maxLength") -> ("For NINO %s: country code is greater than " + countryCodeLen + " chars, needs to be " + countryCodeLen + " chars"),
+      LogClassificationRule("/contactDetails/countryCode", "pattern") -> "For NINO %s: country code contained an unrecognised char sequence",
+      LogClassificationRule("/contactDetails/address1", "type") -> "For NINO %s: address1 field is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/address1", "maxLength") -> ("For NINO %s: address1 field is greater than " + addressLineLen + " chars"),
+      LogClassificationRule("/contactDetails", "required", "address1") -> "For NINO %s: address1 field was mandatory but not supplied",
+      LogClassificationRule("/contactDetails/address2", "type") -> "For NINO %s: address2 field is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/address2", "maxLength") -> ("For NINO %s: address2 field is greater than " + addressLineLen + " chars"),
+      LogClassificationRule("/contactDetails", "required", "address2") -> "For NINO %s: address2 field was mandatory but not supplied",
+      LogClassificationRule("/contactDetails/address3", "type") -> "For NINO %s: address3 field is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/address3", "maxLength") -> ("For NINO %s: address3 field is greater than " + addressLineLen + " chars"),
+      LogClassificationRule("/contactDetails/address4", "type") -> "For NINO %s: address4 field is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/address4", "maxLength") -> ("For NINO %s: address4 field is greater than " + addressLineLen + " chars"),
+      LogClassificationRule("/contactDetails/address5", "type") -> "For NINO %s: address5 field is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/address5", "maxLength") -> ("For NINO %s: address5 field is greater than " + addressLineLen + " chars"),
+      LogClassificationRule("/contactDetails/postcode", "type") -> "For NINO %s: postcode field is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/postcode", "maxLength") -> ("For NINO %s: postcode is greater than " + maxPostcodeLen + " chars"),
+      LogClassificationRule("/contactDetails", "required", "postcode") -> "For NINO %s: postcode was mandatory but not supplied",
+      LogClassificationRule("/contactDetails/communicationPreference", "type") -> "For NINO %s: communication preference field is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/communicationPreference", "minLength") -> ("For NINO %s: communications preference is less than " + countryCodeLen + " chars, needs to be " + countryCodeLen + " chars"),
+      LogClassificationRule("/contactDetails/communicationPreference", "maxLength") -> ("For NINO %s: communications preference is greater than " + countryCodeLen + " chars, needs to be " + countryCodeLen + " chars"),
+      LogClassificationRule("/contactDetails/communicationPreference", "pattern") -> "For NINO %s: communications preference contained an unrecognised char sequence",
+      LogClassificationRule("/contactDetails", "required", "communicationPreference") -> "For NINO %s: communications preference was mandatory but not supplied",
+      LogClassificationRule("/contactDetails/phoneNumber", "maxLength") -> ("For NINO %s: phone number is greater than " + maxPhoneNmberLen + " chars"),
+      LogClassificationRule("/contactDetails/phoneNumber", "type") -> "For NINO %s: phone number field is wrong type, needs to be a string",
+      LogClassificationRule("/contactDetails/email", "maxLength") -> ("For NINO %s: email address is greater than " + maxEmailLen + " chars"),
+      LogClassificationRule("/registrationChannel", "maxLength") -> ("For NINO %s: registration channel is greater than " + maxRegistrationChannel + " chars"),
+      LogClassificationRule("/registrationChannel", "pattern") -> "For NINO %s: registration channel contained an unrecognised char sequence",
+      LogClassificationRule("", "required", "registrationChannel") -> "For NINO %s: registration channel was mandatory but not supplied",
+      LogClassificationRule("/nino", "minLength") -> ("For NINO %s: nino is less than " + maxNinoLen + " chars, needs to be " + maxNinoLen + " chars"),
+      LogClassificationRule("/nino", "maxLength") -> ("For NINO %s: nino is greater than " + maxNinoLen + " chars, needs to be " + maxNinoLen + " chars"),
+      LogClassificationRule("/nino", "pattern") -> "For NINO %s: nino contained an unrecognised char sequence",
+      LogClassificationRule("", "required", "nino") -> "Nino was mandatory but not supplied"
+    )
+
+    val logClassificationKeys = logClassificationRules.keySet.seq
   }
 
   // details required to get an authorisation token from OAuth
