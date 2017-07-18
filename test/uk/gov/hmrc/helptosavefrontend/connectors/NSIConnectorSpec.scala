@@ -63,6 +63,22 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
 
+    "Return a SubmissionFailure when the status is INTERNAL_SERVER_ERROR" in {
+      val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
+      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.INTERNAL_SERVER_ERROR,
+        Some(Json.toJson(submissionFailure))))
+      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+      Await.result(result, 3.seconds) shouldBe submissionFailure
+    }
+
+    "Return a SubmissionFailure when the status is SERVICE_UNAVAILABLE" in {
+      val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
+      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.SERVICE_UNAVAILABLE,
+        Some(Json.toJson(submissionFailure))))
+      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+      Await.result(result, 3.seconds) shouldBe submissionFailure
+    }
+
     "Return a SubmissionFailure in case there is an invalid json" in {
       mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.BAD_REQUEST,
         Some(Json.parse("""{"invalidJson":"foo"}"""))))
