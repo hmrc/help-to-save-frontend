@@ -23,7 +23,7 @@ sbt test
 ```
 This command will not run the Selenium tests.
 
-The Selenium tests can be run separately by running
+The Selenium tests can be run separately by running 
  ```
  ./run_selenium_system_test.sh ${ENV} ${BROWSER} ${DRIVERS}
 ```
