@@ -25,7 +25,7 @@ import cats.syntax.either._
 import cats.syntax.traverse._
 import com.fasterxml.jackson.databind.JsonNode
 import com.github.fge.jackson.JsonLoader
-import com.github.fge.jsonschema.core.report.ProcessingReport
+import com.github.fge.jsonschema.core.report.{ProcessingReport, ProcessingMessage}
 import com.github.fge.jsonschema.main.{JsonSchemaFactory, JsonValidator}
 import com.google.inject.Inject
 import configs.syntax._
@@ -241,6 +241,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         }
       }
     }
+
+  def classify(message: ProcessingMessage, userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] = ???
 
   private[controllers] def validateUserInfoAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
 
