@@ -242,14 +242,33 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       }
     }
 
-  def classify(message: ProcessingMessage, userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] = ???
+  private def anError(json: JsonNode) = json.path("level").asText() == "error"
 
+  private def instanceIs(json: JsonNode, s: String): Boolean = json.path("instance").path("pointer").asText() == s
+
+  private def keywordIs(json: JsonNode, s: String): Boolean = json.path("keyword").asText() == s
+
+  private def messageContains(json: JsonNode, s: Option[String]): Boolean = s.fold(true) { contents => json.path("message").asText().contains(contents) }
+
+  def classify(message: ProcessingMessage, userInfo: NSIUserInfo): Either[String, Option[NSIUserInfo]] =  {
+    val json: JsonNode = message.asJson()
+    if (anError(json)) {
+      val firingRule = logClassificationKeys.find(rule => instanceIs(json, rule.instance) && keywordIs(json, rule.keyword) && messageContains(json, rule.messageContains))
+      firingRule.fold(Right(Some(userInfo)): Either[String, Option[NSIUserInfo]]) { firedRule => Left(logClassificationRules.getOrElse(firedRule, "").format(userInfo.nino)) }
+    } else {
+      Right(Some(userInfo))
+    }
+  }
+  
   private[controllers] def validateUserInfoAgainstSchema(userInfo: NSIUserInfo, schema: JsonNode): Either[String, Option[NSIUserInfo]] = {
-
+    import scala.collection.JavaConversions._
     try {
       val userInfoJson = JsonLoader.fromString(Json.toJson(userInfo).toString)
       val report: ProcessingReport = jsonValidator.validate(schema, userInfoJson)
-      if (report.isSuccess) Right(Some(userInfo)) else Left(report.toString)
+      val classification = report.iterator().toIterable.map(msg => classify(msg, userInfo)).find(_.isLeft)
+      classification.fold(Right(Some(userInfo)): Either[String, Option[NSIUserInfo]]) {
+        identity
+      }
     } catch {
       case e: Exception => Left(e.getMessage)
     }
@@ -364,6 +383,24 @@ object RegisterController {
     lazy val validationSchema = JsonLoader.fromString(validationSchemaStr)
     lazy val featureLogger = Logger("outgoing-json-validation")
     lazy val jsonValidator: JsonValidator = JsonSchemaFactory.byDefault().getValidator
+
+    case class LogClassificationRule(instance: String, keyword: String, messageContains: Option[String])
+
+    object LogClassificationRule {
+      def apply(instance: String, keyword: String): LogClassificationRule = LogClassificationRule(instance, keyword, None)
+
+      def apply(instance: String, keyword: String, contains: String): LogClassificationRule = LogClassificationRule(instance, keyword, Some(contains))
+    }
+
+
+    // NOTE: These rules work with the json-schema-validator library version 2.2.8 from github.com/java-json-tools.
+    // They depend very specifically on the library verion. This section of code will have to be revisited if the
+    // library is changed.
+    val logClassificationRules = Map[LogClassificationRule, String](
+      LogClassificationRule("/forename", "type") -> "For NINO %s: forename is wrong type, needs to be a string"
+    )
+
+    val logClassificationKeys = logClassificationRules.keySet.seq
   }
 
   // details required to get an authorisation token from OAuth
