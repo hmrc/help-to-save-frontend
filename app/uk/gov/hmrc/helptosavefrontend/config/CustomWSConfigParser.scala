@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io._
 import java.security.KeyStore
-import java.security.cert.CertificateFactory
+import java.security.cert.{Certificate, CertificateFactory}
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
@@ -83,6 +83,12 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       result match {
         case Success(customTrustFile) ⇒
           Logger.info(s"Successfully wrote custom truststore to file: ${customTrustFile.getAbsolutePath}")
+
+          val source = scala.io.Source.fromFile(customTrustFile)
+          val lines = try source.mkString finally source.close()
+
+          Logger.info(s"content of p7b file are $lines")
+
           val is = new FileInputStream(cacertsPath)
 
           val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
@@ -94,10 +100,11 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           val bytes = new Array[Byte](dis.available)
           dis.readFully(bytes)
           val bais = new ByteArrayInputStream(bytes)
-          val certs = cf.generateCertificate(bais)
+          val certs = cf.generateCertificates(bais)
 
-          // Add the certificate
-          keystore.setCertificateEntry("api.nsi.hts.esit", certs)
+          for (cert <- certs.toArray.zipWithIndex) {
+            keystore.setCertificateEntry(s"api.nsi.hts.esit-${cert._2}", cert._1.asInstanceOf[Certificate])
+          }
 
           // Save the new keystore contents
           val out = new FileOutputStream(cacertsPath)
@@ -108,7 +115,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           sys.error(s"Error in truststore configuration: ${error.getMessage}")
       }
     }.recover {
-      case e => Logger.error(s"error during truststore setup $e")
+      case e => Logger.error(s"error during truststore setup ${e.printStackTrace()}")
     }
 
   }
