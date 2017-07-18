@@ -63,7 +63,7 @@ class NSIConnectorImpl extends NSIConnector {
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
-            Logger.info(s"Successfully created a NSI account for ${userInfo.nino}")
+            Logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino}")
             SubmissionSuccess()
 
           case Status.BAD_REQUEST ⇒
@@ -73,8 +73,11 @@ class NSIConnectorImpl extends NSIConnector {
           case other ⇒
             Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status: $other")
             SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
-        }
-      }
+        } }
+      }.recover {
+    case e ⇒
+      Logger.error("Encountered error while trying to create account", e)
+      SubmissionFailure(None, s"Encountered error while trying to create account", e.getMessage)
   }
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {

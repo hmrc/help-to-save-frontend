@@ -29,7 +29,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
   val specialCharacters: List[Char] = (Char.MinValue to Char.MaxValue).toList.filter(!_.isLetterOrDigit)
 
   val address: Address = validUserInfo.address
-  val postcode: String = validNSIUserInfo.contactDetails.postCode
+  val postcode: String = validNSIUserInfo.contactDetails.postcode
   val forename: String = validNSIUserInfo.forename
   val surname: String = validNSIUserInfo.surname
   val email: String = validNSIUserInfo.contactDetails.email
@@ -131,7 +131,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(surname = "Lann'ister")).isValid shouldBe true
 
           forAll(Gen.oneOf(specialCharacters)) { c: Char ⇒
-            whenever(c != '&' && c != '-' && c != '.') {
+            whenever(c != '&' && c != '-' && c != '.' && c!= ''') {
               NSIUserInfo(validUserInfo.copy(surname = s"Lann${c}ister")).isInvalid shouldBe true
             }
           }
@@ -217,7 +217,8 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
               List("1 the Street", "The Place")))
           ).getOrElse(sys.error("Expected valid NSIUserInformation"))
 
-          info.contactDetails.address shouldBe List("1 the Street", "The Place")
+          info.contactDetails.address1 shouldBe "1 the Street"
+          info.contactDetails.address2 shouldBe "The Place"
         }
 
         "contain lines which are longer than 35 characters" in {

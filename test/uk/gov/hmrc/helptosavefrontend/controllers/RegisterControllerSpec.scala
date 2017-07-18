@@ -16,8 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
+import com.fasterxml.jackson.databind.JsonNode
+import com.github.fge.jackson.JsonLoader
+
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Reads, Writes}
@@ -35,6 +40,9 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.JSONValidationFeature._
+import java.time.format.DateTimeFormatter
+import java.time.LocalDate
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
@@ -125,7 +133,7 @@ class RegisterControllerSpec extends TestSupport {
         implicit val request = FakeRequest()
         val result = register.getAuthorisation(request)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.confirmDetails(Some(nino), None,None,None).absoluteURL())
+        redirectLocation(result) shouldBe Some(routes.RegisterController.confirmDetails(Some(nino), None, None, None).absoluteURL())
       }
 
       "return the not eligible page if redirects to OAUTH are disabled and a NINO is not available" in {
@@ -156,8 +164,8 @@ class RegisterControllerSpec extends TestSupport {
           case u :: p :: Nil ⇒
             val paramList = p.split('&').toList
             val keyValueSet = paramList.map(_.split('=').toList match {
-              case key:: value :: Nil ⇒ key → value
-              case  _                 ⇒ fail(s"Could not parse query parameters: $p")
+              case key :: value :: Nil ⇒ key → value
+              case _ ⇒ fail(s"Could not parse query parameters: $p")
             }).toSet
 
             u → keyValueSet
@@ -212,6 +220,72 @@ class RegisterControllerSpec extends TestSupport {
         status(result) shouldBe Status.SEE_OTHER
 
         redirectLocation(result) shouldBe Some("/help-to-save/register/not-eligible")
+      }
+
+      "use the validate function to check user info against empty schemas" in {
+        val schema = JsonLoader.fromString("{}")
+
+        register.validateUserInfoAgainstSchema(validNSIUserInfo, schema) shouldBe Right(Some(validNSIUserInfo))
+      }
+
+      "use the validate function to check user info against arbitrary schemas (example 1)" in {
+        val schema = JsonLoader.fromString("""{"type": "object", "properties": {"forename": {"type": "string"}, "surname": {"type": "string"}}}""")
+
+        register.validateUserInfoAgainstSchema(validNSIUserInfo, schema) shouldBe Right(Some(validNSIUserInfo))
+      }
+
+      "use the validate function to check arbitrary JSON against arbitrary schemas (example 2)" in {
+        val schema = JsonLoader.fromString("""{"type": "object", "properties": {"forename": {"type": "number"}, "food": {"type": "string"}}}""")
+
+        register.validateUserInfoAgainstSchema(validNSIUserInfo, schema).isLeft shouldBe true
+      }
+
+      "If the outgoing-json validation feature is a schema as defined by json-schema.org" in {
+        val schemaJsonNode: JsonNode = JsonLoader.fromString(validationSchemaStr)
+
+        schemaJsonNode.isObject shouldBe true
+      }
+
+      "If the outgoing-json validation feature detects an exception, a left with the exception message is produced" in {
+        register.validateUserInfoAgainstSchema(validNSIUserInfo, null).isLeft shouldBe true
+      }
+
+      "If the outgoing-json validation feature detects a birth date prior to 1800 it returns a left" in {
+        val date = LocalDate.parse("17990505", DateTimeFormatter.BASIC_ISO_DATE)
+        val oldUser = validNSIUserInfo copy (dateOfBirth = date)
+        register.before1800(oldUser).isLeft shouldBe true
+      }
+
+      "If the outgoing-json validation feature detects a birth date just after to 1800 it returns a right" in {
+        val date = LocalDate.parse("18000101", DateTimeFormatter.BASIC_ISO_DATE)
+        val oldUser = validNSIUserInfo copy (dateOfBirth = date)
+        register.before1800(oldUser).isRight shouldBe true
+      }
+
+      "If the outgoing-json validateOutGoingJson function detects a birth date prior to 1800 it returns a left" in {
+        val date = LocalDate.parse("17990505", DateTimeFormatter.BASIC_ISO_DATE)
+        val oldUser = validNSIUserInfo copy (dateOfBirth = date)
+        register.validateCreateAccountJsonSchema(Some(oldUser)).isLeft shouldBe true
+      }
+
+      "If the outgoing-json futureDate function detects a birth date in the future it returns a left " in {
+        val today = java.time.LocalDate.now()
+        val futureUser = validNSIUserInfo copy (dateOfBirth = today)
+        register.validateCreateAccountJsonSchema(Some(futureUser)).isRight shouldBe true
+      }
+
+      "If the outgoing-json futureDate function detects a birth date of today it returns a right " in {
+        val today = java.time.LocalDate.now()
+        val tomorrow = today.plus(1, java.time.temporal.ChronoUnit.DAYS)
+        val futureUser = validNSIUserInfo copy (dateOfBirth = tomorrow)
+        register.validateCreateAccountJsonSchema(Some(futureUser)).isLeft shouldBe true
+      }
+
+      "If the outgoing-json validateOutGoingJson function detects a birth date in the future it returns a left " in {
+        val today = java.time.LocalDate.now()
+        val tomorrow = today.plus(1, java.time.temporal.ChronoUnit.DAYS)
+        val futureUser = validNSIUserInfo copy (dateOfBirth = tomorrow)
+        register.futureDate(futureUser).isLeft shouldBe true
       }
 
       "report missing user info back to the user" in {
@@ -344,7 +418,5 @@ class RegisterControllerSpec extends TestSupport {
         }
       }
     }
-
   }
-
 }

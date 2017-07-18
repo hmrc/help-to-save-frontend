@@ -29,13 +29,11 @@ trait NINOGenerator {
 
   def generateEligibleNINO: String = {
     val eligibleNino = "AE" + generateNINO.drop(2)
-    println("Eligible NINO: " + eligibleNino)
     eligibleNino
   }
 
   def generateIneligibleNINO: String = {
     val ineligibleNino = "NA" + generateNINO.drop(2)
-    println("Ineligible NINO: " + ineligibleNino)
     ineligibleNino
 
   }
