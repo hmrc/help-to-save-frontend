@@ -404,7 +404,6 @@ object RegisterController {
       def apply(instance: String, keyword: String, contains: String): LogClassificationRule = LogClassificationRule(instance, keyword, Some(contains))
     }
 
-
     // NOTE: These rules work with the json-schema-validator library version 2.2.8 from github.com/java-json-tools.
     // They depend very specifically on the library verion. This section of code will have to be revisited if the
     // library is changed.
