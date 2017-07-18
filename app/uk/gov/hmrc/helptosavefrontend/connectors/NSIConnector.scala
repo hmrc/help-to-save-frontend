@@ -63,7 +63,7 @@ class NSIConnectorImpl extends NSIConnector {
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
-            Logger.info(s"Received 201 from NSI for create account: ${userInfo.nino}")
+            Logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino}")
             SubmissionSuccess()
 
           case Status.BAD_REQUEST ⇒

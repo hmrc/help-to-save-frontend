@@ -75,7 +75,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                 nino ← EitherT.fromOption[Future](maybeNino, "could not retrieve either userDetailsUrl or NINO from auth")
                 eligible ← helpToSaveService.checkEligibility(nino, authorisationCode)
                 nsiUserInfo ← toNSIUserInfo(eligible)
-                _ <- EitherT.fromEither[Future](validateOutGoingUserInfo(nsiUserInfo))
+                _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo))
                 _ ← writeToKeyStore(nsiUserInfo)
               } yield (nino, eligible)
 
@@ -117,7 +117,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       Future.successful(Ok(views.html.register.create_account_help_to_save()))
   }
 
-  def validateOutGoingUserInfo(userInfo: Option[NSIUserInfo]): Either[String, Option[NSIUserInfo]] = {
+  def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Option[NSIUserInfo]] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
     userInfo match {
       case None => Right(None)
@@ -267,7 +267,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 object RegisterController {
 
   object JSONValidationFeature {
-    //For ICD v 1.2
+    //For ICD v 1.7
     private[controllers] lazy val validationSchemaStr = """
     {
       "$schema": "http://json-schema.org/schema#",

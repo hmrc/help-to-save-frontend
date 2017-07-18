@@ -29,8 +29,6 @@ object Toggles {
         case None => throw new RuntimeException(s"FEATURE($name) is not present in configuration file - misconfigured")
       }
     }
-
-    //TODO: def enabledWith(additional: String): FEATURE_THEN_KEY[A] = ???
   }
   object FEATURE {
     def apply[A](name: String, conf: Configuration): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, None, Logger(name))
@@ -52,9 +50,6 @@ object Toggles {
     }
   }
   object FEATURE_THEN
-
-//  case class FEATURE_THEN_KEY[A](name: String, key: String, enabled: Boolean, hasKey: Boolean, unconfiguredVal: A)
-//  object FEATURE_THEN_KEY
 
   implicit def eitherPop[A](e: Either[Option[A], A]): A = {
     e match {

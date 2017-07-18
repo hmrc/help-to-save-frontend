@@ -265,20 +265,20 @@ class RegisterControllerSpec extends TestSupport {
       "If the outgoing-json validateOutGoingJson function detects a birth date prior to 1800 it returns a left" in {
         val date = LocalDate.parse("17990505", DateTimeFormatter.BASIC_ISO_DATE)
         val oldUser = validNSIUserInfo copy (dateOfBirth = date)
-        register.validateOutGoingUserInfo(Some(oldUser)).isLeft shouldBe true
+        register.validateCreateAccountJsonSchema(Some(oldUser)).isLeft shouldBe true
       }
 
       "If the outgoing-json futureDate function detects a birth date in the future it returns a left " in {
         val today = java.time.LocalDate.now()
         val futureUser = validNSIUserInfo copy (dateOfBirth = today)
-        register.validateOutGoingUserInfo(Some(futureUser)).isRight shouldBe true
+        register.validateCreateAccountJsonSchema(Some(futureUser)).isRight shouldBe true
       }
 
       "If the outgoing-json futureDate function detects a birth date of today it returns a right " in {
         val today = java.time.LocalDate.now()
         val tomorrow = today.plus(1, java.time.temporal.ChronoUnit.DAYS)
         val futureUser = validNSIUserInfo copy (dateOfBirth = tomorrow)
-        register.validateOutGoingUserInfo(Some(futureUser)).isLeft shouldBe true
+        register.validateCreateAccountJsonSchema(Some(futureUser)).isLeft shouldBe true
       }
 
       "If the outgoing-json validateOutGoingJson function detects a birth date in the future it returns a left " in {
