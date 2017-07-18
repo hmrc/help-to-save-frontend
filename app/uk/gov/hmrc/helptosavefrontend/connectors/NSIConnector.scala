@@ -70,6 +70,14 @@ class NSIConnectorImpl extends NSIConnector {
             Logger.error(s"Failed to create an account for ${userInfo.nino} due to bad request")
             handleBadRequestResponse(response)
 
+          case Status.INTERNAL_SERVER_ERROR ⇒
+            Logger.error(s"Received 500 from NSI, failed to create account for ${userInfo.nino} as there was an internal server error")
+            handleBadRequestResponse(response)
+
+          case Status.SERVICE_UNAVAILABLE ⇒
+            Logger.error(s"Received 503 from NSI, failed to create account for ${userInfo.nino} as NSI service is unavailable")
+            handleBadRequestResponse(response)
+
           case other ⇒
             Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status: $other")
             SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
