@@ -61,11 +61,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
       ts.data match {
         case Some(data) ⇒
-          val tsResponse = Try(createTrustStoreConfig(ts, data, "jks"))
-            .toOption
-            .getOrElse(Try(createTrustStoreConfig(ts, data, "pkcs12"))
-              .toOption
-              .getOrElse(createTrustStoreConfig(ts, data, "des")))
+          val tsResponse = createTrustStoreConfig(ts, data, "p7b")
           Logger.info(s"truststore config reading done=$tsResponse")
           tsResponse
 
