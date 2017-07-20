@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io._
 import java.security.KeyStore
-import java.security.cert.CertificateFactory
+import java.security.cert.{Certificate, CertificateFactory}
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
@@ -69,10 +69,9 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   private def updateTruststore(config: Configuration) = {
     Try {
       val cacertsPath = config.getString("truststore.cacerts.path").get
+      Logger.info(s"cacerts path $cacertsPath")
       val cacertsPass = config.getString("truststore.cacerts.password").get
-
       val decryptedPass = new String(Base64.getDecoder.decode(cacertsPass))
-
       val trustData = config.getString("truststore.data").get
 
       val result = for {
@@ -83,27 +82,27 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       result match {
         case Success(customTrustFile) ⇒
           Logger.info(s"Successfully wrote custom truststore to file: ${customTrustFile.getAbsolutePath}")
-
-          val is = new FileInputStream(cacertsPath)
-
           val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
-          keystore.load(is, decryptedPass.toCharArray)
-
+          keystore.load(new FileInputStream(cacertsPath), decryptedPass.toCharArray)
           val cf = CertificateFactory.getInstance("X.509")
-          val fis = new FileInputStream(customTrustFile)
-          val dis = new DataInputStream(fis)
-          val bytes = new Array[Byte](dis.available)
-          dis.readFully(bytes)
-          val bais = new ByteArrayInputStream(bytes)
-          val cert = cf.generateCertificate(bais)
+          val bais = fullStream(customTrustFile)
+          var certs = new Array[Certificate](cf.generateCertificates(bais).toArray.length)
 
-          //Logger.info(s"certificate  = $cert")
-
-          keystore.setCertificateEntry("api.nsi.hts.esit", cert)
+          if (certs.length == 1) {
+            val certStream = fullStream(customTrustFile)
+            Logger.info("One certificate found, no chain")
+            val cert = cf.generateCertificate(certStream)
+            keystore.setCertificateEntry("api.nsi.hts.esit", cert)
+          }
+          else {
+            Logger.info("Certificate chain length: ${certs.length}")
+            certs.zipWithIndex.foreach {
+              case (cert, i) => keystore.setCertificateEntry("api.nsi.hts.esit-" + i, cert)
+            }
+          }
 
           // Save the new keystore contents
-          val out = new FileOutputStream(cacertsPath)
-          keystore.store(out, decryptedPass.toCharArray)
+          keystore.store(new FileOutputStream(cacertsPath), decryptedPass.toCharArray)
 
         case Failure(error) ⇒
           Logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
@@ -115,7 +114,16 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   }
 
-  def writeToTempFile(data: Array[Byte], ext: String = ".tmp"): Try[File] = Try {
+  private def fullStream(fileName: File) = {
+    val fis = new FileInputStream(fileName)
+    val dis = new DataInputStream(fis)
+    val bytes = new Array[Byte](dis.available)
+    dis.readFully(bytes)
+    val bais = new ByteArrayInputStream(bytes)
+    bais
+  }
+
+  def writeToTempFile(data: Array[Byte], ext: String = ".tmp") = Try {
     val file = File.createTempFile(getClass.getSimpleName, ext)
     file.deleteOnExit()
     val os = new FileOutputStream(file)
