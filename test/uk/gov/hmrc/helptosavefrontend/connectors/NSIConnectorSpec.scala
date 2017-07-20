@@ -34,7 +34,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
 
   lazy val mockHTTPProxy = mock[WSHttpProxy]
 
-  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl {
+  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration) {
     override val httpProxy = mockHTTPProxy
   }
 
