@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import play.api.{Application, Logger}
+import play.api.{Configuration, Logger}
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
@@ -49,14 +49,14 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject()(app: Application) extends NSIConnector {
+class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
 
   val httpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
-    FEATURE("log-json-airgap", app.configuration) enabled() thenDo {
+    FEATURE("log-json-airgap", conf) enabled() thenDo {
       Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
       Logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
     }
