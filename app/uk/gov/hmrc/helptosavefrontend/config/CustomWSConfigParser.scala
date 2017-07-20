@@ -98,10 +98,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           val cert = cf.generateCertificate(bais)
 
           Logger.info(s"certificate  = $cert")
-
-          Try(Logger.info(s"certs are ${cf.generateCertificates(bais)}"))
-            .recover { case e => Logger.error(s"error during generateCertificates ${e.printStackTrace()}") }
-
+          
           keystore.setCertificateEntry("api.nsi.hts.esit", cert)
 
           // Save the new keystore contents
