@@ -84,19 +84,19 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           Logger.info(s"Successfully wrote custom truststore to file: ${customTrustFile.getAbsolutePath}")
           val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
           keystore.load(new FileInputStream(cacertsPath), decryptedPass.toCharArray)
+
           val cf = CertificateFactory.getInstance("X.509")
           val bais = fullStream(customTrustFile)
-          var certs = new Array[Certificate](cf.generateCertificates(bais).toArray.length)
+          val certs = cf.generateCertificates(bais)
 
-          if (certs.length == 1) {
-            val certStream = fullStream(customTrustFile)
+          if (certs.size() == 1) {
             Logger.info("One certificate found, no chain")
-            val cert = cf.generateCertificate(certStream)
+            val cert = cf.generateCertificate(bais)
             keystore.setCertificateEntry("api.nsi.hts.esit", cert)
           }
           else {
-            Logger.info("Certificate chain length: ${certs.length}")
-            certs.zipWithIndex.foreach {
+            Logger.info(s"Certificate chain length: ${certs.size()}")
+            certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
               case (cert, i) => keystore.setCertificateEntry("api.nsi.hts.esit-" + i, cert)
             }
           }
@@ -109,7 +109,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           sys.error(s"Error in truststore configuration: ${error.getMessage}")
       }
     }.recover {
-      case e => Logger.error(s"error during truststore setup $e")
+      case e =>
+        Logger.error(s"error during truststore setup:", e)
     }
 
   }
