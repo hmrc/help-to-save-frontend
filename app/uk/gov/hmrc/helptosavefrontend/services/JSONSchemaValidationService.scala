@@ -20,12 +20,9 @@ package uk.gov.hmrc.helptosavefrontend.services
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import cats.instances.either._
-import cats.syntax.cartesian._
 import cats.syntax.either._
 import com.eclipsesource.schema.{SchemaType, SchemaValidator}
 import com.google.inject.{ImplementedBy, Singleton}
-import play.api.Logger
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
 
@@ -50,14 +47,14 @@ class JSONSchemaValidationServiceImpl extends  JSONSchemaValidationService {
 
   private val dateFormatter = DateTimeFormatter.BASIC_ISO_DATE
 
-  private def futureDate(date: LocalDate): Either[String, LocalDate] = {
-    val today = java.time.LocalDate.now()
-    if (date.isAfter(today)) Left("FEATURE outgoing-json-validation: Date of birth in the future") else Right(date)
-  }
-
   private def before1800(date: LocalDate): Either[String, LocalDate] = {
     val year = date.getYear
     if (year < 1800) Left("FEATURE outgoing-json-validation: Date of birth before 1800") else Right(date)
+  }
+
+  private def futureDate(date: LocalDate): Either[String, LocalDate] = {
+    val today = java.time.LocalDate.now()
+    if (date.isAfter(today)) Left("FEATURE outgoing-json-validation: Date of birth in the future") else Right(date)
   }
 
   private def extractDateOfBirth(userInfo: JsValue): Either[String, LocalDate] = {
@@ -75,23 +72,21 @@ class JSONSchemaValidationServiceImpl extends  JSONSchemaValidationService {
     )
   }
 
-  def validate(userInfo: JsValue): Either[String, JsValue] = {
-    val schemaCheck: Either[String, JsValue] = jsonValidator.validate(validationSchema, userInfo) match {
+  private def validateAgainstSchema(userInfo: JsValue): Either[String,JsValue] =
+    jsonValidator.validate(validationSchema, userInfo) match {
       case e: JsError ⇒ Left(s"User info was not valid against schema: ${e.prettyPrint()}")
       case JsSuccess(u, _) ⇒ Right(u)
     }
 
-    val dateCheck = for {
-      d <- extractDateOfBirth(userInfo)
+  def validate(userInfo: JsValue): Either[String, JsValue] =
+    for {
+      u ← validateAgainstSchema(userInfo)
+      d ← extractDateOfBirth(userInfo)
       _ ← futureDate(d)
       _ ← before1800(d)
-    } yield d
-
-      (schemaCheck |@| dateCheck).map{ case _ ⇒ userInfo }
-  }
+    } yield u
 
 }
-
 
 object JSONSchemaValidationServiceImpl {
 
