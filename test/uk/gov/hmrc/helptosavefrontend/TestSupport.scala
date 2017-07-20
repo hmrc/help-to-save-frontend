@@ -18,13 +18,13 @@ package uk.gov.hmrc.helptosavefrontend
 
 import java.util.UUID
 
-import com.typesafe.config.Config
+import com.typesafe.config.{Config, ConfigValueFactory}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{Headers, Session}
-import play.api.{Application, Play}
+import play.api.{Application, Configuration, Play}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -35,7 +35,12 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
 
   lazy val fakeApplication: Application =
     new GuiceApplicationBuilder()
-      .configure("metrics.enabled" -> "false")
+      .configure("metrics.enabled" → false)
+      .build()
+
+  def fakeApplicationWithConfig(additionalConfig: Config): Application =
+    new GuiceApplicationBuilder()
+      .configure(Configuration(additionalConfig.withValue("metrics.enabled", ConfigValueFactory.fromAnyRef(false))))
       .build()
 
   implicit val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
