@@ -60,8 +60,9 @@ class RegisterControllerSpec extends TestSupport {
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
     mockSessionCacheConnector,
-    jsonSchemaValidationService)(
-    fakeApplication, ec) {
+    jsonSchemaValidationService,
+    fakeApplication)(
+    ec) {
     override val oauthConfig = testOAuthConfiguration
     override lazy val authConnector = mockAuthConnector
   }
@@ -123,8 +124,8 @@ class RegisterControllerSpec extends TestSupport {
           fakeApplication.injector.instanceOf[MessagesApi],
           mockHtsService,
           mockSessionCacheConnector,
-          jsonSchemaValidationService)(
-          fakeApplication, ec) {
+          jsonSchemaValidationService,
+          fakeApplication)(ec) {
           override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
           override lazy val authConnector = mockAuthConnector
         }
@@ -142,8 +143,8 @@ class RegisterControllerSpec extends TestSupport {
           fakeApplication.injector.instanceOf[MessagesApi],
           mockHtsService,
           mockSessionCacheConnector,
-          jsonSchemaValidationService)(
-          fakeApplication, ec) {
+          jsonSchemaValidationService,
+          fakeApplication)(ec) {
           override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
           override lazy val authConnector = mockAuthConnector
         }

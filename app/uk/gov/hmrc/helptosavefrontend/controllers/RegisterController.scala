@@ -46,7 +46,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    helpToSaveService: HelpToSaveService,
                                    sessionCacheConnector: SessionCacheConnector,
-                                   jsonSchemaValidationService: JSONSchemaValidationService)(implicit app: Application, ec: ExecutionContext)
+                                   jsonSchemaValidationService: JSONSchemaValidationService,
+                                   app: Application)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
 
 
