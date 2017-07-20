@@ -97,8 +97,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           val bais = new ByteArrayInputStream(bytes)
           val cert = cf.generateCertificate(bais)
 
-          Logger.info(s"certificate  = $cert")
-          
+          //Logger.info(s"certificate  = $cert")
+
           keystore.setCertificateEntry("api.nsi.hts.esit", cert)
 
           // Save the new keystore contents
@@ -110,7 +110,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           sys.error(s"Error in truststore configuration: ${error.getMessage}")
       }
     }.recover {
-      case e => Logger.error(s"error during truststore setup ${e.printStackTrace()}")
+      case e => Logger.error(s"error during truststore setup $e")
     }
 
   }
