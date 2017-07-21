@@ -28,5 +28,26 @@ class HTSEventSpec extends TestSupport {
       val event = new ApplicationSubmittedEvent(validNSIUserInfo)(new HeaderCarrier)
       event.auditSource shouldBe "hts-frontend"
     }
+
+    "be created with the appropriate auditType" in {
+      val event = new ApplicationSubmittedEvent(validNSIUserInfo)(new HeaderCarrier)
+      event.auditType shouldBe "applicationSubmitted"
+    }
+
+    "have the correct detail" in {
+      val event = new ApplicationSubmittedEvent(validNSIUserInfo)(new HeaderCarrier)
+      event.detail.size shouldBe 4
+      event.detail.exists(x => x._1 == "forename" && x._2 == validNSIUserInfo.forename) shouldBe true
+      event.detail.exists(x => x._1 == "surname" && x._2 == validNSIUserInfo.surname) shouldBe true
+      event.detail.exists(x => x._1 == "dateOfBirth" && x._2 == validNSIUserInfo.dateOfBirth) shouldBe true
+      event.detail.exists(x => x._1 == "nino" && x._2 == validNSIUserInfo.nino) shouldBe true
+
+
+//      event.detail.exists(x => x._1 == "serviceFeel" && x._2 == serviceFeel) shouldBe true
+//      event.detail.exists(x => x._1 == "comments" && x._2 == comments) shouldBe true
+//      event.detail.exists(x => x._1 == "fullName" && x._2 == fullName) shouldBe true
+//      event.detail.exists(x => x._1 == "email" && x._2 == email) shouldBe true
+//      event.detail.exists(x => x._1 == "phoneNumber" && x._2 == phoneNumber) shouldBe true
+    }
   }
 }

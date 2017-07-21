@@ -20,9 +20,33 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 
+
+//case class NSIUserInfo (forename: String,
+//                        surname: String,
+//                        dateOfBirth: LocalDate,
+//                        nino: String,
+//                        contactDetails: ContactDetails,
+//                        registrationChannel: String = "online")
+//
+//object NSIUserInfo {
+//
+//    case class ContactDetails(address1: String,
+//                              address2: String,
+//                              address3: Option[String],
+//                              address4: Option[String],
+//                              address5: Option[String],
+//                              postcode: String,
+//                              countryCode: Option[String],
+//                              email: String,
+//                              phoneNumber: Option[String] = None,
+//                              communicationPreference: String = "02")
+
 abstract class HTSEvent(auditType: String, detail: Map[String, String])(implicit hc: HeaderCarrier)
   extends DataEvent(auditSource = "hts-frontend", auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
 class ApplicationSubmittedEvent(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier)
   extends HTSEvent("applicationSubmitted",
-    Map("nino" -> userInfo.nino))
+    Map("forename" -> userInfo.forename,
+        "surname" -> userInfo.surname,
+        "nino" -> userInfo.nino
+        ))
