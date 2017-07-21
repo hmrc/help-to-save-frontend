@@ -88,6 +88,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
         } }
       }.recover {
     case e ⇒
+      e.printStackTrace()
       Logger.error("Encountered error while trying to create account", e)
       SubmissionFailure(None, s"Encountered error while trying to create account", e.getMessage)
   }
