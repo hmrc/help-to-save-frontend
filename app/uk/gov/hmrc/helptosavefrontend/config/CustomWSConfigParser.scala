@@ -97,7 +97,9 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           else {
             Logger.info(s"Certificate chain length: ${certs.size()}")
             certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
-              case (cert, i) => keystore.setCertificateEntry("api.nsi.hts.esit-" + i, cert)
+              case (cert, i) =>
+                keystore.setCertificateEntry("api.nsi.hts.esit-" + i, cert)
+                Logger.info(s"certificate at index $i is ${cert.toString}")
             }
           }
 
