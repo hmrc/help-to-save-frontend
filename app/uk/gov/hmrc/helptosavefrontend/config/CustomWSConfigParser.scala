@@ -21,7 +21,6 @@ import java.security.KeyStore
 import java.security.cert.{Certificate, CertificateFactory}
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
-import javax.net.ssl._
 
 import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
@@ -32,22 +31,6 @@ import scala.util.{Failure, Success, Try}
 
 @Singleton
 class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) {
-
-  HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier {
-    override def verify(host: String, sslSession: SSLSession): Boolean = {
-      Logger.info(s"hostname is $host")
-      Logger.info(s"sslSession chain is ${sslSession.getPeerCertificateChain}")
-      Logger.info(s"sslSession getPeerHost ${sslSession.getPeerHost}")
-      true
-    }
-  })
-
-  val sslContext: SSLContext = SSLContext.getDefault
-  val sslEngine: SSLEngine = sslContext.createSSLEngine
-
-  val sslParams = new SSLParameters
-  sslParams.setEndpointIdentificationAlgorithm("HTTPS")
-  sslEngine.setSSLParameters(sslParams)
 
   Logger.info("Starting CustomWSConfigParser")
 
