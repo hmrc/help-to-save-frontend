@@ -21,11 +21,8 @@ object FrontendBuild extends Build with MicroService {
     "org.typelevel" %% "cats" % "0.9.0",
     "uk.gov.hmrc" %% "play-auth" % "1.1.0",
     "uk.gov.hmrc" %% "domain" % "4.1.0",
-    "com.chuusai" %% "shapeless" % "2.2.5",
     "com.github.kxbmap" %% "configs" % "0.4.4",
-    "com.github.java-json-tools" % "json-schema-validator" % "2.2.8",
-    "com.github.fge" % "jackson-coreutils" % "1.8",
-    "com.fasterxml.jackson.core" % "jackson-core" % "2.8.8"
+    "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9"
   )
 
   def test(scope: String = "test") = Seq(
