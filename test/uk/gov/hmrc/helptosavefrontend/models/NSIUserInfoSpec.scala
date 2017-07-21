@@ -23,6 +23,7 @@ import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.domain.{Generator, Nino}
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 
 class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -53,10 +54,6 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(forename = ".")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "-")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "&")).isInvalid shouldBe true
-        }
-
-        "start with whitespace" in {
-          NSIUserInfo(validUserInfo.copy(forename = " " + forename)).isInvalid shouldBe true
         }
 
         "contains numeric characters" in {
@@ -114,10 +111,6 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(surname = ".")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "-")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "&")).isInvalid shouldBe true
-        }
-
-        "start with whitespace" in {
-          NSIUserInfo(validUserInfo.copy(surname = " " + surname)).isInvalid shouldBe true
         }
 
         "contains numeric characters" in {
@@ -334,6 +327,38 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
         }
       }
 
+    }
+
+    "transform" should {
+
+      "remove new line, tab and carriage return in forename" in {
+        val modifiedForename = "\n\t\rname\t"
+        val userInfo = NSIUserInfo(validUserInfo.copy(forename = modifiedForename))
+        (userInfo.map{_.forename} == Valid("name"))
+      }
+
+      "remove white spaces in forename" in {
+        val forenameWithSpaces = " " + "forename" + " "
+        val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameWithSpaces))
+        (userInfo.map{_.forename} == Valid("forename"))
+      }
+
+      "remove whitespace from surname" in {
+        val userInfo = NSIUserInfo(validUserInfo.copy(surname = " " + surname))
+        (userInfo.map{_.surname} == Valid(" " + surname)) shouldBe false
+      }
+
+      "remove new lines, tabs, carriage returns and trailing whitespaces from all address lines" in {
+        val specialAddress = Address(List("\naddress \tline1\r  ", " line2", "line3\t  ", "line4", "line5\t\n  "),
+          Some("BN43 7AB"), None)
+        val ui: UserInfo = validUserInfo.copy(address = specialAddress)
+        val userInfo = NSIUserInfo(ui)
+        (userInfo.map{_.contactDetails.address1}) shouldBe Valid("address line1")
+        (userInfo.map{_.contactDetails.address2}) shouldBe Valid("line2")
+        (userInfo.map{_.contactDetails.address3}) shouldBe Valid(Some("line3"))
+        (userInfo.map{_.contactDetails.address4}) shouldBe Valid(Some("line4"))
+        (userInfo.map{_.contactDetails.address5}) shouldBe Valid(Some("line5"))
+      }
     }
   }
 }

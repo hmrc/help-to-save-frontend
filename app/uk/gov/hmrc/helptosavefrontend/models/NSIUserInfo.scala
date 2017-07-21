@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import java.text.Normalizer
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -55,10 +56,10 @@ object NSIUserInfo {
     * if successful.
     */
   def apply(userInfo: UserInfo): ValidatedNel[String, NSIUserInfo] = {
-    (forenameValidation(userInfo.forename) |@|
-      surnameValidation(userInfo.surname) |@|
+    (forenameValidation(transform(userInfo.forename)) |@|
+      surnameValidation(transform(userInfo.surname)) |@|
       dateValidation(userInfo.dateOfBirth) |@|
-      addressLineValidation(userInfo.address.lines) |@|
+      addressLineValidation(userInfo.address.lines.map(transform)) |@|
       postcodeValidation(userInfo.address.postcode) |@|
       countryCodeValidation(userInfo.address.country) |@|
       ninoValidation(userInfo.nino) |@|
@@ -101,6 +102,8 @@ object NSIUserInfo {
   private case class AddressLines(line1: String, line2: String, line3: Option[String], line4: Option[String], line5: Option[String])
 
   private val allowedNameSpecialCharacters = List('-', '&', '.', ''')
+
+  private def transform(s: String): String = s.replaceAll("\t|\n|\r|\\s{2,}", " ").trim
 
   private def forenameValidation(name: String): ValidatedNel[String, String] = {
 
