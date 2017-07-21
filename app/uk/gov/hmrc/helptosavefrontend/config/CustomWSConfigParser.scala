@@ -21,7 +21,7 @@ import java.security.KeyStore
 import java.security.cert.{Certificate, CertificateFactory}
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
-import javax.net.ssl.{HostnameVerifier, HttpsURLConnection, SSLSession}
+import javax.net.ssl._
 
 import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
@@ -41,6 +41,13 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       true
     }
   })
+
+  val sslContext: SSLContext = SSLContext.getDefault
+  val sslEngine: SSLEngine = sslContext.createSSLEngine
+
+  val sslParams = new SSLParameters
+  sslParams.setEndpointIdentificationAlgorithm("HTTPS")
+  sslEngine.setSSLParameters(sslParams)
 
   Logger.info("Starting CustomWSConfigParser")
 
