@@ -65,7 +65,7 @@ object NSIUserInfo {
       dateValidation(userInfo.dateOfBirth) |@|
       addressLineValidation(userInfo.address.lines.map(transform)) |@|
       postcodeValidation(userInfo.address.postcode.map(p ⇒ transform(p.removeAllSpaces))) |@|
-      countryCodeValidation(userInfo.address.country.map(c ⇒ transform(c.removeAllSpaces)) |@|
+      countryCodeValidation(userInfo.address.country.map(c ⇒ transform(c.removeAllSpaces))) |@|
       ninoValidation(transform(userInfo.nino.removeAllSpaces)) |@|
       emailValidation(userInfo.email)).map(
       (forename, surname, dateOfBirth, addressLines, postcode, countryCode, nino, email) ⇒
