@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
+import javax.inject.Inject
+
 import play.api.http.HttpVerbs.{GET => GET_VERB, POST => POST_VERB}
 import play.api.libs.json.Writes
 import uk.gov.hmrc.auth.core.PlayAuthConnector
