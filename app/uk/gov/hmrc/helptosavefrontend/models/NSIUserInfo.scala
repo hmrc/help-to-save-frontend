@@ -103,7 +103,7 @@ object NSIUserInfo {
 
   private val allowedNameSpecialCharacters = List('-', '&', '.', ''')
 
-  private def transform(s: String): String = s.replaceAll("\t|\n|\r|\\s{2,}", " ").trim
+  private def transform(s: String): String = s.replaceAll("\t|\n|\r", " ").trim.replaceAll("\\s{2,}", " ")
 
   private def forenameValidation(name: String): ValidatedNel[String, String] = {
 
