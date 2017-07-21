@@ -24,7 +24,7 @@ object Toggles {
     def enabled(): FEATURE_THEN[A] = {
       conf.getBoolean(s"feature-toggles.$name.enabled") match {
         case Some(b) =>
-          logger.info("FEATURE: " + name + " enabled")
+          logger.info("FEATURE: " + name + (if (b) " enabled" else " disabled"))
           FEATURE_THEN(name, b, unconfiguredVal, logger)
         case None => throw new RuntimeException(s"FEATURE($name) is not present in configuration file - misconfigured")
       }
