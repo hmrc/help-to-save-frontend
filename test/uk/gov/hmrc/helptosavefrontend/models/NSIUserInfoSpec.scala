@@ -357,7 +357,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
 
       "remove whitespace from surname" in {
         val userInfo = NSIUserInfo(validUserInfo.copy(surname = " " + surname))
-        (userInfo.map{_.surname} == Valid(" " + surname)) shouldBe false
+        (userInfo.map{_.surname} == Valid(surname)) shouldBe true
       }
 
       "remove leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname" in {
@@ -400,7 +400,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
         val longName = "John Paul      \n\t\r   Harry"
         val longSurname = "  Smith    Brown  \n\r  "
         val specialAddress = Address(List("   Address\t\n\r     line1\t\n\r   ", "   Address\t\n\r     line2\t\n\r   ", "   Address\t\n\rline3\t\n\r   ",
-          "   Address\t\n\r   line4\t\n\r   ", "   Address\t\n\r             line5\t\n\r   "), Some("BN43 XXX"), None)
+          "   Address\t\n\r   line4\t\n\r   ", "   Address\t\n\r             line5\t\n\r   "), Some("BN43XXX  \t\r\n"), Some("GB    \n\r\t"))
         val ui: UserInfo = validUserInfo.copy(forename = longName, surname = longSurname, address = specialAddress)
         val userInfo = NSIUserInfo(ui)
         (userInfo.map{_.forename}) shouldBe Valid("John Paul Harry")
@@ -410,6 +410,8 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
         (userInfo.map{_.contactDetails.address3}) shouldBe Valid(Some("Address line3"))
         (userInfo.map{_.contactDetails.address4}) shouldBe Valid(Some("Address line4"))
         (userInfo.map{_.contactDetails.address5}) shouldBe Valid(Some("Address line5"))
+        (userInfo.map{_.contactDetails.postcode}) shouldBe Valid("BN43XXX")
+        (userInfo.map{_.contactDetails.countryCode}) shouldBe Valid(Some("GB"))
       }
     }
   }

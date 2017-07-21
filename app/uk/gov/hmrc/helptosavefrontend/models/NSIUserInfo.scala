@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import java.text.Normalizer
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -60,8 +60,8 @@ object NSIUserInfo {
       surnameValidation(transform(userInfo.surname)) |@|
       dateValidation(userInfo.dateOfBirth) |@|
       addressLineValidation(userInfo.address.lines.map(transform)) |@|
-      postcodeValidation(userInfo.address.postcode) |@|
-      countryCodeValidation(userInfo.address.country) |@|
+      postcodeValidation(userInfo.address.postcode.map(transform)) |@|
+      countryCodeValidation(userInfo.address.country.map(transform)) |@|
       ninoValidation(userInfo.nino) |@|
       emailValidation(userInfo.email)).map(
       (forename, surname, dateOfBirth, addressLines, postcode, countryCode, nino, email) ⇒
