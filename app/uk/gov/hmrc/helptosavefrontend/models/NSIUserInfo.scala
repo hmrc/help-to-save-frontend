@@ -40,6 +40,10 @@ case class NSIUserInfo (forename: String,
 
 object NSIUserInfo {
 
+  private implicit class StringOps(val s: String) {
+    def removeAllSpaces: String = s.replaceAll(" ", "")
+  }
+
   case class ContactDetails(address1: String,
                             address2: String,
                             address3: Option[String],
@@ -60,9 +64,9 @@ object NSIUserInfo {
       surnameValidation(transform(userInfo.surname)) |@|
       dateValidation(userInfo.dateOfBirth) |@|
       addressLineValidation(userInfo.address.lines.map(transform)) |@|
-      postcodeValidation(userInfo.address.postcode.map(transform)) |@|
-      countryCodeValidation(userInfo.address.country.map(transform)) |@|
-      ninoValidation(userInfo.nino) |@|
+      postcodeValidation(userInfo.address.postcode.map(p ⇒ transform(p.removeAllSpaces))) |@|
+      countryCodeValidation(userInfo.address.country.map(c ⇒ transform(c.removeAllSpaces)) |@|
+      ninoValidation(transform(userInfo.nino.removeAllSpaces)) |@|
       emailValidation(userInfo.email)).map(
       (forename, surname, dateOfBirth, addressLines, postcode, countryCode, nino, email) ⇒
         NSIUserInfo(forename, surname, dateOfBirth, nino,
@@ -166,11 +170,11 @@ object NSIUserInfo {
       Invalid(NonEmptyList.of("Postcode undefined"))
 
     case Some(p) ⇒
-      val trimmedPostcode = p.replaceAllLiterally(" ", "")
+      //val trimmedPostcode = p.replaceAllLiterally(" ", "")
       val lengthCheck =
-        validatedFromBoolean(trimmedPostcode)(_.length <= 10, s"Postcode was longer thn 10 characters")
+        validatedFromBoolean(p)(_.length <= 10, s"Postcode was longer thn 10 characters")
 
-      lengthCheck.map(_ ⇒ trimmedPostcode)
+      lengthCheck.map(_ ⇒ p)
   }
 
   // TODO: Do we want to check that the country code is in the ISO 3166 list?
