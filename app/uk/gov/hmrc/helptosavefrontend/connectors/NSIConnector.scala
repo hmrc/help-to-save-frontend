@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import javax.inject.Singleton
+import javax.net.ssl.{HostnameVerifier, HttpsURLConnection, SSLSession}
 
 import com.google.inject.ImplementedBy
 import play.api.Logger
@@ -57,6 +58,15 @@ class NSIConnectorImpl extends NSIConnector {
 
     Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
     Logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
+
+    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier {
+      override def verify(host: String, sslSession: SSLSession): Boolean = {
+        Logger.info(s"createAccount - hostname is $host")
+        Logger.info(s"createAccount - sslSession chain is ${sslSession.getPeerCertificateChain}")
+        Logger.info(s"createAccount - sslSession getPeerHost ${sslSession.getPeerHost}")
+        true
+      }
+    })
 
     httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
       NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
