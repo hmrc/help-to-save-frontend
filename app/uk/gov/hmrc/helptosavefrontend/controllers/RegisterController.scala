@@ -185,20 +185,11 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     )
   }
 
-  private def toNSIUserInfo(eligibilityResult: EligibilityCheckResult): EitherT[Future, String, Option[NSIUserInfo]] = {
-
-    val mayBeNSIUserInfo: Either[String, Option[NSIUserInfo]] = eligibilityResult.result.fold(
-      _ ⇒ Right(None), {
-        case Some(info) ⇒
-          NSIUserInfo(info).toEither.bimap(
-            errors ⇒ s"User info did not pass NS&I validity checks: ${errors.toList.mkString("; ")}",
-            info ⇒ Some(info))
-        case _ ⇒ Right(None)
-      }
-    )
-
-    EitherT.fromEither[Future](mayBeNSIUserInfo)
-  }
+  private def toNSIUserInfo(eligibilityResult: EligibilityCheckResult): EitherT[Future, String, Option[NSIUserInfo]] =
+    EitherT.fromEither[Future](eligibilityResult.result.fold(
+      _ ⇒ Right(None),
+      u ⇒ Right(u.map(NSIUserInfo(_)))
+    ))
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")}, " +
