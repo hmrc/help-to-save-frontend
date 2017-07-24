@@ -33,6 +33,8 @@ object MyHostNameService {
     case e => e.printStackTrace()
   }
 
+  Logger.info("done initialising TrustAllManager")
+
 }
 
 class MyHostNameService extends NameService {
