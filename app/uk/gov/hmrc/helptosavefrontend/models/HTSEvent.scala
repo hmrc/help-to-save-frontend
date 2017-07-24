@@ -41,3 +41,10 @@ class ApplicationSubmittedEvent(userInfo: NSIUserInfo)(implicit hc: HeaderCarrie
         "phoneNumber" -> {userInfo.contactDetails.phoneNumber.fold(""){identity}},
         "communicationPreference" -> userInfo.contactDetails.communicationPreference,
         "registrationChannel" -> userInfo.registrationChannel))
+
+class EligibilityCheckEvent(nino: String, errorDescription: Option[String])(implicit hc: HeaderCarrier)
+  extends HTSEvent("eligibilityCheck", {
+      val basicMap = Map[String, String]("nino" -> nino)
+      errorDescription.fold(basicMap + ("eligible" -> "true")) {reason =>
+          basicMap + ("eligible" -> "false") + ("reason" -> reason)
+      }})

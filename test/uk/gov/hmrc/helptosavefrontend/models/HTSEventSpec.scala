@@ -64,4 +64,32 @@ class HTSEventSpec extends TestSupport {
       event.detail.exists(x => x._1 == "registrationChannel" && x._2 == completeUserInfo.registrationChannel) shouldBe true
     }
   }
+
+  "EligibilityCheckEvent" must {
+    "be created with the appropriate auditSource" in {
+      val event = new EligibilityCheckEvent(validNSIUserInfo.nino, None)(new HeaderCarrier)
+      event.auditSource shouldBe "hts-frontend"
+    }
+
+    "be created with the appropriate auditType" in {
+      val event = new EligibilityCheckEvent(validNSIUserInfo.nino, None)(new HeaderCarrier)
+      event.auditType shouldBe "eligibilityCheck"
+    }
+
+    "be created with the eligible tag set true, no reason tag, and the nino, if the errorDetailString is None" in {
+      val event = new EligibilityCheckEvent(validNSIUserInfo.nino, None)(new HeaderCarrier)
+      event.detail.size shouldBe 2
+      event.detail.exists(x => x._1 == "nino" && x._2 == validNSIUserInfo.nino) shouldBe true
+      event.detail.exists(x => x._1 == "eligible" && x._2 == "true") shouldBe true
+    }
+
+    "be created with the eligible tag set false, a reason tag, and the nino, if the errorDetailString is given" in {
+      val reason = "reason"
+      val event = new EligibilityCheckEvent(validNSIUserInfo.nino, Some(reason))(new HeaderCarrier)
+      event.detail.size shouldBe 3
+      event.detail.exists(x => x._1 == "nino" && x._2 == validNSIUserInfo.nino) shouldBe true
+      event.detail.exists(x => x._1 == "eligible" && x._2 == "false") shouldBe true
+      event.detail.exists(x => x._1 == "reason" && x._2 == reason) shouldBe true
+    }
+  }
 }
