@@ -20,16 +20,10 @@ package uk.gov.hmrc.helptosavefrontend.models
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import cats.data.Validated.Invalid
-import cats.data.{NonEmptyList, Validated, ValidatedNel}
-import cats.syntax.CartesianBuilder
-import cats.syntax.cartesian._
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 
-import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
-import scala.util.matching.Regex
 
 case class NSIUserInfo (forename: String,
                         surname: String,
