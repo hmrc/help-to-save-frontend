@@ -170,9 +170,8 @@ object NSIUserInfo {
       Invalid(NonEmptyList.of("Postcode undefined"))
 
     case Some(p) ⇒
-      //val trimmedPostcode = p.replaceAllLiterally(" ", "")
       val lengthCheck =
-        validatedFromBoolean(p)(_.length <= 10, s"Postcode was longer thn 10 characters")
+        validatedFromBoolean(p)(_.length <= 10, s"Postcode was longer than 10 characters")
 
       lengthCheck.map(_ ⇒ p)
   }
