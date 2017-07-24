@@ -20,33 +20,24 @@ import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 
-
-//case class NSIUserInfo (forename: String,
-//                        surname: String,
-//                        dateOfBirth: LocalDate,
-//                        nino: String,
-//                        contactDetails: ContactDetails,
-//                        registrationChannel: String = "online")
-//
-//object NSIUserInfo {
-//
-//    case class ContactDetails(address1: String,
-//                              address2: String,
-//                              address3: Option[String],
-//                              address4: Option[String],
-//                              address5: Option[String],
-//                              postcode: String,
-//                              countryCode: Option[String],
-//                              email: String,
-//                              phoneNumber: Option[String] = None,
-//                              communicationPreference: String = "02")
-
-abstract class HTSEvent(auditType: String, detail: Map[String, String])(implicit hc: HeaderCarrier)
+abstract class HTSEvent(auditType: String, detail: Map[String,String])(implicit hc: HeaderCarrier)
   extends DataEvent(auditSource = "hts-frontend", auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
 class ApplicationSubmittedEvent(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier)
   extends HTSEvent("applicationSubmitted",
-    Map("forename" -> userInfo.forename,
+    Map[String, String](
+        "forename" -> userInfo.forename,
         "surname" -> userInfo.surname,
-        "nino" -> userInfo.nino
-        ))
+        "dateOfBirth" -> userInfo.dateOfBirth.toString,
+        "nino" -> userInfo.nino,
+        "address1" -> userInfo.contactDetails.address1,
+        "address2" -> userInfo.contactDetails.address2,
+        "address3" -> {userInfo.contactDetails.address3.fold("") {identity}},
+        "address4" -> {userInfo.contactDetails.address4.fold("") {identity}},
+        "address5" -> {userInfo.contactDetails.address5.fold("") {identity}},
+        "postcode" -> userInfo.contactDetails.postcode,
+        "countryCode" -> {userInfo.contactDetails.countryCode.fold("") {identity}},
+        "email" -> userInfo.contactDetails.email,
+        "phoneNumber" -> {userInfo.contactDetails.phoneNumber.fold(""){identity}},
+        "communicationPreference" -> userInfo.contactDetails.communicationPreference,
+        "registrationChannel" -> userInfo.registrationChannel))
