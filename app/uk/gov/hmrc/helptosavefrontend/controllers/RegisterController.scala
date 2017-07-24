@@ -33,12 +33,13 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUr
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckResult, HTSSession, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckEvent, EligibilityCheckResult, HTSSession, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuditConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -83,11 +84,19 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                 }, { case (nino, eligibility) ⇒
                   eligibility.result.fold(
                     infos ⇒ {
-                      Logger.error(s"user $nino has missing information: ${infos.missingInfo.mkString(",")}")
+                      val problemDescription = s"user $nino has missing information: ${infos.missingInfo.mkString(",")}"
+                      Logger.error(problemDescription)
+                      FrontendAuditConnector.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
                       Ok(views.html.register.missing_user_info(infos.missingInfo, personalAccountUrl))
                     }, {
-                      case Some(info) ⇒ Ok(views.html.register.confirm_details(info))
-                      case _ ⇒ SeeOther(routes.RegisterController.notEligible().url)
+                      case Some(info) ⇒ {
+                        FrontendAuditConnector.sendEvent(new EligibilityCheckEvent(nino, None))
+                        Ok(views.html.register.confirm_details(info))
+                      }
+                      case _ ⇒ {
+                        FrontendAuditConnector.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
+                        SeeOther(routes.RegisterController.notEligible().url)
+                      }
                     })
                 }
               )
