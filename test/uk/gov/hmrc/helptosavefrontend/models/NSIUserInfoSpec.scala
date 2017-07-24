@@ -23,6 +23,7 @@ import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.domain.{Generator, Nino}
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 
 class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -53,10 +54,6 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(forename = ".")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "-")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(forename = "&")).isInvalid shouldBe true
-        }
-
-        "start with whitespace" in {
-          NSIUserInfo(validUserInfo.copy(forename = " " + forename)).isInvalid shouldBe true
         }
 
         "contains numeric characters" in {
@@ -114,10 +111,6 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
           NSIUserInfo(validUserInfo.copy(surname = ".")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "-")).isInvalid shouldBe true
           NSIUserInfo(validUserInfo.copy(surname = "&")).isInvalid shouldBe true
-        }
-
-        "start with whitespace" in {
-          NSIUserInfo(validUserInfo.copy(surname = " " + surname)).isInvalid shouldBe true
         }
 
         "contains numeric characters" in {
@@ -334,6 +327,92 @@ class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropert
         }
       }
 
+    }
+
+    "transform" should {
+
+      "remove new line, tab and carriage return in forename" in {
+        val modifiedForename = "\n\t\rname\t"
+        val userInfo = NSIUserInfo(validUserInfo.copy(forename = modifiedForename))
+        (userInfo.map{_.forename} == Valid("name"))
+      }
+
+      "remove white spaces in forename" in {
+        val forenameWithSpaces = " " + "forename" + " "
+        val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameWithSpaces))
+        (userInfo.map{_.forename} == Valid("forename"))
+      }
+
+      "remove spaces, tabs, new lines and carriage returns from a double barrel forename" in {
+        val forenameDoubleBarrel = "   John\t\n\r   Paul\t\n\r   "
+        val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel))
+        (userInfo.map{_.forename} == Valid("John Paul"))
+      }
+
+      "remove spaces, tabs, new lines and carriage returns from a double barrel forename with a hyphen" in {
+        val forenameDoubleBarrel = "   John\t\n\r-Paul\t\n\r   "
+        val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel))
+        (userInfo.map{_.forename} == Valid("John-Paul"))
+      }
+
+      "remove whitespace from surname" in {
+        val userInfo = NSIUserInfo(validUserInfo.copy(surname = " " + surname))
+        (userInfo.map{_.surname} == Valid(surname)) shouldBe true
+      }
+
+      "remove leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname" in {
+        val modifiedSurname = "   Luis\t\n\r   Guerra\t\n\r   "
+        val userInfo = NSIUserInfo(validUserInfo.copy(surname = modifiedSurname))
+        (userInfo.map{_.surname} == Valid("Luis Guerra"))
+      }
+
+      "remove leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname with a hyphen" in {
+        val modifiedSurname = "   Luis\t\n\r-Guerra\t\n\r   "
+        val userInfo = NSIUserInfo(validUserInfo.copy(surname = " " + modifiedSurname))
+        (userInfo.map{_.surname} == Valid("Luis-Guerra"))
+      }
+
+      "remove new lines, tabs, carriage returns and trailing whitespaces from all address lines" in {
+        val specialAddress = Address(List("\naddress \tline1\r  ", " line2", "line3\t  ", "line4", "line5\t\n  "),
+          Some("BN43 XXX"), None)
+        val ui: UserInfo = validUserInfo.copy(address = specialAddress)
+        val userInfo = NSIUserInfo(ui)
+        (userInfo.map{_.contactDetails.address1}) shouldBe Valid("address line1")
+        (userInfo.map{_.contactDetails.address2}) shouldBe Valid("line2")
+        (userInfo.map{_.contactDetails.address3}) shouldBe Valid(Some("line3"))
+        (userInfo.map{_.contactDetails.address4}) shouldBe Valid(Some("line4"))
+        (userInfo.map{_.contactDetails.address5}) shouldBe Valid(Some("line5"))
+      }
+
+      "remove leading and trailing whitespaces, new lines, tabs, carriage returns from all address lines" in {
+        val specialAddress = Address(List("   Address\t\n\r   line1\t\n\r   ", "   Address\t\n\r   line2\t\n\r   ", "   Address\t\n\r   line3\t\n\r   ",
+          "   Address\t\n\r   line4\t\n\r   ", "   Address\t\n\r   line5\t\n\r   "), Some("BN43 XXX"), None)
+        val ui: UserInfo = validUserInfo.copy(address = specialAddress)
+        val userInfo = NSIUserInfo(ui)
+        (userInfo.map{_.contactDetails.address1}) shouldBe Valid("Address line1")
+        (userInfo.map{_.contactDetails.address2}) shouldBe Valid("Address line2")
+        (userInfo.map{_.contactDetails.address3}) shouldBe Valid(Some("Address line3"))
+        (userInfo.map{_.contactDetails.address4}) shouldBe Valid(Some("Address line4"))
+        (userInfo.map{_.contactDetails.address5}) shouldBe Valid(Some("Address line5"))
+      }
+
+      "remove any spaces bigger than 1 character" in {
+        val longName = "John Paul      \n\t\r   Harry"
+        val longSurname = "  Smith    Brown  \n\r  "
+        val specialAddress = Address(List("   Address\t\n\r     line1\t\n\r   ", "   Address\t\n\r     line2\t\n\r   ", "   Address\t\n\rline3\t\n\r   ",
+          "   Address\t\n\r   line4\t\n\r   ", "   Address\t\n\r             line5\t\n\r   "), Some("BN43XXX  \t\r\n"), Some("GB    \n\r\t"))
+        val ui: UserInfo = validUserInfo.copy(forename = longName, surname = longSurname, address = specialAddress)
+        val userInfo = NSIUserInfo(ui)
+        (userInfo.map{_.forename}) shouldBe Valid("John Paul Harry")
+        (userInfo.map{_.surname}) shouldBe Valid("Smith Brown")
+        (userInfo.map{_.contactDetails.address1}) shouldBe Valid("Address line1")
+        (userInfo.map{_.contactDetails.address2}) shouldBe Valid("Address line2")
+        (userInfo.map{_.contactDetails.address3}) shouldBe Valid(Some("Address line3"))
+        (userInfo.map{_.contactDetails.address4}) shouldBe Valid(Some("Address line4"))
+        (userInfo.map{_.contactDetails.address5}) shouldBe Valid(Some("Address line5"))
+        (userInfo.map{_.contactDetails.postcode}) shouldBe Valid("BN43XXX")
+        (userInfo.map{_.contactDetails.countryCode}) shouldBe Valid(Some("GB"))
+      }
     }
   }
 }
