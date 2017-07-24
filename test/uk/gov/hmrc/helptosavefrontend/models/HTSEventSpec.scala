@@ -19,9 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.models
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-/**
-  * Created by andy on 21/07/2017.
-  */
 class HTSEventSpec extends TestSupport {
   "ApplicationSubmittedEvent" must {
     "be created with the appropriate auditSource" in {
