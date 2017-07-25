@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 import javax.net.ssl.{HostnameVerifier, HttpsURLConnection, SSLSession}
 
 import com.google.inject.ImplementedBy
