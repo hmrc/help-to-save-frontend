@@ -24,7 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuditConnector, WSHttpProxy}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
@@ -34,10 +34,11 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class NSIConnectorSpec extends TestSupport with MockFactory {
 
   lazy val mockHTTPProxy = mock[WSHttpProxy]
-  //val mockAuditConnector = mock[FrontendAuditConnector]
+  val mockAuditConnector = mock[AuditConnector]
 
   lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration) {
     override val httpProxy = mockHTTPProxy
+    override val auditConnector = mockAuditConnector
   }
 
   // put in fake authorization details - these should be removed by the call to create an account
@@ -49,21 +50,19 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
     )(_: Writes[I], _: HeaderCarrier))
       .expects(nsiUrl, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, hc.copy(authorization = None))
       .returning(Future.successful(result))
-
-    //(mockAuditConnector.sendEvent(_: ApplicationSubmittedEvent)(_: HeaderCarrier, _: ExecutionContext)).expects(*, *, *).returning(Future.successful(AuditResult.Success))
-
   }
 
   "the createAccount Method" must {
     "Return a SubmissionSuccess when the status is Created" in {
-      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.CREATED))
+      inSequence {
+        mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.CREATED))
+        (mockAuditConnector.sendEvent(_: ApplicationSubmittedEvent)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(*, *, *)
+          .returning(Future.successful(AuditResult.Success))
+      }
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
     }
-
-//    "send an application submissionEvent to splunk when creating an account" in {
-//      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.CREATED))
-//    }
 
     "Return a SubmissionFailure when the status is BAD_REQUEST" in {
       val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")

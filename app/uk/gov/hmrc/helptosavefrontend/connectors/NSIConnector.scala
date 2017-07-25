@@ -27,6 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuditConnector, WSHttpProx
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +53,7 @@ object NSIConnector {
 class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
 
   val httpProxy = new WSHttpProxy
-  val auditConnector = FrontendAuditConnector
+  val auditConnector: AuditConnector = FrontendAuditConnector
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
@@ -69,7 +70,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
         response.status match {
           case Status.CREATED ⇒
             val applicationEventResult = auditConnector.sendEvent(new ApplicationSubmittedEvent(userInfo))
-              applicationEventResult.onFailure {
+            applicationEventResult.onFailure {
               case e: Throwable => Logger.error(s"Unable to post application submission event to audit connector - ${e.getMessage}", e)
             }
             Logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino}")
@@ -88,10 +89,12 @@ class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
             handleBadRequestResponse(response)
 
           case other ⇒
-            Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status: $other")
+            Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status" +
+              s": $other")
             SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
-        } }
-      }.recover {
+        }
+      }
+  }.recover {
     case e ⇒
       Logger.error("Encountered error while trying to create account", e)
       SubmissionFailure(None, s"Encountered error while trying to create account", e.getMessage)

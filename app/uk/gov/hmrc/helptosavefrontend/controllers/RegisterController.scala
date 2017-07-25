@@ -40,6 +40,7 @@ import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuditConnector
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -50,6 +51,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    jsonSchemaValidationService: JSONSchemaValidationService,
                                    app: Application)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
+
+  val auditConnector: AuditConnector = FrontendAuditConnector
 
 
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
@@ -86,15 +89,28 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                     infos ⇒ {
                       val problemDescription = s"user $nino has missing information: ${infos.missingInfo.mkString(",")}"
                       Logger.error(problemDescription)
-                      FrontendAuditConnector.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
+
+                      val eligibilityCheckEventResult = auditConnector.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
+                      eligibilityCheckEventResult.onFailure {
+                        case e: Throwable => Logger.error(s"Unable to post eligibility check event to audit connector - ${e.getMessage}", e)
+                      }
+
                       Ok(views.html.register.missing_user_info(infos.missingInfo, personalAccountUrl))
                     }, {
                       case Some(info) ⇒ {
-                        FrontendAuditConnector.sendEvent(new EligibilityCheckEvent(nino, None))
+                        val eligibilityCheckEventResult = auditConnector.sendEvent(new EligibilityCheckEvent(nino, None))
+                        eligibilityCheckEventResult.onFailure {
+                          case e: Throwable => Logger.error(s"Unable to post eligibility check event to audit connector - ${e.getMessage}", e)
+                        }
+
                         Ok(views.html.register.confirm_details(info))
                       }
                       case _ ⇒ {
-                        FrontendAuditConnector.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
+                        val eligibilityCheckEventResult = auditConnector.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
+                        eligibilityCheckEventResult.onFailure {
+                          case e: Throwable => Logger.error(s"Unable to post eligibility check event to audit connector - ${e.getMessage}", e)
+                        }
+
                         SeeOther(routes.RegisterController.notEligible().url)
                       }
                     })
@@ -127,7 +143,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
     userInfo match {
-      case None     => Right(None)
+      case None => Right(None)
       case Some(ui) =>
         FEATURE[Either[String, Option[NSIUserInfo]]]("outgoing-json-validation", app.configuration, Right(userInfo)) enabled() thenDo {
           jsonSchemaValidationService.validate(Json.toJson(ui)).map(_ ⇒ Some(ui))
