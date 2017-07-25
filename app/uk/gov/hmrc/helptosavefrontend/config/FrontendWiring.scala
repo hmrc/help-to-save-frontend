@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
+import javax.net.ssl.{HostnameVerifier, HttpsURLConnection, SSLSession}
+
+import play.api.Logger
 import play.api.http.HttpVerbs.{GET => GET_VERB, POST => POST_VERB}
 import play.api.libs.json.Writes
 import uk.gov.hmrc.auth.core.PlayAuthConnector
@@ -81,6 +84,18 @@ class WSHttpProxy extends WSHttp with WSProxy with RunMode with HttpAuditing wit
   def post[A](url: String,
               body: A,
               headers: Map[String,String] = Map.empty[String,String]
-             )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] =
-  doPost(url, body, headers.toSeq)
+             )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
+
+    HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier {
+      override def verify(host: String, sslSession: SSLSession): Boolean = {
+        Logger.info(s"post - hostname is $host")
+        Logger.info(s"post - sslSession chain is ${sslSession.getPeerCertificateChain}")
+        Logger.info(s"post - sslSession getPeerHost ${sslSession.getPeerHost}")
+        true
+      }
+    })
+
+    doPost(url, body, headers.toSeq)
+  }
+
 }

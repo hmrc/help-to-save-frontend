@@ -2,6 +2,7 @@ import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._
 import play.routes.compiler.StaticRoutesGenerator
+import sbtdocker.Instructions.Cmd
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 trait MicroService {
@@ -12,9 +13,10 @@ trait MicroService {
   import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
   import uk.gov.hmrc.versioning.SbtGitVersioning
   import play.sbt.routes.RoutesKeys.routesGenerator
-
+  import sbtdocker.DockerKeys._
 
   import TestPhases._
+
 
   val appName: String
 
@@ -34,7 +36,19 @@ trait MicroService {
     )
   }
 
-  def seleniumTestFilter(name: String): Boolean = name.endsWith("SeleniumSystemTest")
+    lazy val dockerSettings = Seq(
+      // things the docker file generation depends on are listed here
+      dockerfile in docker := {
+        // any vals to be declared here
+        val host = "api.nsi.hts.esit:212.250.135.50"
+
+        new sbtdocker.mutable.Dockerfile {
+          add("api.nsi.hts.esit:212.250.135.50", "/etc/hosts")
+        }
+      }
+    )
+
+    def seleniumTestFilter(name: String): Boolean = name.endsWith("SeleniumSystemTest")
 
   def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name)
 
