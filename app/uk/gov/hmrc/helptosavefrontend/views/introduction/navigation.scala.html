@@ -1,0 +1,65 @@
+@*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.link
+@(currentPageUrl: String)(implicit messages: play.api.i18n.Messages)
+
+<h1 class="heading-xlarge">@Messages("hts.introduction.title")</h1>
+<div class="divider--bottom">
+    <ol>
+        <li>
+        @{if(routes.AboutHelpToSaveController.getAboutHelpToSave().url == currentPageUrl){
+            Messages("hts.introduction.about-help-to-save.title")
+        }
+        else {
+            link(routes.AboutHelpToSaveController.getAboutHelpToSave().url, Messages("hts.introduction.about-help-to-save.title"))
+        }}
+        </li>
+        <li>
+        @{if(routes.EligibilityController.getEligibility().url == currentPageUrl){
+            Messages("hts.introduction.eligibility.title")
+        }
+        else {
+            link(routes.EligibilityController.getEligibility().url, Messages("hts.introduction.eligibility.title"))
+        }}
+        </li>
+        <li>
+        @{if(routes.HowTheAccountWorksController.getHowTheAccountWorks().url == currentPageUrl){
+            Messages("hts.introduction.how-the-account-works.title")
+        }
+        else {
+            link(routes.HowTheAccountWorksController.getHowTheAccountWorks().url, Messages("hts.introduction.how-the-account-works.title"))
+        }}
+        </li>
+        <li>
+        @{if(routes.HowWeCalculateBonusesController.getHowWeCalculateBonuses().url == currentPageUrl){
+            Messages("hts.introduction.how-we-calculate-bonuses.title")
+        }
+        else {
+            link(routes.HowWeCalculateBonusesController.getHowWeCalculateBonuses().url, Messages("hts.introduction.how-we-calculate-bonuses.title"))
+        }}
+        </li>
+        <li>
+        @{if(routes.ApplyController.getApply().url == currentPageUrl){
+            Messages("hts.introduction.apply.title")
+        }
+        else {
+            link(routes.ApplyController.getApply().url, Messages("hts.introduction.apply.title"))
+        }}
+        </li>
+    </ol>
+</div>
