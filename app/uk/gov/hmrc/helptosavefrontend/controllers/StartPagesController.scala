@@ -19,26 +19,32 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import com.google.inject.Inject
+import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 @Singleton
-class StartPagesController @Inject()(val messagesApi: MessagesApi) extends FrontendController with I18nSupport {
+class StartPagesController @Inject()(implicit val app: Application, val messagesApi: MessagesApi) extends HelpToSaveAuth(app) with I18nSupport {
 
-  def getApplyHelpToSave: Action[AnyContent] = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.core.apply_help_to_save()))
+  def getApplyHelpToSave: Action[AnyContent] = isAuthorised {
+    implicit request ⇒
+      implicit htsContext ⇒
+        Future.successful(Ok(views.html.core.apply_help_to_save()))
   }
 
-  def getAboutHelpToSave: Action[AnyContent] = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.core.about_help_to_save()))
+  def getAboutHelpToSave: Action[AnyContent] = isAuthorised {
+    implicit request ⇒
+      implicit htsContext ⇒
+        Future.successful(Ok(views.html.core.about_help_to_save()))
   }
 
-  def getEligibilityHelpToSave: Action[AnyContent] = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.core.eligibility_help_to_save()))
+  def getEligibilityHelpToSave: Action[AnyContent] = isAuthorised {
+    implicit request ⇒
+      implicit htsContext ⇒
+        Future.successful(Ok(views.html.core.eligibility_help_to_save()))
   }
 
 }

@@ -15,8 +15,11 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form, button, submit, start_nav, link, sidebar}
-@()(implicit request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{start_nav, link, sidebar}
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.eligibility-help-to-save.header-page"),
     sidebarLinks = Some(sidebar()),

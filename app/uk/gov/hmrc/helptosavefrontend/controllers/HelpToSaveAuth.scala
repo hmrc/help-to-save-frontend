@@ -22,8 +22,8 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{IdentityCallbackUrl, UserInfoOAuthUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthWithConfidence, UserDetailsUrlWithAllEnrolments, AuthProvider ⇒ HtsAuthProvider}
-import uk.gov.hmrc.helptosavefrontend.util.NINO
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
+import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -36,15 +36,13 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
 
   override def env: Environment = Environment(app.path, app.classloader, app.mode)
 
+  private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
 
-  private type HtsAction = Request[AnyContent] => Future[Result]
-  private type HtsActionWithEnrolments = Request[AnyContent] => Option[NINO] => Future[Result]
-
-  def authorisedForHtsWithEnrolments(action: HtsActionWithEnrolments): Action[AnyContent] = {
+  def authorisedForHtsWithEnrolments(action: HtsAction): Action[AnyContent] =
     Action.async { implicit request =>
       authorised(AuthWithConfidence)
         .retrieve(UserDetailsUrlWithAllEnrolments) {
-          case allEnrols =>
+          allEnrols ⇒
             val nino =
               allEnrols
                 .enrolments
@@ -52,18 +50,17 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
                 .flatMap(_.getIdentifier("NINO"))
                 .map(_.value)
 
-            action(request)(nino)
+            action(request)(HtsContext(nino, isAuthorised = true))
 
         }.recover {
         case e ⇒ handleFailure(e)
       }
     }
-  }
 
   def authorisedForHts(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
-      authorised(HtsAuthProvider) {
-        action(request)
+      authorised(AuthProvider) {
+        action(request)(HtsContext(None, isAuthorised = true))
       }.recover {
         case e ⇒ handleFailure(e)
       }
@@ -73,9 +70,19 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def authorisedForHtsWithConfidence(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(AuthWithConfidence) {
-        action(request)
+        action(request)(HtsContext(None, isAuthorised = true))
       }.recover {
         case e ⇒ handleFailure(e)
+      }
+    }
+  }
+
+  def isAuthorised(action: HtsAction): Action[AnyContent] = {
+    Action.async { implicit request =>
+      authorised() {
+        action(request)(HtsContext(None, isAuthorised = true))
+      }.recoverWith {
+        case _ ⇒ action(request)(HtsContext(None))
       }
     }
   }
@@ -85,12 +92,6 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
       case _: NoActiveSession ⇒ redirectToLogin
       case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
         toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
-      case ex: InternalError ⇒
-        Logger.error(s"could not authenticate user due to: ${ex.reason}")
-        InternalServerError("")
-      case ex: AuthorisationException ⇒
-        Logger.warn(s"access denied to user due to: ${ex.reason}")
-        SeeOther(routes.RegisterController.accessDenied().url)
       case ex ⇒
         Logger.error(s"could not authenticate user due to: $ex")
         InternalServerError("")

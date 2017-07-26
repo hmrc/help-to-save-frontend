@@ -17,8 +17,9 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.user_details
 @import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-@(userDetails: UserInfo)(implicit request: Request[_], messages: Messages)
+@(userDetails: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.confirmdetails.header-page"), bodyClasses = None) {
  <header class="page-header text">

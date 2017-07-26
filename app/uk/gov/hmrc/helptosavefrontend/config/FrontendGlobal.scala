@@ -25,6 +25,7 @@ import play.api.mvc.Request
 import play.api.{Configuration, _}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
+import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
@@ -42,8 +43,11 @@ object FrontendGlobal extends DefaultFrontendGlobal {
     ApplicationCrypto.verifyConfiguration()
   }
 
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit rh: Request[_]): Html =
+  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit rh: Request[_]): Html = {
+    //TODO :  not sure how to pass valid HtsContext here
+    implicit val htsContext = HtsContext(None)
     uk.gov.hmrc.helptosavefrontend.views.html.error_template(pageTitle, heading, message)
+  }
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"microservice.metrics")
 

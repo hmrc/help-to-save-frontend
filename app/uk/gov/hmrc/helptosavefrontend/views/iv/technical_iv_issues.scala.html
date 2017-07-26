@@ -14,7 +14,9 @@
  * limitations under the License.
  *@
 
-@(retryUrl: String)(implicit request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+
+@(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
     <div class="grid-layout grid-layout--stacked">

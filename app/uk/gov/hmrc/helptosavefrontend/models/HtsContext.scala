@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+package uk.gov.hmrc.helptosavefrontend.models
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+import play.api.libs.json.{Format, Json}
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.access.denied.header")) {
+case class HtsContext(nino: Option[String], isAuthorised: Boolean = false)
 
-    <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h2>@Messages("hts.access.denied.message")</h2>
-            </header>
-        </div>
-    </div>
+object HtsContext {
+
+  implicit val htsContextFormat: Format[HtsContext] = Json.format[HtsContext]
 
 }
