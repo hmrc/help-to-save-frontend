@@ -18,322 +18,206 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import java.time.LocalDate
 
-import cats.data.Validated.Valid
-import org.scalacheck.Gen
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.domain.{Generator, Nino}
+import play.api.libs.json._
 
-class NSIUserInfoSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
+class NSIUserInfoSpec extends WordSpec with Matchers {
 
-  val specialCharacters: List[Char] = (Char.MinValue to Char.MaxValue).toList.filter(!_.isLetterOrDigit)
+  "The NSIUSerInfo" must {
 
-  val address: Address = validUserInfo.address
-  val postcode: String = validNSIUserInfo.contactDetails.postcode
-  val forename: String = validNSIUserInfo.forename
-  val surname: String = validNSIUserInfo.surname
-  val email: String = validNSIUserInfo.contactDetails.email
+    "have JSON format" which {
 
-  "The NSIUSerInfo" when {
-
-    "validating validUserInfo" must {
-
-      "mark as valid valid user information" in {
-        NSIUserInfo(validUserInfo) shouldBe Valid(validNSIUserInfo)
+      "reads and writes NSIUserInfo" in {
+        Json.fromJson[NSIUserInfo](Json.toJson(validNSIUserInfo)) shouldBe JsSuccess(validNSIUserInfo)
       }
 
+      "reads and writes dates in the format 'yyyyMMdd'" in {
+        val date = LocalDate.of(1234,5,6)
+
+        // check the happy path
+        val json1 = Json.toJson(validNSIUserInfo.copy(dateOfBirth = date))
+        (json1 \ "dateOfBirth").get shouldBe JsString("12340506")
+
+        // check the read will fail if the date is in the wrong format
+        val json2 = json1.as[JsObject] ++ Json.obj("dateOfBirth" → JsString("not a date"))
+        Json.fromJson[NSIUserInfo](json2).isError shouldBe true
+
+        // check that read will fail if the date is not a string
+        val json3 = json1.as[JsObject] ++ Json.obj("dateOfBirth" → JsNumber(0))
+        Json.fromJson[NSIUserInfo](json3).isError shouldBe true
+      }
     }
 
-    "validating forenames" should {
 
-      "mark as invalid forenames" which {
 
-        "are empty" in {
-          NSIUserInfo(validUserInfo.copy(forename = "")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = ".")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "-")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "&")).isInvalid shouldBe true
+    "have an apply method" which {
+
+      "takes in a UserInfo" which {
+
+        "converts appropriately" in {
+          NSIUserInfo(validUserInfo) shouldBe validNSIUserInfo
         }
 
-        "start with whitespace" in {
-          NSIUserInfo(validUserInfo.copy(forename = " " + forename)).isInvalid shouldBe true
+        "removes new line, tab and carriage return in forename" in {
+          val modifiedForename = "\n\t\rname\t"
+          val userInfo = NSIUserInfo(validUserInfo.copy(forename = modifiedForename))
+          userInfo.forename shouldBe "name"
         }
 
-        "contains numeric characters" in {
-          NSIUserInfo(validUserInfo.copy(forename = "Tyrion2")).isInvalid shouldBe true
+        "removes white spaces in forename" in {
+          val forenameWithSpaces = " " + "forename" + " "
+          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameWithSpaces))
+          userInfo.forename shouldBe "forename"
         }
 
-        "contains special characters which aren't ''', '-', '.' or '&'" in {
-          NSIUserInfo(validUserInfo.copy(forename = "Tyr&ion")).isValid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "Tyr-ion")).isValid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "Tyr.ion")).isValid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "Tyr'ion")).isValid shouldBe true
-
-
-          forAll(Gen.oneOf(specialCharacters)) { c: Char ⇒
-            whenever(c != '&' && c != '-' && c != '.' && c != ''') {
-              NSIUserInfo(validUserInfo.copy(forename = s"Tyr${c}ion")).isInvalid shouldBe true
-            }
-          }
+        "removes spaces, tabs, new lines and carriage returns from a double barrel forename" in {
+          val forenameDoubleBarrel = "   John\t\n\r   Paul\t\n\r   "
+          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel))
+          userInfo.forename shouldBe "John Paul"
         }
 
-        "starts with ''', '-', '.' or '&'" in {
-          NSIUserInfo(validUserInfo.copy(forename = "-Tyrion")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "&Tyrion")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = ".Tyrion")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(forename = "'Tyrion")).isInvalid shouldBe true
+        "removes spaces, tabs, new lines and carriage returns from a double barrel forename with a hyphen" in {
+          val forenameDoubleBarrel = "   John\t\n\r-Paul\t\n\r   "
+          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel))
+          userInfo.forename shouldBe "John -Paul"
         }
 
-        "contains consecutive special characters" in {
-          val combos = List('-', '.', '&', ''').combinations(2).map(_.mkString("")).toList
-          combos.foreach(c ⇒
-            NSIUserInfo(validUserInfo.copy(forename = s"Tyr${c}ion")).isInvalid shouldBe true
+        "removes whitespace from surname" in {
+          val userInfo = NSIUserInfo(validUserInfo.copy(surname = " surname"))
+          userInfo.surname shouldBe "surname"
+        }
+
+        "removes leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname" in {
+          val modifiedSurname = "   Luis\t\n\r   Guerra\t\n\r   "
+          val userInfo = NSIUserInfo(validUserInfo.copy(surname = modifiedSurname))
+          userInfo.surname shouldBe "Luis Guerra"
+        }
+
+        "removes leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname with a hyphen" in {
+          val modifiedSurname = "   Luis\t\n\r-Guerra\t\n\r   "
+          val userInfo = NSIUserInfo(validUserInfo.copy(surname = " " + modifiedSurname))
+          userInfo.surname shouldBe "Luis -Guerra"
+        }
+
+        "removes new lines, tabs, carriage returns and trailing whitespaces from all address lines" in {
+          val specialAddress =
+            Address(
+              List(
+                "\naddress \tline1\r  ",
+                " line2",
+                "line3\t  ",
+                "line4",
+                "line5\t\n  "
+              ),
+              Some("BN43 XXX"),
+              None
+            )
+          val ui: UserInfo = validUserInfo.copy(address = specialAddress)
+          val userInfo = NSIUserInfo(ui)
+          userInfo.contactDetails.address1 shouldBe "address line1"
+          userInfo.contactDetails.address2 shouldBe "line2"
+          userInfo.contactDetails.address3 shouldBe Some("line3")
+          userInfo.contactDetails.address4 shouldBe Some("line4")
+          userInfo.contactDetails.address5 shouldBe Some("line5")
+          userInfo.contactDetails.postcode shouldBe "BN43XXX"
+        }
+
+        "removes leading and trailing whitespaces, new lines, tabs, carriage returns from all address lines" in {
+          val specialAddress = Address(List(
+            "   Address\t\n\r   line1\t\n\r   ",
+            "   Address\t\n\r   line2\t\n\r   ",
+            "   Address\t\n\r   line3\t\n\r   ",
+            "   Address\t\n\r   line4\t\n\r   ",
+            "   Address\t\n\r   line5\t\n\r   ")
+            , Some("BN43 XXX"),
+            None
           )
+
+          val ui: UserInfo = validUserInfo.copy(address = specialAddress)
+          val userInfo = NSIUserInfo(ui)
+          userInfo.contactDetails.address1 shouldBe "Address line1"
+          userInfo.contactDetails.address2 shouldBe "Address line2"
+          userInfo.contactDetails.address3 shouldBe Some("Address line3")
+          userInfo.contactDetails.address4 shouldBe Some("Address line4")
+          userInfo.contactDetails.address5 shouldBe Some("Address line5")
+          userInfo.contactDetails.postcode shouldBe "BN43XXX"
         }
 
-        "are longer than 26 characters" in {
-          val maxLength = 26
-
-          forAll(Gen.alphaStr.map(_.take(maxLength)).filter(_.nonEmpty)) { s ⇒
-            NSIUserInfo(validUserInfo.copy(forename = s)).isValid shouldBe true
-          }
-
-          forAll(Gen.alphaStr.filter(s ⇒ s.length > maxLength)) { s ⇒
-            NSIUserInfo(validUserInfo.copy(forename = s)).isInvalid shouldBe true
-          }
-        }
-      }
-    }
-
-    "validating surnames" should {
-
-      "mark as invalid surnames" which {
-
-        "do not have at least one character" in {
-          NSIUserInfo(validUserInfo.copy(surname = "")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = ".")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "-")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "&")).isInvalid shouldBe true
-        }
-
-        "start with whitespace" in {
-          NSIUserInfo(validUserInfo.copy(surname = " " + surname)).isInvalid shouldBe true
-        }
-
-        "contains numeric characters" in {
-          NSIUserInfo(validUserInfo.copy(surname = "Lannister3")).isInvalid shouldBe true
-        }
-
-        "contains special characters which aren't ''', '-', '.', or '&'" in {
-          NSIUserInfo(validUserInfo.copy(surname = "Lann&ister")).isValid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lann-ister")).isValid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lann.ister")).isValid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lann'ister")).isValid shouldBe true
-
-          forAll(Gen.oneOf(specialCharacters)) { c: Char ⇒
-            whenever(c != '&' && c != '-' && c != '.' && c!= ''') {
-              NSIUserInfo(validUserInfo.copy(surname = s"Lann${c}ister")).isInvalid shouldBe true
-            }
-          }
-        }
-
-        "starts or ends with ''', '-', '.' or '&'" in {
-          NSIUserInfo(validUserInfo.copy(surname = "-Lannister")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "&Lannister")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = ".Lannister")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "'Lannister")).isInvalid shouldBe true
-
-
-          NSIUserInfo(validUserInfo.copy(surname = "Lannister-")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lannister&")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lannister.")).isInvalid shouldBe true
-          NSIUserInfo(validUserInfo.copy(surname = "Lannister'")).isInvalid shouldBe true
-        }
-
-        "contains consecutive special characters" in {
-          val combos = List('-', '.', '&', ''').combinations(2).map(_.mkString("")).toList
-          combos.foreach(c ⇒
-            NSIUserInfo(validUserInfo.copy(surname = s"Lann${c}ister")).isInvalid shouldBe true
+        "removes any spaces bigger than 1 character" in {
+          val longName = "John Paul      \n\t\r   Harry"
+          val longSurname = "  Smith    Brown  \n\r  "
+          val specialAddress = Address(List(
+            "   Address\t\n\r     line1\t\n\r   ",
+            "   Address\t\n\r     line2\t\n\r   ",
+            "   Address\t\n\rline3\t\n\r   ",
+            "   Address\t\n\r   line4\t\n\r   ",
+            "   Address\t\n\r             line5\t\n\r   "),
+            Some("BN43XXX  \t\r\n"),
+            Some("GB    \n\r\t")
           )
+
+          val ui: UserInfo = validUserInfo.copy(forename = longName, surname = longSurname, address = specialAddress)
+
+          val userInfo = NSIUserInfo(ui)
+          userInfo.forename shouldBe "John Paul Harry"
+          userInfo.surname shouldBe "Smith Brown"
+          userInfo.contactDetails.address1 shouldBe "Address line1"
+          userInfo.contactDetails.address2 shouldBe "Address line2"
+          userInfo.contactDetails.address3 shouldBe Some("Address line3")
+          userInfo.contactDetails.address4 shouldBe Some("Address line4")
+          userInfo.contactDetails.address5 shouldBe Some("Address line5")
+          userInfo.contactDetails.postcode shouldBe "BN43XXX"
+          userInfo.contactDetails.countryCode shouldBe Some("GB")
         }
 
-        "are longer than 300 characters" in {
-          val maxLength = 300
-          forAll(Gen.alphaStr.map(_.take(maxLength)).filter(_.length > 1)) { s ⇒
-            NSIUserInfo(validUserInfo.copy(surname = s)).isValid shouldBe true
-          }
-
-          forAll(Gen.alphaStr.map(s ⇒ s + s).filter(s ⇒ s.length > maxLength)) { s ⇒
-            NSIUserInfo(validUserInfo.copy(surname = s)).isInvalid shouldBe true
-          }
-        }
-      }
-    }
-
-    "validating date of births" should {
-
-      "mark as invalid date of births" which {
-
-        "are before 1st January 1800" in {
-          forAll(Gen.choose(1L, 1000L)) { d ⇒ // scalastyle:ignore magic.number
-            // 1st Jan 1880 is 62,091 days before Epoch
-            NSIUserInfo(validUserInfo.copy(dateOfBirth = LocalDate.ofEpochDay(-62091 - d))).isInvalid shouldBe true // scalastyle:ignore magic.number
-
-          }
+        "returns a blank string for the postcode if it is not present" in {
+          val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(postcode = None))
+          NSIUserInfo(ui).contactDetails.postcode shouldBe ""
         }
 
-        "are in the future" in {
-          forAll(Gen.choose(1L, 1000L)) { d ⇒ // scalastyle:ignore magic.number
-            NSIUserInfo(validUserInfo.copy(dateOfBirth = LocalDate.now().plusDays(d))).isInvalid shouldBe true
-          }
+        "returns a blank string for address lines 1 or 2 if they are missing" in {
+          // check when there are no address lines
+          val ui1: UserInfo = validUserInfo.copy(address =
+            validUserInfo.address.copy(lines = List()))
+
+          NSIUserInfo(ui1).contactDetails.address1 shouldBe ""
+          NSIUserInfo(ui1).contactDetails.address2 shouldBe ""
+          NSIUserInfo(ui1).contactDetails.address3 shouldBe None
+          NSIUserInfo(ui1).contactDetails.address4 shouldBe None
+          NSIUserInfo(ui1).contactDetails.address5 shouldBe None
+
+          // check when there is only one address line
+          val ui2: UserInfo = validUserInfo.copy(address =
+            validUserInfo.address.copy(lines = List("line")))
+
+          NSIUserInfo(ui2).contactDetails.address1 shouldBe "line"
+          NSIUserInfo(ui2).contactDetails.address2 shouldBe ""
+          NSIUserInfo(ui2).contactDetails.address3 shouldBe None
+          NSIUserInfo(ui2).contactDetails.address4 shouldBe None
+          NSIUserInfo(ui2).contactDetails.address5 shouldBe None
         }
 
-      }
-    }
+        "filter out address lines which are empty" in {
+          // check that lines with nothing in them get filitered out
+          val willBeFilteredOut = {
+            val l = List("\t","\n","\r"," ", "")
+            l ::: l.combinations(2).flatten.toList
+          }
 
-    "validating addresses" should {
+          val ui: UserInfo = validUserInfo.copy(address =
+            validUserInfo.address.copy(lines = willBeFilteredOut ::: List("line")))
 
-      "mark as invalid addresses" which {
-        val emptyAddress = Address(List.empty[String], Some(postcode), None)
-
-
-        "do not have at least two lines" in {
-
-          NSIUserInfo(validUserInfo.copy(address = emptyAddress)).isInvalid shouldBe true
-
-          // test one line addresses are invalid
-          NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(lines = List("1 the Street")))).isInvalid shouldBe true
-
-          NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(lines = List("1 the Street", "")))).isInvalid shouldBe true
-
-          NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(lines = List("", "1 the Street")))).isInvalid shouldBe true
-
-          // test two line addresses are valid
-          val info = NSIUserInfo(validUserInfo.copy(
-            address = emptyAddress.copy(
-              List("1 the Street", "The Place")))
-          ).getOrElse(sys.error("Expected valid NSIUserInformation"))
-
-          info.contactDetails.address1 shouldBe "1 the Street"
-          info.contactDetails.address2 shouldBe "The Place"
+          NSIUserInfo(ui).contactDetails.address1 shouldBe "line"
+          NSIUserInfo(ui).contactDetails.address2 shouldBe ""
+          NSIUserInfo(ui).contactDetails.address3 shouldBe None
+          NSIUserInfo(ui).contactDetails.address4 shouldBe None
+          NSIUserInfo(ui).contactDetails.address5 shouldBe None
         }
 
-        "contain lines which are longer than 35 characters" in {
-          forAll { s: String ⇒
-            whenever(s.length > 35) {
-              NSIUserInfo(validUserInfo.copy(
-                address = emptyAddress.copy(
-                  lines = List(s,s)
-                ))).isInvalid shouldBe true
-            }
-          }
-        }
-      }
-    }
-
-    "validating postcodes" should {
-
-      "mark as invalid postcodes" which {
-
-        "are longer than 10 characters when trimmed" in {
-          forAll { p: String ⇒
-            whenever(p.replaceAllLiterally(" ", "").length > 10) {
-              NSIUserInfo(validUserInfo.copy(address = address.copy(postcode = Some(p)))).isInvalid shouldBe true
-            }
-          }
-        }
-      }
-    }
-
-    "validating country codes" should {
-
-      "mark as invalid country codes" which {
-
-        "are not two characters long when the country code is defined" in {
-          // None should be allowed
-          NSIUserInfo(validUserInfo.copy(address = address.copy(country = None))).isValid shouldBe true
-
-          // two letters should be allowed
-          forAll { (c1: Char, c2: Char) ⇒
-            val code = c1.toString + c2.toString
-            NSIUserInfo(validUserInfo.copy(address = address.copy(country = Some(code)))).isValid shouldBe true
-          }
-
-          forAll { (s: String) ⇒
-            whenever(s.length != 2) {
-              NSIUserInfo(validUserInfo.copy(address = address.copy(country = Some(s)))).isInvalid shouldBe true
-            }
-          }
-        }
-      }
-    }
-
-    "validating emails" should {
-
-      "mark as invalid emails" which {
-
-        "which do not contain an '@' sign" in {
-          NSIUserInfo(validUserInfo.copy(email = email.filterNot(_ == '@'))).isInvalid shouldBe true
-        }
-
-        "has a local part greater than 64 characters" in {
-          forAll { s: String ⇒
-            whenever(s.length <= 64) {
-              NSIUserInfo(validUserInfo.copy(email = s + "@test.com")).isValid shouldBe true
-            }
-          }
-
-          forAll { s: String ⇒
-            whenever(s.length > 64) {
-              NSIUserInfo(validUserInfo.copy(email = s + "@test.com")).isInvalid shouldBe true
-            }
-          }
-        }
-
-
-        "has a domain part greater than 252 characters" in {
-          val maxLength = 252
-
-          forAll { s: String ⇒
-            whenever(s.length <= maxLength) {
-              NSIUserInfo(validUserInfo.copy(email = "a@" + s)).isValid shouldBe true
-            }
-          }
-
-          forAll { s: String ⇒
-            // create a bigger string here so that the property check below
-            // is more likely to succeed
-            val t = List.fill(10)(s).mkString("") // scalastyle:ignore magic.number
-            whenever(t.filter(_ != '@').length > maxLength) {
-              NSIUserInfo(validUserInfo.copy(email = "a@" + t.filter(_ != '@'))).isInvalid shouldBe true
-            }
-          }
-        }
       }
     }
 
 
-    "validating ninos" should {
-
-      "mark as invalid nino's" which {
-
-        "are invalid" in {
-          val generator = new Generator()
-          forAll(Gen.function0(generator.nextNino.nino)) { nino ⇒
-            NSIUserInfo(validUserInfo.copy(nino = nino())).isValid shouldBe true
-          }
-
-          forAll { s: String ⇒
-            whenever(!Nino.isValid(s)) {
-              NSIUserInfo(validUserInfo.copy(nino = s)).isInvalid shouldBe true
-            }
-          }
-        }
-      }
-
-    }
   }
+
 }

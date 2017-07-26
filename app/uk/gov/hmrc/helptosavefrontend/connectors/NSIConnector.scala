@@ -60,7 +60,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
 
     Logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
 
-    FEATURE("log-json-airgap", conf) enabled() thenDo {
+    FEATURE("log-account-creation-json", conf) enabled() thenDo {
       Logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
     }
 

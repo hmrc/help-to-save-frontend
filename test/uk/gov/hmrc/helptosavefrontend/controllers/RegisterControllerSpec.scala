@@ -211,7 +211,6 @@ class RegisterControllerSpec extends TestSupport {
         val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
         val result = Await.result(responseFuture, 5.seconds)
 
-        println(result + "\n\n\n\n")
         status(result) shouldBe Status.OK
 
         contentType(result) shouldBe Some("text/html")
@@ -285,14 +284,6 @@ class RegisterControllerSpec extends TestSupport {
               mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
               failEligibilityResult(nino, oauthAuthorisationCode)
             })
-        }
-
-        "if the user details fo not pass NS&I validation checks" in {
-          val user = validUserInfo.copy(forename = " space-at-beginning")
-          test(inSequence {
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-            mockEligibilityResult(nino, oauthAuthorisationCode)(Right(Some(user)))
-          })
         }
 
         "if the JSON schema validation is unsuccessful" in {
