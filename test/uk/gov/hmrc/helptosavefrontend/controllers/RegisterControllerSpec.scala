@@ -22,7 +22,7 @@ import cats.syntax.either._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json, Reads, Writes}
-import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
@@ -34,7 +34,9 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, Email}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -53,6 +55,7 @@ class RegisterControllerSpec extends TestSupport {
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val testOAuthConfiguration = OAuthConfiguration(true, "url", "client-ID", "callback", List("scope1", "scope2"))
+  val mockAuditor = mock[HTSAuditor]
 
   val oauthAuthorisationCode = "authorisation-code"
 
@@ -61,7 +64,8 @@ class RegisterControllerSpec extends TestSupport {
     mockHtsService,
     mockSessionCacheConnector,
     jsonSchemaValidationService,
-    fakeApplication)(
+    fakeApplication,
+    mockAuditor)(
     ec) {
     override val oauthConfig = testOAuthConfiguration
     override lazy val authConnector = mockAuthConnector
@@ -71,6 +75,11 @@ class RegisterControllerSpec extends TestSupport {
     (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
       .expects(nino,authorisationCode, *)
       .returning(EitherT.pure[Future,String,EligibilityCheckResult](EligibilityCheckResult(result)))
+
+  def mockSendAuditEvent =
+    (mockAuditor.sendEvent(_: HTSEvent))
+      .expects(*)
+      .returning(Future.successful(AuditResult.Success))
 
   def failEligibilityResult(nino: String, authorisationCode: String): Unit =
     (mockHtsService.checkEligibility(_: String, _: String)(_: HeaderCarrier))
@@ -125,7 +134,8 @@ class RegisterControllerSpec extends TestSupport {
           mockHtsService,
           mockSessionCacheConnector,
           jsonSchemaValidationService,
-          fakeApplication)(ec) {
+          fakeApplication,
+          mockAuditor)(ec) {
           override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
           override lazy val authConnector = mockAuthConnector
         }
@@ -144,7 +154,8 @@ class RegisterControllerSpec extends TestSupport {
           mockHtsService,
           mockSessionCacheConnector,
           jsonSchemaValidationService,
-          fakeApplication)(ec) {
+          fakeApplication,
+          mockAuditor)(ec) {
           override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
           override lazy val authConnector = mockAuthConnector
         }
@@ -191,11 +202,13 @@ class RegisterControllerSpec extends TestSupport {
 
       "return user details if the user is eligible for help-to-save" in {
         val user = validUserInfo
+
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
           mockEligibilityResult(nino, oauthAuthorisationCode)(Right(Some(user)))
           mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
           mockSessionCacheConnectorPut(Right(CacheMap("1", Map.empty[String, JsValue])))
+          mockSendAuditEvent
         }
 
         val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
@@ -214,9 +227,11 @@ class RegisterControllerSpec extends TestSupport {
       }
 
       "display a 'Not Eligible' page if the user is not eligible" in {
+
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
           mockEligibilityResult(nino, oauthAuthorisationCode)(Right(None))
+          mockSendAuditEvent
         }
 
         val result = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
@@ -230,6 +245,7 @@ class RegisterControllerSpec extends TestSupport {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
           mockEligibilityResult(nino, oauthAuthorisationCode)(Left(MissingUserInfos(Set(Email, Contact))))
+          mockSendAuditEvent
         }
 
         val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)

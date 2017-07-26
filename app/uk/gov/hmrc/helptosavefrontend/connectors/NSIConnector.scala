@@ -19,13 +19,14 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import javax.inject.{Inject, Singleton}
 
 import com.google.inject.ImplementedBy
-import play.api.{Configuration, Logger}
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
+import play.api.{Configuration, Logger}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.play.http._
 
@@ -49,7 +50,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
+class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) extends NSIConnector {
 
   val httpProxy = new WSHttpProxy
 
@@ -67,6 +68,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
+            auditor.sendEvent(new ApplicationSubmittedEvent(userInfo))
             Logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino}")
             SubmissionSuccess()
 
@@ -83,10 +85,12 @@ class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
             handleBadRequestResponse(response)
 
           case other ⇒
-            Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status: $other")
+            Logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status" +
+              s": $other")
             SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
-        } }
-      }.recover {
+        }
+      }
+  }.recover {
     case e ⇒
       Logger.error("Encountered error while trying to create account", e)
       SubmissionFailure(None, s"Encountered error while trying to create account", e.getMessage)

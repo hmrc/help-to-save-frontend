@@ -20,10 +20,12 @@ import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiBasicAuth, nsiAuthHeaderKey, nsiUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
@@ -33,24 +35,31 @@ import scala.concurrent.{Await, Future}
 class NSIConnectorSpec extends TestSupport with MockFactory {
 
   lazy val mockHTTPProxy = mock[WSHttpProxy]
+  val mockAuditor = mock[HTSAuditor]
 
-  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration) {
+  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration, mockAuditor) {
     override val httpProxy = mockHTTPProxy
   }
 
   // put in fake authorization details - these should be removed by the call to create an account
   implicit val hc = HeaderCarrier(authorization = Some(Authorization("auth")))
 
-  def mockCreateAccount[I](body: I)(result: HttpResponse): Unit =
+  def mockCreateAccount[I](body: I)(result: HttpResponse): Unit = {
     (mockHTTPProxy.post(
       _: String, _: I, _: Map[String, String]
     )(_: Writes[I], _: HeaderCarrier))
       .expects(nsiUrl, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, hc.copy(authorization = None))
       .returning(Future.successful(result))
+  }
 
   "the createAccount Method" must {
     "Return a SubmissionSuccess when the status is Created" in {
-      mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.CREATED))
+      inSequence {
+        mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.CREATED))
+        (mockAuditor.sendEvent(_: ApplicationSubmittedEvent))
+          .expects(*)
+          .returning(Future.successful(AuditResult.Success))
+      }
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
     }
