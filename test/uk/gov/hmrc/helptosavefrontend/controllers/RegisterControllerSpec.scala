@@ -34,6 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, Email}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -54,7 +55,7 @@ class RegisterControllerSpec extends TestSupport {
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val testOAuthConfiguration = OAuthConfiguration(true, "url", "client-ID", "callback", List("scope1", "scope2"))
-  val mockAuditConnector = mock[AuditConnector]
+  val mockAuditor = mock[HTSAuditor]
 
   val oauthAuthorisationCode = "authorisation-code"
 
@@ -63,11 +64,11 @@ class RegisterControllerSpec extends TestSupport {
     mockHtsService,
     mockSessionCacheConnector,
     jsonSchemaValidationService,
-    fakeApplication)(
+    fakeApplication,
+    mockAuditor)(
     ec) {
     override val oauthConfig = testOAuthConfiguration
     override lazy val authConnector = mockAuthConnector
-    override val auditConnector = mockAuditConnector
   }
 
   def mockEligibilityResult(nino: String, authorisationCode: String)(result: Either[MissingUserInfos, Option[UserInfo]]): Unit =
@@ -76,8 +77,8 @@ class RegisterControllerSpec extends TestSupport {
       .returning(EitherT.pure[Future,String,EligibilityCheckResult](EligibilityCheckResult(result)))
 
   def mockSendAuditEvent =
-    (mockAuditConnector.sendEvent(_: ApplicationSubmittedEvent)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *)
+    (mockAuditor.sendEvent(_: HTSEvent))
+      .expects(*)
       .returning(Future.successful(AuditResult.Success))
 
   def failEligibilityResult(nino: String, authorisationCode: String): Unit =
@@ -133,7 +134,8 @@ class RegisterControllerSpec extends TestSupport {
           mockHtsService,
           mockSessionCacheConnector,
           jsonSchemaValidationService,
-          fakeApplication)(ec) {
+          fakeApplication,
+          mockAuditor)(ec) {
           override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
           override lazy val authConnector = mockAuthConnector
         }
@@ -152,7 +154,8 @@ class RegisterControllerSpec extends TestSupport {
           mockHtsService,
           mockSessionCacheConnector,
           jsonSchemaValidationService,
-          fakeApplication)(ec) {
+          fakeApplication,
+          mockAuditor)(ec) {
           override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
           override lazy val authConnector = mockAuthConnector
         }

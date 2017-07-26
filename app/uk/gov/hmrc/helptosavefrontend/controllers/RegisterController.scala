@@ -35,12 +35,10 @@ import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckEvent, EligibilityCheckResult, HTSSession, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.NINO
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, NINO}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuditConnector
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,10 +47,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    helpToSaveService: HelpToSaveService,
                                    sessionCacheConnector: SessionCacheConnector,
                                    jsonSchemaValidationService: JSONSchemaValidationService,
-                                   app: Application)(implicit ec: ExecutionContext)
+                                   app: Application,
+                                   auditor: HTSAuditor)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport {
-
-  val auditConnector: AuditConnector = FrontendAuditConnector
 
 
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
@@ -89,28 +86,15 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                     infos ⇒ {
                       val problemDescription = s"user $nino has missing information: ${infos.missingInfo.mkString(",")}"
                       Logger.error(problemDescription)
-
-                      val eligibilityCheckEventResult = auditConnector.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
-                      eligibilityCheckEventResult.onFailure {
-                        case e: Throwable => Logger.error(s"Unable to post eligibility check event to audit connector - ${e.getMessage}", e)
-                      }
-
+                      auditor.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
                       Ok(views.html.register.missing_user_info(infos.missingInfo, personalAccountUrl))
                     }, {
                       case Some(info) ⇒ {
-                        val eligibilityCheckEventResult = auditConnector.sendEvent(new EligibilityCheckEvent(nino, None))
-                        eligibilityCheckEventResult.onFailure {
-                          case e: Throwable => Logger.error(s"Unable to post eligibility check event to audit connector - ${e.getMessage}", e)
-                        }
-
+                        auditor.sendEvent(new EligibilityCheckEvent(nino, None))
                         Ok(views.html.register.confirm_details(info))
                       }
                       case _ ⇒ {
-                        val eligibilityCheckEventResult = auditConnector.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
-                        eligibilityCheckEventResult.onFailure {
-                          case e: Throwable => Logger.error(s"Unable to post eligibility check event to audit connector - ${e.getMessage}", e)
-                        }
-
+                        auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
                         SeeOther(routes.RegisterController.notEligible().url)
                       }
                     })

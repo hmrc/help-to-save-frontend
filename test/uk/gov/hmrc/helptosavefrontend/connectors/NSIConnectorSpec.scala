@@ -24,6 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuditConnector, WSHttpProxy}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
 import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -34,11 +35,10 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class NSIConnectorSpec extends TestSupport with MockFactory {
 
   lazy val mockHTTPProxy = mock[WSHttpProxy]
-  val mockAuditConnector = mock[AuditConnector]
+  val mockAuditor = mock[HTSAuditor]
 
-  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration) {
+  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration, mockAuditor) {
     override val httpProxy = mockHTTPProxy
-    override val auditConnector = mockAuditConnector
   }
 
   // put in fake authorization details - these should be removed by the call to create an account
@@ -56,8 +56,8 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
     "Return a SubmissionSuccess when the status is Created" in {
       inSequence {
         mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.CREATED))
-        (mockAuditConnector.sendEvent(_: ApplicationSubmittedEvent)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(*, *, *)
+        (mockAuditor.sendEvent(_: ApplicationSubmittedEvent))
+          .expects(*)
           .returning(Future.successful(AuditResult.Success))
       }
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)

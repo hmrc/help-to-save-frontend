@@ -26,6 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuditConnector, WSHttpProxy}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http._
@@ -50,10 +51,9 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
+class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) extends NSIConnector {
 
   val httpProxy = new WSHttpProxy
-  val auditConnector: AuditConnector = FrontendAuditConnector
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
@@ -69,10 +69,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration) extends NSIConnector {
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
-            val applicationEventResult = auditConnector.sendEvent(new ApplicationSubmittedEvent(userInfo))
-            applicationEventResult.onFailure {
-              case e: Throwable => Logger.error(s"Unable to post application submission event to audit connector - ${e.getMessage}", e)
-            }
+            auditor.sendEvent(new ApplicationSubmittedEvent(userInfo))
             Logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino}")
             SubmissionSuccess()
 
