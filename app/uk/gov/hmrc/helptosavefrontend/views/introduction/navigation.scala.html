@@ -1,0 +1,48 @@
+@*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.link
+@(currentPageUrl: String)(implicit messages: play.api.i18n.Messages)
+
+<h1 class="heading-xlarge">@Messages("hts.introduction.navigation.title")</h1>
+
+<ul class="divider--bottom">
+    <li>
+    @{if(routes.StartPagesController.getAboutHelpToSave().url == currentPageUrl){
+        Messages("hts.helpers.link-1")
+    }
+    else {
+        link(routes.StartPagesController.getAboutHelpToSave().url, Messages("hts.helpers.link-1"))
+    }}
+    </li>
+    <li>
+    @{if(routes.StartPagesController.getEligibilityHelpToSave().url == currentPageUrl){
+        Messages("hts.helpers.link-2")
+    }
+    else {
+        link(routes.StartPagesController.getEligibilityHelpToSave().url, Messages("hts.helpers.link-2"))
+    }}
+    </li>
+    <li>
+    @{if(routes.StartPagesController.getApplyHelpToSave().url == currentPageUrl){
+        Messages("hts.helpers.link-3")
+    }
+    else {
+        link(routes.StartPagesController.getApplyHelpToSave().url, Messages("hts.helpers.link-3"))
+    }}
+    </li>
+</ul>

@@ -1,5 +1,7 @@
 # microservice specific routes
 
+GET        /introduction/about                      @uk.gov.hmrc.helptosavefrontend.controllers.AboutHelpToSaveController.getAboutHelpToSave
+
 GET        /apply                                   @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getApplyHelpToSave
 GET        /about                                   @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave
 GET        /eligibility                             @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getEligibilityHelpToSave
