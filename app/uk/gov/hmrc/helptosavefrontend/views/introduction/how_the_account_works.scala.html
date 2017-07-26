@@ -14,5 +14,22 @@
  * limitations under the License.
  *@
 
-@(externalLink: String, message:String)(implicit messages: play.api.i18n.Messages)
-<a href=@externalLink >@message</a>
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.html.introduction.{navigation, sidebar}
+
+@()(implicit request: Request[_], messages: Messages)
+
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+    title = Messages("hts.core.about-help-to-save.header-page"),
+    sidebarLinks = Some(sidebar()),
+    bodyClasses = None) {
+    <div class="grid-row">
+        <div class="column-two-thirds">
+
+            @navigation(request.uri)
+
+            <h2>@Messages("hts.introduction.how-the-account-works.title")</h2>
+
+        </div>
+    </div>
+}
