@@ -15,10 +15,11 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form, button, submit}
 @import uk.gov.hmrc.helptosavefrontend.views.html.introduction.{navigation, sidebar}
 
-@()(implicit request: Request[_], messages: Messages)
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.introduction.about-help-to-save.title"),

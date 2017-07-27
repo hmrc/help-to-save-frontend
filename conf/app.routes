@@ -16,9 +16,7 @@ GET        /register/get-authorisation                      @uk.gov.hmrc.helptos
 GET        /register/confirm-details                        @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmDetails(code: Option[String], error: Option[String], error_description: Option[String], error_code: Option[String])
 
 GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
+
 GET        /register/nsi                                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
-
-GET        /register/access-denied                          @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.accessDenied
-
 GET        /register/not-eligible                           @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.notEligible
