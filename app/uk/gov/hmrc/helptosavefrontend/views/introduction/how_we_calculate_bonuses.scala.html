@@ -21,54 +21,232 @@
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = Messages("hts.core.about-help-to-save.header-page"),
+    title = Messages("hts.introduction.how-we-calculate-bonuses.title"),
     sidebarLinks = Some(sidebar()),
     bodyClasses = None) {
     @navigation(request.uri)
 
     <section class="section">
-        <h2>3. @Messages("hts.introduction.how-the-account-works.title")</h2>
-        <h3 class="heading-small">@Messages("")</h3>
-        <p>@Messages("")</p>
-        <ul class="bullets">
-            <li>@Messages("")</li>
-            <li>@Messages("")</li>
-            <li>@Messages("")</li>
-        </ul>
-        <h3 class="heading-small">@Messages("")</h3>
-        <p>@Messages("")</p>
-        <ul class="bullets">
-            <li>@Messages("")</li>
-            <li>@Messages("")</li>
-        </ul>
-        <p>@Messages("")</p>
-        <h3 class="heading-small">@Messages("")</h3>
-        <p>@Messages("")</p>
-        <p>@Messages("")</p>
-        <div class="panel">
-            <p>@Messages("")</p>
+        <h2>3. @Messages("hts.introduction.how-we-calculate-bonuses.title")</h2>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-1")</p>
+        <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-1")</h3>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-2")</p>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-3")</p>
+        <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-2")</h3>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-4")</p>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-5")</p>
+
+        <div data-tabs class="js-hash-selected-tab">
+            <ul class="tabs-nav" role="tablist">
+                <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")" role="tab"
+                data-tab-link="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")"
+                aria-selected="true"
+                aria-controls="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")">
+                    <span class="tabs-nav__tab tabs-nav__tab--active"
+                    href="#">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.title")</span>
+                </li>
+                <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")" role="tab"
+                data-tab-link="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")"
+                aria-selected="false"
+                aria-controls="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")">
+                    <a class="tabs-nav__tab" href="#">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.title")</a>
+                </li>
+                <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")" role="tab"
+                data-tab-link="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")"
+                aria-selected="false"
+                aria-controls="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")">
+                    <a class="tabs-nav__tab" href="#">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.title")</a>
+                </li>
+            </ul>
+            <ul>
+                <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")"
+                data-tab-content="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")"
+                class="tab-content"
+                role="tabpanel"
+                aria-labelledby="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col"><span aria-label="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.th-1")" style="display: none;">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.th-1")</span></th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.th-2")</th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.th-3")</th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.th-4")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="heading-small" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-1.td-1")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-1.td-2")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-1.td-3")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-1.td-4")</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background-color: #F8F8F8; padding: 1em">
+                                    <strong class="heading-small" style="color: #005EA5">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-2.td-col-4.strong")</strong><br>
+                                    <span class="font-xsmall">
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-2.td-col-4.span-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-2.td-col-4.span-1.br-1")<br>
+                                        <span style="color: #006435">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-2.td-col-4.span-2")</span>
+                                    </span>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="heading-small" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-3.td-1")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-3.td-2")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-3.td-3")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-3.td-4")</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background-color: #F8F8F8; padding: 1em">
+                                    <strong class="heading-small" style="color: #005EA5">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-4.td-col-4.strong")</strong><br>
+                                    <span class="font-xsmall">
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-4.td-col-4.span-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-4.td-col-4.span-1.br-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-4.td-col-4.span-1.br-2")<br>
+                                        <span style="color: #006435">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.table.tr-4.td-col-4.span-2")</span>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </li>
+                <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")"
+                data-tab-content="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")"
+                class="tab-content"
+                role="tabpanel"
+                aria-labelledby="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col"><span aria-label="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.th-1")" style="display: none;">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.th-1")</span></th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.th-2")</th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.th-3")</th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.th-4")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="heading-small" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-1.td-1")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-1.td-2")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-1.td-3")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-1.td-4")</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background-color: #F8F8F8; padding: 1em">
+                                    <strong class="heading-small" style="color: #005EA5">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-2.td-col-4.strong")</strong><br>
+                                    <span class="font-xsmall">
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-2.td-col-4.span-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-2.td-col-4.span-1.br-1")<br>
+                                        <span style="color: #006435">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-2.td-col-4.span-2")</span>
+                                    </span>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="heading-small" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-3.td-1")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-3.td-2")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-3.td-3")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-3.td-4")</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background-color: #F8F8F8; padding: 1em">
+                                    <strong class="heading-small" style="color: #005EA5">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-4.td-col-4.strong")</strong><br>
+                                    <span class="font-xsmall">
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-4.td-col-4.span-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-4.td-col-4.span-1.br-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-4.td-col-4.span-1.br-2")<br>
+                                        <span style="color: #006435">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.table.tr-4.td-col-4.span-2")</span>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </li>
+                <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")"
+                data-tab-content="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")"
+                class="tab-content"
+                role="tabpanel"
+                aria-labelledby="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th scope="col"><span aria-label="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.th-1")" style="display: none;">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.th-1")</span></th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.th-2")</th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.th-3")</th>
+                                <th class="numeric" scope="col">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.th-4")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="heading-small" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-1.td-1")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-1.td-2")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-1.td-3")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-1.td-4")</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background-color: #F8F8F8; padding: 1em">
+                                    <strong class="heading-small" style="color: #005EA5">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-2.td-col-4.strong")</strong><br>
+                                    <span class="font-xsmall">
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-2.td-col-4.span-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-2.td-col-4.span-1.br-1")<br>
+                                        <span style="color: #006435">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-2.td-col-4.span-2")</span>
+                                    </span>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="heading-small" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-3.td-1")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-3.td-2")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-3.td-3")</td>
+                                <td class="numeric" style="padding: 1em">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-3.td-4")</td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background-color: #F8F8F8; padding: 1em">
+                                    <strong class="heading-small" style="color: #005EA5">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.strong")</strong><br>
+                                    <span class="font-xsmall">
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1.br-1")<br>
+                                        @Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1.br-2")<br>
+                                        <span style="color: #006435">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-2")</span>
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </li>
+            </ul>
         </div>
-        <h3 class="heading-small">@Messages("")</h3>
-        <p>@Messages("")</p>
+        <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-3")</h3>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-6")</p>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-7")</p>
+        <ol>
+            <li>@Messages("hts.introduction.how-we-calculate-bonuses.ol-1-1")</li>
+            <li>@Messages("hts.introduction.how-we-calculate-bonuses.ol-1-2")</li>
+            <li>@Messages("hts.introduction.how-we-calculate-bonuses.ol-1-3")</li>
+        </ol>
+        <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-4")</h3>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-8")</p>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-9")</p>
+        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-10")</p>
         <ul class="bullets">
-            <li>@Messages("")</li>
-            <li>@Messages("")</li>
-            <li>@Messages("")</li>
+            <li>@Messages("hts.introduction.how-we-calculate-bonuses.ul-1-1")</li>
+            <li>@Messages("hts.introduction.how-we-calculate-bonuses.ul-1-2")</li>
         </ul>
     </section>
     <div class="grid-layout grid-layout--no-gutter">
         <div class="grid-layout__column grid-layout__column--1-2">
             <a class="page-nav__link page-nav__link--previous"
-            title="Navigate to @Messages("hts.introduction.eligibility.title")" rel="prev" href="@routes.IntroductionController.getEligibility()">
+            title="Navigate to @Messages("hts.introduction.how-the-account-works.title")" rel="prev" href="@routes.IntroductionController.getHowTheAccountWorks()">
                 <span class="page-nav__label">Previous</span>
-                <span class="page-nav__title">@Messages("hts.introduction.eligibility.title")</span>
+                <span class="page-nav__title">@Messages("hts.introduction.how-the-account-works.title")</span>
             </a>
         </div>
         <div class="grid-layout__column grid-layout__column--1-2">
             <a class="page-nav__link page-nav__link--next"
-            title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="next" href=@routes.IntroductionController.getHowWeCalculateBonuses()>
+            title="Navigate to @Messages("hts.introduction.apply.title")" rel="next" href=@routes.IntroductionController.getApply()>
                 <span class="page-nav__label">Next</span>
-                <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
+                <span class="page-nav__title">@Messages("hts.introduction.apply.title")</span>
             </a>
         </div>
     </div>
