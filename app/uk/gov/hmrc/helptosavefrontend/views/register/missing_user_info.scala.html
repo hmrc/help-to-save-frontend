@@ -15,8 +15,9 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-@(missingInfos: Set[MissingUserInfo], personalAccountUrl: String)(implicit request: Request[_], messages: Messages)
+@(missingInfos: Set[MissingUserInfo], personalAccountUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.missinguserinfo.header.page.title"), bodyClasses = None) {
 

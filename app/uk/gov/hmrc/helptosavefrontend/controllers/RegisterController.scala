@@ -33,9 +33,9 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUr
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.OAuthConfiguration
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckEvent, EligibilityCheckResult, HTSSession, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -54,73 +54,68 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
 
-  def getAuthorisation: Action[AnyContent] = authorisedForHtsWithEnrolments {
+  def getAuthorisation: Action[AnyContent] = authorisedForHtsWithNino {
     implicit request ⇒
-      implicit userUrlWithNino ⇒
-        Future.successful(redirectForAuthorisationCode(request, userUrlWithNino))
+      implicit htsContext ⇒
+        Future.successful(redirectForAuthorisationCode(request, htsContext))
   }
 
   def confirmDetails(code: Option[String],
                      error: Option[String],
                      error_description: Option[String],
-                     error_code: Option[String]): Action[AnyContent] =
-    (code, error) match {
-      case (Some(authorisationCode), _) ⇒
-        authorisedForHtsWithEnrolments {
-          implicit request ⇒
-            implicit maybeNino ⇒
-              val result = for {
-                nino ← EitherT.fromOption[Future](maybeNino, "could not retrieve either userDetailsUrl or NINO from auth")
-                eligible ← helpToSaveService.checkEligibility(nino, authorisationCode)
-                nsiUserInfo ← toNSIUserInfo(eligible)
-                _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo))
-                _ ← writeToKeyStore(nsiUserInfo)
-              } yield (nino, eligible)
+                     error_code: Option[String]): Action[AnyContent] = authorisedForHtsWithNino {
+    implicit request ⇒
+      implicit htsContext ⇒
+        (code, error) match {
+          case (Some(authorisationCode), _) ⇒
 
-              result.fold(
-                error ⇒ {
-                  Logger.error(s"Could not perform eligibility check: $error")
-                  InternalServerError("")
-                }, { case (nino, eligibility) ⇒
-                  eligibility.result.fold(
-                    infos ⇒ {
-                      val problemDescription = s"user $nino has missing information: ${infos.missingInfo.mkString(",")}"
-                      Logger.error(problemDescription)
-                      auditor.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
-                      Ok(views.html.register.missing_user_info(infos.missingInfo, personalAccountUrl))
-                    }, {
-                      case Some(info) ⇒ {
-                        auditor.sendEvent(new EligibilityCheckEvent(nino, None))
-                        Ok(views.html.register.confirm_details(info))
-                      }
-                      case _ ⇒ {
-                        auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
-                        SeeOther(routes.RegisterController.notEligible().url)
-                      }
-                    })
-                }
-              )
+            val result = for {
+              nino ← EitherT.fromOption[Future](htsContext.nino, "could not retrieve NINO from auth")
+              eligible ← helpToSaveService.checkEligibility(nino, authorisationCode)
+              nsiUserInfo ← toNSIUserInfo(eligible)
+              _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo))
+              _ ← writeToKeyStore(nsiUserInfo)
+            } yield (nino, eligible)
+
+            result.fold(
+              error ⇒ {
+                Logger.error(s"Could not perform eligibility check: $error")
+                InternalServerError("")
+              }, { case (nino, eligibility) ⇒
+                eligibility.result.fold(
+                  infos ⇒ {
+                    val problemDescription = s"user $nino has missing information: ${infos.missingInfo.mkString(",")}"
+                    Logger.error(problemDescription)
+                    auditor.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
+                    Ok(views.html.register.missing_user_info(infos.missingInfo, personalAccountUrl))
+                  }, {
+                    case Some(info) ⇒
+                      auditor.sendEvent(new EligibilityCheckEvent(nino, None))
+                      Ok(views.html.register.confirm_details(info))
+                    case _ ⇒
+                      auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
+                      SeeOther(routes.RegisterController.notEligible().url)
+                  })
+              }
+            )
+
+          case (_, Some(e)) ⇒
+            Logger.error(s"Could not get authorisation code: $e. Error description was" +
+              s"${error_description.getOrElse("-")}, error code was ${error_code.getOrElse("-")}")
+            Future.successful(InternalServerError(""))
+
+          case _ ⇒
+            // we should never reach here - we shouldn't have a successful code and an error at the same time
+            Logger.error("Inconsistent result found when attempting to retrieve an authorisation code")
+            Future.successful(InternalServerError(""))
         }
 
-      case (_, Some(e)) ⇒
-        Logger.error(s"Could not get authorisation code: $e. Error description was" +
-          s"${error_description.getOrElse("-")}, error code was ${error_code.getOrElse("-")}")
-        // TODO: do something better
-        Action {
-          InternalServerError(s"Could not get authorisation code: $e")
-        }
-
-      case _ ⇒
-        // we should never reach here - we shouldn't have a successful code and an error at the same time
-        Logger.error("Inconsistent result found when attempting to retrieve an authorisation code")
-        Action {
-          InternalServerError("")
-        }
-    }
+  }
 
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
-      Future.successful(Ok(views.html.register.create_account_help_to_save()))
+      implicit htsContext ⇒
+        Future.successful(Ok(views.html.register.create_account_help_to_save()))
   }
 
   private def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Option[NSIUserInfo]] = {
@@ -138,31 +133,29 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
-      val result = for {
-        userInfo ← retrieveUserInfo()
-        _ ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
-      } yield userInfo
+      implicit htsContext ⇒
+        val result = for {
+          userInfo ← retrieveUserInfo()
+          _ ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
+        } yield userInfo
 
-      // TODO: plug in actual pages below
-      result.fold(
-        error ⇒ {
-          Logger.error(s"Could not create account: $error")
-          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
-        },
-        info ⇒ {
-          Logger.debug(s"Successfully created account for ${info.nino}")
-          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
-        }
-      )
+        // TODO: plug in actual pages below
+        result.fold(
+          error ⇒ {
+            Logger.error(s"Could not create account: $error")
+            Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
+          },
+          info ⇒ {
+            Logger.debug(s"Successfully created account for ${info.nino}")
+            Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
+          }
+        )
   }
 
-  def accessDenied: Action[AnyContent] = Action.async {
+  val notEligible: Action[AnyContent] = unprotected {
     implicit request ⇒
-      Future.successful(Ok(views.html.access_denied()))
-  }
-
-  val notEligible: Action[AnyContent] = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.core.not_eligible()))
+      implicit htsContext ⇒
+        Future.successful(Ok(views.html.core.not_eligible()))
   }
 
   private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, NSIUserInfo] = {
@@ -207,7 +200,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   private lazy val redirectForAuthorisationCode =
     if (oauthConfig.enabled) {
-      { (_: Request[AnyContent], _: Option[NINO]) ⇒
+      { (_: Request[AnyContent], _: HtsContext) ⇒
         Logger.info("Received request to get user details: redirecting to oauth obtain authorisation code")
 
         // we need to get an authorisation token from OAuth - redirect to OAuth here. When the authorisation
@@ -222,14 +215,14 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           ))
       }
     } else {
-      { (request: Request[AnyContent], userDetailsUrlWithNino: Option[NINO]) ⇒
+      { (request: Request[AnyContent], htsContext: HtsContext) ⇒
         // if the redirect to oauth is not enabled redirect straight to our 'confirm-details' endpoint
         // using the NINO as the authorisation code
         implicit val r = request
 
-        userDetailsUrlWithNino.fold {
-          Logger.error("NINO or user details URI not available")
-          Redirect(routes.RegisterController.notEligible().absoluteURL())
+        htsContext.nino.fold {
+          Logger.error("NINO is not available")
+          InternalServerError("could not retrieve NINO for logged in user")
         } { nino ⇒
           Logger.info(s"Received request to get user details: redirecting to get user details using NINO $nino as authorisation code")
           Redirect(routes.RegisterController.confirmDetails(Some(nino), None, None, None).absoluteURL())

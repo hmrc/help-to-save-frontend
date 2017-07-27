@@ -76,6 +76,14 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val personalAccountUrl = getString("microservice.services.pertax-frontend.url")
 
+  val feedbackSurveyUrl = getString("microservice.services.feedback-survey.url")
+
+  val caFrontendUrl = getString("microservice.services.ca-frontend.url")
+
+  val ggSignOutUrl = s"$caFrontendUrl/gg/sign-out"
+
+  val signOutUrl = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
+
   override lazy val analyticsToken = getString("google-analytics.token")
   override lazy val analyticsHost = getString("google-analytics.host")
 

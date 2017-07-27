@@ -39,6 +39,7 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
 
   def journeyResult: Action[AnyContent] = authorisedForHts {
     implicit request ⇒
+      implicit htsContext ⇒
       //Will be populated if we arrived here because of an IV success/failure
       val journeyId = request.getQueryString("token").orElse(request.getQueryString("journeyId"))
       val allowContinue = true
