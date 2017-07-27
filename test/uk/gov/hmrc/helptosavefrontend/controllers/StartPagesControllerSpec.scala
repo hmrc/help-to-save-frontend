@@ -22,7 +22,7 @@ import akka.util.Timeout
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{charset, contentType}
+import play.api.test.Helpers.{charset, contentAsString, contentType}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 
 class StartPagesControllerSpec extends TestSupport {
@@ -39,6 +39,10 @@ class StartPagesControllerSpec extends TestSupport {
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+
+      val html = contentAsString(result)
+
+      html should not include "Sign out"
     }
 
     "the getEligibilityHelpToSave should  return 200" in {

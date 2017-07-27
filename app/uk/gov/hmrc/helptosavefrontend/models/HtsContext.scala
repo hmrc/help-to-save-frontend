@@ -16,12 +16,4 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import play.api.libs.json.{Format, Json}
-
 case class HtsContext(nino: Option[String], isAuthorised: Boolean = false)
-
-object HtsContext {
-
-  implicit val htsContextFormat: Format[HtsContext] = Json.format[HtsContext]
-
-}
