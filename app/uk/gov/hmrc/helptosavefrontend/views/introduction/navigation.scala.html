@@ -29,7 +29,7 @@
             link(routes.IntroductionController.getAboutHelpToSave().url, Messages("hts.introduction.about-help-to-save.title"))
         }}
         </li>
-        @*
+
         <li>
         @{if(routes.IntroductionController.getEligibility().url == currentPageUrl){
             Messages("hts.introduction.eligibility.title")
@@ -38,6 +38,7 @@
             link(routes.IntroductionController.getEligibility().url, Messages("hts.introduction.eligibility.title"))
         }}
         </li>
+        @*
         <li>
         @{if(routes.IntroductionController.getHowTheAccountWorks().url == currentPageUrl){
             Messages("hts.introduction.how-the-account-works.title")
