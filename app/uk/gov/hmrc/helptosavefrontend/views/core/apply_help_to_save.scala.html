@@ -45,7 +45,7 @@
             </ul>
             <p> @Messages("hts.core.apply-help-to-save.par-6") </p>
             <p> @Messages("hts.core.apply-help-to-save.par-7") </p>
-            @form(routes.RegisterController.getAuthorisation(), 'class -> "group") {
+            @form(routes.EligibilityCheckController.getAuthorisation(), 'class -> "group") {
                 @submit('_buttonClass -> "button--get-started") {
                     @Messages("hts.core.apply-help-to-save.button")
                 }
