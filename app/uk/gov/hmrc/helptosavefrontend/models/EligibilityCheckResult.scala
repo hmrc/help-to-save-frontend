@@ -18,31 +18,10 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json._
 
-case class EligibilityCheckResult(result: Either[MissingUserInfos, Option[UserInfo]])
+case class EligibilityCheckResult(result: Option[UserInfo])
 
 object EligibilityCheckResult {
 
-  implicit val eligibilityResultFormat: Format[EligibilityCheckResult] = new Format[EligibilityCheckResult] {
-    override def reads(json: JsValue): JsResult[EligibilityCheckResult] = {
-      (json \ "result").toOption match {
-        case None ⇒
-          JsError("Could not find 'result' path in JSON")
+  implicit val eligibilityCheckResultFormat: Format[EligibilityCheckResult] = Json.format[EligibilityCheckResult]
 
-        case Some(jsValue) ⇒
-          jsValue.validate[MissingUserInfos].fold(e1 ⇒
-            jsValue.validateOpt[UserInfo].fold(e2 ⇒
-              JsError(e1 ++ e2),
-              maybeUserInfo ⇒ JsSuccess(EligibilityCheckResult(Right(maybeUserInfo)))
-            ),
-            missing ⇒ JsSuccess(EligibilityCheckResult(Left(missing)))
-          )
-      }
-    }
-
-    override def writes(o: EligibilityCheckResult): JsValue = Json.obj(
-      o.result.fold(
-        missingInfos ⇒ "result" -> Json.toJson(missingInfos),
-        maybeUserInfo ⇒ "result" -> Json.toJson(maybeUserInfo)
-      ))
-  }
 }

@@ -17,6 +17,21 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json._
+import uk.gov.hmrc.helptosavefrontend.util.NINO
+
+sealed trait EligibilityCheckError
+
+object EligibilityCheckError {
+  case object NoNINO extends EligibilityCheckError
+  case class BackendError(message: String, nino: NINO) extends EligibilityCheckError
+  case class MissingUserInfos(missingInfo: Set[MissingUserInfo], nino: NINO) extends EligibilityCheckError
+  case class JSONSchemaValidationError(message: String, nino: NINO) extends EligibilityCheckError
+  case class KeyStoreWriteError(message: String, nino: NINO) extends EligibilityCheckError
+
+  object MissingUserInfos {
+    implicit val missingUserInfosFormat: Format[MissingUserInfos] = Json.format[MissingUserInfos]
+  }
+}
 
 trait MissingUserInfo
 
@@ -55,11 +70,4 @@ object MissingUserInfo {
       JsString(result)
     }
   }
-}
-
-case class MissingUserInfos(missingInfo: Set[MissingUserInfo])
-
-object MissingUserInfos {
-  implicit val missingInfosFormat: Format[MissingUserInfos] = Json.format[MissingUserInfos]
-
 }
