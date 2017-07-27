@@ -27,21 +27,21 @@ import uk.gov.hmrc.helptosavefrontend.views
 import scala.concurrent.Future
 
 @Singleton
-class StartPagesController @Inject()(implicit val app: Application, val messagesApi: MessagesApi) extends HelpToSaveAuth(app) with I18nSupport {
+class StartPagesController @Inject()(implicit app: Application, val messagesApi: MessagesApi) extends HelpToSaveAuth(app) with I18nSupport {
 
-  def getApplyHelpToSave: Action[AnyContent] = isAuthorised {
+  def getApplyHelpToSave: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
         Future.successful(Ok(views.html.core.apply_help_to_save()))
   }
 
-  def getAboutHelpToSave: Action[AnyContent] = isAuthorised {
+  def getAboutHelpToSave: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
         Future.successful(Ok(views.html.core.about_help_to_save()))
   }
 
-  def getEligibilityHelpToSave: Action[AnyContent] = isAuthorised {
+  def getEligibilityHelpToSave: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
         Future.successful(Ok(views.html.core.eligibility_help_to_save()))

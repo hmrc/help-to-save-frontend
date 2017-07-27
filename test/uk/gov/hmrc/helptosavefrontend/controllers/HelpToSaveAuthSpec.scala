@@ -56,7 +56,7 @@ class HelpToSaveAuthSpec extends TestSupport {
       Future.successful(Ok(""))
   }
 
-  private def actionWithEnrols = htsAuth.authorisedForHtsWithEnrolments {
+  private def actionWithEnrols = htsAuth.authorisedForHtsWithNino {
     implicit request ⇒
       implicit userWithNino ⇒
         Future.successful(Ok(""))

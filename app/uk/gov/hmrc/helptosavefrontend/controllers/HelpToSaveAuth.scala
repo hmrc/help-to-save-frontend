@@ -38,7 +38,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
 
   private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
 
-  def authorisedForHtsWithEnrolments(action: HtsAction): Action[AnyContent] =
+  def authorisedForHtsWithNino(action: HtsAction): Action[AnyContent] =
     Action.async { implicit request =>
       authorised(AuthWithConfidence)
         .retrieve(UserDetailsUrlWithAllEnrolments) {
@@ -77,7 +77,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
     }
   }
 
-  def isAuthorised(action: HtsAction): Action[AnyContent] = {
+  def unprotected(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised() {
         action(request)(HtsContext(None, isAuthorised = true))

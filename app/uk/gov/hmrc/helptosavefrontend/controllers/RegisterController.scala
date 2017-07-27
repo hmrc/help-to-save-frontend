@@ -54,7 +54,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
 
-  def getAuthorisation: Action[AnyContent] = authorisedForHtsWithEnrolments {
+  def getAuthorisation: Action[AnyContent] = authorisedForHtsWithNino {
     implicit request ⇒
       implicit htsContext ⇒
         Future.successful(redirectForAuthorisationCode(request, htsContext))
@@ -63,7 +63,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   def confirmDetails(code: Option[String],
                      error: Option[String],
                      error_description: Option[String],
-                     error_code: Option[String]): Action[AnyContent] = authorisedForHtsWithEnrolments {
+                     error_code: Option[String]): Action[AnyContent] = authorisedForHtsWithNino {
     implicit request ⇒
       implicit htsContext ⇒
         (code, error) match {
@@ -152,7 +152,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         )
   }
 
-  val notEligible: Action[AnyContent] = isAuthorised {
+  val notEligible: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
         Future.successful(Ok(views.html.core.not_eligible()))
