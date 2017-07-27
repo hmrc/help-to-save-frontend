@@ -1,11 +1,11 @@
 # microservice specific routes
 
 GET        /apply-for-help-to-save                          @controllers.Default.redirect(to = "apply-for-help-to-save/about-help-to-save")
-GET        /apply-for-help-to-save/about-help-to-save       @uk.gov.hmrc.helptosavefrontend.controllers.AboutHelpToSaveController.getAboutHelpToSave
-GET        /apply-for-help-to-save/eligibility              @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityController.getEligibility
-GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptosavefrontend.controllers.HowTheAccountWorksController.getHowTheAccountWorks
-GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.HowWeCalculateBonusesController.getHowWeCalculateBonuses
-GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.ApplyController.getApply
+GET        /apply-for-help-to-save/about-help-to-save       @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getAboutHelpToSave
+GET        /apply-for-help-to-save/eligibility              @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getEligibility
+GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowTheAccountWorks
+GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
+GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
 
 GET        /apply                                           @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getApplyHelpToSave
 GET        /about                                           @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave

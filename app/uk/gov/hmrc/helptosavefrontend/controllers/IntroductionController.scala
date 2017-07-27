@@ -27,10 +27,28 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import scala.concurrent.Future
 
 @Singleton
-class AboutHelpToSaveController @Inject()(val messagesApi: MessagesApi) extends FrontendController with I18nSupport {
+class IntroductionController @Inject()(val messagesApi: MessagesApi) extends FrontendController with I18nSupport {
 
-  def getAboutHelpToSave: Action[AnyContent] = Action.async { implicit request ⇒
-    Future.successful(Ok(views.html.introduction.about_help_to_save()))
+  def getAboutHelpToSave: Action[AnyContent] = Action{ implicit request ⇒
+    Ok(views.html.introduction.about_help_to_save())
   }
+
+  def getEligibility: Action[AnyContent] = Action{ implicit request ⇒
+    Ok(views.html.introduction.eligibility())
+  }
+
+  def getHowTheAccountWorks: Action[AnyContent] = Action{ implicit request ⇒
+    Ok(views.html.introduction.how_the_account_works())
+  }
+
+  def getHowWeCalculateBonuses: Action[AnyContent] = Action{ implicit request ⇒
+    Ok(views.html.introduction.how_we_calculate_bonuses())
+  }
+
+  def getApply: Action[AnyContent] = Action{ implicit request ⇒
+    Ok(views.html.introduction.apply())
+  }
+
+
 
 }

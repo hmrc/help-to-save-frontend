@@ -19,47 +19,49 @@
 @(currentPageUrl: String)(implicit messages: play.api.i18n.Messages)
 
 <h1 class="heading-xlarge">@Messages("hts.introduction.title")</h1>
-<div class="divider--bottom">
+<nav class="divider--bottom">
     <ol>
         <li>
-        @{if(routes.AboutHelpToSaveController.getAboutHelpToSave().url == currentPageUrl){
+        @{if(routes.IntroductionController.getAboutHelpToSave().url == currentPageUrl){
             Messages("hts.introduction.about-help-to-save.title")
         }
         else {
-            link(routes.AboutHelpToSaveController.getAboutHelpToSave().url, Messages("hts.introduction.about-help-to-save.title"))
+            link(routes.IntroductionController.getAboutHelpToSave().url, Messages("hts.introduction.about-help-to-save.title"))
         }}
         </li>
+        @*
         <li>
-        @{if(routes.EligibilityController.getEligibility().url == currentPageUrl){
+        @{if(routes.IntroductionController.getEligibility().url == currentPageUrl){
             Messages("hts.introduction.eligibility.title")
         }
         else {
-            link(routes.EligibilityController.getEligibility().url, Messages("hts.introduction.eligibility.title"))
+            link(routes.IntroductionController.getEligibility().url, Messages("hts.introduction.eligibility.title"))
         }}
         </li>
         <li>
-        @{if(routes.HowTheAccountWorksController.getHowTheAccountWorks().url == currentPageUrl){
+        @{if(routes.IntroductionController.getHowTheAccountWorks().url == currentPageUrl){
             Messages("hts.introduction.how-the-account-works.title")
         }
         else {
-            link(routes.HowTheAccountWorksController.getHowTheAccountWorks().url, Messages("hts.introduction.how-the-account-works.title"))
+            link(routes.IntroductionController.getHowTheAccountWorks().url, Messages("hts.introduction.how-the-account-works.title"))
         }}
         </li>
         <li>
-        @{if(routes.HowWeCalculateBonusesController.getHowWeCalculateBonuses().url == currentPageUrl){
+        @{if(routes.IntroductionController.getHowWeCalculateBonuses().url == currentPageUrl){
             Messages("hts.introduction.how-we-calculate-bonuses.title")
         }
         else {
-            link(routes.HowWeCalculateBonusesController.getHowWeCalculateBonuses().url, Messages("hts.introduction.how-we-calculate-bonuses.title"))
+            link(routes.IntroductionController.getHowWeCalculateBonuses().url, Messages("hts.introduction.how-we-calculate-bonuses.title"))
         }}
         </li>
         <li>
-        @{if(routes.ApplyController.getApply().url == currentPageUrl){
+        @{if(routes.IntroductionController.getApply().url == currentPageUrl){
             Messages("hts.introduction.apply.title")
         }
         else {
-            link(routes.ApplyController.getApply().url, Messages("hts.introduction.apply.title"))
+            link(routes.IntroductionController.getApply().url, Messages("hts.introduction.apply.title"))
         }}
         </li>
+        *@
     </ol>
-</div>
+</nav>
