@@ -21,16 +21,27 @@
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = Messages("hts.core.about-help-to-save.header-page"),
+    title = Messages("hts.introduction.apply.title"),
     sidebarLinks = Some(sidebar()),
     bodyClasses = None) {
-    <div class="grid-row">
-        <div class="column-two-thirds">
 
-            @navigation(request.uri)
+    @navigation(request.uri)
 
-            <h2>@Messages("hts.introduction.apply.title")</h2>
-
-        </div>
-    </div>
+    <section class="section">
+        <h2>4. @Messages("hts.introduction.apply.title")</h2>
+        <p>@Messages("hts.introduction.apply.par-1")</p>
+        <ul class="bullets">
+            <li>@Messages("hts.introduction.apply.ul-1-1") <a title="Navigate to @Messages("hts.introduction.eligibility.title")" href=@routes.IntroductionController.getEligibility()>@Messages("hts.introduction.apply.ul-1-1-2")</a> @Messages("hts.introduction.apply.ul-1-2-1")</li>
+            <li>@Messages("hts.introduction.apply.ul-1-2-1") <a target="_blank" title="Navigate to @Messages("hts.introduction.apply.ul-1-2-2")" href=@routes.IntroductionController.getEligibility()>@Messages("hts.introduction.apply.ul-1-2-2")</a> @Messages("hts.introduction.apply.ul-1-2-3")</li>
+        </ul>
+        <p>@Messages("hts.introduction.apply.par-2")</p>
+        <p>@Messages("hts.introduction.apply.par-3")</p>
+        <p>@Messages("hts.introduction.apply.par-4")</p>
+        <a class="button button--get-started"" href="#" role="button">@Messages("hts.introduction.apply.button-1")</a>
+    </section>
+    <a class="page-nav__link page-nav__link--previous"
+    title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
+        <span class="page-nav__label">Previous</span>
+        <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
+    </a>
 }
