@@ -16,16 +16,21 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.util.concurrent.TimeUnit.SECONDS
+
+import akka.util.Timeout
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{charset, contentType, _}
+import play.api.test.Helpers.{charset, contentAsString, contentType}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 
 class StartPagesControllerSpec extends TestSupport {
 
+  implicit val timeout = Timeout(5, SECONDS)
+
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new StartPagesController(fakeApplication.injector.instanceOf[MessagesApi])
+  val helpToSave = new StartPagesController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi])
 
   "GET /" should {
     "the getApplyHelpToSave should return html" in {
@@ -34,6 +39,10 @@ class StartPagesControllerSpec extends TestSupport {
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+
+      val html = contentAsString(result)
+
+      html should not include "Sign out"
     }
 
     "the getEligibilityHelpToSave should  return 200" in {

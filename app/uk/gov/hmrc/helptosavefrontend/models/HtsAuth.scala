@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L200
-import uk.gov.hmrc.auth.core.Retrievals.{allEnrolments, userDetailsUri}
+import uk.gov.hmrc.auth.core.Retrievals.allEnrolments
 import uk.gov.hmrc.auth.core._
 
 object HtsAuth {

@@ -51,10 +51,12 @@ class HelpToSaveAuthSpec extends TestSupport {
   }
 
   private def actionWithNoEnrols = htsAuth.authorisedForHts {
-    implicit request ⇒ Future.successful(Ok(""))
+    implicit request ⇒
+      implicit htsContext ⇒
+      Future.successful(Ok(""))
   }
 
-  private def actionWithEnrols = htsAuth.authorisedForHtsWithEnrolments {
+  private def actionWithEnrols = htsAuth.authorisedForHtsWithNino {
     implicit request ⇒
       implicit userWithNino ⇒
         Future.successful(Ok(""))
@@ -109,9 +111,7 @@ class HelpToSaveAuthSpec extends TestSupport {
       mockAuthWith("UnsupportedCredentialRole")
 
       val result = actionWithEnrols(FakeRequest())
-      status(result) shouldBe Status.SEE_OTHER
-      val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
-      redirectTo should include("/help-to-save/register/access-denied")
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
     "handle any other error and display technical error page to user" in {

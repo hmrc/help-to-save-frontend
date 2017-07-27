@@ -36,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -148,7 +148,7 @@ class RegisterControllerSpec extends TestSupport {
         redirectLocation(result) shouldBe Some(routes.RegisterController.confirmDetails(Some(nino), None, None, None).absoluteURL())
       }
 
-      "return the not eligible page if redirects to OAUTH are disabled and a NINO is not available" in {
+      "return error if redirects to OAUTH are disabled and a NINO is not available" in {
         val register = new RegisterController(
           fakeApplication.injector.instanceOf[MessagesApi],
           mockHtsService,
@@ -164,8 +164,7 @@ class RegisterControllerSpec extends TestSupport {
 
         implicit val request = FakeRequest()
         val result = register.getAuthorisation(request)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.notEligible().absoluteURL())
+        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
       }
 
       "redirect to OAuth to get an access token if enabled" in {
@@ -196,6 +195,7 @@ class RegisterControllerSpec extends TestSupport {
       }
 
       "return a 500 if there is an error while getting the authorisation token" in {
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
         val result = register.confirmDetails(None, Some("uh oh"), None, None)(FakeRequest())
         status(result) shouldBe 500
       }
@@ -224,6 +224,7 @@ class RegisterControllerSpec extends TestSupport {
         html should include(user.forename)
         html should include(user.email)
         html should include(user.nino)
+        html should include("Sign out")
       }
 
       "display a 'Not Eligible' page if the user is not eligible" in {
