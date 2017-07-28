@@ -20,11 +20,12 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import play.api.{Application, Logger}
+import play.api.{Application}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
+import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.helptosavefrontend.views.html.access_denied
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 
@@ -35,9 +36,9 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
                              ivConnector: IvConnector,
                              val messagesApi: MessagesApi,
                              implicit val app: Application)
-  extends HelpToSaveAuth(app) with I18nSupport {
+  extends HelpToSaveAuth(app) with I18nSupport with Logging {
 
-  def journeyResult: Action[AnyContent] = authorisedForHts {
+  def journeyResult: Action[AnyContent] = authorisedForHts { // scalastyle:ignore cyclomatic.complexity method.length
     implicit request ⇒
       implicit htsContext ⇒
       //Will be populated if we arrived here because of an IV success/failure
@@ -85,7 +86,7 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
             case Some(TechnicalIssue) ⇒
               //A technical issue on the platform caused the journey to end.
               // This is usually a transient issue, so that the user should try again later
-              Logger.warn(s"TechnicalIssue response from identityVerificationFrontendService")
+              logger.warn(s"TechnicalIssue response from identityVerificationFrontendService")
               Unauthorized(user_aborted_or_incomplete(IvRetryUrl, allowContinue))
 
             case Some(Timeout) ⇒
@@ -93,13 +94,13 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
               Unauthorized(cant_confirm_identity(IvRetryUrl, allowContinue))
 
             case _ =>
-              Logger.error(s"unexpected response from identityVerificationFrontendService")
+              logger.warn(s"unexpected response from identityVerificationFrontendService")
               InternalServerError(technical_iv_issues(IvRetryUrl))
           }
 
         case None =>
           // No journeyId signifies subsequent 2FA failure
-          Logger.warn(s"response from identityVerificationFrontendService did not contain token or journeyId param")
+          logger.warn(s"response from identityVerificationFrontendService did not contain token or journeyId param")
           Future.successful(Unauthorized(access_denied()))
       }
   }

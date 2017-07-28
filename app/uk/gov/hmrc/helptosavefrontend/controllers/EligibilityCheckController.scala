@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -46,7 +46,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             jsonSchemaValidationService: JSONSchemaValidationService,
                                             app: Application,
                                             auditor: HTSAuditor)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app) with I18nSupport {
+  extends HelpToSaveAuth(app) with I18nSupport with Logging {
 
   import EligibilityCheckController._
 
@@ -88,7 +88,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
               })
 
           case (_, Some(e)) ⇒
-            Logger.error(s"Could not get authorisation code: $e. Error description was" +
+            logger.error(s"Could not get authorisation code: $e. Error description was" +
               s"${error_description.getOrElse("-")}, error code was ${error_code.getOrElse("-")}")
             // TODO: do something better
             Future.successful(InternalServerError(s"Could not get authorisation code: $e"))
@@ -96,7 +96,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
 
           case _ ⇒
             // we should never reach here - we shouldn't have a successful code and an error at the same time
-            Logger.error("Inconsistent result found when attempting to retrieve an authorisation code")
+            logger.error("Inconsistent result found when attempting to retrieve an authorisation code")
             Future.successful(InternalServerError(""))
         }
   }
@@ -111,25 +111,25 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
     implicit request: Request[AnyContent], hc: HeaderCarrier, htsContext: HtsContext
   ): Result = e match {
     case NoNINO =>
-      Logger.error("Could not find NINO")
+      logger.warn("Could not find NINO")
       InternalServerError
 
     case BackendError(message, nino) =>
-      Logger.error(s"An error occured while trying to call the backend service for user $nino: $message")
+      logger.error(s"An error occured while trying to call the backend service for user $nino: $message")
       InternalServerError
 
     case MissingUserInfos(missingInfo, nino) =>
       val problemDescription = s"user $nino has missing information: ${missingInfo.mkString(",")}"
-      Logger.error(problemDescription)
+      logger.warn(problemDescription)
       auditor.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
       Ok(views.html.register.missing_user_info(missingInfo, personalAccountUrl))
 
     case JSONSchemaValidationError(message, nino) =>
-      Logger.error(s"JSON schema validation failed for user $nino: $message")
+      logger.warn(s"JSON schema validation failed for user $nino: $message")
       InternalServerError
 
     case KeyStoreWriteError(message, nino) =>
-      Logger.error(s"Could not write to key store for user $nino: $message")
+      logger.error(s"Could not write to key store for user $nino: $message")
       InternalServerError
   }
 
@@ -168,7 +168,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
   private lazy val redirectForAuthorisationCode =
     if (oauthConfig.enabled) {
       { (_: Request[AnyContent], _: HtsContext) ⇒
-        Logger.info("Received request to get user details: redirecting to oauth obtain authorisation code")
+        logger.info("Received request to get user details: redirecting to oauth obtain authorisation code")
 
         // we need to get an authorisation token from OAuth - redirect to OAuth here. When the authorisation
         // is done they'll redirect to the callback url we give them
@@ -188,7 +188,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
         implicit val r = request
 
         htsContext.nino.fold {
-          Logger.error("NINO or user details URI not available")
+          logger.warn("NINO or user details URI not available")
           InternalServerError("")
         } { nino ⇒
           Logger.info(s"Received request to get user details: redirecting to get user details using NINO $nino as authorisation code")

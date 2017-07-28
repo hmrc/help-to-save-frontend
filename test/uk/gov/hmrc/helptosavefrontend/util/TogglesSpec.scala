@@ -32,11 +32,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import akka.event.slf4j.Slf4jLogger
-import com.typesafe.config.Config
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+
+import uk.gov.hmrc.play.test.UnitSpec
 import play.api.{Configuration, Logger}
-import org.scalatest.{BeforeAndAfter, Matchers}
+import org.scalatest.BeforeAndAfter
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 
 class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
