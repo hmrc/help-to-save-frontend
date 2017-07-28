@@ -22,7 +22,9 @@ import java.time.format.DateTimeFormatter
 
 import cats.syntax.either._
 import com.eclipsesource.schema.{SchemaType, SchemaValidator}
-import com.google.inject.{ImplementedBy, Singleton}
+import com.google.inject.{ImplementedBy, Inject, Singleton}
+import com.typesafe.config.{Config, ConfigFactory, ConfigObject, ConfigRenderOptions}
+import play.api.Configuration
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
 
@@ -36,12 +38,17 @@ trait JSONSchemaValidationService {
 }
 
 @Singleton
-class JSONSchemaValidationServiceImpl extends  JSONSchemaValidationService {
+class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends  JSONSchemaValidationService {
 
-  import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationServiceImpl._
+  def schema: Option[String] = {
+    conf.getObject("schema").fold(None: Option[String]) { configObject =>
+      Some(configObject.toConfig.root().render(ConfigRenderOptions.concise()))}
+  }
 
-  private val validationSchema: SchemaType =
-    Json.fromJson[SchemaType](Json.parse(validationSchemaStr)).getOrElse(sys.error("Could not parse schema string"))
+  private val validationSchema: SchemaType = {
+    val schemaStr = schema.getOrElse(sys.error("Could not find json validation schema in configuration"))
+    Json.fromJson[SchemaType](Json.parse(schemaStr)).getOrElse(sys.error("Could not parse schema string"))
+  }
 
   private lazy val jsonValidator: SchemaValidator = new SchemaValidator()
 
@@ -85,101 +92,5 @@ class JSONSchemaValidationServiceImpl extends  JSONSchemaValidationService {
       _ ← futureDate(d)
       _ ← before1800(d)
     } yield u
-
-}
-
-object JSONSchemaValidationServiceImpl {
-
-  //For ICD v 1.7
-  private val validationSchemaStr = """
-    {
-      "$schema": "http://json-schema.org/schema#",
-      "description": "A JSON schema to validate JSON as described in PPM-30048-UEM009-ICD001-HTS-HMRC-Interfaces v1.2.docx",
-
-      "type" : "object",
-      "additionalProperties": false,
-      "required": ["forename", "surname", "dateOfBirth", "contactDetails", "registrationChannel", "nino"],
-      "properties" : {
-          "forename" : {
-          "type" : "string",
-          "minLength": 1,
-          "maxLength": 26
-          },
-          "surname": {
-          "type": "string",
-          "minLength": 1,
-          "maxLength": 300
-        },
-          "dateOfBirth": {
-          "type": "string",
-          "minLength": 8,
-          "maxLength": 8,
-          "pattern": "^[0-9]{4}(01|02|03|04|05|06|07|08|09|10|11|12)[0-9]{2}$"
-        },
-        "contactDetails": {
-          "type": "object",
-          "additionalProperties": false,
-          "required": ["address1", "address2", "postcode", "communicationPreference"],
-          "properties": {
-            "countryCode": {
-              "type": "string",
-              "minLength": 2,
-              "maxLength": 2,
-              "pattern": "[A-Z][A-Z]"
-            },
-            "address1": {
-              "type": "string",
-              "maxLength": 35
-            },
-            "address2": {
-              "type": "string",
-              "maxLength": 35
-            },
-            "address3": {
-              "type": "string",
-              "maxLength": 35
-            },
-            "address4": {
-              "type": "string",
-              "maxLength": 35
-            },
-           "address5": {
-             "type": "string",
-             "maxLength": 35
-            },
-            "postcode": {
-              "type": "string",
-              "maxLength": 10
-            },
-            "communicationPreference": {
-              "type": "string",
-              "minLength": 2,
-              "maxLength": 2,
-              "pattern": "00|02"
-            },
-           "phoneNumber": {
-             "type": "string",
-             "maxLength": 15
-            },
-            "email": {
-              "type": "string",
-              "maxLength": 254,
-              "pattern": "^.{1,64}@.{1,252}$"
-            }
-          }
-        },
-        "registrationChannel": {
-          "type": "string",
-          "maxLength": 10,
-          "pattern": "^online$|^callCentre$"
-         },
-        "nino" : {
-          "type" : "string",
-          "minLength": 9,
-          "maxLength": 9,
-          "pattern": "^(([A-CEGHJ-PR-TW-Z][A-CEGHJ-NPR-TW-Z])([0-9]{2})([0-9]{2})([0-9]{2})([A-D]{1})|((XX)(99)(99)(99)(X)))$"
-        }
-      }
-    }""".stripMargin
 
 }
