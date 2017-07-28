@@ -23,11 +23,12 @@ import cats.instances.future._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import play.api.{Application, Logger}
+import play.api.Application
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -38,35 +39,36 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    helpToSaveService: HelpToSaveService,
                                    sessionCacheConnector: SessionCacheConnector,
                                    app: Application)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app) with I18nSupport {
+  extends HelpToSaveAuth(app) with I18nSupport with Logging {
 
 
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
       implicit htsContext ⇒
-      Future.successful(Ok(views.html.register.create_account_help_to_save()))
+        Future.successful(Ok(views.html.register.create_account_help_to_save()))
   }
 
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
       implicit htsContext ⇒
 
-      val result = for {
-        userInfo ← retrieveUserInfo()
-        _ ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
-      } yield userInfo
+        val result = for {
+          userInfo ← retrieveUserInfo()
+          _        ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
+        } yield userInfo
 
-      // TODO: plug in actual pages below
-      result.fold(
-        error ⇒ {
-          Logger.error(s"Could not create account: $error")
-          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
-        },
-        info ⇒ {
-          Logger.debug(s"Successfully created account for ${info.nino}")
-          Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
-        }
-      )
+        // TODO: plug in actual pages below
+        result.fold(
+          error ⇒ {
+            // TODO: error or warning?
+            logger.error(s"Could not create account: $error")
+            Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
+          },
+          info ⇒ {
+            logger.info(s"Successfully created account for ${info.nino}")
+            Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
+          }
+        )
   }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
