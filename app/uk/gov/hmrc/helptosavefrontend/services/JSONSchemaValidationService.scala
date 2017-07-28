@@ -40,13 +40,8 @@ trait JSONSchemaValidationService {
 @Singleton
 class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends  JSONSchemaValidationService {
 
-  def schema: Option[String] = {
-    conf.getObject("schema").fold(None: Option[String]) { configObject =>
-      Some(configObject.toConfig.root().render(ConfigRenderOptions.concise()))}
-  }
-
   private val validationSchema: SchemaType = {
-    val schemaStr = schema.getOrElse(sys.error("Could not find json validation schema in configuration"))
+    val schemaStr = conf.underlying.getString("schema")
     Json.fromJson[SchemaType](Json.parse(schemaStr)).getOrElse(sys.error("Could not parse schema string"))
   }
 
