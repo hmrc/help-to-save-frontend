@@ -25,16 +25,16 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.OAuthConfiguration
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError.{BackendError, MissingUserInfos}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, Email}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, UserDetailsURI}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -47,17 +47,17 @@ class EligibilityCheckControllerSpec extends TestSupport {
   private val mockHtsService = mock[HelpToSaveService]
 
   val nino = "WM123456C"
+  val userDetailsURI = "user-details-uri"
 
-  private val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
-  private val enrolments = Enrolments(Set(enrolment))
+  val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
+  val enrolments = Enrolments(Set(enrolment))
+  val userDetailsURIWithEnrolments = core.~[Option[UserDetailsURI],Enrolments](Some(userDetailsURI), enrolments)
 
   private val mockAuthConnector = mock[PlayAuthConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
-  val testOAuthConfiguration = OAuthConfiguration(true, "url", "client-ID", "callback", List("scope1", "scope2"))
   val mockAuditor = mock[HTSAuditor]
 
-  val oauthAuthorisationCode = "authorisation-code"
 
   val controller = new EligibilityCheckController(
     fakeApplication.injector.instanceOf[MessagesApi],
@@ -67,7 +67,6 @@ class EligibilityCheckControllerSpec extends TestSupport {
     fakeApplication,
     mockAuditor)(
     ec) {
-    override val oauthConfig = testOAuthConfiguration
     override lazy val authConnector = mockAuthConnector
   }
 
@@ -94,9 +93,9 @@ class EligibilityCheckControllerSpec extends TestSupport {
       .expects(AuthWithConfidence, *, *)
       .returning(Future.successful(()))
 
-  def mockPlayAuthWithRetrievals[A, B](predicate: Predicate)(result: Enrolments): Unit =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier))
-      .expects(predicate, *, *)
+  def mockPlayAuthWithRetrievals[A, B](predicate: Predicate)(result: Option[UserDetailsURI]~Enrolments): Unit =
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Option[UserDetailsURI] ~ Enrolments])(_: HeaderCarrier))
+      .expects(predicate, HtsAuth.UserDetailsUrlWithAllEnrolments, *)
       .returning(Future.successful(result))
 
   def mockJsonSchemaValidation(input: NSIUserInfo)(result: Either[String, NSIUserInfo]) =
@@ -108,96 +107,22 @@ class EligibilityCheckControllerSpec extends TestSupport {
   "The EligiblityCheckController" when {
 
     "checking eligibility" must {
-      def doConfirmDetailsRequest(): Future[PlayResult] = controller.getAuthorisation(FakeRequest())
 
-      def doConfirmDetailsCallbackRequest(authorisationCode: String): Future[PlayResult] =
-        controller.confirmDetails(Some(authorisationCode), None, None, None)(FakeRequest())
-
-
-      "redirect to confirm-details with the NINO as the authorisation code if redirects to OAUTH are disabled" in {
-        val controller = new EligibilityCheckController(
-          fakeApplication.injector.instanceOf[MessagesApi],
-          mockHtsService,
-          mockSessionCacheConnector,
-          jsonSchemaValidationService,
-          fakeApplication,
-          mockAuditor)(ec) {
-          override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
-          override lazy val authConnector = mockAuthConnector
-        }
-
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-
-        implicit val request = FakeRequest()
-        val result = controller.getAuthorisation(request)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.confirmDetails(Some(nino), None, None, None).absoluteURL())
-      }
-
-      "return error if redirects to OAUTH are disabled and a NINO is not available" in {
-        val register = new EligibilityCheckController(
-          fakeApplication.injector.instanceOf[MessagesApi],
-          mockHtsService,
-          mockSessionCacheConnector,
-          jsonSchemaValidationService,
-          fakeApplication,
-          mockAuditor)(ec) {
-          override val oauthConfig = testOAuthConfiguration.copy(enabled = false)
-          override lazy val authConnector = mockAuthConnector
-        }
-
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(Enrolments(Set.empty[Enrolment]))
-
-        implicit val request = FakeRequest()
-        val result = register.getAuthorisation(request)
-        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-
-      "redirect to OAuth to get an access token if enabled" in {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-
-        val result = doConfirmDetailsRequest()
-        status(result) shouldBe Status.SEE_OTHER
-
-        val (url, params) = redirectLocation(result).get.split('?').toList match {
-          case u :: p :: Nil ⇒
-            val paramList = p.split('&').toList
-            val keyValueSet = paramList.map(_.split('=').toList match {
-              case key :: value :: Nil ⇒ key → value
-              case _ ⇒ fail(s"Could not parse query parameters: $p")
-            }).toSet
-
-            u → keyValueSet
-
-          case _ ⇒ fail("Could not parse URL with query parameters")
-        }
-
-        url shouldBe testOAuthConfiguration.url
-        params shouldBe (testOAuthConfiguration.scopes.map("scope" → _).toSet ++ Set(
-          "client_id" -> testOAuthConfiguration.clientID,
-          "response_type" -> "code",
-          "redirect_uri" -> testOAuthConfiguration.callbackURL
-        ))
-      }
-
-      "return a 500 if there is an error while getting the authorisation token" in {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-        val result = controller.confirmDetails(None, Some("uh oh"), None, None)(FakeRequest())
-        status(result) shouldBe 500
-      }
+      def doConfirmDetailsCallbackRequest(): Future[PlayResult] =
+        controller.confirmDetails(FakeRequest())
 
       "return user details if the user is eligible for help-to-save" in {
         val user = validUserInfo
 
         inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-          mockEligibilityResult(nino, oauthAuthorisationCode)(Right(EligibilityCheckResult(Some(user))))
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEligibilityResult(nino, userDetailsURI)(Right(EligibilityCheckResult(Some(user))))
           mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
           mockSessionCacheConnectorPut(Right(CacheMap("1", Map.empty[String, JsValue])))
           mockSendAuditEvent
         }
 
-        val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
+        val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest()
         val result = Await.result(responseFuture, 5.seconds)
 
         status(result) shouldBe Status.OK
@@ -216,12 +141,12 @@ class EligibilityCheckControllerSpec extends TestSupport {
       "display a 'Not Eligible' page if the user is not eligible" in {
 
         inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-          mockEligibilityResult(nino, oauthAuthorisationCode)(Right(EligibilityCheckResult(None)))
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEligibilityResult(nino, userDetailsURI)(Right(EligibilityCheckResult(None)))
           mockSendAuditEvent
         }
 
-        val result = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
+        val result = doConfirmDetailsCallbackRequest()
 
         status(result) shouldBe Status.SEE_OTHER
 
@@ -230,12 +155,12 @@ class EligibilityCheckControllerSpec extends TestSupport {
 
       "report missing user info back to the user" in {
         inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-          mockEligibilityResult(nino, oauthAuthorisationCode)(Left(MissingUserInfos(Set(Email, Contact), nino)))
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEligibilityResult(nino, userDetailsURI)(Left(MissingUserInfos(Set(Email, Contact), nino)))
           mockSendAuditEvent
         }
 
-        val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
+        val responseFuture: Future[PlayResult] = doConfirmDetailsCallbackRequest()
         val result = Await.result(responseFuture, 5.seconds)
 
         status(result) shouldBe Status.OK
@@ -258,36 +183,42 @@ class EligibilityCheckControllerSpec extends TestSupport {
         // on the controller
         def test(mockActions: ⇒ Unit): Unit = {
           mockActions
-          val result = doConfirmDetailsCallbackRequest(oauthAuthorisationCode)
+          val result = doConfirmDetailsCallbackRequest()
           isError(result) shouldBe true
         }
 
         "the nino is not available" in {
           test(
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(Enrolments(Set.empty[Enrolment]))
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(Some(userDetailsURI), Enrolments(Set())))
+          )
+        }
+
+        "the user details URI is not available" in {
+          test(
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(None, enrolments))
           )
         }
 
         "the eligibility check call returns with an error" in {
           test(
             inSequence {
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-              mockEligibilityResult(nino, oauthAuthorisationCode)(Left(BackendError("Oh no!", nino)))
+              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+              mockEligibilityResult(nino, userDetailsURI)(Left(BackendError("Oh no!", nino)))
             })
         }
 
         "if the JSON schema validation is unsuccessful" in {
           test(inSequence {
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-            mockEligibilityResult(nino, oauthAuthorisationCode)(Right(EligibilityCheckResult(Some(validUserInfo))))
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEligibilityResult(nino, userDetailsURI)(Right(EligibilityCheckResult(Some(validUserInfo))))
             mockJsonSchemaValidation(validNSIUserInfo)(Left("uh oh"))
           })
         }
 
         "there is an error writing to the session cache" in {
           test(inSequence {
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(enrolments)
-            mockEligibilityResult(nino, oauthAuthorisationCode)(Right(EligibilityCheckResult(Some(validUserInfo))))
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEligibilityResult(nino, userDetailsURI)(Right(EligibilityCheckResult(Some(validUserInfo))))
             mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
             mockSessionCacheConnectorPut(Left("Bang"))
           })

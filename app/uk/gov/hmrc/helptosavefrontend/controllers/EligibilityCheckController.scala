@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO, UserDetailsURI}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -48,58 +48,31 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             auditor: HTSAuditor)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport with Logging {
 
-  import EligibilityCheckController._
-
-
-  private[controllers] val oauthConfig = app.configuration.underlying.get[OAuthConfiguration]("oauth").value
-
-  def getAuthorisation: Action[AnyContent] = authorisedForHtsWithNino {
-    implicit request ⇒
-      implicit htsContext⇒
-        Future.successful(redirectForAuthorisationCode(request, htsContext))
-  }
-
-  def confirmDetails(code: Option[String],
-                     error: Option[String],
-                     error_description: Option[String],
-                     error_code: Option[String]): Action[AnyContent] =  authorisedForHtsWithNino {
+  def confirmDetails: Action[AnyContent] =  authorisedForHtsWithInfo  {
     implicit request ⇒
       implicit htsContext ⇒
-        (code, error) match {
-          case (Some(authorisationCode), _) ⇒
-            val result: EitherT[Future, EligibilityCheckError, (NINO, EligibilityCheckResult)] = for {
-              nino ← EitherT.fromOption[Future](htsContext.nino, EligibilityCheckError.NoNINO)
-              eligible ← helpToSaveService.checkEligibility(nino, authorisationCode)
-              nsiUserInfo = eligible.result.map(NSIUserInfo(_))
-              _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
-              _ ← writeToKeyStore(nsiUserInfo).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
-            } yield (nino, eligible)
+        val result: EitherT[Future, EligibilityCheckError, (NINO, EligibilityCheckResult)] = for {
+          nino ← EitherT.fromOption[Future](htsContext.nino, EligibilityCheckError.NoNINO)
+          userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, EligibilityCheckError.NoUserDetailsURI(nino))
+          eligible ← helpToSaveService.checkEligibility(nino, userDetailsURI)
+          nsiUserInfo = eligible.result.map(NSIUserInfo(_))
+          _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
+          _ ← writeToKeyStore(nsiUserInfo).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
+        } yield (nino, eligible)
 
-            result.fold(
-              handleEligibilityCheckError, { case (nino, eligibility) ⇒
-                eligibility.result.fold {
-                  auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
-                  SeeOther(routes.EligibilityCheckController.notEligible().url)
-                } { info ⇒
-                  auditor.sendEvent(new EligibilityCheckEvent(nino, None))
-                  Ok(views.html.register.confirm_details(info))
-                }
+        result.fold(
+          handleEligibilityCheckError, { case (nino, eligibility) ⇒
+            eligibility.result.fold {
+              auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
+              SeeOther(routes.EligibilityCheckController.notEligible().url)
+            } { info ⇒
+              auditor.sendEvent(new EligibilityCheckEvent(nino, None))
+              Ok(views.html.register.confirm_details(info))
+            }
 
-              })
-
-          case (_, Some(e)) ⇒
-            logger.error(s"Could not get authorisation code: $e. Error description was" +
-              s"${error_description.getOrElse("-")}, error code was ${error_code.getOrElse("-")}")
-            // TODO: do something better
-            Future.successful(InternalServerError(s"Could not get authorisation code: $e"))
-
-
-          case _ ⇒
-            // we should never reach here - we shouldn't have a successful code and an error at the same time
-            logger.error("Inconsistent result found when attempting to retrieve an authorisation code")
-            Future.successful(InternalServerError(""))
-        }
+          })
   }
+
 
   val notEligible: Action[AnyContent] = unprotected {
     implicit request ⇒
@@ -114,8 +87,12 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       logger.warn("Could not find NINO")
       InternalServerError
 
+    case NoUserDetailsURI(nino) ⇒
+      logger.warn(s"Could not find user details URI for user $nino")
+      InternalServerError
+
     case BackendError(message, nino) =>
-      logger.error(s"An error occured while trying to call the backend service for user $nino: $message")
+      logger.warn(s"An error occured while trying to call the backend service for user $nino: $message")
       InternalServerError
 
     case MissingUserInfos(missingInfo, nino) =>
@@ -164,44 +141,4 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
         .recover { case e ⇒ Left(e.getMessage) }
     )
   }
-
-  private lazy val redirectForAuthorisationCode =
-    if (oauthConfig.enabled) {
-      { (_: Request[AnyContent], _: HtsContext) ⇒
-        logger.info("Received request to get user details: redirecting to oauth obtain authorisation code")
-
-        // we need to get an authorisation token from OAuth - redirect to OAuth here. When the authorisation
-        // is done they'll redirect to the callback url we give them
-        Redirect(
-          oauthConfig.url,
-          Map(
-            "client_id" -> Seq(oauthConfig.clientID),
-            "scope" -> oauthConfig.scopes,
-            "response_type" -> Seq("code"),
-            "redirect_uri" -> Seq(oauthConfig.callbackURL)
-          ))
-      }
-    } else {
-      { (request: Request[AnyContent], htsContext: HtsContext) ⇒
-        // if the redirect to oauth is not enabled redirect straight to our 'confirm-details' endpoint
-        // using the NINO as the authorisation code
-        implicit val r = request
-
-        htsContext.nino.fold {
-          logger.warn("NINO or user details URI not available")
-          InternalServerError("")
-        } { nino ⇒
-          Logger.info(s"Received request to get user details: redirecting to get user details using NINO $nino as authorisation code")
-          Redirect(routes.EligibilityCheckController.confirmDetails(Some(nino), None, None, None).absoluteURL())
-        }
-      }
-    }
-}
-
-object EligibilityCheckController {
-
-  // details required to get an authorisation token from OAuth
-  private[controllers] case class OAuthConfiguration(enabled: Boolean, url: String, clientID: String, callbackURL: String, scopes: List[String])
-
-
 }

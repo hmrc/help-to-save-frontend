@@ -32,6 +32,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
 
+  val HtsConfirmDetailsUrl = getConfString("help-to-save-confirm-details.url", "")
+
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
   val eligibilityCheckUrl = s"$helpToSaveUrl/help-to-save/eligibility-check"
@@ -39,8 +41,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   val ivUrl = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
 
   def encoded(url: String) = URLEncoder.encode(url, "UTF-8")
-
-  val UserInfoOAuthUrl = getConfString("user-info-oauth.url", "")
 
   val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
 

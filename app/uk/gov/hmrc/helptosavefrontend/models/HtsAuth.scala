@@ -18,8 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L200
-import uk.gov.hmrc.auth.core.Retrievals.allEnrolments
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.helptosavefrontend.util.UserDetailsURI
 
 object HtsAuth {
 
@@ -29,6 +29,6 @@ object HtsAuth {
 
   val AuthWithConfidence: Predicate = NinoEnrolmentWithConfidence and AuthProvider
 
-  val UserDetailsUrlWithAllEnrolments: Retrieval[Enrolments] = allEnrolments
+  val UserDetailsUrlWithAllEnrolments: Retrieval[Option[UserDetailsURI] ~ Enrolments] = Retrievals.userDetailsUri and Retrievals.allEnrolments
 
 }

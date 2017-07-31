@@ -7,8 +7,8 @@ GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptos
 GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
 GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
 
-GET        /register/get-authorisation                      @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getAuthorisation
-GET        /register/confirm-details                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.confirmDetails(code: Option[String], error: Option[String], error_description: Option[String], error_code: Option[String])
+
+GET        /register/confirm-details                @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.confirmDetails
 
 GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 
