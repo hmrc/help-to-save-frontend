@@ -16,6 +16,7 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.views.html.introduction.{navigation, sidebar}
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
@@ -37,7 +38,11 @@
         <p>@Messages("hts.introduction.apply.par-2")</p>
         <p>@Messages("hts.introduction.apply.par-3")</p>
         <p>@Messages("hts.introduction.apply.par-4")</p>
-        <a class="button button--get-started"" href="#" role="button">@Messages("hts.introduction.apply.button-1")</a>
+        @form(routes.EligibilityCheckController.getAuthorisation(), 'class -> "group") {
+            @submit('_buttonClass -> "button--get-started") {
+                @Messages("hts.introduction.apply.button-1")
+            }
+        }
     </section>
     <a class="page-nav__link page-nav__link--previous"
     title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
