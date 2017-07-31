@@ -17,18 +17,19 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.mvc._
-import play.api.{Application, Configuration, Environment, Logger}
+import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{IdentityCallbackUrl, UserInfoOAuthUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-class HelpToSaveAuth(app: Application) extends FrontendController with AuthorisedFunctions with Redirects {
+class HelpToSaveAuth(app: Application) extends FrontendController with AuthorisedFunctions with Redirects with Logging {
 
   override def authConnector: AuthConnector = FrontendAuthConnector
 
@@ -93,7 +94,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
       case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
         toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
       case ex ⇒
-        Logger.error(s"could not authenticate user due to: $ex")
+        logger.error(s"could not authenticate user due to: $ex")
         InternalServerError("")
     }
 

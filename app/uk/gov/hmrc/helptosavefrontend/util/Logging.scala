@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.util
+import play.api.Logger
 
-import play.api.libs.json._
+trait Logging {
 
-case class EligibilityCheckResult(result: Option[UserInfo])
-
-object EligibilityCheckResult {
-
-  implicit val eligibilityCheckResultFormat: Format[EligibilityCheckResult] = Json.format[EligibilityCheckResult]
+  val logger = Logger(this.getClass)
 
 }

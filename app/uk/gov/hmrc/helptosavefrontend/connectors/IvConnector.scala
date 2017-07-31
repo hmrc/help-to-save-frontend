@@ -17,11 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.google.inject.{ImplementedBy, Singleton}
-import play.api.Logger
 import play.mvc.Http.Status.OK
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivUrl
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
 import uk.gov.hmrc.helptosavefrontend.models.iv._
+import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,7 +33,7 @@ trait IvConnector {
 }
 
 @Singleton
-class IvConnectorImpl extends IvConnector {
+class IvConnectorImpl extends IvConnector with Logging {
 
   val http: WSHttpExtension = WSHttp
 
@@ -46,11 +46,11 @@ class IvConnectorImpl extends IvConnector {
         Future.successful(IvSuccessResponse.fromString(result))
 
       case r =>
-        Logger.warn(s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service")
+        logger.warn(s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service")
         Future.successful(Some(IvUnexpectedResponse(r)))
 
     }.recoverWith { case e: Exception =>
-      Logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
+      logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
       Future.successful(Some(IvErrorResponse(e)))
     }
   }

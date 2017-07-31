@@ -19,9 +19,12 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
-import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.EligibilityCheckResponse
+import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError.{BackendError, MissingUserInfos}
+import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckError, EligibilityCheckResult, MissingUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -31,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibility(nino: NINO, oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult]
+  def getEligibility(nino: NINO, oauthCode: String)(implicit hc: HeaderCarrier): EitherT[Future,EligibilityCheckError,EligibilityCheckResult]
 }
 
 @Singleton
@@ -51,13 +54,61 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
   val http: WSHttpExtension = WSHttp
 
   override def getEligibility(nino: NINO,
-                              oauthCode: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult] =
+                              oauthCode: String)(implicit hc: HeaderCarrier): EitherT[Future,EligibilityCheckError,EligibilityCheckResult] =
     EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, oauthCode)))
-      .subflatMap { response ⇒
+      .leftMap(s ⇒ BackendError(s, nino))
+      .subflatMap{ response ⇒
         if (response.status == 200) {
-          response.parseJson[EligibilityCheckResult]
+          response.parseJson[EligibilityCheckResponse].fold(
+            e ⇒ Left(BackendError(e, nino)),
+            _.result.fold(
+              m ⇒ Left(MissingUserInfos(m.missingInfo, nino)),
+              u ⇒ Right(EligibilityCheckResult(u))
+            )
+          )
         } else {
-          Left(badResponseMessage(response, "Eligibility check"))
+          Left(BackendError(badResponseMessage(response, "Eligibility check"), nino))
         }
       }
+}
+
+
+object HelpToSaveConnectorImpl {
+
+  private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
+
+  private[connectors] object MissingUserInfoSet {
+    implicit val missingUserInfoSetFormat: Format[MissingUserInfoSet] =
+      Json.format[MissingUserInfoSet]
+  }
+
+  private[connectors] case class EligibilityCheckResponse(result: Either[MissingUserInfoSet, Option[UserInfo]])
+
+  private[connectors] object EligibilityCheckResponse {
+
+    implicit val eligibilityResultFormat: Format[EligibilityCheckResponse] = new Format[EligibilityCheckResponse] {
+      override def reads(json: JsValue): JsResult[EligibilityCheckResponse] = {
+        (json \ "result").toOption match {
+          case None ⇒
+            JsError("Could not find 'result' path in JSON")
+
+          case Some(jsValue) ⇒
+            jsValue.validate[MissingUserInfoSet].fold(e1 ⇒
+              jsValue.validateOpt[UserInfo].fold(e2 ⇒
+                JsError(e1 ++ e2),
+                maybeUserInfo ⇒ JsSuccess(EligibilityCheckResponse(Right(maybeUserInfo)))
+              ),
+              missing ⇒ JsSuccess(EligibilityCheckResponse(Left(missing)))
+            )
+        }
+      }
+
+      override def writes(o: EligibilityCheckResponse): JsValue = Json.obj(
+        o.result.fold(
+          missingInfos ⇒ "result" -> Json.toJson(missingInfos),
+          maybeUserInfo ⇒ "result" -> Json.toJson(maybeUserInfo)
+        ))
+    }
+  }
+
 }

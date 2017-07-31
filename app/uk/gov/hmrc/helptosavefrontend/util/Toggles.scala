@@ -42,7 +42,7 @@ object Toggles {
         val startTime = Instant.now.toEpochMilli
         val result = action
         val endTime = Instant.now.toEpochMilli
-        Logger.info("FEATURE: " + name + " executed in " + (endTime - startTime).toString + " milliseconds.")
+        logger.info("FEATURE: " + name + " executed in " + (endTime - startTime).toString + " milliseconds.")
         Right(result)
       } else {
         Left(unconfiguredVal)
