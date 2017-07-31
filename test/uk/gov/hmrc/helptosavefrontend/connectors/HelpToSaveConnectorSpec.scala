@@ -24,7 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{Eligib
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, DateOfBirth, Email, GivenName, Surname}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.NINO
+import uk.gov.hmrc.helptosavefrontend.util.{NINO, UserDetailsURI}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.duration._
@@ -32,7 +32,7 @@ import scala.concurrent.{Await, Future}
 
 class HelpToSaveConnectorSpec extends TestSupport {
 
-  def eligibilityURL(nino: NINO, userDetailsURI: String): String =
+  def eligibilityURL(nino: NINO, userDetailsURI: UserDetailsURI): String =
     s"$eligibilityCheckUrl?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}"
 
   class TestApparatus {
