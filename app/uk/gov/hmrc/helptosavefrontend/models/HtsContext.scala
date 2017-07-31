@@ -16,4 +16,4 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-case class HtsContext(nino: Option[String], isAuthorised: Boolean = false)
+case class HtsContext(nino: Option[String], userDetailsURI: Option[String], isAuthorised: Boolean = false)

@@ -59,7 +59,6 @@ class HelpToSaveAuthSpec extends TestSupport {
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        implicit userDetailsURI ⇒
           Future.successful(Ok(""))
   }
 

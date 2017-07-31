@@ -51,11 +51,9 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
   def confirmDetails: Action[AnyContent] =  authorisedForHtsWithInfo  {
     implicit request ⇒
       implicit htsContext ⇒
-        maybeUserDetailsURI ⇒
-
         val result: EitherT[Future, EligibilityCheckError, (NINO, EligibilityCheckResult)] = for {
           nino ← EitherT.fromOption[Future](htsContext.nino, EligibilityCheckError.NoNINO)
-          userDetailsURI ← EitherT.fromOption[Future](maybeUserDetailsURI, EligibilityCheckError.NoUserDetailsURI(nino))
+          userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, EligibilityCheckError.NoUserDetailsURI(nino))
           eligible ← helpToSaveService.checkEligibility(nino, userDetailsURI)
           nsiUserInfo = eligible.result.map(NSIUserInfo(_))
           _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))

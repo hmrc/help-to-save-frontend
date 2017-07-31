@@ -40,7 +40,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
 
   private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
 
-  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Option[UserDetailsURI] ⇒ Future[Result]): Action[AnyContent] =
+  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]): Action[AnyContent] =
     Action.async { implicit request ⇒
       authorised(AuthWithConfidence)
         .retrieve(UserDetailsUrlWithAllEnrolments) {
@@ -52,7 +52,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
                 .flatMap(_.getIdentifier("NINO"))
                 .map(_.value)
 
-            action(request)(HtsContext(nino, isAuthorised = true))(userDetailsUri)
+            action(request)(HtsContext(nino, userDetailsUri, isAuthorised = true))
 
         }.recover {
         case e ⇒ handleFailure(e)
@@ -62,7 +62,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def authorisedForHts(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(AuthProvider) {
-        action(request)(HtsContext(None, isAuthorised = true))
+        action(request)(HtsContext(None, None, isAuthorised = true))
       }.recover {
         case e ⇒ handleFailure(e)
       }
@@ -72,7 +72,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def authorisedForHtsWithConfidence(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(AuthWithConfidence) {
-        action(request)(HtsContext(None, isAuthorised = true))
+        action(request)(HtsContext(None, None, isAuthorised = true))
       }.recover {
         case e ⇒ handleFailure(e)
       }
@@ -82,9 +82,9 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def unprotected(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised() {
-        action(request)(HtsContext(None, isAuthorised = true))
+        action(request)(HtsContext(None, None, isAuthorised = true))
       }.recoverWith {
-        case _ ⇒ action(request)(HtsContext(None))
+        case _ ⇒ action(request)(HtsContext(None, None))
       }
     }
   }

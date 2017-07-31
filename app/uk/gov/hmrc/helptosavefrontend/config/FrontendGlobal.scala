@@ -45,7 +45,7 @@ object FrontendGlobal extends DefaultFrontendGlobal {
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit rh: Request[_]): Html = {
     //TODO :  not sure how to pass valid HtsContext here
-    implicit val htsContext = HtsContext(None)
+    implicit val htsContext = HtsContext(None, None)
     uk.gov.hmrc.helptosavefrontend.views.html.error_template(pageTitle, heading, message)
   }
 
