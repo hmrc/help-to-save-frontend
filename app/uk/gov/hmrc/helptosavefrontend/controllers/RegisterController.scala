@@ -72,7 +72,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
-    s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")}, " +
+    s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
 
   private def retrieveUserInfo()(implicit hc: HeaderCarrier): EitherT[Future, String, NSIUserInfo] = {
