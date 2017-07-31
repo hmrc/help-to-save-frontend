@@ -25,7 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.IdentityCallbackU
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, UserDetailsURI}
+import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -62,7 +62,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def authorisedForHts(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(AuthProvider) {
-        action(request)(HtsContext(None, None, isAuthorised = true))
+        action(request)(HtsContext(isAuthorised = true))
       }.recover {
         case e ⇒ handleFailure(e)
       }
@@ -72,7 +72,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def authorisedForHtsWithConfidence(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(AuthWithConfidence) {
-        action(request)(HtsContext(None, None, isAuthorised = true))
+        action(request)(HtsContext(isAuthorised = true))
       }.recover {
         case e ⇒ handleFailure(e)
       }
@@ -82,9 +82,9 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
   def unprotected(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised() {
-        action(request)(HtsContext(None, None, isAuthorised = true))
+        action(request)(HtsContext(isAuthorised = true))
       }.recoverWith {
-        case _ ⇒ action(request)(HtsContext(None, None))
+        case _ ⇒ action(request)(HtsContext(isAuthorised = false))
       }
     }
   }
