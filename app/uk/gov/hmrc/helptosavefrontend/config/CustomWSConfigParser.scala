@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io._
 import java.security.KeyStore
-import java.security.cert.{Certificate, CertificateFactory}
+import java.security.cert.{Certificate, CertificateFactory, X509Certificate}
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
@@ -76,7 +76,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       val trustData = config.getString("truststore.data").get
 
       val result = for {
-        dataBytes ← Try(Base64.getDecoder.decode(trustData))
+        dataBytes ← Try(Base64.getDecoder.decode(trustData.trim))
         file ← writeToTempFile(dataBytes, ".p7b")
       } yield file
 
@@ -91,16 +91,17 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           val certs = cf.generateCertificates(bais)
 
           if (certs.size() == 1) {
-            logger.info("One certificate found, no chain")
+            logger.info("Truststore - One certificate found, no chain")
             val cert = cf.generateCertificate(bais)
             keystore.setCertificateEntry("api.nsi.hts.esit", cert)
           }
           else {
-            logger.info(s"Certificate chain length: ${certs.size()}")
+            logger.info(s"Truststore - Certificate chain length: ${certs.size()}")
             certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
               case (cert, i) =>
-                keystore.setCertificateEntry("api.nsi.hts.esit-" + i, cert)
-                logger.info(s"certificate at index $i is ${cert.toString}")
+                val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
+                keystore.setCertificateEntry(alias, cert)
+                logger.info(s"truststore - certificate at index $i is ${cert.toString}")
             }
           }
 
@@ -137,11 +138,33 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     file
   }
 
+  private def printCerts(keyStoreFile: File, ksType: String) = {
+    logger.info(s"start printing $ksType certificates")
+    val cf = CertificateFactory.getInstance("X.509")
+    val bais = fullStream(keyStoreFile)
+    val certs = cf.generateCertificates(bais)
+
+    if (certs.size() == 1) {
+      logger.info("One certificate found, no chain")
+      val cert = cf.generateCertificate(bais)
+      logger.info(s"certificate is ${cert.toString}")
+    }
+    else {
+      logger.info(s"Certificate chain has length: ${certs.size()}")
+      certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
+        case (cert, i) =>
+          logger.info(s"certificate at index $i is ${cert.toString}")
+      }
+    }
+
+    logger.info(s"end printing $ksType certificates")
+  }
+
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     logger.info("Creating key store config")
 
     val result = for {
-      dataBytes ← Try(Base64.getDecoder.decode(data))
+      dataBytes ← Try(Base64.getDecoder.decode(data.trim))
       file ← writeToTempFile(dataBytes)
     } yield file
 
@@ -152,6 +175,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         val decryptedPass = ks.password
           .map(pass ⇒ Base64.getDecoder.decode(pass))
           .map(bytes ⇒ new String(bytes))
+
+        printCerts(keyStoreFile, "keystore")
 
         ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
 
