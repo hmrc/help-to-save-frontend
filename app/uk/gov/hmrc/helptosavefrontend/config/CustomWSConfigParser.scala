@@ -19,9 +19,11 @@ package uk.gov.hmrc.helptosavefrontend.config
 import java.io._
 import java.security.KeyStore
 import java.security.cert.{Certificate, CertificateFactory, X509Certificate}
+import java.util
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
+import com.typesafe.config.{ConfigObject, ConfigValueFactory}
 import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
 import play.api.libs.ws.{WSClientConfig, WSConfigParser}
@@ -37,7 +39,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   override def parse(): WSClientConfig = {
     logger.info("Parsing WSClientConfig")
-    val internalParser = new WSConfigParser(configuration, env)
+    val mergedConfiguration = mergeAllStores(configuration)
+    val internalParser = new WSConfigParser(mergedConfiguration, env)
     val config = internalParser.parse()
 
     val keyStores = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks ⇒
@@ -58,13 +61,33 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       }
     }
 
-    val updatedKeyManagerConfig = config.ssl.keyManagerConfig.copy(keyStoreConfigs = keyStores)
-
-    val wsClientConfig = config.copy(ssl = config.ssl.copy(keyManagerConfig = updatedKeyManagerConfig))
+    val wsClientConfig = config.copy(
+      ssl = config.ssl.copy(
+        keyManagerConfig = config.ssl.keyManagerConfig.copy(
+          keyStoreConfigs = keyStores
+        )
+      )
+    )
 
     updateTruststore(configuration)
 
     wsClientConfig
+  }
+
+  private def mergeAllStores(config: Configuration): Configuration = {
+    mergeStores(mergeStores(config, "key"), "trust")
+  }
+
+  private def mergeStores(config: Configuration, name: String): Configuration = {
+    val under = config.underlying
+    if (under.hasPath(s"play.ws.ssl.${name}Manager.store")) {
+      val singleStore: ConfigObject = under.getObject(s"play.ws.ssl.${name}Manager.store")
+      val stores: util.List[AnyRef] = under.getList(s"play.ws.ssl.${name}Manager.stores").unwrapped()
+      if (singleStore != null) {
+        stores.add(singleStore)
+      }
+      config.copy(underlying = config.underlying.withValue(s"play.ws.ssl.${name}Manager.stores", ConfigValueFactory.fromIterable(stores)))
+    } else config
   }
 
   private def updateTruststore(config: Configuration) = {
@@ -138,22 +161,6 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     file
   }
 
-  private def printCerts(keyStoreData: String) = {
-    logger.info(s"start printing keystore certificates")
-    val cf = CertificateFactory.getInstance("X.509")
-    val is = new ByteArrayInputStream(keyStoreData.getBytes("UTF-8"))
-    val bis = new BufferedInputStream(is)
-    val buffer = new scala.collection.mutable.ListBuffer[Certificate]()
-    while (bis.available() > 0) {
-      val cert = cf.generateCertificate(bis)
-      buffer.append(cert)
-      logger.info(s"certificate entry is ${cert.toString}")
-    }
-    logger.info(s"number of certs=${buffer.size}")
-
-    logger.info(s"end printing keystore certificates")
-  }
-
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     logger.info("Creating key store config")
 
@@ -169,8 +176,6 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         val decryptedPass = ks.password
           .map(pass ⇒ Base64.getDecoder.decode(pass))
           .map(bytes ⇒ new String(bytes))
-
-        printCerts(data.trim)
 
         ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
 
