@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.eligibilityCheckUrl
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{eligibilityCheckUrl, encoded}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpExtension
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, MissingUserInfoSet}
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError.MissingUserInfos
@@ -32,8 +32,8 @@ import scala.concurrent.{Await, Future}
 
 class HelpToSaveConnectorSpec extends TestSupport {
 
-  def eligibilityURL(nino: NINO, authorisationCode: String): String =
-    s"$eligibilityCheckUrl?nino=$nino&oauthAuthorisationCode=$authorisationCode"
+  def eligibilityURL(nino: NINO, userDetailsURI: String): String =
+    s"$eligibilityCheckUrl?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}"
 
   class TestApparatus {
     val mockHttp = mock[WSHttpExtension]
@@ -53,27 +53,27 @@ class HelpToSaveConnectorSpec extends TestSupport {
     "getting eligibility status" should {
 
       val nino = "nino"
-      val authorisationCode = "authorisation-code"
+      val userDetailsURI = "http://user-details-uri"
 
       "perform a GET request to the help-to-save-service" in new TestApparatus {
-        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(HttpResponse(200))
-        connector.getEligibility(nino, authorisationCode)
+        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(HttpResponse(200))
+        connector.getEligibility(nino, userDetailsURI)
       }
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result" in new TestApparatus {
         val userInfo = randomUserInfo()
-        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
+        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(
           HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(Right(Some(userInfo)))))))
 
-        val result = connector.getEligibility(nino, authorisationCode)
+        val result = connector.getEligibility(nino, userDetailsURI)
         Await.result(result.value, 3.seconds) shouldBe Right(EligibilityCheckResult(Some(userInfo)))
       }
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result" in new TestApparatus {
-        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
+        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(
           HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(Right(None))))))
 
-        val result = connector.getEligibility(nino, authorisationCode)
+        val result = connector.getEligibility(nino, userDetailsURI)
         Await.result(result.value, 3.seconds) shouldBe Right(EligibilityCheckResult(None))
       }
 
@@ -82,18 +82,18 @@ class HelpToSaveConnectorSpec extends TestSupport {
         val eligibilityResponse =
           EligibilityCheckResponse(Left(MissingUserInfoSet(missingInfo)))
 
-        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(
+        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(
           HttpResponse(200, responseJson = Some(Json.toJson(eligibilityResponse))))
 
-        val result = connector.getEligibility(nino, authorisationCode)
+        val result = connector.getEligibility(nino, userDetailsURI)
         Await.result(result.value, 3.seconds) shouldBe Left(MissingUserInfos(missingInfo, nino))
       }
 
 
       "return an error if the call does not come back with a 200 status" in new TestApparatus {
-        mockGetEligibilityStatus(eligibilityURL(nino, authorisationCode))(HttpResponse(500))
+        mockGetEligibilityStatus(eligibilityURL(nino, userDetailsURI))(HttpResponse(500))
 
-        val result = connector.getEligibility(nino, authorisationCode)
+        val result = connector.getEligibility(nino, userDetailsURI)
         Await.result(result.value, 3.seconds).isLeft shouldBe true
       }
 

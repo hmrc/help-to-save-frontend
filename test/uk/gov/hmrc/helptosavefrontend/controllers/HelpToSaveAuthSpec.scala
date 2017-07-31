@@ -25,7 +25,7 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{UserInfoOAuthUrl, encoded}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{HtsConfirmDetailsUrl, encoded}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -56,10 +56,11 @@ class HelpToSaveAuthSpec extends TestSupport {
       Future.successful(Ok(""))
   }
 
-  private def actionWithEnrols = htsAuth.authorisedForHtsWithNino {
+  private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo {
     implicit request ⇒
-      implicit userWithNino ⇒
-        Future.successful(Ok(""))
+      implicit htsContext ⇒
+        implicit userDetailsURI ⇒
+          Future.successful(Ok(""))
   }
 
   private def mockAuthWith(error: String) =
@@ -82,7 +83,7 @@ class HelpToSaveAuthSpec extends TestSupport {
         val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
-        redirectTo should include(encoded(UserInfoOAuthUrl))
+        redirectTo should include(encoded(HtsConfirmDetailsUrl))
       }
     }
 

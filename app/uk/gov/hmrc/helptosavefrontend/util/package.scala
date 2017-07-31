@@ -28,5 +28,7 @@ package object util {
 
   type NINO = String
 
+  type UserDetailsURI = String
+
   type Result[A] = EitherT[Future, String, A]
 }

@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.Eligibi
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError.{BackendError, MissingUserInfos}
 import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckError, EligibilityCheckResult, MissingUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
+import uk.gov.hmrc.helptosavefrontend.util.{NINO, UserDetailsURI}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,7 +41,8 @@ trait HelpToSaveConnector {
 class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
 
-  def eligibilityURL(nino: NINO, oauthCode: String) = s"$eligibilityCheckUrl?nino=$nino&oauthAuthorisationCode=$oauthCode"
+  def eligibilityURL(nino: NINO, userDetailsURI: String) =
+    s"$eligibilityCheckUrl?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}"
 
   /**
     * @param response The HTTPResponse which came back with a bad status
@@ -54,8 +55,8 @@ class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends H
   val http: WSHttpExtension = WSHttp
 
   override def getEligibility(nino: NINO,
-                              oauthCode: String)(implicit hc: HeaderCarrier): EitherT[Future,EligibilityCheckError,EligibilityCheckResult] =
-    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, oauthCode)))
+                              userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future,EligibilityCheckError,EligibilityCheckResult] =
+    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, userDetailsURI)))
       .leftMap(s ⇒ BackendError(s, nino))
       .subflatMap{ response ⇒
         if (response.status == 200) {

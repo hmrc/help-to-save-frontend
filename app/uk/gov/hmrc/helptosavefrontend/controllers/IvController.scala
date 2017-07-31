@@ -20,7 +20,8 @@ import javax.inject.{Inject, Singleton}
 
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import play.api.{Application}
+import play.api.Application
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
@@ -49,7 +50,7 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
         case Some(id) ⇒
           ivConnector.getJourneyStatus(JourneyId(id)).map {
             case Some(Success) ⇒
-              Ok(iv_success(UserInfoOAuthUrl))
+              Ok(iv_success(FrontendAppConfig.HtsConfirmDetailsUrl))
 
             case Some(Incomplete) ⇒
               //The journey has not been completed yet.

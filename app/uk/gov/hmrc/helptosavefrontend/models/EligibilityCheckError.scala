@@ -23,6 +23,7 @@ sealed trait EligibilityCheckError
 
 object EligibilityCheckError {
   case object NoNINO extends EligibilityCheckError
+  case class NoUserDetailsURI(nino: NINO) extends EligibilityCheckError
   case class BackendError(message: String, nino: NINO) extends EligibilityCheckError
   case class MissingUserInfos(missingInfo: Set[MissingUserInfo], nino: NINO) extends EligibilityCheckError
   case class JSONSchemaValidationError(message: String, nino: NINO) extends EligibilityCheckError
