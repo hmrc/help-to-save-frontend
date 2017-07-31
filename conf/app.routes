@@ -1,16 +1,22 @@
 # microservice specific routes
 
-GET        /apply                                   @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getApplyHelpToSave
-GET        /about                                   @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave
-GET        /eligibility                             @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getEligibilityHelpToSave
+GET        /apply-for-help-to-save                          @controllers.Default.redirect(to = "apply-for-help-to-save/about-help-to-save")
+GET        /apply-for-help-to-save/about-help-to-save       @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getAboutHelpToSave
+GET        /apply-for-help-to-save/eligibility              @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getEligibility
+GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowTheAccountWorks
+GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
+GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
+
+GET        /apply                                           @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getApplyHelpToSave
+GET        /about                                           @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getAboutHelpToSave
+GET        /eligibility                                     @uk.gov.hmrc.helptosavefrontend.controllers.StartPagesController.getEligibilityHelpToSave
 
 
-GET        /register/get-authorisation              @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getAuthorisation
-GET        /register/confirm-details                @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.confirmDetails(code: Option[String], error: Option[String], error_description: Option[String], error_code: Option[String])
+GET        /register/get-authorisation                      @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getAuthorisation
+GET        /register/confirm-details                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.confirmDetails(code: Option[String], error: Option[String], error_description: Option[String], error_code: Option[String])
 
-GET        /register/create-an-account              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
+GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 
-GET        /register/nsi                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
-GET        /iv/journey-result                       @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
-
-GET        /register/not-eligible                   @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.notEligible
+GET        /register/nsi                                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
+GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
+GET        /register/not-eligible                           @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.notEligible
