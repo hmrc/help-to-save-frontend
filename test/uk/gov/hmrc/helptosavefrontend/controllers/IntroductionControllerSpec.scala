@@ -25,16 +25,16 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentAsString, contentType}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 
-class StartPagesControllerSpec extends TestSupport {
+class IntroductionControllerSpec extends TestSupport {
 
   implicit val timeout = Timeout(5, SECONDS)
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new StartPagesController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi])
+  val helpToSave = new IntroductionController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi])
 
   "GET /" should {
-    "the getApplyHelpToSave should return html" in {
-      val result = helpToSave.getApplyHelpToSave(fakeRequest)
+    "the getAboutHelpToSave should return html" in {
+      val result = helpToSave.getAboutHelpToSave(fakeRequest)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
@@ -45,16 +45,32 @@ class StartPagesControllerSpec extends TestSupport {
       html should not include "Sign out"
     }
 
-    "the getEligibilityHelpToSave should  return 200" in {
-      val result = helpToSave.getEligibilityHelpToSave(fakeRequest)
+    "the getEligibility should  return 200" in {
+      val result = helpToSave.getEligibility(fakeRequest)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
     }
 
-    "the getAboutHelpToSave return 200" in {
-      val result = helpToSave.getAboutHelpToSave(fakeRequest)
+    "the getHowTheAccountWorks return 200" in {
+      val result = helpToSave.getHowTheAccountWorks(fakeRequest)
+      status(result) shouldBe Status.OK
+
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+    "the getHowWeCalculateBonuses return 200" in {
+      val result = helpToSave.getHowWeCalculateBonuses(fakeRequest)
+      status(result) shouldBe Status.OK
+
+      contentType(result) shouldBe Some("text/html")
+      charset(result) shouldBe Some("utf-8")
+    }
+
+    "the getApply return 200" in {
+      val result = helpToSave.getApply(fakeRequest)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
