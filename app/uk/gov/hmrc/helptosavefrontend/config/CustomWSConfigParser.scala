@@ -30,6 +30,7 @@ import play.api.libs.ws.{WSClientConfig, WSConfigParser}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
+import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -177,13 +178,24 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           .map(pass ⇒ Base64.getDecoder.decode(pass))
           .map(bytes ⇒ new String(bytes))
 
-        logger.info(s"xpassxword is {$decryptedPass}")
+        printKeyStore(keyStoreFile, decryptedPass.getOrElse(""))
 
         ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
 
       case Failure(error) ⇒
         logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
         sys.error(s"Error in keystore configuration: ${error.getMessage}")
+    }
+  }
+
+  private def printKeyStore(keyStoreFile: File, pass: String) = {
+
+    val is = new FileInputStream(keyStoreFile)
+    val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
+    keystore.load(is, pass.toCharArray)
+
+    keystore.aliases().foreach {
+      alias ⇒ logger.info(s"alias $alias and certificate chain length= ${keystore.getCertificateChain(alias).length} ")
     }
   }
 
