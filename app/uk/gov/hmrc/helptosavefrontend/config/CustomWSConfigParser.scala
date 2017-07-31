@@ -177,6 +177,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           .map(pass ⇒ Base64.getDecoder.decode(pass))
           .map(bytes ⇒ new String(bytes))
 
+        logger.info(s"xpassxword is {$decryptedPass}")
+
         ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
 
       case Failure(error) ⇒
