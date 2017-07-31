@@ -138,26 +138,20 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     file
   }
 
-  private def printCerts(keyStoreFile: File, ksType: String) = {
-    logger.info(s"start printing $ksType certificates")
+  private def printCerts(keyStoreData: String) = {
+    logger.info(s"start printing keystore certificates")
     val cf = CertificateFactory.getInstance("X.509")
-    val bais = fullStream(keyStoreFile)
-    val certs = cf.generateCertificates(bais)
-
-    if (certs.size() == 1) {
-      logger.info("One certificate found, no chain")
-      val cert = cf.generateCertificate(bais)
-      logger.info(s"certificate is ${cert.toString}")
+    val is = new ByteArrayInputStream(keyStoreData.getBytes("UTF-8"))
+    val bis = new BufferedInputStream(is)
+    val buffer = new scala.collection.mutable.ListBuffer[Certificate]()
+    while (bis.available() > 0) {
+      val cert = cf.generateCertificate(bis)
+      buffer.append(cert)
+      logger.info(s"certificate entry is ${cert.toString}")
     }
-    else {
-      logger.info(s"Certificate chain has length: ${certs.size()}")
-      certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
-        case (cert, i) =>
-          logger.info(s"certificate at index $i is ${cert.toString}")
-      }
-    }
+    logger.info(s"number of certs=${buffer.size}")
 
-    logger.info(s"end printing $ksType certificates")
+    logger.info(s"end printing keystore certificates")
   }
 
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
@@ -176,7 +170,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           .map(pass ⇒ Base64.getDecoder.decode(pass))
           .map(bytes ⇒ new String(bytes))
 
-        printCerts(keyStoreFile, "keystore")
+        printCerts(data.trim)
 
         ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
 
