@@ -30,8 +30,8 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, NINO}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -39,19 +39,22 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 
 class RegisterControllerSpec extends TestSupport {
 
-  private val mockHtsService = mock[HelpToSaveService]
 
   val nino = "WM123456C"
 
-  private val mockAuthConnector = mock[PlayAuthConnector]
+  val mockHtsService = mock[HelpToSaveService]
+  val mockAuthConnector = mock[PlayAuthConnector]
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor = mock[HTSAuditor]
+  val mockEnrolmentService: EnrolmentService = mock[EnrolmentService]
+
 
   val register = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
     mockSessionCacheConnector,
+    mockEnrolmentService,
     fakeApplication)(
     ec) {
     override lazy val authConnector = mockAuthConnector
@@ -77,6 +80,11 @@ class RegisterControllerSpec extends TestSupport {
       .expects(AuthWithConfidence, *, *)
       .returning(Future.successful(()))
 
+  def mockEnrolUser(nino: NINO)(result: Either[String,Unit]): Unit =
+    (mockEnrolmentService.enrolUser(_: NINO)(_: HeaderCarrier, _: ExecutionContext))
+    .expects(nino, *, *)
+    .returning(EitherT.fromEither[Future](result))
+
 
   "The RegisterController" when {
 
@@ -99,18 +107,35 @@ class RegisterControllerSpec extends TestSupport {
         inSequence {
           mockPlayAuthWithWithConfidence()
           mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
-          mockCreateAccount(validNSIUserInfo)()
+          mockCreateAccount(validNSIUserInfo)(Left(SubmissionFailure(None, "", "")))
         }
         val result = Await.result(doCreateAccountRequest(), 5.seconds)
         status(result) shouldBe Status.OK
       }
 
 
-      "indicate to the user that the creation was successful if the creation was successful" in {
+      "indicate to the user that the creation was successful " +
+        "and enrol the user if the creation was successful" in {
         inSequence {
           mockPlayAuthWithWithConfidence()
           mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
           mockCreateAccount(validNSIUserInfo)()
+          mockEnrolUser(nino)(Right(()))
+        }
+
+        val result = doCreateAccountRequest()
+
+        val html = contentAsString(result)
+        html should include("Successfully created account")
+      }
+
+      "indicate to the user that the creation was successful " +
+        "and even if the user couldn't be enrolled" in {
+        inSequence {
+          mockPlayAuthWithWithConfidence()
+          mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
+          mockCreateAccount(validNSIUserInfo)()
+          mockEnrolUser(nino)(Left("Oh no"))
         }
 
         val result = doCreateAccountRequest()

@@ -32,7 +32,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
 
-  val HtsConfirmDetailsUrl = getConfString("help-to-save-confirm-details.url", "")
+  val HtsConfirmDetailsUrl: String = getConfString("help-to-save-confirm-details.url", "")
 
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
@@ -40,13 +40,15 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val ivUrl = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
 
-  def encoded(url: String) = URLEncoder.encode(url, "UTF-8")
+  val itmpEnrolmentURL: String = baseUrl("itmp-enrolment")
+
+  def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
 
   val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
 
   val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
 
-  val IdentityCallbackUrl = getConfString("identity-callback.url", "")
+  val IdentityCallbackUrl: String = getConfString("identity-callback.url", "")
 
   val IvRetryUrl: String =
     new URI(s"$ivUpliftUrl?origin=$sosOrigin&" +
@@ -55,9 +57,9 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
       s"&confidenceLevel=200")
       .toString
 
-  val nsiAuthHeaderKey = getString("microservice.services.nsi.authorization.header-key")
+  val nsiAuthHeaderKey: String = getString("microservice.services.nsi.authorization.header-key")
 
-  val nsiBasicAuth = {
+  val nsiBasicAuth: String = {
     val user = getString("microservice.services.nsi.authorization.user")
     val password = getString("microservice.services.nsi.authorization.password")
     val encoding = getString("microservice.services.nsi.authorization.encoding")
@@ -68,29 +70,29 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val nsiUrl = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
 
-  val sessionCacheKey = getString("microservice.services.keystore.session-key")
+  val sessionCacheKey: String = getString("microservice.services.keystore.session-key")
 
-  val keyStoreUrl = baseUrl("keystore")
+  val keyStoreUrl: String = baseUrl("keystore")
 
-  val keyStoreDomain = getString("microservice.services.keystore.domain")
+  val keyStoreDomain: String = getString("microservice.services.keystore.domain")
 
-  val personalAccountUrl = getString("microservice.services.pertax-frontend.url")
+  val personalAccountUrl: String = getString("microservice.services.pertax-frontend.url")
 
-  val feedbackSurveyUrl = getString("microservice.services.feedback-survey.url")
+  val feedbackSurveyUrl: String = getString("microservice.services.feedback-survey.url")
 
-  val caFrontendUrl = getString("microservice.services.ca-frontend.url")
+  val caFrontendUrl: String = getString("microservice.services.ca-frontend.url")
 
   val ggSignOutUrl = s"$caFrontendUrl/gg/sign-out"
 
   val signOutUrl = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
 
-  override lazy val analyticsToken = getString("google-analytics.token")
-  override lazy val analyticsHost = getString("google-analytics.host")
+  override lazy val analyticsToken: String = getString("google-analytics.token")
+  override lazy val analyticsHost: String = getString("google-analytics.host")
 
-  val contactHost = getString(s"contact-frontend.host")
-  val contactFormServiceIdentifier = "MyService"
+  val contactHost: String = getString(s"contact-frontend.host")
+  val contactFormServiceIdentifier: String = "MyService"
 
-  override lazy val reportAProblemPartialUrl = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  override lazy val reportAProblemNonJSUrl = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  override lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  override lazy val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
 }
