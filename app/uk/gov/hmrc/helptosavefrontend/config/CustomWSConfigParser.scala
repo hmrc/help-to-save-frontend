@@ -94,7 +94,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     } else config
   }
 
-  private def updateTruststore(config: Configuration) : Seq[TrustStoreConfig] = {
+  private def updateTruststore(config: Configuration): Seq[TrustStoreConfig] = {
     Try {
       val cacertsPath = config.getString("truststore.cacerts.path").get
       logger.info(s"cacerts path $cacertsPath")
@@ -157,8 +157,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     }.recover {
       case e =>
         logger.error(s"error during truststore setup:", e)
-    }
-
+        List.empty[TrustStoreConfig]
+    }.toOption.getOrElse(List.empty[TrustStoreConfig])
   }
 
   private def fullStream(fileName: File) = {
