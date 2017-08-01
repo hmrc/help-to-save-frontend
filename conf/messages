@@ -176,6 +176,7 @@ hts.helpers.sidebar.government-gateway=Government Gateway
 hts.helpers.sidebar.universal-credit=Universal Credit
 hts.helpers.sidebar.apply-for-universal-credit=Apply for Universal Credit
 hts.helpers.sidebar.working-tax-credit=Working Tax Credit
+hts.helpers.phaseBanner.feedback=This is a new service – your feedback will help us to improve it.
 hts.register.confirmdetails.header-page=Confirm your contact details
 hts.register.confirmdetails.header=Check and confirm your details
 hts.register.confirmdetails.your-details-header=Your details
