@@ -102,9 +102,11 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       val decryptedPass = new String(Base64.getDecoder.decode(cacertsPass))
       val trustData = config.getString("truststore.data").get
 
+      logger.info(s"trustData is $trustData")
+
       val result = for {
         dataBytes ← Try(Base64.getDecoder.decode(trustData.trim))
-        file ← writeToTempFile(dataBytes, ".p7b")
+        file ← writeToTempFile(dataBytes, ".jks")
       } yield file
 
       result match {
@@ -138,7 +140,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
           // Save the new keystore contents
 
-          val file = File.createTempFile(getClass.getSimpleName, "p7b")
+          val file = File.createTempFile(getClass.getSimpleName, "jks")
           file.deleteOnExit()
 
           keystore.store(new FileOutputStream(file), decryptedPass.toCharArray)
