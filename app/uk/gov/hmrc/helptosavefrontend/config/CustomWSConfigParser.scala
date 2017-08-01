@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io._
 import java.security.KeyStore
-import java.security.cert.{Certificate, CertificateFactory, X509Certificate}
+import java.security.cert.CertificateFactory
 import java.util
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
@@ -66,11 +66,14 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       ssl = config.ssl.copy(
         keyManagerConfig = config.ssl.keyManagerConfig.copy(
           keyStoreConfigs = keyStores
+        ),
+        trustManagerConfig = config.ssl.trustManagerConfig.copy(
+          trustStoreConfigs = updateTruststore(configuration)
         )
       )
     )
 
-    updateTruststore(configuration)
+    //updateTruststore(configuration)
 
     wsClientConfig
   }
@@ -91,7 +94,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     } else config
   }
 
-  private def updateTruststore(config: Configuration) = {
+  private def updateTruststore(config: Configuration) : Seq[TrustStoreConfig] = {
     Try {
       val cacertsPath = config.getString("truststore.cacerts.path").get
       logger.info(s"cacerts path $cacertsPath")
@@ -110,27 +113,42 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
           keystore.load(new FileInputStream(cacertsPath), decryptedPass.toCharArray)
 
+          logger.info(s"truststore size before import = ${keystore.size()}")
+
           val cf = CertificateFactory.getInstance("X.509")
           val bais = fullStream(customTrustFile)
-          val certs = cf.generateCertificates(bais)
+          val certs = cf.generateCertificate(bais)
 
-          if (certs.size() == 1) {
-            logger.info("Truststore - One certificate found, no chain")
-            val cert = cf.generateCertificate(bais)
-            keystore.setCertificateEntry("api.nsi.hts.esit", cert)
-          }
-          else {
-            logger.info(s"Truststore - Certificate chain length: ${certs.size()}")
-            certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
-              case (cert, i) =>
-                val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
-                keystore.setCertificateEntry(alias, cert)
-                logger.info(s"truststore - certificate at index $i is ${cert.toString}")
-            }
-          }
+          keystore.setCertificateEntry("api.nsi.hts.esit", certs)
+
+          //          if (certs.size() == 1) {
+          //            logger.info("Truststore - One certificate found, no chain")
+          //            val cert = cf.generateCertificate(bais)
+          //            keystore.setCertificateEntry("api.nsi.hts.esit", cert)
+          //          }
+          //          else {
+          //            logger.info(s"Truststore - Certificate chain length: ${certs.size()}")
+          //            certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
+          //              case (cert, i) =>
+          //                val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
+          //                keystore.setCertificateEntry(alias, cert)
+          //                logger.info(s"truststore - certificate at index $i is ${cert.toString}")
+          //            }
+          //          }
 
           // Save the new keystore contents
-          keystore.store(new FileOutputStream(cacertsPath), decryptedPass.toCharArray)
+
+          val file = File.createTempFile(getClass.getSimpleName, "p7b")
+          file.deleteOnExit()
+
+          keystore.store(new FileOutputStream(file), decryptedPass.toCharArray)
+
+          val keystoreNew = KeyStore.getInstance(KeyStore.getDefaultType)
+          keystoreNew.load(new FileInputStream(file), decryptedPass.toCharArray)
+
+          logger.info(s"truststore size after import = ${keystoreNew.size()}")
+
+          List(TrustStoreConfig(filePath = Some(file.getAbsolutePath), data = None))
 
         case Failure(error) ⇒
           logger.info(s"Error in truststore configuration: ${error.getMessage}", error)
