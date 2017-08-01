@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
+import javax.inject.{Inject, Singleton}
+
 import akka.stream.Materializer
 import com.google.inject.Provider
 import io.netty.handler.ssl.SslContextBuilder
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
 import org.asynchttpclient.DefaultAsyncHttpClientConfig
-import play.api.{Configuration, Environment}
+import org.asynchttpclient.netty.ssl.DefaultSslEngineFactory
 import play.api.inject.{ApplicationLifecycle, Binding, Module}
+import play.api.libs.ws.ahc.{AhcConfigBuilder, AhcWSClient, AhcWSClientConfig}
 import play.api.libs.ws.{WSAPI, WSClient}
-import play.api.libs.ws.ahc.AhcWSClient
-import javax.inject.{Inject, Singleton}
-
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
 import scala.concurrent.Future
 
 @Singleton
-class AcceptAllAhcWSAPI @Inject()(lifecycle: ApplicationLifecycle, configuration: Configuration)(implicit materializer: Materializer)
+class AcceptAllAhcWSAPI @Inject()(lifecycle: ApplicationLifecycle, configuration: Configuration, environment: Environment)(implicit materializer: Materializer)
   extends WSAPI with Logging {
 
   logger.info("Starting up AcceptAllAhcWSAPI")
@@ -40,7 +41,9 @@ class AcceptAllAhcWSAPI @Inject()(lifecycle: ApplicationLifecycle, configuration
   private val context = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build()
   private val builder = new DefaultAsyncHttpClientConfig.Builder
 
-  private val config = builder.setAcceptAnyCertificate(true).setSslContext(context).build()
+  private val config = builder.setAcceptAnyCertificate(true).setSslEngineFactory(new DefaultSslEngineFactory).setSslContext(context).build()
+
+  config.getSslEngineFactory.init(new AhcConfigBuilder(AhcWSClientConfig(new CustomWSConfigParser(configuration, environment).parse())).build())
 
   lazy val client = {
     val innerClient = new AhcWSClient(config)
