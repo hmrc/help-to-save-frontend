@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io._
 import java.security.KeyStore
-import java.security.cert.CertificateFactory
+import java.security.cert.{Certificate, CertificateFactory, X509Certificate}
 import java.util
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
@@ -102,8 +102,6 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       val decryptedPass = new String(Base64.getDecoder.decode(cacertsPass))
       val trustData = config.getString("truststore.data").get
 
-      logger.info(s"trustData is $trustData")
-
       val result = for {
         dataBytes ← Try(Base64.getDecoder.decode(trustData.trim))
         file ← writeToTempFile(dataBytes, ".jks")
@@ -118,25 +116,15 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           logger.info(s"truststore size before import = ${keystore.size()}")
 
           val cf = CertificateFactory.getInstance("X.509")
-          val bais = fullStream(customTrustFile)
-          val certs = cf.generateCertificate(bais)
+          val certs = cf.generateCertificates(fullStream(customTrustFile))
 
-          keystore.setCertificateEntry("api.nsi.hts.esit", certs)
-
-          //          if (certs.size() == 1) {
-          //            logger.info("Truststore - One certificate found, no chain")
-          //            val cert = cf.generateCertificate(bais)
-          //            keystore.setCertificateEntry("api.nsi.hts.esit", cert)
-          //          }
-          //          else {
-          //            logger.info(s"Truststore - Certificate chain length: ${certs.size()}")
-          //            certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
-          //              case (cert, i) =>
-          //                val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
-          //                keystore.setCertificateEntry(alias, cert)
-          //                logger.info(s"truststore - certificate at index $i is ${cert.toString}")
-          //            }
-          //          }
+          logger.info(s"Truststore - Certificate chain length: ${certs.size()}")
+          certs.toArray[Certificate](new Array[Certificate](certs.size())).zipWithIndex.foreach {
+            case (cert, i) =>
+              val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
+              keystore.setCertificateEntry(alias, cert)
+              logger.info(s"truststore - certificate at index $i is ${cert.toString}")
+          }
 
           // Save the new keystore contents
 
