@@ -195,7 +195,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     keystore.load(is, pass.toCharArray)
 
     keystore.aliases().foreach {
-      alias ⇒ logger.info(s"alias $alias and certificate chain length= ${keystore.getCertificateChain(alias).length} ")
+      alias ⇒ logger.info(s"key store alias $alias and certificate chain length= ${keystore.getCertificateChain(alias).length} ")
     }
   }
 
