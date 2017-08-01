@@ -19,13 +19,15 @@ package uk.gov.hmrc.helptosavefrontend.services
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import play.api.Configuration
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.validNSIUserInfo
 
 class JSONSchemaValidationServiceImplSpec extends TestSupport {
 
-  val service = new JSONSchemaValidationServiceImpl()
+  val fakeConfiguration = fakeApplication.configuration
+  val service = new JSONSchemaValidationServiceImpl(fakeConfiguration)
 
   val validUserInfoJSON: JsValue = Json.toJson(validNSIUserInfo)
 
