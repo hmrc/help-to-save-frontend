@@ -1,4 +1,3 @@
-@ignore
 Feature: Applicant undergoes eligibility check
 
   Scenario: Applicant is in receipt of working tax credit and so is eligible
