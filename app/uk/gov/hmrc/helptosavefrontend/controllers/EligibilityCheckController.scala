@@ -71,7 +71,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                   _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
                 )
               }
-              Ok("Yay!")
+              Ok("You've already got an account - yay!")
 
             case EligibilityResult(nino, Right(eligibility)) ⇒
               // user wasn't already enrolled and the eligibility check was successful
