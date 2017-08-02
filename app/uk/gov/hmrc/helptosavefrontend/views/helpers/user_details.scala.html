@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.models.UserInfo
-@import uk.gov.hmrc.helptosavefrontend.models.UserInfo.localDateShow
+@import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
+@import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.localDateShow
 @import cats.syntax.show._
 
-@(userDetails: UserInfo)(implicit messages: play.api.i18n.Messages)
+@(userDetails: NSIUserInfo)(implicit messages: play.api.i18n.Messages)
 <div>
     <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
         <div class="grid-layout__column grid-layout__column--1-4">
@@ -35,7 +35,7 @@
             <p>@Messages("hts.register.confirmdetails.contact-details")</p>
         </div>
         <div class="grid-layout__column grid-layout__column--2-4">
-            <p>@Messages("hts.register.confirmdetails.email"): @(userDetails.email) </p>
+            <p>@Messages("hts.register.confirmdetails.email"): @(userDetails.contactDetails.email) </p>
         </div>
         <div class="grid-layout__column grid-layout__column--1-4">
             <p><a>change</a></p>

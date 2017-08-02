@@ -33,8 +33,6 @@ case class UserInfo(forename: String,
 
 object UserInfo {
 
-  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")))
-
   implicit val userDetailsFormat: Format[UserInfo] = Json.format[UserInfo]
 }
 

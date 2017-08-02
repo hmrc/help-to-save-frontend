@@ -42,6 +42,19 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   extends HelpToSaveAuth(app) with I18nSupport with Logging {
 
 
+  def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithConfidence {
+    implicit request ⇒
+      implicit htsContext ⇒
+        retrieveUserInfo().fold(
+          {
+            e ⇒
+              logger.warn(s"Could not retrieve user info: $e")
+              InternalServerError
+          },
+          u ⇒ Ok(views.html.register.confirm_details(u))
+        )
+  }
+
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
       implicit htsContext ⇒

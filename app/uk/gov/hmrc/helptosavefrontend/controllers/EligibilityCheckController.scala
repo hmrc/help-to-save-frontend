@@ -48,7 +48,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             auditor: HTSAuditor)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport with Logging {
 
-  def confirmDetails: Action[AnyContent] =  authorisedForHtsWithInfo  {
+  def getYouAreEligible: Action[AnyContent] =  authorisedForHtsWithInfo  {
     implicit request ⇒
       implicit htsContext ⇒
         val result: EitherT[Future, EligibilityCheckError, (NINO, EligibilityCheckResult)] = for {
@@ -65,9 +65,9 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
             eligibility.result.fold {
               auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
               SeeOther(routes.EligibilityCheckController.notEligible().url)
-            } { info ⇒
+            } { _ ⇒
               auditor.sendEvent(new EligibilityCheckEvent(nino, None))
-              Ok(views.html.register.confirm_details(info))
+              Ok(views.html.register.you_are_eligible())
             }
 
           })

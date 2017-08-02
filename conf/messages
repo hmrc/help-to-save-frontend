@@ -178,6 +178,17 @@ hts.helpers.sidebar.universal-credit=Universal Credit
 hts.helpers.sidebar.apply-for-universal-credit=Apply for Universal Credit
 hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 hts.helpers.phaseBanner.feedback=This is a new service – your feedback will help us to improve it.
+
+hts.register.you-are-eligible.title=You are eligible
+hts.register.you-are-eligible.notification.h1=You''re eligible
+hts.register.you-are-eligible.notification.p=for a Help to Save account
+hts.register.you-are-eligible.p-1=We''ve checked your details and you're eligible for a Help to Save account.
+hts.register.you-are-eligible.p-2=You don''t have an account yet.
+hts.register.you-are-eligible.h2-1=What happens next?
+hts.register.you-are-eligible.p-3=If you choose start creating your account, you''ll need to follow a few simple steps. You can start using it as soon as your enter your UK bank account details.
+hts.register.you-are-eligible.p-4=To start creating your account, you'll need to follow a few simple steps.
+hts.register.you-are-eligible.button-1=Start creating your account
+
 hts.register.confirmdetails.header-page=Confirm your contact details
 hts.register.confirmdetails.header=Check and confirm your details
 hts.register.confirmdetails.your-details-header=Your details
@@ -190,10 +201,12 @@ hts.register.confirmdetails.email=Email
 hts.register.confirmdetails.create-your-account-header=Create your account
 hts.register.confirmdetails.text=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
 hts.register.confirmdetails.label=Continue
+
 hts.register.missinguserinfo.header=We couldn''t retrieve the following details
 hts.register.missinguserinfo.header.page.title= Help-to-save: Missing UserInfo
 hts.register.missinguserinfo.redirect.personal.account= Please navigate to your <a href="{0}" target="_blank">Personal Account</a> and provide the missing information
 hts.register.missinguserinfo.contact.hmrc=If you have trouble getting in, please  <a href="{0}" target="_blank">Contact HMRC</a>
+
 hts.register.create_account_help_to_save.title=Create a account
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.par-1=Before opening an account, you’'ll need to confirm you accept these conditions:
@@ -201,6 +214,7 @@ hts.register.create_account_help_to_save.bullet-1=you’'re only allowed one acc
 hts.register.create_account_help_to_save.bullet-2=you’'ll need to enter your bank details to access your account
 hts.register.create_account_help_to_save.accept-label=Accept and create account
 hts.register.create_account_help_to_save.cancel-label=Exit without creating account
+
 hts.iv.identity_verification.title=Help to Save Identity verification
 hts.iv.cant_confirm_your_identity=We can''t to confirm your identity
 hts.iv.were_unable_to_confirm_your_identity=We''re unable to confirm your identity

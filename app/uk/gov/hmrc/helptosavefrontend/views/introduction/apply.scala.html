@@ -38,7 +38,7 @@
         <p>@Messages("hts.introduction.apply.par-2")</p>
         <p>@Messages("hts.introduction.apply.par-3")</p>
         <p>@Messages("hts.introduction.apply.par-4")</p>
-        @form(routes.EligibilityCheckController.confirmDetails(), 'class -> "group") {
+        @form(routes.EligibilityCheckController.getYouAreEligible(), 'class -> "group") {
             @submit('_buttonClass -> "button--get-started") {
                 @Messages("hts.introduction.apply.button-1")
             }
