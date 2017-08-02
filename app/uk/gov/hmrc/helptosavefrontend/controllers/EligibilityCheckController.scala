@@ -18,9 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.option._
 import cats.syntax.either._
-import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -28,108 +26,97 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             helpToSaveService: HelpToSaveService,
-                                            sessionCacheConnector: SessionCacheConnector,
+                                            val sessionCacheConnector: SessionCacheConnector,
                                             jsonSchemaValidationService: JSONSchemaValidationService,
-                                            enrolmentService: EnrolmentService,
+                                            val enrolmentService: EnrolmentService,
                                             val app: Application,
                                             auditor: HTSAuditor)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app) with I18nSupport with Logging {
+  extends HelpToSaveAuth(app) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
-  import EligibilityCheckController.EligibilityResult
-
-  def getCheckEligibility: Action[AnyContent] =  authorisedForHtsWithInfo  {
+  def getCheckEligibility: Action[AnyContent] =  authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        val eligibilityCheck = for {
-          nino            ← EitherT.fromOption[Future](htsContext.nino, NoNINO)
-          enrolmentStatus ← enrolmentService.getUserEnrolmentStatus(nino).leftMap(e ⇒ EnrolmentCheckError(nino, e))
-          result          ← handleEnrolmentStatus(enrolmentStatus, nino, htsContext)
-        } yield result
-
-        eligibilityCheck.fold(
-          handleEligibilityCheckError, {
-            case EligibilityResult(nino, Left(EnrolmentStore.Enrolled(itmpHtSFlag))) ⇒
-              // if the user is enrolled but the itmp flag is not set then just
-              // start the process to set the itmp flag here without worrying about the result
-              if (!itmpHtSFlag){
-                enrolmentService.setITMPFlag(nino).fold(
-                  e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
-                  _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
-                )
-              }
-              Ok("You've already got an account - yay!")
-
-            case EligibilityResult(nino, Right(eligibility)) ⇒
-              // user wasn't already enrolled and the eligibility check was successful
-              eligibility.result.fold {
-                auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
-                SeeOther(routes.EligibilityCheckController.notEligible().url)
-              } { _ ⇒
-                auditor.sendEvent(new EligibilityCheckEvent(nino, None))
-                SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-              }
-
-          })
+        checkIfAlreadyEnrolled{ nino ⇒
+          checkSession(
+            // there is no session yet
+            performEligibilityChecks(nino, htsContext).fold(
+              e ⇒ handleEligibilityCheckError(e),
+              { case (nino, eligibility) ⇒ handleEligibilityResult(eligibility, nino) }
+            ), session ⇒
+              // there is a session
+              Future.successful(handleEligibilityResult(session, nino))
+          )
+        }
   }
 
-  val notEligible: Action[AnyContent] = unprotected {
+  val notEligible: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        Future.successful(Ok(views.html.core.not_eligible()))
+        checkIfAlreadyEnrolled { _ ⇒
+          checkSession(
+            Future.successful(SeeOther(routes.IntroductionController.getApply().url)),
+            _.eligibilityCheckResult.fold {
+              Future.successful(Ok(views.html.core.not_eligible()))
+            }(_ ⇒
+              Future.successful(SeeOther(routes.EligibilityCheckController.getIsEligible().url))
+            )
+          )
+        }
   }
 
   val getIsEligible: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        Future.successful(Ok(views.html.register.you_are_eligible()))
+        checkIfAlreadyEnrolled { _ ⇒
+          checkSession(
+            Future.successful(SeeOther(routes.IntroductionController.getApply().url)),
+            _.eligibilityCheckResult.fold(
+              Future.successful(SeeOther(routes.EligibilityCheckController.notEligible().url))
+            )(_ ⇒
+              Future.successful(Ok(views.html.register.you_are_eligible()))
+            )
+          )
+        }
   }
 
-  /**
-    * If the user is enrolled return None. If the user is not enrolled perform the
-    * eligibility checks and return Some if successful
-    */
-  private def handleEnrolmentStatus(enrolmentStatus: EnrolmentStore.Status,
-                                    nino: NINO,
-                                    htsContext: HtsContext)(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, EligibilityResult] =
-    enrolmentStatus.fold(
-      performAndHandleEligibilityChecks(nino, htsContext),
-      itmpFlag ⇒ EitherT.pure(EligibilityResult(nino, Left(EnrolmentStore.Enrolled(itmpFlag))))
-    )
-
-  private def performAndHandleEligibilityChecks(nino: NINO,
-                                                htsContext: HtsContext)(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, EligibilityResult] =
+  private def performEligibilityChecks(nino: NINO,
+                                       htsContext: HtsContext
+                                      )(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, (NINO, HTSSession)] =
     for {
       userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, EligibilityCheckError.NoUserDetailsURI(nino))
-      eligible ← helpToSaveService.checkEligibility(nino, userDetailsURI)
-      nsiUserInfo = eligible.result.map(NSIUserInfo(_))
-      _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
-      _ ← writeToKeyStore(nsiUserInfo).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
-    } yield EligibilityResult(nino, Right(eligible))
+      eligible       ← helpToSaveService.checkEligibility(nino, userDetailsURI)
+      nsiUserInfo    = eligible.result.map(NSIUserInfo(_))
+      _              ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
+      session        = HTSSession(nsiUserInfo)
+      _              ←  sessionCacheConnector.put(session).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
+    } yield (nino, session)
+
+  private def handleEligibilityResult(eligibilityCheckResult: HTSSession,
+                                      nino: NINO
+                                     )(implicit hc: HeaderCarrier) = {
+    eligibilityCheckResult.eligibilityCheckResult.fold{
+      auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
+      SeeOther(routes.EligibilityCheckController.notEligible().url)
+    } { _ ⇒
+      auditor.sendEvent(new EligibilityCheckEvent(nino, None))
+      SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+    }
+  }
 
   private def handleEligibilityCheckError(e: EligibilityCheckError)(
     implicit request: Request[AnyContent], hc: HeaderCarrier, htsContext: HtsContext
   ): Result = e match {
-    case NoNINO =>
-      logger.warn("Could not find NINO")
-      InternalServerError
-
-    case EnrolmentCheckError(nino, message) ⇒
-      logger.warn(s"Error checking if user was enrolled for user $nino: $message")
-      InternalServerError
-
     case NoUserDetailsURI(nino) ⇒
       logger.warn(s"Could not find user details URI for user $nino")
       InternalServerError
@@ -165,36 +152,5 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
     }
   }
 
-  /**
-    * Writes the user info to key-store if it exists and returns the associated [[CacheMap]]. If the user info
-    * is not defined, don't do anything and return [[None]]. Any errors during writing to key-store are
-    * captured as a [[String]] in the [[Either]].
-    */
-  private def writeToKeyStore(userDetails: Option[NSIUserInfo])(implicit hc: HeaderCarrier): EitherT[Future, String, Option[CacheMap]] = {
-    // write to key-store
-    val cacheMapOption: Option[Future[CacheMap]] =
-      userDetails.map { details ⇒ sessionCacheConnector.put(HTSSession(Some(details))) }
-
-    // use traverse to swap the option and future
-    val cacheMapFuture: Future[Option[CacheMap]] =
-      cacheMapOption.traverse[Future, CacheMap](identity)
-
-    EitherT(
-      cacheMapFuture.map[Either[String, Option[CacheMap]]](Right(_))
-        .recover { case e ⇒ Left(e.getMessage) }
-    )
-  }
 }
 
-object EligibilityCheckController {
-
-  /**
-    * Contains the result of checking eligibility
-    *
-    * @param nino The NINO of the user
-    * @param result Left if the user is already enrolled and Right if the user is not
-    *               enrolled and the eligibility checks were successful
-    */
-  private case class EligibilityResult(nino: NINO, result: Either[EnrolmentStore.Enrolled,EligibilityCheckResult])
-
-}
