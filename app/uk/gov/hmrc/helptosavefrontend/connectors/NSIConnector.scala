@@ -63,7 +63,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) exten
       logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
     }
 
-    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
+    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth, "token" -> hc.token.map(_.value).getOrElse("MISSING_TOKEN")))(
       NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
       .map { response ⇒
         response.status match {
