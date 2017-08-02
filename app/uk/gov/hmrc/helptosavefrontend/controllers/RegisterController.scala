@@ -27,7 +27,7 @@ import play.api.Application
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -38,7 +38,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    helpToSaveService: HelpToSaveService,
                                    sessionCacheConnector: SessionCacheConnector,
-                                   app: Application)(implicit ec: ExecutionContext)
+                                   enrolmentService: EnrolmentService,
+                                   val app: Application)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport with Logging {
 
 
@@ -64,7 +65,6 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithConfidence {
     implicit request ⇒
       implicit htsContext ⇒
-
         val result = for {
           userInfo ← retrieveUserInfo()
           _        ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
@@ -79,6 +79,12 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           },
           info ⇒ {
             logger.info(s"Successfully created account for ${info.nino}")
+            // start the process to enrol the user but don't worry about the result
+            enrolmentService.enrolUser(info.nino).fold(
+              e ⇒ logger.warn(s"Could not start process to enrol user ${info.nino}: $e"),
+              _ ⇒ logger.info(s"Started process to enrol user ${info.nino}")
+            )
+
             Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
           }
         )

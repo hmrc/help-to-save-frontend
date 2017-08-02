@@ -182,11 +182,11 @@ hts.helpers.phaseBanner.feedback=This is a new service – your feedback will he
 hts.register.you-are-eligible.title=You are eligible
 hts.register.you-are-eligible.notification.h1=You''re eligible
 hts.register.you-are-eligible.notification.p=for a Help to Save account
-hts.register.you-are-eligible.p-1=We''ve checked your details and you're eligible for a Help to Save account.
+hts.register.you-are-eligible.p-1=We''ve checked your details and you''re eligible for a Help to Save account.
 hts.register.you-are-eligible.p-2=You don''t have an account yet.
 hts.register.you-are-eligible.h2-1=What happens next?
 hts.register.you-are-eligible.p-3=If you choose start creating your account, you''ll need to follow a few simple steps. You can start using it as soon as your enter your UK bank account details.
-hts.register.you-are-eligible.p-4=To start creating your account, you'll need to follow a few simple steps.
+hts.register.you-are-eligible.p-4=To start creating your account, you''ll need to follow a few simple steps.
 hts.register.you-are-eligible.button-1=Start creating your account
 
 hts.register.confirmdetails.header-page=Confirm your contact details
