@@ -16,29 +16,26 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 @import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.localDateShow
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import cats.syntax.show._
 
 @(userDetails: NSIUserInfo)(implicit messages: play.api.i18n.Messages)
-<div>
-    <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
-        <div class="grid-layout__column grid-layout__column--1-4">
-            <p>@Messages("hts.register.confirmdetails.your-details")</p>
-        </div>
-        <div class="grid-layout__column grid-layout__column--2-4">
-            <p>@Messages("hts.register.confirmdetails.name"): @(userDetails.forename + " " + userDetails.surname)</p>
-            <p>@Messages("hts.register.confirmdetails.national-insurance-number"): @(userDetails.nino)</p>
-            <p>@Messages("hts.register.confirmdetails.date-of-birth"): @(userDetails.dateOfBirth.show)</p>
-        </div>
-    </div>
-    <div class="subsection grid-layout grid-layout--no-gutter divider--bottom font-xsmall">
-        <div class="grid-layout__column grid-layout__column--1-4">
-            <p>@Messages("hts.register.confirmdetails.contact-details")</p>
-        </div>
-        <div class="grid-layout__column grid-layout__column--2-4">
-            <p>@Messages("hts.register.confirmdetails.email"): @(userDetails.contactDetails.email) </p>
-        </div>
-        <div class="grid-layout__column grid-layout__column--1-4">
-            <p><a>change</a></p>
-        </div>
-    </div>
+
+<div class="divider--bottom">
+    <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.name")</h4>
+    <p>@(userDetails.forename + " " + userDetails.surname)</p>
+</div>
+<div class="divider--bottom">
+    <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.nino")</h4>
+    <p>@(userDetails.nino)</p>
+</div>
+<div class="divider--bottom">
+    <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.dob")</h4>
+    <p>@(userDetails.dateOfBirth.show)</p>
+</div>
+<div class="divider--bottom">
+    <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.email")
+        <span><a style="float: right; font-weight: normal;" href=@routes.UpdateEmailAddressController.getUpdateYourEmailAddress()>@Messages("hts.register.check-and-confirm-your-details.change-button-label")</a></span>
+    </h4>
+    <p>@(userDetails.contactDetails.email)</p>
 </div>

@@ -22,16 +22,13 @@
 @(userDetails: NSIUserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.check-and-confirm-your-details.title"), bodyClasses = None) {
- <h1 class="form-title heading-xlarge">
-    <span class="heading-secondary">
-    Step 1 of 4
-    </span>
+    <h1 class="form-title heading-xlarge">
+        <span class="heading-secondary">
+        @Messages("hts.register.check-and-confirm-your-details.step")
+        </span>
      @Messages("hts.register.check-and-confirm-your-details.title")
- </h1>
+    </h1>
     @user_details(userDetails)
- <header>
-  <h2>@Messages("hts.register.confirmdetails.create-your-account-header")</h2>
-  <p>@Messages("hts.register.confirmdetails.text")</p>
- </header>
- <a href=@routes.RegisterController.getCreateAccountHelpToSavePage() id="continue" class="button">@Messages("hts.register.confirmdetails.label")</a>
+    <p>@Messages("hts.register.check-and-confirm-your-details.p-1")</p>
+    <a href=@routes.RegisterController.getCreateAccountHelpToSavePage() id="continue" class="button">@Messages("hts.register.check-and-confirm-your-details.continue-button-label")</a>
 }
