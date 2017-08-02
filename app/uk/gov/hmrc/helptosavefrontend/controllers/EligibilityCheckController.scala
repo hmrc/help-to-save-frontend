@@ -22,18 +22,18 @@ import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import com.google.inject.Inject
-import configs.syntax._
-import play.api.{Application, Logger}
+import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request}
 import play.api.mvc.Result
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError._
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO, UserDetailsURI}
+import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -44,41 +44,75 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             helpToSaveService: HelpToSaveService,
                                             sessionCacheConnector: SessionCacheConnector,
                                             jsonSchemaValidationService: JSONSchemaValidationService,
-                                            app: Application,
+                                            enrolmentService: EnrolmentService,
+                                            val app: Application,
                                             auditor: HTSAuditor)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with I18nSupport with Logging {
+
+  import EligibilityCheckController.EligibilityResult
 
   def confirmDetails: Action[AnyContent] =  authorisedForHtsWithInfo  {
     implicit request ⇒
       implicit htsContext ⇒
-        val result: EitherT[Future, EligibilityCheckError, (NINO, EligibilityCheckResult)] = for {
-          nino ← EitherT.fromOption[Future](htsContext.nino, EligibilityCheckError.NoNINO)
-          userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, EligibilityCheckError.NoUserDetailsURI(nino))
-          eligible ← helpToSaveService.checkEligibility(nino, userDetailsURI)
-          nsiUserInfo = eligible.result.map(NSIUserInfo(_))
-          _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
-          _ ← writeToKeyStore(nsiUserInfo).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
-        } yield (nino, eligible)
+        val eligibilityCheck = for {
+          nino            ← EitherT.fromOption[Future](htsContext.nino, NoNINO)
+          enrolmentStatus ← enrolmentService.getUserEnrolmentStatus(nino).leftMap(e ⇒ EnrolmentCheckError(nino, e))
+          result          ← handleEnrolmentStatus(enrolmentStatus, nino, htsContext)
+        } yield result
 
-        result.fold(
-          handleEligibilityCheckError, { case (nino, eligibility) ⇒
-            eligibility.result.fold {
-              auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
-              SeeOther(routes.EligibilityCheckController.notEligible().url)
-            } { info ⇒
-              auditor.sendEvent(new EligibilityCheckEvent(nino, None))
-              Ok(views.html.register.confirm_details(info))
-            }
+        eligibilityCheck.fold(
+          handleEligibilityCheckError, {
+            case EligibilityResult(nino, Left(EnrolmentStore.Enrolled(itmpHtSFlag))) ⇒
+              // if the user is enrolled but the itmp flag is not set then just
+              // start the process to set the itmp flag here without worrying about the result
+              if (!itmpHtSFlag){
+                enrolmentService.setITMPFlag(nino).fold(
+                  e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
+                  _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
+                )
+              }
+              Ok("You've already got an account - yay!")
+
+            case EligibilityResult(nino, Right(eligibility)) ⇒
+              // user wasn't already enrolled and the eligibility check was successful
+              eligibility.result.fold {
+                auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
+                SeeOther(routes.EligibilityCheckController.notEligible().url)
+              } { info ⇒
+                auditor.sendEvent(new EligibilityCheckEvent(nino, None))
+                Ok(views.html.register.confirm_details(info))
+              }
 
           })
   }
-
 
   val notEligible: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
         Future.successful(Ok(views.html.core.not_eligible()))
   }
+
+  /**
+    * If the user is enrolled return None. If the user is not enrolled perform the
+    * eligibility checks and return Some if successful
+    */
+  private def handleEnrolmentStatus(enrolmentStatus: EnrolmentStore.Status,
+                                    nino: NINO,
+                                    htsContext: HtsContext)(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, EligibilityResult] =
+    enrolmentStatus.fold(
+      performAndHandleEligibilityChecks(nino, htsContext),
+      itmpFlag ⇒ EitherT.pure(EligibilityResult(nino, Left(EnrolmentStore.Enrolled(itmpFlag))))
+    )
+
+  private def performAndHandleEligibilityChecks(nino: NINO,
+                                                htsContext: HtsContext)(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, EligibilityResult] =
+    for {
+      userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, EligibilityCheckError.NoUserDetailsURI(nino))
+      eligible ← helpToSaveService.checkEligibility(nino, userDetailsURI)
+      nsiUserInfo = eligible.result.map(NSIUserInfo(_))
+      _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
+      _ ← writeToKeyStore(nsiUserInfo).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
+    } yield EligibilityResult(nino, Right(eligible))
 
   private def handleEligibilityCheckError(e: EligibilityCheckError)(
     implicit request: Request[AnyContent], hc: HeaderCarrier, htsContext: HtsContext
@@ -87,12 +121,16 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       logger.warn("Could not find NINO")
       InternalServerError
 
+    case EnrolmentCheckError(nino, message) ⇒
+      logger.warn(s"Error checking if user was enrolled for user $nino: $message")
+      InternalServerError
+
     case NoUserDetailsURI(nino) ⇒
       logger.warn(s"Could not find user details URI for user $nino")
       InternalServerError
 
     case BackendError(message, nino) =>
-      logger.warn(s"An error occured while trying to call the backend service for user $nino: $message")
+      logger.warn(s"An error occurred while trying to call the backend service for user $nino: $message")
       InternalServerError
 
     case MissingUserInfos(missingInfo, nino) =>
@@ -141,4 +179,17 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
         .recover { case e ⇒ Left(e.getMessage) }
     )
   }
+}
+
+object EligibilityCheckController {
+
+  /**
+    * Contains the result of checking eligibility
+    *
+    * @param nino The NINO of the user
+    * @param result Left if the user is already enrolled and Right if the user is not
+    *               enrolled and the eligibility checks were successful
+    */
+  private case class EligibilityResult(nino: NINO, result: Either[EnrolmentStore.Enrolled,EligibilityCheckResult])
+
 }
