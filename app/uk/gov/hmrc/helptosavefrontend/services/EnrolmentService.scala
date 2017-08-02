@@ -45,7 +45,7 @@ class EnrolmentServiceImpl @Inject()(enrolmentStore: EnrolmentStore,
 
   def enrolUser(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     for {
-      _ ← enrolmentStore.put(nino, itmpHtSFlag = false)
+      _ ← enrolmentStore.update(nino, itmpHtSFlag = false)
       _ ← setITMPFlagAndUpdateMongo(nino)
     } yield ()
 
@@ -58,7 +58,7 @@ class EnrolmentServiceImpl @Inject()(enrolmentStore: EnrolmentStore,
 
   private def  setITMPFlagAndUpdateMongo(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, Unit] = for {
     _ ← itmpConnector.setFlag(nino)(hc, ec)
-    _ ← enrolmentStore.put(nino, itmpHtSFlag = true)
+    _ ← enrolmentStore.update(nino, itmpHtSFlag = true)
   } yield ()
 
 }

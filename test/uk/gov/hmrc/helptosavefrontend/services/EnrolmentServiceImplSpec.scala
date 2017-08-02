@@ -34,7 +34,7 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
   val itmpConnector: ITMPConnector = mock[ITMPConnector]
 
   def mockEnrolmentStorePut(nino: NINO, itmpFlag: Boolean)(result: Either[String,Unit]): Unit =
-    (enrolmentStore.put(_: NINO, _: Boolean))
+    (enrolmentStore.update(_: NINO, _: Boolean))
       .expects(nino, itmpFlag)
       .returning(EitherT.fromEither[Future](result))
 

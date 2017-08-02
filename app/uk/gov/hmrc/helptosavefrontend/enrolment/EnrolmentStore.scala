@@ -36,7 +36,7 @@ trait EnrolmentStore {
 
   def get(nino: NINO): EitherT[Future,String,Status]
 
-  def put(nino: NINO, itmpHtSFlag: Boolean): EitherT[Future,String,Unit]
+  def update(nino: NINO, itmpHtSFlag: Boolean): EitherT[Future,String,Unit]
 
 }
 
@@ -70,7 +70,7 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
     )
   )
 
-  def update(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
+  private[enrolment] def doUpdate(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
     collection.findAndUpdate(
       BSONDocument("nino" -> data.nino),
       BSONDocument("$set" -> BSONDocument("itmpHtSFlag" -> data.itmpHtSFlag)),
@@ -87,10 +87,10 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
         Left(s"Could not read from enrolment store: ${e.getMessage}")
     })
 
-  override def put(nino: NINO, itmpHtSFlag: Boolean): EitherT[Future, String, Unit] = {
+  override def update(nino: NINO, itmpHtSFlag: Boolean): EitherT[Future, String, Unit] = {
     logger.info(s"Putting nino $nino into enrolment store")
     EitherT(
-      update(EnrolmentData(nino, itmpHtSFlag)).map[Either[String,Unit]]{ result ⇒
+      doUpdate(EnrolmentData(nino, itmpHtSFlag)).map[Either[String,Unit]]{ result ⇒
         result.fold[Either[String,Unit]](
           Left("Could not update enrolment store")
         ){ _ ⇒

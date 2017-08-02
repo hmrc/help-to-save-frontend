@@ -58,7 +58,7 @@ class MongoEnrolmentStoreSpec extends TestSupport{
         Seq.empty[Index]
       }
 
-      override def update(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
+      override def doUpdate(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
         mockDBFunctions.update[EnrolmentData](data)
 
 
@@ -91,7 +91,7 @@ class MongoEnrolmentStoreSpec extends TestSupport{
     "putting" must {
 
       def put(nino: NINO, itmpNeedsUpdate: Boolean): Either[String,Unit] =
-        Await.result(store.put(nino, itmpNeedsUpdate).value, 5.seconds)
+        Await.result(store.update(nino, itmpNeedsUpdate).value, 5.seconds)
 
 
       "insert into the mongodb collection" in {
