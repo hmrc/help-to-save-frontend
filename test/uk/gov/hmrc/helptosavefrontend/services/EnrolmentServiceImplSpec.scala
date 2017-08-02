@@ -33,9 +33,9 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
   val enrolmentStore: EnrolmentStore = mock[EnrolmentStore]
   val itmpConnector: ITMPConnector = mock[ITMPConnector]
 
-  def mockEnrolmentStorePut(nino: NINO, itmpFlagSet: Boolean)(result: Either[String,Unit]): Unit =
+  def mockEnrolmentStorePut(nino: NINO, itmpFlag: Boolean)(result: Either[String,Unit]): Unit =
     (enrolmentStore.put(_: NINO, _: Boolean))
-      .expects(nino, itmpFlagSet)
+      .expects(nino, itmpFlag)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEnrolmentStoreGet(nino: NINO)(result: Either[String, EnrolmentStore.Status]): Unit =
@@ -62,14 +62,14 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
     "enrolling a user" must {
 
       "create a mongo record with the ITMP flag set to false" in {
-        mockEnrolmentStorePut(nino, itmpFlagSet = false)(Left(""))
+        mockEnrolmentStorePut(nino, itmpFlag = false)(Left(""))
 
         await(service.enrolUser(nino).value)
       }
 
       "set the ITMP flag" in {
         inSequence{
-          mockEnrolmentStorePut(nino, itmpFlagSet = false)(Right(()))
+          mockEnrolmentStorePut(nino, itmpFlag = false)(Right(()))
           mockITMPConnector(nino)(Left(""))
         }
 
@@ -78,9 +78,9 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
 
       "update the mongo record with the ITMP flag set to true" in {
         inSequence{
-          mockEnrolmentStorePut(nino, itmpFlagSet = false)(Right(()))
+          mockEnrolmentStorePut(nino, itmpFlag = false)(Right(()))
           mockITMPConnector(nino)(Right(()))
-          mockEnrolmentStorePut(nino, itmpFlagSet = true)(Left(""))
+          mockEnrolmentStorePut(nino, itmpFlag = true)(Left(""))
         }
 
         await(service.enrolUser(nino).value)
@@ -88,9 +88,9 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
 
       "return a Right if all the steps were successful" in {
         inSequence{
-          mockEnrolmentStorePut(nino, itmpFlagSet = false)(Right(()))
+          mockEnrolmentStorePut(nino, itmpFlag = false)(Right(()))
           mockITMPConnector(nino)(Right(()))
-          mockEnrolmentStorePut(nino, itmpFlagSet = true)(Right(()))
+          mockEnrolmentStorePut(nino, itmpFlag = true)(Right(()))
         }
 
         await(service.enrolUser(nino).value) shouldBe Right(())
@@ -102,17 +102,17 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
           await(service.enrolUser(nino).value).isLeft shouldBe true
         }
 
-        test(mockEnrolmentStorePut(nino, itmpFlagSet = false)(Left("")))
+        test(mockEnrolmentStorePut(nino, itmpFlag = false)(Left("")))
 
         test(inSequence{
-          mockEnrolmentStorePut(nino, itmpFlagSet = false)(Right(()))
+          mockEnrolmentStorePut(nino, itmpFlag = false)(Right(()))
           mockITMPConnector(nino)(Left(""))
         })
 
         test(inSequence{
-          mockEnrolmentStorePut(nino, itmpFlagSet = false)(Right(()))
+          mockEnrolmentStorePut(nino, itmpFlag = false)(Right(()))
           mockITMPConnector(nino)(Right(()))
-          mockEnrolmentStorePut(nino, itmpFlagSet = true)(Left(""))
+          mockEnrolmentStorePut(nino, itmpFlag = true)(Left(""))
         })
       }
 
@@ -130,7 +130,7 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
       "update the mongo record with the ITMP flag set to true" in {
         inSequence{
           mockITMPConnector(nino)(Right(()))
-          mockEnrolmentStorePut(nino, itmpFlagSet = true)(Left(""))
+          mockEnrolmentStorePut(nino, itmpFlag = true)(Left(""))
         }
 
         await(service.setITMPFlag(nino).value)
@@ -139,7 +139,7 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
       "return a Right if all the steps were successful" in {
         inSequence{
           mockITMPConnector(nino)(Right(()))
-          mockEnrolmentStorePut(nino, itmpFlagSet = true)(Right(()))
+          mockEnrolmentStorePut(nino, itmpFlag = true)(Right(()))
         }
 
         await(service.setITMPFlag(nino).value) shouldBe Right(())
@@ -155,7 +155,7 @@ class EnrolmentServiceImplSpec extends TestSupport with GeneratorDrivenPropertyC
 
         test(inSequence{
           mockITMPConnector(nino)(Right(()))
-          mockEnrolmentStorePut(nino, itmpFlagSet = true)(Left(""))
+          mockEnrolmentStorePut(nino, itmpFlag = true)(Left(""))
         })
       }
 

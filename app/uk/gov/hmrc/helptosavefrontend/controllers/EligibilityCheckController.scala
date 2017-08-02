@@ -62,10 +62,10 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
 
         eligibilityCheck.fold(
           handleEligibilityCheckError, {
-            case EligibilityResult(nino, Left(EnrolmentStore.Enrolled(itmpHtSFlagSet))) ⇒
+            case EligibilityResult(nino, Left(EnrolmentStore.Enrolled(itmpHtSFlag))) ⇒
               // if the user is enrolled but the itmp flag is not set then just
               // start the process to set the itmp flag here without worrying about the result
-              if (!itmpHtSFlagSet){
+              if (!itmpHtSFlag){
                 enrolmentService.setITMPFlag(nino).fold(
                   e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
                   _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
@@ -101,7 +101,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                     htsContext: HtsContext)(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, EligibilityResult] =
     enrolmentStatus.fold(
       performAndHandleEligibilityChecks(nino, htsContext),
-      itmpFlagSet ⇒ EitherT.pure(EligibilityResult(nino, Left(EnrolmentStore.Enrolled(itmpFlagSet))))
+      itmpFlag ⇒ EitherT.pure(EligibilityResult(nino, Left(EnrolmentStore.Enrolled(itmpFlag))))
     )
 
   private def performAndHandleEligibilityChecks(nino: NINO,
@@ -113,9 +113,6 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       _ <- EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
       _ ← writeToKeyStore(nsiUserInfo).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
     } yield EligibilityResult(nino, Right(eligible))
-
-
-
 
   private def handleEligibilityCheckError(e: EligibilityCheckError)(
     implicit request: Request[AnyContent], hc: HeaderCarrier, htsContext: HtsContext

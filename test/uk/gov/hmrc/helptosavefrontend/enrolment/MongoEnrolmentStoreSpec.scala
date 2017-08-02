@@ -73,9 +73,9 @@ class MongoEnrolmentStoreSpec extends TestSupport{
     }
   }
 
-  def mockInsert(nino: NINO, imtpNeedsUpdate: Boolean)(result: ⇒ Future[Option[EnrolmentData]]): Unit =
+  def mockInsert(nino: NINO, itmpNeedsUpdate: Boolean)(result: ⇒ Future[Option[EnrolmentData]]): Unit =
     (mockDBFunctions.update[EnrolmentData](_: EnrolmentData))
-      .expects(EnrolmentData(nino, imtpNeedsUpdate))
+      .expects(EnrolmentData(nino, itmpNeedsUpdate))
       .returning(result)
 
   def mockFind(nino: NINO)(result: ⇒ Future[List[(NINO,Boolean)]]): Unit =
@@ -90,8 +90,8 @@ class MongoEnrolmentStoreSpec extends TestSupport{
 
     "putting" must {
 
-      def put(nino: NINO, imtpNeedsUpdate: Boolean): Either[String,Unit] =
-        Await.result(store.put(nino, imtpNeedsUpdate).value, 5.seconds)
+      def put(nino: NINO, itmpNeedsUpdate: Boolean): Either[String,Unit] =
+        Await.result(store.put(nino, itmpNeedsUpdate).value, 5.seconds)
 
 
       "insert into the mongodb collection" in {

@@ -36,7 +36,7 @@ trait EnrolmentStore {
 
   def get(nino: NINO): EitherT[Future,String,Status]
 
-  def put(nino: NINO, itmpHtSFlagSet: Boolean): EitherT[Future,String,Unit]
+  def put(nino: NINO, itmpHtSFlag: Boolean): EitherT[Future,String,Unit]
 
 }
 
@@ -44,12 +44,12 @@ object EnrolmentStore {
 
   sealed trait Status {
     def fold[T](ifNotEnrolled: ⇒ T, ifEnrolled: Boolean ⇒ T): T = this match {
-      case e: Enrolled  ⇒ ifEnrolled(e.itmpHtSFlagSet)
+      case e: Enrolled  ⇒ ifEnrolled(e.itmpHtSFlag)
       case NotEnrolled  ⇒ ifNotEnrolled
     }
   }
 
-  case class Enrolled(itmpHtSFlagSet: Boolean) extends Status
+  case class Enrolled(itmpHtSFlag: Boolean) extends Status
 
   case object NotEnrolled extends Status
 
@@ -73,24 +73,24 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
   def update(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
     collection.findAndUpdate(
       BSONDocument("nino" -> data.nino),
-      BSONDocument("$set" -> BSONDocument("imtpHtSFlagSet" -> data.imtpHtSFlagSet)),
+      BSONDocument("$set" -> BSONDocument("itmpHtSFlag" -> data.itmpHtSFlag)),
       fetchNewObject = true,
       upsert = true
     ).map(_.result[EnrolmentData])
 
   override def get(nino: String): EitherT[Future, String, EnrolmentStore.Status] = EitherT(
     find("nino" → JsString(nino)).map { res ⇒
-      Right(res.headOption.fold[Status](NotEnrolled)(data ⇒ Enrolled(data.imtpHtSFlagSet)))
+      Right(res.headOption.fold[Status](NotEnrolled)(data ⇒ Enrolled(data.itmpHtSFlag)))
     }.recover{
       case e ⇒
         logger.error(s"Could not read from enrolment store", e)
         Left(s"Could not read from enrolment store: ${e.getMessage}")
     })
 
-  override def put(nino: NINO, itmpHtSFlagSet: Boolean): EitherT[Future, String, Unit] = {
+  override def put(nino: NINO, itmpHtSFlag: Boolean): EitherT[Future, String, Unit] = {
     logger.info(s"Putting nino $nino into enrolment store")
     EitherT(
-      update(EnrolmentData(nino, itmpHtSFlagSet)).map[Either[String,Unit]]{ result ⇒
+      update(EnrolmentData(nino, itmpHtSFlag)).map[Either[String,Unit]]{ result ⇒
         result.fold[Either[String,Unit]](
           Left("Could not update enrolment store")
         ){ _ ⇒
@@ -107,7 +107,7 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
 
 object MongoEnrolmentStore {
 
-  private[enrolment] case class EnrolmentData(nino: String, imtpHtSFlagSet: Boolean)
+  private[enrolment] case class EnrolmentData(nino: String, itmpHtSFlag: Boolean)
 
   private[enrolment]  object EnrolmentData {
     implicit val ninoFormat = Json.format[EnrolmentData]

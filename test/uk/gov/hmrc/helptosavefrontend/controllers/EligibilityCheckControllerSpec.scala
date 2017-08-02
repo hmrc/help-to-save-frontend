@@ -146,7 +146,7 @@ class EligibilityCheckControllerSpec extends TestSupport {
         "redirect to NS&I and set the ITMP flag if it has not already been set" in {
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlagSet = false)))
+            mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlag = false)))
             mockWriteITMPFlag(nino)(Right(()))
           }
 
@@ -157,7 +157,7 @@ class EligibilityCheckControllerSpec extends TestSupport {
         "redirect to NS&I and even if there is an error setting the ITMP flag" in {
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlagSet = false)))
+            mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlag = false)))
             mockWriteITMPFlag(nino)(Left("Uh oh"))
           }
 
@@ -168,7 +168,7 @@ class EligibilityCheckControllerSpec extends TestSupport {
         "redirect to NS&I and not set the ITMP flag if it has already been set" in {
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlagSet = true)))
+            mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlag = true)))
           }
 
           val result = doConfirmDetailsRequest()
