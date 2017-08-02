@@ -32,13 +32,16 @@ import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError._
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO, UserDetailsURI}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
+import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
 
 class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             helpToSaveService: HelpToSaveService,
@@ -51,7 +54,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
 
   import EligibilityCheckController.EligibilityResult
 
-  def confirmDetails: Action[AnyContent] =  authorisedForHtsWithInfo  {
+  def getCheckEligibility: Action[AnyContent] =  authorisedForHtsWithInfo  {
     implicit request ⇒
       implicit htsContext ⇒
         val eligibilityCheck = for {
@@ -78,9 +81,9 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
               eligibility.result.fold {
                 auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
                 SeeOther(routes.EligibilityCheckController.notEligible().url)
-              } { info ⇒
+              } { _ ⇒
                 auditor.sendEvent(new EligibilityCheckEvent(nino, None))
-                Ok(views.html.register.confirm_details(info))
+                SeeOther(routes.EligibilityCheckController.getIsEligible().url)
               }
 
           })
@@ -90,6 +93,12 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
     implicit request ⇒
       implicit htsContext ⇒
         Future.successful(Ok(views.html.core.not_eligible()))
+  }
+
+  val getIsEligible: Action[AnyContent] = authorisedForHtsWithInfo {
+    implicit request ⇒
+      implicit htsContext ⇒
+        Future.successful(Ok(views.html.register.you_are_eligible()))
   }
 
   /**

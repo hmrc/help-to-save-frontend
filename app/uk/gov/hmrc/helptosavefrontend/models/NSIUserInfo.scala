@@ -20,6 +20,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import cats.Show
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 
@@ -45,6 +46,7 @@ object NSIUserInfo {
                             phoneNumber: Option[String] = None,
                             communicationPreference: String = "02")
 
+  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")))
 
   private implicit class StringOps(val s: String) {
     def removeAllSpaces: String = s.replaceAll(" ", "")
