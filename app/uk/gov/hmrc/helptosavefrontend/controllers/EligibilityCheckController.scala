@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import akka.actor.ActorRef
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._

@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 
 import cats.data.EitherT
-import cats.instances.future._
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.json.{Format, Json}
 import play.mvc.Http.Status.{CONFLICT, OK}
