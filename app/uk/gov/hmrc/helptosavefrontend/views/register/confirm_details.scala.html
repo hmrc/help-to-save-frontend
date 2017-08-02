@@ -22,15 +22,13 @@
 @(userDetails: NSIUserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title =   Messages("hts.register.confirmdetails.header-page"), bodyClasses = None) {
- <header class="page-header text">
-  <h1>@Messages("hts.register.confirmdetails.header")</h1>
- </header>
-  &nbsp;
-  &nbsp;
- <header class="divider--bottom">
-  <h2>@Messages("hts.register.confirmdetails.your-details-header")</h2>
- </header>
- @user_details(userDetails)
+ <h1 class="form-title heading-xlarge">
+    <span class="heading-secondary">
+    Step 1 of 4
+    </span>
+     @Messages("hts.register.confirmdetails.your-details-header")
+ </h1>
+    @user_details(userDetails)
  <header>
   <h2>@Messages("hts.register.confirmdetails.create-your-account-header")</h2>
   <p>@Messages("hts.register.confirmdetails.text")</p>
