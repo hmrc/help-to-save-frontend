@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Singleton}
 import play.api.libs.json.{Format, Json}
