@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import akka.util.Timeout
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
-import org.scalatest.BeforeAndAfterAll
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json, Writes}
@@ -123,7 +121,7 @@ class EligibilityCheckControllerSpec extends TestSupport {
     "checking eligibility" when {
 
       def doConfirmDetailsRequest(): Future[PlayResult] =
-        controller.confirmDetails(FakeRequest())
+        controller.getCheckEligibility(FakeRequest())
 
 
       "an error occurs while trying to see if the user is already enrolled" must {
@@ -196,17 +194,8 @@ class EligibilityCheckControllerSpec extends TestSupport {
           val responseFuture: Future[PlayResult] = doConfirmDetailsRequest()
           val result = Await.result(responseFuture, 5.seconds)
 
-          status(result) shouldBe Status.OK
-
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
-
-          val html = contentAsString(result)
-
-          html should include(user.forename)
-          html should include(user.email)
-          html should include(user.nino)
-          html should include("Sign out")
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
         }
 
         "display a 'Not Eligible' page if the user is not eligible and not already enrolled" in {
