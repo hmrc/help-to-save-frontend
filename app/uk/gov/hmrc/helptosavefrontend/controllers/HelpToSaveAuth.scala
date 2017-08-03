@@ -100,7 +100,7 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
     }
 
   def redirectToLogin = Redirect(ggLoginUrl, Map(
-    "continue" -> Seq(FrontendAppConfig.HtsConfirmDetailsUrl),
+    "continue" -> Seq(FrontendAppConfig.CheckEligibilityUrl),
     "accountType" -> Seq("individual"),
     "origin" -> Seq(origin)
   ))

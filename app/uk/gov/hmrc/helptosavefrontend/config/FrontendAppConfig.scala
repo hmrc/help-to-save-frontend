@@ -32,7 +32,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
 
-  val HtsConfirmDetailsUrl: String = getConfString("help-to-save-confirm-details.url", "")
+  val CheckEligibilityUrl: String = getConfString("help-to-save-check-eligibility.url", "")
 
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
