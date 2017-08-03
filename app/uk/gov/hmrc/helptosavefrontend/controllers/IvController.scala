@@ -50,7 +50,7 @@ class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
         case Some(id) ⇒
           ivConnector.getJourneyStatus(JourneyId(id)).map {
             case Some(Success) ⇒
-              Ok(iv_success(FrontendAppConfig.HtsConfirmDetailsUrl))
+              Ok(iv_success(FrontendAppConfig.CheckEligibilityUrl))
 
             case Some(Incomplete) ⇒
               //The journey has not been completed yet.
