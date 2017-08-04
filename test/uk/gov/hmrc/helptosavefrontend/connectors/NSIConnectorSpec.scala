@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.http.logging.Authorization
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, Token}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -42,7 +42,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
   }
 
   // put in fake authorization details - these should be removed by the call to create an account
-  implicit val hc = HeaderCarrier(authorization = Some(Authorization("auth")), token = Some(Token("token")))
+  implicit val hc = HeaderCarrier(authorization = Some(Authorization("auth")))
 
   def mockCreateAccount[I](body: I)(result: HttpResponse): Unit = {
     (mockHTTPProxy.post(
