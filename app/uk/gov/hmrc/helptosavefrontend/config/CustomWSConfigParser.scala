@@ -17,6 +17,8 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io._
+import java.security.KeyStore
+import java.security.cert.{Certificate, CertificateFactory, X509Certificate}
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
@@ -26,6 +28,7 @@ import play.api.libs.ws.{WSClientConfig, WSConfigParser}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
+import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -81,12 +84,33 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     createTempFileForData(data) match {
       case Success(trustFile) ⇒
         logger.info(s"Successfully wrote truststore to file: ${trustFile.getAbsolutePath}")
-        TrustStoreConfig(storeType ="pkcs7" ,filePath = Some(trustFile.getAbsolutePath), data = None)
+
+        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType)
+        val certs = generateCertificates(trustFile)
+
+        certs.foreach { cert ⇒
+          val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
+          keyStore.setCertificateEntry(alias, cert)
+        }
+        keyStore.store(new FileOutputStream(trustFile.getAbsolutePath), "".toCharArray)
+        TrustStoreConfig(filePath = Some(trustFile.getAbsolutePath), data = None)
 
       case Failure(error) ⇒
         logger.error(s"Error storing trust data in temp file", error)
         sys.error(s"Error storing trust data in temp file: ${error.getMessage}")
     }
+  }
+
+  private def generateCertificates(file: File): Seq[Certificate] = {
+
+    val dis = new DataInputStream(new FileInputStream(file))
+    val bytes = new Array[Byte](dis.available)
+    dis.readFully(bytes)
+    val bais = new ByteArrayInputStream(bytes)
+
+    val cf = CertificateFactory.getInstance("X.509")
+    val certs = cf.generateCertificates(bais)
+    certs.toList
   }
 
   def createTempFileForData(data: String) = Try {
