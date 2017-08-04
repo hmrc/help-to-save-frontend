@@ -48,7 +48,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
     (mockHTTPProxy.post(
       _: String, _: I, _: Map[String, String]
     )(_: Writes[I], _: HeaderCarrier))
-      .expects(nsiUrl, body, Map(nsiAuthHeaderKey → nsiBasicAuth, "token" → "token"), *, hc.copy(authorization = None))
+      .expects(nsiUrl, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *)
       .returning(Future.successful(result))
   }
 
