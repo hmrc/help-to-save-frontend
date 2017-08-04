@@ -17,8 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.io._
-import java.security.KeyStore
-import java.security.cert.{Certificate, CertificateFactory, X509Certificate}
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
@@ -28,7 +26,6 @@ import play.api.libs.ws.{WSClientConfig, WSConfigParser}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
-import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 @Singleton
@@ -54,13 +51,24 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       }
     }
 
+    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
+      ts.data match {
+        case (Some(data)) ⇒
+          createTrustStoreConfig(ts, data)
+
+        case None ⇒
+          logger.info(s"Adding ${ts.storeType} type truststore")
+          ts
+      }
+    }
+
     val wsClientConfig = config.copy(
       ssl = config.ssl.copy(
         keyManagerConfig = config.ssl.keyManagerConfig.copy(
           keyStoreConfigs = keyStores
         ),
         trustManagerConfig = config.ssl.trustManagerConfig.copy(
-          trustStoreConfigs = customTrustStore(configuration)
+          trustStoreConfigs = trustStores
         )
       )
     )
@@ -68,53 +76,16 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     wsClientConfig
   }
 
-  private def customTrustStore(config: Configuration): Seq[TrustStoreConfig] = {
-    val cacerts = config.getString("custom-trustManager.path")
-    val cacertsPass = config.getString("custom-trustManager.password")
-    val trustData = config.getString("custom-trustManager.data")
+  private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
 
-    (cacerts, cacertsPass, trustData) match {
-      case (Some(cacertsPath), Some(cacertsPassword), Some(trustStoreData)) if !trustStoreData.equals("") ⇒
-        createTempFileForData(trustStoreData) match {
-          case Success(trustFile) ⇒
+    createTempFileForData(data) match {
+      case Success(trustFile) ⇒
+        TrustStoreConfig(filePath = Some(trustFile.getAbsolutePath), data = None)
 
-            logger.info(s"loading default cacerts from: $cacerts")
-            val keyStore = KeyStore.getInstance(KeyStore.getDefaultType)
-            val decryptedPass = new String(Base64.getDecoder.decode(cacertsPassword))
-            keyStore.load(new FileInputStream(cacertsPath), decryptedPass.toCharArray)
-
-            val certs = generateCertificates(trustFile)
-
-            certs.foreach { cert ⇒
-              val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
-              keyStore.setCertificateEntry(alias, cert)
-            }
-
-            keyStore.store(new FileOutputStream(cacertsPath), decryptedPass.toCharArray)
-
-            List(TrustStoreConfig(filePath = Some(cacertsPath), data = None))
-
-          case Failure(error) ⇒
-            logger.error(s"Error storing trust data in temp file", error)
-            sys.error(s"Error storing trust data in temp file: ${error.getMessage}")
-        }
-
-      case (_, _, _) ⇒
-        logger.error(s"no config found for truststore - continuing... ")
-        List.empty //TODO: ideally we should do sys.error but tests failing
+      case Failure(error) ⇒
+        logger.error(s"Error storing trust data in temp file", error)
+        sys.error(s"Error storing trust data in temp file: ${error.getMessage}")
     }
-  }
-
-  private def generateCertificates(file: File): Seq[Certificate] = {
-
-    val dis = new DataInputStream(new FileInputStream(file))
-    val bytes = new Array[Byte](dis.available)
-    dis.readFully(bytes)
-    val bais = new ByteArrayInputStream(bytes)
-
-    val cf = CertificateFactory.getInstance("X.509")
-    val certs = cf.generateCertificates(bais)
-    certs.toList
   }
 
   def createTempFileForData(data: String) = Try {
