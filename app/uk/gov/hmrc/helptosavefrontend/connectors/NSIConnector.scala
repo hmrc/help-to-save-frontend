@@ -72,10 +72,6 @@ class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) exten
             logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino}")
             SubmissionSuccess()
 
-          case Status.CONFLICT ⇒
-            logger.info(s"Received HTTP 409 (conflict) from NS&I create account request: ${userInfo.nino}. Account had already been created")
-            SubmissionSuccess()
-
           case Status.BAD_REQUEST ⇒
             logger.warn(s"Failed to create an account for ${userInfo.nino} due to bad request")
             handleBadRequestResponse(response)
