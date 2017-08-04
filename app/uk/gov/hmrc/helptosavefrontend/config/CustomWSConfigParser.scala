@@ -83,8 +83,6 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
     createTempFileForData(data) match {
       case Success(trustFile) ⇒
-        logger.info(s"Successfully wrote truststore to file: ${trustFile.getAbsolutePath}")
-
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType)
         keyStore.load(null, null)
         val certs = generateCertificates(trustFile)
@@ -94,7 +92,9 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
           keyStore.setCertificateEntry(alias, cert)
         }
         keyStore.store(new FileOutputStream(trustFile.getAbsolutePath), "".toCharArray)
-        TrustStoreConfig(filePath = Some(trustFile.getAbsolutePath), data = None)
+        logger.info(s"Successfully wrote truststore to file: ${trustFile.getAbsolutePath}")
+
+        ts.copy(filePath = Some(trustFile.getAbsolutePath), data = None)
 
       case Failure(error) ⇒
         logger.error(s"Error storing trust data in temp file", error)
