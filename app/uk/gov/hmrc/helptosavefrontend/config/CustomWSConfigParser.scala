@@ -81,7 +81,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     createTempFileForData(data) match {
       case Success(trustFile) ⇒
         logger.info(s"Successfully wrote truststore to file: ${trustFile.getAbsolutePath}")
-        TrustStoreConfig(storeType ="pkcs12" ,filePath = Some(trustFile.getAbsolutePath), data = None)
+        TrustStoreConfig(storeType ="pkcs7" ,filePath = Some(trustFile.getAbsolutePath), data = None)
 
       case Failure(error) ⇒
         logger.error(s"Error storing trust data in temp file", error)
