@@ -86,6 +86,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         logger.info(s"Successfully wrote truststore to file: ${trustFile.getAbsolutePath}")
 
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType)
+        keyStore.load(null, null)
         val certs = generateCertificates(trustFile)
 
         certs.foreach { cert ⇒
