@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hts.suites
+package src.test.scala.hts.suites
 
 import cucumber.api.CucumberOptions
 import cucumber.api.junit.Cucumber
@@ -24,7 +24,7 @@ import org.junit.runner.RunWith
 @CucumberOptions(
   features = Array("selenium-system-test/src/test/resources/features"),
   glue = Array("hts.steps"),
-  plugin = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
+  format = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
   tags = Array("~@ignore")
 )
 class RunnerSeleniumSystemTest {}

@@ -14,20 +14,52 @@
  * limitations under the License.
  */
 
-package hts.utils
+package src.test.scala.hts.utils
 
-case class Configuration(htsUrl: String, timeout: Int)
+class Configuration(val url: String, val BROWSER: String = System.getProperty("browser", "firefox"))
+
+object Environment extends Enumeration {
+  type Name = Value
+  val Local, Dev, Qa, Staging = Value
+}
 
 object Configuration {
 
-  private val basePath = "help-to-save"
+  lazy val host: String = Configuration.settings.url
+  lazy val authHost: String = "http://localhost:9949"
 
-  val host = System.getProperty("host")
+  lazy val environment: Environment.Name = {
+    val environmentProperty = Option(System.getProperty("environment")).getOrElse("local").toLowerCase
+    environmentProperty match {
+      case "local" => Environment.Local
+      case "qa" => Environment.Qa
+      case "dev" => Environment.Dev
+      case "staging" => Environment.Staging
+      case _ => throw new IllegalArgumentException(s"Environment '$environmentProperty' not known")
+    }
+  }
 
-  val authHost = System.getProperty("authHost")
+  lazy val settings: Configuration = create()
 
-  private val timeout = System.getProperty("timeout", "5")
-
-  val settings: Configuration = new Configuration(s"$host/$basePath", timeout.toInt)
-
+  private def create(): Configuration = {
+    environment match {
+      case Environment.Local =>
+        new Configuration(
+          url = "http://localhost:7000"
+        )
+      case Environment.Dev =>
+        new Configuration(
+          url = "https://www-dev.tax.service.gov.uk"
+        )
+      case Environment.Qa =>
+        new Configuration(
+          url = "https://www-qa.tax.service.gov.uk"
+        )
+      case Environment.Staging =>
+        new Configuration(
+          url = "https://www-staging.tax.service.gov.uk"
+        )
+      case _ => throw new IllegalArgumentException(s"Environment '$environment' not known")
+    }
+  }
 }

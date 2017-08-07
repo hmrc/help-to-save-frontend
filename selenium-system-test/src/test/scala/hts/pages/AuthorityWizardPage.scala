@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package hts.pages
+package src.test.scala.hts.pages
 
-import hts.utils.Configuration
 import org.openqa.selenium.{By, WebDriver}
+import src.test.scala.hts.utils.Configuration
 
 object AuthorityWizardPage {
 
   def goToPage()(implicit driver: WebDriver): Unit =
-    driver.navigate().to(Configuration.authHost + "/auth-login-stub/gg-sign-in")
+    driver.navigate().to(Configuration.host + "/auth-login-stub/gg-sign-in")
 
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
     driver.findElement(By.name("redirectionUrl")).sendKeys(url)

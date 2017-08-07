@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hts.pages
+package src.test.scala.hts.pages
 
 import org.openqa.selenium.WebDriver
 

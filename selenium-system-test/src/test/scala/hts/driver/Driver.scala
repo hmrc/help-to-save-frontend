@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hts.driver
+package src.test.scala.hts.driver
 
 import java.util.concurrent.TimeUnit
 
@@ -57,7 +57,7 @@ object Driver {
 
   private val isJsEnabled: Boolean = true
 
-  private val driverDirectory: String = systemProperties.getProperty("drivers")
+  private val driverDirectory: String = "drivers"
 
   private def createChromeDriver(): WebDriver = {
     if (isMac) {

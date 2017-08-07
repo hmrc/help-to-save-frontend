@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package hts.steps
+package src.test.scala.hts.steps
 
 import cucumber.api.DataTable
-import hts.pages.{AuthorityWizardPage, Page}
-import hts.utils.Configuration
+import src.test.scala.hts.pages.{AuthorityWizardPage, Page}
+import src.test.scala.hts.utils.{Configuration, NINOGenerator}
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import src.test.scala.hts.utils.NINOGenerator
 
 class UserDetailsSteps extends Steps with NINOGenerator{
 
@@ -54,7 +54,7 @@ class UserDetailsSteps extends Steps with NINOGenerator{
 
   When("""^an applicant passes the eligibility check$"""){ () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     nino = Some(generateEligibleNINO)

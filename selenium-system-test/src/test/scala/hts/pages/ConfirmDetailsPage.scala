@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package hts.pages
+package src.test.scala.hts.pages
 
-import hts.utils.Configuration
 import org.openqa.selenium.{By, WebDriver}
+import src.test.scala.hts.utils.Configuration
 
 object ConfirmDetailsPage {
 

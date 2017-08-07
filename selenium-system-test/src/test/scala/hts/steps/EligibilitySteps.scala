@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package hts.steps
+package src.test.scala.hts.steps
 
-import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
-import hts.utils.Configuration
-import src.test.scala.hts.utils.NINOGenerator
+import src.test.scala.hts.pages.{AuthorityWizardPage, EligibilityCheckPage, Page}
+import src.test.scala.hts.utils.{Configuration, NINOGenerator}
 
 class EligibilitySteps extends Steps with NINOGenerator {
 
@@ -30,7 +29,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
 
   When("""^they apply for Help to Save$""") { () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     AuthorityWizardPage.setNino(nino.getOrElse(""))
@@ -38,7 +37,11 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () =>
-    Page.getPageContent() should include("Check and confirm your details")
+    Page.getPageContent() should include("You're eligible")
+  }
+
+  When("""^They start to create an account$"""){ () =>
+    EligibilityCheckPage.startCreatingAccount()
   }
 
   Given("""^an applicant is NOT in receipt of working tax credit$""") { () =>

@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package hts.steps
+package src.test.scala.hts.steps
 
 import java.util.concurrent.TimeUnit
 
 import cats.syntax.either._
 import cucumber.api.scala.{EN, ScalaDsl}
-import hts.driver.Driver
 import org.openqa.selenium.WebDriver
 import org.scalatest.Matchers
+import src.test.scala.hts.driver.Driver
 
 trait Steps extends ScalaDsl with EN with Matchers {
 
@@ -33,7 +33,7 @@ trait Steps extends ScalaDsl with EN with Matchers {
 
   // create a new driver for each scenario
   Before { _ ⇒
-    if(_driver.isEmpty) {
+    if (_driver.isEmpty) {
       val d = Driver.newWebDriver()
         // map the left to Nothing
         .leftMap(e ⇒ sys.error(s"Could not find driver: $e"))

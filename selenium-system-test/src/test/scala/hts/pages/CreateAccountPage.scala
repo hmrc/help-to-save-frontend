@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages
+package src.test.scala.hts.pages
 
-import hts.utils.Configuration
-import org.openqa.selenium.{By, WebDriver}
+import src.test.scala.hts.utils.Configuration
 
-object CreateAccountPage {
+object CreateAccountPage extends WebPage {
 
-  def goToPage()(implicit driver: WebDriver): Unit =
-    driver.navigate().to(Configuration.host + "/help-to-save/register/create-an-account")
+  def goToPage(): Unit = go to s"${Configuration.host}/help-to-save/register/create-an-account"
 
-  def createAccount()(implicit driver: WebDriver): Unit =
-    driver.findElement(By.id("accept-and-create-account")).click()
+  def createAccount(): Unit = click on "accept-and-create-account"
+
+  def exitWithoutCreatingAccount(): Unit = click on "exit-without-creating-account"
 
 }

@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package hts.steps
+package src.test.scala.hts.steps
 
-import cucumber.api.java.en.Given
-import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
-import hts.utils.Configuration
-import src.test.scala.hts.utils.NINOGenerator
+import src.test.scala.hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
+import src.test.scala.hts.utils.{Configuration, NINOGenerator}
 
 class SecuritySteps extends Steps with NINOGenerator {
 
@@ -52,7 +50,7 @@ class SecuritySteps extends Steps with NINOGenerator {
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setNino(generateEligibleNINO)
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
   }
 
   When("""^they try to view the user details page$""") { () =>
@@ -69,11 +67,15 @@ class SecuritySteps extends Steps with NINOGenerator {
 
   Given("""^an applicant has logged in and passed IV$""") { () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     AuthorityWizardPage.setNino(generateEligibleNINO)
     AuthorityWizardPage.submit()
+  }
+
+  Then("""^the GG sign in page is visible$"""){ () =>
+    getDriverUnsafe.getCurrentUrl should include ("gg/sign-in?")
   }
 
 }
