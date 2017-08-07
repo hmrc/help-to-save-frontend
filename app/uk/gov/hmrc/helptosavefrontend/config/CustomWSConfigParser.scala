@@ -80,20 +80,25 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
 
-    val tsFile = createTempFileForData(data)
+    val (filePath, fileBytes) = createTempFileForData(data)
 
     val keyStore = initKeystore()
 
-    generateCertificates(tsFile).foreach { cert ⇒
+    generateCertificates(fileBytes).foreach { cert ⇒
       val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
       keyStore.setCertificateEntry(alias, cert)
     }
 
-    val stream = new FileOutputStream(tsFile.getAbsolutePath)
-    keyStore.store(stream, "".toCharArray)
-    logger.info(s"Successfully wrote truststore data to file: ${tsFile.getAbsolutePath}")
-    stream.close()
-    ts.copy(filePath = Some(tsFile.getAbsolutePath), data = None)
+    val stream = new FileOutputStream(filePath)
+
+    try {
+      keyStore.store(stream, "".toCharArray)
+      logger.info(s"Successfully wrote truststore data to file: $filePath")
+      ts.copy(filePath = Some(filePath), data = None)
+    } finally {
+      stream.close()
+
+    }
   }
 
   private def initKeystore(): KeyStore = {
@@ -102,32 +107,29 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     keystore
   }
 
-  private def generateCertificates(file: File): Seq[Certificate] = {
-
-    val dis = new DataInputStream(new FileInputStream(file))
-    val bytes = new Array[Byte](dis.available)
-    dis.readFully(bytes)
-    val stream = new ByteArrayInputStream(bytes)
-
+  private def generateCertificates(file: Array[Byte]): Seq[Certificate] = {
+    val stream = new ByteArrayInputStream(file)
     try {
       CertificateFactory.getInstance("X.509")
         .generateCertificates(stream)
         .toList
     } finally {
       stream.close()
-      dis.close()
     }
   }
 
-  def createTempFileForData(data: String): File = {
+  /**
+    * @return absolute file path with the bytes written to the file
+    */
+  def createTempFileForData(data: String): (String, Array[Byte])= {
     val file = File.createTempFile(getClass.getSimpleName, ".tmp")
     file.deleteOnExit()
     val os = new FileOutputStream(file)
     try {
-      os.write(Base64.getDecoder.decode(data.trim))
+      val bytes = Base64.getDecoder.decode(data.trim)
+      os.write(bytes)
       os.flush()
-      os.close()
-      file
+      file.getAbsolutePath → bytes
     } finally {
       os.close()
     }
@@ -135,14 +137,14 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     logger.info("Creating key store config")
-    val ksFile = createTempFileForData(data)
-    logger.info(s"Successfully wrote keystore data to file: ${ksFile.getAbsolutePath}")
+    val (ksFilePath, _)= createTempFileForData(data)
+    logger.info(s"Successfully wrote keystore data to file: $ksFilePath")
 
     val decryptedPass = ks.password
       .map(password ⇒ Base64.getDecoder.decode(password))
       .map(bytes ⇒ new String(bytes))
 
-    ks.copy(data = None, filePath = Some(ksFile.getAbsolutePath), password = decryptedPass)
+    ks.copy(data = None, filePath = Some(ksFilePath), password = decryptedPass)
   }
 }
 
