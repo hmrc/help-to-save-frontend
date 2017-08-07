@@ -29,7 +29,6 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
 import scala.collection.JavaConversions._
-import scala.util.{Failure, Success, Try}
 
 @Singleton
 class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) with Logging {
@@ -81,25 +80,26 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
 
-    createTempFileForData(data) match {
-      case Success(trustFile) ⇒
-        val keyStore = KeyStore.getInstance(KeyStore.getDefaultType)
-        keyStore.load(null, null)
+    val tsFile = createTempFileForData(data)
 
-        val certs = generateCertificates(trustFile)
-        certs.foreach { cert ⇒
-          val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
-          keyStore.setCertificateEntry(alias, cert)
-        }
+    val keyStore = initKeystore()
 
-        keyStore.store(new FileOutputStream(trustFile.getAbsolutePath), "".toCharArray)
-        logger.info(s"Successfully wrote truststore data to file: ${trustFile.getAbsolutePath}")
-        ts.copy(filePath = Some(trustFile.getAbsolutePath), data = None)
-
-      case Failure(error) ⇒
-        logger.error(s"Error storing trust data in temp file", error)
-        sys.error(s"Error storing trust data in temp file: ${error.getMessage}")
+    generateCertificates(tsFile).foreach { cert ⇒
+      val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
+      keyStore.setCertificateEntry(alias, cert)
     }
+
+    val stream = new FileOutputStream(tsFile.getAbsolutePath)
+    keyStore.store(stream, "".toCharArray)
+    logger.info(s"Successfully wrote truststore data to file: ${tsFile.getAbsolutePath}")
+    stream.close()
+    ts.copy(filePath = Some(tsFile.getAbsolutePath), data = None)
+  }
+
+  private def initKeystore(): KeyStore = {
+    val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
+    keystore.load(null, null)
+    keystore
   }
 
   private def generateCertificates(file: File): Seq[Certificate] = {
@@ -107,38 +107,42 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     val dis = new DataInputStream(new FileInputStream(file))
     val bytes = new Array[Byte](dis.available)
     dis.readFully(bytes)
-    val bais = new ByteArrayInputStream(bytes)
-    val cf = CertificateFactory.getInstance("X.509")
-    cf.generateCertificates(bais).toList
+    val stream = new ByteArrayInputStream(bytes)
+
+    try {
+      CertificateFactory.getInstance("X.509")
+        .generateCertificates(stream)
+        .toList
+    } finally {
+      stream.close()
+      dis.close()
+    }
   }
 
-  def createTempFileForData(data: String) = Try {
+  def createTempFileForData(data: String): File = {
     val file = File.createTempFile(getClass.getSimpleName, ".tmp")
     file.deleteOnExit()
     val os = new FileOutputStream(file)
-    os.write(Base64.getDecoder.decode(data.trim))
-    os.flush()
-    os.close()
-    file
+    try {
+      os.write(Base64.getDecoder.decode(data.trim))
+      os.flush()
+      os.close()
+      file
+    } finally {
+      os.close()
+    }
   }
 
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     logger.info("Creating key store config")
+    val ksFile = createTempFileForData(data)
+    logger.info(s"Successfully wrote keystore data to file: ${ksFile.getAbsolutePath}")
 
-    createTempFileForData(data) match {
-      case Success(keyStoreFile) ⇒
-        logger.info(s"Successfully wrote keystore data to file: ${keyStoreFile.getAbsolutePath}")
+    val decryptedPass = ks.password
+      .map(password ⇒ Base64.getDecoder.decode(password))
+      .map(bytes ⇒ new String(bytes))
 
-        val decryptedPass = ks.password
-          .map(pass ⇒ Base64.getDecoder.decode(pass))
-          .map(bytes ⇒ new String(bytes))
-
-        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), password = decryptedPass)
-
-      case Failure(error) ⇒
-        logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
-        sys.error(s"Error in keystore configuration: ${error.getMessage}")
-    }
+    ks.copy(data = None, filePath = Some(ksFile.getAbsolutePath), password = decryptedPass)
   }
 }
 

@@ -63,7 +63,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) exten
       logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
     }
 
-    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(NSIUserInfo.nsiUserInfoFormat, hc.copy(token = None))
+    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
