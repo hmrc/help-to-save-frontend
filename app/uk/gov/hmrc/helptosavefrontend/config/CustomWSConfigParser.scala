@@ -16,19 +16,19 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import java.io.{File, FileOutputStream}
-import java.util
+import java.io._
+import java.security.KeyStore
+import java.security.cert.{Certificate, CertificateFactory, X509Certificate}
 import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
-import com.typesafe.config.{ConfigObject, ConfigValueFactory}
 import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
 import play.api.libs.ws.{WSClientConfig, WSConfigParser}
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
-import scala.util.{Failure, Success, Try}
+import scala.collection.JavaConversions._
 
 @Singleton
 class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) with Logging {
@@ -36,45 +36,35 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   logger.info("Starting CustomWSConfigParser")
 
   override def parse(): WSClientConfig = {
+
     logger.info("Parsing WSClientConfig")
-    val mergedConfiguration = mergeAllStores(configuration)
-    val internalParser = new WSConfigParser(mergedConfiguration, env)
+
+    val internalParser = new WSConfigParser(configuration, env)
     val config = internalParser.parse()
 
     val keyStores = config.ssl.keyManagerConfig.keyStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ks ⇒
       (ks.storeType.toUpperCase, ks.filePath, ks.data) match {
-        // it's a PEM, so we don't need to do anything
-        case ("PEM", _, _) ⇒
-          logger.info("Adding PEM keystore certificate")
-          ks
-
-        // it is not a PEM and data has been provided but no file path given, therefore assume data is base64 encoded file
         case (_, None, Some(data)) ⇒
           createKeyStoreConfig(ks, data)
 
-        // just because ...
         case other ⇒
           logger.info(s"Adding ${other._1} type keystore")
           ks
       }
     }
 
-    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.map { ts ⇒
-      (ts.storeType.toUpperCase, ts.filePath, ts.data) match {
-        case ("PEM", _, _) ⇒
-          logger.info("Adding PEM truststore")
-          ts
-        case (storeType, None, Some(data)) ⇒
-          logger.info(s"Adding $storeType truststore")
+    val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
+      (ts.filePath, ts.data) match {
+        case (None, Some(data)) ⇒
           createTrustStoreConfig(ts, data)
 
-        case other ⇒
-          logger.info(s"Adding ${other._1} type truststore")
+        case _ ⇒
+          logger.info(s"Adding ${ts.storeType} type truststore from ${ts.filePath}")
           ts
       }
     }
 
-    val modded = config.copy(
+    val wsClientConfig = config.copy(
       ssl = config.ssl.copy(
         keyManagerConfig = config.ssl.keyManagerConfig.copy(
           keyStoreConfigs = keyStores
@@ -84,68 +74,78 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
         )
       )
     )
-    modded
+
+    wsClientConfig
   }
 
-  private def mergeAllStores(config: Configuration): Configuration = {
-    mergeStores(mergeStores(config, "key"), "trust")
+  private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
+
+    val (filePath, fileBytes) = createTempFileForData(data)
+
+    val keyStore = initKeystore()
+
+    generateCertificates(fileBytes).foreach { cert ⇒
+      val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
+      keyStore.setCertificateEntry(alias, cert)
+    }
+
+    val stream = new FileOutputStream(filePath)
+
+    try {
+      keyStore.store(stream, "".toCharArray)
+      logger.info(s"Successfully wrote truststore data to file: $filePath")
+      ts.copy(filePath = Some(filePath), data = None)
+    } finally {
+      stream.close()
+
+    }
   }
 
-  private def mergeStores(config: Configuration, name: String): Configuration = {
-    val under = config.underlying
-    if (under.hasPath(s"play.ws.ssl.${name}Manager.store")) {
-      val singleStore: ConfigObject = under.getObject(s"play.ws.ssl.${name}Manager.store")
-      val stores: util.List[AnyRef] = under.getList(s"play.ws.ssl.${name}Manager.stores").unwrapped()
-      if (singleStore != null) {
-        stores.add(singleStore)
-      }
-      config.copy(underlying = config.underlying.withValue(s"play.ws.ssl.${name}Manager.stores", ConfigValueFactory.fromIterable(stores)))
-    } else config
+  private def initKeystore(): KeyStore = {
+    val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
+    keystore.load(null, null)
+    keystore
   }
 
+  private def generateCertificates(file: Array[Byte]): Seq[Certificate] = {
+    val stream = new ByteArrayInputStream(file)
+    try {
+      CertificateFactory.getInstance("X.509")
+        .generateCertificates(stream)
+        .toList
+    } finally {
+      stream.close()
+    }
+  }
 
-  def writeToTempFile(data: Array[Byte]): Try[File] = Try {
+  /**
+    * @return absolute file path with the bytes written to the file
+    */
+  def createTempFileForData(data: String): (String, Array[Byte])= {
     val file = File.createTempFile(getClass.getSimpleName, ".tmp")
     file.deleteOnExit()
     val os = new FileOutputStream(file)
-    os.write(data)
-    os.flush()
-    os.close()
-    file
+    try {
+      val bytes = Base64.getDecoder.decode(data.trim)
+      os.write(bytes)
+      os.flush()
+      file.getAbsolutePath → bytes
+    } finally {
+      os.close()
+    }
   }
 
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     logger.info("Creating key store config")
+    val (ksFilePath, _)= createTempFileForData(data)
+    logger.info(s"Successfully wrote keystore data to file: $ksFilePath")
 
-    val result = for {
-      dataBytes ← Try(Base64.getDecoder.decode(data))
-      file ← writeToTempFile(dataBytes)
-    } yield file
+    val decryptedPass = ks.password
+      .map(password ⇒ Base64.getDecoder.decode(password))
+      .map(bytes ⇒ new String(bytes))
 
-    result match {
-      case Success(keyStoreFile) ⇒
-        logger.info(s"Successfully wrote keystore to file: ${keyStoreFile.getAbsolutePath}")
-
-        val decryptedPass = ks.password
-          .map(pass ⇒ Base64.getDecoder.decode(pass))
-          .map(bytes ⇒ new String(bytes))
-
-        ks.copy(data = None, filePath = Some(keyStoreFile.getAbsolutePath), storeType = ks.storeType, password = decryptedPass)
-
-      case Failure(error) ⇒
-        logger.info(s"Error in keystore configuration: ${error.getMessage}", error)
-        sys.error(s"Error in keystore configuration: ${error.getMessage}")
-    }
+    ks.copy(data = None, filePath = Some(ksFilePath), password = decryptedPass)
   }
-
-  private def createTrustStoreConfig(ts: TrustStoreConfig, data: String): TrustStoreConfig = {
-    val decoded = Base64.getDecoder.decode(data)
-    ts.storeType match {
-      case "base64-PEM" => ts.copy(data = Some(new String(decoded)), storeType = "PEM")
-      case _ => ts
-    }
-  }
-
 }
 
 class CustomWSConfigParserModule extends Module {
