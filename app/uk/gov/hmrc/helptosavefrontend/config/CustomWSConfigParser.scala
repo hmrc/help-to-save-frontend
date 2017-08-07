@@ -55,12 +55,12 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     }
 
     val trustStores = config.ssl.trustManagerConfig.trustStoreConfigs.filter(_.data.forall(_.nonEmpty)).map { ts ⇒
-      ts.data match {
-        case (Some(data)) ⇒
+      (ts.filePath, ts.data) match {
+        case (None, Some(data)) ⇒
           createTrustStoreConfig(ts, data)
 
-        case None ⇒
-          logger.info(s"Adding ${ts.storeType} type truststore")
+        case _ ⇒
+          logger.info(s"Adding ${ts.storeType} type truststore from ${ts.filePath}")
           ts
       }
     }
@@ -85,15 +85,15 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       case Success(trustFile) ⇒
         val keyStore = KeyStore.getInstance(KeyStore.getDefaultType)
         keyStore.load(null, null)
-        val certs = generateCertificates(trustFile)
 
+        val certs = generateCertificates(trustFile)
         certs.foreach { cert ⇒
           val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
           keyStore.setCertificateEntry(alias, cert)
         }
-        keyStore.store(new FileOutputStream(trustFile.getAbsolutePath), "".toCharArray)
-        logger.info(s"Successfully wrote truststore to file: ${trustFile.getAbsolutePath}")
 
+        keyStore.store(new FileOutputStream(trustFile.getAbsolutePath), "".toCharArray)
+        logger.info(s"Successfully wrote truststore data to file: ${trustFile.getAbsolutePath}")
         ts.copy(filePath = Some(trustFile.getAbsolutePath), data = None)
 
       case Failure(error) ⇒
@@ -108,10 +108,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
     val bytes = new Array[Byte](dis.available)
     dis.readFully(bytes)
     val bais = new ByteArrayInputStream(bytes)
-
     val cf = CertificateFactory.getInstance("X.509")
-    val certs = cf.generateCertificates(bais)
-    certs.toList
+    cf.generateCertificates(bais).toList
   }
 
   def createTempFileForData(data: String) = Try {
@@ -125,11 +123,11 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
-    logger.info("Creating key store config with the encrypted data provided")
+    logger.info("Creating key store config")
 
     createTempFileForData(data) match {
       case Success(keyStoreFile) ⇒
-        logger.info(s"Successfully wrote keystore to file: ${keyStoreFile.getAbsolutePath}")
+        logger.info(s"Successfully wrote keystore data to file: ${keyStoreFile.getAbsolutePath}")
 
         val decryptedPass = ks.password
           .map(pass ⇒ Base64.getDecoder.decode(pass))
