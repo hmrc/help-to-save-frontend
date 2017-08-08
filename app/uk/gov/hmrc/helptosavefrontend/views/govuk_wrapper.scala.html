@@ -31,9 +31,18 @@
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.phaseBanner
 
+
+@linkElement = {
+    <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/help-to-save-frontend.css")' />
+    <!--[if lte IE 8 ]>
+    <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/help-to-save-frontend-ie.css")" />
+    <![endif]-->
+}
+
+
 @head = {
     @uiLayouts.head(
-      linkElem = None,
+      linkElem = Some(linkElement),
       headScripts = None)
     <meta name="format-detection" content="telephone=no" />
 }
