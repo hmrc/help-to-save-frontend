@@ -66,7 +66,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
           checkSession(
-            SeeOther(routes.IntroductionController.getApply().url),
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url),
             _.eligibilityCheckResult.fold {
               Ok(views.html.core.not_eligible())
             }(_ ⇒
@@ -81,7 +81,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
           checkSession(
-            SeeOther(routes.IntroductionController.getApply().url),
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url),
             _.eligibilityCheckResult.fold(
               SeeOther(routes.EligibilityCheckController.notEligible().url)
             )(_ ⇒

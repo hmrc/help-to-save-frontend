@@ -112,7 +112,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
 
 
     if(testRedirectOnNoSession){
-      "redirect to the apply page if there is no session data for the user" in {
+      "redirect to the eligibility checks if there is no session data for the user" in {
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
@@ -122,7 +122,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.IntroductionController.getApply().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
     }
 

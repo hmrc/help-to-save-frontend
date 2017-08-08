@@ -97,8 +97,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   private def checkIfDoneEligibilityChecks(ifEligible: NSIUserInfo ⇒ Future[Result]
                                           )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
     checkSession(
-      // no session data => user has not gone through the journey this session => take them to apply now
-      SeeOther(routes.IntroductionController.getApply().url),
+      // no session data => user has not gone through the journey this session => take them to eligibility checks
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url),
       _.eligibilityCheckResult.fold[Future[Result]](
         // user has gone through journey already this sessions and were found to be ineligible
         SeeOther(routes.EligibilityCheckController.notEligible().url)
