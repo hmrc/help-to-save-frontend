@@ -24,7 +24,6 @@
   contentHeader: Option[Html] = None,
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
-  cssFile: Option[String]= None,
   scriptElem: Option[Html] = None)(implicit  htsContext: HtsContext,request: Request[_], messages: Messages)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
@@ -34,9 +33,8 @@
 
 
 @linkElement = {
-@cssFile.map{css => <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/" + css)' /> }
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/help-to-save-frontend.css")' />
-        <!--[if lte IE 8 ]>
+    <!--[if lte IE 8 ]>
     <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/help-to-save-frontend-ie.css")" />
     <![endif]-->
 }
