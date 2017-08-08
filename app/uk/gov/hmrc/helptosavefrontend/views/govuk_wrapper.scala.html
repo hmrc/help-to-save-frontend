@@ -24,6 +24,7 @@
   contentHeader: Option[Html] = None,
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
+  cssFile: Option[String]= None,
   scriptElem: Option[Html] = None)(implicit  htsContext: HtsContext,request: Request[_], messages: Messages)
 
 @import layouts.{govuk_template => hmrcGovUkTemplate}
@@ -31,9 +32,19 @@
 @import uk.gov.hmrc.play.views.html.{helpers => uiHelpers}
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.phaseBanner
 
+
+@linkElement = {
+@cssFile.map{css => <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/" + css)' /> }
+    <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/help-to-save-frontend.css")' />
+        <!--[if lte IE 8 ]>
+    <link rel="stylesheet" href="@routes.Assets.versioned("stylesheets/help-to-save-frontend-ie.css")" />
+    <![endif]-->
+}
+
+
 @head = {
     @uiLayouts.head(
-      linkElem = None,
+      linkElem = Some(linkElement),
       headScripts = None)
     <meta name="format-detection" content="telephone=no" />
 }
