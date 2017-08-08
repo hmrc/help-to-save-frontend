@@ -4,13 +4,6 @@ import sbt._
 import play.routes.compiler.StaticRoutesGenerator
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
-// imports for Asset Pipeline
-import com.typesafe.sbt.digest.Import._
-import com.typesafe.sbt.uglify.Import._
-import com.typesafe.sbt.web.Import._
-import net.ground5hark.sbt.concat.Import._
-
-
 trait MicroService {
 
   import uk.gov.hmrc._
@@ -60,13 +53,6 @@ trait MicroService {
       retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
       routesGenerator := StaticRoutesGenerator
-    )
-    .settings(
-      // prevent removal of unused code which generates warning errors due to use of third-party libs
-      UglifyKeys.compressOptions := Seq("unused=false", "dead_code=false"),
-      pipelineStages := Seq(digest),
-      // below line required to force asset pipeline to operate in dev rather than only prod
-      pipelineStages in Assets := Seq(concat,uglify)
     )
     .configs(IntegrationTest)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
