@@ -30,6 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -55,7 +56,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
               { case (nino, eligibility) ⇒ handleEligibilityResult(eligibility, nino) }
             ), session ⇒
               // there is a session
-              Future.successful(handleEligibilityResult(session, nino))
+              handleEligibilityResult(session, nino)
           )
         }
   }
@@ -65,11 +66,11 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
           checkSession(
-            Future.successful(SeeOther(routes.IntroductionController.getApply().url)),
+            SeeOther(routes.IntroductionController.getApply().url),
             _.eligibilityCheckResult.fold {
-              Future.successful(Ok(views.html.core.not_eligible()))
+              Ok(views.html.core.not_eligible())
             }(_ ⇒
-              Future.successful(SeeOther(routes.EligibilityCheckController.getIsEligible().url))
+              SeeOther(routes.EligibilityCheckController.getIsEligible().url)
             )
           )
         }
@@ -80,11 +81,11 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
           checkSession(
-            Future.successful(SeeOther(routes.IntroductionController.getApply().url)),
+            SeeOther(routes.IntroductionController.getApply().url),
             _.eligibilityCheckResult.fold(
-              Future.successful(SeeOther(routes.EligibilityCheckController.notEligible().url))
+              SeeOther(routes.EligibilityCheckController.notEligible().url)
             )(_ ⇒
-              Future.successful(Ok(views.html.register.you_are_eligible()))
+              Ok(views.html.register.you_are_eligible())
             )
           )
         }

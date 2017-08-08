@@ -25,8 +25,7 @@ import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
 import uk.gov.hmrc.helptosavefrontend.views
-
-import scala.concurrent.Future
+import uk.gov.hmrc.helptosavefrontend.util.toFuture
 
 @Singleton
 class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionCacheConnector,
@@ -39,8 +38,8 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
           checkSession(
-            Future.successful(SeeOther(routes.IntroductionController.getApply().url)),
-            _ ⇒ Future.successful(Ok(views.html.register.update_email_address()))
+            SeeOther(routes.IntroductionController.getApply().url),
+            _ ⇒ Ok(views.html.register.update_email_address())
           )
 
         }

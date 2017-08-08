@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -41,13 +41,12 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    val app: Application)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
-
   def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled{ _ ⇒
           checkIfDoneEligibilityChecks{ userInfo ⇒
-            Future.successful(Ok(views.html.register.confirm_details(userInfo)))
+            Ok(views.html.register.confirm_details(userInfo))
           }
         }
   }
@@ -57,7 +56,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       implicit htsContext ⇒
         checkIfAlreadyEnrolled{ _ ⇒
           checkIfDoneEligibilityChecks { _ ⇒
-            Future.successful(Ok(views.html.register.create_account_help_to_save()))
+            Ok(views.html.register.create_account_help_to_save())
           }
         }
   }
@@ -99,10 +98,10 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                           )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
     checkSession(
       // no session data => user has not gone through the journey this session => take them to apply now
-      Future.successful(SeeOther(routes.IntroductionController.getApply().url)),
-      _.eligibilityCheckResult.fold(
+      SeeOther(routes.IntroductionController.getApply().url),
+      _.eligibilityCheckResult.fold[Future[Result]](
         // user has gone through journey already this sessions and were found to be ineligible
-        Future.successful(SeeOther(routes.EligibilityCheckController.notEligible().url))
+        SeeOther(routes.EligibilityCheckController.notEligible().url)
       )(
         // user has gone through journey already this sessions and were found to be eligible
         ifEligible
