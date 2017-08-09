@@ -22,11 +22,11 @@ import play.api.mvc.Result
 import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait EnrolmentCheckBehaviour { this: FrontendController with Logging ⇒
 
@@ -52,7 +52,7 @@ trait EnrolmentCheckBehaviour { this: FrontendController with Logging ⇒
             _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
           )
         }
-        Future.successful(Ok("You've already got an account - yay!"))
+        Ok("You've already got an account - yay!")
 
       case (nino, EnrolmentStore.NotEnrolled) ⇒
         ifNotEnrolled(nino)

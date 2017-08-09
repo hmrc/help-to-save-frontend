@@ -48,16 +48,17 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
   def getCheckEligibility: Action[AnyContent] =  authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        checkIfAlreadyEnrolled{ nino ⇒
-          checkSession(
-            // there is no session yet
-            performEligibilityChecks(nino, htsContext).fold(
-              e ⇒ handleEligibilityCheckError(e),
-              { case (nino, eligibility) ⇒ handleEligibilityResult(eligibility, nino) }
-            ), session ⇒
-              // there is a session
-              handleEligibilityResult(session, nino)
-          )
+        checkIfAlreadyEnrolled{
+          nino ⇒
+            checkSession(
+              // there is no session yet
+              performEligibilityChecks(nino, htsContext).fold(
+                handleEligibilityCheckError,
+                Function.tupled(handleEligibilityResult)
+              ), session ⇒
+                // there is a session
+                handleEligibilityResult(session, nino)
+            )
         }
   }
 
@@ -93,7 +94,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
 
   private def performEligibilityChecks(nino: NINO,
                                        htsContext: HtsContext
-                                      )(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, (NINO, HTSSession)] =
+                                      )(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, (HTSSession, NINO)] =
     for {
       userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, EligibilityCheckError.NoUserDetailsURI(nino))
       eligible       ← helpToSaveService.checkEligibility(nino, userDetailsURI)
@@ -101,7 +102,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       _              ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
       session        = HTSSession(nsiUserInfo)
       _              ←  sessionCacheConnector.put(session).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
-    } yield (nino, session)
+    } yield session → nino
 
   private def handleEligibilityResult(eligibilityCheckResult: HTSSession,
                                       nino: NINO

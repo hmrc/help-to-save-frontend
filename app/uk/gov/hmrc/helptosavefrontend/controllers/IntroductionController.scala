@@ -25,9 +25,6 @@ import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 
-
-import scala.concurrent.Future
-
 @Singleton
 class IntroductionController @Inject()(implicit app: Application, val messagesApi: MessagesApi) extends HelpToSaveAuth(app) with I18nSupport {
 
