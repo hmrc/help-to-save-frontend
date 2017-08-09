@@ -21,7 +21,7 @@ import play.mvc.Http.Status.OK
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivUrl
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
 import uk.gov.hmrc.helptosavefrontend.models.iv._
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,15 +43,15 @@ class IvConnectorImpl extends IvConnector with Logging {
 
       case r if r.status == OK ⇒
         val result = (r.json \ "result").as[String]
-        Future.successful(IvSuccessResponse.fromString(result))
+        IvSuccessResponse.fromString(result)
 
       case r =>
         logger.warn(s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service")
-        Future.successful(Some(IvUnexpectedResponse(r)))
+        Some(IvUnexpectedResponse(r))
 
     }.recoverWith { case e: Exception =>
       logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
-      Future.successful(Some(IvErrorResponse(e)))
+      Some(IvErrorResponse(e))
     }
   }
 }
