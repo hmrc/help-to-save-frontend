@@ -86,6 +86,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val signOutUrl = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
 
+  val mongoEncSeed = getString("microservice.mongo-encryption-seed")
+
   override lazy val analyticsToken: String = getString("google-analytics.token")
   override lazy val analyticsHost: String = getString("google-analytics.host")
 
