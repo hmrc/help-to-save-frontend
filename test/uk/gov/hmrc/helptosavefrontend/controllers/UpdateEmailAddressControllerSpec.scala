@@ -44,7 +44,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       testCommonEnrolmentAndSessionBehaviour(getResult)
 
       "return the update your email page if the user is not already enrolled and the " +
-        "session data indicates that they are ineligible" in {
+        "session data indicates that they are eligible" in {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
@@ -54,6 +54,20 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         val result = getResult()
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Update your email address")
+      }
+
+
+      "return the you're not aeligible page if the user is not already enrolled and the " +
+        "session data indicates that they are ineligible" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None))))
+        }
+
+        val result = getResult()
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("not eligible")
       }
 
     }
