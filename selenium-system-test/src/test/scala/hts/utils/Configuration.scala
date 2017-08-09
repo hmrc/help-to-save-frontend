@@ -16,17 +16,12 @@
 
 package src.test.scala.hts.utils
 
-class Configuration(val url: String, val BROWSER: String = System.getProperty("browser", "firefox"))
-
 object Environment extends Enumeration {
   type Name = Value
   val Local, Dev, Qa, Staging = Value
 }
 
 object Configuration {
-
-  lazy val host: String = Configuration.settings.url
-  lazy val authHost: String = "http://localhost:9949"
 
   lazy val environment: Environment.Name = {
     val environmentProperty = Option(System.getProperty("environment")).getOrElse("local").toLowerCase
@@ -39,26 +34,16 @@ object Configuration {
     }
   }
 
-  lazy val settings: Configuration = create()
-
-  private def create(): Configuration = {
+ val (host, authHost) =  {
     environment match {
-      case Environment.Local =>
-        new Configuration(
-          url = "http://localhost:7000"
-        )
-      case Environment.Dev =>
-        new Configuration(
-          url = "https://www-dev.tax.service.gov.uk"
-        )
-      case Environment.Qa =>
-        new Configuration(
-          url = "https://www-qa.tax.service.gov.uk"
-        )
-      case Environment.Staging =>
-        new Configuration(
-          url = "https://www-staging.tax.service.gov.uk"
-        )
+      case Environment.Local => ("http://localhost:7000", "http://localhost:9949")
+
+      case Environment.Dev => "https://www-dev.tax.service.gov.uk"
+
+      case Environment.Qa => "https://www-qa.tax.service.gov.uk"
+
+      case Environment.Staging => "https://www-staging.tax.service.gov.uk"
+
       case _ => throw new IllegalArgumentException(s"Environment '$environment' not known")
     }
   }

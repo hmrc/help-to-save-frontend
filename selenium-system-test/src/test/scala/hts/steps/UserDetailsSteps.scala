@@ -17,7 +17,7 @@
 package src.test.scala.hts.steps
 
 import cucumber.api.DataTable
-import src.test.scala.hts.pages.{AuthorityWizardPage, Page}
+import src.test.scala.hts.pages.{AuthorityWizardPage, EligibilityCheckPage, Page}
 import src.test.scala.hts.utils.{Configuration, NINOGenerator}
 
 import scala.collection.JavaConverters._
@@ -41,7 +41,7 @@ class UserDetailsSteps extends Steps with NINOGenerator{
         case (Some(field), value @ Some(_)) =>
           field match {
             case "name"          => name = value
-            case "NINO"          =>
+            case "NINO"          => nino = value
             case "date of birth" => dateOfBirth = value
             case "email address" => email = value
             case other           => sys.error(s"Unexpected field: $other")
@@ -61,6 +61,7 @@ class UserDetailsSteps extends Steps with NINOGenerator{
     println("NINO: " + nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.setNino(nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.submit()
+    EligibilityCheckPage.startCreatingAccount()
   }
 
   Then("""^they see their details$"""){ () =>
