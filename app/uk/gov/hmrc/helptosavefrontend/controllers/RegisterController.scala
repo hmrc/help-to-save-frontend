@@ -76,7 +76,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
               _ ⇒ {
                 logger.info(s"Successfully created account for $nino")
                 // start the process to enrol the user but don't worry about the result
-                enrolmentService.enrolUser(nino).fold(
+                enrolmentService.enrolUser(EnrolmentData(nino, false, Some(userInfo.contactDetails.email))).fold(
                   e ⇒ logger.warn(s"Could not start process to enrol user $nino: $e"),
                   _ ⇒ logger.info(s"Started process to enrol user $nino")
                 )

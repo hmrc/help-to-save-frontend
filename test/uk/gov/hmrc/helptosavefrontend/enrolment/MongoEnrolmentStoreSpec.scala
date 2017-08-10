@@ -23,7 +23,7 @@ import reactivemongo.api.DefaultDB
 import reactivemongo.api.indexes.Index
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore.{Enrolled, NotEnrolled, Status}
-import uk.gov.hmrc.helptosavefrontend.enrolment.MongoEnrolmentStore.EnrolmentData
+import uk.gov.hmrc.helptosavefrontend.models.EnrolmentData
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.mongo.MongoConnector
 
@@ -91,7 +91,7 @@ class MongoEnrolmentStoreSpec extends TestSupport{
     "putting" must {
 
       def put(nino: NINO, itmpNeedsUpdate: Boolean): Either[String,Unit] =
-        Await.result(store.update(nino, itmpNeedsUpdate).value, 5.seconds)
+        Await.result(store.update(EnrolmentData(nino, itmpNeedsUpdate)).value, 5.seconds)
 
 
       "insert into the mongodb collection" in {
