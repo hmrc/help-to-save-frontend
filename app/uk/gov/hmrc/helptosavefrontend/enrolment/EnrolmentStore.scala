@@ -24,7 +24,8 @@ import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore.{Enrolled, NotEnrolled, Status}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentData
-import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.DataEncrypter._
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -74,7 +75,7 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
   private[enrolment] def doUpdate(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] = {
 
     val fields = data.email.fold(BSONDocument("itmpHtSFlag" -> data.itmpHtSFlag))(
-      email ⇒ BSONDocument("itmpHtSFlag" -> data.itmpHtSFlag, "email" -> DataEncrypter.encrypt(email))
+      email ⇒ BSONDocument("itmpHtSFlag" -> data.itmpHtSFlag, "email" -> encrypt(email))
     )
 
     collection.findAndUpdate(
