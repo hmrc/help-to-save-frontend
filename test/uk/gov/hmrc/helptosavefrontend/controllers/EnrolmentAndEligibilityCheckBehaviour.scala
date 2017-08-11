@@ -25,7 +25,7 @@ import uk.gov.hmrc.auth.core
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsAuth}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService

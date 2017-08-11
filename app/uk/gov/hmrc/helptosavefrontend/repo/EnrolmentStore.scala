@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.enrolment
+package uk.gov.hmrc.helptosavefrontend.repo
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject}
@@ -22,8 +22,8 @@ import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore.{Enrolled, NotEnrolled, Status}
-import uk.gov.hmrc.helptosavefrontend.models.EnrolmentData
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.{Enrolled, NotEnrolled, Status}
+import uk.gov.hmrc.helptosavefrontend.repo.MongoEnrolmentStore.EnrolmentData
 import uk.gov.hmrc.helptosavefrontend.util.DataEncrypter._
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -38,8 +38,9 @@ trait EnrolmentStore {
 
   def get(nino: NINO): EitherT[Future, String, Status]
 
-  def update(data: EnrolmentData): EitherT[Future, String, Unit]
+  def create(nino: NINO, itmpFlag: Boolean, email: String): EitherT[Future, String, Unit]
 
+  def update(nino: NINO, itmpFlag: Boolean): EitherT[Future, String, Unit]
 }
 
 object EnrolmentStore {
@@ -72,19 +73,21 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
     )
   )
 
-  private[enrolment] def doUpdate(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] = {
-
-    val fields = data.email.fold(BSONDocument("itmpHtSFlag" -> data.itmpHtSFlag))(
-      email ⇒ BSONDocument("itmpHtSFlag" -> data.itmpHtSFlag, "email" -> encrypt(email))
-    )
-
+  private[repo] def doCreate(nino: NINO, itmpFlag: Boolean, email: String)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
     collection.findAndUpdate(
-      BSONDocument("nino" -> data.nino),
-      BSONDocument("$set" -> fields),
+      BSONDocument("nino" -> nino),
+      BSONDocument("$set" -> BSONDocument("itmpHtSFlag" -> itmpFlag, "email" -> encrypt(email))),
       fetchNewObject = true,
       upsert = true
     ).map(_.result[EnrolmentData])
-  }
+
+  private[repo] def doUpdate(nino: NINO, itmpFlag: Boolean)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
+    collection.findAndUpdate(
+      BSONDocument("nino" -> nino),
+      BSONDocument("$set" -> BSONDocument("itmpHtSFlag" -> itmpFlag)),
+      fetchNewObject = true,
+      upsert = true
+    ).map(_.result[EnrolmentData])
 
   override def get(nino: String): EitherT[Future, String, EnrolmentStore.Status] = EitherT(
     find("nino" → JsString(nino)).map { res ⇒
@@ -95,12 +98,29 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
         Left(s"Could not read from enrolment store: ${e.getMessage}")
     })
 
-  override def update(data: EnrolmentData): EitherT[Future, String, Unit] = {
-    logger.info(s"Putting nino ${data.nino} into enrolment store")
+  override def create(nino: NINO, itmpFlag: Boolean, email: String): EitherT[Future, String, Unit] = {
+    logger.debug(s"Creating enrolment for nino: $nino")
     EitherT(
-      doUpdate(data).map[Either[String, Unit]] { result ⇒
+      doCreate(nino, itmpFlag, email).map[Either[String, Unit]] { result ⇒
         result.fold[Either[String, Unit]](
-          Left("Could not update enrolment store")
+          Left(s"Could not create enrolment for nino: $nino")
+        ) { _ ⇒
+          logger.info(s"Successfully created enrolment for nino: $nino")
+          Right(())
+        }
+      }.recover { case e ⇒
+        logger.error(s"Could not write to enrolment store", e)
+        Left(s"Failed to write to enrolments store: ${e.getMessage}")
+      }
+    )
+  }
+
+  override def update(nino: NINO, itmpFlag: Boolean): EitherT[Future, String, Unit] = {
+    logger.debug(s"updating enrolment for nino: $nino")
+    EitherT(
+      doUpdate(nino, itmpFlag).map[Either[String, Unit]] { result ⇒
+        result.fold[Either[String, Unit]](
+          Left(s"Could not update enrolment for nino: $nino")
         ) { _ ⇒
           logger.info("Successfully updated enrolment store")
           Right(())
@@ -110,5 +130,14 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
         Left(s"Failed to write to enrolments store: ${e.getMessage}")
       }
     )
+  }
+}
+
+object MongoEnrolmentStore {
+
+  private[repo] case class EnrolmentData(nino: String, itmpHtSFlag: Boolean, email: String)
+
+  private[repo] object EnrolmentData {
+    implicit val ninoFormat = Json.format[EnrolmentData]
   }
 }

@@ -24,10 +24,13 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.mongoEncSeed
 
 object DataEncrypter {
 
-  val keySpec: DESKeySpec = new DESKeySpec(mongoEncSeed.getBytes("UTF-8"))
-  val keyFactory: SecretKeyFactory = SecretKeyFactory.getInstance("DES")
-  val key: SecretKey = keyFactory.generateSecret(keySpec)
-  val cipher: Cipher = Cipher.getInstance("DES")
+  private val key: SecretKey = {
+    val keySpec: DESKeySpec = new DESKeySpec(mongoEncSeed.getBytes("UTF-8"))
+    val keyFactory: SecretKeyFactory = SecretKeyFactory.getInstance("DES")
+    keyFactory.generateSecret(keySpec)
+  }
+
+  private val cipher: Cipher = Cipher.getInstance("DES")
 
   def encrypt(data: String): String = {
     cipher.init(Cipher.ENCRYPT_MODE, key)

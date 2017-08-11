@@ -28,6 +28,8 @@ class DataEncrypterSpec extends TestSupport {
 
       val encoded = DataEncrypter.encrypt(original)
 
+      encoded should not be original
+
       val decoded = DataEncrypter.decrypt(encoded)
 
       decoded should be(original)
@@ -38,6 +40,8 @@ class DataEncrypterSpec extends TestSupport {
       val original = "Dörte@Sören!#$%&'*+-/=?^_`उपयोगकर्ता@उदाहरण.कॉम.{|}~@example.com"
 
       val encoded = DataEncrypter.encrypt(original)
+
+      encoded should not be original
 
       val decoded = DataEncrypter.decrypt(encoded)
 

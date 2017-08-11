@@ -20,9 +20,8 @@ import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.connectors.ITMPConnector
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore.Status
-import uk.gov.hmrc.helptosavefrontend.models.EnrolmentData
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.Status
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -31,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[EnrolmentServiceImpl])
 trait EnrolmentService {
 
-  def enrolUser(data: EnrolmentData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def enrolUser(nino: NINO, email: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
@@ -43,21 +42,22 @@ trait EnrolmentService {
 class EnrolmentServiceImpl @Inject()(enrolmentStore: EnrolmentStore,
                                      itmpConnector: ITMPConnector) extends EnrolmentService {
 
-  def enrolUser(data: EnrolmentData)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+  def enrolUser(nino: NINO, email: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     for {
-      _ ← enrolmentStore.update(data)
-      _ ← setITMPFlagAndUpdateMongo(data.copy(itmpHtSFlag = true))
+      _ ← enrolmentStore.create(nino, itmpFlag = false, email)
+      _ ← setITMPFlagAndUpdateMongo(nino)
     } yield ()
 
   def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    setITMPFlagAndUpdateMongo(EnrolmentData(nino, true))
+    setITMPFlagAndUpdateMongo(nino)
 
   def getUserEnrolmentStatus(nino: NINO)(implicit ec: ExecutionContext): Result[Status] =
     enrolmentStore.get(nino)
 
-  private def setITMPFlagAndUpdateMongo(data: EnrolmentData)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, Unit] = for {
-    _ ← itmpConnector.setFlag(data.nino)(hc, ec)
-    _ ← enrolmentStore.update(data)
+
+  private def setITMPFlagAndUpdateMongo(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, Unit] = for {
+    _ ← itmpConnector.setFlag(nino)(hc, ec)
+    _ ← enrolmentStore.update(nino, itmpFlag = true)
   } yield ()
 
 }

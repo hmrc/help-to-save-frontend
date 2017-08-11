@@ -44,8 +44,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        checkIfAlreadyEnrolled{ _ ⇒
-          checkIfDoneEligibilityChecks{ userInfo ⇒
+        checkIfAlreadyEnrolled { _ ⇒
+          checkIfDoneEligibilityChecks { userInfo ⇒
             Ok(views.html.register.confirm_details(userInfo))
           }
         }
@@ -54,7 +54,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        checkIfAlreadyEnrolled{ _ ⇒
+        checkIfAlreadyEnrolled { _ ⇒
           checkIfDoneEligibilityChecks { _ ⇒
             Ok(views.html.register.create_account_help_to_save())
           }
@@ -76,7 +76,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
               _ ⇒ {
                 logger.info(s"Successfully created account for $nino")
                 // start the process to enrol the user but don't worry about the result
-                enrolmentService.enrolUser(EnrolmentData(nino, false, Some(userInfo.contactDetails.email))).fold(
+                enrolmentService.enrolUser(nino, userInfo.contactDetails.email).fold(
                   e ⇒ logger.warn(s"Could not start process to enrol user $nino: $e"),
                   _ ⇒ logger.info(s"Started process to enrol user $nino")
                 )
