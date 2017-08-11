@@ -26,11 +26,10 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError._
+import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
-import uk.gov.hmrc.helptosavefrontend.util.toFuture
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO, UserDetailsURI, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -46,6 +45,8 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             auditor: HTSAuditor)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
+  import EligibilityCheckController._
+
   def getCheckEligibility: Action[AnyContent] =  authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
@@ -55,10 +56,14 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
               // there is no session yet
               performEligibilityChecks(nino, htsContext).fold(
                 handleEligibilityCheckError,
-                Function.tupled(handleEligibilityResult)
+                r ⇒ handleEligibilityResult(r, nino)
               ), session ⇒
                 // there is a session
-                handleEligibilityResult(session, nino)
+                session.eligibilityCheckResult.fold(
+                  SeeOther(routes.EligibilityCheckController.notEligible().url)
+                )( _ ⇒
+                  SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+                )
             )
         }
   }
@@ -95,52 +100,69 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
 
   private def performEligibilityChecks(nino: NINO,
                                        htsContext: HtsContext
-                                      )(implicit hc: HeaderCarrier): EitherT[Future, EligibilityCheckError, (HTSSession, NINO)] =
+                                      )(implicit hc: HeaderCarrier): EitherT[Future, Error, EligibilityResultWithUserInfo] =
     for {
-      userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, EligibilityCheckError.NoUserDetailsURI(nino))
-      eligible       ← helpToSaveService.checkEligibility(nino, userDetailsURI)
-      nsiUserInfo    = eligible.result.map(NSIUserInfo(_))
-      _              ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(e ⇒ JSONSchemaValidationError(e, nino))
+      userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, Error("Could not find user details URI"))
+      eligible       ← helpToSaveService.checkEligibility(nino).leftMap(Error.apply)
+      resultWithInfo ← getUserInformation(eligible, nino, userDetailsURI)
+      nsiUserInfo    = resultWithInfo.value.toOption.map(_._2)
+      _              ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(Error.apply)
       session        = HTSSession(nsiUserInfo)
-      _              ←  sessionCacheConnector.put(session).leftMap[EligibilityCheckError](e ⇒ KeyStoreWriteError(e, nino))
-    } yield session → nino
+      _              ←  sessionCacheConnector.put(session).leftMap[Error](Error.apply)
+    } yield resultWithInfo
 
-  private def handleEligibilityResult(eligibilityCheckResult: HTSSession,
+  private def getUserInformation(eligibilityCheckResult: EligibilityCheckResult,
+                                nino: NINO,
+                                userDetailsURI: UserDetailsURI
+                               )(implicit hc: HeaderCarrier): EitherT[Future,Error,EligibilityResultWithUserInfo] =
+    eligibilityCheckResult.result.fold[EitherT[Future,Error,EligibilityResultWithUserInfo]](
+      { ineligibilityReason ⇒
+        // if the person is ineligible don't get the user info - return with an ineligibility reason
+        EitherT.pure[Future,Error,EligibilityResultWithUserInfo](EligibilityResultWithUserInfo(Left(ineligibilityReason)))
+      }, { eligibilityReason ⇒
+          helpToSaveService.getUserInformation(nino, userDetailsURI).bimap(
+            Error.apply,
+            userInfo ⇒ EligibilityResultWithUserInfo(Right(eligibilityReason → NSIUserInfo(userInfo)))
+          )
+      }
+    )
+
+  private def handleEligibilityResult(result: EligibilityResultWithUserInfo,
                                       nino: NINO
                                      )(implicit hc: HeaderCarrier) = {
-    eligibilityCheckResult.eligibilityCheckResult.fold{
-      auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some("Unknown eligibility problem")))
-      SeeOther(routes.EligibilityCheckController.notEligible().url)
-    } { _ ⇒
+    result.value.fold(
+      { ineligibilityReason ⇒
+        auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(ineligibilityReason.legibleString)))
+        SeeOther(routes.EligibilityCheckController.notEligible().url)
+    },{ case (eligibilityReason, nsiUserInfo) ⇒
       auditor.sendEvent(new EligibilityCheckEvent(appName, nino, None))
       SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-    }
+    })
   }
 
-  private def handleEligibilityCheckError(e: EligibilityCheckError)(
-    implicit request: Request[AnyContent], hc: HeaderCarrier, htsContext: HtsContext
-  ): Result = e match {
-    case NoUserDetailsURI(nino) ⇒
-      logger.warn(s"Could not find user details URI for user $nino")
+  private def handleEligibilityCheckError(error: Error)
+                                         (implicit request: Request[AnyContent],
+                                          hc: HeaderCarrier,
+                                          htsContext: HtsContext): Result = error.value match {
+
+    case Left(error) ⇒
+      logger.warn(error)
       InternalServerError
 
-    case BackendError(message, nino) =>
-      logger.warn(s"An error occurred while trying to call the backend service for user $nino: $message")
-      InternalServerError
+    case Right(u: UserInformationRetrievalError) ⇒
+      u match {
 
-    case MissingUserInfos(missingInfo, nino) =>
-      val problemDescription = s"user $nino has missing information: ${missingInfo.mkString(",")}"
-      logger.warn(problemDescription)
-      auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(problemDescription)))
-      Ok(views.html.register.missing_user_info(missingInfo, personalAccountUrl))
+        case UserInformationRetrievalError.BackendError(message, nino) ⇒
+          logger.warn(s"An error occurred while trying to call the backend service to get user information $nino: $message")
+          InternalServerError
 
-    case JSONSchemaValidationError(message, nino) =>
-      logger.warn(s"JSON schema validation failed for user $nino: $message")
-      InternalServerError
+        case MissingUserInfos(missingInfo, nino) =>
+          val problemDescription = s"user $nino has missing information: ${missingInfo.mkString(",")}"
+          logger.warn(problemDescription)
+          auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(problemDescription)))
+          Ok(views.html.register.missing_user_info(missingInfo, personalAccountUrl))
 
-    case KeyStoreWriteError(message, nino) =>
-      logger.error(s"Could not write to key store for user $nino: $message")
-      InternalServerError
+      }
   }
 
   private def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Option[NSIUserInfo]] = {
@@ -157,3 +179,14 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
 
 }
 
+object EligibilityCheckController {
+
+  private case class Error(value: Either[String,UserInformationRetrievalError])
+
+  private object Error{
+    def apply(error: String): Error = Error(Left(error))
+    def apply(u: UserInformationRetrievalError): Error = Error(Right(u))
+  }
+
+  private case class EligibilityResultWithUserInfo(value: Either[IneligibilityReason,(EligibilityReason,NSIUserInfo)])
+}

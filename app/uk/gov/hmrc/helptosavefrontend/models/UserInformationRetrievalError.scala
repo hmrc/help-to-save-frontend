@@ -19,14 +19,13 @@ package uk.gov.hmrc.helptosavefrontend.models
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 
-sealed trait EligibilityCheckError
+sealed trait UserInformationRetrievalError
 
-object EligibilityCheckError {
-  case class NoUserDetailsURI(nino: NINO) extends EligibilityCheckError
-  case class BackendError(message: String, nino: NINO) extends EligibilityCheckError
-  case class MissingUserInfos(missingInfo: Set[MissingUserInfo], nino: NINO) extends EligibilityCheckError
-  case class JSONSchemaValidationError(message: String, nino: NINO) extends EligibilityCheckError
-  case class KeyStoreWriteError(message: String, nino: NINO) extends EligibilityCheckError
+object UserInformationRetrievalError {
+
+  case class MissingUserInfos(missingInfo: Set[MissingUserInfo], nino: NINO) extends UserInformationRetrievalError
+
+  case class BackendError(message: String, nino: NINO) extends UserInformationRetrievalError
 
   object MissingUserInfos {
     implicit val missingUserInfosFormat: Format[MissingUserInfos] = Json.format[MissingUserInfos]
@@ -50,22 +49,22 @@ object MissingUserInfo {
   implicit val missingInfoFormat: Format[MissingUserInfo] = new Format[MissingUserInfo] {
     override def reads(json: JsValue): JsResult[MissingUserInfo] = {
       json match {
-        case JsString("GivenName") ⇒ JsSuccess(GivenName)
-        case JsString("Surname") ⇒ JsSuccess(Surname)
-        case JsString("Email") ⇒ JsSuccess(Email)
+        case JsString("GivenName")   ⇒ JsSuccess(GivenName)
+        case JsString("Surname")     ⇒ JsSuccess(Surname)
+        case JsString("Email")       ⇒ JsSuccess(Email)
         case JsString("DateOfBirth") ⇒ JsSuccess(DateOfBirth)
-        case JsString("Contact") => JsSuccess(Contact)
-        case _ => JsError("unknown field for MissingUserInfo")
+        case JsString("Contact")     ⇒ JsSuccess(Contact)
+        case _                       ⇒ JsError("unknown field for MissingUserInfo")
       }
     }
 
     override def writes(missingType: MissingUserInfo): JsValue = {
       val result = missingType match {
-        case GivenName ⇒ "GivenName"
-        case Surname ⇒ "Surname"
-        case Email => "Email"
-        case DateOfBirth => "DateOfBirth"
-        case Contact ⇒ "Contact"
+        case GivenName   ⇒ "GivenName"
+        case Surname     ⇒ "Surname"
+        case Email       ⇒ "Email"
+        case DateOfBirth ⇒ "DateOfBirth"
+        case Contact     ⇒ "Contact"
       }
       JsString(result)
     }

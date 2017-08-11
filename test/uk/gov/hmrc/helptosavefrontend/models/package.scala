@@ -18,37 +18,44 @@ package uk.gov.hmrc.helptosavefrontend
 
 import java.time.LocalDate
 
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.Gen
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.testutil._
-
+import uk.gov.hmrc.smartstub.AutoGen
+import uk.gov.hmrc.smartstub.AutoGen.{GenProvider, instance}
+import uk.gov.hmrc.smartstub._
 
 package object models {
 
-  implicit val addressArb =
-    Arbitrary(for {
-      line1 ← Gen.alphaNumStr
-      line2 ← Gen.alphaNumStr
-      line3 ← Gen.alphaNumStr
-      line4 ← Gen.alphaNumStr
-      line5 ← Gen.alphaNumStr
-      postcode ← Gen.alphaNumStr
-      country ← Gen.alphaStr
-    } yield Address(List(line1, line2, line3, line4, line5),
-      Some(postcode), Some(country)))
+  implicit def providerLocalDate(s: String): GenProvider[LocalDate] = instance({
+    s.toLowerCase match {
+      case "dateofbirth" | "dob" | "birthdate" ⇒ Gen.date(LocalDate.of(1900,1,1), LocalDate.now())
+      case _                                   ⇒ Gen.date
+    }
+  })
 
-  implicit val userInfoArb =
-    Arbitrary(for {
-      name ← Gen.alphaStr
-      surname ← Gen.alphaStr
-      nino ← Gen.alphaNumStr
-      dob ← Gen.choose(0L, 100L).map(LocalDate.ofEpochDay)
-      email ← Gen.alphaNumStr
-      address ← addressArb.arbitrary
-    } yield UserInfo(name, surname, nino, dob, email, address))
+  implicit val userInfoGen: Gen[UserInfo] = AutoGen[UserInfo]
 
-  def randomUserInfo(): UserInfo = sample(userInfoArb)
+  implicit val eligibilityCheckResultGen: Gen[EligibilityCheckResult] = AutoGen[EligibilityCheckResult]
 
+  implicit val eligibilityReasonGen: Gen[EligibilityReason] = AutoGen[EligibilityReason]
+
+  implicit val ineligibilityReasonGen: Gen[IneligibilityReason] = AutoGen[IneligibilityReason]
+
+  implicit val userInformationRetrievalError: Gen[UserInformationRetrievalError] =
+    Gen.const(UserInformationRetrievalError.BackendError("", ""))
+
+//    AutoGen[UserInformationRetrievalError]
+
+  def randomUserInfo(): UserInfo = sample(userInfoGen)
+
+  def randomEligibilityCheckResult() = sample(eligibilityCheckResultGen)
+
+  def randomUserInformationRetrievalError() = sample(userInformationRetrievalError)
+
+  def randomEligibilityReason() = sample(eligibilityReasonGen)
+
+  def randomIneligibilityReason() = sample(ineligibilityReasonGen)
 
 
   /**

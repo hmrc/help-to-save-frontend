@@ -22,7 +22,7 @@ import cats.data.EitherT
 import com.google.inject.Inject
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckError, EligibilityCheckResult, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, UserDetailsURI}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -31,10 +31,13 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends Logging {
 
-  def checkEligibility(nino: String,
-                       userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future,EligibilityCheckError,EligibilityCheckResult] =
+  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): EitherT[Future,String,EligibilityCheckResult] =
+    helpToSaveConnector.getEligibility(nino)
 
-    helpToSaveConnector.getEligibility(nino, userDetailsURI)
+  def getUserInformation(nino: String,
+                         userDetailsURI: UserDetailsURI
+                        )(implicit hc: HeaderCarrier): EitherT[Future,UserInformationRetrievalError,UserInfo] =
+    helpToSaveConnector.getUserInformation(nino, userDetailsURI)
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]] {
@@ -45,6 +48,8 @@ class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIC
         logger.error(s"Could not create an account for ${userInfo.nino} due to $failure")
         Left(failure)
     })
+
+
 
 }
 
