@@ -122,9 +122,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     */
   private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[String]) ⇒ Future[Result]
                                           )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
-    checkSession(
+    checkSession{
       // no session data => user has not gone through the journey this session => take them to eligibility checks
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url),
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)}{
       session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
           // user has gone through journey already this sessions and were found to be ineligible
@@ -132,7 +132,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         )( userInfo ⇒
           // user has gone through journey already this sessions and were found to be eligible
           ifEligible(userInfo, session.confirmedEmail)
-        ))
+        )
+    }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +

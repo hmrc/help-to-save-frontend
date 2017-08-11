@@ -37,12 +37,13 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
-          checkSession(
-            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url),
+          checkSession{
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+          }{
             _.eligibilityCheckResult.fold(
               Ok(views.html.core.not_eligible())
             )(_ ⇒ Ok(views.html.register.update_email_address()))
-          )
+          }
         }
   }
 

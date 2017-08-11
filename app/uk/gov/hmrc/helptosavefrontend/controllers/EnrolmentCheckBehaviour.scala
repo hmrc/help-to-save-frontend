@@ -34,51 +34,55 @@ trait EnrolmentCheckBehaviour { this: FrontendController with Logging ⇒
 
   val enrolmentService: EnrolmentService
 
-  def checkIfAlreadyEnrolled(ifNotEnrolled: NINO ⇒ Future[Result]
+  def checkIfAlreadyEnrolled(ifNotEnrolled: NINO ⇒ Future[Result],
+                             handleEnrolmentServiceError: EnrolmentServiceError ⇒ Future[Result] = _ ⇒ InternalServerError
                             )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
-    val enrolled = for {
+    val enrolled: EitherT[Future, EnrolmentCheckError, (String, EnrolmentStore.Status)] = for {
       nino ← EitherT.fromOption[Future](htsContext.nino, NoNINO)
       enrolmentStatus ← enrolmentService.getUserEnrolmentStatus(nino).leftMap[EnrolmentCheckError](e ⇒ EnrolmentServiceError(nino, e))
     } yield (nino, enrolmentStatus)
 
+    enrolled.fold[Future[Result]]( initialError ⇒
+      handleError(initialError, handleEnrolmentServiceError),
+      {
+        case (nino, EnrolmentStore.Enrolled(itmpHtSFlag)) ⇒
+          // if the user is enrolled but the itmp flag is not set then just
+          // start the process to set the itmp flag here without worrying about the result
+          if (!itmpHtSFlag) {
+            enrolmentService.setITMPFlag(nino).fold(
+              e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
+              _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
+            )
+          }
+          Ok("You've already got an account - yay!")
 
-    enrolled.semiflatMap {
-      case (nino, EnrolmentStore.Enrolled(itmpHtSFlag)) ⇒
-        // if the user is enrolled but the itmp flag is not set then just
-        // start the process to set the itmp flag here without worrying about the result
-        if (!itmpHtSFlag) {
-          enrolmentService.setITMPFlag(nino).fold(
-            e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
-            _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
-          )
-        }
-        Ok("You've already got an account - yay!")
-
-      case (nino, EnrolmentStore.NotEnrolled) ⇒
-        ifNotEnrolled(nino)
-    }.leftMap(handleError)
-      .value
-      .map(_.merge)
+        case (nino, EnrolmentStore.NotEnrolled) ⇒
+          ifNotEnrolled(nino)
+      }
+    ).flatMap(identity)
   }
 
-  private def handleError(enrolmentCheckError: EnrolmentCheckError): Result = enrolmentCheckError match {
+  private def handleError(enrolmentCheckError: EnrolmentCheckError,
+                          handleEnrolmentServiceError: EnrolmentServiceError ⇒ Future[Result]
+                         ): Future[Result] = enrolmentCheckError match {
     case NoNINO ⇒
       logger.warn("Could not get NINO")
       InternalServerError
 
-    case EnrolmentServiceError(nino, message) ⇒
+    case e @ EnrolmentServiceError(nino, message) ⇒
       logger.warn(s"Error while trying to check if user $nino was already enrolled to HtS: $message")
-      InternalServerError
+      handleEnrolmentServiceError(e)
+
   }
 
 }
 
 object EnrolmentCheckBehaviour {
 
-  private sealed trait EnrolmentCheckError
+  sealed trait EnrolmentCheckError
 
-  private case object NoNINO extends EnrolmentCheckError
+  case object NoNINO extends EnrolmentCheckError
 
-  private case class EnrolmentServiceError(nino: NINO, message: String) extends EnrolmentCheckError
+  case class EnrolmentServiceError(nino: NINO, message: String) extends EnrolmentCheckError
 
 }
