@@ -26,6 +26,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import uk.gov.hmrc.helptosavefrontend.controllers.EnrolmentCheckBehaviour.EnrolmentServiceError
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
@@ -50,7 +51,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
   def getCheckEligibility: Action[AnyContent] =  authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        checkIfAlreadyEnrolled{
+        checkIfAlreadyEnrolled({
           nino ⇒
             checkSession(
               // there is no session yet
@@ -65,7 +66,9 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                   SeeOther(routes.EligibilityCheckController.getIsEligible().url)
                 )
             )
-        }
+        },
+          handleEnrolmentCheckErrorOnEligibilityCheck
+        )
   }
 
   val notEligible: Action[AnyContent] = authorisedForHtsWithInfo {
@@ -97,6 +100,24 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
           )
         }
   }
+
+  private def handleEnrolmentCheckErrorOnEligibilityCheck(enrolmentCheckError: EnrolmentServiceError
+                                                         )(implicit hc: HeaderCarrier): Future[Result] =
+  // if we couldn't check the enrolment check the eligibility to see if they already have an account
+    helpToSaveService.checkEligibility(enrolmentCheckError.nino).fold(
+      { e ⇒
+        logger.warn(s"Could not check eligibility $e")
+        InternalServerError
+      },
+      result ⇒
+        result.result match {
+          case Left(IneligibilityReason.AccountAlreadyOpened) ⇒
+            Ok("You've already got an account - yay!")
+
+          case _ ⇒
+            InternalServerError
+        }
+    )
 
   private def performEligibilityChecks(nino: NINO,
                                        htsContext: HtsContext
