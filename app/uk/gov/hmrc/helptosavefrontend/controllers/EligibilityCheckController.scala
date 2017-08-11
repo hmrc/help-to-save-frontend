@@ -133,32 +133,39 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
     } yield resultWithInfo
 
   private def getUserInformation(eligibilityCheckResult: EligibilityCheckResult,
-                                nino: NINO,
-                                userDetailsURI: UserDetailsURI
-                               )(implicit hc: HeaderCarrier): EitherT[Future,Error,EligibilityResultWithUserInfo] =
+                                 nino: NINO,
+                                 userDetailsURI: UserDetailsURI
+                                )(implicit hc: HeaderCarrier): EitherT[Future,Error,EligibilityResultWithUserInfo] =
     eligibilityCheckResult.result.fold[EitherT[Future,Error,EligibilityResultWithUserInfo]](
       { ineligibilityReason ⇒
         // if the person is ineligible don't get the user info - return with an ineligibility reason
         EitherT.pure[Future,Error,EligibilityResultWithUserInfo](EligibilityResultWithUserInfo(Left(ineligibilityReason)))
       }, { eligibilityReason ⇒
-          helpToSaveService.getUserInformation(nino, userDetailsURI).bimap(
-            Error.apply,
-            userInfo ⇒ EligibilityResultWithUserInfo(Right(eligibilityReason → NSIUserInfo(userInfo)))
-          )
+        helpToSaveService.getUserInformation(nino, userDetailsURI).bimap(
+          Error.apply,
+          userInfo ⇒ EligibilityResultWithUserInfo(Right(eligibilityReason → NSIUserInfo(userInfo)))
+        )
       }
     )
 
+  // TODO: pass in email for account already opened case
   private def handleEligibilityResult(result: EligibilityResultWithUserInfo,
                                       nino: NINO
                                      )(implicit hc: HeaderCarrier) = {
     result.value.fold(
-      { ineligibilityReason ⇒
-        auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(ineligibilityReason.legibleString)))
-        SeeOther(routes.EligibilityCheckController.notEligible().url)
-    },{ case (eligibilityReason, nsiUserInfo) ⇒
-      auditor.sendEvent(new EligibilityCheckEvent(appName, nino, None))
-      SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-    })
+      {
+        case r @ IneligibilityReason.AccountAlreadyOpened ⇒
+          auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(r.legibleString)))
+          Ok("You've already got an account - yay!!!")
+
+        case other ⇒
+          auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(other.legibleString)))
+          SeeOther(routes.EligibilityCheckController.notEligible().url)
+      },
+      { case (eligibilityReason, nsiUserInfo) ⇒
+        auditor.sendEvent(new EligibilityCheckEvent(appName, nino, None))
+        SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+      })
   }
 
   private def handleEligibilityCheckError(error: Error)
