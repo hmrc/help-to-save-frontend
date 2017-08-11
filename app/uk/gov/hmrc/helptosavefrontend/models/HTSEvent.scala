@@ -21,7 +21,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.config.AppName
 
-abstract class HTSEvent(auditSource: String, auditType: String, detail: Map[String,String])(implicit hc: HeaderCarrier)
+class HTSEvent(auditSource: String, auditType: String, detail: Map[String,String])(implicit hc: HeaderCarrier)
   extends DataEvent(auditSource = auditSource, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
 class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(implicit hc: HeaderCarrier)
