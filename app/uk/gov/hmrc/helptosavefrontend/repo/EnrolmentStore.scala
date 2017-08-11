@@ -20,6 +20,7 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject}
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.{Enrolled, NotEnrolled, Status}
@@ -73,13 +74,8 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
     )
   )
 
-  private[repo] def doCreate(nino: NINO, itmpFlag: Boolean, email: String)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
-    collection.findAndUpdate(
-      BSONDocument("nino" -> nino),
-      BSONDocument("$set" -> BSONDocument("itmpHtSFlag" -> itmpFlag, "email" -> encrypt(email))),
-      fetchNewObject = true,
-      upsert = true
-    ).map(_.result[EnrolmentData])
+  private[repo] def doCreate(nino: NINO, itmpFlag: Boolean, email: String)(implicit ec: ExecutionContext): Future[WriteResult] =
+    collection.insert(BSONDocument("nino" -> nino, "itmpHtSFlag" -> itmpFlag, "email" -> encrypt(email)))
 
   private[repo] def doUpdate(nino: NINO, itmpFlag: Boolean)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
     collection.findAndUpdate(
@@ -102,9 +98,9 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
     logger.debug(s"Creating enrolment for nino: $nino")
     EitherT(
       doCreate(nino, itmpFlag, email).map[Either[String, Unit]] { result ⇒
-        result.fold[Either[String, Unit]](
-          Left(s"Could not create enrolment for nino: $nino")
-        ) { _ ⇒
+        if (result.hasErrors) {
+          Left(s"Could not create enrolment for nino: $nino, errors: ${result.writeErrors}")
+        } else {
           logger.info(s"Successfully created enrolment for nino: $nino")
           Right(())
         }
@@ -140,4 +136,5 @@ object MongoEnrolmentStore {
   private[repo] object EnrolmentData {
     implicit val ninoFormat = Json.format[EnrolmentData]
   }
+
 }

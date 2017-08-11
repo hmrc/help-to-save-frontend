@@ -20,6 +20,7 @@ import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.libs.json.{JsString, Json}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DefaultDB
+import reactivemongo.api.commands.{DefaultWriteResult, WriteError, WriteResult}
 import reactivemongo.api.indexes.Index
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.{Enrolled, NotEnrolled, Status}
@@ -34,7 +35,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class MongoEnrolmentStoreSpec extends TestSupport {
 
   trait MockDBFunctions {
-    def create[A](a: A): Future[Option[A]]
+    def create[A](a: A): Future[WriteResult]
 
     def update[A](a: A): Future[Option[A]]
 
@@ -63,7 +64,7 @@ class MongoEnrolmentStoreSpec extends TestSupport {
         Seq.empty[Index]
       }
 
-      override def doCreate(nino: NINO, itmpFlag: Boolean, email: String)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
+      override def doCreate(nino: NINO, itmpFlag: Boolean, email: String)(implicit ec: ExecutionContext): Future[WriteResult] =
         mockDBFunctions.create[EnrolmentData](EnrolmentData(nino, itmpFlag, email))
 
       override def doUpdate(nino: NINO, itmpFlag: Boolean)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
@@ -81,7 +82,7 @@ class MongoEnrolmentStoreSpec extends TestSupport {
     }
   }
 
-  def mockInsert(nino: NINO, itmpNeedsUpdate: Boolean, email: String)(result: ⇒ Future[Option[EnrolmentData]]): Unit =
+  def mockInsert(nino: NINO, itmpNeedsUpdate: Boolean, email: String)(result: ⇒ Future[WriteResult]): Unit =
     (mockDBFunctions.create[EnrolmentData](_: EnrolmentData))
       .expects(EnrolmentData(nino, itmpNeedsUpdate, email))
       .returning(result)
@@ -106,15 +107,17 @@ class MongoEnrolmentStoreSpec extends TestSupport {
       def insert(nino: NINO, itmpNeedsUpdate: Boolean, email: String): Either[String, Unit] =
         Await.result(store.create(nino, itmpNeedsUpdate, email).value, 5.seconds)
 
+      val writeResult = DefaultWriteResult(ok = true, 1, Seq.empty, None, Some(1), Some("unexpected error"))
+      val writeResultFailure = writeResult.copy(writeErrors = List(WriteError(1, 1, "unexpected error")))
 
       "insert into the mongodb collection" in {
-        mockInsert(nino, true, email)(Future.successful(Some(EnrolmentData(nino, true, email))))
+        mockInsert(nino, true, email)(Future.successful(writeResult))
 
         insert(nino, true, email)
       }
 
       "return successfully if the write was successful" in {
-        mockInsert(nino, false, email)(Future.successful(Some(EnrolmentData(nino, false, email))))
+        mockInsert(nino, false, email)(Future.successful(writeResult))
 
         insert(nino, false, email) shouldBe Right(())
       }
@@ -122,7 +125,7 @@ class MongoEnrolmentStoreSpec extends TestSupport {
       "return an error" when {
 
         "the write result from mongo is negative" in {
-          mockInsert(nino, true, email)(Future.successful(None))
+          mockInsert(nino, true, email)(Future.successful(writeResultFailure))
 
           insert(nino, true, email).isLeft shouldBe true
         }
