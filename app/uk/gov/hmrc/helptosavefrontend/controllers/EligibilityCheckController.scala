@@ -32,6 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveServ
 import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,7 +44,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             val enrolmentService: EnrolmentService,
                                             val app: Application,
                                             auditor: HTSAuditor)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+  extends HelpToSaveAuth(app) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   def getCheckEligibility: Action[AnyContent] =  authorisedForHtsWithInfo {
     implicit request ⇒
@@ -108,10 +109,10 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                       nino: NINO
                                      )(implicit hc: HeaderCarrier) = {
     eligibilityCheckResult.eligibilityCheckResult.fold{
-      auditor.sendEvent(new EligibilityCheckEvent(nino, Some("Unknown eligibility problem")))
+      auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some("Unknown eligibility problem")))
       SeeOther(routes.EligibilityCheckController.notEligible().url)
     } { _ ⇒
-      auditor.sendEvent(new EligibilityCheckEvent(nino, None))
+      auditor.sendEvent(new EligibilityCheckEvent(appName, nino, None))
       SeeOther(routes.EligibilityCheckController.getIsEligible().url)
     }
   }
@@ -130,7 +131,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
     case MissingUserInfos(missingInfo, nino) =>
       val problemDescription = s"user $nino has missing information: ${missingInfo.mkString(",")}"
       logger.warn(problemDescription)
-      auditor.sendEvent(new EligibilityCheckEvent(nino, Some(problemDescription)))
+      auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(problemDescription)))
       Ok(views.html.register.missing_user_info(missingInfo, personalAccountUrl))
 
     case JSONSchemaValidationError(message, nino) =>
