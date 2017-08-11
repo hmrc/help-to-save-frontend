@@ -28,8 +28,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore.NotEnrolled
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.NotEnrolled
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError.{BackendError, MissingUserInfos}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, Email}

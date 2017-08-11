@@ -23,10 +23,9 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
@@ -57,10 +56,10 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
       .expects(nSIUserInfo, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockEnrolUser(nino: NINO)(result: Either[String,Unit]): Unit =
-    (mockEnrolmentService.enrolUser(_: NINO)(_: HeaderCarrier, _: ExecutionContext))
-    .expects(nino, *, *)
-    .returning(EitherT.fromEither[Future](result))
+  def mockEnrolUser(nino: NINO, email: String)(result: Either[String, Unit]): Unit =
+    (mockEnrolmentService.enrolUser(_: NINO, _: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, email, *, *)
+      .returning(EitherT.fromEither[Future](result))
 
 
   "The RegisterController" when {
@@ -138,7 +137,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo)))))
           mockCreateAccount(validNSIUserInfo)()
-          mockEnrolUser(nino)(Right(()))
+          mockEnrolUser(nino, validNSIUserInfo.contactDetails.email)(Right(()))
         }
 
         val result = doCreateAccountRequest()
@@ -154,7 +153,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo)))))
           mockCreateAccount(validNSIUserInfo)()
-          mockEnrolUser(nino)(Left("Oh no"))
+          mockEnrolUser(nino, validNSIUserInfo.contactDetails.email)(Left("Oh no"))
         }
 
         val result = doCreateAccountRequest()
@@ -179,9 +178,4 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
       }
     }
   }
-
-
-
-
-
 }

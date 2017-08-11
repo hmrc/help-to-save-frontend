@@ -22,7 +22,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, validNSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 

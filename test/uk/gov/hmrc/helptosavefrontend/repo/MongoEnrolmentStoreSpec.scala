@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.enrolment
+package uk.gov.hmrc.helptosavefrontend.repo
 
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.libs.json.{JsString, Json}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.DefaultDB
+import reactivemongo.api.commands.{DefaultWriteResult, WriteError, WriteResult}
 import reactivemongo.api.indexes.Index
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore.{Enrolled, NotEnrolled, Status}
-import uk.gov.hmrc.helptosavefrontend.enrolment.MongoEnrolmentStore.EnrolmentData
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.{Enrolled, NotEnrolled, Status}
+import uk.gov.hmrc.helptosavefrontend.repo.MongoEnrolmentStore.EnrolmentData
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.mongo.MongoConnector
 
@@ -31,16 +32,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class MongoEnrolmentStoreSpec extends TestSupport{
+class MongoEnrolmentStoreSpec extends TestSupport {
 
   trait MockDBFunctions {
+    def create[A](a: A): Future[WriteResult]
+
     def update[A](a: A): Future[Option[A]]
-    def get[A,B](a: A): Future[List[B]]
+
+    def get[A, B](a: A): Future[List[B]]
   }
 
   val mockDBFunctions = mock[MockDBFunctions]
 
   val mockMongo = mock[ReactiveMongoComponent]
+
+  val email = "test@test.com"
 
   val store = {
     val connector = mock[MongoConnector]
@@ -58,8 +64,11 @@ class MongoEnrolmentStoreSpec extends TestSupport{
         Seq.empty[Index]
       }
 
-      override def doUpdate(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
-        mockDBFunctions.update[EnrolmentData](data)
+      override def doCreate(nino: NINO, itmpFlag: Boolean, email: String)(implicit ec: ExecutionContext): Future[WriteResult] =
+        mockDBFunctions.create[EnrolmentData](EnrolmentData(nino, itmpFlag, email))
+
+      override def doUpdate(nino: NINO, itmpFlag: Boolean)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
+        mockDBFunctions.update[EnrolmentData](EnrolmentData(nino, itmpFlag, email))
 
 
       override def find(query: (String, Json.JsValueWrapper)*
@@ -73,64 +82,105 @@ class MongoEnrolmentStoreSpec extends TestSupport{
     }
   }
 
-  def mockInsert(nino: NINO, itmpNeedsUpdate: Boolean)(result: ⇒ Future[Option[EnrolmentData]]): Unit =
-    (mockDBFunctions.update[EnrolmentData](_: EnrolmentData))
-      .expects(EnrolmentData(nino, itmpNeedsUpdate))
+  def mockInsert(nino: NINO, itmpNeedsUpdate: Boolean, email: String)(result: ⇒ Future[WriteResult]): Unit =
+    (mockDBFunctions.create[EnrolmentData](_: EnrolmentData))
+      .expects(EnrolmentData(nino, itmpNeedsUpdate, email))
       .returning(result)
 
-  def mockFind(nino: NINO)(result: ⇒ Future[List[(NINO,Boolean)]]): Unit =
+  def mockUpdate(nino: NINO, itmpNeedsUpdate: Boolean)(result: ⇒ Future[Option[EnrolmentData]]): Unit =
+    (mockDBFunctions.update[EnrolmentData](_: EnrolmentData))
+      .expects(EnrolmentData(nino, itmpNeedsUpdate, email))
+      .returning(result)
+
+  def mockFind(nino: NINO)(result: ⇒ Future[List[(NINO, Boolean)]]): Unit =
     (mockDBFunctions.get[Json.JsValueWrapper, EnrolmentData](_: Json.JsValueWrapper))
       .expects(toJsFieldJsValueWrapper(JsString(nino)))
-      .returning(result.map(_.map{ case (n,b) ⇒ EnrolmentData(n,b) }))
+      .returning(result.map(_.map { case (n, b) ⇒ EnrolmentData(n, b, email) }))
 
 
   "The MongoEnrolmentStore" when {
 
     val nino = "NINO"
 
-    "putting" must {
+    "inserting" must {
 
-      def put(nino: NINO, itmpNeedsUpdate: Boolean): Either[String,Unit] =
-        Await.result(store.update(nino, itmpNeedsUpdate).value, 5.seconds)
+      def insert(nino: NINO, itmpNeedsUpdate: Boolean, email: String): Either[String, Unit] =
+        Await.result(store.create(nino, itmpNeedsUpdate, email).value, 5.seconds)
 
+      val writeResult = DefaultWriteResult(ok = true, 1, Seq.empty, None, Some(1), Some("unexpected error"))
+      val writeResultFailure = writeResult.copy(writeErrors = List(WriteError(1, 1, "unexpected error")))
 
       "insert into the mongodb collection" in {
-        mockInsert(nino, true)(Future.successful(Some(EnrolmentData(nino, true))))
+        mockInsert(nino, true, email)(Future.successful(writeResult))
 
-        put(nino, true)
+        insert(nino, true, email)
       }
 
       "return successfully if the write was successful" in {
-        mockInsert(nino, false)(Future.successful(Some(EnrolmentData(nino, false))))
+        mockInsert(nino, false, email)(Future.successful(writeResult))
 
-        put(nino, false) shouldBe Right(())
+        insert(nino, false, email) shouldBe Right(())
       }
 
       "return an error" when {
 
         "the write result from mongo is negative" in {
-          mockInsert(nino, true)(Future.successful(None))
+          mockInsert(nino, true, email)(Future.successful(writeResultFailure))
 
-          put(nino, true).isLeft shouldBe true
+          insert(nino, true, email).isLeft shouldBe true
         }
 
         "the future returned by mongo fails" in {
-          mockInsert(nino, false)(Future.failed(new Exception))
+          mockInsert(nino, false, email)(Future.failed(new Exception))
 
-          put(nino, false).isLeft shouldBe true
+          insert(nino, false, email).isLeft shouldBe true
 
         }
+      }
+    }
 
+    "updating" must {
+
+      def update(nino: NINO, itmpNeedsUpdate: Boolean): Either[String, Unit] =
+        Await.result(store.update(nino, itmpNeedsUpdate).value, 5.seconds)
+
+
+      "update the mongodb collection" in {
+        mockUpdate(nino, true)(Future.successful(Some(EnrolmentData(nino, true, email))))
+
+        update(nino, true)
+      }
+
+      "return successfully if the update was successful" in {
+        mockUpdate(nino, false)(Future.successful(Some(EnrolmentData(nino, false, email))))
+
+        update(nino, false) shouldBe Right(())
+      }
+
+      "return an error" when {
+
+        "the update result from mongo is negative" in {
+          mockUpdate(nino, true)(Future.successful(None))
+
+          update(nino, true).isLeft shouldBe true
+        }
+
+        "the future returned by mongo fails" in {
+          mockUpdate(nino, false)(Future.failed(new Exception))
+
+          update(nino, false).isLeft shouldBe true
+
+        }
       }
     }
 
     "getting" must {
 
-      def get(nino: NINO): Either[String,Status] =
+      def get(nino: NINO): Either[String, Status] =
         Await.result(store.get(nino).value, 5.seconds)
 
       "attempt to find the entry in the collection based on the input nino" in {
-        mockFind(nino)(Future.successful(List.empty[(NINO,Boolean)]))
+        mockFind(nino)(Future.successful(List.empty[(NINO, Boolean)]))
 
         get(nino)
       }
@@ -143,7 +193,7 @@ class MongoEnrolmentStoreSpec extends TestSupport{
       }
 
       "return a not enrolled status if the entry is not found" in {
-        mockFind(nino)(Future.successful(List.empty[(NINO,Boolean)]))
+        mockFind(nino)(Future.successful(List.empty[(NINO, Boolean)]))
 
         get(nino) shouldBe Right(NotEnrolled)
       }
@@ -156,6 +206,4 @@ class MongoEnrolmentStoreSpec extends TestSupport{
     }
 
   }
-
-
 }
