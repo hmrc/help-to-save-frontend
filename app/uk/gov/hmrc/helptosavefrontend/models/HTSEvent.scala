@@ -19,12 +19,14 @@ package uk.gov.hmrc.helptosavefrontend.models
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
+import uk.gov.hmrc.play.config.AppName
 
-abstract class HTSEvent(auditType: String, detail: Map[String,String])(implicit hc: HeaderCarrier)
-  extends DataEvent(auditSource = "hts-frontend", auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
+class HTSEvent(auditSource: String, auditType: String, detail: Map[String,String])(implicit hc: HeaderCarrier)
+  extends DataEvent(auditSource = auditSource, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
-class ApplicationSubmittedEvent(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier)
-  extends HTSEvent("applicationSubmitted",
+class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(implicit hc: HeaderCarrier)
+  extends HTSEvent(auditSource,
+      "applicationSubmitted",
     Map[String, String](
         "forename" -> userInfo.forename,
         "surname" -> userInfo.surname,
@@ -42,8 +44,8 @@ class ApplicationSubmittedEvent(userInfo: NSIUserInfo)(implicit hc: HeaderCarrie
         "communicationPreference" -> userInfo.contactDetails.communicationPreference,
         "registrationChannel" -> userInfo.registrationChannel))
 
-class EligibilityCheckEvent(nino: String, errorDescription: Option[String])(implicit hc: HeaderCarrier)
-  extends HTSEvent("eligibilityCheck", {
+class EligibilityCheckEvent(auditSource: String, nino: String, errorDescription: Option[String])(implicit hc: HeaderCarrier)
+  extends HTSEvent(auditSource, "eligibilityCheck", {
       val basicMap = Map[String, String]("nino" -> nino)
       errorDescription.fold(basicMap + ("eligible" -> "true")) {reason =>
           basicMap + ("eligible" -> "false") + ("reason" -> reason)

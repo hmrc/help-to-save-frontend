@@ -31,4 +31,7 @@ package object util {
   type UserDetailsURI = String
 
   type Result[A] = EitherT[Future, String, A]
+
+  implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
+
 }

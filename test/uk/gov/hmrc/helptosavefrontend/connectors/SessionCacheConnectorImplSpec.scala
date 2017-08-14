@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.ws.WSHttp
 
-class SessionCacheConnectorSpec extends TestSupport with ScalaFutures {
+class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
 
   class TestApparatus {
     val mockWsHttp = mock[WSHttp]
@@ -51,7 +51,7 @@ class SessionCacheConnectorSpec extends TestSupport with ScalaFutures {
 
       val result = sessionCacheConnector.put(htsSession)
 
-      result.futureValue should be(cacheMap)
+      result.value.futureValue should be(Right(cacheMap))
 
     }
 
@@ -63,7 +63,7 @@ class SessionCacheConnectorSpec extends TestSupport with ScalaFutures {
 
       val result = sessionCacheConnector.get
 
-      result.futureValue should be(Some(htsSession))
+      result.value.futureValue should be(Right(Some(htsSession)))
 
     }
 

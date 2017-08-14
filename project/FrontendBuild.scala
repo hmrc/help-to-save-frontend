@@ -33,7 +33,8 @@ object FrontendBuild extends Build with MicroService {
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope,
-    // below for selenium tests
+    "uk.gov.hmrc" %% "stub-data-generator" % "0.4.0" % scope,
+  // below for selenium tests
     "com.codeborne" % "phantomjsdriver" % "1.4.3" % scope,
     "info.cukes" % "cucumber-junit" % "1.2.4" % scope,
     "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
