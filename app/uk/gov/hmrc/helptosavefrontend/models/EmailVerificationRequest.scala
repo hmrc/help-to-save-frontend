@@ -25,6 +25,8 @@ case class EmailVerificationRequest(email: String, templateId: String,
 object EmailVerificationRequest {
   implicit val formats: Format[EmailVerificationRequest] = Json.format[EmailVerificationRequest]
 
-  def apply(email: String, nino: String, templateId: String, linkExpiryDuration: String, continueUrl: String, templateParameters: Map[String, String]): EmailVerificationRequest =
-    EmailVerificationRequest(email, templateId, linkExpiryDuration, continueUrl, Map("email" → email, "nino" → nino) ++ templateParameters)
+  def apply(email: String, nino: String, templateId: String, linkExpiryDuration: String, continueUrl: String,
+            templateParameters: Map[String, String]): EmailVerificationRequest =
+    EmailVerificationRequest(email, templateId, linkExpiryDuration, continueUrl,
+      Map("email" → email, "nino" → nino) ++ templateParameters)
 }

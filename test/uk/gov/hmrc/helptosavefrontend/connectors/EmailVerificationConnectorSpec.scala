@@ -17,22 +17,14 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import org.joda.time.Period
-import org.scalatest.{BeforeAndAfterEach, Matchers}
-import org.scalatest.mockito.MockitoSugar
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
-import play.api.mvc.{AnyContent, Request}
-import play.api.test.FakeApplication
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.WSHttpExtension
-import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailStatus}
-import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailStatus
 import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, HttpResponse}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailStatus.Verifing
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
@@ -99,6 +91,8 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
       an [Exception] should be thrownBy connector.verifyEmail("AE123456D", "email@gmail.com")
 
     }
+
+
   }
 
 
