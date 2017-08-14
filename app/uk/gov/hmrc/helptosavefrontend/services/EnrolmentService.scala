@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[EnrolmentServiceImpl])
 trait EnrolmentService {
 
-  def enrolUser(nino: NINO, email: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def enrolUser(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
@@ -42,9 +42,9 @@ trait EnrolmentService {
 class EnrolmentServiceImpl @Inject()(enrolmentStore: EnrolmentStore,
                                      itmpConnector: ITMPConnector) extends EnrolmentService {
 
-  def enrolUser(nino: NINO, email: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+  def enrolUser(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     for {
-      _ ← enrolmentStore.create(nino, itmpFlag = false, email)
+      _ ← enrolmentStore.update(nino, itmpFlag = false)
       _ ← setITMPFlagAndUpdateMongo(nino)
     } yield ()
 

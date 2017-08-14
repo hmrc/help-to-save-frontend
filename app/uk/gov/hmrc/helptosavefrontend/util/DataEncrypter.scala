@@ -22,6 +22,8 @@ import javax.crypto.{Cipher, SecretKey, SecretKeyFactory}
 
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.mongoEncSeed
 
+import scala.util.control.NonFatal
+
 object DataEncrypter {
 
   private val key: SecretKey = {
@@ -37,9 +39,11 @@ object DataEncrypter {
     base64Encode(cipher.doFinal(data.getBytes("UTF-8")))
   }
 
-  def decrypt(data: String): String = {
+  def decrypt(data: String): Either[String,String] = try {
     cipher.init(Cipher.DECRYPT_MODE, key)
-    new String(cipher.doFinal(base64Decode(data)), "UTF-8")
+    Right(new String(cipher.doFinal(base64Decode(data)), "UTF-8"))
+  } catch {
+    case NonFatal(e) ⇒ Left(e.getMessage)
   }
 
   private def base64Encode(bytes: Array[Byte]) = Base64.getEncoder.encodeToString(bytes)

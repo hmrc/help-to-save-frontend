@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 
-class DataEncrypterSpec extends TestSupport {
+class DataEncrypterSpec extends TestSupport with GeneratorDrivenPropertyChecks {
 
   "The DataEncrypter" must {
 
@@ -32,7 +33,7 @@ class DataEncrypterSpec extends TestSupport {
 
       val decoded = DataEncrypter.decrypt(encoded)
 
-      decoded should be(original)
+      decoded should be(Right(original))
     }
 
     "correctly encrypt and decrypt the data when there are special characters" in {
@@ -45,7 +46,16 @@ class DataEncrypterSpec extends TestSupport {
 
       val decoded = DataEncrypter.decrypt(encoded)
 
-      decoded should be(original)
+      decoded should be(Right(original))
     }
+
+    "return an error when there are errors decrypting" in {
+      forAll{ s: String ⇒
+        whenever(s.nonEmpty){
+          DataEncrypter.decrypt(s).isLeft shouldBe true
+        }
+      }
+    }
+
   }
 }

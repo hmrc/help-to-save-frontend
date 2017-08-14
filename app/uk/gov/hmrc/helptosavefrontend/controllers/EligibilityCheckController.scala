@@ -107,7 +107,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       resultWithInfo ← getUserInformation(eligible, nino, userDetailsURI)
       nsiUserInfo    = resultWithInfo.value.toOption.map(_._2)
       _              ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(Error.apply)
-      session        = HTSSession(nsiUserInfo)
+      session        = HTSSession(nsiUserInfo, None)
       _              ←  sessionCacheConnector.put(session).leftMap[Error](Error.apply)
     } yield resultWithInfo
 
