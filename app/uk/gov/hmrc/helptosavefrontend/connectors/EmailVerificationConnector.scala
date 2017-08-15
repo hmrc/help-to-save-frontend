@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import org.joda.time.Period
+import java.time.Duration
 import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
@@ -41,26 +41,22 @@ trait EmailVerificationConnector {
 @Singleton
 class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuration) extends EmailVerificationConnector with ServicesConfig with Logging {
 
+  val linkTTLMinutes = conf.getInt("services.email-verification.linkTTLMinutes") match {
+    case Some(minutes) => minutes
+    case None => throw new RuntimeException("email-verification.link.ttlMinutes not present in configuration")
+  }
   val emailVerifyBaseURL = baseUrl("email-verification")
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
   def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
 
   val continueURL = "email-verification.continue.baseUrl"
   //+ EmailVerificationController.showSuccess.
-  val defaultTemplate = "hts_email_verification"
+  val templateId = "hts_email_verification"
 
-  override def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[VerifyEmailStatus] = {
-    conf.getInt("services.email-verification.linkTTLMinutes") match {
-      case Some(linkTTLMinutes) ⇒ verify(nino, newEmail, Period.minutes(linkTTLMinutes))
-      case None ⇒ throw new RuntimeException("email-verification.link.ttlMinutes not present in configuration")
-    }
-  }
+  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[VerifyEmailStatus] = {
+    val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueURL, Map())
 
-  private def verify(nino: String, newEmail: String, ttlPeriod: Period)(implicit hc: HeaderCarrier): Future[VerifyEmailStatus] = {
-    val postURL = s"""$verifyEmailURL"""
-    val json: JsValue = Json.toJson(EmailVerificationRequest(newEmail, nino, "", ttlPeriod.toString, ttlPeriod.toString, Map()))
-
-    http.post(postURL, json).map { (response: HttpResponse) ⇒
+    http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {
         case OK | CREATED =>
           logger.info("[EmailVerification] - Successful return of data")
