@@ -30,11 +30,7 @@ trait EmailVerificationController {
     implicit request =>
       Future.successful(Ok("hello"))
   }
-
-
-
 }
-
 
 object EmailVerificationController extends EmailVerificationController {
 
