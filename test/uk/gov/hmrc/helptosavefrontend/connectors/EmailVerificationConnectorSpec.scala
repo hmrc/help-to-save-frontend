@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.time.Duration
-
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
@@ -36,11 +34,10 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
   val nino = "AE123XXXX"
   val email = "email@gmail.com"
   val mockHttp = mock[WSHttp]
+
   lazy val connector = {
-    val mockConf = mock[Configuration]
-    (mockConf.getInt(_: String)).expects("services.email-verification.linkTTLMinutes").returning(Some(120))
-    mockConf
-    new EmailVerificationConnectorImpl(mockHttp, mockConf)
+    val config = Configuration("services.email-verification.linkTTLMinutes" → " 120")
+    new EmailVerificationConnectorImpl(mockHttp, config)
   }
 
   def mockPost(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
@@ -58,68 +55,62 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
 
   "verifyEmail" should {
-    "does good json equal 201" in {
+    "return 201 when given good json" in {
       mockPost(Status.OK, None)
       await(connector.verifyEmail(nino, email)) shouldBe Right(())
     }
 
-    "does bad json equal 400" in {
+    "return 400 when given bad json" in {
       mockPost(Status.BAD_REQUEST, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError(nino))
     }
 
-    "has the email already been verified and results in 409" in {
+    "return 409 when the email has already been verified" in {
       mockPost(Status.CONFLICT, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified(nino, email))
     }
 
-    "do we get a verification service unavailable error when the email verification service is down" in {
+    "return a verification service unavailable error when the email verification service is down" in {
       mockPost(Status.SERVICE_UNAVAILABLE, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
     }
 
-    "does Period produce ISO 8601 duration syntax when requested" in {
-      //30 minutes = PT30M
-      Duration.ofMinutes(30).toString shouldBe "PT30M"
-    }
-
-    "If email TTL does not exist in the configuration throw a runtime exception" in {
-      val mockConf = mock[Configuration]
-      (mockConf.getInt(_: String)).expects("services.email-verification.linkTTLMinutes").returning(None)
-      an [Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], mockConf)
+    "throw a runtime exception If email TTL does not exist in the configuration" in {
+      val config = Configuration("x" → "y")
+      an [Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], config)
     }
   }
 
   "isVerified" should {
-    "if the email is verified return Future true" in {
+    "return a Future true if the email is verified" in {
       mockGet(Status.OK, email, None)
       await(connector.isVerified(email)) shouldBe Right(true)
     }
 
-    "if the email is not verified return Future false" in {
+    "return a Future false if the email is not verified" in {
       mockGet(Status.NOT_FOUND, email, None)
       await(connector.isVerified(email)) shouldBe Right(false)
     }
 
-    "if the email string is not valid return a Future false" in {
+    "return a Future false if the email string is not valid" in {
       mockGet(Status.NOT_FOUND, "email", None)
       await(connector.isVerified("email")) shouldBe Right(false)
     }
 
-    "if the email verification service is down return a VerificationServiceUnavailable error" in {
+    "return a VerificationServiceUnavailable error if the email verification service is down" in {
       mockGet(Status.SERVICE_UNAVAILABLE, email, None)
       await(connector.isVerified(email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
     }
   }
 
   "verifyEmailURL" should {
-    "will return the correct url" in {
+    "return the correct url" in {
       connector.verifyEmailURL shouldBe s"http://localhost:9891/email-verification/verification-requests"
     }
   }
 
   "isVerifiedURL" should {
-    "will return the correct url when given an email address" in {
+    "return the correct url when given an email address" in {
       val email = "email@gmail.com"
       connector.isVerifiedURL(email) shouldBe s"http://localhost:9891/email-verification/verified-email-addresses/$email"
     }

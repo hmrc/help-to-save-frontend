@@ -27,6 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
@@ -40,10 +41,7 @@ trait EmailVerificationConnector {
 @Singleton
 class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuration) extends EmailVerificationConnector with ServicesConfig with Logging {
 
-  val linkTTLMinutes = conf.getInt("services.email-verification.linkTTLMinutes") match {
-    case Some(minutes) => minutes
-    case None => throw new RuntimeException("email-verification.link.ttlMinutes not present in configuration")
-  }
+  val linkTTLMinutes = conf.underlying.getInt("services.email-verification.linkTTLMinutes")
   val emailVerifyBaseURL = baseUrl("email-verification")
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
   def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
