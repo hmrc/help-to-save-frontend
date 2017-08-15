@@ -19,4 +19,3 @@ POST       /register/create-an-account                      @uk.gov.hmrc.helptos
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
 GET        /register/not-eligible                           @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.notEligible
 
-GET        /email-verification-success/                     uk.gov.hmrc.helptosavefrontend.controllers.EmailVerificationController.showSuccess
