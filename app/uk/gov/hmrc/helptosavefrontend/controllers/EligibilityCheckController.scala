@@ -26,7 +26,6 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.EnrolmentCheckBehaviour.EnrolmentServiceError
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
@@ -55,7 +54,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
           nino ⇒
             checkSession{
               // there is no session yet
-              getEligibilityPlayResult(nino)
+              getEligibilityActionResult(nino)
             } { session ⇒
               // there is a session
               session.eligibilityCheckResult.fold(
@@ -68,7 +67,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
             }
         }, { enrolmentCheckError ⇒
           // if there is an error checking the enrolment, do the eligibility checks
-          getEligibilityPlayResult(enrolmentCheckError.nino)
+          getEligibilityActionResult(enrolmentCheckError.nino)
         }
         )
   }
@@ -104,7 +103,9 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
         }
   }
 
-  private def getEligibilityPlayResult(nino: NINO)(implicit hc: HeaderCarrier, htsContext: HtsContext, request: Request[AnyContent]) =
+  private def getEligibilityActionResult(nino: NINO)(implicit hc: HeaderCarrier,
+                                                   htsContext: HtsContext,
+                                                   request: Request[AnyContent]): Future[Result] =
     performEligibilityChecks(nino).fold(
       handleEligibilityCheckError,
       r ⇒ handleEligibilityResult(r, nino))
@@ -139,7 +140,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
 
   private def handleEligibilityResult(result: EligibilityResultWithUserInfo,
                                       nino: NINO
-                                     )(implicit hc: HeaderCarrier) = {
+                                     )(implicit hc: HeaderCarrier): Result = {
     result.value.fold(
       {
         case r @ IneligibilityReason.AccountAlreadyOpened ⇒
