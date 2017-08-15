@@ -28,7 +28,6 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-
 class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
 {
 
@@ -111,7 +110,9 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
     }
 
     "if the email string is not valid return a Future false" in {
-
+      val http = getHttpMock(Status.NOT_FOUND, None)
+      val connector = new EmailVerificationConnectorImpl(http, mock[Configuration])
+      await(connector.isVerified("email")) shouldBe Right(false)
     }
 
     "if the email verification service is down return a VerificationServiceUnavailable error" in {
