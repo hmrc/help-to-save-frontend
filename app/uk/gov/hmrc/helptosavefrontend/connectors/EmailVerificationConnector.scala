@@ -22,8 +22,8 @@ import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailStatus._
-import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailStatus}
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
+import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -34,8 +34,8 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[VerifyEmailStatus]
-  def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailStatus, Boolean]]
+  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]]
+  def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Boolean]]
 }
 
 @Singleton
@@ -53,31 +53,31 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
   //+ EmailVerificationController.showSuccess.
   val templateId = "hts_email_verification"
 
-  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[VerifyEmailStatus] = {
+  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
     val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueURL, Map())
 
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {
         case OK | CREATED =>
-          logger.info("[EmailVerification] - Successful return of data")
-          Verifing(nino, newEmail)
+          logger.info("[EmailVerification] - Email verification successfully triggered")
+          Right(())
         case BAD_REQUEST ⇒
-          logger.warn("[EmailVerification] - Bad Request")
-          RequestNotValidError(nino)
+          logger.warn("[EmailVerification] - Bad Request from email verification service")
+          Left(RequestNotValidError(nino))
         case CONFLICT ⇒
           logger.info("[EmailVerification] - Email already verified")
-          AlreadyVerified(nino, newEmail)
+          Left(AlreadyVerified(nino, newEmail))
         case SERVICE_UNAVAILABLE ⇒
           logger.warn("[EmailVerification] - Email Verification service not available")
-          VerificationServiceUnavailable()
+          Left(VerificationServiceUnavailable())
         case _ ⇒
           logger.warn("[EmailVerification] - Unexpected status received from email verification")
-          BackendError("Unexpected response from email verification service. Status = " + response.status + ", body = " + response.body.toString)
+          Left(BackendError(s"Unexpected response from email verification service. Status = ${response.status}, body = ${response.body}"))
       }
     }
   }
 
-  def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailStatus, Boolean]] = {
+  def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Boolean]] = {
     val getURL = isVerifiedURL(email)
     http.get(getURL).map { response ⇒
       response.status match {

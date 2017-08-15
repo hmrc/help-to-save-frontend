@@ -18,12 +18,11 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.helptosavefrontend.util._
 
-sealed trait VerifyEmailStatus
+sealed trait VerifyEmailError
 
-object VerifyEmailStatus {
-  case class RequestNotValidError(nino: NINO) extends VerifyEmailStatus
-  case class VerificationServiceUnavailable() extends VerifyEmailStatus
-  case class AlreadyVerified(nino: NINO, emailAddress: String) extends VerifyEmailStatus
-  case class Verifing(nino: NINO, emailAddress: String) extends VerifyEmailStatus
-  case class BackendError(message: String) extends VerifyEmailStatus
+object VerifyEmailError {
+  case class RequestNotValidError(nino: NINO) extends VerifyEmailError
+  case class VerificationServiceUnavailable() extends VerifyEmailError
+  case class AlreadyVerified(nino: NINO, emailAddress: String) extends VerifyEmailError
+  case class BackendError(message: String) extends VerifyEmailError
 }

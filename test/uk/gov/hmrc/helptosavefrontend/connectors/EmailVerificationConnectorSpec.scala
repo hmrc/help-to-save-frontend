@@ -22,7 +22,7 @@ import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailStatus
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -54,22 +54,22 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
   "verifyEmail" should {
     "does good json equal 201" in {
       mockPost(Status.OK, None)
-      await(connector.verifyEmail(nino, email)) shouldBe VerifyEmailStatus.Verifing(nino, email)
+      await(connector.verifyEmail(nino, email)) shouldBe Right(())
     }
 
     "does bad json equal 400" in {
       mockPost(Status.BAD_REQUEST, None)
-      await(connector.verifyEmail(nino, email)) shouldBe VerifyEmailStatus.RequestNotValidError(nino)
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError(nino))
     }
 
     "has the email already been verified and results in 409" in {
       mockPost(Status.CONFLICT, None)
-      await(connector.verifyEmail(nino, email)) shouldBe VerifyEmailStatus.AlreadyVerified(nino, email)
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified(nino, email))
     }
 
     "do we get a verification service unavailable error when the email verification service is down" in {
       mockPost(Status.SERVICE_UNAVAILABLE, None)
-      await(connector.verifyEmail(nino, email)) shouldBe VerifyEmailStatus.VerificationServiceUnavailable()
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
     }
 
     "does Period produce ISO 8601 duration syntax when requested" in {
@@ -103,7 +103,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
 
     "if the email verification service is down return a VerificationServiceUnavailable error" in {
       mockGet(Status.SERVICE_UNAVAILABLE, None)
-      await(connector.isVerified(email)) shouldBe Left(VerifyEmailStatus.VerificationServiceUnavailable())
+      await(connector.isVerified(email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
     }
   }
 
