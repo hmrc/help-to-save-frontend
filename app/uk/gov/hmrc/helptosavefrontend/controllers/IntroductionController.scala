@@ -33,7 +33,6 @@ class IntroductionController @Inject()(implicit app: Application, val messagesAp
   def getAboutHelpToSave: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
-        println(htsContext.isAuthorised + "\n\n\n\n\n\n")
         Ok(views.html.introduction.about_help_to_save())
   }
 

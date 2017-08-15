@@ -44,7 +44,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             val enrolmentService: EnrolmentService,
                                             val app: Application,
                                             auditor: HTSAuditor,
-                                           frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
+                                            frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   import EligibilityCheckController._
@@ -106,8 +106,8 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
   }
 
   private def getEligibilityActionResult(nino: NINO)(implicit hc: HeaderCarrier,
-                                                   htsContext: HtsContext,
-                                                   request: Request[AnyContent]): Future[Result] =
+                                                     htsContext: HtsContext,
+                                                     request: Request[AnyContent]): Future[Result] =
     performEligibilityChecks(nino).fold(
       handleEligibilityCheckError,
       r ⇒ handleEligibilityResult(r, nino))
