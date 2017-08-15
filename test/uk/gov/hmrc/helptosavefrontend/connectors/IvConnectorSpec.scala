@@ -21,7 +21,7 @@ import java.util.UUID
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.WSHttpExtension
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, HttpResponse}
@@ -31,18 +31,16 @@ import scala.concurrent.Future
 class IvConnectorSpec extends TestSupport with ScalaFutures {
 
   class TestApparatus {
-    val httpMock = mock[WSHttpExtension]
+    val mockHttp = mock[WSHttp]
 
     val journeyId = JourneyId(UUID.randomUUID().toString)
 
     val url = s"http://localhost:9938/mdtp/journey/journeyId/${journeyId.Id}"
 
-    val ivConnector = new IvConnectorImpl {
-      override val http: WSHttpExtension = httpMock
-    }
+    val ivConnector = new IvConnectorImpl(mockHttp)
 
     def mockHttpResponse(httpResponse: HttpResponse) = {
-      (httpMock.GET[HttpResponse](_: String)(_: HttpReads[HttpResponse], _: HeaderCarrier))
+      (mockHttp.GET[HttpResponse](_: String)(_: HttpReads[HttpResponse], _: HeaderCarrier))
         .expects(url, *, *)
         .returning(httpResponse)
     }
@@ -78,7 +76,7 @@ class IvConnectorSpec extends TestSupport with ScalaFutures {
 
         val exception = new RuntimeException("some failure")
 
-        (httpMock.GET[RuntimeException](_: String)(_: HttpReads[RuntimeException], _: HeaderCarrier))
+        (mockHttp.GET[RuntimeException](_: String)(_: HttpReads[RuntimeException], _: HeaderCarrier))
           .expects(url, *, *)
           .returning(Future.failed(exception))
 

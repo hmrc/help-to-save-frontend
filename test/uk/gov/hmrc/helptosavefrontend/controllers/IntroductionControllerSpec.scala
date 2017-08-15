@@ -23,58 +23,82 @@ import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentAsString, contentType}
+import uk.gov.hmrc.auth.core.{EmptyPredicate, EmptyRetrieval, Predicate, Retrieval}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.play.http.HeaderCarrier
+
+import scala.concurrent.Future
 
 class IntroductionControllerSpec extends TestSupport {
 
   implicit val timeout = Timeout(5, SECONDS)
+  val frontendAuthConnector = mock[FrontendAuthConnector]
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new IntroductionController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi])
+  val helpToSave = new IntroductionController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], frontendAuthConnector)
+
+  def mockAuthorise(loggedIn: Boolean) =
+    (frontendAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier))
+    .expects(EmptyPredicate, EmptyRetrieval, *)
+    .returning(if(loggedIn) Future.successful(()) else Future.failed(new Exception("")))
 
   "GET /" should {
     "the getAboutHelpToSave should return html" in {
+      mockAuthorise(false)
+
       val result = helpToSave.getAboutHelpToSave(fakeRequest)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
 
-      val html = contentAsString(result)
-
-      html should not include "Sign out"
+      contentAsString(result) should not include "Sign out"
     }
 
     "the getEligibility should  return 200" in {
+      mockAuthorise(true)
+
       val result = helpToSave.getEligibility(fakeRequest)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+
+      contentAsString(result) should include("Sign out")
     }
 
     "the getHowTheAccountWorks return 200" in {
+      mockAuthorise(false)
+
       val result = helpToSave.getHowTheAccountWorks(fakeRequest)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+      contentAsString(result) should not include "Sign out"
     }
 
     "the getHowWeCalculateBonuses return 200" in {
+      mockAuthorise(true)
+
       val result = helpToSave.getHowWeCalculateBonuses(fakeRequest)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+      contentAsString(result) should include("Sign out")
     }
 
     "the getApply return 200" in {
+      mockAuthorise(false)
+
       val result = helpToSave.getApply(fakeRequest)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")
       charset(result) shouldBe Some("utf-8")
+      contentAsString(result) should not include "Sign out"
     }
   }
 }

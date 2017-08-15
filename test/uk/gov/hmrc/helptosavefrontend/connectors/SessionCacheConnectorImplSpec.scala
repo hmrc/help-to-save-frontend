@@ -20,22 +20,20 @@ import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.ws.WSHttp
 
 class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
 
   class TestApparatus {
     val mockWsHttp = mock[WSHttp]
 
-    val htsSession = HTSSession(Some(validNSIUserInfo))
+    val htsSession = HTSSession(Some(validNSIUserInfo), Some("hello"))
 
     val cacheMap = CacheMap("1", Map("htsSession" -> Json.toJson(htsSession)))
 
-    val sessionCacheConnector = new SessionCacheConnectorImpl {
-      override def http: HttpGet with HttpPut with HttpDelete = mockWsHttp
-    }
+    val sessionCacheConnector = new SessionCacheConnectorImpl(mockWsHttp)
 
     val putUrl = s"http://localhost:8400/keystore/help-to-save-frontend/${headerCarrier.sessionId.get.value}/data/htsSession"
     val getUrl = s"http://localhost:8400/keystore/help-to-save-frontend/${headerCarrier.sessionId.get.value}"

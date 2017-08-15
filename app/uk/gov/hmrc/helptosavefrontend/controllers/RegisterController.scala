@@ -23,11 +23,13 @@ import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
 import play.api.Application
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.repo.EmailStore
 import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -38,25 +40,47 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    helpToSaveService: HelpToSaveService,
                                    val sessionCacheConnector: SessionCacheConnector,
                                    val enrolmentService: EnrolmentService,
-                                   val app: Application)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+                                   emailStore: EmailStore,
+                                   val app: Application,
+                                   frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
+  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+
+  import RegisterController.NSIUserInfoOps
 
   def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
-          checkIfDoneEligibilityChecks { userInfo ⇒
-            Ok(views.html.register.confirm_details(userInfo))
+          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
+            Ok(views.html.register.confirm_details(nsiUserInfo))
           }
         }
   }
 
-  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithInfo {
+  def getCreateAccountHelpToSavePage(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        checkIfAlreadyEnrolled { _ ⇒
-          checkIfDoneEligibilityChecks { _ ⇒
-            Ok(views.html.register.create_account_help_to_save())
+        checkIfAlreadyEnrolled { nino ⇒
+          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
+            DataEncrypter.decrypt(confirmedEmail).fold(
+              { e ⇒
+                logger.warn(s"Could not decrypt email: $e")
+                InternalServerError
+              },{ email ⇒
+                val result = for{
+                  _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(email)))
+                  _ ← emailStore.storeConfirmedEmail(email, nino)
+                } yield ()
+
+                result.fold(
+                  { e ⇒
+                    logger.warn(s"Could not store confirmed email: $e")
+                    InternalServerError
+                  },
+                  _ ⇒ Ok(views.html.register.create_account_help_to_save())
+                )
+              }
+            )
           }
         }
   }
@@ -65,25 +89,29 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { nino ⇒
-          checkIfDoneEligibilityChecks { userInfo ⇒
-            // TODO: plug in actual pages below
-            helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString).fold(
-              error ⇒ {
-                // TODO: error or warning?
-                logger.error(s"Could not create account: $error")
-                Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
-              },
-              _ ⇒ {
-                logger.info(s"Successfully created account for $nino")
-                // start the process to enrol the user but don't worry about the result
-                enrolmentService.enrolUser(nino, userInfo.contactDetails.email).fold(
-                  e ⇒ logger.warn(s"Could not start process to enrol user $nino: $e"),
-                  _ ⇒ logger.info(s"Started process to enrol user $nino")
-                )
+          checkIfDoneEligibilityChecks { case (nsiUserInfo, confirmedEmail) ⇒
+            confirmedEmail.fold[Future[Result]](
+              SeeOther(routes.RegisterController.getConfirmDetailsPage().url)
+            ) { email ⇒
+              // TODO: plug in actual pages below
+              helpToSaveService.createAccount(nsiUserInfo.updateEmail(email)).leftMap(submissionFailureToString).fold(
+                error ⇒ {
+                  // TODO: error or warning?
+                  logger.error(s"Could not create account: $error")
+                  Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
+                },
+                _ ⇒ {
+                  logger.info(s"Successfully created account for $nino")
+                  // start the process to enrol the user but don't worry about the result
+                  enrolmentService.enrolUser(nino).fold(
+                    e ⇒ logger.warn(s"Could not start process to enrol user $nino: $e"),
+                    _ ⇒ logger.info(s"Started process to enrol user $nino")
+                  )
 
-                Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
-              }
-            )
+                  Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
+                }
+              )
+            }
           }
         }
   }
@@ -94,18 +122,20 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
     * given action if the the session data indicates that they are eligible
     */
-  private def checkIfDoneEligibilityChecks(ifEligible: NSIUserInfo ⇒ Future[Result]
+  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[String]) ⇒ Future[Result]
                                           )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
-    checkSession(
+    checkSession{
       // no session data => user has not gone through the journey this session => take them to eligibility checks
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url),
-      _.eligibilityCheckResult.fold[Future[Result]](
-        // user has gone through journey already this sessions and were found to be ineligible
-        SeeOther(routes.EligibilityCheckController.notEligible().url)
-      )(
-        // user has gone through journey already this sessions and were found to be eligible
-        ifEligible
-      ))
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)}{
+      session ⇒
+        session.eligibilityCheckResult.fold[Future[Result]](
+          // user has gone through journey already this sessions and were found to be ineligible
+          SeeOther(routes.EligibilityCheckController.notEligible().url)
+        )( userInfo ⇒
+          // user has gone through journey already this sessions and were found to be eligible
+          ifEligible(userInfo, session.confirmedEmail)
+        )
+    }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +
@@ -114,3 +144,11 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
 }
 
+object RegisterController {
+
+  private[controllers] implicit class NSIUserInfoOps(val nsiUserInfo: NSIUserInfo) extends AnyVal {
+    def updateEmail(email: String): NSIUserInfo =
+      nsiUserInfo.copy(contactDetails = nsiUserInfo.contactDetails.copy(email = email))
+  }
+
+}

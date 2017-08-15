@@ -13,10 +13,8 @@ GET        /register/check-eligibility                      @uk.gov.hmrc.helptos
 GET        /register/you-are-eligible                       @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 GET        /register/check-and-confirm-your-details         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmDetailsPage
 GET        /register/update-your-email-address              @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.getUpdateYourEmailAddress
-GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
+GET        /register/create-an-account/:confirmedEmail      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage(confirmedEmail)
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
 GET        /register/not-eligible                           @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.notEligible
-
-GET        /email-verification-success/                     uk.gov.hmrc.helptosavefrontend.controllers.EmailVerificationController.showSuccess

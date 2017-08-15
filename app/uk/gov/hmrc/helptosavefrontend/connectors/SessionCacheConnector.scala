@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import cats.data.EitherT
-import com.google.inject.{ImplementedBy, Singleton}
+import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{keyStoreDomain, keyStoreUrl, sessionCacheKey}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
@@ -42,7 +42,7 @@ trait SessionCacheConnector {
 }
 
 @Singleton
-class SessionCacheConnectorImpl extends SessionCacheConnector with SessionCache with ServicesConfig with AppName {
+class SessionCacheConnectorImpl @Inject()(val http: WSHttp) extends SessionCacheConnector with SessionCache with ServicesConfig with AppName {
 
   override def defaultSource: String = appName
 
@@ -51,8 +51,6 @@ class SessionCacheConnectorImpl extends SessionCacheConnector with SessionCache 
   override def baseUri: String = keyStoreUrl
 
   override def domain: String = keyStoreDomain
-
-  override def http: HttpGet with HttpPut with HttpDelete = WSHttp
 
   def put(body: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[CacheMap] =
     EitherT[Future,String,CacheMap](
