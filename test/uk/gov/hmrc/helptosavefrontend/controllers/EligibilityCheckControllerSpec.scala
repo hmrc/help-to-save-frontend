@@ -33,6 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.NotEnrolled
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
+import uk.gov.hmrc.helptosavefrontend.models.IneligibilityReason.AccountAlreadyOpened
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, Email}
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -73,8 +74,8 @@ class EligibilityCheckControllerSpec
 
   def mockGetUserInformation(nino: NINO, userDetailsURI: UserDetailsURI)(result: Either[UserInformationRetrievalError, UserInfo]): Unit =
     (mockHtsService.getUserInformation(_: NINO, _: UserDetailsURI)(_: HeaderCarrier))
-    .expects(nino, userDetailsURI, *)
-    .returning(EitherT.fromEither[Future](result))
+      .expects(nino, userDetailsURI, *)
+      .returning(EitherT.fromEither[Future](result))
 
   def mockSendAuditEvent: Unit =
     (mockAuditor.sendEvent(_: HTSEvent))
@@ -88,7 +89,7 @@ class EligibilityCheckControllerSpec
 
 
   "The EligibilityCheckController" when {
-    
+
     "displaying the you are eligible page" must {
 
       def getIsEligible(): Future[PlayResult] = controller.getIsEligible(FakeRequest())
@@ -154,7 +155,7 @@ class EligibilityCheckControllerSpec
       }
 
     }
-    
+
 
     "checking eligibility" when {
 
@@ -168,16 +169,101 @@ class EligibilityCheckControllerSpec
 
       "an error occurs while trying to see if the user is already enrolled" must {
 
-        "return an error" in {
+        "call the get eligibility endpoint of the help to save service" in {
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
             mockEnrolmentCheck(nino)(Left("Oh no!"))
+            mockEligibilityResult(nino)(Left(""))
           }
-          val result = doCheckEligibilityRequest()
 
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+          await(doCheckEligibilityRequest())
         }
 
+        "redirect to NS&I if the eligibility check indicates the user already has an account" in {
+          inSequence{
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Left("Oh no!"))
+            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
+            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSendAuditEvent
+          }
+
+          val result = doCheckEligibilityRequest()
+          status(result) shouldBe OK
+          contentAsString(result) shouldBe "You've already got an account - yay!!!"
+        }
+
+        "show the you are eligible page if the eligibility check indicates the user is eligible" in {
+          inSequence{
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Left("Oh no!"))
+            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(EligibilityReason.WTCWithUC))))
+            mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
+            mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
+            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSendAuditEvent
+          }
+
+          val result = doCheckEligibilityRequest()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+        }
+
+        "show the you are not eligible page if the eligibility check indicates the user is eligible" in {
+          inSequence{
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Left("Oh no!"))
+            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.NotEntitledToWTC(false)))))
+            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSendAuditEvent
+          }
+
+          val result = doCheckEligibilityRequest()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.notEligible().url)
+        }
+
+
+
+        "return an error" when {
+
+          "the eligibility check call returns with an error" in {
+            inSequence{
+              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+              mockEnrolmentCheck(nino)(Left("Oh no!"))
+              mockEligibilityResult(nino)(Left(""))
+            }
+
+            val result = doCheckEligibilityRequest()
+            status(result) shouldBe INTERNAL_SERVER_ERROR
+          }
+
+          "the eligibility check indicates they do not already have an account" in {
+            def test(eligibilityCheckResult: EligibilityCheckResult): Unit = {
+              inSequence{
+                mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+                mockEnrolmentCheck(nino)(Left("Oh no!"))
+                mockEligibilityResult(nino)(Right(eligibilityCheckResult))
+              }
+
+              val result = doCheckEligibilityRequest()
+              status(result) shouldBe INTERNAL_SERVER_ERROR
+            }
+
+            implicit val eligibilityReasonArb   = Arbitrary(eligibilityReasonGen)
+            implicit val ineligibilityReasonArb = Arbitrary(ineligibilityReasonGen)
+
+            forAll{ eligibilityReason: EligibilityReason ⇒
+              test(EligibilityCheckResult(Right(eligibilityReason)))
+            }
+
+            forAll{ ineligibilityReason: IneligibilityReason ⇒
+              whenever(ineligibilityReason != AccountAlreadyOpened){
+                test(EligibilityCheckResult(Left(ineligibilityReason)))
+              }
+            }
+          }
+        }
       }
 
       "the user is not already enrolled" must {
