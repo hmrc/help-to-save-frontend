@@ -22,15 +22,18 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 
 @Singleton
-class IntroductionController @Inject()(implicit app: Application, val messagesApi: MessagesApi) extends HelpToSaveAuth(app) with I18nSupport {
+class IntroductionController @Inject()(implicit app: Application, val messagesApi: MessagesApi,
+                                       frontendAuthConnector: FrontendAuthConnector) extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport {
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
+        println(htsContext.isAuthorised + "\n\n\n\n\n\n")
         Ok(views.html.introduction.about_help_to_save())
   }
 

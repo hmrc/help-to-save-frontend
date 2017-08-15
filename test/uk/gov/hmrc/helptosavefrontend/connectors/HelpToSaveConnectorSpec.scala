@@ -20,7 +20,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.encoded
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttpExtension}
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, MissingUserInfoSet}
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, DateOfBirth, Email, GivenName, Surname}
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
@@ -42,11 +42,9 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
 
   class TestApparatus {
-    val mockHttp = mock[WSHttpExtension]
+    val mockHttp = mock[WSHttp]
 
-    val connector = new HelpToSaveConnectorImpl {
-      override val http = mockHttp
-    }
+    val connector = new HelpToSaveConnectorImpl(mockHttp)
 
     def mockGetEligibilityStatus[I](url: String)(result: HttpResponse): Unit =
       (mockHttp.get(_: String)(_: HeaderCarrier))

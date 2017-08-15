@@ -21,12 +21,12 @@ import org.joda.time.Period
 import play.api.Configuration
 import play.api.http.Status._
 import play.api.libs.json.{JsValue, Json}
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailStatus._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailStatus}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.ws.WSHttp
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -60,7 +60,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
     val postURL = s"""$verifyEmailURL"""
     val json: JsValue = Json.toJson(EmailVerificationRequest(newEmail, nino, "", ttlPeriod.toString, ttlPeriod.toString, Map()))
 
-    http.POST(postURL, json).map { (response: HttpResponse) ⇒
+    http.post(postURL, json).map { (response: HttpResponse) ⇒
       response.status match {
         case OK | CREATED =>
           logger.info("[EmailVerification] - Successful return of data")
@@ -83,7 +83,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
 
   def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailStatus, Boolean]] = {
     val getURL = isVerifiedURL(email)
-    http.GET(getURL).map { response ⇒
+    http.get(getURL).map { response ⇒
       response.status match {
         case OK ⇒
           logger.info("[EmailVerification] - email is verified")

@@ -21,8 +21,8 @@ import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailStatus
-import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -36,14 +36,14 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
 
   def postHttpMock(returnedStatus: Int, returnedData: Option[JsValue]): WSHttp = {
     val mockHttp = mock[WSHttp]
-    (mockHttp.POST(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HttpReads[Any], _: HeaderCarrier)).expects(*, *, *, *, *, *)
+    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier)).expects(*, *, *, *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
     mockHttp
   }
 
   def getHttpMock(returnedStatus: Int, returnedData: Option[JsValue]): WSHttp = {
     val mockHttp = mock[WSHttp]
-    (mockHttp.GET(_: String) (_: HttpReads[Any], _: HeaderCarrier)).expects(*, *, *)
+    (mockHttp.get(_: String) (_: HeaderCarrier)).expects(*, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
     mockHttp
   }

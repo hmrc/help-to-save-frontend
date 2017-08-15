@@ -24,6 +24,7 @@ import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.repo.{EmailStore, EnrolmentStore}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
@@ -43,6 +44,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
   val mockHtsService = mock[HelpToSaveService]
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor = mock[HTSAuditor]
+  val frontendAuthConnector = stub[FrontendAuthConnector]
   val mockEmailStore = mock[EmailStore]
 
   val controller = new RegisterController(
@@ -51,7 +53,8 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
     mockSessionCacheConnector,
     mockEnrolmentService,
     mockEmailStore,
-    fakeApplication)(
+    fakeApplication,
+    frontendAuthConnector)(
     ec) {
     override lazy val authConnector = mockAuthConnector
   }

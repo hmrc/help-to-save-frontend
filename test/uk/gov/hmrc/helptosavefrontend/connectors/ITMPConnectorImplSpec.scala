@@ -20,7 +20,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json.Writes
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.itmpEnrolmentURL
-import uk.gov.hmrc.helptosavefrontend.config.WSHttpExtension
+import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
 import uk.gov.hmrc.helptosavefrontend.connectors.ITMPConnectorImpl.PostBody
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -29,7 +29,7 @@ import scala.concurrent.Future
 
 class ITMPConnectorImplSpec extends TestSupport with GeneratorDrivenPropertyChecks{
 
-  val mockHttp: WSHttpExtension = mock[WSHttpExtension]
+  val mockHttp = mock[WSHttp]
 
   def mockPost[A](url: String, body: A)(result: Option[HttpResponse]): Unit =
     (mockHttp.post(_: String, _: A, _: Seq[(String,String)])(_: Writes[A], _: HeaderCarrier))
@@ -38,9 +38,7 @@ class ITMPConnectorImplSpec extends TestSupport with GeneratorDrivenPropertyChec
 
   "The ITMPConnectorImpl" when {
 
-    val connector = new ITMPConnectorImpl(){
-      override val http: WSHttpExtension = mockHttp
-    }
+    val connector = new ITMPConnectorImpl(mockHttp)
 
     val nino = "NINO"
 
