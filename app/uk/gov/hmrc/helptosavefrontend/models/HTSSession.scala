@@ -24,8 +24,10 @@ import play.api.libs.json.{Format, Json}
   * @param eligibilityCheckResult Contains `Some` if the user has gone through the eligibility checks
   *                               and they are eligible for HtS and contains `None` if the user has gone
   *                               through eligibility checks and they are ineligible
+  * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
+  *                               if they haven't
   */
-case class HTSSession(eligibilityCheckResult: Option[NSIUserInfo])
+case class HTSSession(eligibilityCheckResult: Option[NSIUserInfo], confirmedEmail: Option[String])
 
 object HTSSession {
   implicit val htsSessionFormat: Format[HTSSession] = Json.format[HTSSession]

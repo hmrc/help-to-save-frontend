@@ -48,7 +48,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo)))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
         val result = getResult()
@@ -62,7 +62,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
         val result = getResult()

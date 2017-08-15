@@ -99,7 +99,7 @@ class EligibilityCheckControllerSpec
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo)))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
         val result = getIsEligible()
@@ -112,7 +112,7 @@ class EligibilityCheckControllerSpec
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
         val result = getIsEligible()
@@ -132,7 +132,7 @@ class EligibilityCheckControllerSpec
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
         val result = getIsNotEligible()
@@ -145,7 +145,7 @@ class EligibilityCheckControllerSpec
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo)))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
         val result = getIsNotEligible()
@@ -187,7 +187,7 @@ class EligibilityCheckControllerSpec
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
             mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
           }
 
           val result = doCheckEligibilityRequest()
@@ -201,7 +201,7 @@ class EligibilityCheckControllerSpec
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
             mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo)))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           }
 
           val result = doCheckEligibilityRequest()
@@ -222,7 +222,7 @@ class EligibilityCheckControllerSpec
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
             mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
             mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
-            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo)))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(CacheMap("1", Map.empty[String, JsValue])))
             mockSendAuditEvent
           }
 
@@ -242,7 +242,7 @@ class EligibilityCheckControllerSpec
             mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(ineligibilityReason))))
-            mockSessionCacheConnectorPut(HTSSession(None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
             mockSendAuditEvent
           }
 
@@ -370,7 +370,7 @@ class EligibilityCheckControllerSpec
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
-              mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo)))(Left("Bang"))
+              mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Left("Bang"))
             }
             )
           }
