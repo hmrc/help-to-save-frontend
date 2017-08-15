@@ -145,6 +145,13 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
       {
         case r @ IneligibilityReason.AccountAlreadyOpened ⇒
           auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(r.legibleString)))
+
+          // set the ITMP flag here but don't worry about the result
+          enrolmentService.setITMPFlag(nino).fold(
+            e ⇒ logger.warn(s"Could not set ITMP flag for user $nino: $e"),
+            _ ⇒ logger.info(s"Set ITMP flag for user $nino")
+          )
+
           Ok("You've already got an account - yay!!!")
 
         case other ⇒
