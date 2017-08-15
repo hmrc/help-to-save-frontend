@@ -30,9 +30,10 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-class HelpToSaveAuth(app: Application) extends FrontendController with AuthorisedFunctions with Redirects with Logging {
+class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnector)
+  extends FrontendController with AuthorisedFunctions with Redirects with Logging {
 
-  override def authConnector: AuthConnector = FrontendAuthConnector
+  override def authConnector: AuthConnector = frontendAuthConnector
 
   override def config: Configuration = app.configuration
 
@@ -84,7 +85,8 @@ class HelpToSaveAuth(app: Application) extends FrontendController with Authorise
       authorised() {
         action(request)(HtsContext(isAuthorised = true))
       }.recoverWith {
-        case _ ⇒ action(request)(HtsContext(isAuthorised = false))
+        case _ ⇒
+          action(request)(HtsContext(isAuthorised = false))
       }
     }
   }

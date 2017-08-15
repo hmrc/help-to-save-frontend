@@ -30,6 +30,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.NotEnrolled
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
@@ -54,6 +55,7 @@ class EligibilityCheckControllerSpec
   val mockHtsService = mock[HelpToSaveService]
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor = mock[HTSAuditor]
+  val frontendAuthConnector = stub[FrontendAuthConnector]
 
   val controller = new EligibilityCheckController(
     fakeApplication.injector.instanceOf[MessagesApi],
@@ -62,7 +64,8 @@ class EligibilityCheckControllerSpec
     jsonSchemaValidationService,
     mockEnrolmentService,
     fakeApplication,
-    mockAuditor)(
+    mockAuditor,
+    frontendAuthConnector)(
     ec) {
     override lazy val authConnector: PlayAuthConnector = mockAuthConnector
   }

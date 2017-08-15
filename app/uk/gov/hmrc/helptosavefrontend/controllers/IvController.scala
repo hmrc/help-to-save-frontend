@@ -21,7 +21,7 @@ import javax.inject.{Inject, Singleton}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import play.api.Application
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
@@ -36,8 +36,9 @@ import scala.concurrent.Future
 class IvController @Inject()(val sessionCacheConnector: SessionCacheConnector,
                              ivConnector: IvConnector,
                              val messagesApi: MessagesApi,
-                             implicit val app: Application)
-  extends HelpToSaveAuth(app) with I18nSupport with Logging {
+                             implicit val app: Application,
+                             frontendAuthConnector: FrontendAuthConnector)
+  extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport with Logging {
 
   def journeyResult: Action[AnyContent] = authorisedForHts { // scalastyle:ignore cyclomatic.complexity method.length
     implicit request ⇒

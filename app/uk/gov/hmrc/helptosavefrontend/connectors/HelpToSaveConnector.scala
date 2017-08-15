@@ -44,9 +44,7 @@ trait HelpToSaveConnector {
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector {
-
-  val http: WSHttpExtension = WSHttp
+class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
   override def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future,String,EligibilityCheckResult] = {
     EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino)))

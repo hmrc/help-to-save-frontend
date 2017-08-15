@@ -23,6 +23,7 @@ import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
 import play.api.Application
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -40,8 +41,9 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    val sessionCacheConnector: SessionCacheConnector,
                                    val enrolmentService: EnrolmentService,
                                    emailStore: EmailStore,
-                                   val app: Application)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+                                   val app: Application,
+                                   frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
+  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
   import RegisterController.NSIUserInfoOps
 

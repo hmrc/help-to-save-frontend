@@ -25,6 +25,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -42,8 +43,9 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
                                             jsonSchemaValidationService: JSONSchemaValidationService,
                                             val enrolmentService: EnrolmentService,
                                             val app: Application,
-                                            auditor: HTSAuditor)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
+                                            auditor: HTSAuditor,
+                                            frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
+  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   import EligibilityCheckController._
 
@@ -104,8 +106,8 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
   }
 
   private def getEligibilityActionResult(nino: NINO)(implicit hc: HeaderCarrier,
-                                                   htsContext: HtsContext,
-                                                   request: Request[AnyContent]): Future[Result] =
+                                                     htsContext: HtsContext,
+                                                     request: Request[AnyContent]): Future[Result] =
     performEligibilityChecks(nino).fold(
       handleEligibilityCheckError,
       r ⇒ handleEligibilityResult(r, nino))
