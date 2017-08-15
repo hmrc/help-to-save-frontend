@@ -17,20 +17,22 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import java.time.Duration
+
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
+class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig
 {
-
+  lazy val emailVerifyBaseURL = baseUrl("email-verification")
   val nino = "AE123XXXX"
   val email = "email@gmail.com"
   val mockHttp = mock[WSHttp]
@@ -41,14 +43,18 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
     new EmailVerificationConnectorImpl(mockHttp, mockConf)
   }
 
-  def mockPost(returnedStatus: Int, returnedData: Option[JsValue]): Unit =
-    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier)).expects(*, *, *, *, *)
+  def mockPost(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
+    val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
+    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier)).expects(verifyEmailURL, *, *, *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
+  }
   
 
-  def mockGet(returnedStatus: Int, returnedData: Option[JsValue]): Unit =
-    (mockHttp.get(_: String) (_: HeaderCarrier)).expects(*, *)
+  def mockGet(returnedStatus: Int, email: String, returnedData: Option[JsValue]): Unit = {
+    val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
+    (mockHttp.get(_: String)(_: HeaderCarrier)).expects(verifyEmailURL, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
+  }
   
   
   "verifyEmail" should {
@@ -80,29 +86,28 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport
     "If email TTL does not exist in the configuration throw a runtime exception" in {
       val mockConf = mock[Configuration]
       (mockConf.getInt(_: String)).expects("services.email-verification.linkTTLMinutes").returning(None)
-      //val connector = new EmailVerificationConnectorImpl(mock[WSHttp], mockConf)
       an [Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], mockConf)
     }
   }
 
   "isVerified" should {
     "if the email is verified return Future true" in {
-      mockGet(Status.OK, None)
+      mockGet(Status.OK, email, None)
       await(connector.isVerified(email)) shouldBe Right(true)
     }
 
     "if the email is not verified return Future false" in {
-      mockGet(Status.NOT_FOUND, None)
+      mockGet(Status.NOT_FOUND, email, None)
       await(connector.isVerified(email)) shouldBe Right(false)
     }
 
     "if the email string is not valid return a Future false" in {
-      mockGet(Status.NOT_FOUND, None)
+      mockGet(Status.NOT_FOUND, "email", None)
       await(connector.isVerified("email")) shouldBe Right(false)
     }
 
     "if the email verification service is down return a VerificationServiceUnavailable error" in {
-      mockGet(Status.SERVICE_UNAVAILABLE, None)
+      mockGet(Status.SERVICE_UNAVAILABLE, email, None)
       await(connector.isVerified(email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
     }
   }
