@@ -25,7 +25,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -72,7 +72,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
           getEligibilityActionResult(enrolmentCheckError.nino)
         }
         )
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   val notEligible: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
@@ -87,7 +87,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
             )
           }
         }
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   val getIsEligible: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
@@ -103,7 +103,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
             )
           }
         }
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   private def getEligibilityActionResult(nino: NINO)(implicit hc: HeaderCarrier,
                                                      htsContext: HtsContext,

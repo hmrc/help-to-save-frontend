@@ -23,7 +23,7 @@ import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
 import play.api.Application
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -55,7 +55,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
             Ok(views.html.register.confirm_details(nsiUserInfo))
           }
         }
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def getCreateAccountHelpToSavePage(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
@@ -83,7 +83,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
             )
           }
         }
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
@@ -114,7 +114,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
             }
           }
         }
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   /**
     * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility

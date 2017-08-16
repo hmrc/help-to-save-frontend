@@ -22,7 +22,7 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
 import uk.gov.hmrc.helptosavefrontend.views
@@ -47,6 +47,6 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
             )(_ ⇒ Ok(views.html.register.update_email_address()))
           }
         }
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
 }

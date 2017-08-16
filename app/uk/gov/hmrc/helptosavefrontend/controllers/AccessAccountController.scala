@@ -20,7 +20,7 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -44,6 +44,6 @@ class AccessAccountController  @Inject()(val messagesApi: MessagesApi,
           SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
         }
         )
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.accessAccountUrl)
 
 }

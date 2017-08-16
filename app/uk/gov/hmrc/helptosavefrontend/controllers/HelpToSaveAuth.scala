@@ -21,8 +21,8 @@ import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.~
 import uk.gov.hmrc.auth.frontend.Redirects
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.IdentityCallbackUrl
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{encoded, identityCallbackUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithConfidence, UserDetailsUrlWithAllEnrolments}
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.helptosavefrontend.util.Logging
@@ -41,7 +41,8 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
   private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
 
-  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]): Action[AnyContent] =
+  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
+                              )(redirectOnLoginURL: String): Action[AnyContent] =
     Action.async { implicit request ⇒
       authorised(AuthWithConfidence)
         .retrieve(UserDetailsUrlWithAllEnrolments) {
@@ -56,26 +57,26 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
             action(request)(HtsContext(nino, userDetailsUri, isAuthorised = true))
 
         }.recover {
-        case e ⇒ handleFailure(e)
+        case e ⇒ handleFailure(e, redirectOnLoginURL)
       }
     }
 
-  def authorisedForHts(action: HtsAction): Action[AnyContent] = {
+  def authorisedForHts(action: HtsAction)(redirectOnLoginURL: String): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(AuthProvider) {
         action(request)(HtsContext(isAuthorised = true))
       }.recover {
-        case e ⇒ handleFailure(e)
+        case e ⇒ handleFailure(e, redirectOnLoginURL)
       }
     }
   }
 
-  def authorisedForHtsWithConfidence(action: HtsAction): Action[AnyContent] = {
+  def authorisedForHtsWithConfidence(action: HtsAction)(redirectOnLoginURL: String): Action[AnyContent] = {
     Action.async { implicit request =>
       authorised(AuthWithConfidence) {
         action(request)(HtsContext(isAuthorised = true))
       }.recover {
-        case e ⇒ handleFailure(e)
+        case e ⇒ handleFailure(e, redirectOnLoginURL)
       }
     }
   }
@@ -91,18 +92,18 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
     }
   }
 
-  def handleFailure(e: Throwable): Result =
+  def handleFailure(e: Throwable, redirectOnLoginURL: String): Result =
     e match {
-      case _: NoActiveSession ⇒ redirectToLogin
+      case _: NoActiveSession ⇒ redirectToLogin(redirectOnLoginURL)
       case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
-        toPersonalIV(IdentityCallbackUrl, ConfidenceLevel.L200)
+        toPersonalIV(s"$identityCallbackUrl?continueURL=${encoded(redirectOnLoginURL)}", ConfidenceLevel.L200)
       case ex ⇒
         logger.error(s"could not authenticate user due to: $ex")
         InternalServerError("")
     }
 
-  def redirectToLogin = Redirect(ggLoginUrl, Map(
-    "continue" -> Seq(FrontendAppConfig.CheckEligibilityUrl),
+  def redirectToLogin(redirectOnLoginURL: String) = Redirect(ggLoginUrl, Map(
+    "continue" -> Seq(redirectOnLoginURL),
     "accountType" -> Seq("individual"),
     "origin" -> Seq(origin)
   ))
