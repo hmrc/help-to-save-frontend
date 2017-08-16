@@ -17,5 +17,5 @@ GET        /register/update-your-email-address              @uk.gov.hmrc.helptos
 GET        /register/create-an-account/:confirmedEmail      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage(confirmedEmail)
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 
-GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
+GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String)
 GET        /register/not-eligible                           @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.notEligible

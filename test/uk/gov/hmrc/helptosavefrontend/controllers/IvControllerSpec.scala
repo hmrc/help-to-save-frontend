@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.net.URLEncoder
 import java.util.UUID.randomUUID
 
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -67,7 +68,9 @@ class IvControllerSpec extends TestSupport {
 
   private val fakeRequest = FakeRequest("GET", s"/iv/journey-result?journeyId=${journeyId.Id}")
 
-  private def doRequest() = ivController.journeyResult()(fakeRequest)
+  val continueURL = "continue-here!!"
+
+  private def doRequest() = ivController.journeyResult(URLEncoder.encode(continueURL))(fakeRequest)
 
   "GET /iv/journey-result" should {
 
@@ -105,7 +108,7 @@ class IvControllerSpec extends TestSupport {
 
       mockAuthConnectorResult()
 
-      val responseFuture = ivController.journeyResult()(FakeRequest("GET", s"/iv/journey-result"))
+      val responseFuture = ivController.journeyResult(URLEncoder.encode(continueURL))(FakeRequest("GET", s"/iv/journey-result"))
 
       val result = Await.result(responseFuture, 3.seconds)
 

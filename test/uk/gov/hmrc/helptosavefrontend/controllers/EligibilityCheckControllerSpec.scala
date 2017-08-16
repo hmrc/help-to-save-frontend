@@ -57,7 +57,7 @@ class EligibilityCheckControllerSpec
   val mockAuditor = mock[HTSAuditor]
   val frontendAuthConnector = stub[FrontendAuthConnector]
 
-  val controller = new EligibilityCheckController(
+  lazy val controller = new EligibilityCheckController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
     mockSessionCacheConnector,

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import java.net.{URI, URLEncoder}
+import java.net.{URI, URLDecoder, URLEncoder}
 import java.util.Base64
 
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -32,7 +32,9 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
 
-  val CheckEligibilityUrl: String = getConfString("help-to-save-check-eligibility.url", "")
+  val checkEligibilityUrl: String = getConfString("help-to-save-check-eligibility.url", "")
+
+  val accessAccountUrl: String = getConfString("help-to-save-access-account.url", "")
 
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
@@ -42,16 +44,18 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
 
+  def decoded(url: String): String = URLDecoder.decode(url, "UTF-8")
+
   val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
 
   val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
 
-  val IdentityCallbackUrl: String = getConfString("identity-callback.url", "")
+  val identityCallbackUrl: String = getConfString("identity-callback.url", "")
 
   val IvRetryUrl: String =
     new URI(s"$ivUpliftUrl?origin=$sosOrigin&" +
-      s"completionURL=${URLEncoder.encode(IdentityCallbackUrl, "UTF-8")}&" +
-      s"failureURL=${URLEncoder.encode(IdentityCallbackUrl, "UTF-8")}" +
+      s"completionURL=${URLEncoder.encode(identityCallbackUrl, "UTF-8")}&" +
+      s"failureURL=${URLEncoder.encode(identityCallbackUrl, "UTF-8")}" +
       s"&confidenceLevel=200")
       .toString
 
