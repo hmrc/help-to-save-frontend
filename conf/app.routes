@@ -9,8 +9,8 @@ GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptos
 GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
 GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
 
-GET        /register/check-eligibility                      @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
-GET        /register/you-are-eligible                       @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
+GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
+GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 GET        /register/check-and-confirm-your-details         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmDetailsPage
 GET        /register/update-your-email-address              @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.getUpdateYourEmailAddress
 GET        /register/create-an-account/:confirmedEmail      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage(confirmedEmail)
