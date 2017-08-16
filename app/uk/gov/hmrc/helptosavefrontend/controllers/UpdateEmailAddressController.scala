@@ -29,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
+import scala.concurrent.Future
 
 @Singleton
 class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionCacheConnector,
@@ -41,22 +42,28 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
-          checkSession{
+          checkSession {
             SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-          }{
+          } {
             _.eligibilityCheckResult.fold(
               Ok(views.html.core.not_eligible())
-            )(_ ⇒ {
-              Ok(views.html.register.update_email_address(UpdateEmailForm.newEmailForm))
+            )( userInfo ⇒ {
+
+              Ok(views.html.register.update_email_address(userInfo.contactDetails.email, UpdateEmailForm.newEmailForm))
             })
           }
         }
   }
 
-  def onSubmit(): Action[AnyContent] = Action.async { implicit request =>
-    val form = UpdateEmailForm.newEmailForm.bindFromRequest()
-    form.fold(/*haserrors*/){userEmail =>
-      // do something with the userEmail
-    }
+  def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo {
+    implicit request =>
+      implicit htsContext ⇒
+        UpdateEmailForm.newEmailForm.bindFromRequest().fold(formWithErrors => {
+          Future.successful(BadRequest(views.html.register.update_email_address("", formWithErrors)))
+        },
+          details => {
+            Future.successful(Ok /*actually a redirect*/)
+          }
+        )
   }
 }

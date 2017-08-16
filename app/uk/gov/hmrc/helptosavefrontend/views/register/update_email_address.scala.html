@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
 
-@(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(emailAddress: String, form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
   title = Messages("hts.introduction.eligibility.title"),
@@ -30,8 +30,9 @@
     @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.UpdateEmailAddressController.onSubmit()) {
         @helpers.input_text(
             id = "value",
-            label = "email",
-            errorKey = "email"
+            label = "email label",
+            errorKey = "errorKey",
+            value = Some(emailAddress)
         )
     }
 }
