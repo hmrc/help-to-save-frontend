@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.helptosavefrontend.forms
+@()(implicit messages: Messages)
 
-import play.api.data._
-import play.api.data.Forms._
-import play.api.i18n.Lang
-
-object UpdateEmailForm {
-  val newEmailForm = Form(
-    mapping("value" -> text
-    )(UpdateEmail.apply)(UpdateEmail.unapply)
-  )
-}
-
-case class UpdateEmail(email: String)
+<div class="section">
+    <button id="submit" class="button">@messages("site.continue")</button>
+</div>

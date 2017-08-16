@@ -31,8 +31,11 @@
         @helpers.input_text(
             id = "value",
             label = "email label",
-            errorKey = "errorKey",
+            errorKey = "",
             value = Some(emailAddress)
         )
+        @helpers.submit('_buttonClass -> "") {
+            @Messages("change-email-submit")
+        }
     }
 }

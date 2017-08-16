@@ -19,5 +19,5 @@ POST       /register/create-an-account                      @uk.gov.hmrc.helptos
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult
 GET        /register/not-eligible                           @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.notEligible
 
-POST        /email/update                                    @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.onSubmit
+POST        /email/update                                   @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.onSubmit
 
