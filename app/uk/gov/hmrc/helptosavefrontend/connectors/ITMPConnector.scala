@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import cats.data.EitherT
-import com.google.inject.{ImplementedBy, Singleton}
+import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Format, Json}
 import play.mvc.Http.Status.{CONFLICT, OK}
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
@@ -36,10 +36,8 @@ trait ITMPConnector {
 }
 
 @Singleton
-class ITMPConnectorImpl extends ITMPConnector with Logging {
+class ITMPConnectorImpl @Inject()(http: WSHttp) extends ITMPConnector with Logging {
   import uk.gov.hmrc.helptosavefrontend.connectors.ITMPConnectorImpl._
-
-  val http: WSHttpExtension = WSHttp
 
   def url(nino: NINO): String = s"$itmpEnrolmentURL/set-enrolment-flag/$nino"
 

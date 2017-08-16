@@ -18,13 +18,14 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.EligibilityCheckResponse
-import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckError.{BackendError, MissingUserInfos}
-import uk.gov.hmrc.helptosavefrontend.models.{EligibilityCheckError, EligibilityCheckResult, MissingUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, MissingUserInfoSet}
+import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, UserDetailsURI}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -34,43 +35,79 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibility(nino: NINO, oauthCode: String)(implicit hc: HeaderCarrier): EitherT[Future,EligibilityCheckError,EligibilityCheckResult]
+  def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future,String,EligibilityCheckResult]
+
+  def getUserInformation(nino: NINO,
+                         userDetailsURI: UserDetailsURI)
+                        (implicit hc: HeaderCarrier): EitherT[Future,UserInformationRetrievalError,UserInfo]
+
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject()(implicit ec: ExecutionContext) extends HelpToSaveConnector {
+class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
-
-  def eligibilityURL(nino: NINO, userDetailsURI: String) =
-    s"$eligibilityCheckUrl?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}"
-
-  /**
-    * @param response The HTTPResponse which came back with a bad status
-    * @param service  The call we tried to make
-    * @return a string describing an error response from a HTTP call
-    */
-  def badResponseMessage(response: HttpResponse, service: String): String =
-    s"$service call returned with status ${response.status}. Response body was ${response.body}"
-
-  val http: WSHttpExtension = WSHttp
-
-  override def getEligibility(nino: NINO,
-                              userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future,EligibilityCheckError,EligibilityCheckResult] =
-    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino, userDetailsURI)))
-      .leftMap(s ⇒ BackendError(s, nino))
-      .subflatMap{ response ⇒
+  override def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future,String,EligibilityCheckResult] = {
+    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino)))
+      .subflatMap { response ⇒
         if (response.status == 200) {
-          response.parseJson[EligibilityCheckResponse].fold(
-            e ⇒ Left(BackendError(e, nino)),
-            _.result.fold(
-              m ⇒ Left(MissingUserInfos(m.missingInfo, nino)),
-              u ⇒ Right(EligibilityCheckResult(u))
-            )
-          )
+          response.parseJson[EligibilityCheckResponse].flatMap(r ⇒ toEligibilityCheckResponse(r))
         } else {
-          Left(BackendError(badResponseMessage(response, "Eligibility check"), nino))
+          Left(s"Call to check eligibility came back with status ${response.status}")
         }
       }
+
+  }
+
+  def getUserInformation(nino: NINO, userDetailsURI: UserDetailsURI
+                        )(implicit hc: HeaderCarrier): EitherT[Future,UserInformationRetrievalError,UserInfo] = {
+    val backendError = (s: String) ⇒ UserInformationRetrievalError.BackendError(s, nino)
+    EitherT.right[Future, String, HttpResponse](http.get(userInformationURL(nino, userDetailsURI)))
+      .leftMap(backendError)
+      .subflatMap { response ⇒
+        if(response.status == 200) {
+          response.parseJson[UserInfo].fold[Either[UserInformationRetrievalError, UserInfo]](
+            // couldn't parse user info in this case - try to parse as missing user info
+            _ ⇒
+              response.parseJson[MissingUserInfoSet].fold(
+                _ ⇒ Left(backendError("Could not parse JSON reponse from user information endpoint")),
+                m ⇒ Left(MissingUserInfos(m.missingInfo, nino))
+              ),
+            Right(_)
+          )
+        } else {
+          Left(backendError(s"Call to get user details came back with status ${response.status}"))
+        }
+      }
+  }
+
+  private def eligibilityURL(nino: NINO) =
+    s"$helpToSaveUrl/help-to-save/eligibility-check?nino=$nino"
+
+  private def userInformationURL(nino: NINO, userDetailsURI: String) =
+    s"$helpToSaveUrl/help-to-save/user-information?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}"
+
+  private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String,EligibilityCheckResult] = {
+    val reasonInt = eligibilityCheckResponse.reason
+
+    eligibilityCheckResponse.result match {
+      case 1     ⇒
+        // user is eligible
+        Either.fromOption(
+          EligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(Right(r))),
+          s"Could not parse ineligibility reason '$reasonInt'")
+
+      case 2     ⇒
+        // user is ineligible
+        Either.fromOption(
+          IneligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(Left(r))),
+          s"Could not parse eligibility reason '$reasonInt'")
+
+      case other ⇒
+        Left(s"Could not parse eligibility result '$other'")
+
+    }
+  }
+
 }
 
 
@@ -83,33 +120,12 @@ object HelpToSaveConnectorImpl {
       Json.format[MissingUserInfoSet]
   }
 
-  private[connectors] case class EligibilityCheckResponse(result: Either[MissingUserInfoSet, Option[UserInfo]])
+  private[connectors] case class EligibilityCheckResponse(result: Int, reason: Int)
 
   private[connectors] object EligibilityCheckResponse {
 
-    implicit val eligibilityResultFormat: Format[EligibilityCheckResponse] = new Format[EligibilityCheckResponse] {
-      override def reads(json: JsValue): JsResult[EligibilityCheckResponse] = {
-        (json \ "result").toOption match {
-          case None ⇒
-            JsError("Could not find 'result' path in JSON")
+    implicit val format: Format[EligibilityCheckResponse] = Json.format[EligibilityCheckResponse]
 
-          case Some(jsValue) ⇒
-            jsValue.validate[MissingUserInfoSet].fold(e1 ⇒
-              jsValue.validateOpt[UserInfo].fold(e2 ⇒
-                JsError(e1 ++ e2),
-                maybeUserInfo ⇒ JsSuccess(EligibilityCheckResponse(Right(maybeUserInfo)))
-              ),
-              missing ⇒ JsSuccess(EligibilityCheckResponse(Left(missing)))
-            )
-        }
-      }
-
-      override def writes(o: EligibilityCheckResponse): JsValue = Json.obj(
-        o.result.fold(
-          missingInfos ⇒ "result" -> Json.toJson(missingInfos),
-          maybeUserInfo ⇒ "result" -> Json.toJson(maybeUserInfo)
-        ))
-    }
   }
 
 }

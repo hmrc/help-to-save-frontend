@@ -14,11 +14,13 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+
 @()(implicit messages: play.api.i18n.Messages)
 
 <div class="service-info">
     <h2 class="heading-medium">Sign In</h2>
     <ul>
-        <li><a href="#">@Messages("hts.introduction.apply.sign-in-link")</a></li>
+        <li><a href=@routes.AccessAccountController.accessAccount>@Messages("hts.introduction.apply.sign-in-link")</a></li>
     </ul>
 </div>

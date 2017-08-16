@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.enrolment
+package uk.gov.hmrc.helptosavefrontend.repo
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject}
@@ -22,8 +22,8 @@ import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore.{Enrolled, NotEnrolled, Status}
-import uk.gov.hmrc.helptosavefrontend.enrolment.MongoEnrolmentStore.EnrolmentData
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.{Enrolled, NotEnrolled, Status}
+import uk.gov.hmrc.helptosavefrontend.repo.MongoEnrolmentStore.EnrolmentData
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -36,7 +36,7 @@ trait EnrolmentStore {
 
   def get(nino: NINO): EitherT[Future,String,Status]
 
-  def update(nino: NINO, itmpHtSFlag: Boolean): EitherT[Future,String,Unit]
+  def update(nino: NINO, itmpFlag: Boolean): EitherT[Future,String,Unit]
 
 }
 
@@ -70,10 +70,10 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
     )
   )
 
-  private[enrolment] def doUpdate(data: EnrolmentData)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
+  private[repo] def doUpdate(nino: NINO, itmpFlag: Boolean)(implicit ec: ExecutionContext): Future[Option[EnrolmentData]] =
     collection.findAndUpdate(
-      BSONDocument("nino" -> data.nino),
-      BSONDocument("$set" -> BSONDocument("itmpHtSFlag" -> data.itmpHtSFlag)),
+      BSONDocument("nino" -> nino),
+      BSONDocument("$set" -> BSONDocument("itmpHtSFlag" -> itmpFlag)),
       fetchNewObject = true,
       upsert = true
     ).map(_.result[EnrolmentData])
@@ -87,10 +87,10 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
         Left(s"Could not read from enrolment store: ${e.getMessage}")
     })
 
-  override def update(nino: NINO, itmpHtSFlag: Boolean): EitherT[Future, String, Unit] = {
+  override def update(nino: NINO, itmpFlag: Boolean): EitherT[Future, String, Unit] = {
     logger.info(s"Putting nino $nino into enrolment store")
     EitherT(
-      doUpdate(EnrolmentData(nino, itmpHtSFlag)).map[Either[String,Unit]]{ result ⇒
+      doUpdate(nino, itmpFlag).map[Either[String,Unit]]{ result ⇒
         result.fold[Either[String,Unit]](
           Left("Could not update enrolment store")
         ){ _ ⇒
@@ -107,9 +107,9 @@ class MongoEnrolmentStore @Inject()(mongo: ReactiveMongoComponent)(implicit ec: 
 
 object MongoEnrolmentStore {
 
-  private[enrolment] case class EnrolmentData(nino: String, itmpHtSFlag: Boolean)
+  private[repo] case class EnrolmentData(nino: String, itmpHtSFlag: Boolean)
 
-  private[enrolment]  object EnrolmentData {
+  private[repo]  object EnrolmentData {
     implicit val ninoFormat = Json.format[EnrolmentData]
   }
 

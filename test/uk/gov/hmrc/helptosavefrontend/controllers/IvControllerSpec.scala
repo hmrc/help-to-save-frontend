@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.net.URLEncoder
 import java.util.UUID.randomUUID
 
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -26,6 +27,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -49,6 +51,8 @@ class IvControllerSpec extends TestSupport {
 
   private val mockAuthConnector = mock[PlayAuthConnector]
 
+  val frontendAuthConnector = stub[FrontendAuthConnector]
+
   private def mockAuthConnectorResult() = {
     (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
       .expects(AuthProviders(GovernmentGateway), EmptyRetrieval, *).returning(Future.successful(()))
@@ -57,13 +61,16 @@ class IvControllerSpec extends TestSupport {
   lazy val ivController = new IvController(mockSessionCacheConnector,
     ivConnector,
     fakeApplication.injector.instanceOf[MessagesApi],
-    fakeApplication) {
+    fakeApplication,
+    frontendAuthConnector) {
     override def authConnector: AuthConnector = mockAuthConnector
   }
 
   private val fakeRequest = FakeRequest("GET", s"/iv/journey-result?journeyId=${journeyId.Id}")
 
-  private def doRequest() = ivController.journeyResult()(fakeRequest)
+  val continueURL = "continue-here!!"
+
+  private def doRequest() = ivController.journeyResult(URLEncoder.encode(continueURL))(fakeRequest)
 
   "GET /iv/journey-result" should {
 
@@ -101,7 +108,7 @@ class IvControllerSpec extends TestSupport {
 
       mockAuthConnectorResult()
 
-      val responseFuture = ivController.journeyResult()(FakeRequest("GET", s"/iv/journey-result"))
+      val responseFuture = ivController.journeyResult(URLEncoder.encode(continueURL))(FakeRequest("GET", s"/iv/journey-result"))
 
       val result = Await.result(responseFuture, 3.seconds)
 

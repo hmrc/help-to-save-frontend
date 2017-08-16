@@ -25,7 +25,8 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{CheckEligibilityUrl, encoded}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{checkEligibilityUrl, encoded}
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -35,6 +36,7 @@ import scala.concurrent.duration._
 class HelpToSaveAuthSpec extends TestSupport {
 
   private val mockAuthConnector = mock[PlayAuthConnector]
+  val frontendAuthConnector = stub[FrontendAuthConnector]
 
   def mockAuthResultWith(ex: Throwable): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
@@ -46,7 +48,7 @@ class HelpToSaveAuthSpec extends TestSupport {
       .expects(predicate, *, *)
       .returning(Future.failed(ex))
 
-  val htsAuth = new HelpToSaveAuth(fakeApplication) {
+  val htsAuth = new HelpToSaveAuth(fakeApplication, frontendAuthConnector) {
     override def authConnector: AuthConnector = mockAuthConnector
   }
 
@@ -54,13 +56,13 @@ class HelpToSaveAuthSpec extends TestSupport {
     implicit request ⇒
       implicit htsContext ⇒
       Future.successful(Ok(""))
-  }
+  }(FrontendAppConfig.checkEligibilityUrl)
 
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
           Future.successful(Ok(""))
-  }
+  }(FrontendAppConfig.checkEligibilityUrl)
 
   private def mockAuthWith(error: String) =
     mockAuthWithRetrievalsWith(AuthWithConfidence)(fromString(error))
@@ -82,7 +84,7 @@ class HelpToSaveAuthSpec extends TestSupport {
         val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
-        redirectTo should include(encoded(CheckEligibilityUrl))
+        redirectTo should include(encoded(checkEligibilityUrl))
       }
     }
 

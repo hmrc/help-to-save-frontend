@@ -22,17 +22,31 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
 import uk.gov.hmrc.helptosavefrontend.views
-
-import scala.concurrent.Future
+import uk.gov.hmrc.helptosavefrontend.util.toFuture
 
 @Singleton
-class UpdateEmailAddressController @Inject()(implicit app: Application, val messagesApi: MessagesApi) extends HelpToSaveAuth(app) with I18nSupport {
+class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionCacheConnector,
+                                             val enrolmentService: EnrolmentService,
+                                             frontendAuthConnector: FrontendAuthConnector
+                                            )(implicit app: Application, val messagesApi: MessagesApi)
+  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport {
 
-  def getUpdateYourEmailAddress: Action[AnyContent] = authorisedForHtsWithConfidence {
+  def getUpdateYourEmailAddress: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-        Future.successful(Ok(views.html.register.update_email_address()))
-  }
+        checkIfAlreadyEnrolled { _ ⇒
+          checkSession{
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+          }{
+            _.eligibilityCheckResult.fold(
+              Ok(views.html.core.not_eligible())
+            )(_ ⇒ Ok(views.html.register.update_email_address()))
+          }
+        }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
 }

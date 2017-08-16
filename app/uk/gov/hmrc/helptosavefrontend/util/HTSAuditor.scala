@@ -26,8 +26,8 @@ class HTSAuditor @Inject()() extends Logging {
   val auditConnector = FrontendAuditConnector
 
   def sendEvent(event: HTSEvent) = {
-    val eligibilityCheckEventResult = auditConnector.sendEvent(event)
-    eligibilityCheckEventResult.onFailure {
+    val checkEventResult = auditConnector.sendEvent(event)
+    checkEventResult.onFailure {
       case e: Throwable => logger.error(s"Unable to post audit event of type ${event.auditType} to audit connector - ${e.getMessage}", e)
     }
   }

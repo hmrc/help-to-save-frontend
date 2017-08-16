@@ -16,32 +16,33 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import com.google.inject.{ImplementedBy, Singleton}
+import cats.data.EitherT
+import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{keyStoreDomain, keyStoreUrl, sessionCacheKey}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
+import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
 import uk.gov.hmrc.play.http._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[SessionCacheConnectorImpl])
-trait SessionCacheConnector extends SessionCache with ServicesConfig {
+trait SessionCacheConnector {
 
   val sessionKey: String
 
-  def put(body: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier): Future[CacheMap] =
-    cache[HTSSession](sessionKey, body)(writes, hc)
+  def put(body: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[CacheMap]
 
-  def get(implicit hc: HeaderCarrier, reads: Reads[HTSSession]): Future[Option[HTSSession]] =
-    fetchAndGetEntry[HTSSession](sessionKey)(hc, reads)
+  def get(implicit reads: Reads[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[Option[HTSSession]]
 
 }
 
 @Singleton
-class SessionCacheConnectorImpl extends SessionCacheConnector with AppName {
+class SessionCacheConnectorImpl @Inject()(val http: WSHttp) extends SessionCacheConnector with SessionCache with ServicesConfig with AppName {
 
   override def defaultSource: String = appName
 
@@ -51,5 +52,17 @@ class SessionCacheConnectorImpl extends SessionCacheConnector with AppName {
 
   override def domain: String = keyStoreDomain
 
-  override def http: HttpGet with HttpPut with HttpDelete = WSHttp
+  def put(body: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[CacheMap] =
+    EitherT[Future,String,CacheMap](
+      cache[HTSSession](sessionKey, body)(writes, hc).map(Right(_)).recover{
+        case NonFatal(e) ⇒ Left(e.getMessage)
+      }
+    )
+
+  def get(implicit reads: Reads[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[Option[HTSSession]] =
+    EitherT[Future,String,Option[HTSSession]](
+      fetchAndGetEntry[HTSSession](sessionKey)(hc, reads).map(Right(_)).recover{
+        case NonFatal(e) ⇒ Left(e.getMessage)
+      })
+
 }

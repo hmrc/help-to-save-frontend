@@ -22,41 +22,42 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.views
-
-import scala.concurrent.Future
+import uk.gov.hmrc.helptosavefrontend.util.toFuture
 
 @Singleton
-class IntroductionController @Inject()(implicit app: Application, val messagesApi: MessagesApi) extends HelpToSaveAuth(app) with I18nSupport {
+class IntroductionController @Inject()(implicit app: Application, val messagesApi: MessagesApi,
+                                       frontendAuthConnector: FrontendAuthConnector) extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport {
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
-        Future.successful(Ok(views.html.introduction.about_help_to_save()))
+        Ok(views.html.introduction.about_help_to_save())
   }
 
   def getEligibility: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
-        Future.successful(Ok(views.html.introduction.eligibility()))
+        Ok(views.html.introduction.eligibility())
   }
 
   def getHowTheAccountWorks: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
-        Future.successful(Ok(views.html.introduction.how_the_account_works()))
+        Ok(views.html.introduction.how_the_account_works())
   }
 
   def getHowWeCalculateBonuses: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
-        Future.successful(Ok(views.html.introduction.how_we_calculate_bonuses()))
+        Ok(views.html.introduction.how_we_calculate_bonuses())
   }
 
   def getApply: Action[AnyContent] = unprotected {
     implicit request ⇒
       implicit htsContext ⇒
-        Future.successful(Ok(views.html.introduction.apply()))
+        Ok(views.html.introduction.apply())
   }
 
 }

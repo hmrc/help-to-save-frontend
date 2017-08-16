@@ -28,6 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
+import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -50,7 +51,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) extends NSIConnector with Logging {
+class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) extends NSIConnector with Logging with AppName {
 
   val httpProxy = new WSHttpProxy
 
@@ -63,12 +64,11 @@ class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) exten
       logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
     }
 
-    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(
-      NSIUserInfo.nsiUserInfoFormat, hc.copy(authorization = None))
+    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
       .map { response ⇒
         response.status match {
           case Status.CREATED ⇒
-            auditor.sendEvent(new ApplicationSubmittedEvent(userInfo))
+            auditor.sendEvent(new ApplicationSubmittedEvent(appName, userInfo))
             logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino}")
             SubmissionSuccess()
 

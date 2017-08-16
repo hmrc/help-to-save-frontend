@@ -20,8 +20,8 @@ import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.connectors.ITMPConnector
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.enrolment.EnrolmentStore.Status
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.Status
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, Result}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -38,14 +38,13 @@ trait EnrolmentService {
 
 }
 
-
 @Singleton
 class EnrolmentServiceImpl @Inject()(enrolmentStore: EnrolmentStore,
-                                 itmpConnector: ITMPConnector) extends EnrolmentService {
+                                     itmpConnector: ITMPConnector) extends EnrolmentService {
 
   def enrolUser(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     for {
-      _ ← enrolmentStore.update(nino, itmpHtSFlag = false)
+      _ ← enrolmentStore.update(nino, itmpFlag = false)
       _ ← setITMPFlagAndUpdateMongo(nino)
     } yield ()
 
@@ -56,9 +55,9 @@ class EnrolmentServiceImpl @Inject()(enrolmentStore: EnrolmentStore,
     enrolmentStore.get(nino)
 
 
-  private def  setITMPFlagAndUpdateMongo(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, Unit] = for {
+  private def setITMPFlagAndUpdateMongo(nino: NINO)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, Unit] = for {
     _ ← itmpConnector.setFlag(nino)(hc, ec)
-    _ ← enrolmentStore.update(nino, itmpHtSFlag = true)
+    _ ← enrolmentStore.update(nino, itmpFlag = true)
   } yield ()
 
 }

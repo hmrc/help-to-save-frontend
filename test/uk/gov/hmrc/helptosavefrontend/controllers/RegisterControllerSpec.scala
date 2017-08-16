@@ -20,94 +20,182 @@ import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.libs.json.Reads
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.connectors._
+import uk.gov.hmrc.helptosavefrontend.repo.{EmailStore, EnrolmentStore}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, NINO}
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, HTSAuditor, NINO}
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class RegisterControllerSpec extends TestSupport {
+class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityCheckBehaviour {
 
-
-  val nino = "WM123456C"
+  import RegisterController.NSIUserInfoOps
 
   val mockHtsService = mock[HelpToSaveService]
-  val mockAuthConnector = mock[PlayAuthConnector]
-  val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor = mock[HTSAuditor]
-  val mockEnrolmentService: EnrolmentService = mock[EnrolmentService]
+  val frontendAuthConnector = stub[FrontendAuthConnector]
+  val mockEmailStore = mock[EmailStore]
 
-
-  val register = new RegisterController(
+  val controller = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHtsService,
     mockSessionCacheConnector,
     mockEnrolmentService,
-    fakeApplication)(
+    mockEmailStore,
+    fakeApplication,
+    frontendAuthConnector)(
     ec) {
     override lazy val authConnector = mockAuthConnector
   }
-
-  def mockSessionCacheConnectorGet(mockHtsSession: Option[HTSSession]): Unit =
-    (mockSessionCacheConnector.get(_: HeaderCarrier, _: Reads[HTSSession]))
-      .expects(*, *)
-      .returning(Future.successful(mockHtsSession))
 
   def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess())): Unit =
     (mockHtsService.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
       .expects(nSIUserInfo, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockPlayAuthWithRetrievals[A, B](predicate: Predicate)(result: Enrolments): Unit =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier))
-      .expects(predicate, *, *)
-      .returning(Future.successful(result))
-
-  def mockPlayAuthWithWithConfidence(): Unit =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
-      .expects(AuthWithConfidence, *, *)
-      .returning(Future.successful(()))
-
-  def mockEnrolUser(nino: NINO)(result: Either[String,Unit]): Unit =
+  def mockEnrolUser(nino: NINO)(result: Either[String, Unit]): Unit =
     (mockEnrolmentService.enrolUser(_: NINO)(_: HeaderCarrier, _: ExecutionContext))
-    .expects(nino, *, *)
+      .expects(nino, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockEmailUpdate(email: String, nino: NINO)(result: Either[String,Unit]): Unit =
+    (mockEmailStore.storeConfirmedEmail(_: String, _: NINO)(_: ExecutionContext))
+    .expects(email, nino, *)
     .returning(EitherT.fromEither[Future](result))
 
 
   "The RegisterController" when {
 
+    "handling getConfirmDetailsPage" must {
+
+      def doRequest(): Future[PlayResult] = controller.getConfirmDetailsPage(FakeRequest())
+
+      testCommonEnrolmentAndSessionBehaviour(doRequest)
+
+      "show the users details if the user has not already enrolled and " +
+        "the session data shows that they have been already found to be eligible" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.OK
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+        contentAsString(result) should include(validNSIUserInfo.forename)
+        contentAsString(result) should include(validNSIUserInfo.surname)
+      }
+
+    }
+
+
     "handling a getCreateAccountHelpToSave" must {
 
-      "return 200" in {
-        mockPlayAuthWithWithConfidence()
-        val result = register.getCreateAccountHelpToSavePage(FakeRequest())
+
+      val email = "email"
+      lazy val encryptedEmail = DataEncrypter.encrypt(email)
+
+      def doRequest(encryptedEmail: String): Future[PlayResult] =
+        controller.getCreateAccountHelpToSavePage(encryptedEmail)(FakeRequest())
+
+      testCommonEnrolmentAndSessionBehaviour(() ⇒ doRequest(encryptedEmail))
+
+      "write the email to keystore and the email store if the user has not already enrolled and " +
+        "the session data shows that they have been already found to be eligible" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+          mockEmailUpdate(email, nino)(Left(""))
+        }
+
+        await(doRequest(encryptedEmail))
+      }
+
+      "return a 200 if the write to keystore and the email store was successful" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+          mockEmailUpdate(email, nino)(Right(()))
+        }
+
+        val result = doRequest(encryptedEmail)
         status(result) shouldBe Status.OK
         contentType(result) shouldBe Some("text/html")
         charset(result) shouldBe Some("utf-8")
       }
+
+
+      "return an error" when {
+
+        "the email cannot be decrypted" in {
+          inSequence {
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          }
+
+          val result = doRequest("not-encrypted")
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+        }
+
+        "the email cannot be written to keystore" in {
+          inSequence {
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Left(""))
+          }
+
+          val result = doRequest(encryptedEmail)
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+        }
+
+        "the email cannot be written to the email store" in {
+          inSequence {
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+            mockEmailUpdate(email, nino)(Left(""))
+          }
+
+          val result = doRequest(encryptedEmail)
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+        }
+      }
     }
 
     "creating an account" must {
-      def doCreateAccountRequest(): Future[PlayResult] = register.createAccountHelpToSave(FakeRequest())
+      val confirmedEmail = "confirmed"
 
-      "retrieve the user info from session cache and post it using " +
+      def doCreateAccountRequest(): Future[PlayResult] = controller.createAccountHelpToSave(FakeRequest())
+
+      testCommonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
+
+      "retrieve the user info from session cache and post it with the confirmed email using " +
         "the help to save service" in {
         inSequence {
-          mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
-          mockCreateAccount(validNSIUserInfo)(Left(SubmissionFailure(None, "", "")))
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
+          mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Left(SubmissionFailure(None, "", "")))
         }
         val result = Await.result(doCreateAccountRequest(), 5.seconds)
         status(result) shouldBe Status.OK
@@ -117,9 +205,10 @@ class RegisterControllerSpec extends TestSupport {
       "indicate to the user that the creation was successful " +
         "and enrol the user if the creation was successful" in {
         inSequence {
-          mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
-          mockCreateAccount(validNSIUserInfo)()
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
+          mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
           mockEnrolUser(nino)(Right(()))
         }
 
@@ -132,9 +221,10 @@ class RegisterControllerSpec extends TestSupport {
       "indicate to the user that the creation was successful " +
         "and even if the user couldn't be enrolled" in {
         inSequence {
-          mockPlayAuthWithWithConfidence()
-          mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
-          mockCreateAccount(validNSIUserInfo)()
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
+          mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
           mockEnrolUser(nino)(Left("Oh no"))
         }
 
@@ -143,24 +233,27 @@ class RegisterControllerSpec extends TestSupport {
         html should include("Successfully created account")
       }
 
-      "indicate to the user that the creation was not successful " when {
 
-        "the user details cannot be found in the session cache" in {
-          inSequence {
-            mockPlayAuthWithWithConfidence()
-            mockSessionCacheConnectorGet(None)
-          }
-
-          val result = doCreateAccountRequest()
-          val html = contentAsString(result)
-          html should include("Account creation failed")
+      "redirect the user to the confirm details page if the session indicates they have not done so already" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
+
+        val result = doCreateAccountRequest()
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage().url)
+      }
+
+      "indicate to the user that the creation was not successful " when {
 
         "the help to save service returns with an error" in {
           inSequence {
-            mockPlayAuthWithWithConfidence()
-            mockSessionCacheConnectorGet(Some(HTSSession(Some(validNSIUserInfo))))
-            mockCreateAccount(validNSIUserInfo)(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
+            mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }
 
           val result = doCreateAccountRequest()
