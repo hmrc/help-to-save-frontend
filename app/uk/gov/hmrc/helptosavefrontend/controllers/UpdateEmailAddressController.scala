@@ -20,6 +20,7 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import play.api.Application
+import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
@@ -27,6 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
+import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
 
 @Singleton
 class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionCacheConnector,
@@ -44,9 +46,17 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
           }{
             _.eligibilityCheckResult.fold(
               Ok(views.html.core.not_eligible())
-            )(_ ⇒ Ok(views.html.register.update_email_address()))
+            )(_ ⇒ {
+              Ok(views.html.register.update_email_address(UpdateEmailForm.newEmailForm))
+            })
           }
         }
   }
 
+  def onSubmit(): Action[AnyContent] = Action.async { implicit request =>
+    val form = UpdateEmailForm.newEmailForm.bindFromRequest()
+    form.fold(/*haserrors*/){userEmail =>
+      // do something with the userEmail
+    }
+  }
 }
