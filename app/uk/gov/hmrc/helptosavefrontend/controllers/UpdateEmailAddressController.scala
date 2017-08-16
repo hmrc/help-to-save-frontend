@@ -59,11 +59,9 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
     implicit request =>
       implicit htsContext ⇒
         UpdateEmailForm.newEmailForm.bindFromRequest().fold(formWithErrors => {
-          println(">>>>>>>>>>>>>>>>> FORM WITH ERRORS " + formWithErrors)
           Future.successful(BadRequest(views.html.register.update_email_address("errors", formWithErrors)))
         },
           details => {
-            println(">>>>>>>>>>>>>>>>> DETAILS " + details)
             Future.successful(Ok(views.html.register.check_your_email()))
           }
         )

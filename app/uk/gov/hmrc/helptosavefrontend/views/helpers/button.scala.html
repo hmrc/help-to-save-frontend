@@ -16,4 +16,5 @@
 
 @(args: (Symbol, String)*)(content: Html)(implicit messages: play.api.i18n.Messages)
 @argsMap = @{ args.toMap }
-<button class="@{("button " + argsMap.getOrElse('_modifierClass, "").trim)}" @toHtmlArgs(argsMap.filterNot(entry => entry._1.name.startsWith("_")))>@content</button>
+<button class="@{("button " + argsMap.getOrElse('_modifierClass, "").trim)}" @toHtmlArgs(argsMap.filterNot(entry =>
+entry._1.name.startsWith("_")))>@content</button>
