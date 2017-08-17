@@ -101,17 +101,14 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
 
     }
 
-
-    "handling a getCreateAccountHelpToSave" must {
-
+    "handling a confirmEmail" must {
 
       val email = "email"
-      lazy val encryptedEmail = DataEncrypter.encrypt(email)
 
-      def doRequest(encryptedEmail: String): Future[PlayResult] =
-        controller.getCreateAccountHelpToSavePage(encryptedEmail)(FakeRequest())
+      def doRequest(email: String): Future[PlayResult] =
+        controller.confirmEmail(email)(FakeRequest())
 
-      testCommonEnrolmentAndSessionBehaviour(() ⇒ doRequest(encryptedEmail))
+      testCommonEnrolmentAndSessionBehaviour(() ⇒ doRequest(email))
 
       "write the email to keystore and the email store if the user has not already enrolled and " +
         "the session data shows that they have been already found to be eligible" in {
@@ -123,10 +120,10 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
           mockEmailUpdate(email, nino)(Left(""))
         }
 
-        await(doRequest(encryptedEmail))
+        await(doRequest(email))
       }
 
-      "return a 200 if the write to keystore and the email store was successful" in {
+      "redirect to the create an account page if the write to keystore and the email store was successful" in {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
@@ -135,25 +132,14 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
           mockEmailUpdate(email, nino)(Right(()))
         }
 
-        val result = doRequest(encryptedEmail)
-        status(result) shouldBe Status.OK
-        contentType(result) shouldBe Some("text/html")
-        charset(result) shouldBe Some("utf-8")
+        val result = doRequest(email)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountHelpToSavePage().url)
       }
 
 
       "return an error" when {
 
-        "the email cannot be decrypted" in {
-          inSequence {
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-          }
-
-          val result = doRequest("not-encrypted")
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-        }
 
         "the email cannot be written to keystore" in {
           inSequence {
@@ -163,7 +149,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Left(""))
           }
 
-          val result = doRequest(encryptedEmail)
+          val result = doRequest(email)
           status(result) shouldBe Status.INTERNAL_SERVER_ERROR
         }
 
@@ -176,10 +162,45 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
             mockEmailUpdate(email, nino)(Left(""))
           }
 
-          val result = doRequest(encryptedEmail)
+          val result = doRequest(email)
           status(result) shouldBe Status.INTERNAL_SERVER_ERROR
         }
       }
+    }
+
+    "handling a getCreateAccountHelpToSave" must {
+
+      val email = "email"
+
+      def doRequest(): Future[PlayResult] =
+        controller.getCreateAccountHelpToSavePage()(FakeRequest())
+
+      testCommonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+
+      "redirect the user to the confirm details page if there is no email in the session data" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage().url)
+      }
+
+      "show the user the create account page if the session data contains a confirmed email" in {
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(email)))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe OK
+        contentAsString(result) should include("Accept and create account")
+      }
+
     }
 
     "creating an account" must {
