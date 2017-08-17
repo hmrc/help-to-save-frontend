@@ -30,87 +30,89 @@ import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO, UserDetailsURI, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class EligibilityCheckController @Inject() (val messagesApi:             MessagesApi,
-                                            val helpToSaveService:       HelpToSaveService,
-                                            val sessionCacheConnector:   SessionCacheConnector,
-                                            jsonSchemaValidationService: JSONSchemaValidationService,
-                                            val app:                     Application,
-                                            auditor:                     HTSAuditor,
-                                            frontendAuthConnector:       FrontendAuthConnector)(implicit ec: ExecutionContext)
+class EligibilityCheckController @Inject()(val messagesApi: MessagesApi,
+                                           val helpToSaveService: HelpToSaveService,
+                                           val sessionCacheConnector: SessionCacheConnector,
+                                           jsonSchemaValidationService: JSONSchemaValidationService,
+                                           val app: Application,
+                                           auditor: HTSAuditor,
+                                           frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   import EligibilityCheckController._
 
-  def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled({
-      nino ⇒
-        checkSession {
-          // there is no session yet
-          getEligibilityActionResult(nino)
-        } { session ⇒
-          // there is a session
-          session.eligibilityCheckResult.fold(
-            // user is not eligible
-            SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-          )(_ ⇒
+  def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒
+    implicit htsContext ⇒
+      checkIfAlreadyEnrolled({
+        nino ⇒
+          checkSession {
+            // there is no session yet
+            getEligibilityActionResult(nino)
+          } { session ⇒
+            // there is a session
+            session.eligibilityCheckResult.fold(
+              // user is not eligible
+              SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
+            )(_ ⇒
               // user is eligible
               SeeOther(routes.EligibilityCheckController.getIsEligible().url)
             )
-        }
-    }, { enrolmentCheckError ⇒
-      // if there is an error checking the enrolment, do the eligibility checks
-      getEligibilityActionResult(enrolmentCheckError.nino)
-    }
-    )
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
-
-  val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { _ ⇒
-      checkSession {
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-      } {
-        _.eligibilityCheckResult.fold {
-          Ok(views.html.core.not_eligible())
-        }(_ ⇒
-          SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-        )
+          }
+      }, { enrolmentCheckError ⇒
+        // if there is an error checking the enrolment, do the eligibility checks
+        getEligibilityActionResult(enrolmentCheckError.nino)
       }
-    }
+      )
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  val getIsEligible: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { _ ⇒
-      checkSession {
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-      } {
-        _.eligibilityCheckResult.fold(
-          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-        )(_ ⇒
+  val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒
+    implicit htsContext ⇒
+      checkIfAlreadyEnrolled { _ ⇒
+        checkSession {
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        } {
+          _.eligibilityCheckResult.fold {
+            Ok(views.html.core.not_eligible())
+          }(_ ⇒
+            SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+          )
+        }
+      }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  val getIsEligible: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒
+    implicit htsContext ⇒
+      checkIfAlreadyEnrolled { _ ⇒
+        checkSession {
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        } {
+          _.eligibilityCheckResult.fold(
+            SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
+          )(_ ⇒
             Ok(views.html.register.you_are_eligible())
           )
+        }
       }
-    }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   private def getEligibilityActionResult(nino: NINO)(implicit hc: HeaderCarrier,
                                                      htsContext: HtsContext,
-                                                     request:    Request[AnyContent]): Future[Result] =
+                                                     request: Request[AnyContent]): Future[Result] =
     performEligibilityChecks(nino).fold(
       handleEligibilityCheckError,
       r ⇒ handleEligibilityResult(r, nino))
 
   private def performEligibilityChecks(nino: NINO)(implicit hc: HeaderCarrier, htsContext: HtsContext): EitherT[Future, Error, EligibilityResultWithUserInfo] =
     for {
-      userDetailsURI ← EitherT.fromOption[Future](htsContext.userDetailsURI, Error("Could not find user details URI"))
       eligible ← helpToSaveService.checkEligibility(nino).leftMap(Error.apply)
-      resultWithInfo ← getUserInformation(eligible, nino, userDetailsURI)
+      resultWithInfo ← getUserInformation(eligible, nino)
       nsiUserInfo = resultWithInfo.value.toOption.map(_._2)
       _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(Error.apply)
       session = HTSSession(nsiUserInfo, None)
@@ -118,24 +120,27 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     } yield resultWithInfo
 
   private def getUserInformation(eligibilityCheckResult: EligibilityCheckResult,
-                                 nino:                   NINO,
-                                 userDetailsURI:         UserDetailsURI
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, EligibilityResultWithUserInfo] =
+                                 nino: NINO
+                                )(implicit htsContext: HtsContext, hc: HeaderCarrier): EitherT[Future, Error, EligibilityResultWithUserInfo] =
     eligibilityCheckResult.result.fold[EitherT[Future, Error, EligibilityResultWithUserInfo]](
       { ineligibilityReason ⇒
         // if the person is ineligible don't get the user info - return with an ineligibility reason
         EitherT.pure[Future, Error, EligibilityResultWithUserInfo](EligibilityResultWithUserInfo(Left(ineligibilityReason)))
       }, { eligibilityReason ⇒
-        helpToSaveService.getUserInformation(nino, userDetailsURI).bimap(
-          Error.apply,
-          userInfo ⇒ EligibilityResultWithUserInfo(Right(eligibilityReason → NSIUserInfo(userInfo)))
-        )
+        val result = htsContext.userDetails.fold[Either[Error, EligibilityResultWithUserInfo]](
+          Left(Error("unexpected error: Userinfo expected but not found"))) { info =>
+          info.bimap(
+            missingInfo ⇒ Error(missingInfo),
+            userInfo ⇒ EligibilityResultWithUserInfo(Right(eligibilityReason → NSIUserInfo(userInfo)))
+          )
+        }
+        EitherT.fromEither[Future](result)
       }
     )
 
   private def handleEligibilityResult(result: EligibilityResultWithUserInfo,
-                                      nino:   NINO
-  )(implicit hc: HeaderCarrier): Result = {
+                                      nino: NINO
+                                     )(implicit hc: HeaderCarrier): Result = {
     result.value.fold(
       {
         case IneligibilityReason.AccountAlreadyOpened ⇒
@@ -160,7 +165,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
   }
 
   private def handleEligibilityCheckError(error: Error)(implicit request: Request[AnyContent],
-                                                        hc:         HeaderCarrier,
+                                                        hc: HeaderCarrier,
                                                         htsContext: HtsContext): Result = error.value match {
 
     case Left(e) ⇒
@@ -189,7 +194,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     userInfo match {
       case None ⇒ Right(None)
       case Some(ui) ⇒
-        FEATURE[Either[String, Option[NSIUserInfo]]]("outgoing-json-validation", app.configuration, Right(userInfo)) enabled () thenDo {
+        FEATURE[Either[String, Option[NSIUserInfo]]]("outgoing-json-validation", app.configuration, Right(userInfo)) enabled() thenDo {
           jsonSchemaValidationService.validate(Json.toJson(ui)).map(_ ⇒ Some(ui))
         }
     }

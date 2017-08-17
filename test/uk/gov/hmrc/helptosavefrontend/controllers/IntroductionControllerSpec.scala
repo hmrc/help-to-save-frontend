@@ -23,23 +23,31 @@ import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentAsString, contentType}
+<<<<<<< HEAD
 import uk.gov.hmrc.auth.core.{EmptyPredicate, EmptyRetrieval, Predicate}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+=======
+import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+>>>>>>> HTS-415: Upgrade to latest play-auth version
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class IntroductionControllerSpec extends TestSupport {
+class IntroductionControllerSpec extends AuthSupport {
 
   implicit val timeout = Timeout(5, SECONDS)
-  val frontendAuthConnector = mock[FrontendAuthConnector]
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new IntroductionController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], frontendAuthConnector)
+  val helpToSave = new IntroductionController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector)
 
   def mockAuthorise(loggedIn: Boolean) =
+<<<<<<< HEAD
     (frontendAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier))
+=======
+    (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier))
+>>>>>>> HTS-415: Upgrade to latest play-auth version
       .expects(EmptyPredicate, EmptyRetrieval, *)
       .returning(if (loggedIn) Future.successful(()) else Future.failed(new Exception("")))
 

@@ -20,10 +20,12 @@ import java.util.Base64
 
 import cats.data.EitherT
 import cats.syntax.either._
+import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, MissingUserInfoSet}
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -55,17 +57,18 @@ trait HelpToSaveConnector {
 @Singleton
 class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
-  import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
-
   val base64Encoder: Base64.Encoder = Base64.getEncoder
 
-  def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
-    handle(
-      eligibilityURL(nino),
-      _.parseJson[EligibilityCheckResponse].flatMap(toEligibilityCheckResponse),
-      "check eligibility",
-      identity
-    )
+  override def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] = {
+    EitherT.right[Future, String, HttpResponse](http.get(eligibilityURL(nino)))
+      .subflatMap { response ⇒
+        if (response.status == 200) {
+          response.parseJson[EligibilityCheckResponse].flatMap(r ⇒ toEligibilityCheckResponse(r))
+        } else {
+          Left(s"Call to check eligibility came back with status ${response.status}")
+        }
+      }
+  }
 
   def getUserInformation(nino: NINO, userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] = {
     val backendError = (s: String) ⇒ UserInformationRetrievalError.BackendError(s, nino)
@@ -114,6 +117,8 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
     }.recover {
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
+
+  private def eligibilityURL(nino: NINO) = s"$helpToSaveUrl/help-to-save/eligibility-check?nino=$nino"
 
   private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
     val reasonInt = eligibilityCheckResponse.reason

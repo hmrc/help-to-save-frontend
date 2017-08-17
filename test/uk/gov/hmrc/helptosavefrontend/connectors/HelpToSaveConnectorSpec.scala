@@ -22,10 +22,16 @@ import cats.data.EitherT
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+<<<<<<< HEAD
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, MissingUserInfoSet}
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, DateOfBirth, Email, GivenName, Surname}
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
+=======
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.encoded
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.EligibilityCheckResponse
+>>>>>>> HTS-415: Upgrade to latest play-auth version
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
@@ -170,6 +176,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         }
 
     }
+<<<<<<< HEAD
 
     "getting enrolment status" must {
 
@@ -341,6 +348,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         await(getResult().value).isLeft shouldBe true
       }
     }
+=======
+>>>>>>> HTS-415: Upgrade to latest play-auth version
   }
 
 }

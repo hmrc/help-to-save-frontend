@@ -17,7 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import java.util.UUID
+import java.util.concurrent.TimeUnit.SECONDS
 
+import akka.util.Timeout
 import com.typesafe.config.{Config, ConfigValueFactory}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
@@ -38,6 +40,8 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
     new GuiceApplicationBuilder()
       .configure("metrics.enabled" → false)
       .build()
+
+  //implicit val timeout = Timeout(5, SECONDS)
 
   def fakeApplicationWithConfig(additionalConfig: Config): Application =
     new GuiceApplicationBuilder()

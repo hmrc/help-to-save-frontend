@@ -16,54 +16,69 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.util.concurrent.TimeUnit.SECONDS
+
 import akka.util.Timeout
 import play.api.http.Status
+import play.api.libs.json.Json
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
-import play.api.test.Helpers.redirectLocation
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import play.api.test.Helpers.{contentAsString, redirectLocation}
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{checkEligibilityUrl, encoded}
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 
-import scala.concurrent.Future
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
-class HelpToSaveAuthSpec extends TestSupport {
+class HelpToSaveAuthSpec extends AuthSupport {
 
-  private val mockAuthConnector = mock[PlayAuthConnector]
-  val frontendAuthConnector = stub[FrontendAuthConnector]
+  implicit val timeout = Timeout(5, SECONDS)
 
-  def mockAuthResultWith(ex: Throwable): Unit =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
-      .expects(AuthProviders(GovernmentGateway), *, *)
-      .returning(Future.failed(ex))
+  val htsAuth = new HelpToSaveAuth(fakeApplication, mockAuthConnector)
 
-  def mockAuthWithRetrievalsWith(predicate: Predicate)(ex: Throwable): Unit =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier))
-      .expects(predicate, *, *)
-      .returning(Future.failed(ex))
-
-  val htsAuth = new HelpToSaveAuth(fakeApplication, frontendAuthConnector) {
-    override def authConnector: AuthConnector = mockAuthConnector
-  }
-
+<<<<<<< HEAD
   private def actionWithNoEnrols = htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Future.successful(Ok(""))
   }(FrontendAppConfig.checkEligibilityUrl)
 
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     Future.successful(Ok(""))
+=======
+  private def actionWithNoEnrols = htsAuth.authorisedForHts {
+    implicit request ⇒
+      implicit htsContext ⇒
+        Future.successful(Ok(""))
+  }(FrontendAppConfig.checkEligibilityUrl)
+
+  private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo {
+    implicit request ⇒
+      implicit htsContext ⇒
+        htsContext.userDetails match {
+          case Some(info) ⇒ info match {
+            case Left(missingUserInfo) ⇒ Future.successful(Ok(Json.toJson(missingUserInfo)))
+            case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
+          }
+          case None ⇒ Future.successful(Ok(""))
+        }
+>>>>>>> HTS-415: Upgrade to latest play-auth version
   }(FrontendAppConfig.checkEligibilityUrl)
 
   private def mockAuthWith(error: String) =
-    mockAuthWithRetrievalsWith(AuthWithConfidence)(fromString(error))
+    mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString(error))
 
   "HelpToSaveAuth" should {
+
+    "return UserInfo after successful authentication" in {
+
+      val userInfo =
+        s"""{"forename":"Tyrion","surname":"Lannister","nino":"WM123456C","dateOfBirth":"1970-01-01","email":"tyrion_lannister@gmail.com","address":{"lines":["Casterly Rock","The Westerlands","Westeros"],"postcode":"BA148FY","country":"GB"}}""".stripMargin
+      mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+      val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
+      status(result) shouldBe Status.OK
+      contentAsString(result) shouldBe userInfo
+    }
 
     "handle NoActiveSession exception and redirect user to GG login page" in {
 
@@ -74,7 +89,7 @@ class HelpToSaveAuthSpec extends TestSupport {
         "SessionRecordNotFound")
 
       exceptions.foreach { error ⇒
-        mockAuthResultWith(fromString(error))
+        mockAuthResultWithFail(fromString(error))
         val result = actionWithNoEnrols(FakeRequest())
         status(result) shouldBe Status.SEE_OTHER
         val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
