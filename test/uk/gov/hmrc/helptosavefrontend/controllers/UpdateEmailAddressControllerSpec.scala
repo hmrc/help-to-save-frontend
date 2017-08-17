@@ -16,16 +16,19 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import play.api.Configuration
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
+import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, EmailVerificationConnectorImpl}
 import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, validNSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -38,9 +41,23 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
   val frontendAuthConnector = stub[FrontendAuthConnector]
 
-  val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockEnrolmentService, frontendAuthConnector
+  val mockEmailVerificationConnector = mock[EmailVerificationConnector]
+
+  val mockHttp = mock[WSHttp]
+
+//  lazy val emailVerificationConnector = {
+//    val config = Configuration("services.email-verification.linkTTLMinutes" → " 120")
+//    new EmailVerificationConnectorImpl(mockHttp, config)
+//  }
+
+  lazy val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockEnrolmentService, frontendAuthConnector, mockEmailVerificationConnector
   )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]){
     override val authConnector = mockAuthConnector
+  }
+
+  def mockEmailVerificationConn = {
+    (mockEmailVerificationConnector.verifyEmail(_: String, _:String)(_: HeaderCarrier)).expects(*,*,*)
+      .returning(Future.successful(Right()))
   }
 
   "The UpdateEmailAddressController" when {
@@ -65,7 +82,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       }
 
 
-      "return the you're not aeligible page if the user is not already enrolled and the " +
+      "return the you're not eligible page if the user is not already enrolled and the " +
         "session data indicates that they are ineligible" in {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
@@ -80,6 +97,19 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
     }
 
+  }
+
+  "onSubmit" should {
+    "given a valid email address return the check your email page with a status of Ok" in {
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
+      inSequence {
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEmailVerificationConn
+      }
+      val result = controller.onSubmit()(fakePostRequest)
+      status(result) shouldBe Status.OK
+      contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title"))
+    }
   }
 
 }

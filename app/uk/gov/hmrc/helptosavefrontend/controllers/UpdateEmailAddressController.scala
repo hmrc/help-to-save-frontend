@@ -24,17 +24,20 @@ import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
+
 import scala.concurrent.Future
 
 @Singleton
 class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionCacheConnector,
                                              val enrolmentService: EnrolmentService,
-                                             frontendAuthConnector: FrontendAuthConnector
+                                             frontendAuthConnector: FrontendAuthConnector,
+                                             emailVerificationConnector: EmailVerificationConnector
                                             )(implicit app: Application, val messagesApi: MessagesApi)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport {
 
@@ -58,11 +61,18 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request =>
       implicit htsContext ⇒
-        UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(formWithErrors => {
-          Future.successful(BadRequest(views.html.register.update_email_address("errors", Some(formWithErrors))))
-        },
+        UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
+          formWithErrors => {
+            Future.successful(BadRequest(views.html.register.update_email_address("errors", Some(formWithErrors))))
+          },
           details => {
-            Future.successful(Ok(views.html.register.check_your_email()))
+           emailVerificationConnector.verifyEmail(htsContext.nino.getOrElse(""), details.toString).map {
+                case Right(x) ⇒ Ok(views.html.register.check_your_email())
+                //case Left(RequestNotValidError(nino)) ⇒ Ok(views.html.register.email_verify_error())
+               // case Left(AlreadyVerified(nino, newEmail)) ⇒ Ok(views.html.register.email_verify_error())
+                //case Left(VerificationServiceUnavailable()) ⇒ Ok(views.html.register.email_verify_error())
+               // case Left(BackendError("")) ⇒ Ok(views.html.register.email_verify_error())
+             }
           }
         )
   }
