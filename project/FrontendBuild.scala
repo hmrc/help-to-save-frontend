@@ -40,8 +40,7 @@ object FrontendBuild extends Build with MicroService {
     "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
     "info.cukes" %% "cucumber-scala" % "1.2.4" % scope,
     "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % scope,
-    "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1" % scope,
-    "org.scalactic" %% "scalactic" % "3.0.1"
+    "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1" % scope
   )
 
 }

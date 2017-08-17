@@ -27,7 +27,7 @@ class SecuritySteps extends Steps with NINOGenerator {
 
   val credentialStrengthsRegex: String = oneOfRegex(Set("weak", "strong", "none"))
 
-  Given(s"""^an applicant has a confidence level of $confidenceLevelRegex$$""") { (level: Int) =>
+  Given(s"""^a user has a confidence level of $confidenceLevelRegex$$""") { (level: Int) =>
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setConfidenceLevel(level)
@@ -42,16 +42,26 @@ class SecuritySteps extends Steps with NINOGenerator {
     Page.getCurrentUrl() should include regex ("/iv/journey-result|iv%2Fjourney-result")
   }
 
-  Given("""^an applicant has NOT logged in$""") { () =>
+  Given("""^a user has NOT logged in$""") { () =>
     // Do nothing
   }
 
-  Given("""^an applicant has logged in$""") { () =>
+  Given("""^a user has logged in$""") { () =>
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setNino(generateEligibleNINO)
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/check-eligibility")
   }
+
+  When("""^they have logged in and passed IV$"""){ () =>
+    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/access-account")
+    AuthorityWizardPage.setCredentialStrength("strong")
+    AuthorityWizardPage.setConfidenceLevel(200)
+    AuthorityWizardPage.setNino(generateEligibleNINO)
+    AuthorityWizardPage.submit()
+  }
+
 
   When("""^they try to view the user details page$""") { () =>
     ConfirmDetailsPage.goToPage()
@@ -65,9 +75,9 @@ class SecuritySteps extends Steps with NINOGenerator {
     Page.getCurrentUrl() should include("gg/sign-in")
   }
 
-  Given("""^an applicant has logged in and passed IV$""") { () =>
+  Given("""^a user has logged in and passed IV$""") { () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/check-eligibility")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     AuthorityWizardPage.setNino(generateEligibleNINO)
@@ -75,7 +85,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Then("""^the GG sign in page is visible$"""){ () =>
-    getDriverUnsafe.getCurrentUrl should include ("gg/sign-in?")
+    driver.getCurrentUrl should include ("gg/sign-in?")
   }
 
 }

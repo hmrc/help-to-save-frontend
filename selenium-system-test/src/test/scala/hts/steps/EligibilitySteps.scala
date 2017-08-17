@@ -23,13 +23,13 @@ class EligibilitySteps extends Steps with NINOGenerator {
 
   var nino: Option[String] = None
 
-  Given("""^an applicant is in receipt of working tax credit$""") { () =>
+  Given("""^an user is in receipt of working tax credit$""") { () =>
     nino = Some(generateEligibleNINO)
   }
 
   When("""^they apply for Help to Save$""") { () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/check-eligibility")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     AuthorityWizardPage.setNino(nino.getOrElse(""))
@@ -40,11 +40,11 @@ class EligibilitySteps extends Steps with NINOGenerator {
     Page.getPageContent() should include("You're eligible")
   }
 
-  When("""^They start to create an account$"""){ () =>
+  When("""^they start to create an account$"""){ () =>
     EligibilityCheckPage.startCreatingAccount()
   }
 
-  Given("""^an applicant is NOT in receipt of working tax credit$""") { () =>
+  Given("""^an user is NOT in receipt of working tax credit$""") { () =>
     nino = Some(generateIneligibleNINO)
   }
 

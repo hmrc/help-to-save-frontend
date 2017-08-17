@@ -17,12 +17,16 @@
 package src.test.scala.hts.steps
 
 import src.test.scala.hts.pages.registrationPages._
-import src.test.scala.hts.pages.{ConfirmDetailsPage, CreateAccountPage, Page}
+import src.test.scala.hts.pages._
 
-class CreateAccountSteps extends Steps{
+class CreateAccountSteps extends WebPage {
 
   Given("""^A user is at the start of the registration process$"""){ () =>
     AboutPage.navigateToAboutPage()
+  }
+
+  Given("""^a user is on the apply page$"""){ () =>
+    ApplyPage.navigateToApplyPage()
   }
 
   When("""^they proceed through to the apply page$"""){ () =>
@@ -36,6 +40,10 @@ class CreateAccountSteps extends Steps{
     ApplyPage.clickStartNow()
   }
 
+  When("""^they click on the sign in link$"""){ () =>
+    ApplyPage.clickSignInLink()
+  }
+
   When("""^they choose to not create an account$"""){ () =>
     ConfirmDetailsPage.continue()
     CreateAccountPage.exitWithoutCreatingAccount()
@@ -46,13 +54,24 @@ class CreateAccountSteps extends Steps{
     CreateAccountPage.createAccount()
   }
 
+  When("""^the user clicks on the check eligibility button$"""){ () =>
+    EligibilityQuestionPage.clickCheckEligibility()
+  }
+
   Then("""^they see that the account is created$""") { () =>
     Page.getPageContent() should include("Successfully created account")
   }
 
   Then("""^they see the gov uk page$"""){ () =>
-    getDriverUnsafe.getCurrentUrl shouldBe "https://www.gov.uk/"
+    driver.getCurrentUrl shouldBe "https://www.gov.uk/"
   }
 
+  Then("""^they will be on eligibility question page$"""){ () =>
+    on(EligibilityQuestionPage)
+  }
+
+  Then("""^they will be on the you're eligible page$"""){ () =>
+    on(EligiblePage)
+  }
 
 }

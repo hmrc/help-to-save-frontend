@@ -1,6 +1,7 @@
 package src.test.scala.hts.pages
 
-import org.openqa.selenium.{Keys, WebElement}
+import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
+import org.openqa.selenium.{By, Keys, WebElement}
 import org.scalatest._
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
@@ -26,6 +27,12 @@ trait WebPage extends org.scalatest.selenium.Page
 
   def nextPage(): Unit = click on find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).get
 
+  def on(page: WebPage) = {
+    val wait = new WebDriverWait(driver, 5)
+    wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")))
+    assert(page.isCurrentPage, s"Page was not loaded: ${page.currentUrl}")
+  }
+
   def textField(id: String, value: String): Unit = {
     val elem = find(id)
     if (elem.isDefined) {
@@ -43,7 +50,7 @@ trait WebPage extends org.scalatest.selenium.Page
   }
 
   def pressKeys(value: Keys): Unit = {
-    val e: WebElement = getDriverUnsafe.switchTo.activeElement
+    val e: WebElement = driver.switchTo.activeElement
     e.sendKeys(value)
   }
 
