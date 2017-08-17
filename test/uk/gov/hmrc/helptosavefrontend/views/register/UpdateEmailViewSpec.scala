@@ -17,8 +17,10 @@
 package uk.gov.hmrc.helptosavefrontend.views.register
 
 import org.jsoup.Jsoup
+import org.openqa.selenium.By.ByCssSelector
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
+import reactivemongo.api.BSONSerializationPack.Document
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
@@ -32,16 +34,25 @@ class UpdateEmailViewSpec extends TestSupport {
   def messagesApi = injector.instanceOf[MessagesApi]
   lazy val messages = messagesApi.preferred(request)
 
+  def assertEqualsMessage(doc: Document, cssSelector: String, expectedValue: String) = {
+    val elements = doc.select(cssSelector)
+  }
+
   val mockHtsContext = mock[HtsContext]
   lazy val view = update_email_address("email@gmail.com", UpdateEmailForm.newEmailForm)(mockHtsContext, request, messages)
 
 
   "UpdateEmailView" should {
-    "have a title" in {
+    "when rendered have the correct banner title" in {
       val doc = Jsoup.parse(view.toString())
       val nav = doc.getElementById("proposition-menu")
       val span = nav.children().first()
       span.text shouldBe messagesApi("hts.helpers.header-page")
+    }
+
+    "when rendered must display the correct browser title" in {
+      val doc = Jsoup.parse(view.toString())
+      assertEqualsMessage(doc, "title", "")
     }
   }
 }
