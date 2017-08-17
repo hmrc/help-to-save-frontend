@@ -17,21 +17,16 @@
 package uk.gov.hmrc.helptosavefrontend.views.register
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.i18n.MessagesApi
-import play.api.test.FakeRequest
-import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-import uk.gov.hmrc.helptosavefrontend.views.html.register.update_email_address
+import uk.gov.hmrc.helptosavefrontend.views.html.register.check_your_email
 
-class UpdateEmailViewSpec extends ViewBehavioursSpec {
+class CheckYourEmailSpec extends ViewBehavioursSpec {
 
   val mockHtsContext = mock[HtsContext]
-  lazy val view = update_email_address("email@gmail.com", UpdateEmailForm.newEmailForm)(mockHtsContext, request, messages)
+  lazy val view = check_your_email()(mockHtsContext, request, messages)
   lazy val document = Jsoup.parse(view.toString())
 
-
-  "UpdateEmailView" should {
+  "CheckYourEmail" should {
     "when rendered have the correct banner title" in {
       val nav = document.getElementById("proposition-menu")
       val span = nav.children().first()
@@ -43,19 +38,12 @@ class UpdateEmailViewSpec extends ViewBehavioursSpec {
     }
 
     "when rendered must have the correct page title" in {
-      assertPageTitleEqualsMessage(document, "hts.email-verification.title")
+      assertPageTitleEqualsMessage(document, "hts.email-verification.check-your-email.title")
     }
 
-    "contain a label for the value" in {
-      assertContainsLabel(document, "value", messages("hts.email-verification.input.label"))
+    "when rendered must display user content" in {
+      assertEqualsMessage(document, "p.content", "hts.email-verification.check-your-email.content")
     }
 
-    "contain an input for the value" in {
-      assertRenderedById(document, "value")
-    }
-
-    "contains the correct text on the submit button" in {
-      assertButtonText(document, "hts.email-verification.submit.text")
-    }
   }
 }

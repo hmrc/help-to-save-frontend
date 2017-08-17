@@ -28,11 +28,11 @@ class ViewBehavioursSpec extends TestSupport {
   def messagesApi = injector.instanceOf[MessagesApi]
   lazy val messages = messagesApi.preferred(request)
 
-  def assertEqualsMessage(doc: Document, cssSelector: String, expectedValue: String) = {
+  def assertEqualsMessage(doc: Document, cssSelector: String, expectedMessageKey: String) = {
     val elements = doc.select(cssSelector)
     if(elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
     //<p> HTML elements are rendered out with a carriage return on some pages, so discount for comparison
-    assert(elements.first().html().replace("\n", "") == expectedValue)
+    assert(elements.first().html().replace("\n", "") == messagesApi(expectedMessageKey))
   }
 
   def assertPageTitleEqualsMessage(doc: Document, expectedMessageKey: String, args: Any*) = {

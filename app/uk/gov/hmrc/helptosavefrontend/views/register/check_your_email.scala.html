@@ -18,9 +18,10 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = Messages("hts.check-your-email.title"),
+    title = messages("hts.introduction.title"),
     sidebarLinks = None,
     bodyClasses = None) {
 
-     <h1>Check your email</h1>
+     <h1>@messages("hts.email-verification.check-your-email.title")</h1>
+     <p class="content">@messages("hts.email-verification.check-your-email.content")</p>
     }

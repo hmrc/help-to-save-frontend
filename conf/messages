@@ -234,3 +234,5 @@ hts.access.denied.message=You are not allowed to access this service
 hts.email-verification.title=Update your email
 hts.email-verification.input.label=New email address
 hts.email-verification.submit.text=Verify your email
+hts.email-verification.check-your-email.title=Check your email
+hts.email-verification.check-your-email.content=Please check your emails to activate your account
