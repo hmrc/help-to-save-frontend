@@ -17,10 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend.views.register
 
 import org.jsoup.Jsoup
-import org.openqa.selenium.By.ByCssSelector
+import org.jsoup.nodes.Document
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import reactivemongo.api.BSONSerializationPack.Document
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
@@ -34,25 +33,63 @@ class UpdateEmailViewSpec extends TestSupport {
   def messagesApi = injector.instanceOf[MessagesApi]
   lazy val messages = messagesApi.preferred(request)
 
-  def assertEqualsMessage(doc: Document, cssSelector: String, expectedValue: String) = {
+  private def assertEqualsMessage(doc: Document, cssSelector: String, expectedValue: String) = {
     val elements = doc.select(cssSelector)
+    if(elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
+    //<p> HTML elements are rendered out with a carriage return on some pages, so discount for comparison
+    assert(elements.first().html().replace("\n", "") == expectedValue)
+  }
+
+  private def assertPageTitleEqualsMessage(doc: Document, expectedMessageKey: String, args: Any*) = {
+    val headers = doc.getElementsByTag("h1")
+    headers.size shouldBe 1
+    headers.first.text.replaceAll("\u00a0", " ") shouldBe messages(expectedMessageKey, args:_*).replaceAll("&nbsp;", " ")
+  }
+
+  private def assertContainsLabel(doc: Document, forElement: String, expectedText: String) = {
+    val labels = doc.getElementsByAttributeValue("for", forElement)
+    assert(labels.size == 1, s"\n\nLabel for $forElement was not rendered on the page.")
+    assert(labels.first.text() == expectedText, s"\n\nLabel for $forElement was not $expectedText")
+  }
+
+  private def assertButtonText(doc: Document, expectedMessageKey: String) = {
+    assert(document.select("div > button").toString().contains(messages(expectedMessageKey)))
+  }
+
+  private def assertRenderedById(doc: Document, id: String) = {
+    assert(doc.getElementById(id) != null, "\n\nElement " + id + " was not rendered on the page.\n")
   }
 
   val mockHtsContext = mock[HtsContext]
   lazy val view = update_email_address("email@gmail.com", UpdateEmailForm.newEmailForm)(mockHtsContext, request, messages)
+  lazy val document = Jsoup.parse(view.toString())
 
 
   "UpdateEmailView" should {
     "when rendered have the correct banner title" in {
-      val doc = Jsoup.parse(view.toString())
-      val nav = doc.getElementById("proposition-menu")
+      val nav = document.getElementById("proposition-menu")
       val span = nav.children().first()
       span.text shouldBe messagesApi("hts.helpers.header-page")
     }
 
     "when rendered must display the correct browser title" in {
-      val doc = Jsoup.parse(view.toString())
-      assertEqualsMessage(doc, "title", "")
+      assertEqualsMessage(document, "title", messagesApi("hts.introduction.title"))
+    }
+
+    "when rendered must have the correct page title" in {
+      assertPageTitleEqualsMessage(document, "hts.email-verification.title")
+    }
+
+    "contain a label for the value" in {
+      assertContainsLabel(document, "value", messages("hts.email-verification.input.label"))
+    }
+
+    "contain an input for the value" in {
+      assertRenderedById(document, "value")
+    }
+
+    "contains the correct text on the submit button" in {
+      assertButtonText(document, "hts.email-verification.submit.text")
     }
   }
 }

@@ -230,3 +230,7 @@ hts.iv.we_ve_confirmed_your_identity=We''ve now confirmed your identity
 hts.iv.you_now_access_hts_account=You can now access your help to save account.
 hts.access.denied.header=Access Denied
 hts.access.denied.message=You are not allowed to access this service
+
+hts.email-verification.title=Update your email
+hts.email-verification.input.label=New email address
+hts.email-verification.submit.text=Verify your email
