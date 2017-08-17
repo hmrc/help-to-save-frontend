@@ -31,6 +31,11 @@ import scala.concurrent.Future
 
 class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndEligibilityCheckBehaviour {
 
+  lazy val injector = fakeApplication.injector
+  lazy val request = FakeRequest()
+  def messagesApi = injector.instanceOf[MessagesApi]
+  lazy val messages = messagesApi.preferred(request)
+
   val frontendAuthConnector = stub[FrontendAuthConnector]
 
   val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockEnrolmentService, frontendAuthConnector
@@ -56,7 +61,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
         val result = getResult()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Update your email address")
+        contentAsString(result) should include(messages("hts.email-verification.title"))
       }
 
 

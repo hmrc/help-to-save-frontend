@@ -20,45 +20,11 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.helptosavefrontend.views.html.register.update_email_address
 
-class UpdateEmailViewSpec extends TestSupport {
-
-  lazy val injector = fakeApplication.injector
-  lazy val request = FakeRequest()
-
-  def messagesApi = injector.instanceOf[MessagesApi]
-  lazy val messages = messagesApi.preferred(request)
-
-  private def assertEqualsMessage(doc: Document, cssSelector: String, expectedValue: String) = {
-    val elements = doc.select(cssSelector)
-    if(elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
-    //<p> HTML elements are rendered out with a carriage return on some pages, so discount for comparison
-    assert(elements.first().html().replace("\n", "") == expectedValue)
-  }
-
-  private def assertPageTitleEqualsMessage(doc: Document, expectedMessageKey: String, args: Any*) = {
-    val headers = doc.getElementsByTag("h1")
-    headers.size shouldBe 1
-    headers.first.text.replaceAll("\u00a0", " ") shouldBe messages(expectedMessageKey, args:_*).replaceAll("&nbsp;", " ")
-  }
-
-  private def assertContainsLabel(doc: Document, forElement: String, expectedText: String) = {
-    val labels = doc.getElementsByAttributeValue("for", forElement)
-    assert(labels.size == 1, s"\n\nLabel for $forElement was not rendered on the page.")
-    assert(labels.first.text() == expectedText, s"\n\nLabel for $forElement was not $expectedText")
-  }
-
-  private def assertButtonText(doc: Document, expectedMessageKey: String) = {
-    assert(document.select("div > button").toString().contains(messages(expectedMessageKey)))
-  }
-
-  private def assertRenderedById(doc: Document, id: String) = {
-    assert(doc.getElementById(id) != null, "\n\nElement " + id + " was not rendered on the page.\n")
-  }
+class UpdateEmailViewSpec extends ViewBehavioursSpec {
 
   val mockHtsContext = mock[HtsContext]
   lazy val view = update_email_address("email@gmail.com", UpdateEmailForm.newEmailForm)(mockHtsContext, request, messages)
