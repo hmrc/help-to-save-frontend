@@ -14,17 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.forms
+package uk.gov.hmrc.helptosavefrontend.util
 
-import play.api.data._
-import play.api.data.Forms._
-import play.api.i18n.Lang
+import play.api.data.Form
 
-object UpdateEmailForm {
-  val verifyEmailForm = Form(
-    mapping("value" -> email
-    )(UpdateEmail.apply)(UpdateEmail.unapply)
-  )
+/**
+  * Created by andy on 17/08/2017.
+  */
+object FormHelpers {
+  def getErrorByKey[A](form: Option[Form[A]], errorKey: String) = {
+    val either = for {
+      theForm <- form.toRight("").right
+      theError <- theForm.error(errorKey).toRight("").right
+    } yield theError
+
+    either match {
+      case Left(_) => ""
+      case Right(error) => error.message
+    }
+  }
 }
-
-case class UpdateEmail(email: String)

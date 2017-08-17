@@ -49,7 +49,7 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
               Ok(views.html.core.not_eligible())
             )( userInfo ⇒ {
 
-              Ok(views.html.register.update_email_address(userInfo.contactDetails.email, UpdateEmailForm.newEmailForm))
+              Ok(views.html.register.update_email_address(userInfo.contactDetails.email, Some(UpdateEmailForm.verifyEmailForm)))
             })
           }
         }
@@ -58,8 +58,8 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request =>
       implicit htsContext ⇒
-        UpdateEmailForm.newEmailForm.bindFromRequest().fold(formWithErrors => {
-          Future.successful(BadRequest(views.html.register.update_email_address("errors", formWithErrors)))
+        UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(formWithErrors => {
+          Future.successful(BadRequest(views.html.register.update_email_address("errors", Some(formWithErrors))))
         },
           details => {
             Future.successful(Ok(views.html.register.check_your_email()))

@@ -17,9 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.views.register
 
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import play.api.i18n.MessagesApi
-import play.api.test.FakeRequest
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.helptosavefrontend.views.html.register.update_email_address
@@ -27,7 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.views.html.register.update_email_address
 class UpdateEmailViewSpec extends ViewBehavioursSpec {
 
   val mockHtsContext = mock[HtsContext]
-  lazy val view = update_email_address("email@gmail.com", UpdateEmailForm.newEmailForm)(mockHtsContext, request, messages)
+  lazy val view = update_email_address("email@gmail.com", Some(UpdateEmailForm.verifyEmailForm))(mockHtsContext, request, messages)
   lazy val document = Jsoup.parse(view.toString())
 
 
