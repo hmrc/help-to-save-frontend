@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.{EmailVerificationParams, Logging}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
@@ -48,11 +48,13 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
   def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
 
-  val continueURL = conf.underlying.getString("microservice.services.help-to-save-frontend.url")
+  val continueURL = baseUrl("help-to-save-email-verification") + "/register/check-and-confirm-your-details"
   val templateId = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
-    val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueURL, Map())
+    val params = EmailVerificationParams(nino, newEmail)
+    val continueUrlWithParams = continueURL + "?p=" + params
+    val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueUrlWithParams, Map())
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {
         case OK | CREATED =>

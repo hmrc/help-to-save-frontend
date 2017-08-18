@@ -105,7 +105,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   "verifyEmailURL" should {
     "return the correct url" in {
-      connector.verifyEmailURL shouldBe s"http://localhost:9891/email-verification/verification-requests"
+      connector.verifyEmailURL shouldBe "http://localhost:9891/email-verification/verification-requests"
     }
   }
 

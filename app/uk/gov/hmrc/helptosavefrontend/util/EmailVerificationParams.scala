@@ -24,6 +24,9 @@ case class EmailVerificationParams(nino: String, email: String) {
     val input = nino + ":" + email
     new String(Base64.getEncoder.encode(input.getBytes()), Charset.forName("UTF-8"))
   }
+}
+
+object EmailVerificationParams {
   def decode(base64: String): Option[EmailVerificationParams] = {
     val input = new String(Base64.getDecoder.decode(base64), Charset.forName("UTF-8")).split(":")
     if (input.length == 2) Some(EmailVerificationParams(input(0), input(1))) else None

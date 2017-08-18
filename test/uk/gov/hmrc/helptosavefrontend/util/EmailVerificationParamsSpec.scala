@@ -37,14 +37,14 @@ class EmailVerificationParamsSpec extends TestSupport {
     }
 
     "have a decode method that is the inverse of the encode method" in {
-      val result = params.decode(params.encode)
+      val result = EmailVerificationParams.decode(params.encode)
       result.get.email shouldBe email
       result.get.nino shouldBe nino
     }
 
     "have a decode method that returns None when given a base64 string that does not encode a nino and email" in {
       val s = new String(Base64.getEncoder.encode("wibble".getBytes()), Charset.forName("UTF-8"))
-      params.decode(s) shouldBe None
+      EmailVerificationParams.decode(s) shouldBe None
     }
   }
 }

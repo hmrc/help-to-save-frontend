@@ -241,3 +241,4 @@ hts.email-verification.email-verify-error.already-verified.content=Email address
 hts.email-verification.email-verify-error.request-not-valid.content=Request not valid
 hts.email-verification.email-verify-error.verification-service-unavailable.content=Email verification service is not available
 hts.email-verification.email-verify-error.backend-error.content=There has been an error, please try again later
+hts.email-verification.email-verify-error.bad-continue-url.content=There is an error with this verification link

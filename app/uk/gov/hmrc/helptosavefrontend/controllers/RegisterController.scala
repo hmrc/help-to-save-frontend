@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.repo.EmailStore
 import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, EmailVerificationParams, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -51,8 +51,22 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
-          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
-            Ok(views.html.register.confirm_details(nsiUserInfo))
+          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒ {
+            request.getQueryString("p") match {
+              case None ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
+              case Some(p) ⇒ {
+                val optionalParams = EmailVerificationParams.decode(p)
+                optionalParams.fold(BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.bad-continue-url.content"))){ params ⇒
+                  if (params.nino == nsiUserInfo.nino) {
+                    val updatedNsiUserInfo = nsiUserInfo copy (contactDetails = nsiUserInfo.contactDetails copy (email = params.email))
+                    Ok(views.html.register.confirm_details(updatedNsiUserInfo))
+                  } else {
+                    BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.bad-continue-url.content"))
+                  }
+                }
+              }
+            }
+          }
           }
         }
   }
