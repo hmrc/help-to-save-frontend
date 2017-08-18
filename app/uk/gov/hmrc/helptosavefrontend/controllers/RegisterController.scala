@@ -136,7 +136,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
       session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
           // user has gone through journey already this sessions and were found to be ineligible
-          SeeOther(routes.EligibilityCheckController.notEligible().url)
+          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
         )( userInfo ⇒
           // user has gone through journey already this sessions and were found to be eligible
           ifEligible(userInfo, session.confirmedEmail)

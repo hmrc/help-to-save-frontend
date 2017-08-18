@@ -61,7 +61,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
               // there is a session
               session.eligibilityCheckResult.fold(
                 // user is not eligible
-                SeeOther(routes.EligibilityCheckController.notEligible().url)
+                SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
               )(_ ⇒
                 // user is eligible
                 SeeOther(routes.EligibilityCheckController.getIsEligible().url)
@@ -74,7 +74,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
         )
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  val notEligible: Action[AnyContent] = authorisedForHtsWithInfo {
+  val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
@@ -97,7 +97,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
             SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
           } {
             _.eligibilityCheckResult.fold(
-              SeeOther(routes.EligibilityCheckController.notEligible().url)
+              SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
             )(_ ⇒
               Ok(views.html.register.you_are_eligible())
             )
@@ -158,7 +158,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
 
         case other ⇒
           auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(other.legibleString)))
-          SeeOther(routes.EligibilityCheckController.notEligible().url)
+          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
       },
       { case (eligibilityReason, nsiUserInfo) ⇒
         auditor.sendEvent(new EligibilityCheckEvent(appName, nino, None))
