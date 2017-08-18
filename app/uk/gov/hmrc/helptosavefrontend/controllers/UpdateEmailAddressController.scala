@@ -24,7 +24,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
-import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
+import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
 import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
@@ -63,15 +63,16 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
           formWithErrors => {
             Future.successful(BadRequest(views.html.register.update_email_address("errors", Some(formWithErrors))))
           },
-          details => {
-           emailVerificationConnector.verifyEmail(htsContext.nino.getOrElse(""), details.toString).map {
+          (details: UpdateEmail) => {
+            //Future.successful(Ok(views.html.register.check_your_email()))
+           emailVerificationConnector.verifyEmail(htsContext.nino.getOrElse(""), details.email).map {
              case Right(x) ⇒ Ok(views.html.register.check_your_email())
              case Left(AlreadyVerified()) ⇒ Ok(views.html.register.email_verify_error("hts.email-verification.email-verify-error.already-verified.content"))
              case Left(RequestNotValidError()) ⇒ BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.request-not-valid.content"))
              case Left(VerificationServiceUnavailable()) ⇒ BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.verification-service-unavailable.content"))
              case Left(BackendError(_)) ⇒ InternalServerError(views.html.register.email_verify_error("hts.email-verification.email-verify-error.backend-error.content"))
              }
-          }
+           }
         )
   }
 }

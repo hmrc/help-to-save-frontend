@@ -18,8 +18,10 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import java.time.Duration
+
 import play.api.Configuration
 import play.api.http.Status._
+import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
@@ -41,17 +43,16 @@ trait EmailVerificationConnector {
 @Singleton
 class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuration) extends EmailVerificationConnector with ServicesConfig with Logging {
 
-  val linkTTLMinutes = conf.underlying.getInt("services.email-verification.linkTTLMinutes")
+  val linkTTLMinutes = conf.underlying.getInt("microservice.services.email-verification.linkTTLMinutes")
   val emailVerifyBaseURL = baseUrl("email-verification")
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
   def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
 
   val continueURL = "email-verification.continue.baseUrl"
-  val templateId = "hts_email_verification"
+  val templateId = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
     val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueURL, Map())
-
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {
         case OK | CREATED =>
@@ -66,8 +67,8 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
         case SERVICE_UNAVAILABLE ⇒
           logger.warn("[EmailVerification] - Email Verification service not currently available")
           Left(VerificationServiceUnavailable())
-        case _ ⇒
-          logger.warn("[EmailVerification] - Unexpected status received from email verification")
+        case status ⇒
+          logger.warn(s"[EmailVerification] - Unexpected status $status received from email verification body = ${response.body}")
           Left(BackendError(s"Unexpected response from email verification service. Status = ${response.status}, body = ${response.body}"))
       }
     }
