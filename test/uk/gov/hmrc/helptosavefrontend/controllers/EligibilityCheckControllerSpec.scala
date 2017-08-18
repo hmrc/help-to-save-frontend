@@ -386,7 +386,7 @@ class EligibilityCheckControllerSpec
             test(inSequence{
               mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(None, enrolments))
               mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-              mockSessionCacheConnectorGet(Right(None))
+             mockSessionCacheConnectorGet(Right(None))
             })
           }
 

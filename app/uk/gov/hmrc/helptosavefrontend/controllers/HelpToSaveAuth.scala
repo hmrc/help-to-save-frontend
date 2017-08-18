@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import org.scalatest.exceptions.TestFailedException
 import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core._
@@ -94,9 +95,17 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
   def handleFailure(e: Throwable, redirectOnLoginURL: String): Result =
     e match {
-      case _: NoActiveSession ⇒ redirectToLogin(redirectOnLoginURL)
+      case _: NoActiveSession ⇒
+        redirectToLogin(redirectOnLoginURL)
+
       case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
         toPersonalIV(s"$identityCallbackUrl?continueURL=${encoded(redirectOnLoginURL)}", ConfidenceLevel.L200)
+
+      case e: TestFailedException ⇒
+        // don't catch exceptions thrown by unit tests - throw them
+        // (obviously we won't get unit test exceptions in production)
+        throw e
+
       case ex ⇒
         logger.error(s"could not authenticate user due to: $ex")
         InternalServerError("")
