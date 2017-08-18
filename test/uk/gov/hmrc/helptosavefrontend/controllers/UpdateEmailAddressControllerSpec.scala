@@ -44,7 +44,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
       def getResult(): Future[Result] = controller.getUpdateYourEmailAddress(FakeRequest())
 
-      commonEnrolmentAndSessionBehaviour(getResult)
+      behave like commonEnrolmentAndSessionBehaviour(getResult)
 
       "return the update your email page if the user is not already enrolled and the " +
         "session data indicates that they are eligible" in {
