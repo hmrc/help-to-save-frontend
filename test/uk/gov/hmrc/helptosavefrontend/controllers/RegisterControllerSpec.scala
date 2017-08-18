@@ -81,7 +81,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
 
       def doRequest(): Future[PlayResult] = controller.getConfirmDetailsPage(FakeRequest())
 
-      testCommonEnrolmentAndSessionBehaviour(doRequest)
+      behave like commonEnrolmentAndSessionBehaviour(doRequest)
 
       "show the users details if the user has not already enrolled and " +
         "the session data shows that they have been already found to be eligible" in {
@@ -108,7 +108,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
       def doRequest(email: String): Future[PlayResult] =
         controller.confirmEmail(email)(FakeRequest())
 
-      testCommonEnrolmentAndSessionBehaviour(() ⇒ doRequest(email))
+      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest(email))
 
       "write the email to keystore and the email store if the user has not already enrolled and " +
         "the session data shows that they have been already found to be eligible" in {
@@ -175,7 +175,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
       def doRequest(): Future[PlayResult] =
         controller.getCreateAccountHelpToSavePage()(FakeRequest())
 
-      testCommonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
       "redirect the user to the confirm details page if there is no email in the session data" in {
         inSequence {
@@ -208,7 +208,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
 
       def doCreateAccountRequest(): Future[PlayResult] = controller.createAccountHelpToSave(FakeRequest())
 
-      testCommonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
+      behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 
       "retrieve the user info from session cache and post it with the confirmed email using " +
         "the help to save service" in {
