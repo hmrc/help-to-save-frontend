@@ -19,7 +19,20 @@ package src.test.scala.hts.pages
 import org.openqa.selenium.{By, WebDriver}
 import src.test.scala.hts.utils.Configuration
 
-object AuthorityWizardPage {
+object AuthorityWizardPage extends WebPage {
+
+  def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String): Unit = {
+    goToPage()
+    fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
+  }
+
+  private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String): Unit = {
+    setRedirect(redirectUrl)
+    setConfidenceLevel(confidence)
+    setCredentialStrength(credentialStrength)
+    setNino(nino)
+    submit()
+  }
 
   def goToPage()(implicit driver: WebDriver): Unit =
     driver.navigate().to(Configuration.authHost + "/auth-login-stub/gg-sign-in")

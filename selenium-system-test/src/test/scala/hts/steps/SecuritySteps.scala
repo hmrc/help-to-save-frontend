@@ -47,21 +47,12 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Given("""^a user has logged in$""") { () =>
-    AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setCredentialStrength("strong")
-    AuthorityWizardPage.setNino(generateEligibleNINO)
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/check-eligibility")
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
   }
 
   When("""^they have logged in and passed IV$"""){ () =>
-    AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/access-account")
-    AuthorityWizardPage.setCredentialStrength("strong")
-    AuthorityWizardPage.setConfidenceLevel(200)
-    AuthorityWizardPage.setNino(generateEligibleNINO)
-    AuthorityWizardPage.submit()
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
   }
-
 
   When("""^they try to view the user details page$""") { () =>
     ConfirmDetailsPage.goToPage()
@@ -76,12 +67,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Given("""^a user has logged in and passed IV$""") { () =>
-    AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/check-eligibility")
-    AuthorityWizardPage.setCredentialStrength("strong")
-    AuthorityWizardPage.setConfidenceLevel(200)
-    AuthorityWizardPage.setNino(generateEligibleNINO)
-    AuthorityWizardPage.submit()
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
   }
 
   Then("""^the GG sign in page is visible$"""){ () =>

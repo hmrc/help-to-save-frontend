@@ -7,6 +7,7 @@ import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.time.{Millis, Seconds, Span}
 import src.test.scala.hts.steps.Steps
+import src.test.scala.hts.utils.NINOGenerator
 
 
 trait WebPage extends org.scalatest.selenium.Page
@@ -15,7 +16,8 @@ trait WebPage extends org.scalatest.selenium.Page
   with Eventually
   with PatienceConfiguration
   with Assertions
-  with Steps {
+  with Steps
+  with NINOGenerator {
 
   override val url = ""
 
