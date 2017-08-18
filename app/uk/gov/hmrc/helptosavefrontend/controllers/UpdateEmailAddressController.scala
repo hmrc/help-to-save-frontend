@@ -20,16 +20,15 @@ import javax.inject.Singleton
 
 import com.google.inject.Inject
 import play.api.Application
-import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
-import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
-import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.helptosavefrontend.util.toFuture
-import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
+import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
+import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
+import uk.gov.hmrc.helptosavefrontend.util.toFuture
+import uk.gov.hmrc.helptosavefrontend.views
 
 import scala.concurrent.Future
 
@@ -68,10 +67,10 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
           details => {
            emailVerificationConnector.verifyEmail(htsContext.nino.getOrElse(""), details.toString).map {
                 case Right(x) ⇒ Ok(views.html.register.check_your_email())
-                //case Left(RequestNotValidError(nino)) ⇒ Ok(views.html.register.email_verify_error())
-               // case Left(AlreadyVerified(nino, newEmail)) ⇒ Ok(views.html.register.email_verify_error())
-                //case Left(VerificationServiceUnavailable()) ⇒ Ok(views.html.register.email_verify_error())
-               // case Left(BackendError("")) ⇒ Ok(views.html.register.email_verify_error())
+                case Left(AlreadyVerified(_, _)) ⇒ Ok(views.html.register.email_verify_error("hts.email-verification.email-verify-error.already-verified.content"))
+                case Left(RequestNotValidError(_)) ⇒ BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.request-not-valid.content"))
+                case Left(VerificationServiceUnavailable()) ⇒ BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.verification-service-unavailable.content"))
+                case Left(BackendError(_)) ⇒ InternalServerError(views.html.register.email_verify_error("hts.email-verification.email-verify-error.backend-error.content"))
              }
           }
         )

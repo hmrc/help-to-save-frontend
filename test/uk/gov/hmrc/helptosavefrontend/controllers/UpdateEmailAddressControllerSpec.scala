@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import play.api.Configuration
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
@@ -24,10 +23,11 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
-import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, EmailVerificationConnectorImpl}
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, validNSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
+import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, VerifyEmailError, validNSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -45,19 +45,14 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
   val mockHttp = mock[WSHttp]
 
-//  lazy val emailVerificationConnector = {
-//    val config = Configuration("services.email-verification.linkTTLMinutes" → " 120")
-//    new EmailVerificationConnectorImpl(mockHttp, config)
-//  }
-
   lazy val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockEnrolmentService, frontendAuthConnector, mockEmailVerificationConnector
   )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]){
     override val authConnector = mockAuthConnector
   }
 
-  def mockEmailVerificationConn = {
+  def mockEmailVerificationConn(result: Either[VerifyEmailError, Unit]) = {
     (mockEmailVerificationConnector.verifyEmail(_: String, _:String)(_: HeaderCarrier)).expects(*,*,*)
-      .returning(Future.successful(Right()))
+      .returning(Future.successful(result))
   }
 
   "The UpdateEmailAddressController" when {
@@ -75,7 +70,6 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
-
         val result = getResult()
         status(result) shouldBe Status.OK
         contentAsString(result) should include(messages("hts.email-verification.title"))
@@ -89,26 +83,73 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
           mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
-
         val result = getResult()
         status(result) shouldBe Status.OK
         contentAsString(result) should include("not eligible")
       }
-
     }
 
   }
 
   "onSubmit" should {
-    "given a valid email address return the check your email page with a status of Ok" in {
+    "return the check your email page with a status of Ok, given a valid email address " in {
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEmailVerificationConn
+        mockEmailVerificationConn(Right(()))
       }
       val result = controller.onSubmit()(fakePostRequest)
       status(result) shouldBe Status.OK
-      contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title"))
+      contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title")) shouldBe true
+    }
+
+    "return an AlreadyVerified status and redirect the user to the email-verify-error page," +
+      " given an email address of an already verified user " in {
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
+      inSequence {
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEmailVerificationConn(Left(AlreadyVerified(nino, "email@gmail.com")))
+      }
+      val result = controller.onSubmit()(fakePostRequest)
+      status(result) shouldBe Status.OK
+      contentAsString(result).contains(messagesApi("hts.email-verification.email-verify-error.title")) shouldBe true
+      contentAsString(result).contains(messagesApi("hts.email-verification.email-verify-error.already-verified.content")) shouldBe true
+    }
+
+    "return an Bad request error and redirect the user to the email_verify_error page" in {
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
+      inSequence {
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEmailVerificationConn(Left(RequestNotValidError(nino)))
+      }
+      val result = controller.onSubmit()(fakePostRequest)
+      status(result) shouldBe Status.BAD_REQUEST
+      contentAsString(result).contains(messagesApi("hts.email-verification.email-verify-error.title")) shouldBe true
+      contentAsString(result).contains(messagesApi("hts.email-verification.email-verify-error.request-not-valid.content")) shouldBe true
+    }
+
+    "return a Bad request status and redirect the user to the email_verify_error page" in {
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
+      inSequence {
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEmailVerificationConn(Left(VerificationServiceUnavailable()))
+      }
+      val result = controller.onSubmit()(fakePostRequest)
+      status(result) shouldBe Status.BAD_REQUEST
+      contentAsString(result).contains(messagesApi("hts.email-verification.email-verify-error.title")) shouldBe true
+      contentAsString(result).contains(messagesApi("hts.email-verification.email-verify-error.verification-service-unavailable.content")) shouldBe true
+    }
+
+    "return an Internal server error status and redirect the user to the email_verify_error page" in {
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
+      inSequence {
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEmailVerificationConn(Left(BackendError("There has been an error in the backend")))
+      }
+      val result = controller.onSubmit()(fakePostRequest)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      contentAsString(result).contains(messagesApi("hts.email-verification.email-verify-error.title")) shouldBe true
+      contentAsString(result).contains(messagesApi("hts.email-verification.email-verify-error.backend-error.content")) shouldBe true
     }
   }
 
