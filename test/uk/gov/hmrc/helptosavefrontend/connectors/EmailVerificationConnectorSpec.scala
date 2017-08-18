@@ -62,12 +62,12 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
     "return 400 when given bad json" in {
       mockPost(Status.BAD_REQUEST, None)
-      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError(nino))
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError())
     }
 
     "return 409 when the email has already been verified" in {
       mockPost(Status.CONFLICT, None)
-      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified(nino, email))
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified())
     }
 
     "return a verification service unavailable error when the email verification service is down" in {

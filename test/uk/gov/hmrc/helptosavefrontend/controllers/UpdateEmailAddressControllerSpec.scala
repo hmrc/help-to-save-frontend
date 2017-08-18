@@ -101,6 +101,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       val result = controller.onSubmit()(fakePostRequest)
       status(result) shouldBe Status.OK
       contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title")) shouldBe true
+      contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content")) shouldBe true
     }
 
     "return an AlreadyVerified status and redirect the user to the email-verify-error page," +
@@ -108,7 +109,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEmailVerificationConn(Left(AlreadyVerified(nino, "email@gmail.com")))
+        mockEmailVerificationConn(Left(AlreadyVerified()))
       }
       val result = controller.onSubmit()(fakePostRequest)
       status(result) shouldBe Status.OK
@@ -120,7 +121,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEmailVerificationConn(Left(RequestNotValidError(nino)))
+        mockEmailVerificationConn(Left(RequestNotValidError()))
       }
       val result = controller.onSubmit()(fakePostRequest)
       status(result) shouldBe Status.BAD_REQUEST
