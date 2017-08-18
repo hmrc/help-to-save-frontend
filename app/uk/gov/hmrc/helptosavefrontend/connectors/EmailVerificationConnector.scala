@@ -60,6 +60,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
           Right(())
         case BAD_REQUEST ⇒
           logger.warn("[EmailVerification] - Bad Request from email verification service")
+          //need to log nino and email for all error cases
           Left(RequestNotValidError())
         case CONFLICT ⇒
           logger.info(s"[EmailVerification] - Email: $newEmail already verified")
