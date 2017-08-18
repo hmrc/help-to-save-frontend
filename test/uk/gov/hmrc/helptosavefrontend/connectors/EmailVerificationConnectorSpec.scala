@@ -115,4 +115,10 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       connector.isVerifiedURL(email) shouldBe s"http://localhost:9891/email-verification/verified-email-addresses/$email"
     }
   }
+
+  "continueURL" should {
+    "return the correct url" in {
+      connector.continueURL shouldBe "http://localhost:7000/register/check-and-confirm-your-details"
+    }
+  }
 }

@@ -48,7 +48,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
   def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
 
-  val continueURL = "email-verification.continue.baseUrl"
+  val continueURL = conf.underlying.getString("microservice.services.help-to-save-frontend.url")
   val templateId = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
