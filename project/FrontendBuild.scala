@@ -8,8 +8,6 @@ object FrontendBuild extends Build with MicroService {
 
   override lazy val appDependencies: Seq[ModuleID] = compile ++ test()
 
-  val scalatest = "org.scalatest" %% "scalatest" % "3.0.1"
-
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "frontend-bootstrap" % "7.22.0",
@@ -25,13 +23,12 @@ object FrontendBuild extends Build with MicroService {
     "uk.gov.hmrc" %% "domain" % "4.1.0",
     "com.github.kxbmap" %% "configs" % "0.4.4",
     "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9",
-    "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
-    scalatest
+    "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0"
   )
 
   def test(scope: String = "test") = Seq(
     "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
-    scalatest % scope,
+    "org.scalatest" %% "scalatest" % "3.0.1" % scope,
     "org.pegdown" % "pegdown" % "1.6.0" % scope,
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,

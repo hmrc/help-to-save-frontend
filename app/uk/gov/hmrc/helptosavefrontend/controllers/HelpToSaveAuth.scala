@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import org.scalatest.exceptions.TestFailedException
 import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core._
@@ -58,7 +57,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
             action(request)(HtsContext(nino, userDetailsUri, isAuthorised = true))
 
         }.recover {
-        case e ⇒ handleFailure(e, redirectOnLoginURL)
+        handleFailure(redirectOnLoginURL)
       }
     }
 
@@ -67,7 +66,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
       authorised(AuthProvider) {
         action(request)(HtsContext(isAuthorised = true))
       }.recover {
-        case e ⇒ handleFailure(e, redirectOnLoginURL)
+        handleFailure(redirectOnLoginURL)
       }
     }
   }
@@ -77,7 +76,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
       authorised(AuthWithConfidence) {
         action(request)(HtsContext(isAuthorised = true))
       }.recover {
-        case e ⇒ handleFailure(e, redirectOnLoginURL)
+        handleFailure(redirectOnLoginURL)
       }
     }
   }
@@ -93,23 +92,17 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
     }
   }
 
-  def handleFailure(e: Throwable, redirectOnLoginURL: String): Result =
-    e match {
-      case _: NoActiveSession ⇒
-        redirectToLogin(redirectOnLoginURL)
+  def handleFailure(redirectOnLoginURL: String): PartialFunction[Throwable,Result] = {
+    case _: NoActiveSession ⇒
+      redirectToLogin(redirectOnLoginURL)
 
-      case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
-        toPersonalIV(s"$identityCallbackUrl?continueURL=${encoded(redirectOnLoginURL)}", ConfidenceLevel.L200)
+    case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
+      toPersonalIV(s"$identityCallbackUrl?continueURL=${encoded(redirectOnLoginURL)}", ConfidenceLevel.L200)
 
-      case e: TestFailedException ⇒
-        // don't catch exceptions thrown by unit tests - throw them
-        // (obviously we won't get unit test exceptions in production)
-        throw e
-
-      case ex ⇒
-        logger.error(s"could not authenticate user due to: $ex")
-        InternalServerError("")
-    }
+    case ex: AuthorisationException ⇒
+      logger.error(s"could not authenticate user due to: $ex")
+      InternalServerError("")
+  }
 
   def redirectToLogin(redirectOnLoginURL: String) = Redirect(ggLoginUrl, Map(
     "continue" -> Seq(redirectOnLoginURL),
