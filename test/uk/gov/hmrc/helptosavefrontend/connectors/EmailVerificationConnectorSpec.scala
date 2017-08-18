@@ -36,7 +36,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
   val mockHttp = mock[WSHttp]
 
   lazy val connector = {
-    val config = Configuration("services.email-verification.linkTTLMinutes" → " 120")
+    val config = Configuration("microservice.services.email-verification.linkTTLMinutes" → " 120")
     new EmailVerificationConnectorImpl(mockHttp, config)
   }
 
