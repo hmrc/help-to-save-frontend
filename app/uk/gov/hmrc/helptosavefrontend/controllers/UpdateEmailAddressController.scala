@@ -50,7 +50,6 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
             _.eligibilityCheckResult.fold(
               Ok(views.html.core.not_eligible())
             )( userInfo ⇒ {
-
               Ok(views.html.register.update_email_address(userInfo.contactDetails.email, Some(UpdateEmailForm.verifyEmailForm)))
             })
           }
@@ -66,11 +65,11 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
           },
           details => {
            emailVerificationConnector.verifyEmail(htsContext.nino.getOrElse(""), details.toString).map {
-                case Right(x) ⇒ Ok(views.html.register.check_your_email())
-                case Left(AlreadyVerified()) ⇒ Ok(views.html.register.email_verify_error("hts.email-verification.email-verify-error.already-verified.content"))
-                case Left(RequestNotValidError()) ⇒ BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.request-not-valid.content"))
-                case Left(VerificationServiceUnavailable()) ⇒ BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.verification-service-unavailable.content"))
-                case Left(BackendError(_)) ⇒ InternalServerError(views.html.register.email_verify_error("hts.email-verification.email-verify-error.backend-error.content"))
+             case Right(x) ⇒ Ok(views.html.register.check_your_email())
+             case Left(AlreadyVerified()) ⇒ Ok(views.html.register.email_verify_error("hts.email-verification.email-verify-error.already-verified.content"))
+             case Left(RequestNotValidError()) ⇒ BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.request-not-valid.content"))
+             case Left(VerificationServiceUnavailable()) ⇒ BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.verification-service-unavailable.content"))
+             case Left(BackendError(_)) ⇒ InternalServerError(views.html.register.email_verify_error("hts.email-verification.email-verify-error.backend-error.content"))
              }
           }
         )
