@@ -121,14 +121,14 @@ class EligibilityCheckControllerSpec
 
         val result = getIsEligible()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.notEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
       }
 
     }
 
     "displaying the you are not eligible page" must {
 
-      def getIsNotEligible(): Future[PlayResult] = controller.notEligible(FakeRequest())
+      def getIsNotEligible(): Future[PlayResult] = controller.getIsNotEligible(FakeRequest())
 
       testCommonEnrolmentAndSessionBehaviour(getIsNotEligible)
 
@@ -224,7 +224,7 @@ class EligibilityCheckControllerSpec
 
           val result = doCheckEligibilityRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.notEligible().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
         }
 
 
@@ -283,7 +283,7 @@ class EligibilityCheckControllerSpec
           val result = doCheckEligibilityRequest()
 
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.notEligible().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
         }
 
         "immediately redirect to the you are eligible page if they have session data " +
@@ -358,7 +358,7 @@ class EligibilityCheckControllerSpec
               val result = doCheckEligibilityRequest()
               status(result) shouldBe Status.SEE_OTHER
 
-              redirectLocation(result) shouldBe Some("/help-to-save/register/not-eligible")
+              redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
             }
           }
         }
