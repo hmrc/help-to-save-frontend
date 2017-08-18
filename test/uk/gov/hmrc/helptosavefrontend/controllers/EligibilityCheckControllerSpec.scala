@@ -97,7 +97,7 @@ class EligibilityCheckControllerSpec
 
       def getIsEligible(): Future[PlayResult] = controller.getIsEligible(FakeRequest())
 
-      testCommonEnrolmentAndSessionBehaviour(getIsEligible)
+      behave like commonEnrolmentAndSessionBehaviour(getIsEligible)
 
       "show the you are eligible page if session data indicates that they are eligible" in {
         inSequence{
@@ -130,7 +130,7 @@ class EligibilityCheckControllerSpec
 
       def getIsNotEligible(): Future[PlayResult] = controller.getIsNotEligible(FakeRequest())
 
-      testCommonEnrolmentAndSessionBehaviour(getIsNotEligible)
+      behave like commonEnrolmentAndSessionBehaviour(getIsNotEligible)
 
       "show the you are not eligible page if session data indicates that they are not eligible" in {
         inSequence{
@@ -167,7 +167,9 @@ class EligibilityCheckControllerSpec
 
       "checking if the user is already enrolled or if they've already done the eligibility " +
         "check this session" must {
-        testCommonEnrolmentAndSessionBehaviour(doCheckEligibilityRequest, testRedirectOnNoSession = false)
+
+        behave like commonEnrolmentAndSessionBehaviour(doCheckEligibilityRequest, testRedirectOnNoSession = false, testEnrolmentCheckError = false)
+
       }
 
       "an error occurs while trying to see if the user is already enrolled" must {
@@ -240,32 +242,6 @@ class EligibilityCheckControllerSpec
 
             val result = doCheckEligibilityRequest()
             status(result) shouldBe INTERNAL_SERVER_ERROR
-          }
-
-          "the eligibility check indicates they do not already have an account" in {
-            def test(eligibilityCheckResult: EligibilityCheckResult): Unit = {
-              inSequence{
-                mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-                mockEnrolmentCheck(nino)(Left("Oh no!"))
-                mockEligibilityResult(nino)(Right(eligibilityCheckResult))
-              }
-
-              val result = doCheckEligibilityRequest()
-              status(result) shouldBe INTERNAL_SERVER_ERROR
-            }
-
-            implicit val eligibilityReasonArb   = Arbitrary(eligibilityReasonGen)
-            implicit val ineligibilityReasonArb = Arbitrary(ineligibilityReasonGen)
-
-            forAll{ eligibilityReason: EligibilityReason ⇒
-              test(EligibilityCheckResult(Right(eligibilityReason)))
-            }
-
-            forAll{ ineligibilityReason: IneligibilityReason ⇒
-              whenever(ineligibilityReason != AccountAlreadyOpened){
-                test(EligibilityCheckResult(Left(ineligibilityReason)))
-              }
-            }
           }
         }
       }
@@ -403,62 +379,52 @@ class EligibilityCheckControllerSpec
           }
 
           "the nino is not available" in {
-            test(
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(Some(userDetailsURI), Enrolments(Set())))
-            )
+            test(mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(Some(userDetailsURI), Enrolments(Set()))))
           }
 
           "the user details URI is not available" in {
-            test(
-              inSequence{
-                mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(None, enrolments))
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-              }
-            )
+            test(inSequence{
+              mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(None, enrolments))
+              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+              mockSessionCacheConnectorGet(Right(None))
+            })
           }
 
           "there is an error getting the user's session data" in {
-            test(
-              inSequence {
-                mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-                mockSessionCacheConnectorGet(Left(""))
-              }
-            )
+            test(inSequence {
+              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+              mockSessionCacheConnectorGet(Left(""))
+            })
           }
 
           "the eligibility check call returns with an error" in {
             forAll{ checkError: String ⇒
-              test(
-                inSequence {
-                  mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-                  mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-                  mockSessionCacheConnectorGet(Right(None))
-                  mockEligibilityResult(nino)(Left(checkError))
-                }
-              )
+              test(inSequence {
+                mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+                mockSessionCacheConnectorGet(Right(None))
+                mockEligibilityResult(nino)(Left(checkError))
+              })
             }
           }
 
           "the user information retrieval returns with an error" in {
             val eligibilityReason = randomEligibilityReason()
 
-            test(
-              inSequence {
-                mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-                mockSessionCacheConnectorGet(Right(None))
-                mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
-                mockGetUserInformation(nino, userDetailsURI)(Left(UserInformationRetrievalError.BackendError("", nino)))
-              }
-            )
+            test(inSequence {
+              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+              mockSessionCacheConnectorGet(Right(None))
+              mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
+              mockGetUserInformation(nino, userDetailsURI)(Left(UserInformationRetrievalError.BackendError("", nino)))
+            })
           }
 
 
 
           "if the JSON schema validation is unsuccessful" in {
             val eligibilityReason = randomEligibilityReason()
-
 
             test(inSequence {
               mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
@@ -467,8 +433,7 @@ class EligibilityCheckControllerSpec
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
               mockJsonSchemaValidation(validNSIUserInfo)(Left("uh oh"))
-            }
-            )
+            })
           }
 
           "there is an error writing to the session cache" in {
@@ -482,8 +447,7 @@ class EligibilityCheckControllerSpec
               mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
               mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Left("Bang"))
-            }
-            )
+            })
           }
         }
       }

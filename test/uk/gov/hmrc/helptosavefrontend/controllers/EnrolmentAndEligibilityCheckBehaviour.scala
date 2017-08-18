@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.Helpers._
@@ -76,8 +77,9 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
       .expects(predicate, HtsAuth.UserDetailsUrlWithAllEnrolments, *)
       .returning(Future.successful(result))
 
-  def testCommonEnrolmentAndSessionBehaviour(getResult: () ⇒ Future[Result],  // scalastyle:ignore method.length
-                                             testRedirectOnNoSession: Boolean = true): Unit = {
+  def commonEnrolmentAndSessionBehaviour(getResult: () ⇒ Future[Result], // scalastyle:ignore method.length
+                                         testRedirectOnNoSession: Boolean = true,
+                                         testEnrolmentCheckError: Boolean = true): Unit = {
 
     "redirect to NS&I if the user is already enrolled" in {
       inSequence{
@@ -128,13 +130,15 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
 
     "return an error" when {
 
-      "there is an error getting the enrolment status" in {
-        inSequence{
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Left(""))
-        }
+      if(testEnrolmentCheckError) {
+        "there is an error getting the enrolment status" in {
+          inSequence {
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Left(""))
+          }
 
-        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+          status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+        }
       }
 
       "there is an error getting the session data" in {
