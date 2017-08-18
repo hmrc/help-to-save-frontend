@@ -51,7 +51,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   When("""^they have logged in and passed IV$"""){ () =>
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/access-account", 200, "Strong", generateEligibleNINO)
   }
 
   When("""^they try to view the user details page$""") { () =>
