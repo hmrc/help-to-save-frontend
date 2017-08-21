@@ -64,7 +64,6 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
             Future.successful(BadRequest(views.html.register.update_email_address("errors", Some(formWithErrors))))
           },
           (details: UpdateEmail) => {
-            //Future.successful(Ok(views.html.register.check_your_email()))
            emailVerificationConnector.verifyEmail(htsContext.nino.getOrElse(""), details.email).map {
              case Right(x) ⇒ Ok(views.html.register.check_your_email())
              case Left(AlreadyVerified()) ⇒ Ok(views.html.register.email_verify_error("hts.email-verification.email-verify-error.already-verified.content"))

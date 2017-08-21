@@ -48,7 +48,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
   def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
 
-  val continueURL = baseUrl("help-to-save-email-verification") + "/register/check-and-confirm-your-details"
+  val continueURL = baseUrl("help-to-save-email-verification") + "/help-to-save/register/check-and-confirm-your-details"
   val templateId = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
@@ -62,7 +62,6 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
           Right(())
         case BAD_REQUEST ⇒
           logger.warn("[EmailVerification] - Bad Request from email verification service")
-          //need to log nino and email for all error cases
           Left(RequestNotValidError())
         case CONFLICT ⇒
           logger.info(s"[EmailVerification] - Email: $newEmail already verified")

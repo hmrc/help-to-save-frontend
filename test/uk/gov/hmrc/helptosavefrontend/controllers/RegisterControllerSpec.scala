@@ -81,11 +81,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
 
       def doRequest(): Future[PlayResult] = controller.getConfirmDetailsPage(None)(FakeRequest())
 
-      def doRequestWithQueryParam(p: String): Future[PlayResult] = {
-        route(FakeRequest("GET", s"${uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.getConfirmDetailsPage(Some(p)).url}")).get
-      }
-
-      //def doRequestWithQueryParam(p: String) = controller.getConfirmDetailsPage(Some(p))(FakeRequest("GET", uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.getConfirmDetailsPage(Some(p)).url))
+      def doRequestWithQueryParam(p: String): Future[PlayResult] = controller.getConfirmDetailsPage(Some(p))(FakeRequest())
 
       testCommonEnrolmentAndSessionBehaviour(doRequest)
 
@@ -105,19 +101,22 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
         contentAsString(result) should include(validNSIUserInfo.surname)
       }
 
-//      "show the users details with the verified user email address" +
-//        "if the user has not already enrolled and " +
-//        "the session data shows that they have been already found to be eligible" +
-//        "and the user has clicked on the verify email link sent to them by the email verification service" in {
-//        inSequence{
-//          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-//          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-//          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-//        }
-//        val params = EmailVerificationParams("AE1234XXX", "email@gmail.com")
-//        val result = doRequestWithQueryParam(params.encode())
-//        status(result) shouldBe Status.OK
-//      }
+      "show the users details with the verified user email address " +
+        "if the user has not already enrolled and " +
+        "the session data shows that they have been already found to be eligible " +
+        "and the user has clicked on the verify email link sent to them by the email verification service " in {
+        val testEmail = "email@gmail.com"
+        val theNino = "AE1234XXX"
+        inSequence{
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo.copy (nino = theNino)), None))))
+        }
+        val params = EmailVerificationParams(theNino, testEmail)
+        val result = doRequestWithQueryParam(params.encode())
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include(testEmail)
+      }
     }
 
 

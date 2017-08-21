@@ -118,7 +118,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   "continueURL" should {
     "return the correct url" in {
-      connector.continueURL shouldBe "http://localhost:7000/register/check-and-confirm-your-details"
+      connector.continueURL shouldBe "http://localhost:7000/help-to-save/register/check-and-confirm-your-details"
     }
   }
 }

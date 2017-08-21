@@ -28,14 +28,6 @@ class EmailVerificationParamsSpec extends TestSupport {
   val params = EmailVerificationParams(nino, email)
 
   "EmailVerificationParams" must {
-//    "have an encode method that produces a base64 string" in {
-//      val result = params.encode
-//      result.length > 1 shouldBe true
-//      result.endsWith("==") shouldBe true
-//      result shouldNot include (nino)
-//      result shouldNot include (email)
-//    }
-
     "have a decode method that is the inverse of the encode method" in {
       val result = EmailVerificationParams.decode(params.encode)
       result.get.email shouldBe email
