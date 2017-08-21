@@ -35,8 +35,8 @@ object EnrolmentStatus {
     case class EnrolledJSON (enrolled: Boolean = true, itmpHtSFlag: Boolean)
     case class NotEnrolledJSON (enrolled: Boolean = false)
 
-    implicit val enrolledFormat: Reads[EnrolledJSON] = Json.reads[EnrolledJSON]
-    implicit val notEnrolledFormat: Reads[NotEnrolledJSON] = Json.reads[NotEnrolledJSON]
+    implicit val enrolledReads: Reads[EnrolledJSON] = Json.reads[EnrolledJSON]
+    implicit val ReadsFormat: Reads[NotEnrolledJSON] = Json.reads[NotEnrolledJSON]
 
     override def reads(json: JsValue): JsResult[EnrolmentStatus] =
     // take advantage of the fact that EnrolledJSON has a non-optional field
