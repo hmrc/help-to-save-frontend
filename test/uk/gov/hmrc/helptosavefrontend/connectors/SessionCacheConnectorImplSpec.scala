@@ -18,9 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http._
 

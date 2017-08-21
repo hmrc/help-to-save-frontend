@@ -46,11 +46,12 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       .returning(result.fold(
         Future.failed[HttpResponse](new Exception("")))(Future.successful))
 
-  implicit val unitFormat: Format[Unit] = new Format[Unit]{
+  implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
+
     override def reads(json: JsValue) = json match {
       case JsNull ⇒ JsSuccess(())
-      case _      ⇒ JsError("JSON was not null")
+      case _ ⇒ JsError("JSON was not null")
     }
   }
 
@@ -147,7 +148,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       )
 
       "return the user info if the call comes back with a 200 " +
-        "and the body contains user info" in{
+        "and the body contains user info" in {
         val userInfo: UserInfo = randomUserInfo()
 
         mockHttpGet(userInformationURL(nino, userDetailsURI))(
@@ -158,7 +159,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       }
 
       "return missing user info if the call comes back with a 200 " +
-        "and the body contains missing user info" in{
+        "and the body contains missing user info" in {
         val missingInfo: Set[MissingUserInfo] = Set(Surname, GivenName, Email, DateOfBirth, Contact)
         val eligibilityResponse = MissingUserInfoSet(missingInfo)
 
@@ -174,17 +175,19 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
     "getting enrolment status" must {
 
-      implicit val enrolmentStatusWrites: Writes[EnrolmentStatus] = new Writes[EnrolmentStatus]{
-        case class EnrolledJSON (enrolled
-                                 : Boolean = true, itmpHtSFlag: Boolean)
-        case class NotEnrolledJSON (enrolled: Boolean = false)
+      implicit val enrolmentStatusWrites: Writes[EnrolmentStatus] = new Writes[EnrolmentStatus] {
+
+        case class EnrolledJSON(enrolled
+                                : Boolean = true, itmpHtSFlag: Boolean)
+
+        case class NotEnrolledJSON(enrolled: Boolean = false)
 
         implicit val enrolledWrites: Writes[EnrolledJSON] = Json.writes[EnrolledJSON]
         implicit val notEnrolledFormat: Writes[NotEnrolledJSON] = Json.writes[NotEnrolledJSON]
 
         override def writes(o: EnrolmentStatus) = o match {
           case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒ Json.toJson(EnrolledJSON(itmpHtSFlag = itmpHtSFlag))
-          case EnrolmentStatus.NotEnrolled           ⇒ Json.toJson(NotEnrolledJSON())
+          case EnrolmentStatus.NotEnrolled ⇒ Json.toJson(NotEnrolledJSON())
         }
 
       }
@@ -299,10 +302,10 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     }
   }
 
-  def testCommon[E,A,B](mockGet: Option[HttpResponse] ⇒ Unit,
-                        getResult: () ⇒ EitherT[Future,E,A],
-                        validBody: B,
-                        testInvalidJSON: Boolean = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
+  def testCommon[E, A, B](mockGet: Option[HttpResponse] ⇒ Unit,
+                          getResult: () ⇒ EitherT[Future, E, A],
+                          validBody: B,
+                          testInvalidJSON: Boolean = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
     "perform a GET request to the help-to-save-service" in {
       mockGet(Some(HttpResponse(200)))
       await(getResult())
@@ -310,7 +313,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
     "return an error" when {
 
-      if(testInvalidJSON) {
+      if (testInvalidJSON) {
         "the call comes back with a 200 and an unknown JSON format" in {
           mockGet(
             Some(HttpResponse(200, responseJson = Some(Json.parse(
@@ -328,7 +331,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       }
 
       "the call comes back with any other status other than 200" in {
-        forAll{ status: Int ⇒
+        forAll { status: Int ⇒
           whenever(status != 200) {
             // check we get an error even though there was valid JSON in the response
             mockGet(Some(HttpResponse(status, Some(Json.toJson(validBody)))))

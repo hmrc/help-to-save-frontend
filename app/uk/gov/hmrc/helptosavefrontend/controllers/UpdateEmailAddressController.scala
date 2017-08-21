@@ -25,8 +25,8 @@ import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
+import uk.gov.hmrc.helptosavefrontend.views
 
 @Singleton
 class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionCacheConnector,
@@ -39,9 +39,9 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
-          checkSession{
+          checkSession {
             SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-          }{
+          } {
             _.eligibilityCheckResult.fold(
               Ok(views.html.core.not_eligible())
             )(_ ⇒ Ok(views.html.register.update_email_address()))

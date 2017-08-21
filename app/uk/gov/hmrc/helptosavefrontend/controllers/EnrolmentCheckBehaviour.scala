@@ -27,7 +27,8 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-trait EnrolmentCheckBehaviour { this: FrontendController with Logging ⇒
+trait EnrolmentCheckBehaviour {
+  this: FrontendController with Logging ⇒
 
   import EnrolmentCheckBehaviour._
 
@@ -41,23 +42,22 @@ trait EnrolmentCheckBehaviour { this: FrontendController with Logging ⇒
       enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus(nino).leftMap[EnrolmentCheckError](e ⇒ EnrolmentServiceError(nino, e))
     } yield (nino, enrolmentStatus)
 
-    enrolled.fold[Future[Result]]( initialError ⇒
-      handleError(initialError, handleEnrolmentServiceError),
-      {
-        case (nino, EnrolmentStatus.Enrolled(itmpHtSFlag)) ⇒
-          // if the user is enrolled but the itmp flag is not set then just
-          // start the process to set the itmp flag here without worrying about the result
-          if (!itmpHtSFlag) {
-            helpToSaveService.setITMPFlag(nino).fold(
-              e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
-              _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
-            )
-          }
-          Ok("You've already got an account - yay!")
+    enrolled.fold[Future[Result]](initialError ⇒
+      handleError(initialError, handleEnrolmentServiceError), {
+      case (nino, EnrolmentStatus.Enrolled(itmpHtSFlag)) ⇒
+        // if the user is enrolled but the itmp flag is not set then just
+        // start the process to set the itmp flag here without worrying about the result
+        if (!itmpHtSFlag) {
+          helpToSaveService.setITMPFlag(nino).fold(
+            e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
+            _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
+          )
+        }
+        Ok("You've already got an account - yay!")
 
-        case (nino, EnrolmentStatus.NotEnrolled) ⇒
-          ifNotEnrolled(nino)
-      }
+      case (nino, EnrolmentStatus.NotEnrolled) ⇒
+        ifNotEnrolled(nino)
+    }
     ).flatMap(identity)
   }
 
@@ -68,7 +68,7 @@ trait EnrolmentCheckBehaviour { this: FrontendController with Logging ⇒
       logger.warn("Could not get NINO")
       InternalServerError
 
-    case e @ EnrolmentServiceError(nino, message) ⇒
+    case e@EnrolmentServiceError(nino, message) ⇒
       logger.warn(s"Error while trying to check if user $nino was already enrolled to HtS: $message")
       handleEnrolmentServiceError(e)
 

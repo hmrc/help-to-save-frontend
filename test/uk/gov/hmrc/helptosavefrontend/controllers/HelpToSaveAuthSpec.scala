@@ -55,13 +55,13 @@ class HelpToSaveAuthSpec extends TestSupport {
   private def actionWithNoEnrols = htsAuth.authorisedForHts {
     implicit request ⇒
       implicit htsContext ⇒
-      Future.successful(Ok(""))
+        Future.successful(Ok(""))
   }(FrontendAppConfig.checkEligibilityUrl)
 
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-          Future.successful(Ok(""))
+        Future.successful(Ok(""))
   }(FrontendAppConfig.checkEligibilityUrl)
 
   private def mockAuthWith(error: String) =

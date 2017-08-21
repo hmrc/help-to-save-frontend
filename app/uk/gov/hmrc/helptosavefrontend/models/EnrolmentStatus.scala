@@ -21,24 +21,26 @@ import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrol
 
 sealed trait EnrolmentStatus {
   def fold[T](ifNotEnrolled: ⇒ T, ifEnrolled: Boolean ⇒ T): T = this match {
-    case e: Enrolled  ⇒ ifEnrolled(e.itmpHtSFlag)
-    case NotEnrolled  ⇒ ifNotEnrolled
+    case e: Enrolled ⇒ ifEnrolled(e.itmpHtSFlag)
+    case NotEnrolled ⇒ ifNotEnrolled
   }
 }
 
 object EnrolmentStatus {
+
   case class Enrolled(itmpHtSFlag: Boolean) extends EnrolmentStatus
 
   case object NotEnrolled extends EnrolmentStatus
 
-  implicit val enrolmentStatusReads: Reads[EnrolmentStatus] = new Reads[EnrolmentStatus]{
-    case class EnrolmentStatusJSON (enrolled: Boolean, itmpHtSFlag: Boolean)
+  implicit val enrolmentStatusReads: Reads[EnrolmentStatus] = new Reads[EnrolmentStatus] {
+
+    case class EnrolmentStatusJSON(enrolled: Boolean, itmpHtSFlag: Boolean)
 
     implicit val enrolmentStatusJSONReads: Reads[EnrolmentStatusJSON] = Json.reads[EnrolmentStatusJSON]
 
     override def reads(json: JsValue): JsResult[EnrolmentStatus] =
-      Json.fromJson[EnrolmentStatusJSON](json).map{ result ⇒
-        if(result.enrolled){
+      Json.fromJson[EnrolmentStatusJSON](json).map { result ⇒
+        if (result.enrolled) {
           EnrolmentStatus.Enrolled(result.itmpHtSFlag)
         } else {
           EnrolmentStatus.NotEnrolled

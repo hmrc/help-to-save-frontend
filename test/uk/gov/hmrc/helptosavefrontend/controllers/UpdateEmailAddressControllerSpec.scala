@@ -23,8 +23,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, validNSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, validNSIUserInfo}
 
 import scala.concurrent.Future
 
@@ -33,7 +33,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
   val frontendAuthConnector = stub[FrontendAuthConnector]
 
   val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockHelpToSaveService, frontendAuthConnector
-  )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]){
+  )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]) {
     override val authConnector = mockAuthConnector
   }
 

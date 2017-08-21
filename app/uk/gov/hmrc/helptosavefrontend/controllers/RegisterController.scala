@@ -20,9 +20,9 @@ import javax.inject.Singleton
 
 import cats.instances.future._
 import com.google.inject.Inject
+import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
-import play.api.Application
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -54,26 +54,26 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def confirmEmail(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo{
+  def confirmEmail(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-      checkIfAlreadyEnrolled{ nino ⇒
-        checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
-          val result = for{
-            _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
-            _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail, nino)
-          } yield ()
+        checkIfAlreadyEnrolled { nino ⇒
+          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
+            val result = for {
+              _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
+              _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail, nino)
+            } yield ()
 
-          result.fold[Result](
-            { e ⇒
-              logger.warn(s"Could not write confirmed email for user $nino: $e")
-              InternalServerError
-            },{ _ ⇒
-              SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
-            }
-          )
+            result.fold[Result](
+              { e ⇒
+                logger.warn(s"Could not write confirmed email for user $nino: $e")
+                InternalServerError
+              }, { _ ⇒
+                SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
+              }
+            )
+          }
         }
-      }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithInfo {
@@ -127,14 +127,15 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     */
   private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result]
                                           )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
-    checkSession{
+    checkSession {
       // no session data => user has not gone through the journey this session => take them to eligibility checks
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)}{
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+    } {
       session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
           // user has gone through journey already this sessions and were found to be ineligible
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-        )( userInfo ⇒
+        )(userInfo ⇒
           // user has gone through journey already this sessions and were found to be eligible
           ifEligible(userInfo, session.confirmedEmail)
         )

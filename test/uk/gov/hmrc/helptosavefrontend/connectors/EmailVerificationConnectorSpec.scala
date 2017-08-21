@@ -28,8 +28,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig
-{
+class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig {
   lazy val emailVerifyBaseURL = baseUrl("email-verification")
   val nino = "AE123XXXX"
   val email = "email@gmail.com"
@@ -77,7 +76,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
     "throw a runtime exception If email TTL does not exist in the configuration" in {
       val config = Configuration("x" → "y")
-      an [Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], config)
+      an[Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], config)
     }
   }
 

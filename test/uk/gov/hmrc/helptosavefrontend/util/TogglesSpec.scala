@@ -33,12 +33,13 @@
 package uk.gov.hmrc.helptosavefrontend.util
 
 
-import uk.gov.hmrc.play.test.UnitSpec
-import play.api.{Configuration, Logger}
 import org.scalatest.BeforeAndAfter
+import play.api.{Configuration, Logger}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.play.test.UnitSpec
 
 class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
+
   import Toggles._
 
   val mockConfiguration = mock[Configuration]
@@ -59,33 +60,47 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     "when testing find misconfigured config" in {
       (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature2.enabled").returning(None)
       val ftr = FEATURE("test-feature2", mockConfiguration, "")
-      an [Exception] should be thrownBy ftr.enabled()
+      an[Exception] should be thrownBy ftr.enabled()
     }
 
     "given a FEATURE_THEN that is enabled and has an action, the action is executed" in {
       val ftrThen = FEATURE_THEN[Int]("test-feature0", true, Some(0), Logger("test-feature0"))
+
       def action = 1
-      val result = ftrThen.thenDo {action}
+
+      val result = ftrThen.thenDo {
+        action
+      }
       result shouldBe Right(1)
     }
 
     "given a FEATURE_THEN that is not enabled and has an action, the action is executed" in {
       val ftrThen = FEATURE_THEN[Int]("test-feature0", false, Some(0), Logger("test-feature0"))
+
       def action = 1
-      val result = ftrThen.thenDo {action}
+
+      val result = ftrThen.thenDo {
+        action
+      }
       result shouldBe Left(Some(0))
     }
 
     "given a FEATURE_THEN that is not enabled and has an action, the action is executed even if the unconfiguredVal is None" in {
       val ftrThen = FEATURE_THEN[Int]("test-feature0", true, None, Logger("test-feature0"))
+
       def action = 1
-      val result = ftrThen.thenDo {action}
+
+      val result = ftrThen.thenDo {
+        action
+      }
       result shouldBe Right(1)
     }
 
     "given a FEATURE, the enabled and thenDo should be able to obtain an Either" in {
       (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature0.enabled").returning(Some(true))
+
       def action = 1
+
       val result = FEATURE("test-feature0", mockConfiguration) enabled() thenDo {
         action
       }
@@ -96,13 +111,19 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
 
       (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
       var x: Int = 0
+
       def action = 1
-      an [Exception] shouldBe thrownBy(x = FEATURE("test-feature1", mockConfiguration) enabled() thenDo {action})
+
+      an[Exception] shouldBe thrownBy(x = FEATURE("test-feature1", mockConfiguration) enabled() thenDo {
+        action
+      })
     }
 
     "there is an implicit conversion that converts an Either[Option[A], A] to an A that works if the feature is configured" in {
       (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
+
       def action = 1
+
       val result: Int = FEATURE("test-feature1", mockConfiguration, 0) enabled() thenDo {
         action
       }
@@ -111,7 +132,9 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
 
     "There is an implicit conversion function that allows the unconfigured value to be returned if the feature is unconfigured and the unconfigured value is defined" in {
       (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
+
       def action = 1
+
       val result: Int = FEATURE("test-feature1", mockConfiguration, 0) enabled() thenDo {
         action
       }

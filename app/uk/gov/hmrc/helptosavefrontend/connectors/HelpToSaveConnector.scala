@@ -37,11 +37,11 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future,String,EligibilityCheckResult]
+  def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult]
 
   def getUserInformation(nino: NINO,
                          userDetailsURI: UserDetailsURI)
-                        (implicit hc: HeaderCarrier): EitherT[Future,UserInformationRetrievalError,UserInfo]
+                        (implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
 
 
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
@@ -62,7 +62,7 @@ class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionCont
 
   val base64Encoder: Base64.Encoder = Base64.getEncoder
 
-  def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future,String,EligibilityCheckResult] =
+  def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
     handle(
       eligibilityURL(nino),
       _.parseJson[EligibilityCheckResponse].flatMap(toEligibilityCheckResponse),
@@ -71,11 +71,10 @@ class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionCont
     )
 
   def getUserInformation(nino: NINO, userDetailsURI: UserDetailsURI
-                        )(implicit hc: HeaderCarrier): EitherT[Future,UserInformationRetrievalError,UserInfo] = {
+                        )(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] = {
     val backendError = (s: String) ⇒ UserInformationRetrievalError.BackendError(s, nino)
     handle(
-      userInformationURL(nino, userDetailsURI),
-      { response ⇒
+      userInformationURL(nino, userDetailsURI), { response ⇒
         response.parseJson[UserInfo].fold[Either[UserInformationRetrievalError, UserInfo]](
           // couldn't parse user info in this case - try to parse as missing user info
           _ ⇒
@@ -105,32 +104,32 @@ class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionCont
     handle(storeEmailURL(encodedEmail, nino), _ ⇒ Right(()), "store email", identity)
   }
 
-  private def handle[A,B](url: String,
-                          ifHTTP200: HttpResponse ⇒ Either[B,A],
-                          description: ⇒ String,
-                          toError: String ⇒ B
-                         )(implicit hc: HeaderCarrier): EitherT[Future,B,A] =
-    EitherT(http.get(url).map{ response ⇒
-      if(response.status == 200){
+  private def handle[A, B](url: String,
+                           ifHTTP200: HttpResponse ⇒ Either[B, A],
+                           description: ⇒ String,
+                           toError: String ⇒ B
+                          )(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+    EitherT(http.get(url).map { response ⇒
+      if (response.status == 200) {
         ifHTTP200(response)
       } else {
         Left(toError(s"Call to $description came back with status ${response.status}"))
       }
-    }.recover{
+    }.recover {
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
 
-  private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String,EligibilityCheckResult] = {
+  private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
     val reasonInt = eligibilityCheckResponse.reason
 
     eligibilityCheckResponse.result match {
-      case 1     ⇒
+      case 1 ⇒
         // user is eligible
         Either.fromOption(
           EligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(Right(r))),
           s"Could not parse ineligibility reason '$reasonInt'")
 
-      case 2     ⇒
+      case 2 ⇒
         // user is ineligible
         Either.fromOption(
           IneligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(Left(r))),

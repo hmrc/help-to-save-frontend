@@ -16,37 +16,57 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.AuditExtensions._
-import uk.gov.hmrc.play.config.AppName
 
-class HTSEvent(auditSource: String, auditType: String, detail: Map[String,String])(implicit hc: HeaderCarrier)
+class HTSEvent(auditSource: String, auditType: String, detail: Map[String, String])(implicit hc: HeaderCarrier)
   extends DataEvent(auditSource = auditSource, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
 class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(implicit hc: HeaderCarrier)
   extends HTSEvent(auditSource,
-      "applicationSubmitted",
+    "applicationSubmitted",
     Map[String, String](
-        "forename" -> userInfo.forename,
-        "surname" -> userInfo.surname,
-        "dateOfBirth" -> userInfo.dateOfBirth.toString,
-        "nino" -> userInfo.nino,
-        "address1" -> userInfo.contactDetails.address1,
-        "address2" -> userInfo.contactDetails.address2,
-        "address3" -> {userInfo.contactDetails.address3.fold("") {identity}},
-        "address4" -> {userInfo.contactDetails.address4.fold("") {identity}},
-        "address5" -> {userInfo.contactDetails.address5.fold("") {identity}},
-        "postcode" -> userInfo.contactDetails.postcode,
-        "countryCode" -> {userInfo.contactDetails.countryCode.fold("") {identity}},
-        "email" -> userInfo.contactDetails.email,
-        "phoneNumber" -> {userInfo.contactDetails.phoneNumber.fold(""){identity}},
-        "communicationPreference" -> userInfo.contactDetails.communicationPreference,
-        "registrationChannel" -> userInfo.registrationChannel))
+      "forename" -> userInfo.forename,
+      "surname" -> userInfo.surname,
+      "dateOfBirth" -> userInfo.dateOfBirth.toString,
+      "nino" -> userInfo.nino,
+      "address1" -> userInfo.contactDetails.address1,
+      "address2" -> userInfo.contactDetails.address2,
+      "address3" -> {
+        userInfo.contactDetails.address3.fold("") {
+          identity
+        }
+      },
+      "address4" -> {
+        userInfo.contactDetails.address4.fold("") {
+          identity
+        }
+      },
+      "address5" -> {
+        userInfo.contactDetails.address5.fold("") {
+          identity
+        }
+      },
+      "postcode" -> userInfo.contactDetails.postcode,
+      "countryCode" -> {
+        userInfo.contactDetails.countryCode.fold("") {
+          identity
+        }
+      },
+      "email" -> userInfo.contactDetails.email,
+      "phoneNumber" -> {
+        userInfo.contactDetails.phoneNumber.fold("") {
+          identity
+        }
+      },
+      "communicationPreference" -> userInfo.contactDetails.communicationPreference,
+      "registrationChannel" -> userInfo.registrationChannel))
 
 class EligibilityCheckEvent(auditSource: String, nino: String, errorDescription: Option[String])(implicit hc: HeaderCarrier)
   extends HTSEvent(auditSource, "eligibilityCheck", {
-      val basicMap = Map[String, String]("nino" -> nino)
-      errorDescription.fold(basicMap + ("eligible" -> "true")) {reason =>
-          basicMap + ("eligible" -> "false") + ("reason" -> reason)
-      }})
+    val basicMap = Map[String, String]("nino" -> nino)
+    errorDescription.fold(basicMap + ("eligible" -> "true")) { reason =>
+      basicMap + ("eligible" -> "false") + ("reason" -> reason)
+    }
+  })

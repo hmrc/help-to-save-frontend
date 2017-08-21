@@ -34,7 +34,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
     mockHelpToSaveService,
     fakeApplication,
     frontendAuthConnector
-  ){
+  ) {
     override lazy val authConnector = mockAuthConnector
   }
 
@@ -78,16 +78,16 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
       contentAsString(result) should include("Click here to check your eligibility for Help To Save")
     }
 
-   "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
-     inSequence {
-       mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-       mockEnrolmentCheck(nino)(Left(""))
-     }
+    "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
+      inSequence {
+        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEnrolmentCheck(nino)(Left(""))
+      }
 
-     val result = doRequest()
-     status(result) shouldBe 303
-     redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
-   }
+      val result = doRequest()
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+    }
 
   }
 

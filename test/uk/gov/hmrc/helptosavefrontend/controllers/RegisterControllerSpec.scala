@@ -64,10 +64,10 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
       .expects(nino, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockEmailUpdate(email: String, nino: NINO)(result: Either[String,Unit]): Unit =
+  def mockEmailUpdate(email: String, nino: NINO)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveService.storeConfirmedEmail(_: String, _: NINO)(_: HeaderCarrier))
-    .expects(email, nino, *)
-    .returning(EitherT.fromEither[Future](result))
+      .expects(email, nino, *)
+      .returning(EitherT.fromEither[Future](result))
 
 
   "The RegisterController" when {

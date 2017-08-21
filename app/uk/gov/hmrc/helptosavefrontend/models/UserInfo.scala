@@ -17,9 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
-import cats.Show
 import play.api.libs.json._
 
 /** Details of the user obtained from HMRC services */

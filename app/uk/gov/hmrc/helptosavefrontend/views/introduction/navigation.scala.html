@@ -22,45 +22,55 @@
 <nav class="divider--bottom">
     <ol>
         <li>
-        @{if(routes.IntroductionController.getAboutHelpToSave().url == currentPageUrl){
-            Messages("hts.introduction.about-help-to-save.title")
+        @{
+            if(routes.IntroductionController.getAboutHelpToSave().url == currentPageUrl) {
+                Messages("hts.introduction.about-help-to-save.title")
+            }
+            else {
+                link(routes.IntroductionController.getAboutHelpToSave().url, Messages("hts.introduction.about-help-to-save.title"))
+            }
         }
-        else {
-            link(routes.IntroductionController.getAboutHelpToSave().url, Messages("hts.introduction.about-help-to-save.title"))
-        }}
         </li>
 
         <li>
-        @{if(routes.IntroductionController.getEligibility().url == currentPageUrl){
-            Messages("hts.introduction.eligibility.title")
+        @{
+            if(routes.IntroductionController.getEligibility().url == currentPageUrl) {
+                Messages("hts.introduction.eligibility.title")
+            }
+            else {
+                link(routes.IntroductionController.getEligibility().url, Messages("hts.introduction.eligibility.title"))
+            }
         }
-        else {
-            link(routes.IntroductionController.getEligibility().url, Messages("hts.introduction.eligibility.title"))
-        }}
         </li>
         <li>
-        @{if(routes.IntroductionController.getHowTheAccountWorks().url == currentPageUrl){
-            Messages("hts.introduction.how-the-account-works.title")
+        @{
+            if(routes.IntroductionController.getHowTheAccountWorks().url == currentPageUrl) {
+                Messages("hts.introduction.how-the-account-works.title")
+            }
+            else {
+                link(routes.IntroductionController.getHowTheAccountWorks().url, Messages("hts.introduction.how-the-account-works.title"))
+            }
         }
-        else {
-            link(routes.IntroductionController.getHowTheAccountWorks().url, Messages("hts.introduction.how-the-account-works.title"))
-        }}
         </li>
         <li>
-        @{if(routes.IntroductionController.getHowWeCalculateBonuses().url == currentPageUrl){
-            Messages("hts.introduction.how-we-calculate-bonuses.title")
+        @{
+            if(routes.IntroductionController.getHowWeCalculateBonuses().url == currentPageUrl) {
+                Messages("hts.introduction.how-we-calculate-bonuses.title")
+            }
+            else {
+                link(routes.IntroductionController.getHowWeCalculateBonuses().url, Messages("hts.introduction.how-we-calculate-bonuses.title"))
+            }
         }
-        else {
-            link(routes.IntroductionController.getHowWeCalculateBonuses().url, Messages("hts.introduction.how-we-calculate-bonuses.title"))
-        }}
         </li>
         <li>
-        @{if(routes.IntroductionController.getApply().url == currentPageUrl){
-            Messages("hts.introduction.apply.title")
+        @{
+            if(routes.IntroductionController.getApply().url == currentPageUrl) {
+                Messages("hts.introduction.apply.title")
+            }
+            else {
+                link(routes.IntroductionController.getApply().url, Messages("hts.introduction.apply.title"))
+            }
         }
-        else {
-            link(routes.IntroductionController.getApply().url, Messages("hts.introduction.apply.title"))
-        }}
         </li>
     </ol>
 </nav>

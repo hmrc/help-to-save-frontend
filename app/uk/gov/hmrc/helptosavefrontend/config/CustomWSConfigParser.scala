@@ -121,7 +121,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   /**
     * @return absolute file path with the bytes written to the file
     */
-  def createTempFileForData(data: String): (String, Array[Byte])= {
+  def createTempFileForData(data: String): (String, Array[Byte]) = {
     val file = File.createTempFile(getClass.getSimpleName, ".tmp")
     file.deleteOnExit()
     val os = new FileOutputStream(file)
@@ -137,7 +137,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
   private def createKeyStoreConfig(ks: KeyStoreConfig, data: String): KeyStoreConfig = {
     logger.info("Creating key store config")
-    val (ksFilePath, _)= createTempFileForData(data)
+    val (ksFilePath, _) = createTempFileForData(data)
     logger.info(s"Successfully wrote keystore data to file: $ksFilePath")
 
     val decryptedPass = ks.password

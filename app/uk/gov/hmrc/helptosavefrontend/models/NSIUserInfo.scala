@@ -26,12 +26,12 @@ import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 
 import scala.util.{Failure, Success, Try}
 
-case class NSIUserInfo (forename: String,
-                        surname: String,
-                        dateOfBirth: LocalDate,
-                        nino: String,
-                        contactDetails: ContactDetails,
-                        registrationChannel: String = "online")
+case class NSIUserInfo(forename: String,
+                       surname: String,
+                       dateOfBirth: LocalDate,
+                       nino: String,
+                       contactDetails: ContactDetails,
+                       registrationChannel: String = "online")
 
 object NSIUserInfo {
 
@@ -63,12 +63,12 @@ object NSIUserInfo {
     def extractContactDetails(userInfo: UserInfo): ContactDetails = {
       val (line1, line2, line3, line4, line5) =
         userInfo.address.lines.map(_.cleanupSpecialCharacters).filter(_.nonEmpty) match {
-          case Nil                                                ⇒ ("", "", None, None, None)
-          case line1 :: Nil                                       ⇒ (line1, "", None, None, None)
-          case line1 :: line2 :: Nil                              ⇒ (line1, line2, None, None, None)
-          case line1 :: line2 :: line3 :: Nil                     ⇒ (line1, line2, Some(line3), None, None)
-          case line1 :: line2 :: line3 :: line4 :: Nil            ⇒ (line1, line2, Some(line3), Some(line4), None)
-          case line1 :: line2 :: line3 :: line4 :: line5 :: Nil   ⇒ (line1, line2, Some(line3), Some(line4), Some(s"$line5"))
+          case Nil ⇒ ("", "", None, None, None)
+          case line1 :: Nil ⇒ (line1, "", None, None, None)
+          case line1 :: line2 :: Nil ⇒ (line1, line2, None, None, None)
+          case line1 :: line2 :: line3 :: Nil ⇒ (line1, line2, Some(line3), None, None)
+          case line1 :: line2 :: line3 :: line4 :: Nil ⇒ (line1, line2, Some(line3), Some(line4), None)
+          case line1 :: line2 :: line3 :: line4 :: line5 :: Nil ⇒ (line1, line2, Some(line3), Some(line4), Some(s"$line5"))
           case line1 :: line2 :: line3 :: line4 :: line5 :: other ⇒ (line1, line2, Some(line3), Some(line4), Some(s"$line5,${other.mkString(",")}"))
         }
 

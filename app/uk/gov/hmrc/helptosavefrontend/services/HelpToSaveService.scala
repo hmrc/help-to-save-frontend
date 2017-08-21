@@ -37,7 +37,7 @@ trait HelpToSaveService {
 
   def getUserInformation(nino: String,
                          userDetailsURI: UserDetailsURI
-                        )(implicit hc: HeaderCarrier): EitherT[Future,UserInformationRetrievalError,UserInfo]
+                        )(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
 
   def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
 
@@ -45,7 +45,7 @@ trait HelpToSaveService {
 
   def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit]
 
-  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess]
+  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
 
 }
 
@@ -56,7 +56,7 @@ class HelpToSaveServiceImpl @Inject()(helpToSaveConnector: HelpToSaveConnector, 
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
     helpToSaveConnector.getUserEnrolmentStatus(nino)
 
-  def checkEligibility(nino: String)(implicit hc: HeaderCarrier) :Result[EligibilityCheckResult] =
+  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult] =
     helpToSaveConnector.getEligibility(nino)
 
   def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
@@ -65,14 +65,14 @@ class HelpToSaveServiceImpl @Inject()(helpToSaveConnector: HelpToSaveConnector, 
   def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
     helpToSaveConnector.setITMPFlag(nino)
 
-  def getUserInformation(nino: String, userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future,UserInformationRetrievalError,UserInfo] =
+  def getUserInformation(nino: String, userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] =
     helpToSaveConnector.getUserInformation(nino, userDetailsURI)
 
   def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit] =
     helpToSaveConnector.storeEmail(email, nino)
 
-  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
-    EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]] {
+  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
+    EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure, SubmissionSuccess]] {
       case success: SubmissionSuccess =>
         logger.info(s"Successfully created an account for ${userInfo.nino}")
         Right(success)

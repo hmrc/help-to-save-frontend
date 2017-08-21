@@ -53,15 +53,15 @@ class SessionCacheConnectorImpl @Inject()(val http: WSHttp) extends SessionCache
   override def domain: String = keyStoreDomain
 
   def put(body: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[CacheMap] =
-    EitherT[Future,String,CacheMap](
-      cache[HTSSession](sessionKey, body)(writes, hc).map(Right(_)).recover{
+    EitherT[Future, String, CacheMap](
+      cache[HTSSession](sessionKey, body)(writes, hc).map(Right(_)).recover {
         case NonFatal(e) ⇒ Left(e.getMessage)
       }
     )
 
   def get(implicit reads: Reads[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[Option[HTSSession]] =
-    EitherT[Future,String,Option[HTSSession]](
-      fetchAndGetEntry[HTSSession](sessionKey)(hc, reads).map(Right(_)).recover{
+    EitherT[Future, String, Option[HTSSession]](
+      fetchAndGetEntry[HTSSession](sessionKey)(hc, reads).map(Right(_)).recover {
         case NonFatal(e) ⇒ Left(e.getMessage)
       })
 
