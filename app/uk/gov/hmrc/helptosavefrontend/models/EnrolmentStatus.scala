@@ -31,7 +31,7 @@ object EnrolmentStatus {
 
   case object NotEnrolled extends EnrolmentStatus
 
-  implicit val enrolmentStatusFormat: Reads[EnrolmentStatus] = new Reads[EnrolmentStatus]{
+  implicit val enrolmentStatusReads: Reads[EnrolmentStatus] = new Reads[EnrolmentStatus]{
     case class EnrolledJSON (enrolled: Boolean = true, itmpHtSFlag: Boolean)
     case class NotEnrolledJSON (enrolled: Boolean = false)
 
