@@ -117,6 +117,19 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
         status(result) shouldBe Status.OK
         contentAsString(result) should include(testEmail)
       }
+
+      "return a bad request when the user has not already enrolled and the given nino doesn't match the session nino" in {
+        val testEmail = "email@gmail.com"
+        val theNino = "AE1234XXX"
+        inSequence{
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+        }
+        val params = EmailVerificationParams(theNino, testEmail)
+        val result = doRequestWithQueryParam(params.encode())
+        status(result) shouldBe Status.BAD_REQUEST
+      }
     }
 
 

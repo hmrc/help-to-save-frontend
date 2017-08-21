@@ -56,10 +56,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
               case None ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
               case Some(p) ⇒ {
                 val optionalParams = EmailVerificationParams.decode(p)
-                println(">>>>>>>>>>>>>>>>>>>>>>>>>>> optional params = " + optionalParams)
                 optionalParams.fold(BadRequest(views.html.register.email_verify_error("hts.email-verification.email-verify-error.bad-continue-url.content"))){ params ⇒
-//                  println(">>>>>>>>>>>>>>>>>>>>>>>>>>> params = " + params)
-//                  println(">>>>>>>>>>>>>>>>>>>>>>>>>>> nis user nino  = " + nsiUserInfo.nino)
                   if (params.nino == nsiUserInfo.nino) {
                     val updatedNsiUserInfo = nsiUserInfo copy (contactDetails = nsiUserInfo.contactDetails copy (email = params.email))
                     Ok(views.html.register.confirm_details(updatedNsiUserInfo))

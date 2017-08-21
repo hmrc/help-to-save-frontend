@@ -16,19 +16,20 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import java.nio.charset.Charset
-import java.util.Base64
-
 case class EmailVerificationParams(nino: String, email: String) {
   def encode(): String = {
     val input = nino + ":" + email
-    new String(Base64.getEncoder.encode(input.getBytes()), Charset.forName("UTF-8"))
+    DataEncrypter.encrypt(input)
   }
 }
 
 object EmailVerificationParams {
   def decode(base64: String): Option[EmailVerificationParams] = {
-    val input = new String(Base64.getDecoder.decode(base64), Charset.forName("UTF-8")).split(":")
-    if (input.length == 2) Some(EmailVerificationParams(input(0), input(1))) else None
+    DataEncrypter.decrypt(base64) match {
+      case Left(_) ⇒ None
+      case Right(decrypted) ⇒
+        val params = decrypted.split(":")
+        if (params.length == 2) Some(EmailVerificationParams(params(0), params(1))) else None
+    }
   }
 }
