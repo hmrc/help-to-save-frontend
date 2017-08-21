@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.repo.{EmailStore, EnrolmentStore}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, HTSAuditor, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, EmailVerificationParams, HTSAuditor, NINO}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -79,7 +79,13 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
 
     "handling getConfirmDetailsPage" must {
 
-      def doRequest(): Future[PlayResult] = controller.getConfirmDetailsPage(FakeRequest())
+      def doRequest(): Future[PlayResult] = controller.getConfirmDetailsPage(None)(FakeRequest())
+
+      def doRequestWithQueryParam(p: String): Future[PlayResult] = {
+        route(FakeRequest("GET", s"${uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.getConfirmDetailsPage(Some(p)).url}")).get
+      }
+
+      //def doRequestWithQueryParam(p: String) = controller.getConfirmDetailsPage(Some(p))(FakeRequest("GET", uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.getConfirmDetailsPage(Some(p)).url))
 
       testCommonEnrolmentAndSessionBehaviour(doRequest)
 
@@ -99,6 +105,19 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
         contentAsString(result) should include(validNSIUserInfo.surname)
       }
 
+//      "show the users details with the verified user email address" +
+//        "if the user has not already enrolled and " +
+//        "the session data shows that they have been already found to be eligible" +
+//        "and the user has clicked on the verify email link sent to them by the email verification service" in {
+//        inSequence{
+//          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+//          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+//          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+//        }
+//        val params = EmailVerificationParams("AE1234XXX", "email@gmail.com")
+//        val result = doRequestWithQueryParam(params.encode())
+//        status(result) shouldBe Status.OK
+//      }
     }
 
 
@@ -243,7 +262,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage(None).url)
       }
 
       "indicate to the user that the creation was not successful " when {

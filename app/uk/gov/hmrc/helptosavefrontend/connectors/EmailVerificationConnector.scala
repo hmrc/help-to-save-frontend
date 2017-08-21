@@ -52,7 +52,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
   val templateId = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
-    val params = EmailVerificationParams(nino, newEmail)
+    val params = EmailVerificationParams(nino, newEmail).encode()
     val continueUrlWithParams = continueURL + "?p=" + params
     val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueUrlWithParams, Map())
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒

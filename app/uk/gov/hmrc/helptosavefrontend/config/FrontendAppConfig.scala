@@ -34,6 +34,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val CheckEligibilityUrl: String = getConfString("help-to-save-check-eligibility.url", "")
 
+  def confirmYourDetailsUrl(p: String): String = getConfString("help-to-save-email-verification.url", "") + "?p=" + p
+
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
   val ivUrl = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"

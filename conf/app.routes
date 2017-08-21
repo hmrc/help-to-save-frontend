@@ -11,7 +11,7 @@ GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptos
 
 GET        /register/check-eligibility                      @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
 GET        /register/you-are-eligible                       @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
-GET        /register/check-and-confirm-your-details         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmDetailsPage
+GET        /register/check-and-confirm-your-details         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmDetailsPage(p: Option[String])
 GET        /register/update-your-email-address              @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.getUpdateYourEmailAddress
 GET        /register/create-an-account/:confirmedEmail      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage(confirmedEmail)
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
