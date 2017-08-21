@@ -113,7 +113,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo.copy (nino = theNino)), None))))
         }
         val params = EmailVerificationParams(theNino, testEmail)
-        val result = doRequestWithQueryParam(params.encode())
+        val result = doRequestWithQueryParam(params.encode().replaceAll("%2b", "+"))
         status(result) shouldBe Status.OK
         contentAsString(result) should include(testEmail)
       }
