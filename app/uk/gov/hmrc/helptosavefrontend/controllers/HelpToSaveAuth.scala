@@ -18,8 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.~
+import uk.gov.hmrc.auth.core.{~, _}
 import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{encoded, identityCallbackUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
@@ -92,7 +91,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
     }
   }
 
-  def handleFailure(redirectOnLoginURL: String): PartialFunction[Throwable,Result] = {
+  def handleFailure(redirectOnLoginURL: String): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
       redirectToLogin(redirectOnLoginURL)
 

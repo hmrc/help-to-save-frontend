@@ -21,16 +21,15 @@ import java.time.LocalDate
 import org.scalacheck.Gen
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.testutil._
-import uk.gov.hmrc.smartstub.AutoGen
 import uk.gov.hmrc.smartstub.AutoGen.{GenProvider, instance}
-import uk.gov.hmrc.smartstub._
+import uk.gov.hmrc.smartstub.{AutoGen, _}
 
 package object models {
 
   implicit def providerLocalDate(s: String): GenProvider[LocalDate] = instance({
     s.toLowerCase match {
-      case "dateofbirth" | "dob" | "birthdate" ⇒ Gen.date(LocalDate.of(1900,1,1), LocalDate.now())
-      case _                                   ⇒ Gen.date
+      case "dateofbirth" | "dob" | "birthdate" ⇒ Gen.date(LocalDate.of(1900, 1, 1), LocalDate.now())
+      case _ ⇒ Gen.date
     }
   })
 
@@ -45,7 +44,7 @@ package object models {
   implicit val userInformationRetrievalError: Gen[UserInformationRetrievalError] =
     Gen.const(UserInformationRetrievalError.BackendError("", ""))
 
-//    AutoGen[UserInformationRetrievalError]
+  //    AutoGen[UserInformationRetrievalError]
 
   def randomUserInfo(): UserInfo = sample(userInfoGen)
 

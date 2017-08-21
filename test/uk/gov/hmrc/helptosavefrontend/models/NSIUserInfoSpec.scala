@@ -32,7 +32,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
       }
 
       "reads and writes dates in the format 'yyyyMMdd'" in {
-        val date = LocalDate.of(1234,5,6)
+        val date = LocalDate.of(1234, 5, 6)
 
         // check the happy path
         val json1 = Json.toJson(validNSIUserInfo.copy(dateOfBirth = date))
@@ -47,7 +47,6 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
         Json.fromJson[NSIUserInfo](json3).isError shouldBe true
       }
     }
-
 
 
     "have an apply method" which {
@@ -200,7 +199,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
         "filter out address lines which are empty" in {
           // check that lines with nothing in them get filitered out
           val willBeFilteredOut = {
-            val l = List("\t","\n","\r"," ", "")
+            val l = List("\t", "\n", "\r", " ", "")
             l ::: l.combinations(2).flatten.toList
           }
 

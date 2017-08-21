@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.mvc.Http.Status.OK
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivUrl
-import uk.gov.hmrc.helptosavefrontend.config.{WSHttp, WSHttpExtension}
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.iv._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.play.http.HeaderCarrier

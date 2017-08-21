@@ -40,8 +40,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val ivUrl = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
 
-  val itmpEnrolmentURL: String = baseUrl("itmp-enrolment")
-
   def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
 
   def decoded(url: String): String = URLDecoder.decode(url, "UTF-8")
@@ -87,8 +85,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   val ggSignOutUrl: String = s"$caFrontendUrl/sign-out"
 
   val signOutUrl = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
-
-  val mongoEncSeed = getString("microservice.mongo-encryption-seed")
 
   override lazy val analyticsToken: String = getString("google-analytics.token")
   override lazy val analyticsHost: String = getString("google-analytics.host")

@@ -15,16 +15,20 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.button
-@(args: (Symbol, String)*)(content:Html)(implicit messages: play.api.i18n.Messages)
-@argsMap = @{ args.toMap }
+@(args: (Symbol, String)*)(content: Html)(implicit messages: play.api.i18n.Messages)
+@argsMap = @{
+    args.toMap
+}
 @defining({
     var a = argsMap.filterNot(entry => entry._1.name.startsWith("_")) + ('type -> "submit")
-    if (argsMap.isDefinedAt('_buttonClass)) {
+    if(argsMap.isDefinedAt('_buttonClass)) {
         a = a + ('_modifierClass -> argsMap.get('_buttonClass).get)
     }
     a.toVector
 }) { buttonArgs =>
-    <div class="form-field form-field--submit@if(argsMap.get('_modifierClass).isDefined){ @argsMap.get('_modifierClass)}">
+    <div class="form-field form-field--submit@if(argsMap.get('_modifierClass).isDefined) {
+        @argsMap.get('_modifierClass)
+    }">
     @button(buttonArgs: _*)(content)
     </div>
 }

@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import play.api.{Configuration, Logger}
 import java.time.Instant
 
+import play.api.{Configuration, Logger}
+
 object Toggles {
+
   case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: Option[A], logger: Logger) {
     def enabled(): FEATURE_THEN[A] = {
       conf.getBoolean(s"feature-toggles.$name.enabled") match {
@@ -30,8 +32,10 @@ object Toggles {
       }
     }
   }
+
   object FEATURE {
     def apply[A](name: String, conf: Configuration): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, None, Logger(name))
+
     def apply[A](name: String, conf: Configuration, unconfiguredVal: A): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, Some(unconfiguredVal), Logger(name))
   }
 
@@ -49,6 +53,7 @@ object Toggles {
       }
     }
   }
+
   object FEATURE_THEN
 
   implicit def eitherPop[A](e: Either[Option[A], A]): A = {
@@ -65,4 +70,5 @@ object Toggles {
       case Left(a) => action
     }
   }
+
 }

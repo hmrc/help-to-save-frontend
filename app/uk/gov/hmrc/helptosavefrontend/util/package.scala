@@ -17,12 +17,8 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import cats.data.EitherT
-import play.api.libs.json.{JsError, Reads}
-import play.mvc.Http
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+
+import scala.concurrent.Future
 
 package object util {
 
