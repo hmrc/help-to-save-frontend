@@ -23,8 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, validNSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, validNSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 
 import scala.concurrent.Future
@@ -33,7 +32,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
   val frontendAuthConnector = stub[FrontendAuthConnector]
 
-  val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockEnrolmentService, frontendAuthConnector
+  val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockHelpToSaveService, frontendAuthConnector
   )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]){
     override val authConnector = mockAuthConnector
   }
@@ -50,7 +49,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         "session data indicates that they are eligible" in {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
@@ -64,7 +63,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         "session data indicates that they are ineligible" in {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 

@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.Helpers._
@@ -26,10 +25,9 @@ import uk.gov.hmrc.auth.core
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsAuth}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, HtsAuth}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
-import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, UserDetailsURI}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -40,7 +38,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
 
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
-  val mockEnrolmentService = mock[EnrolmentService]
+  val mockHelpToSaveService = mock[HelpToSaveService]
 
   val mockAuthConnector = mock[PlayAuthConnector]
 
@@ -61,14 +59,14 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
       .expects(*, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockEnrolmentCheck(input: NINO)(result: Either[String,EnrolmentStore.Status]): Unit =
-    (mockEnrolmentService.getUserEnrolmentStatus(_: NINO)(_: ExecutionContext))
+  def mockEnrolmentCheck(input: NINO)(result: Either[String,EnrolmentStatus]): Unit =
+    (mockHelpToSaveService.getUserEnrolmentStatus(_: NINO)(_: HeaderCarrier))
       .expects(input, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockWriteITMPFlag(nino: NINO)(result: Either[String,Unit]): Unit =
-    (mockEnrolmentService.setITMPFlag(_: NINO)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, *, *)
+    (mockHelpToSaveService.setITMPFlag(_: NINO)(_: HeaderCarrier))
+      .expects(nino, *)
       .returning(EitherT.fromEither[Future](result))
 
 
@@ -84,7 +82,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
     "redirect to NS&I if the user is already enrolled" in {
       inSequence{
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlag = true)))
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = true)))
       }
 
       status(getResult()) shouldBe OK
@@ -94,7 +92,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
       "if it has not already been set" in {
       inSequence{
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlag = false)))
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
         mockWriteITMPFlag(nino)(Right(()))
       }
 
@@ -105,7 +103,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
       "setting the ITMP flag" in {
       inSequence{
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(itmpHtSFlag = false)))
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
         mockWriteITMPFlag(nino)(Left(""))
       }
 
@@ -117,7 +115,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
       "redirect to the eligibility checks if there is no session data for the user" in {
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(None))
         }
 
@@ -144,7 +142,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: TestSupport ⇒
       "there is an error getting the session data" in {
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Left(""))
         }
 

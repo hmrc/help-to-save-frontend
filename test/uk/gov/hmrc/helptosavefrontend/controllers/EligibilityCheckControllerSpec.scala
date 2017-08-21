@@ -31,14 +31,12 @@ import uk.gov.hmrc.auth.core
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.NotEnrolled
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models.IneligibilityReason.AccountAlreadyOpened
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, Email}
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
 import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, NINO, UserDetailsURI}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
@@ -52,17 +50,15 @@ class EligibilityCheckControllerSpec
     with EnrolmentAndEligibilityCheckBehaviour
     with GeneratorDrivenPropertyChecks {
 
-  val mockHtsService = mock[HelpToSaveService]
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor = mock[HTSAuditor]
   val frontendAuthConnector = stub[FrontendAuthConnector]
 
   lazy val controller = new EligibilityCheckController(
     fakeApplication.injector.instanceOf[MessagesApi],
-    mockHtsService,
+    mockHelpToSaveService,
     mockSessionCacheConnector,
     jsonSchemaValidationService,
-    mockEnrolmentService,
     fakeApplication,
     mockAuditor,
     frontendAuthConnector)(
@@ -71,12 +67,12 @@ class EligibilityCheckControllerSpec
   }
 
   def mockEligibilityResult(nino: String)(result: Either[String, EligibilityCheckResult]): Unit =
-    (mockHtsService.checkEligibility(_: String)(_: HeaderCarrier))
+    (mockHelpToSaveService.checkEligibility(_: String)(_: HeaderCarrier))
       .expects(nino, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockGetUserInformation(nino: NINO, userDetailsURI: UserDetailsURI)(result: Either[UserInformationRetrievalError, UserInfo]): Unit =
-    (mockHtsService.getUserInformation(_: NINO, _: UserDetailsURI)(_: HeaderCarrier))
+    (mockHelpToSaveService.getUserInformation(_: NINO, _: UserDetailsURI)(_: HeaderCarrier))
       .expects(nino, userDetailsURI, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -102,7 +98,7 @@ class EligibilityCheckControllerSpec
       "show the you are eligible page if session data indicates that they are eligible" in {
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
@@ -115,7 +111,7 @@ class EligibilityCheckControllerSpec
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
@@ -135,7 +131,7 @@ class EligibilityCheckControllerSpec
       "show the you are not eligible page if session data indicates that they are not eligible" in {
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
@@ -148,7 +144,7 @@ class EligibilityCheckControllerSpec
       "redirect to the you are eligible page if session data indicates that they are eligible" in {
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
@@ -252,7 +248,7 @@ class EligibilityCheckControllerSpec
           "which indicates they are not eligible" in {
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
           }
 
@@ -266,7 +262,7 @@ class EligibilityCheckControllerSpec
           "which indicates they are eligible" in {
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           }
 
@@ -279,7 +275,7 @@ class EligibilityCheckControllerSpec
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
           inSequence{
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
@@ -300,7 +296,7 @@ class EligibilityCheckControllerSpec
 
           inSequence {
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
             mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
@@ -324,7 +320,7 @@ class EligibilityCheckControllerSpec
             whenever(ineligibilityReason != AccountAlreadyOpened) {
               inSequence {
                 mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+                mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
                 mockSessionCacheConnectorGet(Right(None))
                 mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(ineligibilityReason))))
                 mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
@@ -344,7 +340,7 @@ class EligibilityCheckControllerSpec
 
           inSequence {
             mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
             mockGetUserInformation(nino, userDetailsURI)(Left(MissingUserInfos(Set(Email, Contact), nino)))
@@ -385,7 +381,7 @@ class EligibilityCheckControllerSpec
           "the user details URI is not available" in {
             test(inSequence{
               mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(None, enrolments))
-              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
             })
           }
@@ -393,7 +389,7 @@ class EligibilityCheckControllerSpec
           "there is an error getting the user's session data" in {
             test(inSequence {
               mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Left(""))
             })
           }
@@ -402,7 +398,7 @@ class EligibilityCheckControllerSpec
             forAll{ checkError: String ⇒
               test(inSequence {
                 mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+                mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
                 mockSessionCacheConnectorGet(Right(None))
                 mockEligibilityResult(nino)(Left(checkError))
               })
@@ -414,7 +410,7 @@ class EligibilityCheckControllerSpec
 
             test(inSequence {
               mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockGetUserInformation(nino, userDetailsURI)(Left(UserInformationRetrievalError.BackendError("", nino)))
@@ -428,7 +424,7 @@ class EligibilityCheckControllerSpec
 
             test(inSequence {
               mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
@@ -441,7 +437,7 @@ class EligibilityCheckControllerSpec
 
             test(inSequence {
               mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))

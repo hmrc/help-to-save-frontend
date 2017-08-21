@@ -21,12 +21,12 @@ import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
-import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 
 class AccessAccountController  @Inject()(val messagesApi: MessagesApi,
-                                         val enrolmentService: EnrolmentService,
+                                         val helpToSaveService: HelpToSaveService,
                                          val app: Application,
                                          frontendAuthConnector: FrontendAuthConnector)
   extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport with Logging

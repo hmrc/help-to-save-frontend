@@ -22,8 +22,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
 
 class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibilityCheckBehaviour {
 
@@ -31,7 +31,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
 
   lazy val controller = new AccessAccountController(
     fakeApplication.injector.instanceOf[MessagesApi],
-    mockEnrolmentService,
+    mockHelpToSaveService,
     fakeApplication,
     frontendAuthConnector
   ){
@@ -45,7 +45,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
     "redirect to NS&I if the user is enrolled" in {
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(true)))
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(true)))
       }
 
       val result = doRequest()
@@ -58,7 +58,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
       "it hasn't already been set" in {
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(false)))
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(false)))
         mockWriteITMPFlag(nino)(Right(()))
       }
 
@@ -70,7 +70,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
     "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
       }
 
       val result = doRequest()

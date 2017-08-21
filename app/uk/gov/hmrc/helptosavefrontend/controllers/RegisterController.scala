@@ -27,9 +27,8 @@ import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthCon
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.repo.EmailStore
-import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, Email, Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -37,10 +36,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegisterController @Inject()(val messagesApi: MessagesApi,
-                                   helpToSaveService: HelpToSaveService,
+                                   val helpToSaveService: HelpToSaveService,
                                    val sessionCacheConnector: SessionCacheConnector,
-                                   val enrolmentService: EnrolmentService,
-                                   emailStore: EmailStore,
                                    val app: Application,
                                    frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
@@ -64,7 +61,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
           val result = for{
             _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
-            _ ← emailStore.storeConfirmedEmail(confirmedEmail, nino)
+            _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail, nino)
           } yield ()
 
           result.fold[Result](
@@ -109,7 +106,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                 _ ⇒ {
                   logger.info(s"Successfully created account for $nino")
                   // start the process to enrol the user but don't worry about the result
-                  enrolmentService.enrolUser(nino).fold(
+                  helpToSaveService.enrolUser(nino).fold(
                     e ⇒ logger.warn(s"Could not start process to enrol user $nino: $e"),
                     _ ⇒ logger.info(s"Started process to enrol user $nino")
                   )

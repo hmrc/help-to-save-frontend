@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthCon
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO, UserDetailsURI, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.config.AppName
@@ -38,10 +38,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
-                                            helpToSaveService: HelpToSaveService,
+                                            val helpToSaveService: HelpToSaveService,
                                             val sessionCacheConnector: SessionCacheConnector,
                                             jsonSchemaValidationService: JSONSchemaValidationService,
-                                            val enrolmentService: EnrolmentService,
                                             val app: Application,
                                             auditor: HTSAuditor,
                                             frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
@@ -149,7 +148,7 @@ class EligibilityCheckController  @Inject()(val messagesApi: MessagesApi,
           auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(r.legibleString)))
 
           // set the ITMP flag here but don't worry about the result
-          enrolmentService.setITMPFlag(nino).fold(
+          helpToSaveService.setITMPFlag(nino).fold(
             e ⇒ logger.warn(s"Could not set ITMP flag for user $nino: $e"),
             _ ⇒ logger.info(s"Set ITMP flag for user $nino")
           )

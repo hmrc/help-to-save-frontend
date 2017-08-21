@@ -31,7 +31,7 @@ class HelpToSaveServiceSpec extends TestSupport {
   val htsConnector = mock[HelpToSaveConnector]
   val nsiConnector = mock[NSIConnector]
 
-  val htsService = new HelpToSaveService(htsConnector, nsiConnector)
+  val htsService = new HelpToSaveServiceImpl(htsConnector, nsiConnector)
 
   "The HelpToSaveService" when {
 

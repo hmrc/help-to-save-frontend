@@ -19,9 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.mvc.Result
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -32,31 +31,31 @@ trait EnrolmentCheckBehaviour { this: FrontendController with Logging ⇒
 
   import EnrolmentCheckBehaviour._
 
-  val enrolmentService: EnrolmentService
+  val helpToSaveService: HelpToSaveService
 
   def checkIfAlreadyEnrolled(ifNotEnrolled: NINO ⇒ Future[Result],
                              handleEnrolmentServiceError: EnrolmentServiceError ⇒ Future[Result] = _ ⇒ InternalServerError
                             )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
-    val enrolled: EitherT[Future, EnrolmentCheckError, (String, EnrolmentStore.Status)] = for {
+    val enrolled: EitherT[Future, EnrolmentCheckError, (String, EnrolmentStatus)] = for {
       nino ← EitherT.fromOption[Future](htsContext.nino, NoNINO)
-      enrolmentStatus ← enrolmentService.getUserEnrolmentStatus(nino).leftMap[EnrolmentCheckError](e ⇒ EnrolmentServiceError(nino, e))
+      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus(nino).leftMap[EnrolmentCheckError](e ⇒ EnrolmentServiceError(nino, e))
     } yield (nino, enrolmentStatus)
 
     enrolled.fold[Future[Result]]( initialError ⇒
       handleError(initialError, handleEnrolmentServiceError),
       {
-        case (nino, EnrolmentStore.Enrolled(itmpHtSFlag)) ⇒
+        case (nino, EnrolmentStatus.Enrolled(itmpHtSFlag)) ⇒
           // if the user is enrolled but the itmp flag is not set then just
           // start the process to set the itmp flag here without worrying about the result
           if (!itmpHtSFlag) {
-            enrolmentService.setITMPFlag(nino).fold(
+            helpToSaveService.setITMPFlag(nino).fold(
               e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
               _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
             )
           }
           Ok("You've already got an account - yay!")
 
-        case (nino, EnrolmentStore.NotEnrolled) ⇒
+        case (nino, EnrolmentStatus.NotEnrolled) ⇒
           ifNotEnrolled(nino)
       }
     ).flatMap(identity)
