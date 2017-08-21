@@ -46,7 +46,7 @@ object DataEncrypter {
     case NonFatal(e) ⇒ Left(e.getMessage)
   }
 
-  private def base64Encode(bytes: Array[Byte]) = Base64.getEncoder.encodeToString(bytes)
+  private def base64Encode(bytes: Array[Byte]) = Base64.getUrlEncoder.encodeToString(bytes)
 
-  private def base64Decode(property: String) = Base64.getDecoder.decode(property)
+  private def base64Decode(property: String) = Base64.getUrlDecoder.decode(property)
 }

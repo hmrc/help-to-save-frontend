@@ -29,9 +29,7 @@ class EmailVerificationParamsSpec extends TestSupport {
 
   "EmailVerificationParams" must {
     "have a decode method that is the inverse of the encode method" in {
-      val rawEncrypted = params.encode
-      val plusesRecreated = rawEncrypted.replaceAll("%2b", "+")
-      val result = EmailVerificationParams.decode(plusesRecreated)
+      val result = EmailVerificationParams.decode(params.encode)
       result.get.email shouldBe email
       result.get.nino shouldBe nino
     }

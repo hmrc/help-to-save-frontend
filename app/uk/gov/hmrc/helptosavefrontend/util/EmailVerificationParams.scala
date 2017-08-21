@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.util
 case class EmailVerificationParams(nino: String, email: String) {
   def encode(): String = {
     val input = nino + ":" + email
-    DataEncrypter.encrypt(input).replaceAll("\\+", "%2b") // Note that + has a special meaning in urls - it is interpreted as a whitespace, for plus use %2b
+    DataEncrypter.encrypt(input)
   }
 }
 
