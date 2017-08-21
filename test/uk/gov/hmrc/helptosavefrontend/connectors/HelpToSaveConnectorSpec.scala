@@ -230,7 +230,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           Some(Json.parse(
             """
               |{
-              |  "enrolled" : false
+              |  "enrolled" : false,
+              |  "itmpHtSFlag" : false
               |}
             """.stripMargin))
         )))

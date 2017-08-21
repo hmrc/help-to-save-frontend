@@ -32,25 +32,19 @@ object EnrolmentStatus {
   case object NotEnrolled extends EnrolmentStatus
 
   implicit val enrolmentStatusReads: Reads[EnrolmentStatus] = new Reads[EnrolmentStatus]{
-    case class EnrolledJSON (enrolled: Boolean = true, itmpHtSFlag: Boolean)
-    case class NotEnrolledJSON (enrolled: Boolean = false)
+    case class EnrolmentStatusJSON (enrolled: Boolean, itmpHtSFlag: Boolean)
 
-    implicit val enrolledReads: Reads[EnrolledJSON] = Json.reads[EnrolledJSON]
-    implicit val ReadsFormat: Reads[NotEnrolledJSON] = Json.reads[NotEnrolledJSON]
+    implicit val enrolmentStatusJSONReads: Reads[EnrolmentStatusJSON] = Json.reads[EnrolmentStatusJSON]
 
     override def reads(json: JsValue): JsResult[EnrolmentStatus] =
-    // take advantage of the fact that EnrolledJSON has a non-optional field
-    // which NotEnrolledJSON so that we can detect when we have one or the other
-      Json.fromJson[EnrolledJSON](json).fold(
-        { e1 ⇒
-          Json.fromJson[NotEnrolledJSON](json).fold(
-            e2          ⇒ JsError(e1 ++ e2),
-            notEnrolled ⇒ JsSuccess(NotEnrolled)
-          )
-        },
-        enrolled ⇒ JsSuccess(Enrolled(enrolled.itmpHtSFlag))
-      )
+      Json.fromJson[EnrolmentStatusJSON](json).map{ result ⇒
+        if(result.enrolled){
+          EnrolmentStatus.Enrolled(result.itmpHtSFlag)
+        } else {
+          EnrolmentStatus.NotEnrolled
+        }
 
+      }
   }
 
 }
