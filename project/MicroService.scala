@@ -49,6 +49,7 @@ trait MicroService {
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
+      //testGrouping in Test := oneForkedJvmPerTest((definedTests in Test).value),
       routesGenerator := StaticRoutesGenerator
     )
     .configs(IntegrationTest)
