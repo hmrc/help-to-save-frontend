@@ -16,6 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
+import java.util.Base64
+import javax.crypto.{Cipher, SecretKey, SecretKeyFactory}
+import javax.crypto.spec.DESKeySpec
+
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
+
+import scala.util.control.NonFatal
+
 case class EmailVerificationParams(nino: String, email: String) {
   def encode(): String = {
     val input = nino + ":" + email
@@ -32,4 +40,31 @@ object EmailVerificationParams {
         if (params.length == 2) Some(EmailVerificationParams(params(0), params(1))) else None
     }
   }
+}
+
+object DataEncrypter {
+
+  private val key: SecretKey = {
+    val keySpec: DESKeySpec = new DESKeySpec(mongoEncSeed.getBytes("UTF-8"))
+    val keyFactory: SecretKeyFactory = SecretKeyFactory.getInstance("DES")
+    keyFactory.generateSecret(keySpec)
+  }
+
+  private val cipher: Cipher = Cipher.getInstance("DES")
+
+  def encrypt(data: String): String = {
+    cipher.init(Cipher.ENCRYPT_MODE, key)
+    base64Encode(cipher.doFinal(data.getBytes("UTF-8")))
+  }
+
+  def decrypt(data: String): Either[String,String] = try {
+    cipher.init(Cipher.DECRYPT_MODE, key)
+    Right(new String(cipher.doFinal(base64Decode(data)), "UTF-8"))
+  } catch {
+    case NonFatal(e) ⇒ Left(e.getMessage)
+  }
+
+  private def base64Encode(bytes: Array[Byte]) = Base64.getUrlEncoder.encodeToString(bytes)
+
+  private def base64Decode(property: String) = Base64.getUrlDecoder.decode(property)
 }

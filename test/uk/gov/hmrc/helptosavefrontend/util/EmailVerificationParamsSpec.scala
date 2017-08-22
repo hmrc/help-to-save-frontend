@@ -19,9 +19,10 @@ package uk.gov.hmrc.helptosavefrontend.util
 import java.nio.charset.Charset
 import java.util.Base64
 
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 
-class EmailVerificationParamsSpec extends TestSupport {
+class EmailVerificationParamsSpec extends TestSupport with GeneratorDrivenPropertyChecks {
 
   val nino = "AE1234XXX"
   val email = "email@gmail.com"
@@ -38,5 +39,43 @@ class EmailVerificationParamsSpec extends TestSupport {
       val s = new String(Base64.getEncoder.encode("wibble".getBytes()), Charset.forName("UTF-8"))
       EmailVerificationParams.decode(s) shouldBe None
     }
+  }
+
+  "The DataEncrypter" must {
+
+    "correctly encrypt and decrypt the data given" in {
+
+      val original = "user+mailbox/department=shipping@example.com"
+
+      val encoded = DataEncrypter.encrypt(original)
+
+      encoded should not be original
+
+      val decoded = DataEncrypter.decrypt(encoded)
+
+      decoded should be(Right(original))
+    }
+
+    "correctly encrypt and decrypt the data when there are special characters" in {
+
+      val original = "Dörte@Sören!#$%&'*+-/=?^_`उपयोगकर्ता@उदाहरण.कॉम.{|}~@example.com"
+
+      val encoded = DataEncrypter.encrypt(original)
+
+      encoded should not be original
+
+      val decoded = DataEncrypter.decrypt(encoded)
+
+      decoded should be(Right(original))
+    }
+
+    "return an error when there are errors decrypting" in {
+      forAll{ s: String ⇒
+        whenever(s.nonEmpty){
+          DataEncrypter.decrypt(s).isLeft shouldBe true
+        }
+      }
+    }
+
   }
 }
