@@ -38,6 +38,13 @@ class CreateAccountSteps extends WebPage {
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply", 200, "Strong", generateEligibleNINO)
   }
 
+  Given("""^a user has previously created an account$"""){ () =>
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
+    EligiblePage.startCreatingAccount()
+    ConfirmDetailsPage.continue()
+    CreateAccountPage.createAccount()
+  }
+
   When("""^they proceed through to the apply page$""") { () =>
     AboutPage.nextPage()
     EligibilityPage.nextPage()
@@ -83,4 +90,7 @@ class CreateAccountSteps extends WebPage {
     on(EligiblePage)
   }
 
+  Then("""^they will be on the account home page$"""){ () =>
+    pageSource.contains("You've already got an account - yay!")
+  }
 }

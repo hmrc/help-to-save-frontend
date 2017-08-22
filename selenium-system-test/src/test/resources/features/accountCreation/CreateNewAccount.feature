@@ -1,3 +1,4 @@
+@RunOnlyInDev
 Feature: Create new account
 
   Scenario: An unauthenticated user wishes to apply for a Help to Save account
@@ -44,6 +45,10 @@ Feature: Create new account
     When they start to create an account
     And they choose to create an account
     Then they see that the account is created
-#
-#    Scenario: An unauhenticated user attempts to access their account through the sign in link
-#      Given a user has previously created an account
+
+  Scenario: An unauthenticated user attempts to access their account through the sign in link
+    Given a user has previously created an account
+    And a user is on the apply page
+    When they click on the sign in link
+    And they have logged in and passed IV2
+    Then they will be on the account home page

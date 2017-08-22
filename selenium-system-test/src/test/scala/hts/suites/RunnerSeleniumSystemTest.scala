@@ -23,9 +23,9 @@ import org.junit.runner.RunWith
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
   features = Array("selenium-system-test/src/test/resources/features"),
-  glue = Array("hts.steps"),
-  format = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
-  tags = Array("~@ignore")
+  glue = Array("src.test.scala.hts.steps"),
+  plugin = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
+  tags = Array("@RunOnlyInDev")
 )
 class RunnerSeleniumSystemTest {}
 

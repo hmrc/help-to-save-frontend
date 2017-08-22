@@ -16,7 +16,7 @@
 
 package src.test.scala.hts.steps
 
-import src.test.scala.hts.pages.{AuthorityWizardPage, EligibilityCheckPage, Page}
+import src.test.scala.hts.pages.{AuthorityWizardPage, EligiblePage, Page}
 import src.test.scala.hts.utils.{Configuration, NINOGenerator}
 
 class EligibilitySteps extends Steps with NINOGenerator {
@@ -28,12 +28,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   When("""^they apply for Help to Save$""") { () =>
-    AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/check-eligibility")
-    AuthorityWizardPage.setCredentialStrength("strong")
-    AuthorityWizardPage.setConfidenceLevel(200)
-    AuthorityWizardPage.setNino(nino.getOrElse(""))
-    AuthorityWizardPage.submit()
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", nino.getOrElse(""))
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () =>
@@ -41,7 +36,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   When("""^they start to create an account$"""){ () =>
-    EligibilityCheckPage.startCreatingAccount()
+    EligiblePage.startCreatingAccount()
   }
 
   Given("""^an user is NOT in receipt of working tax credit$""") { () =>

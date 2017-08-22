@@ -45,7 +45,7 @@ trait Steps extends ScalaDsl with EN with Matchers {
   }
 
   After { _ ⇒
-//    _driver.foreach(_.quit())
+    _driver.foreach(_.quit())
     _driver = None
   }
 

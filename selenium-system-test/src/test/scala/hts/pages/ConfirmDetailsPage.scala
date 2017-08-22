@@ -19,12 +19,12 @@ package src.test.scala.hts.pages
 import org.openqa.selenium.{By, WebDriver}
 import src.test.scala.hts.utils.Configuration
 
-object ConfirmDetailsPage {
+object ConfirmDetailsPage extends WebPage {
 
-  def goToPage()(implicit driver: WebDriver): Unit =
+  def goToPage(): Unit =
     driver.navigate().to(Configuration.host + "/help-to-save/register/confirm-details")
 
-  def continue()(implicit driver: WebDriver): Unit = {
+  def continue(): Unit = {
     driver.findElement(By.id("continue")).click()
   }
 }

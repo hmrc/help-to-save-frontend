@@ -21,6 +21,8 @@ import src.test.scala.hts.utils.Configuration
 
 object AuthorityWizardPage extends WebPage {
 
+  var tempNino: String = ""
+
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String): Unit = {
     goToPage()
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
@@ -31,25 +33,30 @@ object AuthorityWizardPage extends WebPage {
     setConfidenceLevel(confidence)
     setCredentialStrength(credentialStrength)
     setNino(nino)
+    grabNino()
     submit()
   }
 
-  def goToPage()(implicit driver: WebDriver): Unit =
+  private def grabNino(): Unit = tempNino = find(name("nino")).get.underlying.getAttribute("value")
+
+  def getNino: String = tempNino
+
+  def goToPage(): Unit =
     driver.navigate().to(Configuration.authHost + "/auth-login-stub/gg-sign-in")
 
-  def setRedirect(url: String)(implicit driver: WebDriver): Unit =
+  def setRedirect(url: String): Unit =
     driver.findElement(By.name("redirectionUrl")).sendKeys(url)
 
-  def setNino(nino: String)(implicit driver: WebDriver): Unit =
+  def setNino(nino: String): Unit =
     driver.findElement(By.name("nino")).sendKeys(nino)
 
-  def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
+  def setCredentialStrength(strength: String): Unit =
     driver.findElement(By.name("credentialStrength")).sendKeys(strength)
 
-  def setConfidenceLevel(level: Int)(implicit driver: WebDriver): Unit =
+  def setConfidenceLevel(level: Int): Unit =
     driver.findElement(By.name("confidenceLevel")).sendKeys(level.toString)
 
-  def submit()(implicit driver: WebDriver): Unit =
+  def submit(): Unit =
     driver.findElement(By.cssSelector("input.button")).click()
 
 }

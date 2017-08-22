@@ -17,7 +17,7 @@
 package src.test.scala.hts.steps
 
 import cucumber.api.DataTable
-import src.test.scala.hts.pages.{AuthorityWizardPage, EligibilityCheckPage, Page}
+import src.test.scala.hts.pages.{AuthorityWizardPage, EligiblePage, Page}
 import src.test.scala.hts.utils.{Configuration, NINOGenerator}
 
 import scala.collection.JavaConverters._
@@ -61,7 +61,7 @@ class UserDetailsSteps extends Steps with NINOGenerator{
     println("NINO: " + nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.setNino(nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.submit()
-    EligibilityCheckPage.startCreatingAccount()
+    EligiblePage.startCreatingAccount()
   }
 
   Then("""^they see their details$"""){ () =>
