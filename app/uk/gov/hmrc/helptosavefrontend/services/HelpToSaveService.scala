@@ -19,28 +19,60 @@ package uk.gov.hmrc.helptosavefrontend.services
 import javax.inject.Singleton
 
 import cats.data.EitherT
-import com.google.inject.Inject
+import com.google.inject.{ImplementedBy, Inject}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, UserDetailsURI}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, NINO, Result, UserDetailsURI}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends Logging {
+@ImplementedBy(classOf[HelpToSaveServiceImpl])
+trait HelpToSaveService {
 
-  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): EitherT[Future,String,EligibilityCheckResult] =
-    helpToSaveConnector.getEligibility(nino)
+  def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
+
+  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult]
 
   def getUserInformation(nino: String,
                          userDetailsURI: UserDetailsURI
-                        )(implicit hc: HeaderCarrier): EitherT[Future,UserInformationRetrievalError,UserInfo] =
+                        )(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
+
+  def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
+
+  def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
+
+  def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit]
+
+  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
+
+}
+
+
+@Singleton
+class HelpToSaveServiceImpl @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends HelpToSaveService with Logging {
+
+  def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
+    helpToSaveConnector.getUserEnrolmentStatus(nino)
+
+  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult] =
+    helpToSaveConnector.getEligibility(nino)
+
+  def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
+    helpToSaveConnector.enrolUser(nino)
+
+  def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
+    helpToSaveConnector.setITMPFlag(nino)
+
+  def getUserInformation(nino: String, userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] =
     helpToSaveConnector.getUserInformation(nino, userDetailsURI)
 
-  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future,SubmissionFailure,SubmissionSuccess] =
-    EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure,SubmissionSuccess]] {
+  def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit] =
+    helpToSaveConnector.storeEmail(email, nino)
+
+  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
+    EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure, SubmissionSuccess]] {
       case success: SubmissionSuccess =>
         logger.info(s"Successfully created an account for ${userInfo.nino}")
         Right(success)
@@ -48,8 +80,6 @@ class HelpToSaveService @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIC
         logger.error(s"Could not create an account for ${userInfo.nino} due to $failure")
         Left(failure)
     })
-
-
 
 }
 

@@ -20,16 +20,15 @@ import javax.inject.Singleton
 
 import cats.instances.future._
 import com.google.inject.Inject
+import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
-import play.api.Application
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.repo.EmailStore
-import uk.gov.hmrc.helptosavefrontend.services.{EnrolmentService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.{DataEncrypter, Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -37,10 +36,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegisterController @Inject()(val messagesApi: MessagesApi,
-                                   helpToSaveService: HelpToSaveService,
+                                   val helpToSaveService: HelpToSaveService,
                                    val sessionCacheConnector: SessionCacheConnector,
-                                   val enrolmentService: EnrolmentService,
-                                   emailStore: EmailStore,
                                    val app: Application,
                                    frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
@@ -57,30 +54,36 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def getCreateAccountHelpToSavePage(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo {
+  def confirmEmail(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { nino ⇒
           checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
-            DataEncrypter.decrypt(confirmedEmail).fold(
-              { e ⇒
-                logger.warn(s"Could not decrypt email: $e")
-                InternalServerError
-              },{ email ⇒
-                val result = for{
-                  _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(email)))
-                  _ ← emailStore.storeConfirmedEmail(email, nino)
-                } yield ()
+            val result = for {
+              _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
+              _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail, nino)
+            } yield ()
 
-                result.fold(
-                  { e ⇒
-                    logger.warn(s"Could not store confirmed email: $e")
-                    InternalServerError
-                  },
-                  _ ⇒ Ok(views.html.register.create_account_help_to_save())
-                )
+            result.fold[Result](
+              { e ⇒
+                logger.warn(s"Could not write confirmed email for user $nino: $e")
+                InternalServerError
+              }, { _ ⇒
+                SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
               }
             )
+          }
+        }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithInfo {
+    implicit request ⇒
+      implicit htsContext ⇒
+        checkIfAlreadyEnrolled { _ ⇒
+          checkIfDoneEligibilityChecks { case (_, confirmedEmail) ⇒
+            confirmedEmail.fold[Future[Result]](
+              SeeOther(routes.RegisterController.getConfirmDetailsPage().url))(
+              _ ⇒ Ok(views.html.register.create_account_help_to_save()))
           }
         }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
@@ -103,7 +106,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                 _ ⇒ {
                   logger.info(s"Successfully created account for $nino")
                   // start the process to enrol the user but don't worry about the result
-                  enrolmentService.enrolUser(nino).fold(
+                  helpToSaveService.enrolUser(nino).fold(
                     e ⇒ logger.warn(s"Could not start process to enrol user $nino: $e"),
                     _ ⇒ logger.info(s"Started process to enrol user $nino")
                   )
@@ -122,16 +125,17 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
     * given action if the the session data indicates that they are eligible
     */
-  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[String]) ⇒ Future[Result]
+  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result]
                                           )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
-    checkSession{
+    checkSession {
       // no session data => user has not gone through the journey this session => take them to eligibility checks
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)}{
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+    } {
       session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
           // user has gone through journey already this sessions and were found to be ineligible
-          SeeOther(routes.EligibilityCheckController.notEligible().url)
-        )( userInfo ⇒
+          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
+        )(userInfo ⇒
           // user has gone through journey already this sessions and were found to be eligible
           ifEligible(userInfo, session.confirmedEmail)
         )

@@ -21,14 +21,14 @@ import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
-import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 
-class AccessAccountController  @Inject()(val messagesApi: MessagesApi,
-                                         val enrolmentService: EnrolmentService,
-                                         val app: Application,
-                                         frontendAuthConnector: FrontendAuthConnector)
+class AccessAccountController @Inject()(val messagesApi: MessagesApi,
+                                        val helpToSaveService: HelpToSaveService,
+                                        val app: Application,
+                                        frontendAuthConnector: FrontendAuthConnector)
   extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport with Logging
     with EnrolmentCheckBehaviour {
 
@@ -40,8 +40,8 @@ class AccessAccountController  @Inject()(val messagesApi: MessagesApi,
           _ ⇒ Ok(views.html.confirm_check_eligibility())
         }, {
           e ⇒
-          logger.warn(s"Could not check enrolment for ${e.nino} - proceeding to check eligibility")
-          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+            logger.warn(s"Could not check enrolment for ${e.nino} - proceeding to check eligibility")
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
         }
         )
   }(redirectOnLoginURL = FrontendAppConfig.accessAccountUrl)

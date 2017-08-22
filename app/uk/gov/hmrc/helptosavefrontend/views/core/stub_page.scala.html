@@ -16,11 +16,11 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-@(stubMessage: String)(implicit htsContext: HtsContext, request: Request[_],messages: Messages)
+@(stubMessage: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = "My Stub page",
-    bodyClasses = None){
+    bodyClasses = None) {
     <div class="grid-layout grid-layout--stacked">
         <p>@stubMessage</p>
     </div>

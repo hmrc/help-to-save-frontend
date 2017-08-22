@@ -11,11 +11,12 @@ GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptos
 
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
+GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 GET        /register/check-and-confirm-your-details         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmDetailsPage
 GET        /register/update-your-email-address              @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.getUpdateYourEmailAddress
-GET        /register/create-an-account/:confirmedEmail      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage(confirmedEmail)
+POST       /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
+GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String)
-GET        /register/not-eligible                           @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.notEligible

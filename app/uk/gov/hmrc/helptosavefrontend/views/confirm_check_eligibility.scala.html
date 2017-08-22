@@ -14,27 +14,27 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "This is crap") {
 
- <div class="grid-layout grid-layout--stacked">
-  <div class="grid-layout__column grid-layout__column--2-3">
-   <header class="page-header text">
-    <h2>😞 You don't have an account 😢</h2>
-   </header>
+    <div class="grid-layout grid-layout--stacked">
+        <div class="grid-layout__column grid-layout__column--2-3">
+            <header class="page-header text">
+                <h2>😞 You don't have an account 😢</h2>
+            </header>
 
-   <h1>Oh no! 😱😱😱</h1>
+            <h1>Oh no! 😱😱😱</h1>
 
 
-   <a href=@routes.EligibilityCheckController.getCheckEligibility()
-   id="continue"
-   class="button">Click here to check your eligibility for Help To Save</a>
-  </div>
- </div>
+            <a href=@routes.EligibilityCheckController.getCheckEligibility()
+            id="continue"
+            class="button">Click here to check your eligibility for Help To Save</a>
+        </div>
+    </div>
 
 }

@@ -14,12 +14,10 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.user_details
-@import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, NSIUserInfo}
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form, user_details}
 
-@import uk.gov.hmrc.helptosavefrontend.util.DataEncrypter
 @(userDetails: NSIUserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.check-and-confirm-your-details.title"), bodyClasses = None) {
@@ -27,11 +25,13 @@
         <span class="heading-secondary">
         @Messages("hts.register.check-and-confirm-your-details.step")
         </span>
-     @Messages("hts.register.check-and-confirm-your-details.title")
+        @Messages("hts.register.check-and-confirm-your-details.title")
     </h1>
     @user_details(userDetails)
     <p>@Messages("hts.register.check-and-confirm-your-details.p-1")</p>
-    <a href=@routes.RegisterController.getCreateAccountHelpToSavePage(DataEncrypter.encrypt(userDetails.contactDetails.email))
-       id="continue"
-       class="button">@Messages("hts.register.check-and-confirm-your-details.continue-button-label")</a>
+    <div class="grid-layout__column grid-layout__column--1-2">
+    @form(routes.RegisterController.confirmEmail(userDetails.contactDetails.email))(
+        Html(s"""<button id="continue">${Messages("hts.register.check-and-confirm-your-details.continue-button-label")}</button>"""))
+    </div>
+
 }

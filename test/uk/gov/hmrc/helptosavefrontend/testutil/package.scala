@@ -18,13 +18,12 @@ package uk.gov.hmrc.helptosavefrontend
 
 import org.scalacheck.Gen
 
-import scala.reflect.ClassTag
-import scala.reflect._
+import scala.reflect.{ClassTag, _}
 
 
 package object testutil {
 
   def sample[A: ClassTag](gen: Gen[A]): A =
     gen.sample
-    .getOrElse(sys.error(s"Could not generate type ${classTag[A].runtimeClass.getSimpleName}"))
+      .getOrElse(sys.error(s"Could not generate type ${classTag[A].runtimeClass.getSimpleName}"))
 }

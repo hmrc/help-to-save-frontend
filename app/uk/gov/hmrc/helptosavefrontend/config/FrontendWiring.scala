@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import com.google.inject.{Inject, Singleton}
-import play.api.Configuration
 import play.api.http.HttpVerbs.{GET ⇒ GET_VERB, POST ⇒ POST_VERB}
 import play.api.libs.json.Writes
 import uk.gov.hmrc.auth.core.PlayAuthConnector
@@ -25,9 +24,8 @@ import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector ⇒ Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.http.ws
 import uk.gov.hmrc.play.http.ws._
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, ws}
 
 import scala.concurrent.Future
 
@@ -85,7 +83,7 @@ class WSHttpProxy extends ws.WSHttp with WSProxy with RunMode with HttpAuditing 
     */
   def post[A](url: String,
               body: A,
-              headers: Map[String,String] = Map.empty[String,String]
+              headers: Map[String, String] = Map.empty[String, String]
              )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] =
-  doPost(url, body, headers.toSeq)
+    doPost(url, body, headers.toSeq)
 }

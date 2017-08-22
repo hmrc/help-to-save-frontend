@@ -17,8 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend.util
 
 import play.api.libs.json.{JsError, Reads}
-import uk.gov.hmrc.play.http.HttpResponse
 import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
+import uk.gov.hmrc.play.http.HttpResponse
+
 import scala.util.{Failure, Success, Try}
 
 object HttpResponseOps {
@@ -31,7 +32,7 @@ class HttpResponseOps(val response: HttpResponse) extends AnyVal {
     Try(response.json) match {
       case Success(jsValue) ⇒
         // use Option here to filter out null values
-        Option(jsValue).fold[Either[String,A]](
+        Option(jsValue).fold[Either[String, A]](
           Left("No JSON found in body of http response")
         )(_.validate[A].fold(
           errors ⇒

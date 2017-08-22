@@ -23,7 +23,6 @@ import java.time.format.DateTimeFormatter
 import cats.syntax.either._
 import com.eclipsesource.schema.{SchemaType, SchemaValidator}
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import com.typesafe.config.{Config, ConfigFactory, ConfigObject, ConfigRenderOptions}
 import play.api.Configuration
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
@@ -33,12 +32,12 @@ import scala.util.{Failure, Success, Try}
 @ImplementedBy(classOf[JSONSchemaValidationServiceImpl])
 trait JSONSchemaValidationService {
 
-  def validate(userInfo: JsValue): Either[String,JsValue]
+  def validate(userInfo: JsValue): Either[String, JsValue]
 
 }
 
 @Singleton
-class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends  JSONSchemaValidationService {
+class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends JSONSchemaValidationService {
 
   private val validationSchema: SchemaType = {
     val schemaStr = conf.underlying.getString("schema")
@@ -60,12 +59,12 @@ class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends  JS
   }
 
   private def extractDateOfBirth(userInfo: JsValue): Either[String, LocalDate] = {
-    (userInfo \ "dateOfBirth").toEither.fold[Either[String,LocalDate]](
+    (userInfo \ "dateOfBirth").toEither.fold[Either[String, LocalDate]](
       _ ⇒ Left("No date of birth found"),
       _ match {
-        case  JsString(s) ⇒
+        case JsString(s) ⇒
           Try(LocalDate.parse(s, dateFormatter)) match {
-            case Failure(e)     ⇒ Left(s"Could not parse date of birth: ${e.getMessage}")
+            case Failure(e) ⇒ Left(s"Could not parse date of birth: ${e.getMessage}")
             case Success(value) ⇒ Right(value)
           }
 
@@ -74,7 +73,7 @@ class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends  JS
     )
   }
 
-  private def validateAgainstSchema(userInfo: JsValue): Either[String,JsValue] =
+  private def validateAgainstSchema(userInfo: JsValue): Either[String, JsValue] =
     jsonValidator.validate(validationSchema, userInfo) match {
       case e: JsError ⇒ Left(s"User info was not valid against schema: ${e.prettyPrint()}")
       case JsSuccess(u, _) ⇒ Right(u)
