@@ -56,12 +56,6 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
         }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-//  def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo {
-//    implicit request ⇒
-//      implicit htsContext ⇒
-//     Ok(views.html.register.check_your_email())
-//  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
-
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request =>
       implicit htsContext ⇒

@@ -47,6 +47,5 @@ class EmailVerifyErrorSpec extends ViewBehavioursSpec {
       assertEqualsMessage(document("hts.email-verification.email-verify-error.already-verified.content"), "p.content",
         "hts.email-verification.email-verify-error.already-verified.content")
     }
-
   }
 }
