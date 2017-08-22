@@ -47,13 +47,11 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuratio
   val emailVerifyBaseURL = baseUrl("email-verification")
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
   def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
-
-  val continueURL = baseUrl("help-to-save-email-verification") + "/help-to-save/register/check-and-confirm-your-details"
+  val continueURL =  conf.underlying.getString("microservice.services.email-verification.continue-url")
   val templateId = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
-    val params = EmailVerificationParams(nino, newEmail).encode()
-    val continueUrlWithParams = continueURL + "?p=" + params
+    val continueUrlWithParams = continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()
     val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueUrlWithParams, Map())
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {

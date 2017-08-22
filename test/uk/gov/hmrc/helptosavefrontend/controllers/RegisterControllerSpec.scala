@@ -130,6 +130,16 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
         val result = doRequestWithQueryParam(params.encode())
         status(result) shouldBe Status.BAD_REQUEST
       }
+
+      "return a bad request when the link has been corrupted or is incorrect" in {
+        inSequence{
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+        }
+        val result = doRequestWithQueryParam("corrupt-link")
+        status(result) shouldBe Status.BAD_REQUEST
+      }
     }
 
 

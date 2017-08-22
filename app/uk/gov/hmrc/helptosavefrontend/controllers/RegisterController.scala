@@ -47,12 +47,12 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   import RegisterController.NSIUserInfoOps
 
-  def getConfirmDetailsPage(p: Option[String]): Action[AnyContent] = authorisedForHtsWithInfo {
+  def getConfirmDetailsPage(emailVerificationParams: Option[String]): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
           checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒ {
-            p match {
+            emailVerificationParams match {
               case None ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
               case Some(p) ⇒ {
                 val optionalParams = EmailVerificationParams.decode(p)
