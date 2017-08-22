@@ -26,13 +26,13 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-trait SessionBehaviour { this: FrontendController with Logging ⇒
+trait SessionBehaviour {
+  this: FrontendController with Logging ⇒
 
   val sessionCacheConnector: SessionCacheConnector
 
-  def checkSession(noSession: ⇒ Future[Result])(
-                   whenSession: HTSSession ⇒ Future[Result]
-                  )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
+  def checkSession(noSession: ⇒ Future[Result])(whenSession: HTSSession ⇒ Future[Result])
+                  (implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
     sessionCacheConnector.get.fold({
       e ⇒
         logger.warn(s"Could not read sessions data from keystore: $e")

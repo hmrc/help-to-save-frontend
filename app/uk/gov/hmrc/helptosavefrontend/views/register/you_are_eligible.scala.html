@@ -21,9 +21,9 @@
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title =   Messages("hts.register.you-are-eligible.title"),
+    title = Messages("hts.register.you-are-eligible.title"),
     sidebarLinks = None,
-    bodyClasses = None){
+    bodyClasses = None) {
     <div class="govuk-box-highlight" role="alert">
         <h1 class="bold-large">@Messages("hts.register.you-are-eligible.notification.h1")</h1>
         <p class="alert__message">@Messages("hts.register.you-are-eligible.notification.p")</p>

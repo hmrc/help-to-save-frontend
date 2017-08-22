@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.services
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import play.api.Configuration
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.validNSIUserInfo
@@ -87,7 +86,7 @@ class JSONSchemaValidationServiceImplSpec extends TestSupport {
       testError(
         validUserInfoJSON.replace(
           Fields.dob,
-          JsString(LocalDate.of(1799,5,5).format(dateTimeFormmater))
+          JsString(LocalDate.of(1799, 5, 5).format(dateTimeFormmater))
         ))
     }
 
@@ -95,7 +94,7 @@ class JSONSchemaValidationServiceImplSpec extends TestSupport {
       service.validate(
         validUserInfoJSON.replace(
           Fields.dob,
-          JsString(LocalDate.of(1800,1,1).format(dateTimeFormmater))
+          JsString(LocalDate.of(1800, 1, 1).format(dateTimeFormmater))
         )).isRight shouldBe true
     }
 
@@ -185,7 +184,7 @@ class JSONSchemaValidationServiceImplSpec extends TestSupport {
         testError(validUserInfoJSON.replaceInner(Fields.contactDetails, field, JsString("A" * 36)))
       }
 
-      if(number == 1 || number == 2) {
+      if (number == 1 || number == 2) {
         s"when given a NSIUserInfo that the json validation schema reports that the address$number field is missing, return a message" in {
           testError(validUserInfoJSON.removeInner(Fields.contactDetails, field))
         }

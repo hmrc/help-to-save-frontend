@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.helptosavefrontend.util.Email
 
 /**
   * Session data for the HTS journey
@@ -27,7 +28,7 @@ import play.api.libs.json.{Format, Json}
   * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
   *                               if they haven't
   */
-case class HTSSession(eligibilityCheckResult: Option[NSIUserInfo], confirmedEmail: Option[String])
+case class HTSSession(eligibilityCheckResult: Option[NSIUserInfo], confirmedEmail: Option[Email])
 
 object HTSSession {
   implicit val htsSessionFormat: Format[HTSSession] = Json.format[HTSSession]

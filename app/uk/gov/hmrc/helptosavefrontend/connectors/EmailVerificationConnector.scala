@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import com.google.inject.{ImplementedBy, Inject, Singleton}
 import java.time.Duration
 
+import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.Configuration
 import play.api.http.Status._
-import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
@@ -36,16 +35,18 @@ import scala.concurrent.Future
 trait EmailVerificationConnector {
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]]
+
   def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Boolean]]
 
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuration) extends EmailVerificationConnector with ServicesConfig with Logging {
+class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration) extends EmailVerificationConnector with ServicesConfig with Logging {
 
   val linkTTLMinutes = conf.underlying.getInt("microservice.services.email-verification.linkTTLMinutes")
   val emailVerifyBaseURL = baseUrl("email-verification")
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
+
   def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
   val continueURL =  conf.underlying.getString("microservice.services.email-verification.continue-url")
   val templateId = "awrs_email_verification"

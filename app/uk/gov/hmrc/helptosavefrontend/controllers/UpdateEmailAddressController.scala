@@ -22,11 +22,11 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.services.EnrolmentService
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
 
@@ -34,7 +34,7 @@ import scala.concurrent.Future
 
 @Singleton
 class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionCacheConnector,
-                                             val enrolmentService: EnrolmentService,
+                                             val helpToSaveService: HelpToSaveService,
                                              frontendAuthConnector: FrontendAuthConnector,
                                              emailVerificationConnector: EmailVerificationConnector
                                             )(implicit app: Application, val messagesApi: MessagesApi)
@@ -54,7 +54,13 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
             })
           }
         }
-  }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+//  def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo {
+//    implicit request ⇒
+//      implicit htsContext ⇒
+//     Ok(views.html.register.check_your_email())
+//  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request =>
@@ -73,5 +79,5 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
              }
            }
         )
-  }
+  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-case class EligibilityCheckResult(result: Either[IneligibilityReason,EligibilityReason])
+case class EligibilityCheckResult(result: Either[IneligibilityReason, EligibilityReason])
 
 sealed trait EligibilityReason {
   val legibleString: String
@@ -35,7 +35,7 @@ object EligibilityReason {
   }
 
   /** Entitled to WTC and in receipt of positive WTC/CTC Tax Credit */
-  case object WTC extends EligibilityReason  {
+  case object WTC extends EligibilityReason {
     val legibleString: String =
       "Entitled to WTC and in receipt of positive WTC/CTC Tax Credit"
   }
@@ -67,9 +67,9 @@ object IneligibilityReason {
     * Not entitled to WTC and
     * (if receivingUC = true)  in receipt of UC but income is insufficient
     * (if receivingUC = false) not in receipt of UC
-    * */
+    **/
   case class NotEntitledToWTC(receivingUC: Boolean) extends IneligibilityReason {
-    val legibleString: String = if(receivingUC) {
+    val legibleString: String = if (receivingUC) {
       "Not entitled to WTC and in receipt of UC but income is insufficient"
     } else {
       "Not entitled to WTC and not in receipt of UC"
@@ -80,21 +80,21 @@ object IneligibilityReason {
     * Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and
     * (if receivingUC = true)  in receipt of UC but income is insufficient
     * (if receivingUC = false) not in receipt of UC
-    * */
+    **/
   case class EntitledToWTCButNoWTC(receivingUC: Boolean) extends IneligibilityReason {
-    val legibleString: String = if(receivingUC) {
+    val legibleString: String = if (receivingUC) {
       "Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and in receipt of UC but income is insufficient"
     } else {
       "Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and not in receipt of UC"
     }
   }
 
-  def fromInt(i: Int): Option[IneligibilityReason] =  i match{
+  def fromInt(i: Int): Option[IneligibilityReason] = i match {
     case 1 ⇒ Some(AccountAlreadyOpened)
     case 2 ⇒ Some(NotEntitledToWTC(receivingUC = false))
     case 3 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = false))
-    case 4 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = true))  // scalastyle:ignore magic.number
-    case 5 ⇒ Some(NotEntitledToWTC(receivingUC = true))  // scalastyle:ignore magic.number
+    case 4 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = true)) // scalastyle:ignore magic.number
+    case 5 ⇒ Some(NotEntitledToWTC(receivingUC = true)) // scalastyle:ignore magic.number
     case _ ⇒ None
   }
 

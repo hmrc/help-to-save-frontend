@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import javax.inject.{Singleton, Inject}
+import javax.inject.{Inject, Singleton}
+
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuditConnector
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton

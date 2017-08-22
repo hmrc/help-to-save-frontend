@@ -28,8 +28,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig
-{
+class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig {
   lazy val emailVerifyBaseURL = baseUrl("email-verification")
   val nino = "AE123XXXX"
   val email = "email@gmail.com"
@@ -38,7 +37,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
   lazy val connector = {
     val config = Configuration("microservice.services.email-verification.linkTTLMinutes" → " 120",
                                "microservice.services.email-verification.continue-url" ->
-                                 "http://localhost:7000/help-to-save/register/check-and-confirm-your-details"
+                                 "http://localhost:7000/help-to-save/check-and-confirm-your-details"
     )
     new EmailVerificationConnectorImpl(mockHttp, config)
   }
@@ -80,7 +79,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
     "throw a runtime exception If email TTL does not exist in the configuration" in {
       val config = Configuration("x" → "y")
-      an [Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], config)
+      an[Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], config)
     }
   }
 
@@ -121,7 +120,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   "continueURL" should {
     "return the correct url" in {
-      connector.continueURL shouldBe "http://localhost:7000/help-to-save/register/check-and-confirm-your-details"
+      connector.continueURL shouldBe "http://localhost:7000/help-to-save/check-and-confirm-your-details"
     }
   }
 }

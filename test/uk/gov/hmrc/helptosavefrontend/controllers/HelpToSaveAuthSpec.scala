@@ -25,8 +25,8 @@ import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{CheckEligibilityUrl, encoded}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{checkEligibilityUrl, encoded}
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -55,14 +55,14 @@ class HelpToSaveAuthSpec extends TestSupport {
   private def actionWithNoEnrols = htsAuth.authorisedForHts {
     implicit request ⇒
       implicit htsContext ⇒
-      Future.successful(Ok(""))
-  }
+        Future.successful(Ok(""))
+  }(FrontendAppConfig.checkEligibilityUrl)
 
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
-          Future.successful(Ok(""))
-  }
+        Future.successful(Ok(""))
+  }(FrontendAppConfig.checkEligibilityUrl)
 
   private def mockAuthWith(error: String) =
     mockAuthWithRetrievalsWith(AuthWithConfidence)(fromString(error))
@@ -84,7 +84,7 @@ class HelpToSaveAuthSpec extends TestSupport {
         val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
-        redirectTo should include(encoded(CheckEligibilityUrl))
+        redirectTo should include(encoded(checkEligibilityUrl))
       }
     }
 

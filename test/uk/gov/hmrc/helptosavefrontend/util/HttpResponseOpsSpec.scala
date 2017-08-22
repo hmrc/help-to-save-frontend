@@ -23,6 +23,7 @@ import uk.gov.hmrc.play.http.HttpResponse
 class HttpResponseOpsSpec extends TestSupport {
 
   case class Test1(a: Int)
+
   case class Test2(b: String)
 
   implicit val test1Format: Format[Test1] = Json.format[Test1]
@@ -31,6 +32,7 @@ class HttpResponseOpsSpec extends TestSupport {
 
   case class ThrowingHttpResponse() extends HttpResponse {
     override def json: JsValue = throw new Exception()
+
     override def body: String = ""
   }
 

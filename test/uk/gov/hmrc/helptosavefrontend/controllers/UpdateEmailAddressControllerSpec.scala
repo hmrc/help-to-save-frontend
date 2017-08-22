@@ -26,8 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, VerifyEmailError, validNSIUserInfo}
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, VerifyEmailError, validNSIUserInfo}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -45,8 +44,9 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
   val mockHttp = mock[WSHttp]
 
-  lazy val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockEnrolmentService, frontendAuthConnector, mockEmailVerificationConnector
+  lazy val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockHelpToSaveService, frontendAuthConnector, mockEmailVerificationConnector
   )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]){
+
     override val authConnector = mockAuthConnector
   }
 
@@ -61,13 +61,13 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
       def getResult(): Future[Result] = controller.getUpdateYourEmailAddress(FakeRequest())
 
-      testCommonEnrolmentAndSessionBehaviour(getResult)
+      behave like commonEnrolmentAndSessionBehaviour(getResult)
 
       "return the update your email page if the user is not already enrolled and the " +
         "session data indicates that they are eligible" in {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
         val result = getResult()
@@ -80,7 +80,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         "session data indicates that they are ineligible" in {
         inSequence {
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
         val result = getResult()

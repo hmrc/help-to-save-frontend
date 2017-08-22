@@ -23,7 +23,7 @@ import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{charset, contentAsString, contentType}
-import uk.gov.hmrc.auth.core.{EmptyPredicate, EmptyRetrieval, Predicate, Retrieval}
+import uk.gov.hmrc.auth.core.{EmptyPredicate, EmptyRetrieval, Predicate}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -40,8 +40,8 @@ class IntroductionControllerSpec extends TestSupport {
 
   def mockAuthorise(loggedIn: Boolean) =
     (frontendAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier))
-    .expects(EmptyPredicate, EmptyRetrieval, *)
-    .returning(if(loggedIn) Future.successful(()) else Future.failed(new Exception("")))
+      .expects(EmptyPredicate, EmptyRetrieval, *)
+      .returning(if (loggedIn) Future.successful(()) else Future.failed(new Exception("")))
 
   "GET /" should {
     "the getAboutHelpToSave should return html" in {

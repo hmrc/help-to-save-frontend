@@ -16,11 +16,11 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @(title: String,
-  sidebarLinks: Option[Html] = None,
-  contentHeader: Option[Html] = None,
-  bodyClasses: Option[String] = None,
-  mainClass: Option[String] = None,
-  scriptElem: Option[Html] = None)(mainContent: Html)(implicit htsContext: HtsContext, request : Request[_], messages: Messages)
+        sidebarLinks: Option[Html] = None,
+        contentHeader: Option[Html] = None,
+        bodyClasses: Option[String] = None,
+        mainClass: Option[String] = None,
+        scriptElem: Option[Html] = None)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @import uk.gov.hmrc.play.views.html.layouts
 
@@ -28,18 +28,18 @@
 @serviceInfoContent = {}
 
 @sidebar = {
-    @if(sidebarLinks.isDefined) {
-        @layouts.sidebar(sidebarLinks.get, Some("sidebar"))
-    }
+@if(sidebarLinks.isDefined) {
+    @layouts.sidebar(sidebarLinks.get, Some("sidebar"))
+}
 }
 
 
 @govuk_wrapper(appConfig = uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig,
-               title = title,
-               mainClass = mainClass,
-               bodyClasses = bodyClasses,
-               sidebar = sidebar,
-               contentHeader = contentHeader,
-               mainContent = layouts.article(mainContent),
-               scriptElem = scriptElem
+    title = title,
+    mainClass = mainClass,
+    bodyClasses = bodyClasses,
+    sidebar = sidebar,
+    contentHeader = contentHeader,
+    mainContent = layouts.article(mainContent),
+    scriptElem = scriptElem
 )

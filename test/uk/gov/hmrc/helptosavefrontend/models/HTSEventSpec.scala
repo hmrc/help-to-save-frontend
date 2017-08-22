@@ -38,12 +38,12 @@ class HTSEventSpec extends TestSupport {
       val pNumber = "01254-888888"
       val completeUserInfo =
         validNSIUserInfo copy (contactDetails =
-          validNSIUserInfo.contactDetails copy (address4 = Some(addr4),
-                                                address5 = Some(addr5),
-                                                countryCode = Some(cc),
-                                                email = "this@that.com",
-                                                phoneNumber = Some(pNumber),
-                                                communicationPreference = "02"))
+          validNSIUserInfo.contactDetails copy(address4 = Some(addr4),
+            address5 = Some(addr5),
+            countryCode = Some(cc),
+            email = "this@that.com",
+            phoneNumber = Some(pNumber),
+            communicationPreference = "02"))
 
       val event = new ApplicationSubmittedEvent("hts-frontend", completeUserInfo)(new HeaderCarrier)
       event.detail.size shouldBe 15
