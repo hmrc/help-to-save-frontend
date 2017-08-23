@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.utils
+package hts.utils
 
 object Environment extends Enumeration {
   type Name = Value

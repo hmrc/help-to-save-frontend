@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.steps
+package hts.steps
 
 import cucumber.api.DataTable
-import src.test.scala.hts.pages.{AuthorityWizardPage, EligiblePage, Page}
-import src.test.scala.hts.utils.{Configuration, NINOGenerator}
+import hts.pages.{AuthorityWizardPage, EligiblePage, Page}
+import hts.utils.{Configuration, NINOGenerator}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable

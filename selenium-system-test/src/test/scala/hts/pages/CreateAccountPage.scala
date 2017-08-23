@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.pages
+package hts.pages
 
-import src.test.scala.hts.utils.Configuration
+import hts.utils.Configuration
 
 object CreateAccountPage extends WebPage {
 

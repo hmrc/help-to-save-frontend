@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.pages
+package hts.pages
 
 object EligiblePage extends WebPage {
 

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.steps
+package hts.steps
 
-import src.test.scala.hts.pages.{AuthorityWizardPage, EligiblePage, Page}
-import src.test.scala.hts.utils.{Configuration, NINOGenerator}
+import hts.pages.{AuthorityWizardPage, EligiblePage, Page}
+import hts.utils.{Configuration, NINOGenerator}
 
 class EligibilitySteps extends Steps with NINOGenerator {
 

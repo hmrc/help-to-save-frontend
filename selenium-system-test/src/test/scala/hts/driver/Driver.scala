@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.driver
+package hts.driver
 
 import java.util.concurrent.TimeUnit
 
 import cats.syntax.either._
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
-import org.openqa.selenium.firefox.{FirefoxDriver, MarionetteDriver}
 import org.openqa.selenium.phantomjs.{PhantomJSDriver, PhantomJSDriverService}
-import org.openqa.selenium.remote.{BrowserType, DesiredCapabilities}
+import org.openqa.selenium.remote.DesiredCapabilities
 
 object Driver {
 

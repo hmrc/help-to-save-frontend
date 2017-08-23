@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.pages.registrationPages
+package hts.pages.registrationPages
 
-import src.test.scala.hts.pages.WebPage
+import hts.pages.WebPage
 
 object HowWeCalculateBonusesPage extends WebPage {
 

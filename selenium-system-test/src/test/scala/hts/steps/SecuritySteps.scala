@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.steps
+package hts.steps
 
-import src.test.scala.hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
-import src.test.scala.hts.utils.{Configuration, NINOGenerator}
+import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
+import hts.utils.{Configuration, NINOGenerator}
 
 class SecuritySteps extends Steps with NINOGenerator {
 

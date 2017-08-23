@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.pages.registrationPages
+package hts.pages.registrationPages
 
-import src.test.scala.hts.pages.WebPage
-import src.test.scala.hts.utils.Configuration.host
+import hts.pages.WebPage
+import hts.utils.Configuration
 
 object AboutPage extends WebPage {
 
   def navigateToAboutPage(): Unit = {
-    go to s"$host/help-to-save/apply-for-help-to-save/about-help-to-save"
+    go to s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
   }
 
 }

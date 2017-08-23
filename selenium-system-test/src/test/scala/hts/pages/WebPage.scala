@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.pages
+package hts.pages
 
+import hts.steps.Steps
+import hts.utils.NINOGenerator
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, Keys, WebElement}
 import org.scalatest._
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.time.{Millis, Seconds, Span}
-import src.test.scala.hts.steps.Steps
-import src.test.scala.hts.utils.NINOGenerator
 
 
 trait WebPage extends org.scalatest.selenium.Page

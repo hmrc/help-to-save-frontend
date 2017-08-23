@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.steps
+package hts.steps
 
-import src.test.scala.hts.pages.registrationPages._
-import src.test.scala.hts.pages._
-import src.test.scala.hts.utils.Configuration
+import hts.pages.{WebPage, _}
+import hts.pages.registrationPages._
+import hts.utils.Configuration
 
 class CreateAccountSteps extends WebPage {
 
