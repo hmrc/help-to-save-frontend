@@ -63,7 +63,7 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
           logger.warn("[EmailVerification] - Bad Request from email verification service")
           Left(RequestNotValidError())
         case CONFLICT ⇒
-          logger.info(s"[EmailVerification] - Email: $newEmail already verified")
+          logger.info("[EmailVerification] - Email address already verified")
           Left(AlreadyVerified())
         case SERVICE_UNAVAILABLE ⇒
           logger.warn("[EmailVerification] - Email Verification service not currently available")
@@ -80,17 +80,18 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
     http.get(getURL).map { response ⇒
       response.status match {
         case OK ⇒
-          logger.info(s"[EmailVerification] - email: $email is verified")
+          logger.info("[EmailVerification] - Email address is verified")
           Right(true)
         case NOT_FOUND ⇒
-          logger.warn(s"[EmailVerification] - email: $email is not verified")
+          logger.warn("[EmailVerification] - Email address is not verified")
           Right(false)
         case SERVICE_UNAVAILABLE ⇒
-          logger.warn(s"[EmailVerification] - Email Verification service not available. Email: $email")
+          logger.warn("[EmailVerification] - Email Verification service not available")
           Left(VerificationServiceUnavailable())
         case _ ⇒
-          logger.warn(s"[EmailVerification] - Unexpected status received from email verification for email: $email")
-          Left(BackendError(s"Unexpected response from email verification service. Status = ${response.status}, body = ${response.body.toString}"))
+          logger.warn("[EmailVerification] - Unexpected status received from email verification")
+          Left(BackendError(s"Unexpected response from email verification service. Status = ${response.status}, " +
+            s"body = ${response.body.toString}"))
       }
     }
   }

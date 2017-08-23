@@ -26,7 +26,7 @@ import scala.util.control.NonFatal
 
 case class EmailVerificationParams(nino: String, email: String) {
   def encode(): String = {
-    val input = nino + ":" + email
+    val input = nino + "§" + email
     DataEncrypter.encrypt(input)
   }
 }
@@ -36,7 +36,7 @@ object EmailVerificationParams {
     DataEncrypter.decrypt(base64) match {
       case Left(_) ⇒ None
       case Right(decrypted) ⇒
-        val params = decrypted.split(":")
+        val params = decrypted.split("§")
         if (params.length == 2) Some(EmailVerificationParams(params(0), params(1))) else None
     }
   }
