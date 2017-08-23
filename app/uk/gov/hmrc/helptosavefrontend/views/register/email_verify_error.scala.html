@@ -31,14 +31,14 @@ sidebarLinks = None,
 bodyClasses = None) {
     @{
         val messageKey = error match {
-            case RequestNotValidError ⇒ "hts.email-verification.email-verify-error.request-not-valid.content"
-            case VerificationServiceUnavailable ⇒ "hts.email-verification.email-verify-error.verification-service-unavailable.content"
-            case AlreadyVerified ⇒ "hts.email-verification.email-verify-error.already-verified.content"
-            case BackendError ⇒ "hts.email-verification.email-verify-error.backend-error.content"
-            case BadContinueURL ⇒ "hts.email-verification.email-verify-error.bad-continue-url.content"
+            case RequestNotValidError ⇒ "hts.email-verification.error.request-not-valid.content"
+            case VerificationServiceUnavailable ⇒ "hts.email-verification.error.verification-service-unavailable.content"
+            case AlreadyVerified ⇒ "hts.email-verification.error.already-verified.content"
+            case BackendError ⇒ "hts.email-verification.error.backend-error.content"
+            case BadContinueURL ⇒ "hts.email-verification.error.bad-continue-url.content"
         }
 
-            <h1>@messages("hts.email-verification.email-verify-error.title")</h1>
+            <h1>@messages("hts.email-verification.error.title")</h1>
             <p class="content">@messages(messageKey)</p>
     }
 }

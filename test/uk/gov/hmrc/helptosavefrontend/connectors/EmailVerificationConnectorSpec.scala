@@ -64,17 +64,17 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
     "return 400 when given bad json" in {
       mockPost(Status.BAD_REQUEST, None)
-      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError())
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError)
     }
 
     "return 409 when the email has already been verified" in {
       mockPost(Status.CONFLICT, None)
-      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified())
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified)
     }
 
     "return a verification service unavailable error when the email verification service is down" in {
       mockPost(Status.SERVICE_UNAVAILABLE, None)
-      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
     }
 
     "throw a runtime exception If email TTL does not exist in the configuration" in {
@@ -101,7 +101,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
     "return a VerificationServiceUnavailable error if the email verification service is down" in {
       mockGet(Status.SERVICE_UNAVAILABLE, email, None)
-      await(connector.isVerified(email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
+      await(connector.isVerified(email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
     }
   }
 

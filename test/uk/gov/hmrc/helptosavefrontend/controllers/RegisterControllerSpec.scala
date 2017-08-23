@@ -113,7 +113,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
         contentAsString(result) should include(testEmail)
       }
 
-      "return a bad request when the user has not already enrolled and the given nino doesn't match the session nino" in {
+      "return an OK status when the user has not already enrolled and the given nino doesn't match the session nino" in {
         val testEmail = "email@gmail.com"
         val theNino = "AE1234XXX"
         inSequence{
@@ -123,17 +123,17 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
         }
         val params = EmailVerificationParams(theNino, testEmail)
         val result = doRequestWithQueryParam(params.encode())
-        status(result) shouldBe Status.BAD_REQUEST
+        status(result) shouldBe Status.OK
       }
 
-      "return a bad request when the link has been corrupted or is incorrect" in {
+      "return an OK status when the link has been corrupted or is incorrect" in {
         inSequence{
           mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
         val result = doRequestWithQueryParam("corrupt-link")
-        status(result) shouldBe Status.BAD_REQUEST
+        status(result) shouldBe Status.OK
       }
     }
 

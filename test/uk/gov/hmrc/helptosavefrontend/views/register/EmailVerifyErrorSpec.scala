@@ -17,35 +17,36 @@
 package uk.gov.hmrc.helptosavefrontend.views.register
 
 import org.jsoup.Jsoup
-import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.AlreadyVerified
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.email_verify_error
 
 class EmailVerifyErrorSpec extends ViewBehavioursSpec {
 
   val mockHtsContext = mock[HtsContext]
-  def view(messageKey: String) = email_verify_error(messageKey)(mockHtsContext, request, messages)
-  def document(messageKey: String) = Jsoup.parse(view(messageKey).toString())
+  def view(messageKey: VerifyEmailError) = email_verify_error(messageKey)(mockHtsContext, request, messages)
+  def document(messageKey: VerifyEmailError) = Jsoup.parse(view(messageKey).toString())
 
   "CheckYourEmail" should {
     "when rendered have the correct banner title" in {
-      val nav = document("hts.email-verification.email-verify-error.already-verified.content").getElementById("proposition-menu")
+      val nav = document(AlreadyVerified).getElementById("proposition-menu")
       val span = nav.children().first()
       span.text shouldBe messagesApi("hts.helpers.header-page")
     }
 
     "when rendered must display the correct browser title" in {
-      assertEqualsMessage(document("hts.email-verification.email-verify-error.already-verified.content"), "title",
+      assertEqualsMessage(document(AlreadyVerified), "title",
         "hts.introduction.title")
     }
 
     "when rendered must have the correct page title" in {
-      assertPageTitleEqualsMessage(document("hts.email-verification.email-verify-error.already-verified.content"),
-        "hts.email-verification.email-verify-error.title")
+      assertPageTitleEqualsMessage(document(AlreadyVerified),
+        "hts.email-verification.error.title")
     }
 
     "when rendered must display user content" in {
-      assertEqualsMessage(document("hts.email-verification.email-verify-error.already-verified.content"), "p.content",
-        "hts.email-verification.email-verify-error.already-verified.content")
+      assertEqualsMessage(document(AlreadyVerified), "p.content",
+        "hts.email-verification.error.already-verified.content")
     }
   }
 }
