@@ -50,7 +50,7 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
             _.eligibilityCheckResult.fold(
               Ok(views.html.core.not_eligible())
             )( userInfo ⇒ {
-              Ok(views.html.register.update_email_address(userInfo.contactDetails.email, Some(UpdateEmailForm.verifyEmailForm)))
+              Ok(views.html.register.update_email_address(userInfo.contactDetails.email, UpdateEmailForm.verifyEmailForm))
             })
           }
         }
@@ -61,7 +61,7 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
       implicit htsContext ⇒
         UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
           formWithErrors => {
-            Future.successful(BadRequest(views.html.register.update_email_address("errors", Some(formWithErrors))))
+            Future.successful(BadRequest(views.html.register.update_email_address("errors", formWithErrors)))
           },
           (details: UpdateEmail) => {
            emailVerificationConnector.verifyEmail(htsContext.nino.getOrElse(""), details.email).map {
