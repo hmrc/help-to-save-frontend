@@ -16,12 +16,29 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-@(errorMessageKey: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
+
+@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.RequestNotValidError
+@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.VerificationServiceUnavailable
+@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.AlreadyVerified
+@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
+
+@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BadContinueURL
+@(error: VerifyEmailError)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
 title = messages("hts.introduction.title"),
 sidebarLinks = None,
 bodyClasses = None) {
+    @{
+        val messageKey = error match {
+            case RequestNotValidError ⇒ "hts.email-verification.email-verify-error.request-not-valid.content"
+            case VerificationServiceUnavailable ⇒ "hts.email-verification.email-verify-error.verification-service-unavailable.content"
+            case AlreadyVerified ⇒ "hts.email-verification.email-verify-error.already-verified.content"
+            case BackendError ⇒ "hts.email-verification.email-verify-error.backend-error.content"
+            case BadContinueURL ⇒ "hts.email-verification.email-verify-error.bad-continue-url.content"
+        }
 
-<h1>@messages("hts.email-verification.email-verify-error.title")</h1>
-<p class="content">@messages(errorMessageKey)</p>
+            <h1>@messages("hts.email-verification.email-verify-error.title")</h1>
+            <p class="content">@messages(messageKey)</p>
+    }
 }
