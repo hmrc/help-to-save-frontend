@@ -15,10 +15,11 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+
 @(appConfig: uk.gov.hmrc.helptosavefrontend.config.AppConfig,
         title: String,
         mainClass: Option[String] = None,
-        mainDataAttributes: Option[Html] = None,
+        mainDataAttributes: Option[Html] = Some(Html("""ga-event-category = "Sign outxxx" ga-event-action = "Sign outyyy" """)),
         bodyClasses: Option[String] = None,
         sidebar: Html = HtmlFormat.empty,
         contentHeader: Option[Html] = None,
@@ -34,9 +35,7 @@
 @linkElement = {
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/help-to-save-frontend.css")' />
         <!--[if lte IE 8 ]>
-    <link rel="stylesheet" href="
-@routes.Assets.versioned("stylesheets/help-to-save-frontend-ie.css")
-    " />
+    <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/help-to-save-frontend-ie.css")' />
     <![endif]-->
 }
 
@@ -49,10 +48,11 @@
 }
 
 @headerNavLinks = {
-@if(htsContext.isAuthorised) {
-    <li><a id="navSignout" href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out">
-        Sign out</a></li>
-}
+    @if(htsContext.isAuthorised) {
+        <li><a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out">Sign out</a>
+            <a href="/testing/xxx" id="ga-track-anchor-click" class="ga-track-event">Testing</a>
+        </li>
+    }
 }
 
 @insideHeader = {
@@ -111,3 +111,5 @@
 }
 
 @hmrcGovUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
+
+<script src='@routes.Assets.versioned("javascripts/gaTracking.js")' type="text/javascript"></script>
