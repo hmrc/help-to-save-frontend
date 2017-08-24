@@ -59,16 +59,22 @@ class UpdateEmailAddressController @Inject()(val sessionCacheConnector: SessionC
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request =>
       implicit htsContext ⇒
-        UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
-          formWithErrors => {
-            Future.successful(BadRequest(views.html.register.update_email_address("errors", formWithErrors)))
-          },
-          (details: UpdateEmail) => {
-           emailVerificationConnector.verifyEmail(htsContext.nino.getOrElse(""), details.email).map {
-             case Right(_) ⇒ Ok(views.html.register.check_your_email())
-             case Left(e) ⇒ Ok(views.html.register.email_verify_error(e))
-             }
-           }
-        )
+        checkIfAlreadyEnrolled { nino ⇒
+          checkSession {
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+          } { _ ⇒
+            UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
+              formWithErrors => {
+                Future.successful(BadRequest(views.html.register.update_email_address("errors", formWithErrors)))
+              },
+              (details: UpdateEmail) => {
+                emailVerificationConnector.verifyEmail(nino, details.email).map {
+                  case Right(_) ⇒ Ok(views.html.register.check_your_email())
+                  case Left(e) ⇒ Ok(views.html.register.email_verify_error(e))
+                }
+              }
+            )
+          }
+    }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 }

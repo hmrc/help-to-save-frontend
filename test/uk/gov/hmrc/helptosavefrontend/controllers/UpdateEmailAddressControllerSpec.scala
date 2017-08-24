@@ -96,6 +96,8 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(Right())
       }
       val result = await(controller.onSubmit()(fakePostRequest))
@@ -109,6 +111,8 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(Left(AlreadyVerified))
       }
       val result = await(controller.onSubmit()(fakePostRequest))
@@ -121,6 +125,8 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(Left(RequestNotValidError))
       }
       val result = controller.onSubmit()(fakePostRequest)
@@ -133,6 +139,8 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(Left(VerificationServiceUnavailable))
       }
       val result = controller.onSubmit()(fakePostRequest)
@@ -145,6 +153,8 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
       inSequence {
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(Left(BackendError))
       }
       val result = controller.onSubmit()(fakePostRequest)
