@@ -130,6 +130,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
         val params = EmailVerificationParams(theNino, testEmail)
         val result = doRequestWithQueryParam(params.encode())
         status(result) shouldBe Status.OK
+        contentAsString(result) should include("Email verification error")
       }
 
       "return an OK status when the link has been corrupted or is incorrect" in {
@@ -140,6 +141,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
         }
         val result = doRequestWithQueryParam("corrupt-link")
         status(result) shouldBe Status.OK
+        contentAsString(result) should include("Email verification error")
       }
     }
 
