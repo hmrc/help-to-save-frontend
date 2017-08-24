@@ -34,4 +34,3 @@ tmp
 .idea_modules
 bin
 **/*.sc
-drivers/*
