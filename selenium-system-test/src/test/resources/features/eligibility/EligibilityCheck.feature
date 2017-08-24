@@ -1,3 +1,4 @@
+@RunOnlyInDev
 Feature: User undergoes eligibility check
 
   Scenario: User is in receipt of working tax credit and so is eligible

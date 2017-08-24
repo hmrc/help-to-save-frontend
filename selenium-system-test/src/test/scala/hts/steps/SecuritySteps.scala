@@ -34,8 +34,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Given(s"""^their confidence level is $confidenceLevelRegex$$""") { (level: Int) =>
-    AuthorityWizardPage.setConfidenceLevel(level)
-    AuthorityWizardPage.submit()
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", level, "Strong", generateEligibleNINO)
   }
 
   Then("""^they are forced into going through IV before being able to proceed with their HtS application$""") { () =>

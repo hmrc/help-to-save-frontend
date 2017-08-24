@@ -22,7 +22,7 @@ import hts.utils.Configuration
 object ConfirmDetailsPage extends WebPage {
 
   def goToPage(): Unit =
-    driver.navigate().to(Configuration.host + "/help-to-save/register/confirm-details")
+    driver.navigate().to(Configuration.host + "/help-to-save/register/check-and-confirm-your-details")
 
   def continue(): Unit = {
     driver.findElement(By.id("continue")).click()
