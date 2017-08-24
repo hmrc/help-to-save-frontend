@@ -99,7 +99,6 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         mockEmailVerificationConn(Right())
       }
       val result = await(controller.onSubmit()(fakePostRequest))
-      println("################ result: happy path " + result)
       status(result) shouldBe Status.OK
       contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title")) shouldBe true
       contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content")) shouldBe true
@@ -113,7 +112,6 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         mockEmailVerificationConn(Left(AlreadyVerified))
       }
       val result = await(controller.onSubmit()(fakePostRequest))
-      println("################ result:" + result)
       status(result) shouldBe Status.OK
       contentAsString(result).contains(messagesApi("hts.email-verification.error.title")) shouldBe true
       contentAsString(result).contains(messagesApi("hts.email-verification.error.already-verified.content")) shouldBe true

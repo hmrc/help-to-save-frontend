@@ -29,15 +29,13 @@
 title = messages("hts.introduction.title"),
 sidebarLinks = None,
 bodyClasses = None) {
-    @{
-        val messageKey = error match {
+    @defining(error match {
             case RequestNotValidError ⇒ "hts.email-verification.error.request-not-valid.content"
             case VerificationServiceUnavailable ⇒ "hts.email-verification.error.verification-service-unavailable.content"
             case AlreadyVerified ⇒ "hts.email-verification.error.already-verified.content"
             case BackendError ⇒ "hts.email-verification.error.backend-error.content"
             case BadContinueURL ⇒ "hts.email-verification.error.bad-continue-url.content"
-        }
-
+        }){ messageKey =>
             <h1>@messages("hts.email-verification.error.title")</h1>
             <p class="content">@messages(messageKey)</p>
     }
