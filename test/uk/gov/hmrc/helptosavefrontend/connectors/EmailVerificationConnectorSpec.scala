@@ -21,7 +21,7 @@ import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
+import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -37,7 +37,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
   val email = "email@gmail.com"
   val mockHttp = mock[WSHttp]
   implicit val crypto = mock[Crypto]
-
+  val emailVerificationRequest = EmailVerificationRequest(email, nino, "", "", "", Map(" " → "", " " → ""))
 
   lazy val connector = {
     val config = Configuration("microservice.services.email-verification.linkTTLMinutes" → " 120",
@@ -47,9 +47,9 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
     new EmailVerificationConnectorImpl(mockHttp, config)
   }
 
-  def mockPost(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
+  def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
-    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
       .expects(verifyEmailURL, *, *, *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
@@ -81,25 +81,25 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
   "verifyEmail" should {
     "return 201 when given good json" in {
       mockEncrypt(nino + "§" + email)("")
-      mockPost(Status.OK, None)
+      mockPost(emailVerificationRequest)(Status.OK, None)
       await(connector.verifyEmail(nino, email)) shouldBe Right(())
     }
 
     "return 400 when given bad json" in {
       mockEncrypt(nino + "§" + email)("")
-      mockPost(Status.BAD_REQUEST, None)
+      mockPost(emailVerificationRequest)(Status.BAD_REQUEST, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError)
     }
 
     "return 409 when the email has already been verified" in {
       mockEncrypt(nino + "§" + email)("")
-      mockPost(Status.CONFLICT, None)
+      mockPost(emailVerificationRequest)(Status.CONFLICT, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified)
     }
 
     "return a verification service unavailable error when the email verification service is down" in {
       mockEncrypt(nino + "§" + email)("")
-      mockPost(Status.SERVICE_UNAVAILABLE, None)
+      mockPost(emailVerificationRequest)(Status.SERVICE_UNAVAILABLE, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
     }
 
