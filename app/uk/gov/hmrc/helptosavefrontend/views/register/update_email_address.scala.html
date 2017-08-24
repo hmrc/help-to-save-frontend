@@ -32,8 +32,8 @@
             @helpers.input_text(
                 id = "value",
                 label = messages("hts.email-verification.input.label"),
-                errorKey = ek.orNull,
-                value = ek.map(_ ⇒ emailAddress).orNull
+                errorKey = ek.getOrElse(""),
+                value = ek.map(_ ⇒ emailAddress).getOrElse("")
             )
             @helpers.submit('_buttonClass -> "") {
                 @messages("hts.email-verification.submit.text")
