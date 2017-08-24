@@ -40,7 +40,15 @@
         <h3 class="heading-small">@Messages("hts.introduction.how-the-account-works.h3-2")</h3>
         <p>@Messages("hts.introduction.how-the-account-works.par-3")</p>
         <ul class="bullets">
-            <li>@Messages("hts.introduction.how-the-account-works.list-2-1-1") <a title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" href=@routes.IntroductionController.getHowWeCalculateBonuses()>@Messages("hts.introduction.how-the-account-works.list-2-1-2")</a>
+            <li>@Messages("hts.introduction.how-the-account-works.list-2-1-1")
+                <a title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")"
+                   href=@routes.IntroductionController.getHowWeCalculateBonuses()
+                   data-ga-event-category="links"
+                   data-ga-event-action="Bonuses"
+                   data-ga-event-label="How the account works page"
+                   class="ga-track-event">
+                @Messages("hts.introduction.how-the-account-works.list-2-1-2")
+                </a>
                 @Messages("hts.introduction.how-the-account-works.list-2-1-3")</li>
             <li>@Messages("hts.introduction.how-the-account-works.list-2-2")</li>
         </ul>
@@ -48,8 +56,17 @@
         <h3 class="heading-small">@Messages("hts.introduction.how-the-account-works.h3-3")</h3>
         <p>@Messages("hts.introduction.how-the-account-works.par-5")</p>
         <p>@Messages("hts.introduction.how-the-account-works.par-6")</p>
-        <p class="indent">@Messages("hts.introduction.how-the-account-works.par-7-1") <a title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" href=@routes.IntroductionController.getHowWeCalculateBonuses()>@Messages("hts.introduction.how-the-account-works.par-7-2")</a>
-            , @Messages("hts.introduction.how-the-account-works.par-7-3")</p>
+        <p class="indent">@Messages("hts.introduction.how-the-account-works.par-7-1")
+            <a title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")"
+            href=@routes.IntroductionController.getHowWeCalculateBonuses()
+            data-ga-event-category="links"
+            data-ga-event-action="Bonus"
+            data-ga-event-label="How the account works page"
+            class="ga-track-event">
+            @Messages("hts.introduction.how-the-account-works.par-7-2")
+            </a>
+            , @Messages("hts.introduction.how-the-account-works.par-7-3")
+        </p>
 
         <h3 class="heading-small">@Messages("hts.introduction.how-the-account-works.h3-4")</h3>
         <p>@Messages("hts.introduction.how-the-account-works.par-7")</p>
