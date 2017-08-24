@@ -37,12 +37,18 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
   val email = "email@gmail.com"
   val mockHttp = mock[WSHttp]
   implicit val crypto = mock[Crypto]
-  val emailVerificationRequest = EmailVerificationRequest(email, nino, "", "", "", Map(" " → "", " " → ""))
+  val emailVerificationRequest =
+    EmailVerificationRequest(
+      email,
+      "awrs_email_verification",
+      "PT2H",
+      "http://localhost:7000/help-to-save/check-and-confirm-your-details?p=",
+      Map("email" → email, "nino" → nino))
 
   lazy val connector = {
     val config = Configuration("microservice.services.email-verification.linkTTLMinutes" → " 120",
-                               "microservice.services.email-verification.continue-url" ->
-                                 "http://localhost:7000/help-to-save/check-and-confirm-your-details"
+      "microservice.services.email-verification.continue-url" ->
+        "http://localhost:7000/help-to-save/check-and-confirm-your-details"
     )
     new EmailVerificationConnectorImpl(mockHttp, config)
   }
@@ -50,14 +56,14 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
   def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
     (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
-      .expects(verifyEmailURL, *, *, *, *)
+      .expects(verifyEmailURL, expectedBody, Seq.empty[(String,String)], *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
 
-  def mockPostFailure(): Unit = {
+  def mockPostFailure[A](expectedBody: A): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
-    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
-      .expects(verifyEmailURL, *, *, *, *)
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
+      .expects(verifyEmailURL, expectedBody, Seq.empty[(String,String)], *, *)
       .returning(Future.failed(new Exception("Oh no!")))
   }
 
@@ -110,7 +116,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
     "should return a back end error if the future failed" in {
       mockEncrypt(nino + "§" + email)("")
-      mockPostFailure()
+      mockPostFailure(emailVerificationRequest)
       await(connector.verifyEmail(nino, email)) shouldBe Left(BackendError)
     }
   }
