@@ -56,7 +56,7 @@ object Driver {
 
   private val isJsEnabled: Boolean = true
 
-  private val driverDirectory: String = "drivers"
+  private val driverDirectory: String = "selenium-system-test/drivers"
 
   private def createChromeDriver(): WebDriver = {
     if (isMac) {
