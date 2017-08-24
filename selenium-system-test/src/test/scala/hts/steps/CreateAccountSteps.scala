@@ -16,17 +16,81 @@
 
 package hts.steps
 
-import hts.pages.{CreateAccountPage, ConfirmDetailsPage, Page}
+import hts.pages.{WebPage, _}
+import hts.pages.registrationPages._
+import hts.utils.Configuration
 
-class CreateAccountSteps extends Steps{
+class CreateAccountSteps extends WebPage {
+
+  Given("""^A user is at the start of the registration process$""") { () =>
+    AboutPage.navigateToAboutPage()
+  }
+
+  Given("""^An authenticated user is at the start of the registration process$""") { () =>
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save", 200, "Strong", generateEligibleNINO)
+  }
+
+  Given("""^a user is on the apply page$""") { () =>
+    ApplyPage.navigateToApplyPage()
+  }
+
+  Given("""^an authenticated user is on the apply page$""") { () =>
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply", 200, "Strong", generateEligibleNINO)
+  }
+
+  Given("""^a user has previously created an account$"""){ () =>
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
+    EligiblePage.startCreatingAccount()
+    ConfirmDetailsPage.continue()
+    CreateAccountPage.createAccount()
+  }
+
+  When("""^they proceed through to the apply page$""") { () =>
+    AboutPage.nextPage()
+    EligibilityPage.nextPage()
+    HowTheAccountWorksPage.nextPage()
+    HowWeCalculateBonusesPage.nextPage()
+  }
+
+  When("""^they click on the Start now button$""") { () =>
+    ApplyPage.clickStartNow()
+  }
+
+  When("""^they click on the sign in link$""") { () =>
+    ApplyPage.clickSignInLink()
+  }
+
+  When("""^they choose to not create an account$""") { () =>
+    ConfirmDetailsPage.continue()
+    CreateAccountPage.exitWithoutCreatingAccount()
+  }
 
   When("""^they choose to create an account$""") { () =>
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
   }
 
+  When("""^the user clicks on the check eligibility button$""") { () =>
+    EligibilityQuestionPage.clickCheckEligibility()
+  }
+
   Then("""^they see that the account is created$""") { () =>
     Page.getPageContent() should include("Successfully created account")
   }
 
+  Then("""^they see the gov uk page$""") { () =>
+    driver.getCurrentUrl shouldBe "https://www.gov.uk/"
+  }
+
+  Then("""^they will be on the eligibility question page$""") { () =>
+    on(EligibilityQuestionPage)
+  }
+
+  Then("""^they will be on the you're eligible page$""") { () =>
+    on(EligiblePage)
+  }
+
+  Then("""^they will be on the account home page$"""){ () =>
+    pageSource.contains("You've already got an account - yay!")
+  }
 }

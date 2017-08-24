@@ -21,9 +21,8 @@ import java.util.concurrent.TimeUnit
 import cats.syntax.either._
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
-import org.openqa.selenium.firefox.{FirefoxDriver, MarionetteDriver}
 import org.openqa.selenium.phantomjs.{PhantomJSDriver, PhantomJSDriverService}
-import org.openqa.selenium.remote.{BrowserType, DesiredCapabilities}
+import org.openqa.selenium.remote.DesiredCapabilities
 
 object Driver {
 
@@ -57,7 +56,7 @@ object Driver {
 
   private val isJsEnabled: Boolean = true
 
-  private val driverDirectory: String = systemProperties.getProperty("drivers")
+  private val driverDirectory: String = "selenium-system-test/drivers"
 
   private def createChromeDriver(): WebDriver = {
     if (isMac) {

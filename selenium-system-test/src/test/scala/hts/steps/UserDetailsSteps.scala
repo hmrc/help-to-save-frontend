@@ -17,11 +17,11 @@
 package hts.steps
 
 import cucumber.api.DataTable
-import hts.pages.{AuthorityWizardPage, Page}
-import hts.utils.Configuration
+import hts.pages.{AuthorityWizardPage, EligiblePage, Page}
+import hts.utils.{Configuration, NINOGenerator}
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import src.test.scala.hts.utils.NINOGenerator
 
 class UserDetailsSteps extends Steps with NINOGenerator{
 
@@ -41,7 +41,7 @@ class UserDetailsSteps extends Steps with NINOGenerator{
         case (Some(field), value @ Some(_)) =>
           field match {
             case "name"          => name = value
-            case "NINO"          =>
+            case "NINO"          => nino = value
             case "date of birth" => dateOfBirth = value
             case "email address" => email = value
             case other           => sys.error(s"Unexpected field: $other")
@@ -54,13 +54,14 @@ class UserDetailsSteps extends Steps with NINOGenerator{
 
   When("""^an applicant passes the eligibility check$"""){ () =>
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
+    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     nino = Some(generateEligibleNINO)
     println("NINO: " + nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.setNino(nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.submit()
+    EligiblePage.startCreatingAccount()
   }
 
   Then("""^they see their details$"""){ () =>

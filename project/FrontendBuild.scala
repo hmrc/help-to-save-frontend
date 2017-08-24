@@ -29,7 +29,7 @@ object FrontendBuild extends Build with MicroService {
   def test(scope: String = "test") = Seq(
     "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
     "org.scalatest" %% "scalatest" % "3.0.1" % scope,
-    "org.pegdown" % "pegdown" % "1.6.0" % scope,
+    "org.pegdown" % "pegdown" % "1.4.2" % scope,
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope,
@@ -38,9 +38,10 @@ object FrontendBuild extends Build with MicroService {
     "com.codeborne" % "phantomjsdriver" % "1.4.3" % scope,
     "info.cukes" % "cucumber-junit" % "1.2.4" % scope,
     "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
-    "info.cukes" %% "cucumber-scala" % "1.2.2" % scope,
+    "info.cukes" %% "cucumber-scala" % "1.2.4" % scope,
     "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % scope,
     "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1" % scope
+//    "org.scalactic" %% "scalactic" % "3.0.1"
   )
 
 }
