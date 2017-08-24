@@ -30,6 +30,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
@@ -73,6 +74,10 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
           logger.warn(s"[EmailVerification] - Unexpected status $status received from email verification body = ${response.body}")
           Left(BackendError)
       }
+    }.recover{
+      case NonFatal(e) ⇒
+        logger.warn(s"Error while calling email verification service: ${e.getMessage}")
+        Left(BackendError)
     }
   }
 
@@ -94,6 +99,10 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
             s"Status = ${response.status}, body = ${response.body}")
           Left(BackendError)
       }
+    }.recover{
+      case NonFatal(e) ⇒
+        logger.warn(s"Error while calling email verification service: ${e.getMessage}")
+        Left(BackendError)
     }
   }
 }

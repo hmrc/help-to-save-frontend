@@ -48,8 +48,16 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   def mockPost(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
-    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier)).expects(verifyEmailURL, *, *, *, *)
+    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
+      .expects(verifyEmailURL, *, *, *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
+  }
+
+  def mockPostFailure(): Unit = {
+    val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
+    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
+      .expects(verifyEmailURL, *, *, *, *)
+      .returning(Future.failed(new Exception("Oh no!")))
   }
 
 
@@ -57,6 +65,12 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
     (mockHttp.get(_: String)(_: HeaderCarrier)).expects(verifyEmailURL, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
+  }
+
+  def mockGetFailure(): Unit = {
+    val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
+    (mockHttp.get(_: String)(_: HeaderCarrier)).expects(verifyEmailURL, *)
+      .returning(Future.failed(new Exception("Uh oh!")))
   }
 
   def mockEncrypt(expected: String)(result: String): Unit =
