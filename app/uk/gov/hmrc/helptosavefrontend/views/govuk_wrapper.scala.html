@@ -49,8 +49,22 @@
 
 @headerNavLinks = {
     @if(htsContext.isAuthorised) {
-        <li><a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out">Sign out</a>
-            <a href="/testing/xxx" id="ga-track-anchor-click" class="ga-track-event">Testing</a>
+    var xx = window.location.pathname
+        <li>
+            <a href="/get-help" id="get-help"
+               data-ga-event-category = "Get Help"
+               data-ga-event-action = "Get help"
+               data-ga-event-label= "blah"
+               class="ga-track-event">
+                Get help
+            </a>&nbsp;
+            <a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out"
+               data-ga-event-category = "Get Help"
+               data-ga-event-action = "Get help"
+               data-ga-event-label= "blah"
+               class="ga-track-event">
+                Sign out
+            </a>
         </li>
     }
 }
