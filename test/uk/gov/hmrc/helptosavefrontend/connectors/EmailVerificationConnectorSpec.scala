@@ -22,6 +22,7 @@ import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
@@ -106,6 +107,12 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       val config = Configuration("x" → "y")
       an[Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], config)
     }
+
+    "should return a back end error if the future failed" in {
+      mockEncrypt(nino + "§" + email)("")
+      mockPostFailure()
+      await(connector.verifyEmail(nino, email)) shouldBe Left(BackendError)
+    }
   }
 
   "isVerified" should {
@@ -127,6 +134,11 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
     "return a VerificationServiceUnavailable error if the email verification service is down" in {
       mockGet(Status.SERVICE_UNAVAILABLE, email, None)
       await(connector.isVerified(email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
+    }
+
+    "should return a back end error if the future failed" in {
+      mockGetFailure()
+      await(connector.isVerified(email)) shouldBe Left(BackendError)
     }
   }
 
