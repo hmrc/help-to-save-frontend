@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams, Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -39,7 +39,8 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    val helpToSaveService: HelpToSaveService,
                                    val sessionCacheConnector: SessionCacheConnector,
                                    val app: Application,
-                                   frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
+                                   frontendAuthConnector: FrontendAuthConnector
+                                  )(implicit ec: ExecutionContext, crypto: Crypto)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
   import RegisterController.NSIUserInfoOps

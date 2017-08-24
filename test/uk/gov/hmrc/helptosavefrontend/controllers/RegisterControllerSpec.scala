@@ -29,12 +29,13 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
-import uk.gov.hmrc.helptosavefrontend.util.{EmailVerificationParams, HTSAuditor, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, HTSAuditor, NINO}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityCheckBehaviour {
 
@@ -43,6 +44,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor = mock[HTSAuditor]
   val frontendAuthConnector = stub[FrontendAuthConnector]
+  implicit val crypto = fakeApplication.injector.instanceOf[Crypto]
 
   val controller = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
@@ -50,7 +52,7 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
     mockSessionCacheConnector,
     fakeApplication,
     frontendAuthConnector)(
-    ec) {
+    ec, crypto) {
     override lazy val authConnector = mockAuthConnector
   }
 
@@ -69,6 +71,10 @@ class RegisterControllerSpec extends TestSupport with EnrolmentAndEligibilityChe
       .expects(email, nino, *)
       .returning(EitherT.fromEither[Future](result))
 
+  def mockDecrypt(expected: String)(result: Option[String]) =
+    (crypto.decrypt(_: String))
+      .expects(expected)
+      .returning(result.fold[Try[String]](Failure(new Exception))(Success.apply))
 
   "The RegisterController" when {
 

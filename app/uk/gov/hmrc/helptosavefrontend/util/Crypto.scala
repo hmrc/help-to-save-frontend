@@ -16,22 +16,28 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import scala.util.{Failure, Success}
+import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.Configuration
+import uk.gov.hmrc.crypto._
 
-case class EmailVerificationParams(nino: String, email: String) {
-  def encode()(implicit crypto: Crypto): String = {
-    val input = nino + "§" + email
-    crypto.encrypt(input)
-  }
+import scala.util.Try
+
+@ImplementedBy(classOf[CryptoImpl])
+trait Crypto {
+
+  def encrypt(s: String): String
+
+  def decrypt(s: String): Try[String]
 }
 
-object EmailVerificationParams {
-  def decode(base64: String)(implicit crypto: Crypto): Option[EmailVerificationParams] = {
-    crypto.decrypt(base64) match {
-      case Failure(_) ⇒ None
-      case Success(decrypted) ⇒
-        val params = decrypted.split("§")
-        if (params.length == 2) Some(EmailVerificationParams(params(0), params(1))) else None
-    }
-  }
+@Singleton
+class CryptoImpl @Inject()(configuration: Configuration) extends AesGCMCrypto with Crypto {
+
+  val encryptionKey: String = configuration.underlying.getString("crypto.encryption-key")
+
+  def encrypt(s: String): String = encrypt(PlainText(s)).value
+
+  def decrypt(s: String): Try[String] = Try(decrypt(Crypted(s)).value)
+
 }
+

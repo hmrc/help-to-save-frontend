@@ -22,6 +22,7 @@ import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
+import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -29,10 +30,13 @@ import uk.gov.hmrc.play.test.UnitSpec
 import scala.concurrent.Future
 
 class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig {
+
   lazy val emailVerifyBaseURL = baseUrl("email-verification")
   val nino = "AE123XXXX"
   val email = "email@gmail.com"
   val mockHttp = mock[WSHttp]
+  implicit val crypto = mock[Crypto]
+
 
   lazy val connector = {
     val config = Configuration("microservice.services.email-verification.linkTTLMinutes" → " 120",
@@ -55,24 +59,31 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
 
+  def mockEncrypt(expected: String)(result: String): Unit =
+    (crypto.encrypt(_: String)).expects(expected).returning(result)
+
 
   "verifyEmail" should {
     "return 201 when given good json" in {
+      mockEncrypt(nino + "§" + email)("")
       mockPost(Status.OK, None)
       await(connector.verifyEmail(nino, email)) shouldBe Right(())
     }
 
     "return 400 when given bad json" in {
+      mockEncrypt(nino + "§" + email)("")
       mockPost(Status.BAD_REQUEST, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError)
     }
 
     "return 409 when the email has already been verified" in {
+      mockEncrypt(nino + "§" + email)("")
       mockPost(Status.CONFLICT, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified)
     }
 
     "return a verification service unavailable error when the email verification service is down" in {
+      mockEncrypt(nino + "§" + email)("")
       mockPost(Status.SERVICE_UNAVAILABLE, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
     }

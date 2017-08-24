@@ -24,7 +24,7 @@ import play.api.http.Status._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
-import uk.gov.hmrc.helptosavefrontend.util.{EmailVerificationParams, Logging}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
@@ -41,7 +41,8 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration) extends EmailVerificationConnector with ServicesConfig with Logging {
+class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration)(implicit crypto: Crypto)
+  extends EmailVerificationConnector with ServicesConfig with Logging {
 
   val linkTTLMinutes = conf.underlying.getInt("microservice.services.email-verification.linkTTLMinutes")
   val emailVerifyBaseURL = baseUrl("email-verification")
