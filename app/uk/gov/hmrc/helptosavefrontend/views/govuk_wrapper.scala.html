@@ -48,25 +48,24 @@
 }
 
 @headerNavLinks = {
-    @if(htsContext.isAuthorised) {
-    var xx = window.location.pathname
         <li>
             <a href="/get-help" id="get-help"
                data-ga-event-category = "Get Help"
                data-ga-event-action = "Get help"
-               data-ga-event-label= "blah"
+               data-ga-event-label= @request.uri
                class="ga-track-event">
                 Get help
             </a>&nbsp;
-            <a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out"
-               data-ga-event-category = "Get Help"
-               data-ga-event-action = "Get help"
-               data-ga-event-label= "blah"
-               class="ga-track-event">
-                Sign out
-            </a>
+            @if(htsContext.isAuthorised) {
+                <a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out"
+                   data-ga-event-category = "Sign out"
+                   data-ga-event-action = "Sign out"
+                   data-ga-event-label= @request.uri
+                   class="ga-track-event">
+                    Sign out
+                </a>
+            }
         </li>
-    }
 }
 
 @insideHeader = {

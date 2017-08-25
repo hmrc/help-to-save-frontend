@@ -15,4 +15,4 @@
  *@
 
 @(externalLink: String, message: String, category: String, action: String, label: String)(implicit messages: play.api.i18n.Messages)
-<a href=@externalLink data-ga-event-category=@category data-ga-event-action=@action data-ga-event-label=@label class="ga-track-event">@message</a>
+<a href=@externalLink data-ga-event-category="@category" data-ga-event-action="@action" data-ga-event-label="@label" class="ga-track-event">@message</a>
