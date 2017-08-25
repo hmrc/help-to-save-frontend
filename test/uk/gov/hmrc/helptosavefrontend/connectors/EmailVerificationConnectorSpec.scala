@@ -121,43 +121,9 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
     }
   }
 
-  "isVerified" should {
-    "return a Future true if the email is verified" in {
-      mockGet(Status.OK, email, None)
-      await(connector.isVerified(email)) shouldBe Right(true)
-    }
-
-    "return a Future false if the email is not verified" in {
-      mockGet(Status.NOT_FOUND, email, None)
-      await(connector.isVerified(email)) shouldBe Right(false)
-    }
-
-    "return a Future false if the email string is not valid" in {
-      mockGet(Status.NOT_FOUND, "email", None)
-      await(connector.isVerified("email")) shouldBe Right(false)
-    }
-
-    "return a VerificationServiceUnavailable error if the email verification service is down" in {
-      mockGet(Status.SERVICE_UNAVAILABLE, email, None)
-      await(connector.isVerified(email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
-    }
-
-    "should return a back end error if the future failed" in {
-      mockGetFailure()
-      await(connector.isVerified(email)) shouldBe Left(BackendError)
-    }
-  }
-
   "verifyEmailURL" should {
     "return the correct url" in {
       connector.verifyEmailURL shouldBe "http://localhost:9891/email-verification/verification-requests"
-    }
-  }
-
-  "isVerifiedURL" should {
-    "return the correct url when given an email address" in {
-      val email = "email@gmail.com"
-      connector.isVerifiedURL(email) shouldBe s"http://localhost:9891/email-verification/verified-email-addresses/$email"
     }
   }
 

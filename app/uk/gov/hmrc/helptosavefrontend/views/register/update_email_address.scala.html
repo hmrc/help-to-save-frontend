@@ -33,7 +33,7 @@
                 id = "value",
                 label = messages("hts.email-verification.input.label"),
                 errorKey = ek.getOrElse(""),
-                value = ek.map(_ ⇒ emailAddress).getOrElse("")
+                value = ek.fold(emailAddress)(_ => "")
             )
             @helpers.submit('_buttonClass -> "") {
                 @messages("hts.email-verification.submit.text")

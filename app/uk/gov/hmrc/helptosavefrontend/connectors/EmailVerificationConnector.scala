@@ -37,8 +37,6 @@ trait EmailVerificationConnector {
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]]
 
-  def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Boolean]]
-
 }
 
 @Singleton
@@ -49,7 +47,6 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
   val emailVerifyBaseURL = baseUrl("email-verification")
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
 
-  def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
   val continueURL =  conf.underlying.getString("microservice.services.email-verification.continue-url")
   val templateId = "awrs_email_verification"
 
@@ -59,7 +56,7 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {
         case OK | CREATED =>
-          logger.info("[EmailVerification] - Email verification successfully triggered")
+          logger.info(s"[EmailVerification] - Email verification successfully triggered: $continueUrlWithParams")
           Right(())
         case BAD_REQUEST ⇒
           logger.warn("[EmailVerification] - Bad Request from email verification service")
@@ -81,28 +78,4 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
     }
   }
 
-  def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Boolean]] = {
-    val getURL = isVerifiedURL(email)
-    http.get(getURL).map { response ⇒
-      response.status match {
-        case OK ⇒
-          logger.info("[EmailVerification] - Email address is verified")
-          Right(true)
-        case NOT_FOUND ⇒
-          logger.warn("[EmailVerification] - Email address is not verified")
-          Right(false)
-        case SERVICE_UNAVAILABLE ⇒
-          logger.warn("[EmailVerification] - Email Verification service not available")
-          Left(VerificationServiceUnavailable)
-        case _ ⇒
-          logger.warn(s"[EmailVerification] - Unexpected response from email verification service. " +
-            s"Status = ${response.status}, body = ${response.body}")
-          Left(BackendError)
-      }
-    }.recover{
-      case NonFatal(e) ⇒
-        logger.warn(s"Error while calling email verification service: ${e.getMessage}")
-        Left(BackendError)
-    }
-  }
 }
