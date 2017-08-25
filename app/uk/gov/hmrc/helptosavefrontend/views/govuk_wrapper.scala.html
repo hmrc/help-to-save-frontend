@@ -19,7 +19,7 @@
 @(appConfig: uk.gov.hmrc.helptosavefrontend.config.AppConfig,
         title: String,
         mainClass: Option[String] = None,
-        mainDataAttributes: Option[Html] = Some(Html("""ga-event-category = "Sign outxxx" ga-event-action = "Sign outyyy" """)),
+        mainDataAttributes: Option[Html] = None,
         bodyClasses: Option[String] = None,
         sidebar: Html = HtmlFormat.empty,
         contentHeader: Option[Html] = None,
