@@ -16,22 +16,36 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.introduction.title"),
     sidebarLinks = None,
     bodyClasses = None) {
 
-     <h1>@messages("hts.email-verification.check-your-email.title")</h1>
-     <p class="content">@messages("hts.email-verification.check-your-email.content")</p>
+    <h1>@messages("hts.email-verification.check-your-email.title")</h1>
+    <p class="content">@messages("hts.email-verification.check-your-email.content")</p>
+
+    <br>
+
+    <h2>Didn't receive an email?</h2>
+    <p class="content">Click here to resend the verify email</p>
+    @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.UpdateEmailAddressController.onSubmit())(
+        Html(
+            s"""
+             |<input type="hidden" name="value" value="$email">
+             |${helpers.submit('_buttonClass -> "", 'id → "resend-verification") (Html("Resend email"))}
+             |""".stripMargin
+        )
+    )
 
     <br>
 
     <h2>Want to change your email address?</h2>
     <p class="content">Click here to change email address</p>
     <a href=@routes.UpdateEmailAddressController.getUpdateYourEmailAddress()
-       id="update-email"
+    id="update-email"
     class="button">Change email address</a>
 
 }

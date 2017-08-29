@@ -65,7 +65,7 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
           },
           (details: UpdateEmail) ⇒ {
             emailVerificationConnector.verifyEmail(nino, details.email).map {
-              case Right(_) ⇒ Ok(views.html.register.check_your_email())
+              case Right(_) ⇒ Ok(views.html.register.check_your_email(details.email))
               case Left(e)  ⇒ Ok(views.html.register.email_verify_error(e))
             }
           }
