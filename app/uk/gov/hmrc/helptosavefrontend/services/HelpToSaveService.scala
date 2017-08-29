@@ -23,7 +23,7 @@ import com.google.inject.{ImplementedBy, Inject}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, NINO, Result, UserDetailsURI}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, NINO, Result}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,10 +34,6 @@ trait HelpToSaveService {
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
 
   def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult]
-
-  def getUserInformation(nino:           String,
-                         userDetailsURI: UserDetailsURI
-  )(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
 
   def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
 
@@ -63,9 +59,6 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
 
   def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
     helpToSaveConnector.setITMPFlag(nino)
-
-  def getUserInformation(nino: String, userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] =
-    helpToSaveConnector.getUserInformation(nino, userDetailsURI)
 
   def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit] =
     helpToSaveConnector.storeEmail(email, nino)

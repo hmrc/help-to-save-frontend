@@ -128,7 +128,7 @@ class EligibilityCheckController @Inject()(val messagesApi: MessagesApi,
         EitherT.pure[Future, Error, EligibilityResultWithUserInfo](EligibilityResultWithUserInfo(Left(ineligibilityReason)))
       }, { eligibilityReason ⇒
         val result = htsContext.userDetails.fold[Either[Error, EligibilityResultWithUserInfo]](
-          Left(Error("unexpected error: Userinfo expected but not found"))) { info =>
+          Left(Error("unexpected error: Userinfo expected but not found"))) { info ⇒
           info.bimap(
             missingInfo ⇒ Error(missingInfo),
             userInfo ⇒ EligibilityResultWithUserInfo(Right(eligibilityReason → NSIUserInfo(userInfo)))

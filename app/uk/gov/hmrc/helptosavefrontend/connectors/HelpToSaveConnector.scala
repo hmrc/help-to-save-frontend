@@ -25,12 +25,11 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, MissingUserInfoSet}
-import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, NINO, Result, UserDetailsURI}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, NINO, Result}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,10 +39,7 @@ import scala.util.control.NonFatal
 trait HelpToSaveConnector {
 
   def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult]
-
-  def getUserInformation(nino:           NINO,
-                         userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
-
+  
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
 
   def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
@@ -68,25 +64,6 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
           Left(s"Call to check eligibility came back with status ${response.status}")
         }
       }
-  }
-
-  def getUserInformation(nino: NINO, userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] = {
-    val backendError = (s: String) ⇒ UserInformationRetrievalError.BackendError(s, nino)
-    handle(
-      userInformationURL(nino, userDetailsURI), { response ⇒
-        response.parseJson[UserInfo].fold[Either[UserInformationRetrievalError, UserInfo]](
-          // couldn't parse user info in this case - try to parse as missing user info
-          _ ⇒
-            response.parseJson[MissingUserInfoSet].fold(
-              _ ⇒ Left(backendError("Could not parse JSON response from user information endpoint")),
-              m ⇒ Left(MissingUserInfos(m.missingInfo, nino))
-            ),
-          Right(_)
-        )
-      },
-      "get user information",
-      backendError
-    )
   }
 
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
