@@ -23,7 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.views.html.register.check_your_email
 class CheckYourEmailSpec extends ViewBehavioursSpec {
 
   val mockHtsContext = mock[HtsContext]
-  lazy val view = check_your_email()(mockHtsContext, request, messages)
+  lazy val view = check_your_email("")(mockHtsContext, request, messages)
   lazy val document = Jsoup.parse(view.toString())
 
   "CheckYourEmail" when {
@@ -45,9 +45,14 @@ class CheckYourEmailSpec extends ViewBehavioursSpec {
       assertEqualsMessage(document, "p.content", "hts.email-verification.check-your-email.content")
     }
 
-    "rendered must display a buton which allows the user to change their email address" in {
+    "rendered must display a button which allows the user to change their email address" in {
       val button = document.getElementById("update-email")
-      button.className() shouldBe "button"
+      button.className().trim shouldBe "button"
+    }
+
+    "rendered must display a button which allows the user to resend the email verification request" in {
+      val button = document.getElementById("resend-verification")
+      button.className().trim shouldBe "button"
     }
 
   }
