@@ -170,7 +170,7 @@ class EligibilityCheckControllerSpec
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
-            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
             mockWriteITMPFlag(nino)(Right(()))
           }
@@ -186,7 +186,7 @@ class EligibilityCheckControllerSpec
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(EligibilityReason.WTCWithUC))))
             mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
-            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(()))
             mockSendAuditEvent()
           }
 
@@ -200,7 +200,7 @@ class EligibilityCheckControllerSpec
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.NotEntitledToWTC(false)))))
-            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
           }
 
@@ -259,7 +259,7 @@ class EligibilityCheckControllerSpec
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
-            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
             mockWriteITMPFlag(nino)(Right(()))
           }
@@ -279,7 +279,7 @@ class EligibilityCheckControllerSpec
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
-              mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+              mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(()))
               mockSendAuditEvent
             }
 
@@ -301,7 +301,7 @@ class EligibilityCheckControllerSpec
                   mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
                   mockSessionCacheConnectorGet(Right(None))
                   mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(ineligibilityReason))))
-                  mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
+                  mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
                   mockSendAuditEvent
                 }
 

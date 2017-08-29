@@ -9,7 +9,7 @@ GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptos
 GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
 GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
 
-GET        /check-and-confirm-your-details                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmDetailsPage(p: Option[String])
+GET        /check-and-confirm-your-details                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmDetailsPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
 GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
@@ -23,3 +23,5 @@ POST       /register/create-an-account                      @uk.gov.hmrc.helptos
 POST       /email/update                                    @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.onSubmit
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String)
+
+GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.emailVerified(p: String)

@@ -18,25 +18,35 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
 
+import cats.data.EitherT
+import cats.instances.option._
+import cats.instances.future._
+import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.NSIUserInfoOps
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.toFuture
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  SessionCacheConnector,
                                               val helpToSaveService:      HelpToSaveService,
                                               frontendAuthConnector:      FrontendAuthConnector,
                                               emailVerificationConnector: EmailVerificationConnector
-)(implicit app: Application, val messagesApi: MessagesApi)
+)(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, ec: ExecutionContext)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport {
 
   def getUpdateYourEmailAddress: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -72,4 +82,85 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
       }
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  //def getEmailVerificationParams(emailVerificationParams: String): EmailVerificationParams
+
+  def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    EmailVerificationParams.decode(emailVerificationParams) match {
+
+      case None ⇒
+        Ok(views.html.register.email_verify_error(BadContinueURL))
+
+      case Some(params) ⇒
+        val result: EitherT[Future, String, Option[NSIUserInfo]] = for {
+          session ← sessionCacheConnector.get
+          userInfo ← updateSession(session, params)
+        } yield userInfo
+
+        result.fold({
+          e ⇒
+            logger.warn(e)
+            InternalServerError
+        }, { maybeNSIUserInfo ⇒
+          maybeNSIUserInfo.fold{
+            // this means they were ineligible
+            Ok(views.html.core.not_eligible())
+          }{ updatedNSIUserInfo ⇒
+            Ok(views.html.register.confirm_details(updatedNSIUserInfo))
+          }
+        })
+    }
+  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  /** Return `None` if user is ineligible */
+  private def getEligibleUserInfo(session: Option[HTSSession])(implicit htsContext: HtsContext): Either[String, Option[NSIUserInfo]] = session match {
+
+    case Some(s) ⇒
+      s.eligibilityCheckResult.fold[Either[String, Option[NSIUserInfo]]](
+        // IMPOSSIBLE - this means they are ineligible
+        Right(None)
+      ) { userInfo ⇒ Right(Some(userInfo)) }
+
+    case None ⇒
+      htsContext.userDetails
+        .fold[Either[String, Option[NSIUserInfo]]](
+          Left("No user info for user found")
+        ) {
+            _.fold(
+              missingInfos ⇒ Left(s"Missing user info: ${missingInfos.missingInfo}"),
+              nsiUserInfo ⇒ Right(Some(nsiUserInfo))
+            )
+          }
+  }
+
+  /** Return `None` if user is ineligible */
+  private def updateSession(session: Option[HTSSession],
+                            params:  EmailVerificationParams)(
+      implicit
+      htsContext: HtsContext,
+      hc:         HeaderCarrier): EitherT[Future, String, Option[NSIUserInfo]] = {
+    EitherT.fromEither[Future](getEligibleUserInfo(session)).flatMap { maybeInfo ⇒
+      val updatedInfo: Option[EitherT[Future, String, NSIUserInfo]] = maybeInfo.map{ info ⇒
+        if (info.nino != params.nino) {
+          EitherT.fromEither[Future](Left[String, NSIUserInfo]("NINO in confirm details parameters did not match NINO from auth"))
+        } else {
+          val newInfo = info.updateEmail(params.email)
+          val newSession = HTSSession(Some(newInfo), None)
+          sessionCacheConnector.put(newSession).map(_ ⇒ newInfo)
+        }
+      }
+
+      updatedInfo.traverse[EitherTResult, NSIUserInfo](identity)
+    }
+  }
+
+}
+
+object UpdateEmailAddressController {
+
+  implicit class NSIUserInfoOps(val nsiUserInfo: NSIUserInfo) {
+    def updateEmail(newEmail: String): NSIUserInfo =
+      nsiUserInfo.copy(contactDetails = nsiUserInfo.contactDetails.copy(email = newEmail))
+  }
+
 }

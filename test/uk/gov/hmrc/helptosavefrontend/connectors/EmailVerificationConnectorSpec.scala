@@ -45,13 +45,15 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       email,
       "awrs_email_verification",
       "PT2H",
-      "http://localhost:7000/help-to-save/check-and-confirm-your-details?p=",
+      "http://localhost:7000/help-to-save/email-verified?p=",
       Map("email" → email, "nino" → nino))
 
   lazy val connector: EmailVerificationConnectorImpl = {
-    val config = Configuration("microservice.services.email-verification.linkTTLMinutes" → " 120",
-      "microservice.services.email-verification.continue-url" ->
-        "http://localhost:7000/help-to-save/check-and-confirm-your-details"
+    val config = Configuration(
+      "microservice.services.email-verification.linkTTLMinutes" → " 120",
+      "microservice.services.email-verification.continue-url" -> "http://localhost:7000/help-to-save/email-verified",
+      "microservice.services.email-verification.host" → "localhost",
+      "microservice.services.email-verification.port" → "7002"
     )
     new EmailVerificationConnectorImpl(mockHttp, config)
   }
@@ -87,25 +89,25 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   "verifyEmail" should {
     "return 201 when given good json" in {
-      mockEncrypt(nino + "§" + email)("")
+      mockEncrypt(nino + "#" + email)("")
       mockPost(emailVerificationRequest)(Status.OK, None)
       await(connector.verifyEmail(nino, email)) shouldBe Right(())
     }
 
     "return 400 when given bad json" in {
-      mockEncrypt(nino + "§" + email)("")
+      mockEncrypt(nino + "#" + email)("")
       mockPost(emailVerificationRequest)(Status.BAD_REQUEST, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError)
     }
 
     "return 409 when the email has already been verified" in {
-      mockEncrypt(nino + "§" + email)("")
+      mockEncrypt(nino + "#" + email)("")
       mockPost(emailVerificationRequest)(Status.CONFLICT, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified)
     }
 
     "return a verification service unavailable error when the email verification service is down" in {
-      mockEncrypt(nino + "§" + email)("")
+      mockEncrypt(nino + "#" + email)("")
       mockPost(emailVerificationRequest)(Status.SERVICE_UNAVAILABLE, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
     }
@@ -118,7 +120,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
     }
 
     "should return a back end error if the future failed" in {
-      mockEncrypt(nino + "§" + email)("")
+      mockEncrypt(nino + "#" + email)("")
       mockPostFailure(emailVerificationRequest)
       await(connector.verifyEmail(nino, email)) shouldBe Left(BackendError)
     }
@@ -132,7 +134,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   "continueURL" should {
     "return the correct url" in {
-      connector.continueURL shouldBe "http://localhost:7000/help-to-save/check-and-confirm-your-details"
+      connector.continueURL shouldBe "http://localhost:7000/help-to-save/email-verified"
     }
   }
 }

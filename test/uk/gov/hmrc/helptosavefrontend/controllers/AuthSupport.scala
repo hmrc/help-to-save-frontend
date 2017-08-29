@@ -55,7 +55,7 @@ trait AuthSupport extends TestSupport {
   val noEmail: Option[String] = None
 
   val dobStr = "1970-01-01"
-  val dob: Option[LocalDate] = Some(LocalDate.parse(dobStr))
+  val dob: LocalDate = LocalDate.parse(dobStr)
   val itmpName = ItmpName(Some(firstName), Some(lastName), Some(lastName))
   val itmpDob: Option[LocalDate] = Some(LocalDate.parse(dobStr))
 
@@ -66,11 +66,11 @@ trait AuthSupport extends TestSupport {
   val countryCode = "GB"
   val itmpAddress = ItmpAddress(Some(line1), Some(line2), Some(line3), None, None, Some(postCode), Some(countryCode), Some(countryCode))
 
-  val mockedRetrievals = new ~(name, email) and dob and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+  val mockedRetrievals = new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
   //val mockedRetrievals = new ~(new ~(new ~(new ~(new ~(new ~(name, email), dob), itmpName), itmpDob), itmpAddress), Enrolments(Set(enrolment)))
-  val mockedMissingUserInfo = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), dob), itmpName), itmpDob),
+  val mockedMissingUserInfo = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), Option(dob)), itmpName), itmpDob),
     itmpAddress.copy(line1 = None)), Enrolments(Set(enrolment)))
-  val mockedMissingNinoEnrolment = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), dob), itmpName), itmpDob),
+  val mockedMissingNinoEnrolment = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), Option(dob)), itmpName), itmpDob),
     itmpAddress.copy(line1 = None)), Enrolments(Set()))
 
   def mockAuthResultWithFail(ex: Throwable): Unit =

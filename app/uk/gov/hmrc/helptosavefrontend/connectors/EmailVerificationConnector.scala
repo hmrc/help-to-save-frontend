@@ -43,7 +43,9 @@ trait EmailVerificationConnector {
 class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuration)(implicit crypto: Crypto)
   extends EmailVerificationConnector with ServicesConfig with Logging {
 
-  val linkTTLMinutes: Int = conf.underlying.getInt("microservice.services.email-verification.linkTTLMinutes")
+  override def runModeConfiguration: Configuration = conf
+
+  val linkTTLMinutes: Int = getInt("microservice.services.email-verification.linkTTLMinutes")
   val emailVerifyBaseURL: String = baseUrl("email-verification")
   val verifyEmailURL: String = s"$emailVerifyBaseURL/email-verification/verification-requests"
 

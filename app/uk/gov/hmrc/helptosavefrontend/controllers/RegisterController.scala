@@ -48,14 +48,11 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
 
   import RegisterController.NSIUserInfoOps
 
-  def getConfirmDetailsPage(emailVerificationParams: Option[String]): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { _ ⇒
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, _) ⇒ {
-          emailVerificationParams match {
-            case None    ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
-            case Some(p) ⇒ handleConfirmDetailsWithParameters(p, nsiUserInfo)
-          }
+          Ok(views.html.register.confirm_details(nsiUserInfo))
         }
       }
     }
@@ -87,7 +84,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks {
         case (_, confirmedEmail) ⇒
           confirmedEmail.fold[Future[Result]](
-            SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url))(
+            SeeOther(routes.RegisterController.getConfirmDetailsPage.url))(
               _ ⇒ Ok(views.html.register.create_account_help_to_save()))
       }
     }
@@ -98,7 +95,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, confirmedEmail) ⇒
           confirmedEmail.fold[Future[Result]](
-            SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url)
+            SeeOther(routes.RegisterController.getConfirmDetailsPage.url)
           ) { email ⇒
               // TODO: plug in actual pages below
               helpToSaveService.createAccount(nsiUserInfo.updateEmail(email)).leftMap(submissionFailureToString).fold(
@@ -166,7 +163,6 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       }
     }
   }
-
 }
 
 object RegisterController {

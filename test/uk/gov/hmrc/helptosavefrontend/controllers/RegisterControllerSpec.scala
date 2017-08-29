@@ -78,9 +78,9 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
     "handling getConfirmDetailsPage" must {
 
-        def doRequest(): Future[PlayResult] = controller.getConfirmDetailsPage(None)(FakeRequest())
+        def doRequest(): Future[PlayResult] = controller.getConfirmDetailsPage(FakeRequest())
 
-        def doRequestWithQueryParam(p: String): Future[PlayResult] = controller.getConfirmDetailsPage(Some(p))(FakeRequest())
+      //def doRequestWithQueryParam(p: String): Future[PlayResult] = controller.getConfirmDetailsPage(Some(p))(FakeRequest())
 
       behave like commonEnrolmentAndSessionBehaviour(doRequest)
 
@@ -99,48 +99,6 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           contentAsString(result) should include(validNSIUserInfo.forename)
           contentAsString(result) should include(validNSIUserInfo.surname)
         }
-
-      "show the users details with the verified user email address " +
-        "if the user has not already enrolled and " +
-        "the session data shows that they have been already found to be eligible " +
-        "and the user has clicked on the verify email link sent to them by the email verification service " in {
-          val testEmail = "email@gmail.com"
-          val theNino = "AE1234XXX"
-          inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo.copy(nino = theNino)), None))))
-          }
-          val params = EmailVerificationParams(theNino, testEmail)
-          val result = doRequestWithQueryParam(params.encode().replaceAll("%2b", "+"))
-          status(result) shouldBe Status.OK
-          contentAsString(result) should include(testEmail)
-        }
-
-      "return an OK status when the user has not already enrolled and the given nino doesn't match the session nino" in {
-        val testEmail = "email@gmail.com"
-        val theNino = "AE1234XXX"
-        inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-        }
-        val params = EmailVerificationParams(theNino, testEmail)
-        val result = doRequestWithQueryParam(params.encode())
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include("Email verification error")
-      }
-
-      "return an OK status when the link has been corrupted or is incorrect" in {
-        inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-        }
-        val result = doRequestWithQueryParam("corrupt-link")
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include("Email verification error")
-      }
     }
 
     "handling a confirmEmail" must {
@@ -225,7 +183,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage(None).url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage.url)
       }
 
       "show the user the create account page if the session data contains a confirmed email" in {
@@ -301,7 +259,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage(None).url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage.url)
       }
 
       "indicate to the user that the creation was not successful " when {

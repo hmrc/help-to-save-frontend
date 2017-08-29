@@ -27,7 +27,7 @@ case class EmailVerificationParams(nino: String, email: String) {
   private val encoder = Base64.getEncoder
 
   def encode()(implicit crypto: Crypto): String = {
-    val input = nino + "§" + email
+    val input = nino + "#" + email
     new String(encoder.encode(crypto.encrypt(input).getBytes))
   }
 }
@@ -40,8 +40,9 @@ object EmailVerificationParams {
     Try(new String(decoder.decode(base64))).flatMap(crypto.decrypt) match {
       case Failure(_) ⇒ None
       case Success(decrypted) ⇒
-        val params = decrypted.split("§")
-        if (params.length === 2) Some(EmailVerificationParams(params(0), params(1))) else None
+        val nino = decrypted.substring(0, decrypted.indexOf('#'))
+        val email = decrypted.substring(decrypted.indexOf('#') + 1)
+        Some(EmailVerificationParams(nino, email))
     }
   }
 }

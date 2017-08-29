@@ -20,6 +20,7 @@ import cats.data.ValidatedNel
 import cats.instances.string._
 import cats.syntax.cartesian._
 import cats.syntax.eq._
+import cats.syntax.either._
 import cats.syntax.option._
 import org.joda.time.LocalDate
 import play.api.mvc._
@@ -128,8 +129,10 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
     val validation: ValidatedNel[MissingUserInfo, UserInfo] =
       (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| emailValidation)
-        .map((givenName, surname, jodaDob, email) ⇒
-          UserInfo(givenName, surname, nino, jodaDob, email, Address(itmpAddress)))
+        .map{
+          case (givenName, surname, jodaDob, email) ⇒
+            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email, Address(itmpAddress))
+        }
 
     validation
       .leftMap(m ⇒ MissingUserInfos(m.toList.toSet, nino))
