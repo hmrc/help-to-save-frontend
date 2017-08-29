@@ -35,9 +35,9 @@ trait HelpToSaveService {
 
   def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult]
 
-  def getUserInformation(nino: String,
+  def getUserInformation(nino:           String,
                          userDetailsURI: UserDetailsURI
-                        )(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
+  )(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
 
   def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
 
@@ -49,9 +49,8 @@ trait HelpToSaveService {
 
 }
 
-
 @Singleton
-class HelpToSaveServiceImpl @Inject()(helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends HelpToSaveService with Logging {
+class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends HelpToSaveService with Logging {
 
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
     helpToSaveConnector.getUserEnrolmentStatus(nino)
@@ -73,10 +72,10 @@ class HelpToSaveServiceImpl @Inject()(helpToSaveConnector: HelpToSaveConnector, 
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure, SubmissionSuccess]] {
-      case success: SubmissionSuccess =>
+      case success: SubmissionSuccess ⇒
         logger.info(s"Successfully created an account for ${userInfo.nino}")
         Right(success)
-      case failure: SubmissionFailure =>
+      case failure: SubmissionFailure ⇒
         logger.error(s"Could not create an account for ${userInfo.nino} due to $failure")
         Left(failure)
     })

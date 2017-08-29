@@ -27,37 +27,27 @@ import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
 
 @Singleton
-class IntroductionController @Inject()(implicit app: Application, val messagesApi: MessagesApi,
-                                       frontendAuthConnector: FrontendAuthConnector) extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport {
+class IntroductionController @Inject() (implicit app: Application, val messagesApi: MessagesApi,
+                                        frontendAuthConnector: FrontendAuthConnector) extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport {
 
-  def getAboutHelpToSave: Action[AnyContent] = unprotected {
-    implicit request ⇒
-      implicit htsContext ⇒
-        Ok(views.html.introduction.about_help_to_save())
+  def getAboutHelpToSave: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.introduction.about_help_to_save())
   }
 
-  def getEligibility: Action[AnyContent] = unprotected {
-    implicit request ⇒
-      implicit htsContext ⇒
-        Ok(views.html.introduction.eligibility())
+  def getEligibility: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.introduction.eligibility())
   }
 
-  def getHowTheAccountWorks: Action[AnyContent] = unprotected {
-    implicit request ⇒
-      implicit htsContext ⇒
-        Ok(views.html.introduction.how_the_account_works())
+  def getHowTheAccountWorks: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.introduction.how_the_account_works())
   }
 
-  def getHowWeCalculateBonuses: Action[AnyContent] = unprotected {
-    implicit request ⇒
-      implicit htsContext ⇒
-        Ok(views.html.introduction.how_we_calculate_bonuses())
+  def getHowWeCalculateBonuses: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.introduction.how_we_calculate_bonuses())
   }
 
-  def getApply: Action[AnyContent] = unprotected {
-    implicit request ⇒
-      implicit htsContext ⇒
-        Ok(views.html.introduction.apply())
+  def getApply: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.introduction.apply())
   }
 
 }

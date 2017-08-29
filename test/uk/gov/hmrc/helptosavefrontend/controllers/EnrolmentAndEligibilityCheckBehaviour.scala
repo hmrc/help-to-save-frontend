@@ -49,7 +49,6 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val enrolments = Enrolments(Set(enrolment))
   val userDetailsURIWithEnrolments = core.~[Option[UserDetailsURI], Enrolments](Some(userDetailsURI), enrolments)
 
-
   def mockSessionCacheConnectorPut(session: HTSSession)(result: Either[String, CacheMap]): Unit =
     (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier, _: ExecutionContext))
       .expects(session, *, *, *)
@@ -70,15 +69,14 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .expects(nino, *)
       .returning(EitherT.fromEither[Future](result))
 
-
   def mockPlayAuthWithRetrievals[A, B](predicate: Predicate)(result: Option[UserDetailsURI] ~ Enrolments): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Option[UserDetailsURI] ~ Enrolments])(_: HeaderCarrier))
       .expects(predicate, HtsAuth.UserDetailsUrlWithAllEnrolments, *)
       .returning(Future.successful(result))
 
-  def commonEnrolmentAndSessionBehaviour(getResult: () ⇒ Future[Result], // scalastyle:ignore method.length
-                                         testRedirectOnNoSession: Boolean = true,
-                                         testEnrolmentCheckError: Boolean = true): Unit = {
+  def commonEnrolmentAndSessionBehaviour(getResult:               () ⇒ Future[Result], // scalastyle:ignore method.length
+                                         testRedirectOnNoSession: Boolean             = true,
+                                         testEnrolmentCheckError: Boolean             = true): Unit = {
 
     "redirect to NS&I if the user is already enrolled" in {
       inSequence {
@@ -91,26 +89,25 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     "redirect to NS&I if the user is already enrolled and set the ITMP flag " +
       "if it has not already been set" in {
-      inSequence {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-        mockWriteITMPFlag(nino)(Right(()))
-      }
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+          mockWriteITMPFlag(nino)(Right(()))
+        }
 
-      status(getResult()) shouldBe OK
-    }
+        status(getResult()) shouldBe OK
+      }
 
     "redirect to NS&I if the user is already enrolled even if there is an " +
       "setting the ITMP flag" in {
-      inSequence {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-        mockWriteITMPFlag(nino)(Left(""))
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+          mockWriteITMPFlag(nino)(Left(""))
+        }
+
+        status(getResult()) shouldBe OK
       }
-
-      status(getResult()) shouldBe OK
-    }
-
 
     if (testRedirectOnNoSession) {
       "redirect to the eligibility checks if there is no session data for the user" in {
@@ -119,7 +116,6 @@ trait EnrolmentAndEligibilityCheckBehaviour {
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(None))
         }
-
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER

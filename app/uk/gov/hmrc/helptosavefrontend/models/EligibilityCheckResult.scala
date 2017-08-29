@@ -54,7 +54,6 @@ object EligibilityReason {
   }
 }
 
-
 object IneligibilityReason {
 
   /** An HtS account was opened previously (the HtS account may have been closed or inactive) */
@@ -64,10 +63,10 @@ object IneligibilityReason {
   }
 
   /**
-    * Not entitled to WTC and
-    * (if receivingUC = true)  in receipt of UC but income is insufficient
-    * (if receivingUC = false) not in receipt of UC
-    **/
+   * Not entitled to WTC and
+   * (if receivingUC = true)  in receipt of UC but income is insufficient
+   * (if receivingUC = false) not in receipt of UC
+   */
   case class NotEntitledToWTC(receivingUC: Boolean) extends IneligibilityReason {
     val legibleString: String = if (receivingUC) {
       "Not entitled to WTC and in receipt of UC but income is insufficient"
@@ -77,10 +76,10 @@ object IneligibilityReason {
   }
 
   /**
-    * Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and
-    * (if receivingUC = true)  in receipt of UC but income is insufficient
-    * (if receivingUC = false) not in receipt of UC
-    **/
+   * Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and
+   * (if receivingUC = true)  in receipt of UC but income is insufficient
+   * (if receivingUC = false) not in receipt of UC
+   */
   case class EntitledToWTCButNoWTC(receivingUC: Boolean) extends IneligibilityReason {
     val legibleString: String = if (receivingUC) {
       "Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and in receipt of UC but income is insufficient"

@@ -40,14 +40,14 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration)(implicit crypto: Crypto)
+class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuration)(implicit crypto: Crypto)
   extends EmailVerificationConnector with ServicesConfig with Logging {
 
   val linkTTLMinutes = conf.underlying.getInt("microservice.services.email-verification.linkTTLMinutes")
   val emailVerifyBaseURL = baseUrl("email-verification")
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
 
-  val continueURL =  conf.underlying.getString("microservice.services.email-verification.continue-url")
+  val continueURL = conf.underlying.getString("microservice.services.email-verification.continue-url")
   val templateId = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
@@ -55,7 +55,7 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
     val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueUrlWithParams, Map())
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {
-        case OK | CREATED =>
+        case OK | CREATED ⇒
           logger.info(s"[EmailVerification] - Email verification successfully triggered")
           Right(())
         case BAD_REQUEST ⇒

@@ -30,7 +30,6 @@ class EmailVerificationParamsSpec extends TestSupport with GeneratorDrivenProper
   val email = "email@gmail.com"
   val params = EmailVerificationParams(nino, email)
 
-
   "EmailVerificationParams" must {
 
     "have a decode method that is the inverse of the encode method" in {

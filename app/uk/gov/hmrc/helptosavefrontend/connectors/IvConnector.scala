@@ -33,7 +33,7 @@ trait IvConnector {
 }
 
 @Singleton
-class IvConnectorImpl @Inject()(http: WSHttp) extends IvConnector with Logging {
+class IvConnectorImpl @Inject() (http: WSHttp) extends IvConnector with Logging {
 
   override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]] = {
 
@@ -43,13 +43,14 @@ class IvConnectorImpl @Inject()(http: WSHttp) extends IvConnector with Logging {
         val result = (r.json \ "result").as[String]
         IvSuccessResponse.fromString(result)
 
-      case r =>
+      case r ⇒
         logger.warn(s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service")
         Some(IvUnexpectedResponse(r))
 
-    }.recoverWith { case e: Exception =>
-      logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
-      Some(IvErrorResponse(e))
+    }.recoverWith {
+      case e: Exception ⇒
+        logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
+        Some(IvErrorResponse(e))
     }
   }
 }

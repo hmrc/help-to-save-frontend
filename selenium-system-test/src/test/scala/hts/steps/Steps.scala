@@ -33,7 +33,7 @@ trait Steps extends ScalaDsl with EN with Matchers {
 
   // create a new driver for each scenario
   Before { _ ⇒
-    if(_driver.isEmpty) {
+    if (_driver.isEmpty) {
       val d = Driver.newWebDriver()
         // map the left to Nothing
         .leftMap(e ⇒ sys.error(s"Could not find driver: $e"))
@@ -49,16 +49,15 @@ trait Steps extends ScalaDsl with EN with Matchers {
     _driver = None
   }
 
-
 }
 
 object Steps {
 
   /**
-    * Each step definition file extends the `Steps` trait , but they will all reference this single driver
-    * in the companion object. Having this variable in the trait would cause multiple drivers to be
-    * created
-    */
+   * Each step definition file extends the `Steps` trait , but they will all reference this single driver
+   * in the companion object. Having this variable in the trait would cause multiple drivers to be
+   * created
+   */
   private var _driver: Option[WebDriver] = None
 
 }

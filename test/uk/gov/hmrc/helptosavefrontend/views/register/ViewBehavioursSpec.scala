@@ -30,7 +30,7 @@ class ViewBehavioursSpec extends TestSupport {
 
   def assertEqualsMessage(doc: Document, cssSelector: String, expectedMessageKey: String) = {
     val elements = doc.select(cssSelector)
-    if(elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
+    if (elements.isEmpty) throw new IllegalArgumentException(s"CSS Selector $cssSelector wasn't rendered.")
     //<p> HTML elements are rendered out with a carriage return on some pages, so discount for comparison
     assert(elements.first().html().replace("\n", "") == messagesApi(expectedMessageKey))
   }
@@ -38,7 +38,7 @@ class ViewBehavioursSpec extends TestSupport {
   def assertPageTitleEqualsMessage(doc: Document, expectedMessageKey: String, args: Any*) = {
     val headers = doc.getElementsByTag("h1")
     headers.size shouldBe 1
-    headers.first.text.replaceAll("\u00a0", " ") shouldBe messages(expectedMessageKey, args:_*).replaceAll("&nbsp;", " ")
+    headers.first.text.replaceAll("\u00a0", " ") shouldBe messages(expectedMessageKey, args: _*).replaceAll("&nbsp;", " ")
   }
 
   def assertContainsLabel(doc: Document, forElement: String, expectedText: String) = {

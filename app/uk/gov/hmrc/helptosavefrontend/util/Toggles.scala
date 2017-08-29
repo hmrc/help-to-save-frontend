@@ -25,10 +25,10 @@ object Toggles {
   case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: Option[A], logger: Logger) {
     def enabled(): FEATURE_THEN[A] = {
       conf.getBoolean(s"feature-toggles.$name.enabled") match {
-        case Some(b) =>
+        case Some(b) ⇒
           logger.info("FEATURE: " + name + (if (b) " enabled" else " disabled"))
           FEATURE_THEN(name, b, unconfiguredVal, logger)
-        case None => throw new RuntimeException(s"FEATURE($name) is not present in configuration file - misconfigured")
+        case None ⇒ throw new RuntimeException(s"FEATURE($name) is not present in configuration file - misconfigured")
       }
     }
   }
@@ -39,9 +39,8 @@ object Toggles {
     def apply[A](name: String, conf: Configuration, unconfiguredVal: A): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, Some(unconfiguredVal), Logger(name))
   }
 
-
   case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: Option[A], logger: Logger) {
-    def thenDo(action: => A): Either[Option[A], A] = {
+    def thenDo(action: ⇒ A): Either[Option[A], A] = {
       if (enabled) {
         val startTime = Instant.now.toEpochMilli
         val result = action
@@ -58,16 +57,16 @@ object Toggles {
 
   implicit def eitherPop[A](e: Either[Option[A], A]): A = {
     e match {
-      case Right(a) => a
-      case Left(Some(a)) => a
-      case Left(None) => throw new RuntimeException(s"FEATURE has no otherwise branch and no default value")
+      case Right(a)      ⇒ a
+      case Left(Some(a)) ⇒ a
+      case Left(None)    ⇒ throw new RuntimeException(s"FEATURE has no otherwise branch and no default value")
     }
   }
 
   implicit class EitherExtend[A](e: Either[A, A]) {
-    def otherwise(action: => A) = e match {
-      case Right(a) => a
-      case Left(a) => action
+    def otherwise(action: ⇒ A) = e match {
+      case Right(a) ⇒ a
+      case Left(a)  ⇒ action
     }
   }
 

@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging
 import scala.collection.JavaConversions._
 
 @Singleton
-class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) with Logging {
+class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) with Logging {
 
   logger.info("Starting CustomWSConfigParser")
 
@@ -66,7 +66,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
 
     val wsClientConfig = config.copy(
       ssl = config.ssl.copy(
-        keyManagerConfig = config.ssl.keyManagerConfig.copy(
+        keyManagerConfig   = config.ssl.keyManagerConfig.copy(
           keyStoreConfigs = keyStores
         ),
         trustManagerConfig = config.ssl.trustManagerConfig.copy(
@@ -119,8 +119,8 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
   }
 
   /**
-    * @return absolute file path with the bytes written to the file
-    */
+   * @return absolute file path with the bytes written to the file
+   */
   def createTempFileForData(data: String): (String, Array[Byte]) = {
     val file = File.createTempFile(getClass.getSimpleName, ".tmp")
     file.deleteOnExit()
@@ -144,7 +144,7 @@ class CustomWSConfigParser @Inject()(configuration: Configuration, env: Environm
       .map(password ⇒ Base64.getDecoder.decode(password))
       .map(bytes ⇒ new String(bytes))
 
-    ks.copy(data = None, filePath = Some(ksFilePath), password = decryptedPass)
+    ks.copy(data     = None, filePath = Some(ksFilePath), password = decryptedPass)
   }
 }
 

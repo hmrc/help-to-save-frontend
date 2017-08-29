@@ -27,7 +27,6 @@ class UpdateEmailViewSpec extends ViewBehavioursSpec {
   lazy val view = update_email_address("email@gmail.com", UpdateEmailForm.verifyEmailForm)(mockHtsContext, request, messages)
   lazy val document = Jsoup.parse(view.toString())
 
-
   "UpdateEmailView" should {
     "when rendered have the correct banner title" in {
       val nav = document.getElementById("proposition-menu")

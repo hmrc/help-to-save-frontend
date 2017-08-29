@@ -59,10 +59,10 @@ class IvControllerSpec extends TestSupport {
   }
 
   lazy val ivController = new IvController(mockSessionCacheConnector,
-    ivConnector,
-    fakeApplication.injector.instanceOf[MessagesApi],
-    fakeApplication,
-    frontendAuthConnector) {
+                                           ivConnector,
+                                           fakeApplication.injector.instanceOf[MessagesApi],
+                                           fakeApplication,
+                                           frontendAuthConnector) {
     override def authConnector: AuthConnector = mockAuthConnector
   }
 

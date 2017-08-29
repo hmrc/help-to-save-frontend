@@ -48,7 +48,6 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
       }
     }
 
-
     "have an apply method" which {
 
       "takes in a UserInfo" which {
@@ -127,9 +126,8 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
             "   Address\t\n\r   line2\t\n\r   ",
             "   Address\t\n\r   line3\t\n\r   ",
             "   Address\t\n\r   line4\t\n\r   ",
-            "   Address\t\n\r   line5\t\n\r   ")
-            , Some("BN43 XXX"),
-            None
+            "   Address\t\n\r   line5\t\n\r   "), Some("BN43 XXX"),
+                                       None
           )
 
           val ui: UserInfo = validUserInfo.copy(address = specialAddress)
@@ -151,8 +149,8 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
             "   Address\t\n\rline3\t\n\r   ",
             "   Address\t\n\r   line4\t\n\r   ",
             "   Address\t\n\r             line5\t\n\r   "),
-            Some("BN43XXX  \t\r\n"),
-            Some("GB    \n\r\t")
+                                       Some("BN43XXX  \t\r\n"),
+                                       Some("GB    \n\r\t")
           )
 
           val ui: UserInfo = validUserInfo.copy(forename = longName, surname = longSurname, address = specialAddress)
@@ -215,7 +213,6 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
 
       }
     }
-
 
   }
 

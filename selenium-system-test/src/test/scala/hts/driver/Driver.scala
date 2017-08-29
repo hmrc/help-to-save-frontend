@@ -31,10 +31,10 @@ object Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome") ⇒ Right(createChromeDriver())
+      case Some("chrome")    ⇒ Right(createChromeDriver())
       case Some("phantomjs") ⇒ Right(createPhantomJsDriver())
-      case Some(other) ⇒ Left(s"Unrecognised browser: $other")
-      case None ⇒ Left("No browser set")
+      case Some(other)       ⇒ Left(s"Unrecognised browser: $other")
+      case None              ⇒ Left("No browser set")
     }
 
     selectedDriver.map { driver ⇒
@@ -81,7 +81,6 @@ object Driver {
 
     new ChromeDriver(capabilities)
   }
-
 
   private def createPhantomJsDriver(): WebDriver = {
     if (isMac) {
