@@ -38,7 +38,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
   val mockHttp = mock[WSHttp]
 
-  val connector = new HelpToSaveConnectorImpl(mockHttp)
+  lazy val connector = new HelpToSaveConnectorImpl(mockHttp)
 
   def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
     (mockHttp.get(_: String)(_: HeaderCarrier))
@@ -302,7 +302,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     }
   }
 
-  def testCommon[E, A, B](mockGet: Option[HttpResponse] ⇒ Unit,
+  def testCommon[E, A, B](mockGet: => Option[HttpResponse] ⇒ Unit,
                           getResult: () ⇒ EitherT[Future, E, A],
                           validBody: B,
                           testInvalidJSON: Boolean = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length

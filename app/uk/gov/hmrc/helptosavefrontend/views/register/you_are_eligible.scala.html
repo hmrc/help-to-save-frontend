@@ -33,7 +33,7 @@
     <h2 class="heading-medium">@Messages("hts.register.you-are-eligible.h2-1")</h2>
     <p>@Messages("hts.register.you-are-eligible.p-3")</p>
     <p>@Messages("hts.register.you-are-eligible.p-4")</p>
-    @form(routes.RegisterController.getConfirmDetailsPage(), 'class -> "group") {
+    @form(routes.RegisterController.getConfirmDetailsPage(None), 'class -> "group") {
         @submit('_buttonClass -> "") {
             @Messages("hts.register.you-are-eligible.button-1")
         }

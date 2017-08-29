@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.forms
 
-sealed trait VerifyEmailError
+import play.api.data._
+import play.api.data.Forms._
+import play.api.i18n.Lang
 
-object VerifyEmailError {
-  case object RequestNotValidError extends VerifyEmailError
-  case object VerificationServiceUnavailable extends VerifyEmailError
-  case object AlreadyVerified extends VerifyEmailError
-  case object BackendError extends VerifyEmailError
-  case object BadContinueURL extends VerifyEmailError
+object UpdateEmailForm {
+  val verifyEmailForm = Form(
+    mapping("value" -> email
+    )(UpdateEmail.apply)(UpdateEmail.unapply)
+  )
 }
+
+case class UpdateEmail(email: String)

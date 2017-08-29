@@ -22,13 +22,13 @@ import cats.instances.future._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -39,17 +39,23 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                                    val helpToSaveService: HelpToSaveService,
                                    val sessionCacheConnector: SessionCacheConnector,
                                    val app: Application,
-                                   frontendAuthConnector: FrontendAuthConnector)(implicit ec: ExecutionContext)
+                                   frontendAuthConnector: FrontendAuthConnector
+                                  )(implicit ec: ExecutionContext, crypto: Crypto)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
   import RegisterController.NSIUserInfoOps
 
-  def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithInfo {
+
+  def getConfirmDetailsPage(emailVerificationParams: Option[String]): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
         checkIfAlreadyEnrolled { _ ⇒
-          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
-            Ok(views.html.register.confirm_details(nsiUserInfo))
+          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒ {
+            emailVerificationParams match {
+              case None ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
+              case Some(p) ⇒ handleConfirmDetailsWithParameters(p, nsiUserInfo)
+            }
+          }
           }
         }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
@@ -82,7 +88,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         checkIfAlreadyEnrolled { _ ⇒
           checkIfDoneEligibilityChecks { case (_, confirmedEmail) ⇒
             confirmedEmail.fold[Future[Result]](
-              SeeOther(routes.RegisterController.getConfirmDetailsPage().url))(
+              SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url))(
               _ ⇒ Ok(views.html.register.create_account_help_to_save()))
           }
         }
@@ -94,7 +100,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
         checkIfAlreadyEnrolled { nino ⇒
           checkIfDoneEligibilityChecks { case (nsiUserInfo, confirmedEmail) ⇒
             confirmedEmail.fold[Future[Result]](
-              SeeOther(routes.RegisterController.getConfirmDetailsPage().url)
+              SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url)
             ) { email ⇒
               // TODO: plug in actual pages below
               helpToSaveService.createAccount(nsiUserInfo.updateEmail(email)).leftMap(submissionFailureToString).fold(
@@ -145,6 +151,25 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
 
+
+
+  private def handleConfirmDetailsWithParameters(confirmDetailsParameters: String,
+                                                 nsiUserInfo: NSIUserInfo
+                                                )(implicit request: Request[AnyContent], htsContext: HtsContext) = {
+    val optionalParams = EmailVerificationParams.decode(confirmDetailsParameters)
+    optionalParams.fold({
+      logger.warn("Could not decode parameters for confirm details")
+      Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
+    }){ params ⇒
+      if (params.nino == nsiUserInfo.nino) {
+        val updatedNsiUserInfo = nsiUserInfo copy (contactDetails = nsiUserInfo.contactDetails copy (email = params.email))
+        Ok(views.html.register.confirm_details(updatedNsiUserInfo))
+      } else {
+        logger.warn("NINO in confirm details parameters did not match NINO from auth")
+        Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
+      }
+    }
+  }
 
 }
 
