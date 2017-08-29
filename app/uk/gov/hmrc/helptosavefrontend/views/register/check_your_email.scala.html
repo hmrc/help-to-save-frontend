@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
@@ -24,4 +25,14 @@
 
      <h1>@messages("hts.email-verification.check-your-email.title")</h1>
      <p class="content">@messages("hts.email-verification.check-your-email.content")</p>
-    }
+
+    <br>
+
+    <h2>Want to change your email address?</h2>
+    <p class="content">Click here to change email address</p>
+    <a href=@routes.UpdateEmailAddressController.getUpdateYourEmailAddress()
+       id="update-email"
+    class="button">Change email address</a>
+
+}
+    

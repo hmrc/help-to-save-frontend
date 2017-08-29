@@ -26,23 +26,28 @@ class CheckYourEmailSpec extends ViewBehavioursSpec {
   lazy val view = check_your_email()(mockHtsContext, request, messages)
   lazy val document = Jsoup.parse(view.toString())
 
-  "CheckYourEmail" should {
-    "when rendered have the correct banner title" in {
+  "CheckYourEmail" when {
+    "rendered have the correct banner title" in {
       val nav = document.getElementById("proposition-menu")
       val span = nav.children().first()
       span.text shouldBe messagesApi("hts.helpers.header-page")
     }
 
-    "when rendered must display the correct browser title" in {
+    "rendered must display the correct browser title" in {
       assertEqualsMessage(document, "title", "hts.introduction.title")
     }
 
-    "when rendered must have the correct page title" in {
+    "rendered must have the correct page title" in {
       assertPageTitleEqualsMessage(document, "hts.email-verification.check-your-email.title")
     }
 
-    "when rendered must display user content" in {
+    "rendered must display user content" in {
       assertEqualsMessage(document, "p.content", "hts.email-verification.check-your-email.content")
+    }
+
+    "rendered must display a buton which allows the user to change their email address" in {
+      val button = document.getElementById("update-email")
+      button.className() shouldBe "button"
     }
 
   }
