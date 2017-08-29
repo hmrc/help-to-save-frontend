@@ -138,8 +138,8 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
   )(implicit hc: HeaderCarrier): Result = {
     result.value.fold(
       {
-        case r @ IneligibilityReason.AccountAlreadyOpened ⇒
-          auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(r.legibleString)))
+        case IneligibilityReason.AccountAlreadyOpened ⇒
+          auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(IneligibilityReason.AccountAlreadyOpened.legibleString)))
 
           // set the ITMP flag here but don't worry about the result
           helpToSaveService.setITMPFlag(nino).fold(
