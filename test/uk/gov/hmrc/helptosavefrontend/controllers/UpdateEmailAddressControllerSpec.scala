@@ -97,7 +97,7 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
         mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
         mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
-        mockEmailVerificationConn(Right())
+        mockEmailVerificationConn(Right(()))
       }
       val result = await(controller.onSubmit()(fakePostRequest))
       status(result) shouldBe Status.OK

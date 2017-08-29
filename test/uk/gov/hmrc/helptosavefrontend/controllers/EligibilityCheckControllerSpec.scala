@@ -76,7 +76,7 @@ class EligibilityCheckControllerSpec
       .expects(nino, userDetailsURI, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockSendAuditEvent: Unit =
+  def mockSendAuditEvent(): Unit =
     (mockAuditor.sendEvent(_: HTSEvent))
       .expects(*)
       .returning(Future.successful(AuditResult.Success))
@@ -184,7 +184,7 @@ class EligibilityCheckControllerSpec
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-            mockSendAuditEvent
+            mockSendAuditEvent()
             mockWriteITMPFlag(nino)(Right(()))
           }
 
@@ -201,7 +201,7 @@ class EligibilityCheckControllerSpec
             mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
             mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
             mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-            mockSendAuditEvent
+            mockSendAuditEvent()
           }
 
           val result = doCheckEligibilityRequest()
@@ -215,7 +215,7 @@ class EligibilityCheckControllerSpec
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.NotEntitledToWTC(false)))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-            mockSendAuditEvent
+            mockSendAuditEvent()
           }
 
           val result = doCheckEligibilityRequest()
@@ -275,7 +275,7 @@ class EligibilityCheckControllerSpec
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-            mockSendAuditEvent
+            mockSendAuditEvent()
             mockWriteITMPFlag(nino)(Right(()))
           }
 
@@ -296,7 +296,7 @@ class EligibilityCheckControllerSpec
               mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
               mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-              mockSendAuditEvent
+              mockSendAuditEvent()
             }
 
             val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
@@ -318,7 +318,7 @@ class EligibilityCheckControllerSpec
                   mockSessionCacheConnectorGet(Right(None))
                   mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(ineligibilityReason))))
                   mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-                  mockSendAuditEvent
+                  mockSendAuditEvent()
                 }
 
                 val result = doCheckEligibilityRequest()
@@ -338,7 +338,7 @@ class EligibilityCheckControllerSpec
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
             mockGetUserInformation(nino, userDetailsURI)(Left(MissingUserInfos(Set(Email, Contact), nino)))
-            mockSendAuditEvent
+            mockSendAuditEvent()
           }
 
           val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
