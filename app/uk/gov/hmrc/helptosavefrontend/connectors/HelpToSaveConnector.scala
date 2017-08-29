@@ -39,10 +39,8 @@ trait HelpToSaveConnector {
 
   def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult]
 
-  def getUserInformation(nino: NINO,
-                         userDetailsURI: UserDetailsURI)
-                        (implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
-
+  def getUserInformation(nino:           NINO,
+                         userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
 
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
 
@@ -52,11 +50,10 @@ trait HelpToSaveConnector {
 
   def storeEmail(email: Email, nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
 
-
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
+class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
   import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 
@@ -70,8 +67,7 @@ class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionCont
       identity
     )
 
-  def getUserInformation(nino: NINO, userDetailsURI: UserDetailsURI
-                        )(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] = {
+  def getUserInformation(nino: NINO, userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] = {
     val backendError = (s: String) ⇒ UserInformationRetrievalError.BackendError(s, nino)
     handle(
       userInformationURL(nino, userDetailsURI), { response ⇒
@@ -104,11 +100,11 @@ class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionCont
     handle(storeEmailURL(encodedEmail, nino), _ ⇒ Right(()), "store email", identity)
   }
 
-  private def handle[A, B](url: String,
-                           ifHTTP200: HttpResponse ⇒ Either[B, A],
+  private def handle[A, B](url:         String,
+                           ifHTTP200:   HttpResponse ⇒ Either[B, A],
                            description: ⇒ String,
-                           toError: String ⇒ B
-                          )(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+                           toError:     String ⇒ B
+  )(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
     EitherT(http.get(url).map { response ⇒
       if (response.status == 200) {
         ifHTTP200(response)
@@ -143,9 +139,7 @@ class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionCont
 
 }
 
-
 object HelpToSaveConnectorImpl {
-
 
   private[connectors] object URLS {
     def eligibilityURL(nino: NINO) =
@@ -166,7 +160,6 @@ object HelpToSaveConnectorImpl {
     def storeEmailURL(email: Email, nino: NINO) =
       s"$helpToSaveUrl/help-to-save/store-email?email=$email&nino=$nino"
   }
-
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
 

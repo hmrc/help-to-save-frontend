@@ -21,7 +21,6 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 class EmailVerificationRequestSpec extends UnitSpec with TestSupport {
 
-
   "the constructor" should {
 
     "check that the nino and the new email address have been passed in as template parameters" in {

@@ -52,16 +52,12 @@ class HelpToSaveAuthSpec extends TestSupport {
     override def authConnector: AuthConnector = mockAuthConnector
   }
 
-  private def actionWithNoEnrols = htsAuth.authorisedForHts {
-    implicit request ⇒
-      implicit htsContext ⇒
-        Future.successful(Ok(""))
+  private def actionWithNoEnrols = htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Future.successful(Ok(""))
   }(FrontendAppConfig.checkEligibilityUrl)
 
-  private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo {
-    implicit request ⇒
-      implicit htsContext ⇒
-        Future.successful(Ok(""))
+  private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    Future.successful(Ok(""))
   }(FrontendAppConfig.checkEligibilityUrl)
 
   private def mockAuthWith(error: String) =

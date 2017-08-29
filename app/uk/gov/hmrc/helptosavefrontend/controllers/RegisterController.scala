@@ -35,73 +35,68 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegisterController @Inject()(val messagesApi: MessagesApi,
-                                   val helpToSaveService: HelpToSaveService,
-                                   val sessionCacheConnector: SessionCacheConnector,
-                                   val app: Application,
-                                   frontendAuthConnector: FrontendAuthConnector
-                                  )(implicit ec: ExecutionContext, crypto: Crypto)
+class RegisterController @Inject() (val messagesApi:           MessagesApi,
+                                    val helpToSaveService:     HelpToSaveService,
+                                    val sessionCacheConnector: SessionCacheConnector,
+                                    val app:                   Application,
+                                    frontendAuthConnector:     FrontendAuthConnector
+)(implicit ec: ExecutionContext, crypto: Crypto)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
   import RegisterController.NSIUserInfoOps
 
+  def getConfirmDetailsPage(emailVerificationParams: Option[String]): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { _ ⇒
+      checkIfDoneEligibilityChecks {
+        case (nsiUserInfo, _) ⇒ {
+          emailVerificationParams match {
+            case None    ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
+            case Some(p) ⇒ handleConfirmDetailsWithParameters(p, nsiUserInfo)
+          }
+        }
+      }
+    }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def getConfirmDetailsPage(emailVerificationParams: Option[String]): Action[AnyContent] = authorisedForHtsWithInfo {
-    implicit request ⇒
-      implicit htsContext ⇒
-        checkIfAlreadyEnrolled { _ ⇒
-          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒ {
-            emailVerificationParams match {
-              case None ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
-              case Some(p) ⇒ handleConfirmDetailsWithParameters(p, nsiUserInfo)
+  def confirmEmail(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { nino ⇒
+      checkIfDoneEligibilityChecks {
+        case (nsiUserInfo, _) ⇒
+          val result = for {
+            _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
+            _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail, nino)
+          } yield ()
+
+          result.fold[Result](
+            { e ⇒
+              logger.warn(s"Could not write confirmed email for user $nino: $e")
+              InternalServerError
+            }, { _ ⇒
+              SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
             }
-          }
-          }
-        }
+          )
+      }
+    }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def confirmEmail(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo {
-    implicit request ⇒
-      implicit htsContext ⇒
-        checkIfAlreadyEnrolled { nino ⇒
-          checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒
-            val result = for {
-              _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
-              _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail, nino)
-            } yield ()
-
-            result.fold[Result](
-              { e ⇒
-                logger.warn(s"Could not write confirmed email for user $nino: $e")
-                InternalServerError
-              }, { _ ⇒
-                SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
-              }
-            )
-          }
-        }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
-
-  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithInfo {
-    implicit request ⇒
-      implicit htsContext ⇒
-        checkIfAlreadyEnrolled { _ ⇒
-          checkIfDoneEligibilityChecks { case (_, confirmedEmail) ⇒
-            confirmedEmail.fold[Future[Result]](
-              SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url))(
+  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { _ ⇒
+      checkIfDoneEligibilityChecks {
+        case (_, confirmedEmail) ⇒
+          confirmedEmail.fold[Future[Result]](
+            SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url))(
               _ ⇒ Ok(views.html.register.create_account_help_to_save()))
-          }
-        }
+      }
+    }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithInfo {
-    implicit request ⇒
-      implicit htsContext ⇒
-        checkIfAlreadyEnrolled { nino ⇒
-          checkIfDoneEligibilityChecks { case (nsiUserInfo, confirmedEmail) ⇒
-            confirmedEmail.fold[Future[Result]](
-              SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url)
-            ) { email ⇒
+  def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { nino ⇒
+      checkIfDoneEligibilityChecks {
+        case (nsiUserInfo, confirmedEmail) ⇒
+          confirmedEmail.fold[Future[Result]](
+            SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url)
+          ) { email ⇒
               // TODO: plug in actual pages below
               helpToSaveService.createAccount(nsiUserInfo.updateEmail(email)).leftMap(submissionFailureToString).fold(
                 error ⇒ {
@@ -121,18 +116,17 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
                 }
               )
             }
-          }
-        }
+      }
+    }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   /**
-    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
-    * checks yet this session and they are redirected to the 'apply now' page. If the session data indicates
-    * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
-    * given action if the the session data indicates that they are eligible
-    */
-  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result]
-                                          )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
+   * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
+   * checks yet this session and they are redirected to the 'apply now' page. If the session data indicates
+   * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
+   * given action if the the session data indicates that they are eligible
+   */
+  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result])(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
     checkSession {
       // no session data => user has not gone through the journey this session => take them to eligibility checks
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
@@ -142,20 +136,18 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           // user has gone through journey already this sessions and were found to be ineligible
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
         )(userInfo ⇒
-          // user has gone through journey already this sessions and were found to be eligible
-          ifEligible(userInfo, session.confirmedEmail)
-        )
+            // user has gone through journey already this sessions and were found to be eligible
+            ifEligible(userInfo, session.confirmedEmail)
+          )
     }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
 
-
-
   private def handleConfirmDetailsWithParameters(confirmDetailsParameters: String,
-                                                 nsiUserInfo: NSIUserInfo
-                                                )(implicit request: Request[AnyContent], htsContext: HtsContext) = {
+                                                 nsiUserInfo:              NSIUserInfo
+  )(implicit request: Request[AnyContent], htsContext: HtsContext) = {
     val optionalParams = EmailVerificationParams.decode(confirmDetailsParameters)
     optionalParams.fold({
       logger.warn("Could not decode parameters for confirm details")

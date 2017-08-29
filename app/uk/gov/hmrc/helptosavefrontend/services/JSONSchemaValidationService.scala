@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
-
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -37,7 +36,7 @@ trait JSONSchemaValidationService {
 }
 
 @Singleton
-class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends JSONSchemaValidationService {
+class JSONSchemaValidationServiceImpl @Inject() (conf: Configuration) extends JSONSchemaValidationService {
 
   private val validationSchema: SchemaType = {
     val schemaStr = conf.underlying.getString("schema")
@@ -64,7 +63,7 @@ class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends JSO
       _ match {
         case JsString(s) ⇒
           Try(LocalDate.parse(s, dateFormatter)) match {
-            case Failure(e) ⇒ Left(s"Could not parse date of birth: ${e.getMessage}")
+            case Failure(e)     ⇒ Left(s"Could not parse date of birth: ${e.getMessage}")
             case Success(value) ⇒ Right(value)
           }
 
@@ -75,7 +74,7 @@ class JSONSchemaValidationServiceImpl @Inject()(conf: Configuration) extends JSO
 
   private def validateAgainstSchema(userInfo: JsValue): Either[String, JsValue] =
     jsonValidator.validate(validationSchema, userInfo) match {
-      case e: JsError ⇒ Left(s"User info was not valid against schema: ${e.prettyPrint()}")
+      case e: JsError      ⇒ Left(s"User info was not valid against schema: ${e.prettyPrint()}")
       case JsSuccess(u, _) ⇒ Right(u)
     }
 

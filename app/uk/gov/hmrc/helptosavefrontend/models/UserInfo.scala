@@ -21,21 +21,16 @@ import java.time.LocalDate
 import play.api.libs.json._
 
 /** Details of the user obtained from HMRC services */
-case class UserInfo(forename: String,
-                    surname: String,
-                    nino: String,
+case class UserInfo(forename:    String,
+                    surname:     String,
+                    nino:        String,
                     dateOfBirth: LocalDate,
-                    email: String,
-                    address: Address
-                   )
+                    email:       String,
+                    address:     Address
+)
 
 object UserInfo {
 
   implicit val userDetailsFormat: Format[UserInfo] = Json.format[UserInfo]
 }
-
-
-
-
-
 

@@ -45,13 +45,13 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
   val mockHttp = mock[WSHttp]
 
   lazy val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockHelpToSaveService, frontendAuthConnector, mockEmailVerificationConnector
-  )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]){
+  )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]) {
 
     override val authConnector = mockAuthConnector
   }
 
   def mockEmailVerificationConn(result: Either[VerifyEmailError, Unit]) = {
-    (mockEmailVerificationConnector.verifyEmail(_: String, _:String)(_: HeaderCarrier)).expects(*,*,*)
+    (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier)).expects(*, *, *)
       .returning(Future.successful(result))
   }
 
@@ -59,34 +59,33 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
     "getting the update your email page " must {
 
-      def getResult(): Future[Result] = controller.getUpdateYourEmailAddress(FakeRequest())
+        def getResult(): Future[Result] = controller.getUpdateYourEmailAddress(FakeRequest())
 
       behave like commonEnrolmentAndSessionBehaviour(getResult)
 
       "return the update your email page if the user is not already enrolled and the " +
         "session data indicates that they are eligible" in {
-        inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          inSequence {
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          }
+          val result = getResult()
+          status(result) shouldBe Status.OK
+          contentAsString(result) should include(messages("hts.email-verification.title"))
         }
-        val result = getResult()
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include(messages("hts.email-verification.title"))
-      }
-
 
       "return the you're not eligible page if the user is not already enrolled and the " +
         "session data indicates that they are ineligible" in {
-        inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
+          inSequence {
+            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
+          }
+          val result = getResult()
+          status(result) shouldBe Status.OK
+          contentAsString(result) should include("not eligible")
         }
-        val result = getResult()
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include("not eligible")
-      }
     }
 
   }
@@ -108,18 +107,18 @@ class UpdateEmailAddressControllerSpec extends TestSupport with EnrolmentAndElig
 
     "return an AlreadyVerified status and redirect the user to the email-verify-error page," +
       " given an email address of an already verified user " in {
-      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
-      inSequence {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
-        mockEmailVerificationConn(Left(AlreadyVerified))
+        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
+          mockEmailVerificationConn(Left(AlreadyVerified))
+        }
+        val result = await(controller.onSubmit()(fakePostRequest))
+        status(result) shouldBe Status.OK
+        contentAsString(result).contains(messagesApi("hts.email-verification.error.title")) shouldBe true
+        contentAsString(result).contains(messagesApi("hts.email-verification.error.already-verified.content")) shouldBe true
       }
-      val result = await(controller.onSubmit()(fakePostRequest))
-      status(result) shouldBe Status.OK
-      contentAsString(result).contains(messagesApi("hts.email-verification.error.title")) shouldBe true
-      contentAsString(result).contains(messagesApi("hts.email-verification.error.already-verified.content")) shouldBe true
-    }
 
     "return an OK status and redirect the user to the email_verify_error page with request not valid message" in {
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")

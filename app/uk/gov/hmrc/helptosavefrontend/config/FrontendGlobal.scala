@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
 import play.api.Play.current

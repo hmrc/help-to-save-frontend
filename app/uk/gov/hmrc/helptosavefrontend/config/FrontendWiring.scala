@@ -36,9 +36,9 @@ object FrontendAuditConnector extends Auditing with AppName {
 trait WSHttpExtension extends WSGet with WSPost {
 
   /**
-    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
-    * to replace [[GET]] method provided by the hmrc library which will throw exceptions in such cases.
-    */
+   * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
+   * to replace [[GET]] method provided by the hmrc library which will throw exceptions in such cases.
+   */
   def get(url: String)(implicit rhc: HeaderCarrier): Future[HttpResponse] = withTracing(GET_VERB, url) {
     val httpResponse = doGet(url)
     executeHooks(url, GET_VERB, None, httpResponse)
@@ -46,13 +46,13 @@ trait WSHttpExtension extends WSGet with WSPost {
   }
 
   /**
-    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
-    * to replace [[POST]] method provided by the hmrc library which will throw exceptions in such cases.
-    */
-  def post[A](url: String,
-              body: A,
+   * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
+   * to replace [[POST]] method provided by the hmrc library which will throw exceptions in such cases.
+   */
+  def post[A](url:     String,
+              body:    A,
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
-             )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = withTracing(POST_VERB, url) {
+  )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = withTracing(POST_VERB, url) {
     val httpResponse = doPost(url, body, headers)
     executeHooks(url, POST_VERB, None, httpResponse)
     httpResponse
@@ -65,7 +65,7 @@ class WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName wit
 }
 
 @Singleton
-class FrontendAuthConnector @Inject()(wsHttp: WSHttp) extends PlayAuthConnector with ServicesConfig {
+class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector with ServicesConfig {
   override lazy val serviceUrl: String = baseUrl("auth")
 
   override def http = wsHttp
@@ -78,12 +78,12 @@ class WSHttpProxy extends ws.WSHttp with WSProxy with RunMode with HttpAuditing 
   override lazy val auditConnector = FrontendAuditConnector
 
   /**
-    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
-    * to replace [[POST]] method provided by the hmrc library which will throw exceptions in such cases.
-    */
-  def post[A](url: String,
-              body: A,
+   * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
+   * to replace [[POST]] method provided by the hmrc library which will throw exceptions in such cases.
+   */
+  def post[A](url:     String,
+              body:    A,
               headers: Map[String, String] = Map.empty[String, String]
-             )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] =
+  )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] =
     doPost(url, body, headers.toSeq)
 }

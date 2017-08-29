@@ -38,7 +38,7 @@ class HTSEventSpec extends TestSupport {
       val pNumber = "01254-888888"
       val completeUserInfo =
         validNSIUserInfo copy (contactDetails =
-          validNSIUserInfo.contactDetails copy(address4 = Some(addr4),
+          validNSIUserInfo.contactDetails copy (address4 = Some(addr4),
             address5 = Some(addr5),
             countryCode = Some(cc),
             email = "this@that.com",
@@ -47,21 +47,21 @@ class HTSEventSpec extends TestSupport {
 
       val event = new ApplicationSubmittedEvent("hts-frontend", completeUserInfo)(new HeaderCarrier)
       event.detail.size shouldBe 15
-      event.detail.exists(x => x._1 == "forename" && x._2 == completeUserInfo.forename) shouldBe true
-      event.detail.exists(x => x._1 == "surname" && x._2 == completeUserInfo.surname) shouldBe true
-      event.detail.exists(x => x._1 == "dateOfBirth" && x._2 == completeUserInfo.dateOfBirth.toString) shouldBe true
-      event.detail.exists(x => x._1 == "nino" && x._2 == completeUserInfo.nino) shouldBe true
-      event.detail.exists(x => x._1 == "address1" && x._2 == completeUserInfo.contactDetails.address1) shouldBe true
-      event.detail.exists(x => x._1 == "address2" && x._2 == completeUserInfo.contactDetails.address2) shouldBe true
-      event.detail.exists(x => x._1 == "address3" && x._2 == "Westeros") shouldBe true
-      event.detail.exists(x => x._1 == "address4" && x._2 == addr4) shouldBe true
-      event.detail.exists(x => x._1 == "address5" && x._2 == addr5) shouldBe true
-      event.detail.exists(x => x._1 == "postcode" && x._2 == completeUserInfo.contactDetails.postcode) shouldBe true
-      event.detail.exists(x => x._1 == "countryCode" && x._2 == cc) shouldBe true
-      event.detail.exists(x => x._1 == "email" && x._2 == completeUserInfo.contactDetails.email) shouldBe true
-      event.detail.exists(x => x._1 == "phoneNumber" && x._2 == pNumber) shouldBe true
-      event.detail.exists(x => x._1 == "communicationPreference" && x._2 == completeUserInfo.contactDetails.communicationPreference) shouldBe true
-      event.detail.exists(x => x._1 == "registrationChannel" && x._2 == completeUserInfo.registrationChannel) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "forename" && x._2 == completeUserInfo.forename) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "surname" && x._2 == completeUserInfo.surname) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "dateOfBirth" && x._2 == completeUserInfo.dateOfBirth.toString) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "nino" && x._2 == completeUserInfo.nino) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "address1" && x._2 == completeUserInfo.contactDetails.address1) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "address2" && x._2 == completeUserInfo.contactDetails.address2) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "address3" && x._2 == "Westeros") shouldBe true
+      event.detail.exists(x ⇒ x._1 == "address4" && x._2 == addr4) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "address5" && x._2 == addr5) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "postcode" && x._2 == completeUserInfo.contactDetails.postcode) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "countryCode" && x._2 == cc) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "email" && x._2 == completeUserInfo.contactDetails.email) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "phoneNumber" && x._2 == pNumber) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "communicationPreference" && x._2 == completeUserInfo.contactDetails.communicationPreference) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "registrationChannel" && x._2 == completeUserInfo.registrationChannel) shouldBe true
     }
   }
 
@@ -79,17 +79,17 @@ class HTSEventSpec extends TestSupport {
     "be created with the eligible tag set true, no reason tag, and the nino, if the errorDetailString is None" in {
       val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
       event.detail.size shouldBe 2
-      event.detail.exists(x => x._1 == "nino" && x._2 == validNSIUserInfo.nino) shouldBe true
-      event.detail.exists(x => x._1 == "eligible" && x._2 == "true") shouldBe true
+      event.detail.exists(x ⇒ x._1 == "nino" && x._2 == validNSIUserInfo.nino) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "eligible" && x._2 == "true") shouldBe true
     }
 
     "be created with the eligible tag set false, a reason tag, and the nino, if the errorDetailString is given" in {
       val reason = "reason"
       val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, Some(reason))(new HeaderCarrier)
       event.detail.size shouldBe 3
-      event.detail.exists(x => x._1 == "nino" && x._2 == validNSIUserInfo.nino) shouldBe true
-      event.detail.exists(x => x._1 == "eligible" && x._2 == "false") shouldBe true
-      event.detail.exists(x => x._1 == "reason" && x._2 == reason) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "nino" && x._2 == validNSIUserInfo.nino) shouldBe true
+      event.detail.exists(x ⇒ x._1 == "eligible" && x._2 == "false") shouldBe true
+      event.detail.exists(x ⇒ x._1 == "reason" && x._2 == reason) shouldBe true
     }
   }
 }

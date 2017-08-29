@@ -18,14 +18,14 @@ package hts.steps
 
 import hts.pages.{CreateAccountPage, ConfirmDetailsPage, Page}
 
-class CreateAccountSteps extends Steps{
+class CreateAccountSteps extends Steps {
 
-  When("""^they choose to create an account$""") { () =>
+  When("""^they choose to create an account$""") { () ⇒
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
   }
 
-  Then("""^they see that the account is created$""") { () =>
+  Then("""^they see that the account is created$""") { () ⇒
     Page.getPageContent() should include("Successfully created account")
   }
 

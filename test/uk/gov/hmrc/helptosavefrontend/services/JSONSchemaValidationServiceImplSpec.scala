@@ -73,8 +73,8 @@ class JSONSchemaValidationServiceImplSpec extends TestSupport {
 
   "The JSONSchemaValidationServiceImpl" must {
 
-    def testError(userInfo: JsValue): Unit =
-      service.validate(userInfo).isLeft shouldBe true
+      def testError(userInfo: JsValue): Unit =
+        service.validate(userInfo).isLeft shouldBe true
 
     val dateTimeFormmater = DateTimeFormatter.BASIC_ISO_DATE
 
@@ -175,21 +175,21 @@ class JSONSchemaValidationServiceImplSpec extends TestSupport {
       testError(validUserInfoJSON.replaceInner(Fields.contactDetails, Fields.countryCode, JsString("--")))
     }
 
-    def testAddressLines(number: Int, field: String): Unit = {
-      s"when given a NSIUserInfo that the json validation schema reports that the address$number field is the wrong type, return a message" in {
-        testError(validUserInfoJSON.replaceInner(Fields.contactDetails, field, JsNumber(1)))
-      }
+      def testAddressLines(number: Int, field: String): Unit = {
+        s"when given a NSIUserInfo that the json validation schema reports that the address$number field is the wrong type, return a message" in {
+          testError(validUserInfoJSON.replaceInner(Fields.contactDetails, field, JsNumber(1)))
+        }
 
-      s"when given a NSIUserInfo that the json validation schema reports that the address$number field is too long" in {
-        testError(validUserInfoJSON.replaceInner(Fields.contactDetails, field, JsString("A" * 36)))
-      }
+        s"when given a NSIUserInfo that the json validation schema reports that the address$number field is too long" in {
+          testError(validUserInfoJSON.replaceInner(Fields.contactDetails, field, JsString("A" * 36)))
+        }
 
-      if (number == 1 || number == 2) {
-        s"when given a NSIUserInfo that the json validation schema reports that the address$number field is missing, return a message" in {
-          testError(validUserInfoJSON.removeInner(Fields.contactDetails, field))
+        if (number == 1 || number == 2) {
+          s"when given a NSIUserInfo that the json validation schema reports that the address$number field is missing, return a message" in {
+            testError(validUserInfoJSON.removeInner(Fields.contactDetails, field))
+          }
         }
       }
-    }
 
     testAddressLines(1, Fields.address1)
     testAddressLines(2, Fields.address2)
@@ -232,7 +232,6 @@ class JSONSchemaValidationServiceImplSpec extends TestSupport {
     "when given a NSIUserInfo that the json validation schema reports that the phone number field is the wrong type, return a message" in {
       testError(validUserInfoJSON.replaceInner(Fields.contactDetails, Fields.phoneNumber, JsNumber(0)))
     }
-
 
     "when given a NSIUserInfo that the json validation schema reports that the phone number is too long" in {
       testError(validUserInfoJSON.replaceInner(Fields.contactDetails, Fields.phoneNumber, JsString("A" * 16)))

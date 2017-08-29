@@ -40,7 +40,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
 
   "The AccessAccountController" must {
 
-    def doRequest(): Result = await(controller.accessAccount(FakeRequest()))
+      def doRequest(): Result = await(controller.accessAccount(FakeRequest()))
 
     "redirect to NS&I if the user is enrolled" in {
       inSequence {
@@ -53,19 +53,18 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
       contentAsString(result) should include("You've already got an account - yay!")
     }
 
-
     "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
       "it hasn't already been set" in {
-      inSequence {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(false)))
-        mockWriteITMPFlag(nino)(Right(()))
-      }
+        inSequence {
+          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(false)))
+          mockWriteITMPFlag(nino)(Right(()))
+        }
 
-      val result = doRequest()
-      status(result) shouldBe 200
-      contentAsString(result) should include("You've already got an account - yay!")
-    }
+        val result = doRequest()
+        status(result) shouldBe 200
+        contentAsString(result) should include("You've already got an account - yay!")
+      }
 
     "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {
       inSequence {

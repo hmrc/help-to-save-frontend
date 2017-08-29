@@ -40,8 +40,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
   private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
 
-  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
-                              )(redirectOnLoginURL: String): Action[AnyContent] =
+  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Future[Result])(redirectOnLoginURL: String): Action[AnyContent] =
     Action.async { implicit request ⇒
       authorised(AuthWithConfidence)
         .retrieve(UserDetailsUrlWithAllEnrolments) {
@@ -56,12 +55,12 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
             action(request)(HtsContext(nino, userDetailsUri, isAuthorised = true))
 
         }.recover {
-        handleFailure(redirectOnLoginURL)
-      }
+          handleFailure(redirectOnLoginURL)
+        }
     }
 
   def authorisedForHts(action: HtsAction)(redirectOnLoginURL: String): Action[AnyContent] = {
-    Action.async { implicit request =>
+    Action.async { implicit request ⇒
       authorised(AuthProvider) {
         action(request)(HtsContext(isAuthorised = true))
       }.recover {
@@ -71,7 +70,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
   }
 
   def authorisedForHtsWithConfidence(action: HtsAction)(redirectOnLoginURL: String): Action[AnyContent] = {
-    Action.async { implicit request =>
+    Action.async { implicit request ⇒
       authorised(AuthWithConfidence) {
         action(request)(HtsContext(isAuthorised = true))
       }.recover {
@@ -81,7 +80,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
   }
 
   def unprotected(action: HtsAction): Action[AnyContent] = {
-    Action.async { implicit request =>
+    Action.async { implicit request ⇒
       authorised() {
         action(request)(HtsContext(isAuthorised = true))
       }.recoverWith {

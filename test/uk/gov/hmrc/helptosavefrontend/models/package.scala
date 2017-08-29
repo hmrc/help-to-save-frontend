@@ -29,7 +29,7 @@ package object models {
   implicit def providerLocalDate(s: String): GenProvider[LocalDate] = instance({
     s.toLowerCase match {
       case "dateofbirth" | "dob" | "birthdate" ⇒ Gen.date(LocalDate.of(1900, 1, 1), LocalDate.now())
-      case _ ⇒ Gen.date
+      case _                                   ⇒ Gen.date
     }
   })
 
@@ -56,10 +56,9 @@ package object models {
 
   def randomIneligibilityReason() = sample(ineligibilityReasonGen)
 
-
   /**
-    * Valid user details which will pass NSI validation checks
-    */
+   * Valid user details which will pass NSI validation checks
+   */
   val (validUserInfo, nsiValidContactDetails, validNSIUserInfo) = {
     val (forename, surname) = "Tyrion" → "Lannister"
     val dateOfBirth = LocalDate.ofEpochDay(0L)
@@ -69,7 +68,7 @@ package object models {
     val postcode = "BA148FY"
     val country = "GB"
     val address = Address(List(addressLine1, addressLine2, addressLine3),
-      Some(postcode), Some(country))
+                          Some(postcode), Some(country))
     val nino = "WM123456C"
     val email = "tyrion_lannister@gmail.com"
 
@@ -77,7 +76,7 @@ package object models {
     val nsiValidContactDetails = ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
     val nsiUserInfo =
       NSIUserInfo(forename, surname, dateOfBirth, nino,
-        ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
+                  ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
       )
 
     (userInfo, nsiValidContactDetails, nsiUserInfo)

@@ -25,25 +25,23 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 
-class AccessAccountController @Inject()(val messagesApi: MessagesApi,
-                                        val helpToSaveService: HelpToSaveService,
-                                        val app: Application,
-                                        frontendAuthConnector: FrontendAuthConnector)
+class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
+                                         val helpToSaveService: HelpToSaveService,
+                                         val app:               Application,
+                                         frontendAuthConnector: FrontendAuthConnector)
   extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport with Logging
-    with EnrolmentCheckBehaviour {
+  with EnrolmentCheckBehaviour {
 
-  def accessAccount: Action[AnyContent] = authorisedForHtsWithInfo {
-    implicit request ⇒
-      implicit htsContext ⇒
-        checkIfAlreadyEnrolled({
-          // not enrolled
-          _ ⇒ Ok(views.html.confirm_check_eligibility())
-        }, {
-          e ⇒
-            logger.warn(s"Could not check enrolment for ${e.nino} - proceeding to check eligibility")
-            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-        }
-        )
+  def accessAccount: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled({
+      // not enrolled
+      _ ⇒ Ok(views.html.confirm_check_eligibility())
+    }, {
+      e ⇒
+        logger.warn(s"Could not check enrolment for ${e.nino} - proceeding to check eligibility")
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+    }
+    )
   }(redirectOnLoginURL = FrontendAppConfig.accessAccountUrl)
 
 }
