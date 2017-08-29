@@ -22,7 +22,7 @@ import cats.instances.future._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -45,6 +45,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
 
   import RegisterController.NSIUserInfoOps
 
+
   def getConfirmDetailsPage(emailVerificationParams: Option[String]): Action[AnyContent] = authorisedForHtsWithInfo {
     implicit request ⇒
       implicit htsContext ⇒
@@ -52,17 +53,7 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
           checkIfDoneEligibilityChecks { case (nsiUserInfo, _) ⇒ {
             emailVerificationParams match {
               case None ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
-              case Some(p) ⇒ {
-                val optionalParams = EmailVerificationParams.decode(p)
-                optionalParams.fold(Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))){ params ⇒
-                  if (params.nino == nsiUserInfo.nino) {
-                    val updatedNsiUserInfo = nsiUserInfo copy (contactDetails = nsiUserInfo.contactDetails copy (email = params.email))
-                    Ok(views.html.register.confirm_details(updatedNsiUserInfo))
-                  } else {
-                    Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
-                  }
-                }
-              }
+              case Some(p) ⇒ handleConfirmDetailsWithParameters(p, nsiUserInfo)
             }
           }
           }
@@ -160,6 +151,25 @@ class RegisterController @Inject()(val messagesApi: MessagesApi,
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
 
+
+
+  private def handleConfirmDetailsWithParameters(confirmDetailsParameters: String,
+                                                 nsiUserInfo: NSIUserInfo
+                                                )(implicit request: Request[AnyContent], htsContext: HtsContext) = {
+    val optionalParams = EmailVerificationParams.decode(confirmDetailsParameters)
+    optionalParams.fold({
+      logger.warn("Could not decode parameters for confirm details")
+      Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
+    }){ params ⇒
+      if (params.nino == nsiUserInfo.nino) {
+        val updatedNsiUserInfo = nsiUserInfo copy (contactDetails = nsiUserInfo.contactDetails copy (email = params.email))
+        Ok(views.html.register.confirm_details(updatedNsiUserInfo))
+      } else {
+        logger.warn("NINO in confirm details parameters did not match NINO from auth")
+        Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
+      }
+    }
+  }
 
 }
 

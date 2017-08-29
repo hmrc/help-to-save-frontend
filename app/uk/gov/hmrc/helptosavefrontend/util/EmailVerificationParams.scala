@@ -16,18 +16,25 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import scala.util.{Failure, Success}
+import java.util.Base64
+
+import scala.util.{Failure, Success, Try}
 
 case class EmailVerificationParams(nino: String, email: String) {
+  private val encoder = Base64.getEncoder
+
   def encode()(implicit crypto: Crypto): String = {
     val input = nino + "§" + email
-    crypto.encrypt(input)
+    new String(encoder.encode(crypto.encrypt(input).getBytes))
   }
 }
 
 object EmailVerificationParams {
+
+  private val decoder = Base64.getDecoder
+
   def decode(base64: String)(implicit crypto: Crypto): Option[EmailVerificationParams] = {
-    crypto.decrypt(base64) match {
+    Try(new String(decoder.decode(base64))).flatMap(crypto.decrypt) match {
       case Failure(_) ⇒ None
       case Success(decrypted) ⇒
         val params = decrypted.split("§")

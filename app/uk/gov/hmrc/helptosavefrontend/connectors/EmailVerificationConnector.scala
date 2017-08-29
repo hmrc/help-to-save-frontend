@@ -56,7 +56,7 @@ class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {
         case OK | CREATED =>
-          logger.info(s"[EmailVerification] - Email verification successfully triggered: $continueUrlWithParams")
+          logger.info(s"[EmailVerification] - Email verification successfully triggered")
           Right(())
         case BAD_REQUEST ⇒
           logger.warn("[EmailVerification] - Bad Request from email verification service")
