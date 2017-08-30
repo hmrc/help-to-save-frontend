@@ -101,7 +101,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
 
       case None ⇒
         // No journeyId signifies subsequent 2FA failure
-        logger.warn(s"response from identityVerificationFrontendService did not contain token or journeyId param")
+        logger.warn("response from identityVerificationFrontendService did not contain token or journeyId param")
         Future.successful(Unauthorized(access_denied()))
     }
   }(redirectOnLoginURL = continueURL)

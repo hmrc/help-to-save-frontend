@@ -93,7 +93,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor) exte
   }.recover {
     case e ⇒
       logger.warn("Encountered error while trying to create account", e)
-      SubmissionFailure(None, s"Encountered error while trying to create account", e.getMessage)
+      SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage)
   }
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {

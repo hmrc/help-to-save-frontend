@@ -150,7 +150,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "otherwise can be applied to an Right value" in {
-      val r = Right(0)
+      val r: Either[Int, Int] = Right(0)
       val result: Int = r.otherwise {
         10
       }
@@ -158,7 +158,7 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
     }
 
     "otherwise can be applied to a Left value" in {
-      val r = Left(0)
+      val r: Either[Int, Int] = Left(0)
       val result: Int = r.otherwise {
         10
       }
@@ -187,24 +187,22 @@ class TogglesSpec extends UnitSpec with TestSupport with BeforeAndAfter {
 
     "side effect type actions are possible with an otherwise executing the configured branch" in {
       (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature0.enabled").returning(Some(true))
-      var result = 0
+
       FEATURE("test-feature0", mockConfiguration) enabled () thenDo {
-        result = 1
+        ()
       } otherwise {
-        result = 2
+        fail()
       }
-      result shouldBe 1
     }
 
     "side effect type actions are possible with an otherwise executing the unconfigured branch" in {
       (mockConfiguration.getBoolean(_: String)).expects("feature-toggles.test-feature1.enabled").returning(Some(false))
-      var result = 0
+
       FEATURE("test-feature1", mockConfiguration) enabled () thenDo {
-        result = 1
+        fail(): Unit
       } otherwise {
-        result = 2
+        ()
       }
-      result shouldBe 2
     }
   }
 }

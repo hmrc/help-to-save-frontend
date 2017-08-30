@@ -110,7 +110,7 @@ class IvControllerSpec extends TestSupport {
 
       val responseFuture =
         ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(
-          FakeRequest("GET", s"/iv/journey-result"))
+          FakeRequest("GET", "/iv/journey-result"))
 
       val result = Await.result(responseFuture, 3.seconds)
 
