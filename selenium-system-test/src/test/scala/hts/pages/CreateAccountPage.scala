@@ -17,14 +17,14 @@
 package hts.pages
 
 import hts.utils.Configuration
-import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.WebDriver
 
-object CreateAccountPage {
+object CreateAccountPage extends WebPage {
 
-  def goToPage()(implicit driver: WebDriver): Unit =
-    driver.navigate().to(Configuration.host + "/help-to-save/register/create-an-account")
+  def goToPage()(implicit driver: WebDriver): Unit = go to s"${Configuration.host}/help-to-save/register/create-an-account"
 
-  def createAccount()(implicit driver: WebDriver): Unit =
-    driver.findElement(By.id("accept-and-create-account")).click()
+  def createAccount()(implicit driver: WebDriver): Unit = click on "accept-and-create-account"
+
+  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit = click on "exit-without-creating-account"
 
 }

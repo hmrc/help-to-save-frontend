@@ -1,4 +1,4 @@
-import sbt.Keys._
+import sbt.Keys.{testOptions, _}
 import sbt.Tests.{Group, SubProcess}
 import sbt._
 import play.routes.compiler.StaticRoutesGenerator
@@ -32,7 +32,7 @@ trait MicroService {
     )
   }
 
-  def seleniumTestFilter(name: String): Boolean = name.endsWith("SeleniumSystemTest")
+  def seleniumTestFilter(name: String): Boolean = name.contains("suites")
 
   def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name)
 
@@ -101,10 +101,14 @@ trait MicroService {
     .configs(SeleniumTest)
     .settings(
       inConfig(SeleniumTest)(Defaults.testTasks),
-      Keys.fork in SeleniumTest := true,
-      unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test",
+      Keys.fork in SeleniumTest := false,
+      unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/scala",
+      unmanagedResourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/resources",
       testOptions in Test := Seq(Tests.Filter(unitTestFilter)),
-      testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter))
+      testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter)),
+      testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
+      testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
+      testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
     )
 }
 

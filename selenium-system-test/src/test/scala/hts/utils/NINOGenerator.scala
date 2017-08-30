@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package src.test.scala.hts.utils
+package hts.utils
 
 import uk.gov.hmrc.domain.Generator
 
@@ -22,20 +22,22 @@ trait NINOGenerator {
 
   private val generator = new Generator()
 
+  private var current = generator.nextNino.value
+
   private def generateNINO: String = {
-    val nino = generator.nextNino.value
-    nino
+    current = generator.nextNino.value
+    current
   }
 
-  def generateEligibleNINO: String = {
-    val eligibleNino = "AE" + generateNINO.drop(2)
-    eligibleNino
-  }
+  private def toEligible(nino: String) = "AE" + nino.drop(2)
+
+  def generateEligibleNINO: String = toEligible(generateNINO)
 
   def generateIneligibleNINO: String = {
     val ineligibleNino = "NA" + generateNINO.drop(2)
     ineligibleNino
-
   }
+
+  def currentEligibleNINO: String = toEligible(current)
 
 }

@@ -17,26 +17,39 @@
 package hts.pages
 
 import hts.utils.Configuration
-import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.WebDriver
 
-object AuthorityWizardPage {
+object AuthorityWizardPage extends WebPage {
+
+  def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
+    goToPage()
+    fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
+  }
+
+  private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
+    setRedirect(redirectUrl)
+    setConfidenceLevel(confidence)
+    setCredentialStrength(credentialStrength)
+    setNino(nino)
+    submit()
+  }
 
   def goToPage()(implicit driver: WebDriver): Unit =
-    driver.navigate().to(Configuration.authHost + "/auth-login-stub/gg-sign-in")
+    go to s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
-    driver.findElement(By.name("redirectionUrl")).sendKeys(url)
+    find(name("redirectionUrl")).get.underlying.sendKeys(url)
 
   def setNino(nino: String)(implicit driver: WebDriver): Unit =
-    driver.findElement(By.name("nino")).sendKeys(nino)
+    find(name("nino")).get.underlying.sendKeys(nino)
 
   def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
-    driver.findElement(By.name("credentialStrength")).sendKeys(strength)
+    find(name("credentialStrength")).get.underlying.sendKeys(strength)
 
   def setConfidenceLevel(level: Int)(implicit driver: WebDriver): Unit =
-    driver.findElement(By.name("confidenceLevel")).sendKeys(level.toString)
+    find(name("confidenceLevel")).get.underlying.sendKeys(level.toString)
 
   def submit()(implicit driver: WebDriver): Unit =
-    driver.findElement(By.cssSelector("input.button")).click()
+    find(cssSelector("input.button")).get.underlying.click()
 
 }

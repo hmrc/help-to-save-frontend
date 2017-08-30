@@ -16,15 +16,14 @@
 
 package hts.pages
 
-import hts.utils.Configuration
 import org.openqa.selenium.{By, WebDriver}
+import hts.utils.Configuration
 
-object ConfirmDetailsPage {
+object ConfirmDetailsPage extends WebPage {
 
   def goToPage()(implicit driver: WebDriver): Unit =
-    driver.navigate().to(Configuration.host + "/help-to-save/register/confirm-details")
+    go to s"${Configuration.host}/help-to-save/register/check-and-confirm-your-details"
 
-  def continue()(implicit driver: WebDriver): Unit = {
-    driver.findElement(By.id("continue")).click()
-  }
+  def continue()(implicit driver: WebDriver): Unit = click on "continue"
+
 }

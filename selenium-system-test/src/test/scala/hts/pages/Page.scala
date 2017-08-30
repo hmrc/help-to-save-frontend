@@ -20,7 +20,7 @@ import org.openqa.selenium.WebDriver
 
 object Page {
 
-  def getCurrentUrl()(implicit driver: WebDriver): String = driver.getCurrentUrl
+  def getCurrentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
 
-  def getPageContent()(implicit driver: WebDriver): String = driver.getPageSource
+  def getPageContent(implicit driver: WebDriver): String = driver.getPageSource
 }

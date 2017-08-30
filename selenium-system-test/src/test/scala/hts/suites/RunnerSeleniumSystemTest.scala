@@ -25,7 +25,7 @@ import org.junit.runner.RunWith
   features = Array("selenium-system-test/src/test/resources/features"),
   glue     = Array("hts.steps"),
   plugin   = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
-  tags     = Array("~@ignore")
+  tags     = Array("@RunOnlyInDev")
 )
 class RunnerSeleniumSystemTest {}
 

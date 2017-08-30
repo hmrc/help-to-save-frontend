@@ -16,37 +16,34 @@
 
 package hts.steps
 
-import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
-import hts.utils.Configuration
-import src.test.scala.hts.utils.NINOGenerator
+import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage, Page}
+import hts.utils.{Configuration, NINOGenerator}
 
 class EligibilitySteps extends Steps with NINOGenerator {
 
   var nino: Option[String] = None
 
-  Given("""^an applicant is in receipt of working tax credit$""") { () ⇒
+  Given("""^an user is in receipt of working tax credit$""") { () ⇒
     nino = Some(generateEligibleNINO)
   }
 
   When("""^they apply for Help to Save$""") { () ⇒
-    AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
-    AuthorityWizardPage.setCredentialStrength("strong")
-    AuthorityWizardPage.setConfidenceLevel(200)
-    AuthorityWizardPage.setNino(nino.getOrElse(""))
-    AuthorityWizardPage.submit()
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", nino.getOrElse(""))
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () ⇒
-    Page.getPageContent() should include("Check and confirm your details")
+    Page.getPageContent should include("You're eligible")
   }
 
-  Given("""^an applicant is NOT in receipt of working tax credit$""") { () ⇒
+  When("""^they start to create an account$"""){ () ⇒
+    EligiblePage.startCreatingAccount()
+  }
+
+  Given("""^an user is NOT in receipt of working tax credit$""") { () ⇒
     nino = Some(generateIneligibleNINO)
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒
-    Page.getPageContent() should include("You're not eligible")
+    on(NotEligiblePage)
   }
-
 }
