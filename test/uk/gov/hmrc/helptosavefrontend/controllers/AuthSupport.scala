@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.joda.time.LocalDate
-import org.scalamock.handlers.CallHandler3
 import uk.gov.hmrc.auth.core.authorise.{ConfidenceLevel, Enrolment, EnrolmentIdentifier, Enrolments, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.retrieve.{AuthProviders, ItmpAddress, ItmpName, Name, Retrieval, Retrievals, ~}
@@ -28,22 +27,51 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
+object AuthSupport {
+
+  private implicit class ROps[A, B](val r: ~[A, B]) {
+    def and[C](c: C): ~[~[A, B], C] = new ~(r, c)
+  }
+
+}
+
 trait AuthSupport extends TestSupport {
 
-  val mockAuthConnector = mock[FrontendAuthConnector]
+  import AuthSupport._
 
-  val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", "WM123456C")), "activated", ConfidenceLevel.L200)
-  val name = Name(Some("Tyrion"), Some("Lannister"))
-  val email: Option[String] = Some("tyrion_lannister@gmail.com")
+  type UserRetrievalType = Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Enrolments
+
+  val mockAuthConnector: FrontendAuthConnector = mock[FrontendAuthConnector]
+
+  val nino = "WM123456C"
+  val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
+
+  val firstName = "Tyrion"
+  val lastName = "Lannister"
+  val name = Name(Some(firstName), Some(lastName))
+
+  val emailStr = "tyrion_lannister@gmail.com"
+  val email: Option[String] = Some(emailStr)
   val noEmail: Option[String] = None
-  val dob: Option[LocalDate] = Some(LocalDate.parse("1970-01-01"))
-  val itmpName = ItmpName(Some("Tyrion"), Some("Lannister"), Some("Lannister"))
-  val itmpDob: Option[LocalDate] = Some(LocalDate.parse("1970-01-01"))
-  val itmpAddress = ItmpAddress(Some("Casterly Rock"), Some("The Westerlands"), Some("Westeros"),
-                                None, None, Some("BA148FY"), Some("GB"), Some("GB"))
-  val mockedRetrievals = new ~(new ~(new ~(new ~(new ~(new ~(name, email), dob), itmpName), itmpDob), itmpAddress), Enrolments(Set(enrolment)))
-  val mockedMissingUserInfo = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), dob), itmpName), itmpDob), itmpAddress.copy(line1 = None)), Enrolments(Set(enrolment)))
-  val mockedMissingNinoEnrolment = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), dob), itmpName), itmpDob), itmpAddress.copy(line1 = None)), Enrolments(Set()))
+
+  val dobStr = "1970-01-01"
+  val dob: Option[LocalDate] = Some(LocalDate.parse(dobStr))
+  val itmpName = ItmpName(Some(firstName), Some(lastName), Some(lastName))
+  val itmpDob: Option[LocalDate] = Some(LocalDate.parse(dobStr))
+
+  val line1 = "Casterly Rock"
+  val line2 = "The Westerlands"
+  val line3 = "Westeros"
+  val postCode = "BA148FY"
+  val countryCode = "GB"
+  val itmpAddress = ItmpAddress(Some(line1), Some(line2), Some(line3), None, None, Some(postCode), Some(countryCode), Some(countryCode))
+
+  val mockedRetrievals = new ~(name, email) and dob and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+  //val mockedRetrievals = new ~(new ~(new ~(new ~(new ~(new ~(name, email), dob), itmpName), itmpDob), itmpAddress), Enrolments(Set(enrolment)))
+  val mockedMissingUserInfo = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), dob), itmpName), itmpDob),
+    itmpAddress.copy(line1 = None)), Enrolments(Set(enrolment)))
+  val mockedMissingNinoEnrolment = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), dob), itmpName), itmpDob),
+    itmpAddress.copy(line1 = None)), Enrolments(Set()))
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
@@ -55,8 +83,8 @@ trait AuthSupport extends TestSupport {
       .expects(predicate, *, *)
       .returning(Future.failed(ex))
 
-  def mockAuthWithRetrievalsWithSuccess[A, B](predicate: Predicate)(result: Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Enrolments): CallHandler3[Predicate, Retrieval[~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments]], HeaderCarrier, Future[~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments]]] =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Enrolments])(_: HeaderCarrier))
+  def mockAuthWithRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[UserRetrievalType])(_: HeaderCarrier))
       .expects(predicate, UserRetrievals and Retrievals.authorisedEnrolments, *)
       .returning(Future.successful(result))
 

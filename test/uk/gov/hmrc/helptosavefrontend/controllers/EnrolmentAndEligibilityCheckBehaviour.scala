@@ -38,8 +38,6 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
-  val nino = "WM123456C"
-
   def mockSessionCacheConnectorPut(session: HTSSession)(result: Either[String, CacheMap]): Unit =
     (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier, _: ExecutionContext))
       .expects(session, *, *, *)

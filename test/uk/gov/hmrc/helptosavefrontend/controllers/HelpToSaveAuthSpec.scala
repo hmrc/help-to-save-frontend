@@ -23,7 +23,7 @@ import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, redirectLocation}
+import play.api.test.Helpers.{contentAsString, redirectLocation, contentAsJson}
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{checkEligibilityUrl, encoded}
@@ -58,13 +58,30 @@ class HelpToSaveAuthSpec extends AuthSupport {
   "HelpToSaveAuth" should {
 
     "return UserInfo after successful authentication" in {
-
       val userInfo =
-        s"""{"forename":"Tyrion","surname":"Lannister","nino":"WM123456C","dateOfBirth":"1970-01-01","email":"tyrion_lannister@gmail.com","address":{"lines":["Casterly Rock","The Westerlands","Westeros"],"postcode":"BA148FY","country":"GB"}}""".stripMargin
+        Json.parse(
+          s"""{
+        "forename":"$firstName",
+        "surname":"$lastName",
+        "nino":"$nino",
+        "dateOfBirth":"$dobStr",
+        "email":"$emailStr",
+        "address":{
+          "lines":[
+          "$line1",
+          "$line2",
+          "$line3"
+          ],
+          "postcode":"$postCode",
+          "country":"$countryCode"
+        }
+      }""")
+
       mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.OK
-      contentAsString(result) shouldBe userInfo
+      contentAsJson(result) shouldBe userInfo
     }
 
     "handle NoActiveSession exception and redirect user to GG login page" in {

@@ -125,17 +125,10 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
     val emailValidation = email.toValidNel(MissingUserInfo.Email)
 
-    val addressValidation =
-      itmpAddress.line1
-        .orElse(itmpAddress.line2)
-        .orElse(itmpAddress.line3)
-        .map(_ ⇒ itmpAddress) //TODO: Attention!!
-        .toValidNel(MissingUserInfo.Contact)
-
     val validation: ValidatedNel[MissingUserInfo, UserInfo] =
-      (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| emailValidation |@| addressValidation)
-        .map((givenName, surname, jodaDob, email, address) ⇒
-          UserInfo(givenName, surname, nino, jodaDob, email, Address(address)))
+      (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| emailValidation)
+        .map((givenName, surname, jodaDob, email) ⇒
+          UserInfo(givenName, surname, nino, jodaDob, email, Address(itmpAddress)))
 
     validation
       .leftMap(m ⇒ MissingUserInfos(m.toList.toSet, nino))

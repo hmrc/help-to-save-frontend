@@ -318,7 +318,6 @@ class EligibilityCheckControllerSpec
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
-            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
             mockSendAuditEvent
           }
 

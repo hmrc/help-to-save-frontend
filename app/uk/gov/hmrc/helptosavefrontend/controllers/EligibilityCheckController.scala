@@ -108,30 +108,23 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
 
   private def performEligibilityChecks(nino: NINO)(implicit hc: HeaderCarrier, htsContext: HtsContext): EitherT[Future, Error, EligibilityResultWithUserInfo] =
     for {
+      nsiUserInfo ← getUserInformation()
       eligible ← helpToSaveService.checkEligibility(nino).leftMap(Error.apply)
-      resultWithInfo ← getUserInformation(eligible, nino)
-      nsiUserInfo = resultWithInfo.value.toOption.map(_._2)
-      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(nsiUserInfo)).leftMap(Error.apply)
-      session = HTSSession(nsiUserInfo, None)
+      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(eligible, nsiUserInfo)).leftMap(Error.apply)
+      session = {
+        val maybeUserInfo = eligible.result.fold(_ ⇒ None, _ ⇒ Some(nsiUserInfo))
+        HTSSession(maybeUserInfo, None)
+      }
       _ ← sessionCacheConnector.put(session).leftMap[Error](Error.apply)
-    } yield resultWithInfo
+    } yield EligibilityResultWithUserInfo(eligible.result.map(e ⇒ e -> nsiUserInfo))
 
-  private def getUserInformation(eligibilityCheckResult: EligibilityCheckResult,
-                                 nino:                   NINO
-  )(implicit htsContext: HtsContext, hc: HeaderCarrier): EitherT[Future, Error, EligibilityResultWithUserInfo] =
-    eligibilityCheckResult.result.fold[EitherT[Future, Error, EligibilityResultWithUserInfo]](
-      { ineligibilityReason ⇒
-        // if the person is ineligible don't get the user info - return with an ineligibility reason
-        EitherT.pure[Future, Error, EligibilityResultWithUserInfo](EligibilityResultWithUserInfo(Left(ineligibilityReason)))
-      }, { eligibilityReason ⇒
-        val result = htsContext.userDetails.fold[Either[Error, EligibilityResultWithUserInfo]](
-          Left(Error("unexpected error: Userinfo expected but not found"))) { info ⇒
-            info.bimap(
-              missingInfo ⇒ Error(missingInfo),
-              userInfo ⇒ EligibilityResultWithUserInfo(Right(eligibilityReason → NSIUserInfo(userInfo)))
-            )
-          }
-        EitherT.fromEither[Future](result)
+  private def getUserInformation()(implicit htsContext: HtsContext): EitherT[Future, Error, NSIUserInfo] =
+    EitherT.fromEither[Future](htsContext.userDetails.fold[Either[Error, NSIUserInfo]](
+      Left(Error("unexpected error: Userinfo expected but not found"))) { info ⇒
+        info.bimap(
+          missingInfo ⇒ Error(missingInfo),
+          userInfo ⇒ NSIUserInfo(userInfo)
+        )
       }
     )
 
@@ -185,16 +178,18 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
       }
   }
 
-  private def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Option[NSIUserInfo]] = {
+  private def validateCreateAccountJsonSchema(eligibilityCheckResult: EligibilityCheckResult,
+                                              userInfo:               NSIUserInfo): Either[String, NSIUserInfo] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
-    userInfo match {
-      case None ⇒ Right(None)
-      case Some(ui) ⇒
-        FEATURE[Either[String, Option[NSIUserInfo]]]("outgoing-json-validation", app.configuration, Right(userInfo)) enabled () thenDo {
-          jsonSchemaValidationService.validate(Json.toJson(ui)).map(_ ⇒ Some(ui))
+    eligibilityCheckResult.result.fold(
+      _ ⇒ Right(userInfo),
+      _ ⇒ {
+        FEATURE[Either[String, NSIUserInfo]]("outgoing-json-validation", app.configuration, Right(userInfo)) enabled () thenDo {
+          jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ userInfo)
         }
-    }
+      }
+    )
   }
 
 }
