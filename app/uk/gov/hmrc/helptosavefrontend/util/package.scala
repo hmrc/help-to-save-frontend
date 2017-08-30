@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import cats.data.EitherT
+import org.joda.time.LocalDate
 
 import scala.concurrent.Future
 
@@ -32,4 +33,7 @@ package object util {
 
   implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
 
+  implicit def toJavaDate(jodaDate: LocalDate): java.time.LocalDate = {
+    java.time.LocalDate.of(jodaDate.getYear, jodaDate.getMonthOfYear, jodaDate.getDayOfMonth)
+  }
 }

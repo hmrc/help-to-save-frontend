@@ -24,11 +24,11 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, MissingUserInfoSet}
-import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.EligibilityCheckResponse
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, NINO, Result, UserDetailsURI}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, NINO, Result}
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,9 +38,6 @@ import scala.util.control.NonFatal
 trait HelpToSaveConnector {
 
   def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult]
-
-  def getUserInformation(nino:           NINO,
-                         userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo]
 
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
 
@@ -55,8 +52,6 @@ trait HelpToSaveConnector {
 @Singleton
 class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
-  import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
-
   val base64Encoder: Base64.Encoder = Base64.getEncoder
 
   def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
@@ -66,25 +61,6 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
       "check eligibility",
       identity
     )
-
-  def getUserInformation(nino: NINO, userDetailsURI: UserDetailsURI)(implicit hc: HeaderCarrier): EitherT[Future, UserInformationRetrievalError, UserInfo] = {
-    val backendError = (s: String) ⇒ UserInformationRetrievalError.BackendError(s, nino)
-    handle(
-      userInformationURL(nino, userDetailsURI), { response ⇒
-        response.parseJson[UserInfo].fold[Either[UserInformationRetrievalError, UserInfo]](
-          // couldn't parse user info in this case - try to parse as missing user info
-          _ ⇒
-            response.parseJson[MissingUserInfoSet].fold(
-              _ ⇒ Left(backendError("Could not parse JSON response from user information endpoint")),
-              m ⇒ Left(MissingUserInfos(m.missingInfo, nino))
-            ),
-          Right(_)
-        )
-      },
-      "get user information",
-      backendError
-    )
-  }
 
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
     handle(enrolmentStatusURL(nino), _.parseJson[EnrolmentStatus], "get user enrolment status", identity)
@@ -114,6 +90,8 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
     }.recover {
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
+
+  private def eligibilityURL(nino: NINO) = s"$helpToSaveUrl/help-to-save/eligibility-check?nino=$nino"
 
   private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
     val reasonInt = eligibilityCheckResponse.reason

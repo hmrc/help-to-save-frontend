@@ -20,23 +20,17 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 
-class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibilityCheckBehaviour {
-
-  val frontendAuthConnector = stub[FrontendAuthConnector]
+class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
 
   lazy val controller = new AccessAccountController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     fakeApplication,
-    frontendAuthConnector
-  ) {
-    override lazy val authConnector = mockAuthConnector
-  }
+    mockAuthConnector
+  )
 
   "The AccessAccountController" must {
 
@@ -44,7 +38,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
 
     "redirect to NS&I if the user is enrolled" in {
       inSequence {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(true)))
       }
 
@@ -56,7 +50,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
     "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
       "it hasn't already been set" in {
         inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(false)))
           mockWriteITMPFlag(nino)(Right(()))
         }
@@ -68,7 +62,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
 
     "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {
       inSequence {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
       }
 
@@ -79,7 +73,7 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
 
     "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
       inSequence {
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEnrolmentCheck(nino)(Left(""))
       }
 
@@ -87,7 +81,6 @@ class AccessAccountControllerSpec extends TestSupport with EnrolmentAndEligibili
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
     }
-
   }
 
 }

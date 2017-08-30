@@ -24,10 +24,9 @@ import org.scalatest.prop.Tables.Table
 import play.api.http.Status._
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.auth.core.authorise.Predicate
+import uk.gov.hmrc.auth.core.retrieve.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core.retrieve.{AuthProviders, EmptyRetrieval, Retrieval}
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -35,7 +34,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class IvControllerSpec extends TestSupport {
+class IvControllerSpec extends AuthSupport {
 
   val ivConnector: IvConnector = mock[IvConnector]
 
@@ -49,10 +48,6 @@ class IvControllerSpec extends TestSupport {
 
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
-  private val mockAuthConnector = mock[PlayAuthConnector]
-
-  val frontendAuthConnector = stub[FrontendAuthConnector]
-
   private def mockAuthConnectorResult() = {
     (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
       .expects(AuthProviders(GovernmentGateway), EmptyRetrieval, *).returning(Future.successful(()))
@@ -62,9 +57,7 @@ class IvControllerSpec extends TestSupport {
                                            ivConnector,
                                            fakeApplication.injector.instanceOf[MessagesApi],
                                            fakeApplication,
-                                           frontendAuthConnector) {
-    override def authConnector: AuthConnector = mockAuthConnector
-  }
+                                           mockAuthConnector)
 
   private val fakeRequest = FakeRequest("GET", s"/iv/journey-result?journeyId=${journeyId.Id}")
 
