@@ -47,8 +47,8 @@ Feature: Create new account
     Then they see that the account is created
 
   Scenario: An unauthenticated user attempts to access their account through the sign in link
-    Given a user has previously created an account with base64 encoded NINO
+    Given a user has previously created an account
     And a user is on the apply page
     When they click on the sign in link
-    And they have logged in and passed IV with base64 encoded NINO
+    And they have logged in again and passed IV
     Then they will be on the account home page

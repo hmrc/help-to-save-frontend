@@ -16,16 +16,10 @@
 
 package hts.pages
 
-import java.util.Base64
-
 import hts.utils.Configuration
-import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.WebDriver
 
 object AuthorityWizardPage extends WebPage {
-
-  private val s: String = AuthorityWizardPage.encode(generateEligibleNINO)
-
-  def getEncodedNino: String = s
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     goToPage()
@@ -57,11 +51,5 @@ object AuthorityWizardPage extends WebPage {
 
   def submit()(implicit driver: WebDriver): Unit =
     find(cssSelector("input.button")).get.underlying.click()
-
-  def encode(s: String): String = new String(
-    Base64.getEncoder.encodeToString(s.getBytes()))
-
-  def decode(s: String): String = new String(
-    Base64.getDecoder.decode(s))
 
 }

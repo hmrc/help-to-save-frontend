@@ -38,8 +38,8 @@ class CreateAccountSteps extends Steps with NINOGenerator {
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply", 200, "Strong", generateEligibleNINO)
   }
 
-  Given("""^a user has previously created an account with base64 encoded NINO$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", AuthorityWizardPage.decode(AuthorityWizardPage.getEncodedNino))
+  Given("""^a user has previously created an account$"""){ () ⇒
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
@@ -74,8 +74,8 @@ class CreateAccountSteps extends Steps with NINOGenerator {
     EligibilityQuestionPage.clickCheckEligibility()
   }
 
-  When("""^they have logged in and passed IV with base64 encoded NINO$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", AuthorityWizardPage.decode(AuthorityWizardPage.getEncodedNino))
+  When("""^they have logged in again and passed IV$"""){ () ⇒
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", currentEligibleNINO)
   }
 
   Then("""^they see that the account is created$""") { () ⇒
