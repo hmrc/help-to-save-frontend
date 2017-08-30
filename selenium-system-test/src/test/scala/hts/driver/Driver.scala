@@ -59,14 +59,16 @@ object Driver {
   private val driverDirectory: String = "selenium-system-test/drivers"
 
   private def createChromeDriver(): WebDriver = {
-    if (isMac) {
-      systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
-    } else if (isLinux && linuxArch == "amd32") {
-      systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")
-    } else if (isLinux) {
-      systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver")
-    } else {
-      systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
+    if (systemProperties.getProperty("webdriver.chrome.driver") == null) {
+      if (isMac) {
+        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
+      } else if (isLinux && linuxArch == "amd32") {
+        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")
+      } else if (isLinux) {
+        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver")
+      } else {
+        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
+      }
     }
 
     val capabilities = DesiredCapabilities.chrome()
