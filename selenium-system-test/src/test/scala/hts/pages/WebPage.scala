@@ -16,24 +16,19 @@
 
 package hts.pages
 
-import hts.steps.Steps
 import hts.utils.NINOGenerator
-import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
-import org.openqa.selenium.{By, Keys, WebDriver, WebElement}
+import org.openqa.selenium.WebDriver
 import org.scalatest._
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.time.{Millis, Seconds, Span}
 
-trait WebPage extends org.scalatest.selenium.Page
-  with Matchers
+trait WebPage extends Matchers
   with WebBrowser
   with Eventually
   with PatienceConfiguration
   with Assertions
   with NINOGenerator {
-
-  override val url: String = ""
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout  = scaled(Span(5, Seconds)), interval = scaled(Span(500, Millis)))
 

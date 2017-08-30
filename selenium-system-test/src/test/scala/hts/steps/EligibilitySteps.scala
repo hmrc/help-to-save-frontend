@@ -44,7 +44,6 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒
-    //    Page.getPageContent should include("You're not eligible")
     on(NotEligiblePage)
   }
 }
