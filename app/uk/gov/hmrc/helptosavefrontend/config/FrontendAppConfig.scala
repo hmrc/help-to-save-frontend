@@ -56,7 +56,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
     new URI(s"$ivUpliftUrl?origin=$sosOrigin&" +
       s"completionURL=${URLEncoder.encode(identityCallbackUrl, "UTF-8")}&" +
       s"failureURL=${URLEncoder.encode(identityCallbackUrl, "UTF-8")}" +
-      s"&confidenceLevel=200")
+      "&confidenceLevel=200")
       .toString
 
   val nsiAuthHeaderKey: String = getString("microservice.services.nsi.authorization.header-key")
@@ -91,7 +91,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val analyticsToken: String = getString("google-analytics.token")
   override lazy val analyticsHost: String = getString("google-analytics.host")
 
-  val contactHost: String = getString(s"contact-frontend.host")
+  val contactHost: String = getString("contact-frontend.host")
   val contactFormServiceIdentifier: String = "MyService"
 
   override lazy val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"

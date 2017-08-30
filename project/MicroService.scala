@@ -3,16 +3,15 @@ import sbt.Tests.{Group, SubProcess}
 import sbt._
 import play.routes.compiler.StaticRoutesGenerator
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
+import uk.gov.hmrc._
+import DefaultBuildSettings._
+import uk.gov.hmrc.SbtAutoBuildPlugin
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
+import uk.gov.hmrc.versioning.SbtGitVersioning
+import play.sbt.routes.RoutesKeys.routesGenerator
+import TestPhases._
 
 trait MicroService {
-
-  import uk.gov.hmrc._
-  import DefaultBuildSettings._
-  import uk.gov.hmrc.{SbtBuildInfo, ShellPrompt, SbtAutoBuildPlugin}
-  import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-  import uk.gov.hmrc.versioning.SbtGitVersioning
-  import play.sbt.routes.RoutesKeys.routesGenerator
-  import TestPhases._
 
   val appName: String
 
@@ -71,7 +70,10 @@ trait MicroService {
       .setPreference(SpacesWithinPatternBinders, true)
   }
 
+  scalacOptions += "-P:linter:printWarningNames:false"
+
   lazy val microservice = Project(appName, file("."))
+    .settings(addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"))
     .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
     .settings(playSettings ++ scoverageSettings: _*)
     .settings(scalaSettings: _*)

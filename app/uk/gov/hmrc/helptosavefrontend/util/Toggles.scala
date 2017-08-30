@@ -59,7 +59,7 @@ object Toggles {
     e match {
       case Right(a)      ⇒ a
       case Left(Some(a)) ⇒ a
-      case Left(None)    ⇒ throw new RuntimeException(s"FEATURE has no otherwise branch and no default value")
+      case Left(None)    ⇒ throw new RuntimeException("FEATURE has no otherwise branch and no default value")
     }
   }
 

@@ -28,7 +28,7 @@ import play.api.libs.ws.{WSClientConfig, WSConfigParser}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 @Singleton
 class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) with Logging {
@@ -112,7 +112,7 @@ class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environ
     try {
       CertificateFactory.getInstance("X.509")
         .generateCertificates(stream)
-        .toList
+        .asScala.toList
     } finally {
       stream.close()
     }
