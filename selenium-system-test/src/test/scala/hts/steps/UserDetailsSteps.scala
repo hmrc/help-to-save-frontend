@@ -23,36 +23,36 @@ import hts.utils.{Configuration, NINOGenerator}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 
-class UserDetailsSteps extends Steps with NINOGenerator{
+class UserDetailsSteps extends Steps with NINOGenerator {
 
   var name: Option[String] = None
   var nino: Option[String] = None
   var dateOfBirth: Option[String] = None
   var email: Option[String] = None
 
-  Given("""^an applicant has the following details:$"""){ (applicantDetails:DataTable) =>
+  Given("""^an applicant has the following details:$"""){ (applicantDetails: DataTable) ⇒
     val data: List[mutable.Map[String, String]] = applicantDetails.asMaps(classOf[String], classOf[String])
       .asScala
       .toList
       .map(_.asScala)
 
-    data.foreach{ row =>
+    data.foreach{ row ⇒
       row.get("field") -> row.get("value") match {
-        case (Some(field), value @ Some(_)) =>
+        case (Some(field), value @ Some(_)) ⇒
           field match {
-            case "name"          => name = value
-            case "NINO"          => nino = value
-            case "date of birth" => dateOfBirth = value
-            case "email address" => email = value
-            case other           => sys.error(s"Unexpected field: $other")
+            case "name"          ⇒ name = value
+            case "NINO"          ⇒ nino = value
+            case "date of birth" ⇒ dateOfBirth = value
+            case "email address" ⇒ email = value
+            case other           ⇒ sys.error(s"Unexpected field: $other")
           }
 
-        case _ => sys.error("Could not parse table row. Field or value not found")
+        case _ ⇒ sys.error("Could not parse table row. Field or value not found")
       }
     }
   }
 
-  When("""^an applicant passes the eligibility check$"""){ () =>
+  When("""^an applicant passes the eligibility check$"""){ () ⇒
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
     AuthorityWizardPage.setCredentialStrength("strong")
@@ -64,11 +64,10 @@ class UserDetailsSteps extends Steps with NINOGenerator{
     EligiblePage.startCreatingAccount()
   }
 
-  Then("""^they see their details$"""){ () =>
+  Then("""^they see their details$"""){ () ⇒
     Page.getPageContent should include("Name: " + name.getOrElse(sys.error("Could not find name")))
     Page.getPageContent should include("National Insurance number: " + nino.getOrElse(sys.error("Could not find NINO")))
     Page.getPageContent should include("Date of Birth: " + dateOfBirth.getOrElse(sys.error("Could not find DoB")))
     Page.getPageContent should include("Email: " + email.getOrElse(sys.error("Could not find email")))
   }
-
 }

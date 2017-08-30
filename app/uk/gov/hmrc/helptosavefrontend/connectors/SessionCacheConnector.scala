@@ -42,7 +42,7 @@ trait SessionCacheConnector {
 }
 
 @Singleton
-class SessionCacheConnectorImpl @Inject()(val http: WSHttp) extends SessionCacheConnector with SessionCache with ServicesConfig with AppName {
+class SessionCacheConnectorImpl @Inject() (val http: WSHttp) extends SessionCacheConnector with SessionCache with ServicesConfig with AppName {
 
   override def defaultSource: String = appName
 

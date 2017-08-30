@@ -20,6 +20,4 @@ import hts.pages.WebPage
 
 object HowTheAccountWorksPage extends WebPage {
 
-
-
 }

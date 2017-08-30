@@ -59,10 +59,10 @@ class IvControllerSpec extends TestSupport {
   }
 
   lazy val ivController = new IvController(mockSessionCacheConnector,
-    ivConnector,
-    fakeApplication.injector.instanceOf[MessagesApi],
-    fakeApplication,
-    frontendAuthConnector) {
+                                           ivConnector,
+                                           fakeApplication.injector.instanceOf[MessagesApi],
+                                           fakeApplication,
+                                           frontendAuthConnector) {
     override def authConnector: AuthConnector = mockAuthConnector
   }
 
@@ -70,7 +70,7 @@ class IvControllerSpec extends TestSupport {
 
   val continueURL = "continue-here!!"
 
-  private def doRequest() = ivController.journeyResult(URLEncoder.encode(continueURL))(fakeRequest)
+  private def doRequest() = ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(fakeRequest)
 
   "GET /iv/journey-result" should {
 
@@ -108,7 +108,9 @@ class IvControllerSpec extends TestSupport {
 
       mockAuthConnectorResult()
 
-      val responseFuture = ivController.journeyResult(URLEncoder.encode(continueURL))(FakeRequest("GET", s"/iv/journey-result"))
+      val responseFuture =
+        ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(
+          FakeRequest("GET", s"/iv/journey-result"))
 
       val result = Await.result(responseFuture, 3.seconds)
 

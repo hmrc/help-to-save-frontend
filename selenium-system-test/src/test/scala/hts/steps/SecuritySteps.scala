@@ -27,49 +27,50 @@ class SecuritySteps extends Steps with NINOGenerator {
 
   val credentialStrengthsRegex: String = oneOfRegex(Set("weak", "strong", "none"))
 
-  Given(s"""^a user has a confidence level of $confidenceLevelRegex$$""") { (level: Int) =>
+  Given(s"""^a user has a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
     AuthorityWizardPage.goToPage()
     AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
-  Given(s"""^their confidence level is $confidenceLevelRegex$$""") { (level: Int) =>
+  Given(s"""^their confidence level is $confidenceLevelRegex$$""") { (level: Int) ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", level, "Strong", generateEligibleNINO)
   }
 
-  Then("""^they are forced into going through IV before being able to proceed with their HtS application$""") { () =>
+  Then("""^they are forced into going through IV before being able to proceed with their HtS application$""") { () ⇒
     Page.getCurrentUrl should include regex ("/iv/journey-result|iv%2Fjourney-result")
   }
 
-  Given("""^a user has NOT logged in$""") { () =>
+  Given("""^a user has NOT logged in$""") { () ⇒
     // Do nothing
   }
 
-  Given("""^a user has logged in$""") { () =>
+  Given("""^a user has logged in$""") { () ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
   }
 
-  When("""^they have logged in and passed IV$"""){ () =>
+  When("""^they have logged in and passed IV$"""){ () ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/access-account", 200, "Strong", generateEligibleNINO)
+
   }
 
-  When("""^they try to view the user details page$""") { () =>
+  When("""^they try to view the user details page$""") { () ⇒
     ConfirmDetailsPage.goToPage()
   }
 
-  When("""^they try to view the create-an-account page$""") { () =>
+  When("""^they try to view the create-an-account page$""") { () ⇒
     CreateAccountPage.goToPage()
   }
 
-  Then("""^they are prompted to log in$""") { () =>
+  Then("""^they are prompted to log in$""") { () ⇒
     Page.getCurrentUrl should include("gg/sign-in")
   }
 
-  Given("""^a user has logged in and passed IV$""") { () =>
+  Given("""^a user has logged in and passed IV$""") { () ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
   }
 
-  Then("""^the GG sign in page is visible$"""){ () =>
+  Then("""^the GG sign in page is visible$"""){ () ⇒
     driver.getCurrentUrl should include ("gg/sign-in?")
   }
 

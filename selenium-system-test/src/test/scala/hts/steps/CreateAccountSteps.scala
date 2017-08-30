@@ -20,81 +20,81 @@ import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.{Configuration, NINOGenerator}
 
-class CreateAccountSteps extends Steps with NINOGenerator{
+class CreateAccountSteps extends Steps with NINOGenerator {
 
-  Given("""^A user is at the start of the registration process$""") { () =>
+  Given("""^A user is at the start of the registration process$""") { () ⇒
     AboutPage.navigateToAboutPage
   }
 
-  Given("""^An authenticated user is at the start of the registration process$""") { () =>
+  Given("""^An authenticated user is at the start of the registration process$""") { () ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save", 200, "Strong", generateEligibleNINO)
   }
 
-  Given("""^a user is on the apply page$""") { () =>
+  Given("""^a user is on the apply page$""") { () ⇒
     ApplyPage.navigateToApplyPage
   }
 
-  Given("""^an authenticated user is on the apply page$""") { () =>
+  Given("""^an authenticated user is on the apply page$""") { () ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply", 200, "Strong", generateEligibleNINO)
   }
 
-  Given("""^a user has previously created an account with base64 encoded NINO$"""){ ()  =>
+  Given("""^a user has previously created an account with base64 encoded NINO$"""){ () ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", AuthorityWizardPage.decode(AuthorityWizardPage.getEncodedNino))
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
   }
 
-  When("""^they proceed through to the apply page$""") { () =>
+  When("""^they proceed through to the apply page$""") { () ⇒
     AboutPage.nextPage()
     EligibilityPage.nextPage()
     HowTheAccountWorksPage.nextPage()
     HowWeCalculateBonusesPage.nextPage()
   }
 
-  When("""^they click on the Start now button$""") { () =>
+  When("""^they click on the Start now button$""") { () ⇒
     ApplyPage.clickStartNow()
   }
 
-  When("""^they click on the sign in link$""") { () =>
+  When("""^they click on the sign in link$""") { () ⇒
     ApplyPage.clickSignInLink()
   }
 
-  When("""^they choose to not create an account$""") { () =>
+  When("""^they choose to not create an account$""") { () ⇒
     ConfirmDetailsPage.continue()
     CreateAccountPage.exitWithoutCreatingAccount()
   }
 
-  When("""^they choose to create an account$""") { () =>
+  When("""^they choose to create an account$""") { () ⇒
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
   }
 
-  When("""^the user clicks on the check eligibility button$""") { () =>
+  When("""^the user clicks on the check eligibility button$""") { () ⇒
     EligibilityQuestionPage.clickCheckEligibility()
   }
 
-  When("""^they have logged in and passed IV with base64 encoded NINO$"""){ () =>
+  When("""^they have logged in and passed IV with base64 encoded NINO$"""){ () ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", AuthorityWizardPage.decode(AuthorityWizardPage.getEncodedNino))
   }
 
-  Then("""^they see that the account is created$""") { () =>
+  Then("""^they see that the account is created$""") { () ⇒
     Page.getPageContent should include("Successfully created account")
   }
 
-  Then("""^they see the gov uk page$""") { () =>
+  Then("""^they see the gov uk page$""") { () ⇒
     driver.getCurrentUrl shouldBe "https://www.gov.uk/"
   }
 
-  Then("""^they will be on the eligibility question page$""") { () =>
+  Then("""^they will be on the eligibility question page$""") { () ⇒
     on(EligibilityQuestionPage)
   }
 
-  Then("""^they will be on the you're eligible page$""") { () =>
+  Then("""^they will be on the you're eligible page$""") { () ⇒
     on(EligiblePage)
   }
 
-  Then("""^they will be on the account home page$"""){ () =>
+  Then("""^they will be on the account home page$"""){ () ⇒
     Page.getPageContent contains "You've already got an account - yay!"
   }
 }

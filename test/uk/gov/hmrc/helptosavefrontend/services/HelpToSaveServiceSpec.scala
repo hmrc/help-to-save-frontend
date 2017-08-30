@@ -75,10 +75,8 @@ class HelpToSaveServiceSpec extends TestSupport {
         result.value.futureValue should be(Right(userInfo))
       }
 
-
       "return an unsuccessful response if the connector responds with an unsuccessful response" in {
         val error = randomUserInformationRetrievalError()
-
 
         (htsConnector.getUserInformation(_: String, _: String)(_: HeaderCarrier))
           .expects(nino, userDetailsURI, *)

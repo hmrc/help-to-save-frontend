@@ -26,7 +26,6 @@ import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
 
-
 private[steps] trait Steps extends ScalaDsl with EN with Matchers {
 
   import Steps._
@@ -58,16 +57,15 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
     _driver = None
   }
 
-
 }
 
 private[steps] object Steps {
 
   /**
-    * Each step definition file extends the `Steps` trait , but they will all reference this single driver
-    * in the companion object. Having this variable in the trait would cause multiple drivers to be
-    * created
-    */
+   * Each step definition file extends the `Steps` trait , but they will all reference this single driver
+   * in the companion object. Having this variable in the trait would cause multiple drivers to be
+   * created
+   */
   private var _driver: Option[WebDriver] = None
 
 }

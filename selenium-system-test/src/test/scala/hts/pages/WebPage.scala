@@ -25,7 +25,6 @@ import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.time.{Millis, Seconds, Span}
 
-
 trait WebPage extends org.scalatest.selenium.Page
   with Matchers
   with WebBrowser
@@ -36,7 +35,7 @@ trait WebPage extends org.scalatest.selenium.Page
 
   override val url: String = ""
 
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout = scaled(Span(5, Seconds)), interval = scaled(Span(500, Millis)))
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout  = scaled(Span(5, Seconds)), interval = scaled(Span(500, Millis)))
 
   def isCurrentPage(implicit driver: WebDriver): Boolean = false
 

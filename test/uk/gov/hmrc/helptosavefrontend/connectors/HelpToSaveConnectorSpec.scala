@@ -38,7 +38,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
   val mockHttp = mock[WSHttp]
 
-  val connector = new HelpToSaveConnectorImpl(mockHttp)
+  lazy val connector = new HelpToSaveConnectorImpl(mockHttp)
 
   def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
     (mockHttp.get(_: String)(_: HeaderCarrier))
@@ -51,10 +51,9 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
     override def reads(json: JsValue) = json match {
       case JsNull ⇒ JsSuccess(())
-      case _ ⇒ JsError("JSON was not null")
+      case _      ⇒ JsError("JSON was not null")
     }
   }
-
 
   "The HelpToSaveConnectorImpl" when {
 
@@ -70,57 +69,57 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result " +
         "and a valid reason" in {
-        (6 to 8).foreach { eligibilityReason ⇒
-          mockHttpGet(eligibilityURL(nino))(
-            Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(1, eligibilityReason))))))
+          (6 to 8).foreach { eligibilityReason ⇒
+            mockHttpGet(eligibilityURL(nino))(
+              Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(1, eligibilityReason))))))
 
-          val result = connector.getEligibility(nino)
-          await(result.value) shouldBe Right(
-            EligibilityCheckResult(Right(EligibilityReason.fromInt(eligibilityReason).get)))
+            val result = connector.getEligibility(nino)
+            await(result.value) shouldBe Right(
+              EligibilityCheckResult(Right(EligibilityReason.fromInt(eligibilityReason).get)))
+          }
         }
-      }
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result " +
         "and a valid reason" in {
-        (1 to 5).foreach { ineligibilityReason ⇒
-          mockHttpGet(eligibilityURL(nino))(
-            Some(HttpResponse(200, responseJson = Some(Json.toJson(
-              EligibilityCheckResponse(2, ineligibilityReason))))))
+          (1 to 5).foreach { ineligibilityReason ⇒
+            mockHttpGet(eligibilityURL(nino))(
+              Some(HttpResponse(200, responseJson = Some(Json.toJson(
+                EligibilityCheckResponse(2, ineligibilityReason))))))
 
-          val result = connector.getEligibility(nino)
-          await(result.value) shouldBe Right(
-            EligibilityCheckResult(Left(IneligibilityReason.fromInt(ineligibilityReason).get)))
+            val result = connector.getEligibility(nino)
+            await(result.value) shouldBe Right(
+              EligibilityCheckResult(Left(IneligibilityReason.fromInt(ineligibilityReason).get)))
+          }
         }
-      }
 
       "return an error" when {
         "the call comes back with a 200 status with a positive result " +
           "and an invalid reason" in {
-          forAll { eligibilityReason: Int ⇒
-            whenever(!(6 to 8).contains(eligibilityReason)) {
-              mockHttpGet(eligibilityURL(nino))(
-                Some(HttpResponse(200, responseJson = Some(Json.toJson(
-                  EligibilityCheckResponse(1, eligibilityReason))))))
+            forAll { eligibilityReason: Int ⇒
+              whenever(!(6 to 8).contains(eligibilityReason)) {
+                mockHttpGet(eligibilityURL(nino))(
+                  Some(HttpResponse(200, responseJson = Some(Json.toJson(
+                    EligibilityCheckResponse(1, eligibilityReason))))))
 
-              val result = connector.getEligibility(nino)
-              await(result.value).isLeft shouldBe true
+                val result = connector.getEligibility(nino)
+                await(result.value).isLeft shouldBe true
+              }
             }
           }
-        }
 
         "the call comes back with a 200 status with a negative result " +
           "and an invalid reason" in {
-          forAll { ineligibilityReason: Int ⇒
-            whenever(!(1 to 5).contains(ineligibilityReason)) {
-              mockHttpGet(eligibilityURL(nino))(
-                Some(HttpResponse(200, responseJson = Some(Json.toJson(
-                  EligibilityCheckResponse(2, ineligibilityReason))))))
+            forAll { ineligibilityReason: Int ⇒
+              whenever(!(1 to 5).contains(ineligibilityReason)) {
+                mockHttpGet(eligibilityURL(nino))(
+                  Some(HttpResponse(200, responseJson = Some(Json.toJson(
+                    EligibilityCheckResponse(2, ineligibilityReason))))))
 
-              val result = connector.getEligibility(nino)
-              await(result.value).isLeft shouldBe true
+                val result = connector.getEligibility(nino)
+                await(result.value).isLeft shouldBe true
+              }
             }
           }
-        }
 
         "the call comes back with a 200 and an unknown result" in {
           forAll { (result: Int, reason: Int) ⇒
@@ -149,36 +148,34 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return the user info if the call comes back with a 200 " +
         "and the body contains user info" in {
-        val userInfo: UserInfo = randomUserInfo()
+          val userInfo: UserInfo = randomUserInfo()
 
-        mockHttpGet(userInformationURL(nino, userDetailsURI))(
-          Some(HttpResponse(200, Some(Json.toJson(userInfo)))))
+          mockHttpGet(userInformationURL(nino, userDetailsURI))(
+            Some(HttpResponse(200, Some(Json.toJson(userInfo)))))
 
-        val result = connector.getUserInformation(nino, userDetailsURI)
-        await(result.value) shouldBe Right(userInfo)
-      }
+          val result = connector.getUserInformation(nino, userDetailsURI)
+          await(result.value) shouldBe Right(userInfo)
+        }
 
       "return missing user info if the call comes back with a 200 " +
         "and the body contains missing user info" in {
-        val missingInfo: Set[MissingUserInfo] = Set(Surname, GivenName, Email, DateOfBirth, Contact)
-        val eligibilityResponse = MissingUserInfoSet(missingInfo)
+          val missingInfo: Set[MissingUserInfo] = Set(Surname, GivenName, Email, DateOfBirth, Contact)
+          val eligibilityResponse = MissingUserInfoSet(missingInfo)
 
-        mockHttpGet(userInformationURL(nino, userDetailsURI))(
-          Some(HttpResponse(200, responseJson = Some(Json.toJson(eligibilityResponse)))))
+          mockHttpGet(userInformationURL(nino, userDetailsURI))(
+            Some(HttpResponse(200, responseJson = Some(Json.toJson(eligibilityResponse)))))
 
-        val result = connector.getUserInformation(nino, userDetailsURI)
-        await(result.value) shouldBe Left(MissingUserInfos(missingInfo, nino))
-      }
+          val result = connector.getUserInformation(nino, userDetailsURI)
+          await(result.value) shouldBe Left(MissingUserInfos(missingInfo, nino))
+        }
 
     }
-
 
     "getting enrolment status" must {
 
       implicit val enrolmentStatusWrites: Writes[EnrolmentStatus] = new Writes[EnrolmentStatus] {
 
-        case class EnrolledJSON(enrolled
-                                : Boolean = true, itmpHtSFlag: Boolean)
+        case class EnrolledJSON(enrolled: Boolean = true, itmpHtSFlag: Boolean)
 
         case class NotEnrolledJSON(enrolled: Boolean = false)
 
@@ -187,7 +184,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
         override def writes(o: EnrolmentStatus) = o match {
           case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒ Json.toJson(EnrolledJSON(itmpHtSFlag = itmpHtSFlag))
-          case EnrolmentStatus.NotEnrolled ⇒ Json.toJson(NotEnrolledJSON())
+          case EnrolmentStatus.NotEnrolled           ⇒ Json.toJson(NotEnrolledJSON())
         }
 
       }
@@ -200,50 +197,49 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-        mockHttpGet(enrolmentStatusURL(nino))(Some(HttpResponse(
-          200,
-          Some(Json.parse(
-            """
+          mockHttpGet(enrolmentStatusURL(nino))(Some(HttpResponse(
+            200,
+            Some(Json.parse(
+              """
               |{
               |  "enrolled"    : true,
               |  "itmpHtSFlag" : true
               |}
             """.stripMargin))
-        )))
+          )))
 
-        await(connector.getUserEnrolmentStatus(nino).value) shouldBe Right(
-          EnrolmentStatus.Enrolled(itmpHtSFlag = true))
+          await(connector.getUserEnrolmentStatus(nino).value) shouldBe Right(
+            EnrolmentStatus.Enrolled(itmpHtSFlag = true))
 
-        mockHttpGet(enrolmentStatusURL(nino))(Some(HttpResponse(
-          200,
-          Some(Json.parse(
-            """
+          mockHttpGet(enrolmentStatusURL(nino))(Some(HttpResponse(
+            200,
+            Some(Json.parse(
+              """
               |{
               |  "enrolled"    : true,
               |  "itmpHtSFlag" : false
               |}
             """.stripMargin))
-        )))
+          )))
 
-        await(connector.getUserEnrolmentStatus(nino).value) shouldBe Right(
-          EnrolmentStatus.Enrolled(itmpHtSFlag = false))
+          await(connector.getUserEnrolmentStatus(nino).value) shouldBe Right(
+            EnrolmentStatus.Enrolled(itmpHtSFlag = false))
 
-        mockHttpGet(enrolmentStatusURL(nino))(Some(HttpResponse(
-          200,
-          Some(Json.parse(
-            """
+          mockHttpGet(enrolmentStatusURL(nino))(Some(HttpResponse(
+            200,
+            Some(Json.parse(
+              """
               |{
               |  "enrolled" : false,
               |  "itmpHtSFlag" : false
               |}
             """.stripMargin))
-        )))
+          )))
 
-        await(connector.getUserEnrolmentStatus(nino).value) shouldBe Right(EnrolmentStatus.NotEnrolled)
-      }
+          await(connector.getUserEnrolmentStatus(nino).value) shouldBe Right(EnrolmentStatus.NotEnrolled)
+        }
 
     }
-
 
     "enrolling a user" must {
 
@@ -256,11 +252,10 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-        mockHttpGet(enrolUserURL(nino))(Some(HttpResponse(200)))
+          mockHttpGet(enrolUserURL(nino))(Some(HttpResponse(200)))
 
-        await(connector.enrolUser(nino).value) shouldBe Right(())
-      }
-
+          await(connector.enrolUser(nino).value) shouldBe Right(())
+        }
 
     }
 
@@ -275,10 +270,10 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-        mockHttpGet(setITMPFlagURL(nino))(Some(HttpResponse(200)))
+          mockHttpGet(setITMPFlagURL(nino))(Some(HttpResponse(200)))
 
-        await(connector.setITMPFlag(nino).value) shouldBe Right(())
-      }
+          await(connector.setITMPFlag(nino).value) shouldBe Right(())
+        }
     }
 
     "storing emails" must {
@@ -295,17 +290,17 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-        mockHttpGet(storeEmailURL(encodedEmail, nino))(Some(HttpResponse(200)))
+          mockHttpGet(storeEmailURL(encodedEmail, nino))(Some(HttpResponse(200)))
 
-        await(connector.storeEmail(email, nino).value) shouldBe Right(())
-      }
+          await(connector.storeEmail(email, nino).value) shouldBe Right(())
+        }
     }
   }
 
-  def testCommon[E, A, B](mockGet: Option[HttpResponse] ⇒ Unit,
-                          getResult: () ⇒ EitherT[Future, E, A],
-                          validBody: B,
-                          testInvalidJSON: Boolean = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
+  def testCommon[E, A, B](mockGet:         ⇒ Option[HttpResponse] ⇒ Unit,
+                          getResult:       () ⇒ EitherT[Future, E, A],
+                          validBody:       B,
+                          testInvalidJSON: Boolean                       = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
     "perform a GET request to the help-to-save-service" in {
       mockGet(Some(HttpResponse(200)))
       await(getResult())

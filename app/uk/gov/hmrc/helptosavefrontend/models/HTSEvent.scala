@@ -26,7 +26,7 @@ class HTSEvent(auditSource: String, auditType: String, detail: Map[String, Strin
 class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(implicit hc: HeaderCarrier)
   extends HTSEvent(auditSource,
     "applicationSubmitted",
-    Map[String, String](
+                   Map[String, String](
       "forename" -> userInfo.forename,
       "surname" -> userInfo.surname,
       "dateOfBirth" -> userInfo.dateOfBirth.toString,
@@ -66,7 +66,7 @@ class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(impl
 class EligibilityCheckEvent(auditSource: String, nino: String, errorDescription: Option[String])(implicit hc: HeaderCarrier)
   extends HTSEvent(auditSource, "eligibilityCheck", {
     val basicMap = Map[String, String]("nino" -> nino)
-    errorDescription.fold(basicMap + ("eligible" -> "true")) { reason =>
+    errorDescription.fold(basicMap + ("eligible" -> "true")) { reason ⇒
       basicMap + ("eligible" -> "false") + ("reason" -> reason)
     }
   })

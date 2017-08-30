@@ -20,7 +20,6 @@ import org.scalacheck.Gen
 
 import scala.reflect.{ClassTag, _}
 
-
 package object testutil {
 
   def sample[A: ClassTag](gen: Gen[A]): A =

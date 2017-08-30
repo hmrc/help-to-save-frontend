@@ -20,14 +20,14 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.util.Email
 
 /**
-  * Session data for the HTS journey
-  *
-  * @param eligibilityCheckResult Contains `Some` if the user has gone through the eligibility checks
-  *                               and they are eligible for HtS and contains `None` if the user has gone
-  *                               through eligibility checks and they are ineligible
-  * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
-  *                               if they haven't
-  */
+ * Session data for the HTS journey
+ *
+ * @param eligibilityCheckResult Contains `Some` if the user has gone through the eligibility checks
+ *                               and they are eligible for HtS and contains `None` if the user has gone
+ *                               through eligibility checks and they are ineligible
+ * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
+ *                               if they haven't
+ */
 case class HTSSession(eligibilityCheckResult: Option[NSIUserInfo], confirmedEmail: Option[Email])
 
 object HTSSession {

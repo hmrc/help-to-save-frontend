@@ -21,7 +21,9 @@ import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
+import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
+import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -29,22 +31,41 @@ import uk.gov.hmrc.play.test.UnitSpec
 import scala.concurrent.Future
 
 class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig {
+
   lazy val emailVerifyBaseURL = baseUrl("email-verification")
   val nino = "AE123XXXX"
   val email = "email@gmail.com"
   val mockHttp = mock[WSHttp]
+  implicit val crypto = mock[Crypto]
+  val emailVerificationRequest =
+    EmailVerificationRequest(
+      email,
+      "awrs_email_verification",
+      "PT2H",
+      "http://localhost:7000/help-to-save/check-and-confirm-your-details?p=",
+      Map("email" → email, "nino" → nino))
 
   lazy val connector = {
-    val config = Configuration("services.email-verification.linkTTLMinutes" → " 120")
+    val config = Configuration("microservice.services.email-verification.linkTTLMinutes" → " 120",
+      "microservice.services.email-verification.continue-url" ->
+        "http://localhost:7000/help-to-save/check-and-confirm-your-details"
+    )
     new EmailVerificationConnectorImpl(mockHttp, config)
   }
 
-  def mockPost(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
+  def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
-    (mockHttp.post(_: String, _: JsValue, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier)).expects(verifyEmailURL, *, *, *, *)
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
+      .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
 
+  def mockPostFailure[A](expectedBody: A): Unit = {
+    val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
+      .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *)
+      .returning(Future.failed(new Exception("Oh no!")))
+  }
 
   def mockGet(returnedStatus: Int, email: String, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
@@ -52,66 +73,61 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
 
+  def mockGetFailure(): Unit = {
+    val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
+    (mockHttp.get(_: String)(_: HeaderCarrier)).expects(verifyEmailURL, *)
+      .returning(Future.failed(new Exception("Uh oh!")))
+  }
+
+  def mockEncrypt(expected: String)(result: String): Unit =
+    (crypto.encrypt(_: String)).expects(expected).returning(result)
 
   "verifyEmail" should {
     "return 201 when given good json" in {
-      mockPost(Status.OK, None)
+      mockEncrypt(nino + "§" + email)("")
+      mockPost(emailVerificationRequest)(Status.OK, None)
       await(connector.verifyEmail(nino, email)) shouldBe Right(())
     }
 
     "return 400 when given bad json" in {
-      mockPost(Status.BAD_REQUEST, None)
-      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError(nino))
+      mockEncrypt(nino + "§" + email)("")
+      mockPost(emailVerificationRequest)(Status.BAD_REQUEST, None)
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError)
     }
 
     "return 409 when the email has already been verified" in {
-      mockPost(Status.CONFLICT, None)
-      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified(nino, email))
+      mockEncrypt(nino + "§" + email)("")
+      mockPost(emailVerificationRequest)(Status.CONFLICT, None)
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified)
     }
 
     "return a verification service unavailable error when the email verification service is down" in {
-      mockPost(Status.SERVICE_UNAVAILABLE, None)
-      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
+      mockEncrypt(nino + "§" + email)("")
+      mockPost(emailVerificationRequest)(Status.SERVICE_UNAVAILABLE, None)
+      await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
     }
 
     "throw a runtime exception If email TTL does not exist in the configuration" in {
       val config = Configuration("x" → "y")
       an[Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], config)
     }
-  }
 
-  "isVerified" should {
-    "return a Future true if the email is verified" in {
-      mockGet(Status.OK, email, None)
-      await(connector.isVerified(email)) shouldBe Right(true)
-    }
-
-    "return a Future false if the email is not verified" in {
-      mockGet(Status.NOT_FOUND, email, None)
-      await(connector.isVerified(email)) shouldBe Right(false)
-    }
-
-    "return a Future false if the email string is not valid" in {
-      mockGet(Status.NOT_FOUND, "email", None)
-      await(connector.isVerified("email")) shouldBe Right(false)
-    }
-
-    "return a VerificationServiceUnavailable error if the email verification service is down" in {
-      mockGet(Status.SERVICE_UNAVAILABLE, email, None)
-      await(connector.isVerified(email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable())
+    "should return a back end error if the future failed" in {
+      mockEncrypt(nino + "§" + email)("")
+      mockPostFailure(emailVerificationRequest)
+      await(connector.verifyEmail(nino, email)) shouldBe Left(BackendError)
     }
   }
 
   "verifyEmailURL" should {
     "return the correct url" in {
-      connector.verifyEmailURL shouldBe s"http://localhost:9891/email-verification/verification-requests"
+      connector.verifyEmailURL shouldBe "http://localhost:7002/email-verification/verification-requests"
     }
   }
 
-  "isVerifiedURL" should {
-    "return the correct url when given an email address" in {
-      val email = "email@gmail.com"
-      connector.isVerifiedURL(email) shouldBe s"http://localhost:9891/email-verification/verified-email-addresses/$email"
+  "continueURL" should {
+    "return the correct url" in {
+      connector.continueURL shouldBe "http://localhost:7000/help-to-save/check-and-confirm-your-details"
     }
   }
 }

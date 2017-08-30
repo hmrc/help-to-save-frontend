@@ -51,7 +51,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) extends NSIConnector with Logging with AppName {
+class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor) extends NSIConnector with Logging with AppName {
 
   val httpProxy = new WSHttpProxy
 
@@ -60,7 +60,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) exten
 
     logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
 
-    FEATURE("log-account-creation-json", conf) enabled() thenDo {
+    FEATURE("log-account-creation-json", conf) enabled () thenDo {
       logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
     }
 
@@ -99,7 +99,7 @@ class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor) exten
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
     response.parseJson[SubmissionFailure] match {
       case Right(submissionFailure) ⇒ submissionFailure
-      case Left(error) ⇒ SubmissionFailure(None, "", error)
+      case Left(error)              ⇒ SubmissionFailure(None, "", error)
     }
   }
 }

@@ -34,9 +34,9 @@ trait EnrolmentCheckBehaviour {
 
   val helpToSaveService: HelpToSaveService
 
-  def checkIfAlreadyEnrolled(ifNotEnrolled: NINO ⇒ Future[Result],
+  def checkIfAlreadyEnrolled(ifNotEnrolled:               NINO ⇒ Future[Result],
                              handleEnrolmentServiceError: EnrolmentServiceError ⇒ Future[Result] = _ ⇒ InternalServerError
-                            )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
+  )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
     val enrolled: EitherT[Future, EnrolmentCheckError, (String, EnrolmentStatus)] = for {
       nino ← EitherT.fromOption[Future](htsContext.nino, NoNINO)
       enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus(nino).leftMap[EnrolmentCheckError](e ⇒ EnrolmentServiceError(nino, e))
@@ -61,14 +61,14 @@ trait EnrolmentCheckBehaviour {
     ).flatMap(identity)
   }
 
-  private def handleError(enrolmentCheckError: EnrolmentCheckError,
+  private def handleError(enrolmentCheckError:         EnrolmentCheckError,
                           handleEnrolmentServiceError: EnrolmentServiceError ⇒ Future[Result]
-                         ): Future[Result] = enrolmentCheckError match {
+  ): Future[Result] = enrolmentCheckError match {
     case NoNINO ⇒
       logger.warn("Could not get NINO")
       InternalServerError
 
-    case e@EnrolmentServiceError(nino, message) ⇒
+    case e @ EnrolmentServiceError(nino, message) ⇒
       logger.warn(s"Error while trying to check if user $nino was already enrolled to HtS: $message")
       handleEnrolmentServiceError(e)
 

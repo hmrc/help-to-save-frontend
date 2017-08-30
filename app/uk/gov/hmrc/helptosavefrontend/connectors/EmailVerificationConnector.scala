@@ -24,75 +24,58 @@ import play.api.http.Status._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]]
 
-  def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Boolean]]
-
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject()(http: WSHttp, conf: Configuration) extends EmailVerificationConnector with ServicesConfig with Logging {
+class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuration)(implicit crypto: Crypto)
+  extends EmailVerificationConnector with ServicesConfig with Logging {
 
-  val linkTTLMinutes = conf.underlying.getInt("services.email-verification.linkTTLMinutes")
+  val linkTTLMinutes = conf.underlying.getInt("microservice.services.email-verification.linkTTLMinutes")
   val emailVerifyBaseURL = baseUrl("email-verification")
   val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
 
-  def isVerifiedURL(email: String) = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
-
-  val continueURL = "email-verification.continue.baseUrl"
-  val templateId = "hts_email_verification"
+  val continueURL = conf.underlying.getString("microservice.services.email-verification.continue-url")
+  val templateId = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
-    val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueURL, Map())
-
+    val continueUrlWithParams = continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()
+    val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueUrlWithParams, Map())
     http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
       response.status match {
-        case OK | CREATED =>
-          logger.info("[EmailVerification] - Email verification successfully triggered")
+        case OK | CREATED ⇒
+          logger.info(s"[EmailVerification] - Email verification successfully triggered")
           Right(())
         case BAD_REQUEST ⇒
           logger.warn("[EmailVerification] - Bad Request from email verification service")
-          Left(RequestNotValidError(nino))
+          Left(RequestNotValidError)
         case CONFLICT ⇒
-          logger.info("[EmailVerification] - Email already verified")
-          Left(AlreadyVerified(nino, newEmail))
+          logger.info("[EmailVerification] - Email address already verified")
+          Left(AlreadyVerified)
         case SERVICE_UNAVAILABLE ⇒
-          logger.warn("[EmailVerification] - Email Verification service not available")
-          Left(VerificationServiceUnavailable())
-        case _ ⇒
-          logger.warn("[EmailVerification] - Unexpected status received from email verification")
-          Left(BackendError(s"Unexpected response from email verification service. Status = ${response.status}, body = ${response.body}"))
+          logger.warn("[EmailVerification] - Email Verification service not currently available")
+          Left(VerificationServiceUnavailable)
+        case status ⇒
+          logger.warn(s"[EmailVerification] - Unexpected status $status received from email verification body = ${response.body}")
+          Left(BackendError)
       }
+    }.recover{
+      case NonFatal(e) ⇒
+        logger.warn(s"Error while calling email verification service: ${e.getMessage}")
+        Left(BackendError)
     }
   }
 
-  def isVerified(email: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Boolean]] = {
-    val getURL = isVerifiedURL(email)
-    http.get(getURL).map { response ⇒
-      response.status match {
-        case OK ⇒
-          logger.info("[EmailVerification] - email is verified")
-          Right(true)
-        case NOT_FOUND ⇒
-          logger.warn("[EmailVerification] - email is not verified")
-          Right(false)
-        case SERVICE_UNAVAILABLE ⇒
-          logger.warn("[EmailVerification] - Email Verification service not available")
-          Left(VerificationServiceUnavailable())
-        case _ ⇒
-          logger.warn("[EmailVerification] - Unexpected status received from email verification")
-          Left(BackendError(s"Unexpected response from email verification service. Status = ${response.status}, body = ${response.body.toString}"))
-      }
-    }
-  }
 }
