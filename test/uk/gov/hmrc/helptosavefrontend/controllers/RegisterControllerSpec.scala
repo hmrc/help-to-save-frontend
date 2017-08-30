@@ -276,21 +276,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           val html = contentAsString(result)
           html should include("Successfully created account")
         }
-
-      "and even if the user couldn't be enrolled" in {
-        inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
-          mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
-          mockEnrolUser(nino)(Left("Oh no"))
-        }
-
-        val result = doCreateAccountRequest()
-        val html = contentAsString(result)
-        html should include("Successfully created account")
-      }
-
+      
       "indicate to the user that the creation was successful " +
         "and even if the user couldn't be enrolled" in {
           inSequence {
