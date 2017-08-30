@@ -69,9 +69,7 @@ trait MicroService {
       .setPreference(SpacesAroundMultiImports, false)
       .setPreference(SpacesWithinPatternBinders, true)
   }
-
-  scalacOptions += "-P:linter:printWarningNames:false"
-
+  
   lazy val microservice = Project(appName, file("."))
     .settings(addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"))
     .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
