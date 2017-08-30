@@ -276,7 +276,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           val html = contentAsString(result)
           html should include("Successfully created account")
         }
-      
+
       "indicate to the user that the creation was successful " +
         "and even if the user couldn't be enrolled" in {
           inSequence {

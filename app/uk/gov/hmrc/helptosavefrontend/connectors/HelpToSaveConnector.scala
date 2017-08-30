@@ -50,7 +50,7 @@ trait HelpToSaveConnector {
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
+class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
   val base64Encoder: Base64.Encoder = Base64.getEncoder
 
@@ -76,11 +76,11 @@ class HelpToSaveConnectorImpl @Inject()(http: WSHttp)(implicit ec: ExecutionCont
     handle(storeEmailURL(encodedEmail, nino), _ ⇒ Right(()), "store email", identity)
   }
 
-  private def handle[A, B](url: String,
-                           ifHTTP200: HttpResponse ⇒ Either[B, A],
+  private def handle[A, B](url:         String,
+                           ifHTTP200:   HttpResponse ⇒ Either[B, A],
                            description: ⇒ String,
-                           toError: String ⇒ B
-                          )(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+                           toError:     String ⇒ B
+  )(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
     EitherT(http.get(url).map { response ⇒
       if (response.status == 200) {
         ifHTTP200(response)
