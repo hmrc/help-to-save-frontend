@@ -18,10 +18,11 @@ package hts.pages.registrationPages
 
 import hts.pages.WebPage
 import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
 object AboutPage extends WebPage {
 
-  def navigateToAboutPage(): Unit = {
+  def navigateToAboutPage()(implicit driver: WebDriver): Unit = {
     go to s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
   }
 

@@ -32,7 +32,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () =>
-    Page.getPageContent() should include("You're eligible")
+    Page.getPageContent should include("You're eligible")
   }
 
   When("""^they start to create an account$"""){ () =>
@@ -44,7 +44,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () =>
-    Page.getPageContent() should include("You're not eligible")
+    Page.getPageContent should include("You're not eligible")
   }
 
 }

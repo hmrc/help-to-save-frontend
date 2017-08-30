@@ -16,47 +16,52 @@
 
 package hts.pages
 
+import java.util.Base64
+
 import hts.utils.Configuration
-import org.openqa.selenium.By
+import org.openqa.selenium.{By, WebDriver}
 
 object AuthorityWizardPage extends WebPage {
 
-  var tempNino: String = ""
+  private val s: String = AuthorityWizardPage.encode(generateEligibleNINO)
 
-  def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String): Unit = {
+  def getEncodedNino: String = s
+
+  def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     goToPage()
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
   }
 
-  private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String): Unit = {
+  private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     setRedirect(redirectUrl)
     setConfidenceLevel(confidence)
     setCredentialStrength(credentialStrength)
     setNino(nino)
-    grabNino()
     submit()
   }
 
-  private def grabNino(): Unit = tempNino = find(name("nino")).get.underlying.getAttribute("value")
+  def goToPage()(implicit driver: WebDriver): Unit =
+    go to s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
-  def getNino: String = tempNino
+  def setRedirect(url: String)(implicit driver: WebDriver): Unit =
+    find(name("redirectionUrl")).get.underlying.sendKeys(url)
 
-  def goToPage(): Unit =
-    driver.navigate().to(Configuration.authHost + "/auth-login-stub/gg-sign-in")
+  def setNino(nino: String)(implicit driver: WebDriver): Unit =
+    find(name("nino")).get.underlying.sendKeys(nino)
 
-  def setRedirect(url: String): Unit =
-    driver.findElement(By.name("redirectionUrl")).sendKeys(url)
+  def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
+    find(name("credentialStrength")).get.underlying.sendKeys(strength)
 
-  def setNino(nino: String): Unit =
-    driver.findElement(By.name("nino")).sendKeys(nino)
+  def setConfidenceLevel(level: Int)(implicit driver: WebDriver): Unit =
+    find(name("confidenceLevel")).get.underlying.sendKeys(level.toString)
 
-  def setCredentialStrength(strength: String): Unit =
-    driver.findElement(By.name("credentialStrength")).sendKeys(strength)
+  def submit()(implicit driver: WebDriver): Unit =
+    find(cssSelector("input.button")).get.underlying.click()
 
-  def setConfidenceLevel(level: Int): Unit =
-    driver.findElement(By.name("confidenceLevel")).sendKeys(level.toString)
+  def encode(s: String): String = new String(
+    Base64.getEncoder.encodeToString(s.getBytes()))
 
-  def submit(): Unit =
-    driver.findElement(By.cssSelector("input.button")).click()
+  def decode(s: String): String = new String(
+    Base64.getDecoder.decode(s))
 
 }

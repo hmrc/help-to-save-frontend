@@ -65,10 +65,10 @@ class UserDetailsSteps extends Steps with NINOGenerator{
   }
 
   Then("""^they see their details$"""){ () =>
-    Page.getPageContent() should include("Name: " + name.getOrElse(sys.error("Could not find name")))
-    Page.getPageContent() should include("National Insurance number: " + nino.getOrElse(sys.error("Could not find NINO")))
-    Page.getPageContent() should include("Date of Birth: " + dateOfBirth.getOrElse(sys.error("Could not find DoB")))
-    Page.getPageContent() should include("Email: " + email.getOrElse(sys.error("Could not find email")))
+    Page.getPageContent should include("Name: " + name.getOrElse(sys.error("Could not find name")))
+    Page.getPageContent should include("National Insurance number: " + nino.getOrElse(sys.error("Could not find NINO")))
+    Page.getPageContent should include("Date of Birth: " + dateOfBirth.getOrElse(sys.error("Could not find DoB")))
+    Page.getPageContent should include("Email: " + email.getOrElse(sys.error("Could not find email")))
   }
 
 }

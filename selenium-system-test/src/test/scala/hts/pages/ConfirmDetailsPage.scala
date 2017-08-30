@@ -21,10 +21,9 @@ import hts.utils.Configuration
 
 object ConfirmDetailsPage extends WebPage {
 
-  def goToPage(): Unit =
-    driver.navigate().to(Configuration.host + "/help-to-save/register/check-and-confirm-your-details")
+  def goToPage()(implicit driver: WebDriver): Unit =
+    go to s"${Configuration.host}/help-to-save/register/check-and-confirm-your-details"
 
-  def continue(): Unit = {
-    driver.findElement(By.id("continue")).click()
-  }
+  def continue()(implicit driver: WebDriver): Unit = click on "continue"
+
 }

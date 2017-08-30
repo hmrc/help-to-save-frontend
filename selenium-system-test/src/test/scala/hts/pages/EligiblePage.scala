@@ -16,12 +16,14 @@
 
 package hts.pages
 
+import org.openqa.selenium.WebDriver
+
 object EligiblePage extends WebPage {
 
   val pageTitle = "You're eligible"
 
-  def startCreatingAccount(): Unit = click on xpath(".//*[@type='submit']")
+  def startCreatingAccount()(implicit driver: WebDriver): Unit = click on xpath(".//*[@type='submit']")
 
-  override def isCurrentPage: Boolean = checkHeader("h1", pageTitle)
+  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h1", pageTitle)
 
 }

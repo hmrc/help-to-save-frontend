@@ -16,12 +16,14 @@
 
 package hts.pages
 
+import org.openqa.selenium.WebDriver
+
 object EligibilityQuestionPage extends WebPage {
 
   //TODO This page is still under construction
   val pageTitle = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"
 
-  def clickCheckEligibility(): Unit = click on "continue"
+  def clickCheckEligibility()(implicit driver: WebDriver): Unit = click on "continue"
 
-  override def isCurrentPage: Boolean = checkHeader("h2", pageTitle)
+  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h2", pageTitle)
 }

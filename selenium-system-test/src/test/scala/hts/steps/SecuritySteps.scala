@@ -38,7 +38,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Then("""^they are forced into going through IV before being able to proceed with their HtS application$""") { () =>
-    Page.getCurrentUrl() should include regex ("/iv/journey-result|iv%2Fjourney-result")
+    Page.getCurrentUrl should include regex ("/iv/journey-result|iv%2Fjourney-result")
   }
 
   Given("""^a user has NOT logged in$""") { () =>
@@ -53,10 +53,6 @@ class SecuritySteps extends Steps with NINOGenerator {
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/access-account", 200, "Strong", generateEligibleNINO)
   }
 
-  When("""^they have logged in and passed IV2$"""){ () =>
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/access-account", 200, "Strong", AuthorityWizardPage.getNino)
-  }
-
   When("""^they try to view the user details page$""") { () =>
     ConfirmDetailsPage.goToPage()
   }
@@ -66,7 +62,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Then("""^they are prompted to log in$""") { () =>
-    Page.getCurrentUrl() should include("gg/sign-in")
+    Page.getCurrentUrl should include("gg/sign-in")
   }
 
   Given("""^a user has logged in and passed IV$""") { () =>

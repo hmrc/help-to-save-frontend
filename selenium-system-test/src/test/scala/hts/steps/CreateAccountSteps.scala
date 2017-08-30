@@ -16,14 +16,14 @@
 
 package hts.steps
 
-import hts.pages.{WebPage, _}
+import hts.pages._
 import hts.pages.registrationPages._
-import hts.utils.Configuration
+import hts.utils.{Configuration, NINOGenerator}
 
-class CreateAccountSteps extends WebPage {
+class CreateAccountSteps extends Steps with NINOGenerator{
 
   Given("""^A user is at the start of the registration process$""") { () =>
-    AboutPage.navigateToAboutPage()
+    AboutPage.navigateToAboutPage
   }
 
   Given("""^An authenticated user is at the start of the registration process$""") { () =>
@@ -31,15 +31,15 @@ class CreateAccountSteps extends WebPage {
   }
 
   Given("""^a user is on the apply page$""") { () =>
-    ApplyPage.navigateToApplyPage()
+    ApplyPage.navigateToApplyPage
   }
 
   Given("""^an authenticated user is on the apply page$""") { () =>
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply", 200, "Strong", generateEligibleNINO)
   }
 
-  Given("""^a user has previously created an account$"""){ () =>
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
+  Given("""^a user has previously created an account with base64 encoded NINO$"""){ ()  =>
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", AuthorityWizardPage.decode(AuthorityWizardPage.getEncodedNino))
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
@@ -74,8 +74,12 @@ class CreateAccountSteps extends WebPage {
     EligibilityQuestionPage.clickCheckEligibility()
   }
 
+  When("""^they have logged in and passed IV with base64 encoded NINO$"""){ () =>
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", AuthorityWizardPage.decode(AuthorityWizardPage.getEncodedNino))
+  }
+
   Then("""^they see that the account is created$""") { () =>
-    Page.getPageContent() should include("Successfully created account")
+    Page.getPageContent should include("Successfully created account")
   }
 
   Then("""^they see the gov uk page$""") { () =>
@@ -91,6 +95,6 @@ class CreateAccountSteps extends WebPage {
   }
 
   Then("""^they will be on the account home page$"""){ () =>
-    pageSource.contains("You've already got an account - yay!")
+    Page.getPageContent contains "You've already got an account - yay!"
   }
 }
