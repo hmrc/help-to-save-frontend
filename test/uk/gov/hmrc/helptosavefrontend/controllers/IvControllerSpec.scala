@@ -54,19 +54,10 @@ class IvControllerSpec extends AuthSupport {
   }
 
   lazy val ivController = new IvController(mockSessionCacheConnector,
-<<<<<<< HEAD
                                            ivConnector,
                                            fakeApplication.injector.instanceOf[MessagesApi],
                                            fakeApplication,
-                                           frontendAuthConnector) {
-    override def authConnector: AuthConnector = mockAuthConnector
-  }
-=======
-    ivConnector,
-    fakeApplication.injector.instanceOf[MessagesApi],
-    fakeApplication,
-    mockAuthConnector)
->>>>>>> HTS-415: Upgrade to latest play-auth version
+                                           mockAuthConnector)
 
   private val fakeRequest = FakeRequest("GET", s"/iv/journey-result?journeyId=${journeyId.Id}")
 

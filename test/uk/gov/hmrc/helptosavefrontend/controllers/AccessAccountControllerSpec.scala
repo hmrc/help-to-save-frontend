@@ -20,15 +20,8 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-<<<<<<< HEAD
-import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
-=======
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
->>>>>>> HTS-415: Upgrade to latest play-auth version
 
 class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
 
@@ -36,15 +29,8 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     fakeApplication,
-<<<<<<< HEAD
-    frontendAuthConnector
-  ) {
-    override lazy val authConnector = mockAuthConnector
-  }
-=======
     mockAuthConnector
   )
->>>>>>> HTS-415: Upgrade to latest play-auth version
 
   "The AccessAccountController" must {
 
@@ -52,13 +38,8 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
     "redirect to NS&I if the user is enrolled" in {
       inSequence {
-<<<<<<< HEAD
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(true)))
-=======
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(true)))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(true)))
       }
 
       val result = doRequest()
@@ -69,7 +50,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
       "it hasn't already been set" in {
         inSequence {
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(false)))
           mockWriteITMPFlag(nino)(Right(()))
         }
@@ -81,14 +62,8 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
     "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {
       inSequence {
-<<<<<<< HEAD
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-=======
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.Enrolled(false)))
-        mockWriteITMPFlag(nino)(Right(()))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
       }
 
       val result = doRequest()
@@ -98,34 +73,14 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
     "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
       inSequence {
-<<<<<<< HEAD
-        mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-        mockEnrolmentCheck(nino)(Left(""))
-=======
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+        mockEnrolmentCheck(nino)(Left(""))
       }
 
       val result = doRequest()
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
     }
-
-<<<<<<< HEAD
-=======
-   "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
-     inSequence {
-       mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-       mockEnrolmentCheck(nino)(Left(""))
-     }
-
-     val result = doRequest()
-     status(result) shouldBe 303
-     redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
-   }
-
->>>>>>> HTS-415: Upgrade to latest play-auth version
   }
 
 }

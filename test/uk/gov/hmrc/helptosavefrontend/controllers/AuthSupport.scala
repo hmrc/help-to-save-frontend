@@ -43,6 +43,7 @@ trait AuthSupport extends TestSupport {
                                 None, None, Some("BA148FY"), Some("GB"), Some("GB"))
   val mockedRetrievals = new ~(new ~(new ~(new ~(new ~(new ~(name, email), dob), itmpName), itmpDob), itmpAddress), Enrolments(Set(enrolment)))
   val mockedMissingUserInfo = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), dob), itmpName), itmpDob), itmpAddress.copy(line1 = None)), Enrolments(Set(enrolment)))
+  val mockedMissingNinoEnrolment = new ~(new ~(new ~(new ~(new ~(new ~(name, noEmail), dob), itmpName), itmpDob), itmpAddress.copy(line1 = None)), Enrolments(Set()))
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))

@@ -59,35 +59,6 @@ class HelpToSaveServiceSpec extends TestSupport {
       }
     }
 
-    "getting user information" must {
-
-      val nino = "nino"
-      val userDetailsURI = "uri"
-
-      "return a successful response if the connector responds with a successful response" in {
-        val userInfo = randomUserInfo()
-
-        (htsConnector.getUserInformation(_: String, _: String)(_: HeaderCarrier))
-          .expects(nino, userDetailsURI, *)
-          .returning(EitherT.pure(userInfo))
-
-        val result = htsService.getUserInformation(nino, userDetailsURI)
-        result.value.futureValue should be(Right(userInfo))
-      }
-
-      "return an unsuccessful response if the connector responds with an unsuccessful response" in {
-        val error = randomUserInformationRetrievalError()
-
-        (htsConnector.getUserInformation(_: String, _: String)(_: HeaderCarrier))
-          .expects(nino, userDetailsURI, *)
-          .returning(EitherT.fromEither[Future](Left(error)))
-
-        val result = htsService.getUserInformation(nino, userDetailsURI)
-        result.value.futureValue should be(Left(error))
-      }
-
-    }
-
     "createAccount" must {
 
       val nsiUserInfo = models.validNSIUserInfo

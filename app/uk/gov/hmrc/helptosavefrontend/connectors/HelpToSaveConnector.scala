@@ -39,7 +39,7 @@ import scala.util.control.NonFatal
 trait HelpToSaveConnector {
 
   def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult]
-  
+
   def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
 
   def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]

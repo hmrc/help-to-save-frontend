@@ -24,22 +24,13 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Result => PlayResult}
+import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithConfidence
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.IneligibilityReason.AccountAlreadyOpened
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, NINO, UserDetailsURI}
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore
-import uk.gov.hmrc.helptosavefrontend.repo.EnrolmentStore.NotEnrolled
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.HTSAuditor
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
@@ -50,8 +41,8 @@ import scala.concurrent.{Await, Future}
 
 class EligibilityCheckControllerSpec
   extends AuthSupport
-    with EnrolmentAndEligibilityCheckBehaviour
-    with GeneratorDrivenPropertyChecks {
+  with EnrolmentAndEligibilityCheckBehaviour
+  with GeneratorDrivenPropertyChecks {
 
   val jsonSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor = mock[HTSAuditor]
@@ -70,7 +61,7 @@ class EligibilityCheckControllerSpec
       .expects(nino, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockSendAuditEvent: Unit =
+  def mockSendAuditEvent(): Unit =
     (mockAuditor.sendEvent(_: HTSEvent))
       .expects(*)
       .returning(Future.successful(AuditResult.Success))
@@ -103,13 +94,8 @@ class EligibilityCheckControllerSpec
 
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {
         inSequence {
-<<<<<<< HEAD
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-=======
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(NotEnrolled))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
@@ -128,13 +114,8 @@ class EligibilityCheckControllerSpec
 
       "show the you are not eligible page if session data indicates that they are not eligible" in {
         inSequence {
-<<<<<<< HEAD
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-=======
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(NotEnrolled))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
@@ -146,13 +127,8 @@ class EligibilityCheckControllerSpec
 
       "redirect to the you are eligible page if session data indicates that they are eligible" in {
         inSequence {
-<<<<<<< HEAD
-          mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-=======
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(NotEnrolled))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
@@ -179,11 +155,7 @@ class EligibilityCheckControllerSpec
 
         "call the get eligibility endpoint of the help to save service" in {
           inSequence {
-<<<<<<< HEAD
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-=======
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
->>>>>>> HTS-415: Upgrade to latest play-auth version
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Left(""))
           }
@@ -193,11 +165,7 @@ class EligibilityCheckControllerSpec
 
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
           inSequence {
-<<<<<<< HEAD
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-=======
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
->>>>>>> HTS-415: Upgrade to latest play-auth version
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
@@ -212,11 +180,7 @@ class EligibilityCheckControllerSpec
 
         "show the you are eligible page if the eligibility check indicates the user is eligible" in {
           inSequence {
-<<<<<<< HEAD
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-=======
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
->>>>>>> HTS-415: Upgrade to latest play-auth version
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(EligibilityReason.WTCWithUC))))
             mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
@@ -231,11 +195,7 @@ class EligibilityCheckControllerSpec
 
         "show the you are not eligible page if the eligibility check indicates the user is eligible" in {
           inSequence {
-<<<<<<< HEAD
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-=======
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
->>>>>>> HTS-415: Upgrade to latest play-auth version
             mockEnrolmentCheck(nino)(Left("Oh no!"))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.NotEntitledToWTC(false)))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
@@ -247,19 +207,11 @@ class EligibilityCheckControllerSpec
           redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
         }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> HTS-415: Upgrade to latest play-auth version
         "return an error" when {
 
           "the eligibility check call returns with an error" in {
             inSequence {
-<<<<<<< HEAD
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-=======
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
->>>>>>> HTS-415: Upgrade to latest play-auth version
               mockEnrolmentCheck(nino)(Left("Oh no!"))
               mockEligibilityResult(nino)(Left(""))
             }
@@ -267,35 +219,6 @@ class EligibilityCheckControllerSpec
             val result = doCheckEligibilityRequest()
             status(result) shouldBe INTERNAL_SERVER_ERROR
           }
-<<<<<<< HEAD
-=======
-
-          "the eligibility check indicates they do not already have an account" in {
-            def test(eligibilityCheckResult: EligibilityCheckResult): Unit = {
-              inSequence {
-                mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockEnrolmentCheck(nino)(Left("Oh no!"))
-                mockEligibilityResult(nino)(Right(eligibilityCheckResult))
-              }
-
-              val result = doCheckEligibilityRequest()
-              status(result) shouldBe INTERNAL_SERVER_ERROR
-            }
-
-            implicit val eligibilityReasonArb = Arbitrary(eligibilityReasonGen)
-            implicit val ineligibilityReasonArb = Arbitrary(ineligibilityReasonGen)
-
-            forAll { eligibilityReason: EligibilityReason ⇒
-              test(EligibilityCheckResult(Right(eligibilityReason)))
-            }
-
-            forAll { ineligibilityReason: IneligibilityReason ⇒
-              whenever(ineligibilityReason != AccountAlreadyOpened) {
-                test(EligibilityCheckResult(Left(ineligibilityReason)))
-              }
-            }
-          }
->>>>>>> HTS-415: Upgrade to latest play-auth version
         }
       }
 
@@ -303,19 +226,11 @@ class EligibilityCheckControllerSpec
 
         "immediately redirect to the you are not eligible page if they have session data " +
           "which indicates they are not eligible" in {
-<<<<<<< HEAD
             inSequence {
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
             }
-=======
-          inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
-          }
->>>>>>> HTS-415: Upgrade to latest play-auth version
 
             val result = doCheckEligibilityRequest()
 
@@ -325,20 +240,11 @@ class EligibilityCheckControllerSpec
 
         "immediately redirect to the you are eligible page if they have session data " +
           "which indicates they are eligible" in {
-<<<<<<< HEAD
             inSequence {
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
             }
-=======
-          inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-          }
->>>>>>> HTS-415: Upgrade to latest play-auth version
-
             val result = doCheckEligibilityRequest()
 
             status(result) shouldBe Status.SEE_OTHER
@@ -347,13 +253,8 @@ class EligibilityCheckControllerSpec
 
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
           inSequence {
-<<<<<<< HEAD
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-=======
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
@@ -366,36 +267,19 @@ class EligibilityCheckControllerSpec
           contentAsString(result) shouldBe "You've already got an account - yay!!!"
         }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> HTS-415: Upgrade to latest play-auth version
         "return user details if the user is eligible for help-to-save and the " +
           "user is not already enrolled and they have no session data" in {
             val eligibilityReason = randomEligibilityReason()
 
-<<<<<<< HEAD
             inSequence {
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
-              mockGetUserInformation(nino, userDetailsURI)(Right(validUserInfo))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
               mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-              mockSendAuditEvent()
+              mockSendAuditEvent
             }
-=======
-          inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(None))
-            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
-            mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
-            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-            mockSendAuditEvent
-          }
->>>>>>> HTS-415: Upgrade to latest play-auth version
 
             val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
             val result = Await.result(responseFuture, 5.seconds)
@@ -408,29 +292,16 @@ class EligibilityCheckControllerSpec
           "and they have no session data" in {
             implicit val ineligibilityArb: Arbitrary[IneligibilityReason] = Arbitrary(ineligibilityReasonGen)
 
-<<<<<<< HEAD
             forAll { ineligibilityReason: IneligibilityReason ⇒
               whenever(ineligibilityReason != AccountAlreadyOpened) {
                 inSequence {
-                  mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
+                  mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
                   mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
                   mockSessionCacheConnectorGet(Right(None))
                   mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(ineligibilityReason))))
                   mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-                  mockSendAuditEvent()
+                  mockSendAuditEvent
                 }
-=======
-          forAll { ineligibilityReason: IneligibilityReason ⇒
-            whenever(ineligibilityReason != AccountAlreadyOpened) {
-              inSequence {
-                mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-                mockSessionCacheConnectorGet(Right(None))
-                mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(ineligibilityReason))))
-                mockSessionCacheConnectorPut(HTSSession(None, None))(Right(CacheMap("1", Map.empty[String, JsValue])))
-                mockSendAuditEvent
-              }
->>>>>>> HTS-415: Upgrade to latest play-auth version
 
                 val result = doCheckEligibilityRequest()
                 status(result) shouldBe Status.SEE_OTHER
@@ -444,21 +315,11 @@ class EligibilityCheckControllerSpec
           val eligibilityReason = randomEligibilityReason()
 
           inSequence {
-<<<<<<< HEAD
-            mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-=======
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
-<<<<<<< HEAD
-            mockGetUserInformation(nino, userDetailsURI)(Left(MissingUserInfos(Set(Email, Contact), nino)))
-            mockSendAuditEvent()
-=======
             mockSendAuditEvent
->>>>>>> HTS-415: Upgrade to latest play-auth version
           }
 
           val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
@@ -489,36 +350,8 @@ class EligibilityCheckControllerSpec
             }
 
           "the nino is not available" in {
-<<<<<<< HEAD
-            test(mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(Some(userDetailsURI), Enrolments(Set()))))
-          }
-
-          "the user details URI is not available" in {
-            test(inSequence {
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(core.~(None, enrolments))
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionCacheConnectorGet(Right(None))
-            })
-          }
-
-          "there is an error getting the user's session data" in {
-            test(inSequence {
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionCacheConnectorGet(Left(""))
-            })
-=======
             test(
-              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            )
-          }
-
-          "the user details URI is not available" in {
-            test(
-              inSequence {
-                mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-              }
+              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingNinoEnrolment)
             )
           }
 
@@ -526,72 +359,31 @@ class EligibilityCheckControllerSpec
             test(
               inSequence {
                 mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+                mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
                 mockSessionCacheConnectorGet(Left(""))
               }
             )
->>>>>>> HTS-415: Upgrade to latest play-auth version
           }
 
           "the eligibility check call returns with an error" in {
             forAll { checkError: String ⇒
-<<<<<<< HEAD
-              test(inSequence {
-                mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-                mockSessionCacheConnectorGet(Right(None))
-                mockEligibilityResult(nino)(Left(checkError))
-              })
-=======
               test(
                 inSequence {
                   mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                  mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
+                  mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
                   mockSessionCacheConnectorGet(Right(None))
                   mockEligibilityResult(nino)(Left(checkError))
                 }
               )
->>>>>>> HTS-415: Upgrade to latest play-auth version
             }
           }
 
-          "the user information retrieval returns with an error" in {
-            val eligibilityReason = randomEligibilityReason()
-
-<<<<<<< HEAD
-            test(inSequence {
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionCacheConnectorGet(Right(None))
-              mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
-              mockGetUserInformation(nino, userDetailsURI)(Left(UserInformationRetrievalError.BackendError("", nino)))
-            })
-          }
-
-=======
-            test(
-              inSequence {
-                mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
-                mockSessionCacheConnectorGet(Right(None))
-                mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
-              }
-            )
-          }
-
-
->>>>>>> HTS-415: Upgrade to latest play-auth version
           "if the JSON schema validation is unsuccessful" in {
             val eligibilityReason = randomEligibilityReason()
 
             test(inSequence {
-<<<<<<< HEAD
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-=======
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockJsonSchemaValidation(validNSIUserInfo)(Left("uh oh"))
@@ -602,13 +394,8 @@ class EligibilityCheckControllerSpec
             val eligibilityReason = randomEligibilityReason()
 
             test(inSequence {
-<<<<<<< HEAD
-              mockPlayAuthWithRetrievals(AuthWithConfidence)(userDetailsURIWithEnrolments)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-=======
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStore.NotEnrolled))
->>>>>>> HTS-415: Upgrade to latest play-auth version
+              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))

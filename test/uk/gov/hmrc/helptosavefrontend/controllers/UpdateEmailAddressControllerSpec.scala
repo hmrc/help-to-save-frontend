@@ -26,6 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.validNSIUserInfo
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future

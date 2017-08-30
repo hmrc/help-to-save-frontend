@@ -38,31 +38,18 @@ class HelpToSaveAuthSpec extends AuthSupport {
 
   val htsAuth = new HelpToSaveAuth(fakeApplication, mockAuthConnector)
 
-<<<<<<< HEAD
   private def actionWithNoEnrols = htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Future.successful(Ok(""))
   }(FrontendAppConfig.checkEligibilityUrl)
 
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    Future.successful(Ok(""))
-=======
-  private def actionWithNoEnrols = htsAuth.authorisedForHts {
-    implicit request ⇒
-      implicit htsContext ⇒
-        Future.successful(Ok(""))
-  }(FrontendAppConfig.checkEligibilityUrl)
-
-  private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo {
-    implicit request ⇒
-      implicit htsContext ⇒
-        htsContext.userDetails match {
-          case Some(info) ⇒ info match {
-            case Left(missingUserInfo) ⇒ Future.successful(Ok(Json.toJson(missingUserInfo)))
-            case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
-          }
-          case None ⇒ Future.successful(Ok(""))
-        }
->>>>>>> HTS-415: Upgrade to latest play-auth version
+    htsContext.userDetails match {
+      case Some(info) ⇒ info match {
+        case Left(missingUserInfo) ⇒ Future.successful(Ok(Json.toJson(missingUserInfo)))
+        case Right(userInfo)       ⇒ Future.successful(Ok(Json.toJson(userInfo)))
+      }
+      case None ⇒ Future.successful(Ok(""))
+    }
   }(FrontendAppConfig.checkEligibilityUrl)
 
   private def mockAuthWith(error: String) =

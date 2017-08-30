@@ -51,7 +51,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .returning(EitherT.fromEither[Future](result))
 
   def mockEnrolmentCheck(input: NINO)(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus(_: NINO)(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService.getUserEnrolmentStatus(_: NINO)(_: HeaderCarrier))
       .expects(input, *)
       .returning(EitherT.fromEither[Future](result))
 
