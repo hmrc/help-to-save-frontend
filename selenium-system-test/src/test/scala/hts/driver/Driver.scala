@@ -18,6 +18,8 @@ package hts.driver
 
 import java.util.concurrent.TimeUnit
 
+import cats.instances.string._
+import cats.syntax.eq._
 import cats.syntax.either._
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
@@ -36,10 +38,11 @@ object Driver {
       case None              ⇒ Left("No browser set")
     }
 
-    selectedDriver.map { driver ⇒
-      sys.addShutdownHook(driver.quit())
-      driver.manage().window().maximize()
-      driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
+    selectedDriver.foreach { driver ⇒
+      val (_, _, _) = (sys.addShutdownHook(driver.quit()),
+        driver.manage().window().maximize(),
+        driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
+      )
     }
     selectedDriver
   }
@@ -59,10 +62,10 @@ object Driver {
   private val driverDirectory: String = "selenium-system-test/drivers"
 
   private def createChromeDriver(): WebDriver = {
-    if (systemProperties.getProperty("webdriver.chrome.driver") == null) {
-      if (isMac) {
+    if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
+      val _ = if (isMac) {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
-      } else if (isLinux && linuxArch == "amd32") {
+      } else if (isLinux && linuxArch === "amd32") {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")
       } else if (isLinux) {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver")
@@ -84,9 +87,9 @@ object Driver {
   }
 
   private def createPhantomJsDriver(): WebDriver = {
-    if (isMac) {
+    val _ = if (isMac) {
       systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs")
-    } else if (isLinux && linuxArch == "amd32") {
+    } else if (isLinux && linuxArch === "amd32") {
       systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs_linux32")
     } else {
       systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs_linux64")

@@ -19,6 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import cats.instances.future._
+import cats.instances.string._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -33,6 +35,7 @@ import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class RegisterController @Inject() (val messagesApi:           MessagesApi,
@@ -107,10 +110,11 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                 _ ⇒ {
                   logger.info(s"Successfully created account for $nino")
                   // start the process to enrol the user but don't worry about the result
-                  helpToSaveService.enrolUser(nino).fold(
-                    e ⇒ logger.warn(s"Could not start process to enrol user $nino: $e"),
-                    _ ⇒ logger.info(s"Started process to enrol user $nino")
-                  )
+                  helpToSaveService.enrolUser(nino).value.onComplete{
+                    case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user $nino, future failed: $e")
+                    case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user $nino: $e")
+                    case Success(Right(_)) ⇒ logger.info(s"Process started to enrol user $nino")
+                  }
 
                   Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
                 }
@@ -153,7 +157,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       logger.warn("Could not decode parameters for confirm details")
       Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
     }){ params ⇒
-      if (params.nino == nsiUserInfo.nino) {
+      if (params.nino === nsiUserInfo.nino) {
         val updatedNsiUserInfo = nsiUserInfo copy (contactDetails = nsiUserInfo.contactDetails copy (email = params.email))
         Ok(views.html.register.confirm_details(updatedNsiUserInfo))
       } else {

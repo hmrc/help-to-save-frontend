@@ -44,7 +44,7 @@ class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndElig
 
   val mockEmailVerificationConnector = mock[EmailVerificationConnector]
 
-  val mockHttp = mock[WSHttp]
+  val mockHttp: WSHttp = mock[WSHttp]
 
   lazy val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockHelpToSaveService, frontendAuthConnector, mockEmailVerificationConnector
   )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi]) {

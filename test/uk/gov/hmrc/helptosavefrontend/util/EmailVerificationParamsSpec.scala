@@ -26,26 +26,26 @@ import scala.util.{Failure, Success, Try}
 
 class EmailVerificationParamsSpec extends TestSupport with GeneratorDrivenPropertyChecks {
 
-  val nino = "AE1234XXX"
-  val email = "email@gmail.com"
-  val params = EmailVerificationParams(nino, email)
+  val nino: NINO = "AE1234XXX"
+  val email: Email = "email@gmail.com"
+  val params: EmailVerificationParams = EmailVerificationParams(nino, email)
 
   "EmailVerificationParams" must {
 
     "have a decode method that is the inverse of the encode method" in {
-      implicit val crypto = new Crypto {
+      implicit val crypto: Crypto = new Crypto {
         override def encrypt(s: String): String = s
 
         override def decrypt(s: String): Try[String] = Success(s)
       }
 
-      val result = EmailVerificationParams.decode(params.encode)
-      result.get.email shouldBe email
-      result.get.nino shouldBe nino
+      val result = EmailVerificationParams.decode(params.encode).getOrElse(fail("Could not decode email verification params"))
+      result.email shouldBe email
+      result.nino shouldBe nino
     }
 
     "have a decode method that returns None when given a base64 string that does not encode a nino and email" in {
-      implicit val crypto = new Crypto {
+      implicit val crypto: Crypto = new Crypto {
         override def encrypt(s: String): String = s
 
         override def decrypt(s: String): Try[String] = Failure(new Exception)

@@ -31,7 +31,7 @@ import scala.concurrent.Future
 
 class IntroductionControllerSpec extends AuthSupport {
 
-  implicit val timeout = Timeout(5, SECONDS)
+  implicit val timeout: Timeout = Timeout(5, SECONDS)
 
   val fakeRequest = FakeRequest("GET", "/")
   val helpToSave = new IntroductionController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector)

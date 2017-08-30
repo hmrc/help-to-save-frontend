@@ -16,7 +16,23 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import cats.Eq
+import cats.instances.boolean._
+import cats.syntax.eq._
+
+import scala.concurrent.Future
+
 case class EligibilityCheckResult(result: Either[IneligibilityReason, EligibilityReason])
+
+object EligibilityCheckResult {
+
+  def apply(ineligibilityReason: IneligibilityReason): EligibilityCheckResult =
+    EligibilityCheckResult(Left(ineligibilityReason))
+
+  def apply(eligibilityReason: EligibilityReason): EligibilityCheckResult =
+    EligibilityCheckResult(Right(eligibilityReason))
+
+}
 
 sealed trait EligibilityReason {
   val legibleString: String
@@ -55,6 +71,15 @@ object EligibilityReason {
 }
 
 object IneligibilityReason {
+
+  implicit def eqInstance: Eq[IneligibilityReason] = new Eq[IneligibilityReason] {
+    override def eqv(x: IneligibilityReason, y: IneligibilityReason): Boolean = (x, y) match {
+      case (AccountAlreadyOpened, AccountAlreadyOpened) ⇒ true
+      case (NotEntitledToWTC(r1), NotEntitledToWTC(r2)) if r1 === r2 ⇒ true
+      case (EntitledToWTCButNoWTC(r1), EntitledToWTCButNoWTC(r2)) if r1 === r2 ⇒ true
+      case _ ⇒ false
+    }
+  }
 
   /** An HtS account was opened previously (the HtS account may have been closed or inactive) */
   case object AccountAlreadyOpened extends IneligibilityReason {

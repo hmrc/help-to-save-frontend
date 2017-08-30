@@ -34,7 +34,7 @@ import scala.concurrent.{Await, Future}
 
 class HelpToSaveAuthSpec extends AuthSupport {
 
-  implicit val timeout = Timeout(5, SECONDS)
+  implicit val timeout: Timeout = Timeout(5, SECONDS)
 
   val htsAuth = new HelpToSaveAuth(fakeApplication, mockAuthConnector)
 

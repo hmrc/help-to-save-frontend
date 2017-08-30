@@ -36,6 +36,7 @@ import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 class EligibilityCheckController @Inject() (val messagesApi:             MessagesApi,
                                             val helpToSaveService:       HelpToSaveService,
@@ -137,10 +138,11 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
           auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(IneligibilityReason.AccountAlreadyOpened.legibleString)))
 
           // set the ITMP flag here but don't worry about the result
-          helpToSaveService.setITMPFlag(nino).fold(
-            e ⇒ logger.warn(s"Could not set ITMP flag for user $nino: $e"),
-            _ ⇒ logger.info(s"Set ITMP flag for user $nino")
-          )
+          helpToSaveService.setITMPFlag(nino).value.onComplete{
+            case Failure(e)        ⇒ logger.warn(s"Could not set ITMP flag, future failed: ${e.getMessage}")
+            case Success(Left(e))  ⇒ logger.warn(s"Could not set ITMP flag: $e")
+            case Success(Right(_)) ⇒ logger.info(s"Set ITMP flag for user $nino")
+          }
 
           Ok("You've already got an account - yay!!!")
 
@@ -175,9 +177,10 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     eligibilityCheckResult.result.fold(
       _ ⇒ Right(userInfo),
       _ ⇒ {
-        FEATURE[Either[String, NSIUserInfo]]("outgoing-json-validation", app.configuration, Right(userInfo)) enabled () thenDo {
-          jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ userInfo)
-        }
+        FEATURE("outgoing-json-validation", app.configuration, logger).thenOrElse(
+          jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ userInfo),
+          Right(userInfo)
+        )
       }
     )
   }

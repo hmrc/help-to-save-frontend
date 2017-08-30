@@ -28,11 +28,8 @@
 @serviceInfoContent = {}
 
 @sidebar = {
-@if(sidebarLinks.isDefined) {
-    @layouts.sidebar(sidebarLinks.get, Some("sidebar"))
+  @{layouts.sidebar(sidebarLinks.getOrElse(Html("")), Some("sidebar"))}
 }
-}
-
 
 @govuk_wrapper(appConfig = uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig,
     title = title,
