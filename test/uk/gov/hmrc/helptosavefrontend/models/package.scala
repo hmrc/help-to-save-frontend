@@ -41,16 +41,11 @@ package object models {
 
   implicit val ineligibilityReasonGen: Gen[IneligibilityReason] = AutoGen[IneligibilityReason]
 
-  implicit val userInformationRetrievalError: Gen[UserInformationRetrievalError] =
-    Gen.const(UserInformationRetrievalError.BackendError("", ""))
-
   //    AutoGen[UserInformationRetrievalError]
 
   def randomUserInfo(): UserInfo = sample(userInfoGen)
 
   def randomEligibilityCheckResult() = sample(eligibilityCheckResultGen)
-
-  def randomUserInformationRetrievalError() = sample(userInformationRetrievalError)
 
   def randomEligibilityReason() = sample(eligibilityReasonGen)
 

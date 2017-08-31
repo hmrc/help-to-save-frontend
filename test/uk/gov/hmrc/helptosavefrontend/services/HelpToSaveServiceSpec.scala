@@ -35,6 +35,63 @@ class HelpToSaveServiceSpec extends TestSupport {
 
   "The HelpToSaveService" when {
 
+    "get user enrolment status" must {
+
+      val nino = "WM123456C"
+
+      "return a successful response" in {
+
+        (htsConnector.getUserEnrolmentStatus(_: String)(_: HeaderCarrier)).expects(nino, *)
+          .returning(EitherT.pure(EnrolmentStatus.Enrolled(true)))
+
+        val result = htsService.getUserEnrolmentStatus(nino)
+        result.value.futureValue should be(Right(EnrolmentStatus.Enrolled(true)))
+      }
+    }
+
+    "enrol user" must {
+
+      val nino = "WM123456C"
+
+      "return a successful response" in {
+
+        (htsConnector.enrolUser(_: String)(_: HeaderCarrier)).expects(nino, *)
+          .returning(EitherT.pure(Unit))
+
+        val result = htsService.enrolUser(nino)
+        result.value.futureValue.isRight should be(true)
+      }
+    }
+
+    "set ITMPFlag" must {
+
+      val nino = "WM123456C"
+
+      "return a successful response" in {
+
+        (htsConnector.setITMPFlag(_: String)(_: HeaderCarrier)).expects(nino, *)
+          .returning(EitherT.pure(Unit))
+
+        val result = htsService.setITMPFlag(nino)
+        result.value.futureValue.isRight should be(true)
+      }
+    }
+
+    "store email" must {
+
+      val nino = "WM123456C"
+      val email = "user@test.com"
+
+      "return a successful response" in {
+
+        (htsConnector.storeEmail(_: String, _: String)(_: HeaderCarrier)).expects(email, nino, *)
+          .returning(EitherT.pure(Unit))
+
+        val result = htsService.storeConfirmedEmail(email, nino)
+        result.value.futureValue.isRight should be(true)
+      }
+    }
+
     "checking eligibility" must {
 
       val nino = "WM123456C"

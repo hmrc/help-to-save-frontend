@@ -123,9 +123,6 @@ object HelpToSaveConnectorImpl {
     def eligibilityURL(nino: NINO) =
       s"$helpToSaveUrl/help-to-save/eligibility-check?nino=$nino"
 
-    def userInformationURL(nino: NINO, userDetailsURI: String) =
-      s"$helpToSaveUrl/help-to-save/user-information?nino=$nino&userDetailsURI=${encoded(userDetailsURI)}"
-
     def enrolmentStatusURL(nino: NINO) =
       s"$helpToSaveUrl/help-to-save/enrolment-status?nino=$nino"
 
@@ -140,11 +137,6 @@ object HelpToSaveConnectorImpl {
   }
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
-
-  private[connectors] object MissingUserInfoSet {
-    implicit val missingUserInfoSetFormat: Format[MissingUserInfoSet] =
-      Json.format[MissingUserInfoSet]
-  }
 
   private[connectors] case class EligibilityCheckResponse(result: Int, reason: Int)
 
