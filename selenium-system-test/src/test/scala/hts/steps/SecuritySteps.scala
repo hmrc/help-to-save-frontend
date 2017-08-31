@@ -33,7 +33,7 @@ class SecuritySteps extends Steps with NINOGenerator {
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
-  Given(s"""^their confidence level is $confidenceLevelRegex$$""") { (level: Int) ⇒
+  Given(s"""^a user has logged in with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", level, "Strong", generateEligibleNINO)
   }
 
