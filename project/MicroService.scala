@@ -101,7 +101,7 @@ trait MicroService {
     .configs(SeleniumTest)
     .settings(
       inConfig(SeleniumTest)(Defaults.testTasks),
-      Keys.fork in SeleniumTest := false,
+      Keys.fork in SeleniumTest := true,
       unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/scala",
       unmanagedResourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/resources",
       testOptions in Test := Seq(Tests.Filter(unitTestFilter)),

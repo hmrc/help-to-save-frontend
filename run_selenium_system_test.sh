@@ -53,7 +53,7 @@ function get_java_opts {
   elif [ "$1" == 'qa' ]
   then
     host='https://www-qa.tax.service.gov.uk'
-    auth_host='https://www-dev.tax.service.gov.uk'
+    auth_host='https://www-qa.tax.service.gov.uk'
   else
     host='http://localhost:7000'
     auth_host='http://localhost:9949'
@@ -66,7 +66,7 @@ function get_java_opts {
   fi
 
   # create an array with the java options
-  local opts=(-Dhost="${host}" -DauthHost="${auth_host}" -Dbrowser="${2}" -Ddrivers="${3}")
+  local opts=(-Denvironment=$1 -Dbrowser=$2 -Ddrivers=$3)
 
   if [ ! -z "${tags}" ]
   then
@@ -95,4 +95,4 @@ function join_by {
 # environments but doesn't work with others - here we run sbt and add java system properties
 # within the sbt session and then run the tests
 JAVA_OPTS=$(get_java_opts $1 $2 $3 ${@:4})
-sbt "; set javaOptions in SeleniumTest ++= Seq(${JAVA_OPTS}); selenium:test"
+sbt "; set javaOptions in SeleniumTest ++= Seq($JAVA_OPTS); selenium:test"

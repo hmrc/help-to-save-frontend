@@ -31,6 +31,17 @@ object AuthorityWizardPage extends WebPage {
     setConfidenceLevel(confidence)
     setCredentialStrength(credentialStrength)
     setNino(nino)
+    setGivenName("a")
+    setMiddleName("a")
+    setFamilyName("a")
+    setDateOfBirth("1980-12-20")
+    setAddressLine1("a")
+    setAddressLine2("a")
+    setAddressLine3("a")
+    setAddressLine4("a")
+    setAddressLine5("a")
+    setPostCode("S24AH")
+    setCountryCode("01")
     submit()
   }
 
@@ -51,5 +62,38 @@ object AuthorityWizardPage extends WebPage {
 
   def submit()(implicit driver: WebDriver): Unit =
     find(cssSelector("input.button")).get.underlying.click()
+
+  def setGivenName(givenName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.givenName")).get.underlying.sendKeys(givenName)
+
+  def setMiddleName(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.middleName")).get.underlying.sendKeys(middleName)
+
+  def setFamilyName(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.familyName")).get.underlying.sendKeys(middleName)
+
+  def setDateOfBirth(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.dateOfBirth")).get.underlying.sendKeys(middleName)
+
+  def setAddressLine1(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line1")).get.underlying.sendKeys(middleName)
+
+  def setAddressLine2(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line2")).get.underlying.sendKeys(middleName)
+
+  def setAddressLine3(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line3")).get.underlying.sendKeys(middleName)
+
+  def setAddressLine4(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line4")).get.underlying.sendKeys(middleName)
+
+  def setAddressLine5(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line5")).get.underlying.sendKeys(middleName)
+
+  def setPostCode(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.postCode")).get.underlying.sendKeys(middleName)
+
+  def setCountryCode(middleName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.countryCode")).get.underlying.sendKeys(middleName)
 
 }
