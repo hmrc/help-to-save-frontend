@@ -24,7 +24,7 @@
     title = Messages("hts.introduction.how-we-calculate-bonuses.title"),
     sidebarLinks = None,
     bodyClasses = None) {
-    @navigation(request.uri)
+    @navigation(request.uri, "How we calculate bonuses page")
 
     <section class="section">
         <h2>3. @Messages("hts.introduction.how-we-calculate-bonuses.title")</h2>
@@ -41,6 +41,10 @@
                 <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")" role="tab"
                 data-tab-link="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")"
                 aria-selected="true"
+                data-ga-event-category = "links"
+                data-ga-event-action = "£50 a month"
+                data-ga-event-label= "How we calculate bonuses page"
+                class="ga-track-event"
                 aria-controls="@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.url")">
                     <span class="tabs-nav__tab tabs-nav__tab--active"
                     href="#">@Messages("hts.introduction.how-we-calculate-bonuses.tab-1.title")</span>
@@ -48,12 +52,20 @@
                 <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")" role="tab"
                 data-tab-link="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")"
                 aria-selected="false"
+                data-ga-event-category = "links"
+                data-ga-event-action = "£20 a month"
+                data-ga-event-label= "How we calculate bonuses page"
+                class="ga-track-event"
                 aria-controls="@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.url")">
                     <a class="tabs-nav__tab" href="#">@Messages("hts.introduction.how-we-calculate-bonuses.tab-2.title")</a>
                 </li>
                 <li id="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")" role="tab"
                 data-tab-link="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")"
                 aria-selected="false"
+                data-ga-event-category = "links"
+                data-ga-event-action = "£10 a month"
+                data-ga-event-label= "How we calculate bonuses page"
+                class="ga-track-event"
                 aria-controls="@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.url")">
                     <a class="tabs-nav__tab" href="#">@Messages("hts.introduction.how-we-calculate-bonuses.tab-3.title")</a>
                 </li>

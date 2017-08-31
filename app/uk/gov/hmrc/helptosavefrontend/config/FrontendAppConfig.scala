@@ -32,9 +32,9 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
 
-  val checkEligibilityUrl: String = getConfString("help-to-save-check-eligibility.url", "")
+  val checkEligibilityUrl: String = getString("microservice.services.help-to-save-check-eligibility.url")
 
-  val accessAccountUrl: String = getConfString("help-to-save-access-account.url", "")
+  val accessAccountUrl: String = getString("microservice.services.help-to-save-access-account.url")
 
   def confirmYourDetailsUrl(p: String): String = getConfString("help-to-save-email-verification.url", "") + "?p=" + p
 
@@ -46,11 +46,11 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   def decoded(url: String): String = URLDecoder.decode(url, "UTF-8")
 
-  val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
+  val ivUpliftUrl: String = getConfString("microservice.services.identity-verification-uplift.url", "") //TODO: this doesnt work ATM
 
-  val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
+  val sosOrigin: String = getString("appName")
 
-  val identityCallbackUrl: String = getConfString("identity-callback.url", "")
+  val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
 
   val IvRetryUrl: String =
     new URI(s"$ivUpliftUrl?origin=$sosOrigin&" +

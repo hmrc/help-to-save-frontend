@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.link
-@(currentPageUrl: String)(implicit messages: play.api.i18n.Messages)
+@(currentPageUrl: String, gaPageName: String)(implicit messages: play.api.i18n.Messages)
 
 <h1 class="heading-xlarge">@Messages("hts.introduction.title")</h1>
 <nav class="divider--bottom">
@@ -27,7 +27,12 @@
                 Messages("hts.introduction.about-help-to-save.title")
             }
             else {
-                link(routes.IntroductionController.getAboutHelpToSave().url, Messages("hts.introduction.about-help-to-save.title"))
+                link(routes.IntroductionController.getAboutHelpToSave().url,
+                     Messages("hts.introduction.about-help-to-save.title"),
+                     "links",
+                     "About Help to Save",
+                     gaPageName
+                )
             }
         }
         </li>
@@ -38,7 +43,12 @@
                 Messages("hts.introduction.eligibility.title")
             }
             else {
-                link(routes.IntroductionController.getEligibility().url, Messages("hts.introduction.eligibility.title"))
+                link(routes.IntroductionController.getEligibility().url,
+                     Messages("hts.introduction.eligibility.title"),
+                     "links",
+                     "Eligibility",
+                     gaPageName
+                )
             }
         }
         </li>
@@ -48,7 +58,12 @@
                 Messages("hts.introduction.how-the-account-works.title")
             }
             else {
-                link(routes.IntroductionController.getHowTheAccountWorks().url, Messages("hts.introduction.how-the-account-works.title"))
+                link(routes.IntroductionController.getHowTheAccountWorks().url,
+                     Messages("hts.introduction.how-the-account-works.title"),
+                     "links",
+                     "How the account works",
+                     gaPageName
+                )
             }
         }
         </li>
@@ -58,7 +73,12 @@
                 Messages("hts.introduction.how-we-calculate-bonuses.title")
             }
             else {
-                link(routes.IntroductionController.getHowWeCalculateBonuses().url, Messages("hts.introduction.how-we-calculate-bonuses.title"))
+                link(routes.IntroductionController.getHowWeCalculateBonuses().url,
+                     Messages("hts.introduction.how-we-calculate-bonuses.title"),
+                     "links",
+                     "How we calculate bonuses",
+                     gaPageName
+                )
             }
         }
         </li>
@@ -68,7 +88,12 @@
                 Messages("hts.introduction.apply.title")
             }
             else {
-                link(routes.IntroductionController.getApply().url, Messages("hts.introduction.apply.title"))
+                link(routes.IntroductionController.getApply().url,
+                     Messages("hts.introduction.apply.title"),
+                     "links",
+                     "Apply",
+                     gaPageName
+                )
             }
         }
         </li>

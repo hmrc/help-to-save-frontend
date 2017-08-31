@@ -21,6 +21,11 @@
 <div class="service-info">
     <h2 class="heading-medium">Sign In</h2>
     <ul>
-        <li><a href=@routes.AccessAccountController.accessAccount>@Messages("hts.introduction.apply.sign-in-link")</a></li>
+        <li><a href=@routes.AccessAccountController.accessAccount
+               data-ga-event-category = "links"
+               data-ga-event-action = "Eligibility"
+               data-ga-event-label= "Apply page"
+               class="ga-track-event"
+        >@Messages("hts.introduction.apply.sign-in-link")</a></li>
     </ul>
 </div>
