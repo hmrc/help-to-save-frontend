@@ -84,6 +84,13 @@ class HelpToSaveAuthSpec extends AuthSupport {
       contentAsJson(result) shouldBe userInfo
     }
 
+    "handle when some user info is missing" in {
+      mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
+
+      val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
     "handle NoActiveSession exception and redirect user to GG login page" in {
 
       val exceptions = List(
