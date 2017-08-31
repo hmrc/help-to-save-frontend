@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend
+package uk.gov.hmrc.helptosavefrontend.models
 
-import cats.data.EitherT
-import org.joda.time.LocalDate
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 
-import scala.concurrent.Future
+trait MissingUserInfo
 
-package object util {
+object MissingUserInfo {
 
-  type NINO = String
+  case object GivenName extends MissingUserInfo
 
-  type UserDetailsURI = String
+  case object Surname extends MissingUserInfo
 
-  type Email = String
+  case object Email extends MissingUserInfo
 
-  type Result[A] = EitherT[Future, String, A]
+  case object DateOfBirth extends MissingUserInfo
 
-  implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
+  case object Contact extends MissingUserInfo
 
-  implicit def toJavaDate(jodaDate: LocalDate): java.time.LocalDate = {
-    java.time.LocalDate.of(jodaDate.getYear, jodaDate.getMonthOfYear, jodaDate.getDayOfMonth)
-  }
 }
+
+case class MissingUserInfos(missingInfo: Set[MissingUserInfo], nino: NINO)

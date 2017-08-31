@@ -24,7 +24,6 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{Headers, Session}
-import play.api.test.FakeApplication
 import play.api.{Application, Configuration, Play}
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec

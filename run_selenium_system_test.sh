@@ -41,23 +41,8 @@ function get_tags {
 # Return the necessary java options as a single string. Each java option is surrounded by double quotes and
 # separated by a comma
 function get_java_opts {
-  local host
   local auth_host
   local tags
-
-  # get the correct hosts
-  if [ "$1" == 'dev' ]
-  then
-    host='https://www-dev.tax.service.gov.uk'
-    auth_host='https://www-dev.tax.service.gov.uk'
-  elif [ "$1" == 'qa' ]
-  then
-    host='https://www-qa.tax.service.gov.uk'
-    auth_host='https://www-qa.tax.service.gov.uk'
-  else
-    host='http://localhost:7000'
-    auth_host='http://localhost:9949'
-  fi
 
   # get the tags
   if [ ! -z $4 ]

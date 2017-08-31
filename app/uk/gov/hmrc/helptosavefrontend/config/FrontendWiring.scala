@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, ws}
 import scala.concurrent.Future
 
 object FrontendAuditConnector extends Auditing with AppName {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
+  override lazy val auditingConfig = LoadAuditingConfig("auditing")
 }
 
 trait WSHttpExtension extends WSGet with WSPost {
@@ -73,7 +73,7 @@ class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector
 
 class WSHttpProxy extends ws.WSHttp with WSProxy with RunMode with HttpAuditing with ServicesConfig {
   override lazy val appName = getString("appName")
-  override lazy val wsProxyServer = WSProxyConfiguration(s"proxy")
+  override lazy val wsProxyServer = WSProxyConfiguration("proxy")
   override val hooks = Seq(AuditingHook)
   override lazy val auditConnector = FrontendAuditConnector
 

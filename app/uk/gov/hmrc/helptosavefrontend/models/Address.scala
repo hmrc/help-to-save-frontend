@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 
 case class Address(lines:    List[String],
                    postcode: Option[String],
@@ -25,5 +26,17 @@ case class Address(lines:    List[String],
 object Address {
 
   implicit val addressFormat: Format[Address] = Json.format[Address]
+
+  def apply(itmpAddress: ItmpAddress): Address = Address(
+    List(
+      itmpAddress.line1,
+      itmpAddress.line2,
+      itmpAddress.line3,
+      itmpAddress.line4,
+      itmpAddress.line5
+    ).collect { case Some(s) if s.nonEmpty ⇒ s },
+    itmpAddress.postCode,
+    itmpAddress.countryCode
+  )
 
 }

@@ -48,7 +48,7 @@ object FrontendGlobal extends DefaultFrontendGlobal {
     uk.gov.hmrc.helptosavefrontend.views.html.error_template(pageTitle, heading, message)
   }
 
-  override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"microservice.metrics")
+  override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig("microservice.metrics")
 
 }
 
