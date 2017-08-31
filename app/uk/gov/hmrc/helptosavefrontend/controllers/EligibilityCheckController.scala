@@ -27,7 +27,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
+import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO, toFuture}
@@ -157,25 +157,15 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
   private def handleEligibilityCheckError(error: Error)(implicit request: Request[AnyContent],
                                                         hc:         HeaderCarrier,
                                                         htsContext: HtsContext): Result = error.value match {
-
     case Left(e) ⇒
       logger.warn(e)
       InternalServerError
 
-    case Right(u: UserInformationRetrievalError) ⇒
-      u match {
-
-        case UserInformationRetrievalError.BackendError(message, nino) ⇒
-          logger.warn(s"An error occurred while trying to call the backend service to get user information $nino: $message")
-          InternalServerError
-
-        case MissingUserInfos(missingInfo, nino) ⇒
-          val problemDescription = s"user $nino has missing information: ${missingInfo.mkString(",")}"
-          logger.warn(problemDescription)
-          auditor.sendEvent(new EligibilityCheckEvent(appName, nino, Some(problemDescription)))
-          Ok(views.html.register.missing_user_info(missingInfo, personalAccountUrl))
-
-      }
+    case Right(missingUserInfo) ⇒
+      val problemDescription = s"user ${missingUserInfo.nino} has missing information: ${missingUserInfo.missingInfo.mkString(",")}"
+      logger.warn(problemDescription)
+      auditor.sendEvent(new EligibilityCheckEvent(appName, missingUserInfo.nino, Some(problemDescription)))
+      Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalAccountUrl))
   }
 
   private def validateCreateAccountJsonSchema(eligibilityCheckResult: EligibilityCheckResult,
@@ -196,12 +186,12 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
 
 object EligibilityCheckController {
 
-  private case class Error(value: Either[String, UserInformationRetrievalError])
+  private case class Error(value: Either[String, MissingUserInfos])
 
   private object Error {
     def apply(error: String): Error = Error(Left(error))
 
-    def apply(u: UserInformationRetrievalError): Error = Error(Right(u))
+    def apply(u: MissingUserInfos): Error = Error(Right(u))
   }
 
   private case class EligibilityResultWithUserInfo(value: Either[IneligibilityReason, (EligibilityReason, NSIUserInfo)])

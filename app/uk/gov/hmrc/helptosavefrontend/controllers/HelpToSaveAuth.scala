@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{encoded, identityCallbackUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
-import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
+import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models.{Address, HtsContext, MissingUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, toJavaDate}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
@@ -63,7 +63,6 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
               toFuture(InternalServerError("could not find NINO for logged in user"))
             )(nino ⇒ {
                 val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
-
                 action(request)(HtsContext(Some(nino), Some(userDetails), isAuthorised = true))
               })
 

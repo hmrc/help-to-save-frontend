@@ -16,10 +16,22 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-case class HtsContext(nino: Option[String], userDetails: Option[Either[MissingUserInfos, UserInfo]], isAuthorised: Boolean)
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 
-object HtsContext {
+trait MissingUserInfo
 
-  def apply(isAuthorised: Boolean): HtsContext = HtsContext(None, None, isAuthorised)
+object MissingUserInfo {
+
+  case object GivenName extends MissingUserInfo
+
+  case object Surname extends MissingUserInfo
+
+  case object Email extends MissingUserInfo
+
+  case object DateOfBirth extends MissingUserInfo
+
+  case object Contact extends MissingUserInfo
 
 }
+
+case class MissingUserInfos(missingInfo: Set[MissingUserInfo], nino: NINO)

@@ -21,9 +21,9 @@ import java.util.concurrent.TimeUnit.SECONDS
 import akka.util.Timeout
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.mvc.Results.Ok
+import play.api.mvc.Results.{Ok, InternalServerError}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, redirectLocation, contentAsJson}
+import play.api.test.Helpers.{contentAsJson, redirectLocation}
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{checkEligibilityUrl, encoded}
@@ -45,7 +45,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     htsContext.userDetails match {
       case Some(info) ⇒ info match {
-        case Left(missingUserInfo) ⇒ Future.successful(Ok(Json.toJson(missingUserInfo)))
+        case Left(missingUserInfo) ⇒ Future.successful(InternalServerError(""))
         case Right(userInfo)       ⇒ Future.successful(Ok(Json.toJson(userInfo)))
       }
       case None ⇒ Future.successful(Ok(""))
