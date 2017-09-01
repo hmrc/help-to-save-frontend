@@ -139,9 +139,9 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
 
           // set the ITMP flag here but don't worry about the result
           helpToSaveService.setITMPFlag(nino).value.onComplete{
-            case Failure(e)        ⇒ logger.warn(s"Could not set ITMP flag, future failed: ${e.getMessage}")
-            case Success(Left(e))  ⇒ logger.warn(s"Could not set ITMP flag: $e")
-            case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user $nino")
+            case Failure(e)        ⇒ logger.warn(s"NINO [$nino] Could not set ITMP flag, future failed: ${e.getMessage}")
+            case Success(Left(e))  ⇒ logger.warn(s"NINO [$nino] Could not set ITMP flag: $e")
+            case Success(Right(_)) ⇒ logger.info(s"NINO [$nino] Successfully set ITMP flag for user")
           }
 
           Ok("You've already got an account - yay!!!")
