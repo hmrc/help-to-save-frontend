@@ -50,9 +50,9 @@ trait EnrolmentCheckBehaviour {
         // start the process to set the itmp flag here without worrying about the result
         if (!itmpHtSFlag) {
           helpToSaveService.setITMPFlag(nino).value.onComplete{
-            case Failure(e)        ⇒ logger.warn(s"NINO [$nino] Could not start process to set ITMP flag, future failed: $e")
-            case Success(Left(e))  ⇒ logger.warn(s"NINO [$nino] Could not start process to set ITMP flag: $e")
-            case Success(Right(_)) ⇒ logger.info(s"NINO [$nino] Process started to set ITMP flag")
+            case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to set ITMP flag, future failed: $e")
+            case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not start process to set ITMP flag: $e")
+            case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Process started to set ITMP flag")
           }
         }
 
@@ -72,7 +72,7 @@ trait EnrolmentCheckBehaviour {
       InternalServerError
 
     case e @ EnrolmentServiceError(nino, message) ⇒
-      logger.warn(s"NINO [$nino] Error while trying to check if user was already enrolled to HtS: $message")
+      logger.warn(s"For NINO [$nino]: Error while trying to check if user was already enrolled to HtS: $message")
       handleEnrolmentServiceError(e)
 
   }

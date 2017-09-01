@@ -72,7 +72,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
 
           result.fold[Result](
             { e ⇒
-              logger.warn(s"NINO [$nino] Could not write confirmed email: $e")
+              logger.warn(s"For NINO [$nino]: Could not write confirmed email: $e")
               InternalServerError
             }, { _ ⇒
               SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
@@ -111,9 +111,9 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                   logger.info(s"Successfully created account for $nino")
                   // start the process to enrol the user but don't worry about the result
                   helpToSaveService.enrolUser(nino).value.onComplete{
-                    case Failure(e)        ⇒ logger.warn(s"NINO [$nino] Could not start process to enrol user, future failed: $e")
-                    case Success(Left(e))  ⇒ logger.warn(s"NINO [$nino] Could not start process to enrol user: $e")
-                    case Success(Right(_)) ⇒ logger.info(s"NINO [$nino] Process started to enrol user")
+                    case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user, future failed: $e")
+                    case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user: $e")
+                    case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Process started to enrol user")
                   }
 
                   Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
