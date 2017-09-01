@@ -14,18 +14,36 @@
  * limitations under the License.
  */
 
-package hts.suites
+package hts.steps
 
-import cucumber.api.CucumberOptions
-import cucumber.api.junit.Cucumber
-import org.junit.runner.RunWith
+class EmailSteps extends Steps {
 
-@RunWith(classOf[Cucumber])
-@CucumberOptions(
-  features = Array("selenium-system-test/src/test/resources/features"),
-  glue     = Array("hts.steps"),
-  plugin   = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
-  tags     = Array("~@ignore")
-)
-class RunnerSeleniumSystemTest {}
+  Given("""^A user has logged in and is on the confirm details page$"""){ () ⇒
 
+  }
+
+  Given("""^A user is on the verification email page$"""){ () ⇒
+
+  }
+
+  When("""^they wish to change their email$"""){ () ⇒
+
+  }
+
+  When("""^they enter in a new email and confirm$"""){ () ⇒
+
+  }
+
+  When("""^they indicate that they wish to provide an alternative email address$"""){ () ⇒
+
+  }
+
+  Then("""^they will be on the change email page$"""){ () ⇒
+
+  }
+
+  Then("""^the user will be on the verification email page$"""){ () ⇒
+
+  }
+
+}
