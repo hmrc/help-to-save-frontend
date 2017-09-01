@@ -16,14 +16,12 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.util.concurrent.TimeUnit.SECONDS
-
 import akka.util.Timeout
 import play.api.http.Status
 import play.api.libs.json.Json
-import play.api.mvc.Results.{Ok, InternalServerError}
+import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsJson, redirectLocation}
+import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{checkEligibilityUrl, encoded}
@@ -33,8 +31,6 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 class HelpToSaveAuthSpec extends AuthSupport {
-
-  implicit val timeout: Timeout = Timeout(5, SECONDS)
 
   val htsAuth = new HelpToSaveAuth(fakeApplication, mockAuthConnector)
 

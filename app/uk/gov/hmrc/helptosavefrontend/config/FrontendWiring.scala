@@ -57,7 +57,6 @@ class WSHttpExtension extends WSHttp {
    * to replace [[GET]] method provided by the hmrc library which will throw exceptions in such cases.
    */
   def get(url: String)(implicit rhc: HeaderCarrier): Future[HttpResponse] = withTracing(GET_VERB, url) {
-    // Future.successful(1)
     val httpResponse = doGet(url)
     executeHooks(url, GET_VERB, None, httpResponse)
     httpResponse

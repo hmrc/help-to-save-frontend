@@ -16,13 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.util.concurrent.TimeUnit.SECONDS
-
-import akka.util.Timeout
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{charset, contentAsString, contentType}
+import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -30,8 +27,6 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 class IntroductionControllerSpec extends AuthSupport {
-
-  implicit val timeout: Timeout = Timeout(5, SECONDS)
 
   val fakeRequest = FakeRequest("GET", "/")
   val helpToSave = new IntroductionController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector)
