@@ -14,6 +14,9 @@
  * limitations under the License.
  *@
 
+@import cats.instances.string._
+@import cats.syntax.eq._
+
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.link
 @(currentPageUrl: String, gaPageName: String)(implicit messages: play.api.i18n.Messages)
@@ -23,7 +26,7 @@
     <ol>
         <li>
         @{
-            if(routes.IntroductionController.getAboutHelpToSave().url == currentPageUrl) {
+            if(routes.IntroductionController.getAboutHelpToSave().url === currentPageUrl) {
                 Messages("hts.introduction.about-help-to-save.title")
             }
             else {
@@ -39,7 +42,7 @@
 
         <li>
         @{
-            if(routes.IntroductionController.getEligibility().url == currentPageUrl) {
+            if(routes.IntroductionController.getEligibility().url === currentPageUrl) {
                 Messages("hts.introduction.eligibility.title")
             }
             else {
@@ -54,7 +57,7 @@
         </li>
         <li>
         @{
-            if(routes.IntroductionController.getHowTheAccountWorks().url == currentPageUrl) {
+            if(routes.IntroductionController.getHowTheAccountWorks().url === currentPageUrl) {
                 Messages("hts.introduction.how-the-account-works.title")
             }
             else {
@@ -69,7 +72,7 @@
         </li>
         <li>
         @{
-            if(routes.IntroductionController.getHowWeCalculateBonuses().url == currentPageUrl) {
+            if(routes.IntroductionController.getHowWeCalculateBonuses().url === currentPageUrl) {
                 Messages("hts.introduction.how-we-calculate-bonuses.title")
             }
             else {
@@ -84,7 +87,7 @@
         </li>
         <li>
         @{
-            if(routes.IntroductionController.getApply().url == currentPageUrl) {
+            if(routes.IntroductionController.getApply().url === currentPageUrl) {
                 Messages("hts.introduction.apply.title")
             }
             else {

@@ -42,7 +42,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
   }
 
   // put in fake authorization details - these should be removed by the call to create an account
-  implicit val hc = HeaderCarrier(authorization = Some(Authorization("auth")))
+  implicit val hc: HeaderCarrier = HeaderCarrier(authorization = Some(Authorization("auth")))
 
   def mockCreateAccount[I](body: I)(result: HttpResponse): Unit = {
     (mockHTTPProxy.post(
@@ -92,13 +92,19 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
       mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.BAD_REQUEST,
                                                        Some(Json.parse("""{"invalidJson":"foo"}"""))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds).isInstanceOf[SubmissionFailure] shouldBe true
+      Await.result(result, 3.seconds) match {
+        case SubmissionSuccess()  ⇒ fail()
+        case _: SubmissionFailure ⇒ ()
+      }
     }
 
     "Return a SubmissionFailure when the status is anything else" in {
       mockCreateAccount(validNSIUserInfo)(HttpResponse(Status.BAD_GATEWAY))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds).isInstanceOf[SubmissionFailure] shouldBe true
+      Await.result(result, 3.seconds) match {
+        case SubmissionSuccess()  ⇒ fail()
+        case _: SubmissionFailure ⇒ ()
+      }
     }
 
   }

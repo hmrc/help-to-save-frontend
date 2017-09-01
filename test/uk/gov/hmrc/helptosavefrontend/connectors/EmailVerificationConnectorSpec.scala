@@ -23,7 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
-import uk.gov.hmrc.helptosavefrontend.util.Crypto
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -32,12 +32,15 @@ import scala.concurrent.Future
 
 class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig {
 
-  lazy val emailVerifyBaseURL = baseUrl("email-verification")
-  val nino = "AE123XXXX"
-  val email = "email@gmail.com"
-  val mockHttp = mock[WSHttp]
-  implicit val crypto = mock[Crypto]
-  val emailVerificationRequest =
+  lazy val emailVerifyBaseURL: String = baseUrl("email-verification")
+  val nino: NINO = "AE123XXXX"
+  val email: Email = "email@gmail.com"
+
+  val mockHttp: WSHttp = mock[WSHttp]
+
+  implicit val crypto: Crypto = mock[Crypto]
+
+  val emailVerificationRequest: EmailVerificationRequest =
     EmailVerificationRequest(
       email,
       "awrs_email_verification",
@@ -45,7 +48,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       "http://localhost:7000/help-to-save/check-and-confirm-your-details?p=",
       Map("email" → email, "nino" → nino))
 
-  lazy val connector = {
+  lazy val connector: EmailVerificationConnectorImpl = {
     val config = Configuration("microservice.services.email-verification.linkTTLMinutes" → " 120",
       "microservice.services.email-verification.continue-url" ->
         "http://localhost:7000/help-to-save/check-and-confirm-your-details"
@@ -55,14 +58,14 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
-    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier))
       .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
 
   def mockPostFailure[A](expectedBody: A): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
-    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[Any], _: HeaderCarrier))
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier))
       .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *)
       .returning(Future.failed(new Exception("Oh no!")))
   }
@@ -109,7 +112,9 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
     "throw a runtime exception If email TTL does not exist in the configuration" in {
       val config = Configuration("x" → "y")
-      an[Exception] should be thrownBy new EmailVerificationConnectorImpl(mock[WSHttp], config)
+
+      val http = mock[WSHttp]
+      an[Exception] should be thrownBy new EmailVerificationConnectorImpl(http, config)
     }
 
     "should return a back end error if the future failed" in {

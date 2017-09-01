@@ -21,7 +21,7 @@ import org.openqa.selenium.WebDriver
 object EligibilityQuestionPage extends WebPage {
 
   //TODO This page is still under construction
-  val pageTitle = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"
+  val pageTitle: String = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"
 
   def clickCheckEligibility()(implicit driver: WebDriver): Unit = click on "continue"
 

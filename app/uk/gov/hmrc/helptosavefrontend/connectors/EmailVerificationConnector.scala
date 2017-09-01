@@ -43,30 +43,42 @@ trait EmailVerificationConnector {
 class EmailVerificationConnectorImpl @Inject() (http: WSHttp, conf: Configuration)(implicit crypto: Crypto)
   extends EmailVerificationConnector with ServicesConfig with Logging {
 
-  val linkTTLMinutes = conf.underlying.getInt("microservice.services.email-verification.linkTTLMinutes")
-  val emailVerifyBaseURL = baseUrl("email-verification")
-  val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
+  val linkTTLMinutes: Int = conf.underlying.getInt("microservice.services.email-verification.linkTTLMinutes")
+  val emailVerifyBaseURL: String = baseUrl("email-verification")
+  val verifyEmailURL: String = s"$emailVerifyBaseURL/email-verification/verification-requests"
 
-  val continueURL = conf.underlying.getString("microservice.services.email-verification.continue-url")
-  val templateId = "awrs_email_verification"
+  val continueURL: String = conf.underlying.getString("microservice.services.email-verification.continue-url")
+  val templateId: String = "awrs_email_verification"
 
   def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier): Future[Either[VerifyEmailError, Unit]] = {
     val continueUrlWithParams = continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()
-    val verificationRequest = EmailVerificationRequest(newEmail, nino, templateId, Duration.ofMinutes(linkTTLMinutes).toString, continueUrlWithParams, Map())
-    http.post(verifyEmailURL, verificationRequest).map { (response: HttpResponse) ⇒
+
+    val verificationRequest = EmailVerificationRequest(
+      newEmail,
+      nino,
+      templateId,
+      Duration.ofMinutes(linkTTLMinutes).toString,
+      continueUrlWithParams,
+      Map.empty[String, String])
+
+    http.post[EmailVerificationRequest](verifyEmailURL, verificationRequest).map[Either[VerifyEmailError, Unit]]{ (response: HttpResponse) ⇒
       response.status match {
         case OK | CREATED ⇒
           logger.info(s"[EmailVerification] - Email verification successfully triggered")
           Right(())
+
         case BAD_REQUEST ⇒
           logger.warn("[EmailVerification] - Bad Request from email verification service")
           Left(RequestNotValidError)
+
         case CONFLICT ⇒
           logger.info("[EmailVerification] - Email address already verified")
           Left(AlreadyVerified)
+
         case SERVICE_UNAVAILABLE ⇒
           logger.warn("[EmailVerification] - Email Verification service not currently available")
           Left(VerificationServiceUnavailable)
+
         case status ⇒
           logger.warn(s"[EmailVerification] - Unexpected status $status received from email verification body = ${response.body}")
           Left(BackendError)

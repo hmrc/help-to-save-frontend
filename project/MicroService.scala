@@ -9,7 +9,10 @@ import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import play.sbt.routes.RoutesKeys.routesGenerator
+import play.sbt.routes.RoutesKeys.routes
+
 import TestPhases._
+import wartremover._
 
 trait MicroService {
 
@@ -70,6 +73,23 @@ trait MicroService {
       .setPreference(SpacesWithinPatternBinders, true)
   }
 
+  lazy val wartRemoverSettings = {
+    // list of warts here: http://www.wartremover.org/doc/warts.html
+    val excludedWarts = Seq(
+      Wart.DefaultArguments,
+      Wart.FinalCaseClass,
+      Wart.FinalVal,
+      Wart.ImplicitConversion,
+      Wart.ImplicitParameter,
+      Wart.LeakingSealed,
+      Wart.Nothing,
+      Wart.Overloading,
+      Wart.ToString,
+      Wart.Var)
+
+    wartremoverErrors in (Compile, compile) ++= Warts.allBut(excludedWarts: _*)
+  }
+
   lazy val microservice = Project(appName, file("."))
     .settings(addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"))
     .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
@@ -78,6 +98,12 @@ trait MicroService {
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
     .settings(scalariformSettings: _*)
+    .settings(wartRemoverSettings)
+    // disable some wart remover checks in tests - (Any, Null, PublicInference) seems to struggle with
+    // scalamock, (Equals) seems to struggle with stub generator AutoGen and (NonUnitStatements) is
+    // imcompatible with a lot of WordSpec
+    .settings(wartremoverErrors in (Test, compile) --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference))
+    .settings(wartremoverExcluded ++= (sourceManaged ** "*.scala").value.get ++ routes.in(Compile).value)
     .settings(
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,

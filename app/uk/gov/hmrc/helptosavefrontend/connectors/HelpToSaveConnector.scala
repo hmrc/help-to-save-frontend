@@ -100,13 +100,13 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
       case 1 ⇒
         // user is eligible
         Either.fromOption(
-          EligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(Right(r))),
+          EligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(r)),
           s"Could not parse ineligibility reason '$reasonInt'")
 
       case 2 ⇒
         // user is ineligible
         Either.fromOption(
-          IneligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(Left(r))),
+          IneligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(r)),
           s"Could not parse eligibility reason '$reasonInt'")
 
       case other ⇒

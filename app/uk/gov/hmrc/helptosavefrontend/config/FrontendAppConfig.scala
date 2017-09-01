@@ -40,7 +40,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
-  val ivUrl = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
+  val ivUrl: String = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
 
   def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
 
@@ -70,7 +70,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
     s"Basic: ${new String(encoded, encoding)}"
   }
 
-  val nsiUrl = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
+  val nsiUrl: String = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
 
   val sessionCacheKey: String = getString("microservice.services.keystore.session-key")
 
@@ -86,7 +86,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val ggSignOutUrl: String = s"$caFrontendUrl/sign-out"
 
-  val signOutUrl = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
+  val signOutUrl: String = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
 
   override lazy val analyticsToken: String = getString("google-analytics.token")
   override lazy val analyticsHost: String = getString("google-analytics.host")
