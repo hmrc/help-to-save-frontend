@@ -84,6 +84,7 @@ trait MicroService {
       Wart.LeakingSealed,
       Wart.Nothing,
       Wart.Overloading,
+      Wart.ToString,
       Wart.Var)
 
     wartremoverErrors in (Compile, compile) ++= Warts.allBut(excludedWarts: _*)
