@@ -16,35 +16,36 @@
 
 package hts.utils
 
-object Environment extends Enumeration {
-  type Name = Value
-  val Local, Dev, Qa, Staging = Value
+sealed trait Environment
+
+object Environment {
+
+  case object Local extends Environment
+  case object Dev extends Environment
+  case object Qa extends Environment
+  case object Staging extends Environment
 }
 
 object Configuration {
 
-  lazy val environment: Environment.Name = {
+  lazy val environment: Environment = {
     val environmentProperty = Option(System.getProperty("environment")).getOrElse("local").toLowerCase
     environmentProperty match {
       case "local"   ⇒ Environment.Local
       case "qa"      ⇒ Environment.Qa
       case "dev"     ⇒ Environment.Dev
       case "staging" ⇒ Environment.Staging
-      case _         ⇒ throw new IllegalArgumentException(s"Environment '$environmentProperty' not known")
+      case _         ⇒ sys.error(s"Environment '$environmentProperty' not known")
     }
   }
 
-  val (host, authHost) = {
+  val (host: String, authHost: String) = {
     environment match {
       case Environment.Local   ⇒ ("http://localhost:7000", "http://localhost:9949")
-
       case Environment.Dev     ⇒ ("https://www-dev.tax.service.gov.uk", "https://www-dev.tax.service.gov.uk")
-
       case Environment.Qa      ⇒ ("https://www-qa.tax.service.gov.uk", "https://www-qa.tax.service.gov.uk")
-
       case Environment.Staging ⇒ ("https://www-staging.tax.service.gov.uk", "https://www-staging.tax.service.gov.uk")
-
-      case _                   ⇒ throw new IllegalArgumentException(s"Environment '$environment' not known")
+      case _                   ⇒ sys.error(s"Environment '$environment' not known")
     }
   }
 }

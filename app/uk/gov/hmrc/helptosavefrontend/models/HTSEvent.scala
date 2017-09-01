@@ -20,13 +20,24 @@ import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-class HTSEvent(auditSource: String, auditType: String, detail: Map[String, String])(implicit hc: HeaderCarrier)
-  extends DataEvent(auditSource = auditSource, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
+trait HTSEvent {
+  val value: DataEvent
+}
 
-class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(implicit hc: HeaderCarrier)
-  extends HTSEvent(auditSource,
+object HTSEvent {
+  def apply(auditSource: String,
+            auditType:   String,
+            detail:      Map[String, String]
+  )(implicit hc: HeaderCarrier): DataEvent =
+    DataEvent(auditSource = auditSource, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
+}
+
+case class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) extends HTSEvent {
+
+  val value: DataEvent = HTSEvent(
+    auditSource,
     "applicationSubmitted",
-                   Map[String, String](
+    Map[String, String](
       "forename" -> userInfo.forename,
       "surname" -> userInfo.surname,
       "dateOfBirth" -> userInfo.dateOfBirth.toString,
@@ -61,12 +72,17 @@ class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(impl
         }
       },
       "communicationPreference" -> userInfo.contactDetails.communicationPreference,
-      "registrationChannel" -> userInfo.registrationChannel))
+      "registrationChannel" -> userInfo.registrationChannel)
+  )
+}
 
-class EligibilityCheckEvent(auditSource: String, nino: String, errorDescription: Option[String])(implicit hc: HeaderCarrier)
-  extends HTSEvent(auditSource, "eligibilityCheck", {
+case class EligibilityCheckEvent(auditSource: String, nino: String, errorDescription: Option[String])(implicit hc: HeaderCarrier) extends HTSEvent {
+  val value: DataEvent = HTSEvent(
+    auditSource, "eligibilityCheck", {
     val basicMap = Map[String, String]("nino" -> nino)
     errorDescription.fold(basicMap + ("eligible" -> "true")) { reason ⇒
       basicMap + ("eligible" -> "false") + ("reason" -> reason)
     }
-  })
+  }
+  )
+}

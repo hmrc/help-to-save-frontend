@@ -39,12 +39,12 @@ import scala.util.{Failure, Success, Try}
 
 class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
 
-  val jsonSchemaValidationService = mock[JSONSchemaValidationService]
-  val mockAuditor = mock[HTSAuditor]
-  val frontendAuthConnector = stub[FrontendAuthConnector]
-  implicit val crypto = fakeApplication.injector.instanceOf[Crypto]
+  val jsonSchemaValidationService: JSONSchemaValidationService = mock[JSONSchemaValidationService]
+  val mockAuditor: HTSAuditor = mock[HTSAuditor]
+  val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
+  implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
-  val controller = new RegisterController(
+  val controller: RegisterController = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     mockSessionCacheConnector,

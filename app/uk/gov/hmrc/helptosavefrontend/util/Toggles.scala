@@ -16,58 +16,50 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import java.time.Instant
-
+import com.typesafe.config.Config
 import play.api.{Configuration, Logger}
 
 object Toggles {
 
-  case class FEATURE[A](name: String, conf: Configuration, unconfiguredVal: Option[A], logger: Logger) {
-    def enabled(): FEATURE_THEN[A] = {
-      conf.getBoolean(s"feature-toggles.$name.enabled") match {
-        case Some(b) ⇒
-          logger.info("FEATURE: " + name + (if (b) " enabled" else " disabled"))
-          FEATURE_THEN(name, b, unconfiguredVal, logger)
-        case None ⇒ throw new RuntimeException(s"FEATURE($name) is not present in configuration file - misconfigured")
-      }
+  /**
+   *
+   * @param name Name of the feature. Configuration of the feature will be looked for in the path
+   *             'feature-toggles.$name'
+   * @param enabled Whether or not the feature should be enabled
+   * @param logger The logger to use in logging
+   */
+  case class FEATURE private (name:    String,
+                              enabled: Boolean,
+                              logger:  Logger) {
+
+    @inline private def time(): Long = System.nanoTime()
+
+    def thenOrElse[A](ifEnabled: ⇒ A, ifDisabled: ⇒ A): A = {
+      val start = time()
+      val result = if (enabled) ifEnabled else ifDisabled
+      val end = time()
+      logger.info(s"Feature $name (enabled: $enabled) executed in ${end - start} ns")
+      result
     }
+
   }
 
   object FEATURE {
-    def apply[A](name: String, conf: Configuration): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, None, Logger(name))
 
-    def apply[A](name: String, conf: Configuration, unconfiguredVal: A): FEATURE[A] = FEATURE[A](name: String, conf: Configuration, Some(unconfiguredVal), Logger(name))
-  }
+    private def getConfig(name: String, configuration: Configuration): Config =
+      configuration.underlying.getConfig(s"feature-toggles.$name")
 
-  case class FEATURE_THEN[A](name: String, enabled: Boolean, unconfiguredVal: Option[A], logger: Logger) {
-    def thenDo(action: ⇒ A): Either[Option[A], A] = {
-      if (enabled) {
-        val startTime = Instant.now.toEpochMilli
-        val result = action
-        val endTime = Instant.now.toEpochMilli
-        logger.info("FEATURE: " + name + " executed in " + (endTime - startTime).toString + " milliseconds.")
-        Right(result)
-      } else {
-        Left(unconfiguredVal)
-      }
+    /**
+     * @param name Name of the feature. Configuration of the feature will be looked for in the path
+     *             'feature-toggles.$name'
+     * @param configuration The global configuration
+     * @param logger The logger to be used by the feature
+     */
+    def apply(name: String, configuration: Configuration, logger: Logger): FEATURE = {
+      val config = getConfig(name, configuration)
+      FEATURE(name, config.getBoolean("enabled"), logger)
     }
-  }
 
-  object FEATURE_THEN
-
-  implicit def eitherPop[A](e: Either[Option[A], A]): A = {
-    e match {
-      case Right(a)      ⇒ a
-      case Left(Some(a)) ⇒ a
-      case Left(None)    ⇒ throw new RuntimeException("FEATURE has no otherwise branch and no default value")
-    }
-  }
-
-  implicit class EitherExtend[A](e: Either[A, A]) {
-    def otherwise(action: ⇒ A) = e match {
-      case Right(a) ⇒ a
-      case Left(a)  ⇒ action
-    }
   }
 
 }

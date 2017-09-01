@@ -20,17 +20,18 @@ import javax.inject.{Inject, Singleton}
 
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuditConnector
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @Singleton
 class HTSAuditor @Inject() () extends Logging {
-  val auditConnector = FrontendAuditConnector
+  val auditConnector: AuditConnector = FrontendAuditConnector
 
-  def sendEvent(event: HTSEvent) = {
-    val checkEventResult = auditConnector.sendEvent(event)
+  def sendEvent(event: HTSEvent): Unit = {
+    val checkEventResult = auditConnector.sendEvent(event.value)
     checkEventResult.onFailure {
-      case e: Throwable ⇒ logger.error(s"Unable to post audit event of type ${event.auditType} to audit connector - ${e.getMessage}", e)
+      case e: Throwable ⇒ logger.error(s"Unable to post audit event of type ${event.value.auditType} to audit connector - ${e.getMessage}", e)
     }
   }
 }

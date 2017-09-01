@@ -31,7 +31,7 @@ import scala.concurrent.Future
 class IvConnectorSpec extends TestSupport with ScalaFutures {
 
   class TestApparatus {
-    val mockHttp = mock[WSHttp]
+    val mockHttp: WSHttp = mock[WSHttp]
 
     val journeyId = JourneyId(UUID.randomUUID().toString)
 

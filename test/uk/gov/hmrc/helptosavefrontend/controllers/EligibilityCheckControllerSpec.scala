@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.int._
 import cats.syntax.either._
+import cats.syntax.eq._
 import org.scalacheck.Arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
@@ -293,7 +295,7 @@ class EligibilityCheckControllerSpec
             implicit val ineligibilityArb: Arbitrary[IneligibilityReason] = Arbitrary(ineligibilityReasonGen)
 
             forAll { ineligibilityReason: IneligibilityReason ⇒
-              whenever(ineligibilityReason != AccountAlreadyOpened) {
+              whenever(ineligibilityReason =!= AccountAlreadyOpened) {
                 inSequence {
                   mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
                   mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))

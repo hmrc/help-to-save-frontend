@@ -32,25 +32,25 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
 
-  val checkEligibilityUrl: String = getConfString("help-to-save-check-eligibility.url", "")
+  val checkEligibilityUrl: String = getString("microservice.services.help-to-save-check-eligibility.url")
 
-  val accessAccountUrl: String = getConfString("help-to-save-access-account.url", "")
+  val accessAccountUrl: String = getString("microservice.services.help-to-save-access-account.url")
 
   def confirmYourDetailsUrl(p: String): String = getConfString("help-to-save-email-verification.url", "") + "?p=" + p
 
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
-  val ivUrl = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
+  val ivUrl: String = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
 
   def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
 
   def decoded(url: String): String = URLDecoder.decode(url, "UTF-8")
 
-  val ivUpliftUrl: String = getConfString("identity-verification-uplift.url", "")
+  val ivUpliftUrl: String = getConfString("microservice.services.identity-verification-uplift.url", "") //TODO: this doesnt work ATM
 
-  val sosOrigin: String = getConfString("appName", "help-to-save-frontend")
+  val sosOrigin: String = getString("appName")
 
-  val identityCallbackUrl: String = getConfString("identity-callback.url", "")
+  val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
 
   val IvRetryUrl: String =
     new URI(s"$ivUpliftUrl?origin=$sosOrigin&" +
@@ -70,7 +70,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
     s"Basic: ${new String(encoded, encoding)}"
   }
 
-  val nsiUrl = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
+  val nsiUrl: String = s"${baseUrl("nsi")}${getString("microservice.services.nsi.url")}"
 
   val sessionCacheKey: String = getString("microservice.services.keystore.session-key")
 
@@ -86,7 +86,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val ggSignOutUrl: String = s"$caFrontendUrl/sign-out"
 
-  val signOutUrl = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
+  val signOutUrl: String = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
 
   override lazy val analyticsToken: String = getString("google-analytics.token")
   override lazy val analyticsHost: String = getString("google-analytics.host")

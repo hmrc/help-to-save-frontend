@@ -18,6 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.util
 
 import java.util.Base64
 
+import cats.instances.int._
+import cats.syntax.eq._
+
 import scala.util.{Failure, Success, Try}
 
 case class EmailVerificationParams(nino: String, email: String) {
@@ -38,7 +41,7 @@ object EmailVerificationParams {
       case Failure(_) ⇒ None
       case Success(decrypted) ⇒
         val params = decrypted.split("§")
-        if (params.length == 2) Some(EmailVerificationParams(params(0), params(1))) else None
+        if (params.length === 2) Some(EmailVerificationParams(params(0), params(1))) else None
     }
   }
 }

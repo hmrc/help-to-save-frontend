@@ -26,6 +26,7 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 trait EnrolmentCheckBehaviour {
   this: FrontendController with Logging ⇒
@@ -48,11 +49,13 @@ trait EnrolmentCheckBehaviour {
         // if the user is enrolled but the itmp flag is not set then just
         // start the process to set the itmp flag here without worrying about the result
         if (!itmpHtSFlag) {
-          helpToSaveService.setITMPFlag(nino).fold(
-            e ⇒ logger.warn(s"Could not start process to set ITMP flag for user $nino: $e"),
-            _ ⇒ logger.info(s"Process started to set ITMP flag for user $nino")
-          )
+          helpToSaveService.setITMPFlag(nino).value.onComplete{
+            case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to set ITMP flag, future failed: $e")
+            case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not start process to set ITMP flag: $e")
+            case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Process started to set ITMP flag")
+          }
         }
+
         Ok("You've already got an account - yay!")
 
       case (nino, EnrolmentStatus.NotEnrolled) ⇒
@@ -69,7 +72,7 @@ trait EnrolmentCheckBehaviour {
       InternalServerError
 
     case e @ EnrolmentServiceError(nino, message) ⇒
-      logger.warn(s"Error while trying to check if user $nino was already enrolled to HtS: $message")
+      logger.warn(s"For NINO [$nino]: Error while trying to check if user was already enrolled to HtS: $message")
       handleEnrolmentServiceError(e)
 
   }

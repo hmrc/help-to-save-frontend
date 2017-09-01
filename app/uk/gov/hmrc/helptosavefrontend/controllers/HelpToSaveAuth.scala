@@ -17,7 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.ValidatedNel
+import cats.instances.string._
 import cats.syntax.cartesian._
+import cats.syntax.eq._
 import cats.syntax.option._
 import org.joda.time.LocalDate
 import play.api.mvc._
@@ -55,7 +57,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
           case name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ authorisedEnrols ⇒
 
             val mayBeNino = authorisedEnrols.enrolments
-              .find(_.key == "HMRC-NI")
+              .find(_.key === "HMRC-NI")
               .flatMap(_.getIdentifier("NINO"))
               .map(_.value)
 

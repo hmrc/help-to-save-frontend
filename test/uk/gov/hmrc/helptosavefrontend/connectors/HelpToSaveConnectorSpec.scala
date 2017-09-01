@@ -19,6 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import java.util.Base64
 
 import cats.data.EitherT
+import cats.instances.int._
+import cats.syntax.eq._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
@@ -34,9 +36,9 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
   import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 
-  val mockHttp = mock[WSHttp]
+  val mockHttp: WSHttp = mock[WSHttp]
 
-  lazy val connector = new HelpToSaveConnectorImpl(mockHttp)
+  lazy val connector: HelpToSaveConnector = new HelpToSaveConnectorImpl(mockHttp)
 
   def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
     (mockHttp.get(_: String)(_: HeaderCarrier))
@@ -73,7 +75,9 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
             val result = connector.getEligibility(nino)
             await(result.value) shouldBe Right(
-              EligibilityCheckResult(Right(EligibilityReason.fromInt(eligibilityReason).get)))
+              EligibilityCheckResult(Right(
+                EligibilityReason.fromInt(eligibilityReason).getOrElse(sys.error(s"Could not get eligibility reason for $eligibilityReason"))
+              )))
           }
         }
 
@@ -86,7 +90,9 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
             val result = connector.getEligibility(nino)
             await(result.value) shouldBe Right(
-              EligibilityCheckResult(Left(IneligibilityReason.fromInt(ineligibilityReason).get)))
+              EligibilityCheckResult(Left(
+                IneligibilityReason.fromInt(ineligibilityReason).getOrElse(sys.error(s"Could not get ineligibility reason for $ineligibilityReason"))
+              )))
           }
         }
 
@@ -291,7 +297,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "the call comes back with any other status other than 200" in {
         forAll { status: Int ⇒
-          whenever(status != 200) {
+          whenever(status =!= 200) {
             // check we get an error even though there was valid JSON in the response
             mockGet(Some(HttpResponse(status, Some(Json.toJson(validBody)))))
             await(getResult().value).isLeft shouldBe true
