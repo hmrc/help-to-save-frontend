@@ -42,6 +42,7 @@ import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  SessionCacheConnector,
@@ -88,10 +89,11 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     EmailVerificationParams.decode(emailVerificationParams) match {
 
-      case None ⇒
+      case Failure(e) ⇒
+        logger.warn(s"Could not decode email verification parameters: ${e.getMessage}", e)
         Ok(views.html.register.email_verify_error(BadContinueURL))
 
-      case Some(params) ⇒
+      case Success(params) ⇒
         val result: EitherT[Future, String, Option[NSIUserInfo]] = for {
           session ← sessionCacheConnector.get
           userInfo ← updateSession(session, params)
