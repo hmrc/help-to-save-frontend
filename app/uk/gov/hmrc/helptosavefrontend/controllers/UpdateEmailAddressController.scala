@@ -21,7 +21,9 @@ import javax.inject.Singleton
 import cats.data.EitherT
 import cats.instances.option._
 import cats.instances.future._
+import cats.instances.string._
 import cats.syntax.traverse._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -83,8 +85,6 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  //def getEmailVerificationParams(emailVerificationParams: String): EmailVerificationParams
-
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     EmailVerificationParams.decode(emailVerificationParams) match {
 
@@ -126,7 +126,7 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
         .fold[Either[String, Option[NSIUserInfo]]](
           Left("No user info for user found")
         ) {
-            _.fold(
+            _.fold[Either[String, Option[NSIUserInfo]]](
               missingInfos ⇒ Left(s"Missing user info: ${missingInfos.missingInfo}"),
               nsiUserInfo ⇒ Right(Some(nsiUserInfo))
             )
@@ -141,7 +141,7 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
       hc:         HeaderCarrier): EitherT[Future, String, Option[NSIUserInfo]] = {
     EitherT.fromEither[Future](getEligibleUserInfo(session)).flatMap { maybeInfo ⇒
       val updatedInfo: Option[EitherT[Future, String, NSIUserInfo]] = maybeInfo.map{ info ⇒
-        if (info.nino != params.nino) {
+        if (info.nino =!= params.nino) {
           EitherT.fromEither[Future](Left[String, NSIUserInfo]("NINO in confirm details parameters did not match NINO from auth"))
         } else {
           val newInfo = info.updateEmail(params.email)

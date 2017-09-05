@@ -146,23 +146,6 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
 
-  private def handleConfirmDetailsWithParameters(confirmDetailsParameters: String,
-                                                 nsiUserInfo:              NSIUserInfo
-  )(implicit request: Request[AnyContent], htsContext: HtsContext) = {
-    val optionalParams = EmailVerificationParams.decode(confirmDetailsParameters)
-    optionalParams.fold({
-      logger.warn("Could not decode parameters for confirm details")
-      Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
-    }){ params ⇒
-      if (params.nino === nsiUserInfo.nino) {
-        val updatedNsiUserInfo = nsiUserInfo copy (contactDetails = nsiUserInfo.contactDetails copy (email = params.email))
-        Ok(views.html.register.confirm_details(updatedNsiUserInfo))
-      } else {
-        logger.warn("NINO in confirm details parameters did not match NINO from auth")
-        Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
-      }
-    }
-  }
 }
 
 object RegisterController {

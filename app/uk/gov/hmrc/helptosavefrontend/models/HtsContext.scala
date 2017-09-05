@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
-
 case class HtsContext(nino: Option[String], userDetails: Option[Either[MissingUserInfos, NSIUserInfo]], isAuthorised: Boolean)
 
 object HtsContext {

@@ -16,45 +16,41 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.time.LocalDate
-
 import play.api.http.Status
-import play.api.i18n.MessagesApi
-import play.api.mvc.Result
+import play.api.i18n.{Messages, MessagesApi}
+import play.api.inject.Injector
+import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.NSIUserInfoOps
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, NSIUserInfo, VerifyEmailError, validNSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, VerifyEmailError, validNSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import play.api.mvc.{Result ⇒ PlayResult}
-import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.helptosavefrontend.models.randomIneligibilityReason
 
 import scala.concurrent.Future
 
 class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
 
-  lazy val injector = fakeApplication.injector
-  lazy val request = FakeRequest()
-  implicit val crypto = fakeApplication.injector.instanceOf[Crypto]
+  lazy val injector: Injector = fakeApplication.injector
+  lazy val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
+  implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
-  def messagesApi = injector.instanceOf[MessagesApi]
+  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
-  lazy val messages = messagesApi.preferred(request)
+  lazy val messages: Messages = messagesApi.preferred(request)
 
-  val frontendAuthConnector = stub[FrontendAuthConnector]
+  val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
 
-  val mockEmailVerificationConnector = mock[EmailVerificationConnector]
+  val mockEmailVerificationConnector: EmailVerificationConnector = mock[EmailVerificationConnector]
 
   val mockHttp: WSHttp = mock[WSHttp]
 
-  lazy val controller = new UpdateEmailAddressController(mockSessionCacheConnector, mockHelpToSaveService, frontendAuthConnector, mockEmailVerificationConnector
+  lazy val controller: UpdateEmailAddressController = new UpdateEmailAddressController(mockSessionCacheConnector, mockHelpToSaveService, frontendAuthConnector, mockEmailVerificationConnector
   )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto, ec) {
 
     override val authConnector = mockAuthConnector
@@ -176,15 +172,15 @@ class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndElig
   }
 
   "emailVerified" should {
+    val testEmail = "email@gmail.com"
 
-      def doRequestWithQueryParam(p: String): Future[PlayResult] = controller.emailVerified(p)(FakeRequest())
+      def doRequestWithQueryParam(p: String): Future[Result] = controller.emailVerified(p)(FakeRequest())
 
     "show the check and confirm your details page showing the users details with the verified user email address " +
       "if the user has not already enrolled and " +
       "the session data shows that they have been already found to be eligible " +
       "and the user has clicked on the verify email link sent to them by the email verification service and the nino from auth " +
       "matches that passed in via the params" in {
-        val testEmail = "email@gmail.com"
 
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -199,17 +195,6 @@ class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndElig
         contentAsString(result).contains(messagesApi("hts.register.check-and-confirm-your-details.p-1")) shouldBe true
       }
 
-    "return an Internal Server Error status when the user has not already enrolled and the given nino doesn't match the session nino" in {
-      val testEmail = "email@gmail.com"
-      inSequence {
-        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-      }
-      val params = EmailVerificationParams("AE1234XXX", testEmail)
-      val result = doRequestWithQueryParam(params.encode())
-      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-    }
-
     "return an OK status when the link has been corrupted or is incorrect" in {
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -218,6 +203,70 @@ class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndElig
       status(result) shouldBe Status.OK
       contentAsString(result) should include("Email verification error")
     }
+
+    "return an OK status with a not eligible view when an ineligible user comes in via email verified" in {
+      inSequence {
+        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
+      }
+      val params = EmailVerificationParams(validNSIUserInfo.nino, testEmail)
+      val result = doRequestWithQueryParam(params.encode())
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include("not eligible for Help to Save")
+    }
+
+    "return an Internal Server Error" when {
+
+        def test(mockActions: ⇒ Unit, nino: String, email: String) = {
+          mockActions
+          val params = EmailVerificationParams(nino, email)
+          val result = doRequestWithQueryParam(params.encode())
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+        }
+
+      "the user has not already enrolled and the given nino doesn't match the session nino" in {
+        test(inSequence {
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+        },
+          "AE1234XXX",
+             testEmail
+        )
+      }
+
+      "the sessionCacheConnector.get method returns an error" in {
+        test(inSequence {
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Left("An error occurred"))
+        },
+             validNSIUserInfo.nino,
+             testEmail
+        )
+      }
+
+      "the sessionCacheConnector.put method returns an error" in {
+        test(inSequence {
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo.updateEmail(testEmail)), None))(Left("An error occurred"))
+        },
+             validNSIUserInfo.nino,
+             testEmail
+        )
+      }
+
+      "the user has missing info and they do not have a session" in {
+        test(inSequence {
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
+          mockSessionCacheConnectorGet(Right(None))
+        },
+             validNSIUserInfo.nino,
+             testEmail
+        )
+
+      }
+    }
+
   }
 
 }

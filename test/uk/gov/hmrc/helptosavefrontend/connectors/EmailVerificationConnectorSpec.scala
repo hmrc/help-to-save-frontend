@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
@@ -30,7 +31,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future
 
-class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig {
+class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig with GeneratorDrivenPropertyChecks {
 
   lazy val emailVerifyBaseURL: String = baseUrl("email-verification")
   val nino: NINO = "AE123XXXX"
@@ -110,6 +111,18 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       mockEncrypt(nino + "#" + email)("")
       mockPost(emailVerificationRequest)(Status.SERVICE_UNAVAILABLE, None)
       await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
+    }
+
+    "return a Left if the call comes back with an unexpected status" in {
+      val statuses = Set(Status.OK, Status.CREATED, Status.BAD_REQUEST, Status.CONFLICT, Status.SERVICE_UNAVAILABLE)
+
+      forAll{ (status: Int) ⇒
+        whenever(!statuses.contains(status)){
+          mockEncrypt(nino + "#" + email)("")
+          mockPost(emailVerificationRequest)(status, None)
+          await(connector.verifyEmail(nino, email)) shouldBe Left(BackendError)
+        }
+      }
     }
 
     "throw a runtime exception If email TTL does not exist in the configuration" in {
