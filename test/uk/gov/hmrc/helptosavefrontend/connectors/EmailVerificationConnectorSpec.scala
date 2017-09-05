@@ -33,6 +33,13 @@ import scala.concurrent.Future
 
 class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig with GeneratorDrivenPropertyChecks {
 
+  override lazy val additionalConfig: Configuration = Configuration(
+    "microservice.services.email-verification.linkTTLMinutes" → " 120",
+    "microservice.services.email-verification.continue-url" -> "http://localhost:7000/help-to-save/email-verified",
+    "microservice.services.email-verification.host" → "localhost",
+    "microservice.services.email-verification.port" → "7002"
+  )
+
   lazy val emailVerifyBaseURL: String = baseUrl("email-verification")
   val nino: NINO = "AE123XXXX"
   val email: Email = "email@gmail.com"
@@ -49,15 +56,8 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       "http://localhost:7000/help-to-save/email-verified?p=",
       Map("email" → email, "nino" → nino))
 
-  lazy val connector: EmailVerificationConnectorImpl = {
-    val config = Configuration(
-      "microservice.services.email-verification.linkTTLMinutes" → " 120",
-      "microservice.services.email-verification.continue-url" -> "http://localhost:7000/help-to-save/email-verified",
-      "microservice.services.email-verification.host" → "localhost",
-      "microservice.services.email-verification.port" → "7002"
-    )
-    new EmailVerificationConnectorImpl(mockHttp, config)
-  }
+  lazy val connector: EmailVerificationConnectorImpl =
+    new EmailVerificationConnectorImpl(mockHttp)
 
   def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
@@ -126,10 +126,12 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
     }
 
     "throw a runtime exception If email TTL does not exist in the configuration" in {
-      val config = Configuration("x" → "y")
+      val testConfig = Configuration("x" → "y")
 
       val http = mock[WSHttp]
-      an[Exception] should be thrownBy new EmailVerificationConnectorImpl(http, config)
+      an[Exception] should be thrownBy new EmailVerificationConnectorImpl(http) {
+        override protected def runModeConfiguration: Configuration = testConfig
+      }
     }
 
     "should return a back end error if the future failed" in {
