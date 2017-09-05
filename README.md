@@ -12,7 +12,7 @@ Start service manager with the following dependencies:
 sm --start DATASTREAM CA_FRONTEND ASSETS_FRONTEND AUTH_LOGIN_STUB AUTH_LOGIN_API GG_AUTHENTICATION  GG GG_STUBS GG_AUTHENTICATION USER_DETAILS AUTH IDENTITY_VERIFICATION_STUB HELP_TO_SAVE ENROLMENT_EXCEPTION_LIST IDENTITY_VERIFICATION CITIZEN_DETAILS IDENTITY_VERIFICATION_FRONTEND -f 
 ```
 
-## Testing
+## Testing 
 Selenium system tests are distinguished from unit tests by having `SeleniumSystemTest` in the relevant runner name. Note
 that you will need to download Selenium drivers from http://docs.seleniumhq.org/download/. Mac users will have to rename
 the downloaded 'chromedriver' file to 'chromedriver_mac'.
