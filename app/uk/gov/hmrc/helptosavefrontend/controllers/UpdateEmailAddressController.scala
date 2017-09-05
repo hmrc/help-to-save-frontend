@@ -32,7 +32,6 @@ import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthCon
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.NSIUserInfoOps
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
