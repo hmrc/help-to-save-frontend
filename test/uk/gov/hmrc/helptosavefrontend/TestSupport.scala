@@ -37,7 +37,7 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
 
   lazy val fakeApplication: Application =
     new GuiceApplicationBuilder()
-      .configure(Configuration() ++ additionalConfig)
+      .configure(Configuration("metrics.enabled" → false) ++ additionalConfig)
       .build()
 
   implicit lazy val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
