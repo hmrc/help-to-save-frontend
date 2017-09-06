@@ -68,7 +68,7 @@ object Time {
       }
 
     val result = loop(timeWordToDenomination, nanos, List.empty[(Long, String)])
-    result.take(2).map(x ⇒ s"${x._1}${x._2}").mkString(", ")
+    result.take(2).map(x ⇒ s"${x._1}${x._2}").mkString(" ")
   }
 
 }
