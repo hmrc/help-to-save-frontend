@@ -49,7 +49,6 @@ function get_java_opts {
   # get the driver location
   if [ ! -z $3 ]
   then
-#    driverLocation=$(get_driver_location $3)
     driverLocation=$3
   fi
 
