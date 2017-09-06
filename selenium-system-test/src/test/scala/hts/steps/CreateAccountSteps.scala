@@ -39,10 +39,12 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   Given("""^a user has previously created an account$"""){ () ⇒
+    AuthorityWizardPage.goToPage()
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
+    driver.manage().deleteAllCookies()
   }
 
   When("""^they proceed through to the apply page$""") { () ⇒
@@ -75,6 +77,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
+    driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", currentEligibleNINO)
   }
 
@@ -82,8 +85,8 @@ class CreateAccountSteps extends Steps with NINOGenerator {
     Page.getPageContent should include("Successfully created account")
   }
 
-  Then("""^they see the gov uk page$""") { () ⇒
-    driver.getCurrentUrl shouldBe "https://www.gov.uk/"
+  Then("""^they see the about page$""") { () ⇒
+    on(AboutPage)
   }
 
   Then("""^they will be on the eligibility question page$""") { () ⇒

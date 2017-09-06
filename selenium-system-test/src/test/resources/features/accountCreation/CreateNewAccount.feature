@@ -17,7 +17,7 @@ Feature: Create new account
     Given a user has logged in and passed IV
     When they start to create an account
     And they choose to not create an account
-    Then they see the gov uk page
+    Then they see the about page
 
   Scenario: An unauthenticated eligible user wishes to create an account but comes through the sign in link
     Given a user is on the apply page
