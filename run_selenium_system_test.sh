@@ -94,5 +94,4 @@ function join_by {
 # environments but doesn't work with others - here we run sbt and add java system properties
 # within the sbt session and then run the tests
 JAVA_OPTS=$(get_java_opts $1 $2 $3 ${@:4})
-echo $JAVA_OPTS
 sbt "; set javaOptions in SeleniumTest ++= Seq($JAVA_OPTS); selenium:test"
