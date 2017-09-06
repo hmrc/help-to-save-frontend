@@ -16,24 +16,41 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.HttpVerbs.{GET ⇒ GET_VERB, POST ⇒ POST_VERB}
 import play.api.libs.json.Writes
+import play.api.libs.ws.WSProxyServer
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
+import uk.gov.hmrc.play.audit.http.config.{AuditingConfig, LoadAuditingConfig}
 import uk.gov.hmrc.play.audit.http.connector.{AuditConnector ⇒ Auditing}
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
+import uk.gov.hmrc.play.http.hooks.HttpHook
 import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, ws}
 
 import scala.concurrent.Future
 
 object FrontendAuditConnector extends Auditing with AppName {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
+  override lazy val auditingConfig: AuditingConfig = LoadAuditingConfig("auditing")
 }
 
-trait WSHttpExtension extends WSGet with WSPost {
+@ImplementedBy(classOf[WSHttpExtension])
+trait WSHttp extends WSGet with WSPut with WSPost with WSDelete {
+
+  def get(url: String)(implicit rhc: HeaderCarrier): Future[HttpResponse]
+
+  def post[A](url:     String,
+              body:    A,
+              headers: Seq[(String, String)] = Seq.empty[(String, String)]
+  )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse]
+
+}
+
+@Singleton
+class WSHttpExtension extends WSHttp {
+
+  override val hooks: Seq[HttpHook] = NoneRequired
 
   /**
    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
@@ -60,11 +77,6 @@ trait WSHttpExtension extends WSGet with WSPost {
 }
 
 @Singleton
-class WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName with RunMode with WSHttpExtension {
-  override val hooks = NoneRequired
-}
-
-@Singleton
 class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector with ServicesConfig {
   override lazy val serviceUrl: String = baseUrl("auth")
 
@@ -72,10 +84,10 @@ class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector
 }
 
 class WSHttpProxy extends ws.WSHttp with WSProxy with RunMode with HttpAuditing with ServicesConfig {
-  override lazy val appName = getString("appName")
-  override lazy val wsProxyServer = WSProxyConfiguration(s"proxy")
-  override val hooks = Seq(AuditingHook)
-  override lazy val auditConnector = FrontendAuditConnector
+  override lazy val appName: String = getString("appName")
+  override lazy val wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy")
+  override val hooks: Seq[HttpHook] = Seq(AuditingHook)
+  override lazy val auditConnector: Auditing = FrontendAuditConnector
 
   /**
    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed

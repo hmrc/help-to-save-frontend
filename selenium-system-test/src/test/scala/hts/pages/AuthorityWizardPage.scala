@@ -31,6 +31,16 @@ object AuthorityWizardPage extends WebPage {
     setConfidenceLevel(confidence)
     setCredentialStrength(credentialStrength)
     setNino(nino)
+    setGivenName("GivenName")
+    setFamilyName("FamilyName")
+    setDateOfBirth("1980-12-20")
+    setAddressLine1("AddressLine1")
+    setAddressLine2("AddressLine2")
+    setAddressLine3("AddressLine3")
+    setAddressLine4("AddressLine4")
+    setAddressLine5("AddressLine5")
+    setPostCode("S24AH")
+    setCountryCode("01")
     submit()
   }
 
@@ -38,18 +48,48 @@ object AuthorityWizardPage extends WebPage {
     go to s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
-    find(name("redirectionUrl")).get.underlying.sendKeys(url)
+    find(name("redirectionUrl")).foreach(_.underlying.sendKeys(url))
 
   def setNino(nino: String)(implicit driver: WebDriver): Unit =
-    find(name("nino")).get.underlying.sendKeys(nino)
+    find(name("nino")).foreach(_.underlying.sendKeys(nino))
 
   def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
-    find(name("credentialStrength")).get.underlying.sendKeys(strength)
+    find(name("credentialStrength")).foreach(_.underlying.sendKeys(strength))
 
   def setConfidenceLevel(level: Int)(implicit driver: WebDriver): Unit =
-    find(name("confidenceLevel")).get.underlying.sendKeys(level.toString)
+    find(name("confidenceLevel")).foreach(_.underlying.sendKeys(level.toString))
 
   def submit()(implicit driver: WebDriver): Unit =
-    find(cssSelector("input.button")).get.underlying.click()
+    find(cssSelector("input.button")).foreach(_.underlying.click())
+
+  def setGivenName(givenName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.givenName")).foreach(_.underlying.sendKeys(givenName))
+
+  def setFamilyName(familyName: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.familyName")).foreach(_.underlying.sendKeys(familyName))
+
+  def setDateOfBirth(dateOfBirth: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.dateOfBirth")).foreach(_.underlying.sendKeys(dateOfBirth))
+
+  def setAddressLine1(addressLine1: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line1")).foreach(_.underlying.sendKeys(addressLine1))
+
+  def setAddressLine2(addressLine2: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line2")).foreach(_.underlying.sendKeys(addressLine2))
+
+  def setAddressLine3(addressLine3: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line3")).foreach(_.underlying.sendKeys(addressLine3))
+
+  def setAddressLine4(addressLine4: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line4")).foreach(_.underlying.sendKeys(addressLine4))
+
+  def setAddressLine5(addressLine5: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.line5")).foreach(_.underlying.sendKeys(addressLine5))
+
+  def setPostCode(postcode: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.postCode")).foreach(_.underlying.sendKeys(postcode))
+
+  def setCountryCode(countryCode: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.address.countryCode")).foreach(_.underlying.sendKeys(countryCode))
 
 }

@@ -19,6 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import cats.instances.future._
+import cats.instances.string._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -33,6 +35,7 @@ import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class RegisterController @Inject() (val messagesApi:           MessagesApi,
@@ -45,14 +48,11 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
 
   import RegisterController.NSIUserInfoOps
 
-  def getConfirmDetailsPage(emailVerificationParams: Option[String]): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { _ ⇒
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, _) ⇒ {
-          emailVerificationParams match {
-            case None    ⇒ Ok(views.html.register.confirm_details(nsiUserInfo))
-            case Some(p) ⇒ handleConfirmDetailsWithParameters(p, nsiUserInfo)
-          }
+          Ok(views.html.register.confirm_details(nsiUserInfo))
         }
       }
     }
@@ -69,7 +69,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
 
           result.fold[Result](
             { e ⇒
-              logger.warn(s"Could not write confirmed email for user $nino: $e")
+              logger.warn(s"For NINO [$nino]: Could not write confirmed email: $e")
               InternalServerError
             }, { _ ⇒
               SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
@@ -84,7 +84,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks {
         case (_, confirmedEmail) ⇒
           confirmedEmail.fold[Future[Result]](
-            SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url))(
+            SeeOther(routes.RegisterController.getConfirmDetailsPage.url))(
               _ ⇒ Ok(views.html.register.create_account_help_to_save()))
       }
     }
@@ -95,7 +95,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, confirmedEmail) ⇒
           confirmedEmail.fold[Future[Result]](
-            SeeOther(routes.RegisterController.getConfirmDetailsPage(None).url)
+            SeeOther(routes.RegisterController.getConfirmDetailsPage.url)
           ) { email ⇒
               // TODO: plug in actual pages below
               helpToSaveService.createAccount(nsiUserInfo.updateEmail(email)).leftMap(submissionFailureToString).fold(
@@ -107,10 +107,11 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                 _ ⇒ {
                   logger.info(s"Successfully created account for $nino")
                   // start the process to enrol the user but don't worry about the result
-                  helpToSaveService.enrolUser(nino).fold(
-                    e ⇒ logger.warn(s"Could not start process to enrol user $nino: $e"),
-                    _ ⇒ logger.info(s"Started process to enrol user $nino")
-                  )
+                  helpToSaveService.enrolUser(nino).value.onComplete{
+                    case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user, future failed: $e")
+                    case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user: $e")
+                    case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Process started to enrol user")
+                  }
 
                   Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
                 }
@@ -144,24 +145,6 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +
       s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
-
-  private def handleConfirmDetailsWithParameters(confirmDetailsParameters: String,
-                                                 nsiUserInfo:              NSIUserInfo
-  )(implicit request: Request[AnyContent], htsContext: HtsContext) = {
-    val optionalParams = EmailVerificationParams.decode(confirmDetailsParameters)
-    optionalParams.fold({
-      logger.warn("Could not decode parameters for confirm details")
-      Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
-    }){ params ⇒
-      if (params.nino == nsiUserInfo.nino) {
-        val updatedNsiUserInfo = nsiUserInfo copy (contactDetails = nsiUserInfo.contactDetails copy (email = params.email))
-        Ok(views.html.register.confirm_details(updatedNsiUserInfo))
-      } else {
-        logger.warn("NINO in confirm details parameters did not match NINO from auth")
-        Ok(views.html.register.email_verify_error(VerifyEmailError.BadContinueURL))
-      }
-    }
-  }
 
 }
 

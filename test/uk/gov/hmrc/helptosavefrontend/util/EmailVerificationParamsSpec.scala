@@ -26,34 +26,50 @@ import scala.util.{Failure, Success, Try}
 
 class EmailVerificationParamsSpec extends TestSupport with GeneratorDrivenPropertyChecks {
 
-  val nino = "AE1234XXX"
-  val email = "email@gmail.com"
-  val params = EmailVerificationParams(nino, email)
+  val nino: NINO = "AE1234XXX"
+  val email: Email = "email@gmail.com"
+  val params: EmailVerificationParams = EmailVerificationParams(nino, email)
+
+  def successfulCrypto(): Crypto = new Crypto {
+    override def encrypt(s: String): String = s
+
+    override def decrypt(s: String): Try[String] = Success(s)
+  }
 
   "EmailVerificationParams" must {
 
     "have a decode method that is the inverse of the encode method" in {
-      implicit val crypto = new Crypto {
-        override def encrypt(s: String): String = s
-
-        override def decrypt(s: String): Try[String] = Success(s)
-      }
-
-      val result = EmailVerificationParams.decode(params.encode)
-      result.get.email shouldBe email
-      result.get.nino shouldBe nino
+      implicit val crypto: Crypto = successfulCrypto()
+      val result = EmailVerificationParams.decode(params.encode).getOrElse(fail("Could not decode email verification params"))
+      result.email shouldBe email
+      result.nino shouldBe nino
     }
 
-    "have a decode method that returns None when given a base64 string that does not encode a nino and email" in {
-      implicit val crypto = new Crypto {
-        override def encrypt(s: String): String = s
+    "have a decode method that returns a Failure" when {
+      "given a base64 string that does not encode a nino and email" in {
+        implicit val crypto: Crypto = new Crypto {
+          override def encrypt(s: String): String = s
 
-        override def decrypt(s: String): Try[String] = Failure(new Exception)
+          override def decrypt(s: String): Try[String] = Failure(new Exception)
+        }
+
+        EmailVerificationParams.decode(params.encode).isFailure shouldBe true
       }
 
-      val s = new String(Base64.getEncoder.encode("wibble".getBytes()), Charset.forName("UTF-8"))
-      EmailVerificationParams.decode(s) shouldBe None
+      "the parameters do not contain a hash symbol" in {
+        implicit val crypto: Crypto = successfulCrypto()
+
+        val s = new String(Base64.getEncoder.encode("wibble".getBytes()), Charset.forName("UTF-8"))
+        EmailVerificationParams.decode(s).isFailure shouldBe true
+      }
+
+      "given a string that is not base64 encoded" in {
+        implicit val crypto: Crypto = successfulCrypto()
+
+        EmailVerificationParams.decode("###123").isFailure shouldBe true
+      }
     }
+
   }
 
 }

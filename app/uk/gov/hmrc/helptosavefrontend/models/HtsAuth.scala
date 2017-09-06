@@ -16,19 +16,25 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.ConfidenceLevel.L200
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.helptosavefrontend.util.UserDetailsURI
+import org.joda.time.LocalDate
+import uk.gov.hmrc.auth.core.authorise.ConfidenceLevel.L200
+import uk.gov.hmrc.auth.core.authorise.{Enrolment, Predicate}
+import uk.gov.hmrc.auth.core.retrieve.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core.retrieve.{AuthProviders, ItmpAddress, ItmpName, Name, Retrieval, Retrievals, ~}
 
 object HtsAuth {
 
-  val NinoEnrolmentWithConfidence: Enrolment = Enrolment("HMRC-NI").withConfidenceLevel(L200)
+  val NinoWithCL200: Enrolment = Enrolment("HMRC-NI").withConfidenceLevel(L200)
 
   val AuthProvider: AuthProviders = AuthProviders(GovernmentGateway)
 
-  val AuthWithConfidence: Predicate = NinoEnrolmentWithConfidence and AuthProvider
+  val AuthWithCL200: Predicate = NinoWithCL200 and AuthProvider
 
-  val UserDetailsUrlWithAllEnrolments: Retrieval[Option[UserDetailsURI] ~ Enrolments] = Retrievals.userDetailsUri and Retrievals.allEnrolments
-
+  val UserRetrievals: Retrieval[Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress] =
+    Retrievals.name and
+      Retrievals.email and
+      Retrievals.dateOfBirth and
+      Retrievals.itmpName and
+      Retrievals.itmpDateOfBirth and
+      Retrievals.itmpAddress
 }

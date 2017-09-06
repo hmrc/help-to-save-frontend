@@ -35,6 +35,63 @@ class HelpToSaveServiceSpec extends TestSupport {
 
   "The HelpToSaveService" when {
 
+    "get user enrolment status" must {
+
+      val nino = "WM123456C"
+
+      "return a successful response" in {
+
+        (htsConnector.getUserEnrolmentStatus(_: String)(_: HeaderCarrier)).expects(nino, *)
+          .returning(EitherT.pure(EnrolmentStatus.Enrolled(true)))
+
+        val result = htsService.getUserEnrolmentStatus(nino)
+        result.value.futureValue should be(Right(EnrolmentStatus.Enrolled(true)))
+      }
+    }
+
+    "enrol user" must {
+
+      val nino = "WM123456C"
+
+      "return a successful response" in {
+
+        (htsConnector.enrolUser(_: String)(_: HeaderCarrier)).expects(nino, *)
+          .returning(EitherT.pure(Unit))
+
+        val result = htsService.enrolUser(nino)
+        result.value.futureValue.isRight should be(true)
+      }
+    }
+
+    "set ITMPFlag" must {
+
+      val nino = "WM123456C"
+
+      "return a successful response" in {
+
+        (htsConnector.setITMPFlag(_: String)(_: HeaderCarrier)).expects(nino, *)
+          .returning(EitherT.pure(Unit))
+
+        val result = htsService.setITMPFlag(nino)
+        result.value.futureValue.isRight should be(true)
+      }
+    }
+
+    "store email" must {
+
+      val nino = "WM123456C"
+      val email = "user@test.com"
+
+      "return a successful response" in {
+
+        (htsConnector.storeEmail(_: String, _: String)(_: HeaderCarrier)).expects(email, nino, *)
+          .returning(EitherT.pure(Unit))
+
+        val result = htsService.storeConfirmedEmail(email, nino)
+        result.value.futureValue.isRight should be(true)
+      }
+    }
+
     "checking eligibility" must {
 
       val nino = "WM123456C"
@@ -57,35 +114,6 @@ class HelpToSaveServiceSpec extends TestSupport {
         val result = htsService.checkEligibility(nino)
         result.value.futureValue should be(Left("uh oh"))
       }
-    }
-
-    "getting user information" must {
-
-      val nino = "nino"
-      val userDetailsURI = "uri"
-
-      "return a successful response if the connector responds with a successful response" in {
-        val userInfo = randomUserInfo()
-
-        (htsConnector.getUserInformation(_: String, _: String)(_: HeaderCarrier))
-          .expects(nino, userDetailsURI, *)
-          .returning(EitherT.pure(userInfo))
-
-        val result = htsService.getUserInformation(nino, userDetailsURI)
-        result.value.futureValue should be(Right(userInfo))
-      }
-
-      "return an unsuccessful response if the connector responds with an unsuccessful response" in {
-        val error = randomUserInformationRetrievalError()
-
-        (htsConnector.getUserInformation(_: String, _: String)(_: HeaderCarrier))
-          .expects(nino, userDetailsURI, *)
-          .returning(EitherT.fromEither[Future](Left(error)))
-
-        val result = htsService.getUserInformation(nino, userDetailsURI)
-        result.value.futureValue should be(Left(error))
-      }
-
     }
 
     "createAccount" must {

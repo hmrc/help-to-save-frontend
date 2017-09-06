@@ -26,6 +26,7 @@ import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.{AppName, ControllerConfig, RunMode}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.frontend.bootstrap.DefaultFrontendGlobal
@@ -33,9 +34,9 @@ import uk.gov.hmrc.play.http.logging.filters.FrontendLoggingFilter
 
 object FrontendGlobal extends DefaultFrontendGlobal {
 
-  override val auditConnector = FrontendAuditConnector
-  override val loggingFilter = LoggingFilter
-  override val frontendAuditFilter = AuditFilter
+  override val auditConnector: AuditConnector = FrontendAuditConnector
+  override val loggingFilter: LoggingFilter.type = LoggingFilter
+  override val frontendAuditFilter: AuditFilter.type = AuditFilter
 
   override def onStart(app: Application) {
     super.onStart(app)
@@ -44,16 +45,16 @@ object FrontendGlobal extends DefaultFrontendGlobal {
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit rh: Request[_]): Html = {
     //TODO :  not sure how to pass valid HtsContext here
-    implicit val htsContext = HtsContext(isAuthorised = false)
+    implicit val htsContext: HtsContext = HtsContext(isAuthorised = false)
     uk.gov.hmrc.helptosavefrontend.views.html.error_template(pageTitle, heading, message)
   }
 
-  override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig(s"microservice.metrics")
+  override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig("microservice.metrics")
 
 }
 
 object ControllerConfiguration extends ControllerConfig {
-  lazy val controllerConfigs = Play.current.configuration.underlying.as[Config]("controllers")
+  lazy val controllerConfigs: Config = Play.current.configuration.underlying.as[Config]("controllers")
 }
 
 object LoggingFilter extends FrontendLoggingFilter with MicroserviceFilterSupport {
@@ -62,11 +63,11 @@ object LoggingFilter extends FrontendLoggingFilter with MicroserviceFilterSuppor
 
 object AuditFilter extends FrontendAuditFilter with RunMode with AppName with MicroserviceFilterSupport {
 
-  override lazy val maskedFormFields = Seq("password")
+  override lazy val maskedFormFields: Seq[String] = Seq("password")
 
-  override lazy val applicationPort = None
+  override lazy val applicationPort: Option[Int] = None
 
-  override lazy val auditConnector = FrontendAuditConnector
+  override lazy val auditConnector: AuditConnector = FrontendAuditConnector
 
-  override def controllerNeedsAuditing(controllerName: String) = ControllerConfiguration.paramsForController(controllerName).needsAuditing
+  override def controllerNeedsAuditing(controllerName: String): Boolean = ControllerConfiguration.paramsForController(controllerName).needsAuditing
 }

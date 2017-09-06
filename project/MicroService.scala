@@ -3,16 +3,18 @@ import sbt.Tests.{Group, SubProcess}
 import sbt._
 import play.routes.compiler.StaticRoutesGenerator
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
+import uk.gov.hmrc._
+import DefaultBuildSettings._
+import uk.gov.hmrc.SbtAutoBuildPlugin
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
+import uk.gov.hmrc.versioning.SbtGitVersioning
+import play.sbt.routes.RoutesKeys.routesGenerator
+import play.sbt.routes.RoutesKeys.routes
+
+import TestPhases._
+import wartremover._
 
 trait MicroService {
-
-  import uk.gov.hmrc._
-  import DefaultBuildSettings._
-  import uk.gov.hmrc.{SbtBuildInfo, ShellPrompt, SbtAutoBuildPlugin}
-  import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-  import uk.gov.hmrc.versioning.SbtGitVersioning
-  import play.sbt.routes.RoutesKeys.routesGenerator
-  import TestPhases._
 
   val appName: String
 
@@ -71,13 +73,41 @@ trait MicroService {
       .setPreference(SpacesWithinPatternBinders, true)
   }
 
+  lazy val wartRemoverSettings = {
+    // list of warts here: http://www.wartremover.org/doc/warts.html
+    val excludedWarts = Seq(
+      Wart.DefaultArguments,
+      Wart.FinalCaseClass,
+      Wart.FinalVal,
+      Wart.ImplicitConversion,
+      Wart.ImplicitParameter,
+      Wart.LeakingSealed,
+      Wart.Nothing,
+      Wart.Overloading,
+      Wart.ToString,
+      Wart.Var)
+
+    wartremoverErrors in (Compile, compile) ++= Warts.allBut(excludedWarts: _*)
+  }
+
   lazy val microservice = Project(appName, file("."))
+    .settings(addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"))
     .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins: _*)
     .settings(playSettings ++ scoverageSettings: _*)
     .settings(scalaSettings: _*)
     .settings(publishingSettings: _*)
     .settings(defaultSettings(): _*)
     .settings(scalariformSettings: _*)
+    .settings(wartRemoverSettings)
+    // disable some wart remover checks in tests - (Any, Null, PublicInference) seems to struggle with
+    // scalamock, (Equals) seems to struggle with stub generator AutoGen and (NonUnitStatements) is
+    // imcompatible with a lot of WordSpec
+    .settings(wartremoverErrors in (Test, compile) --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference))
+    .settings(wartremoverExcluded ++=
+      routes.in(Compile).value ++
+      (baseDirectory ** "*.sc").value ++
+      Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
+    )
     .settings(
       libraryDependencies ++= appDependencies,
       retrieveManaged := true,
@@ -101,7 +131,7 @@ trait MicroService {
     .configs(SeleniumTest)
     .settings(
       inConfig(SeleniumTest)(Defaults.testTasks),
-      Keys.fork in SeleniumTest := false,
+      Keys.fork in SeleniumTest := true,
       unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/scala",
       unmanagedResourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/resources",
       testOptions in Test := Seq(Tests.Filter(unitTestFilter)),

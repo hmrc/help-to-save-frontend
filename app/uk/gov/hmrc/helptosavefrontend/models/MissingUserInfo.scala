@@ -14,16 +14,24 @@
  * limitations under the License.
  */
 
-package hts.pages
+package uk.gov.hmrc.helptosavefrontend.models
 
-import org.openqa.selenium.WebDriver
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 
-object EligibilityQuestionPage extends WebPage {
+trait MissingUserInfo
 
-  //TODO This page is still under construction
-  val pageTitle: String = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"
+object MissingUserInfo {
 
-  def clickCheckEligibility()(implicit driver: WebDriver): Unit = click on "continue"
+  case object GivenName extends MissingUserInfo
 
-  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h2", pageTitle)
+  case object Surname extends MissingUserInfo
+
+  case object Email extends MissingUserInfo
+
+  case object DateOfBirth extends MissingUserInfo
+
+  case object Contact extends MissingUserInfo
+
 }
+
+case class MissingUserInfos(missingInfo: Set[MissingUserInfo], nino: NINO)

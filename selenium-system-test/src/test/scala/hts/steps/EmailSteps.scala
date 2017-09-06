@@ -14,16 +14,36 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.steps
 
-import org.openqa.selenium.WebDriver
+class EmailSteps extends Steps {
 
-object EligibilityQuestionPage extends WebPage {
+  Given("""^A user has logged in and is on the confirm details page$"""){ () ⇒
 
-  //TODO This page is still under construction
-  val pageTitle: String = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"
+  }
 
-  def clickCheckEligibility()(implicit driver: WebDriver): Unit = click on "continue"
+  Given("""^A user is on the verification email page$"""){ () ⇒
 
-  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h2", pageTitle)
+  }
+
+  When("""^they wish to change their email$"""){ () ⇒
+
+  }
+
+  When("""^they enter in a new email and confirm$"""){ () ⇒
+
+  }
+
+  When("""^they indicate that they wish to provide an alternative email address$"""){ () ⇒
+
+  }
+
+  Then("""^they will be on the change email page$"""){ () ⇒
+
+  }
+
+  Then("""^the user will be on the verification email page$"""){ () ⇒
+
+  }
+
 }

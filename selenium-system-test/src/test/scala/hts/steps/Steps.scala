@@ -35,7 +35,7 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
 
   def on(page: WebPage)(implicit driver: WebDriver) = {
     val wait = new WebDriverWait(driver, 5)
-    wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")))
+    val _ = wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")))
     assert(page.isCurrentPage, s"Page was not loaded: ${page.currentUrl}")
   }
 
@@ -47,7 +47,7 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
         .leftMap(e ⇒ sys.error(s"Could not find driver: $e"))
         // merge will merge Nothing and WebDriver to WebDriver since Nothing is a subtype of everything
         .merge
-      d.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
+      val _ = d.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
       _driver = Some(d)
     }
   }

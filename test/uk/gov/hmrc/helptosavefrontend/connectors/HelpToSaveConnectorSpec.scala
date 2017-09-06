@@ -19,13 +19,13 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import java.util.Base64
 
 import cats.data.EitherT
+import cats.instances.int._
+import cats.syntax.eq._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, MissingUserInfoSet}
-import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfo.{Contact, DateOfBirth, Email, GivenName, Surname}
-import uk.gov.hmrc.helptosavefrontend.models.UserInformationRetrievalError.MissingUserInfos
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
@@ -36,9 +36,9 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
   import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 
-  val mockHttp = mock[WSHttp]
+  val mockHttp: WSHttp = mock[WSHttp]
 
-  lazy val connector = new HelpToSaveConnectorImpl(mockHttp)
+  lazy val connector: HelpToSaveConnector = new HelpToSaveConnectorImpl(mockHttp)
 
   def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
     (mockHttp.get(_: String)(_: HeaderCarrier))
@@ -75,7 +75,9 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
             val result = connector.getEligibility(nino)
             await(result.value) shouldBe Right(
-              EligibilityCheckResult(Right(EligibilityReason.fromInt(eligibilityReason).get)))
+              EligibilityCheckResult(Right(
+                EligibilityReason.fromInt(eligibilityReason).getOrElse(sys.error(s"Could not get eligibility reason for $eligibilityReason"))
+              )))
           }
         }
 
@@ -88,7 +90,9 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
             val result = connector.getEligibility(nino)
             await(result.value) shouldBe Right(
-              EligibilityCheckResult(Left(IneligibilityReason.fromInt(ineligibilityReason).get)))
+              EligibilityCheckResult(Left(
+                IneligibilityReason.fromInt(ineligibilityReason).getOrElse(sys.error(s"Could not get ineligibility reason for $ineligibilityReason"))
+              )))
           }
         }
 
@@ -135,40 +139,6 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         }
 
       }
-    }
-
-    "getting user information" should {
-      val userDetailsURI = "http://user-details-uri"
-
-      behave like testCommon(
-        mockHttpGet(userInformationURL(nino, userDetailsURI)),
-        () ⇒ connector.getUserInformation(nino, userDetailsURI),
-        randomUserInfo()
-      )
-
-      "return the user info if the call comes back with a 200 " +
-        "and the body contains user info" in {
-          val userInfo: UserInfo = randomUserInfo()
-
-          mockHttpGet(userInformationURL(nino, userDetailsURI))(
-            Some(HttpResponse(200, Some(Json.toJson(userInfo)))))
-
-          val result = connector.getUserInformation(nino, userDetailsURI)
-          await(result.value) shouldBe Right(userInfo)
-        }
-
-      "return missing user info if the call comes back with a 200 " +
-        "and the body contains missing user info" in {
-          val missingInfo: Set[MissingUserInfo] = Set(Surname, GivenName, Email, DateOfBirth, Contact)
-          val eligibilityResponse = MissingUserInfoSet(missingInfo)
-
-          mockHttpGet(userInformationURL(nino, userDetailsURI))(
-            Some(HttpResponse(200, responseJson = Some(Json.toJson(eligibilityResponse)))))
-
-          val result = connector.getUserInformation(nino, userDetailsURI)
-          await(result.value) shouldBe Left(MissingUserInfos(missingInfo, nino))
-        }
-
     }
 
     "getting enrolment status" must {
@@ -297,10 +267,10 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     }
   }
 
-  def testCommon[E, A, B](mockGet:         ⇒ Option[HttpResponse] ⇒ Unit,
-                          getResult:       () ⇒ EitherT[Future, E, A],
-                          validBody:       B,
-                          testInvalidJSON: Boolean                       = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
+  private def testCommon[E, A, B](mockGet:         ⇒ Option[HttpResponse] ⇒ Unit,
+                                  getResult:       () ⇒ EitherT[Future, E, A],
+                                  validBody:       B,
+                                  testInvalidJSON: Boolean                       = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
     "perform a GET request to the help-to-save-service" in {
       mockGet(Some(HttpResponse(200)))
       await(getResult())
@@ -327,7 +297,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "the call comes back with any other status other than 200" in {
         forAll { status: Int ⇒
-          whenever(status != 200) {
+          whenever(status =!= 200) {
             // check we get an error even though there was valid JSON in the response
             mockGet(Some(HttpResponse(status, Some(Json.toJson(validBody)))))
             await(getResult().value).isLeft shouldBe true

@@ -20,7 +20,7 @@ import org.openqa.selenium.WebDriver
 
 object EligiblePage extends WebPage {
 
-  val pageTitle = "You're eligible"
+  val pageTitle: String = "You're eligible"
 
   def startCreatingAccount()(implicit driver: WebDriver): Unit = click on xpath(".//*[@type='submit']")
 

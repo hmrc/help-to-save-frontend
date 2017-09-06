@@ -27,7 +27,7 @@ import uk.gov.hmrc.play.http._
 class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
 
   class TestApparatus {
-    val mockWsHttp = mock[WSHttp]
+    val mockWsHttp: WSHttp = mock[WSHttp]
 
     val htsSession = HTSSession(Some(validNSIUserInfo), Some("hello"))
 
@@ -35,8 +35,10 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
 
     val sessionCacheConnector = new SessionCacheConnectorImpl(mockWsHttp)
 
-    val putUrl = s"http://localhost:8400/keystore/help-to-save-frontend/${headerCarrier.sessionId.get.value}/data/htsSession"
-    val getUrl = s"http://localhost:8400/keystore/help-to-save-frontend/${headerCarrier.sessionId.get.value}"
+    val sessionId = headerCarrier.sessionId.getOrElse(sys.error("Could not find session iD"))
+
+    val putUrl: String = s"http://localhost:8400/keystore/help-to-save-frontend/${sessionId.value}/data/htsSession"
+    val getUrl: String = s"http://localhost:8400/keystore/help-to-save-frontend/${sessionId.value}"
   }
 
   "The SessionCacheConnector" should {

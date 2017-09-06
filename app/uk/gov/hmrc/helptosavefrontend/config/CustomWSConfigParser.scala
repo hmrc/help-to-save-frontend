@@ -28,7 +28,7 @@ import play.api.libs.ws.{WSClientConfig, WSConfigParser}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 @Singleton
 class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environment) extends WSConfigParser(configuration, env) with Logging {
@@ -84,9 +84,13 @@ class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environ
 
     val keyStore = initKeystore()
 
-    generateCertificates(fileBytes).foreach { cert ⇒
-      val alias = cert.asInstanceOf[X509Certificate].getSubjectX500Principal.getName
-      keyStore.setCertificateEntry(alias, cert)
+    generateCertificates(fileBytes).foreach {
+      case c: X509Certificate ⇒
+        val alias = c.getSubjectX500Principal.getName
+        keyStore.setCertificateEntry(alias, c)
+      case other ⇒
+        logger.warn(s"Expected X509Certificate but got ${other.getType}")
+
     }
 
     val stream = new FileOutputStream(filePath)
@@ -101,6 +105,7 @@ class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environ
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.Null"))
   private def initKeystore(): KeyStore = {
     val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
     keystore.load(null, null)
@@ -112,7 +117,7 @@ class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environ
     try {
       CertificateFactory.getInstance("X.509")
         .generateCertificates(stream)
-        .toList
+        .asScala.toList
     } finally {
       stream.close()
     }

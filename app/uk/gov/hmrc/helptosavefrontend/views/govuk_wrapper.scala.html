@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+
 @(appConfig: uk.gov.hmrc.helptosavefrontend.config.AppConfig,
         title: String,
         mainClass: Option[String] = None,
@@ -34,9 +35,7 @@
 @linkElement = {
     <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/help-to-save-frontend.css")' />
         <!--[if lte IE 8 ]>
-    <link rel="stylesheet" href="
-@routes.Assets.versioned("stylesheets/help-to-save-frontend-ie.css")
-    " />
+    <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/help-to-save-frontend-ie.css")' />
     <![endif]-->
 }
 
@@ -49,10 +48,24 @@
 }
 
 @headerNavLinks = {
-@if(htsContext.isAuthorised) {
-    <li><a id="navSignout" href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out">
-        Sign out</a></li>
-}
+        <li>
+            <a href="/get-help" id="get-help"
+               data-ga-event-category = "Get Help"
+               data-ga-event-action = "Get help"
+               data-ga-event-label= @request.uri
+               class="ga-track-event">
+                Get help
+            </a>&nbsp;
+            @if(htsContext.isAuthorised) {
+                <a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out"
+                   data-ga-event-category = "Sign out"
+                   data-ga-event-action = "Sign out"
+                   data-ga-event-label= @request.uri
+                   class="ga-track-event">
+                    Sign out
+                </a>
+            }
+        </li>
 }
 
 @insideHeader = {
@@ -87,10 +100,9 @@
 }
 
 @mainContentHeader = {
-@if(contentHeader.isDefined) {
-    @uiLayouts.main_content_header(contentHeader = contentHeader.get)
+  @{uiLayouts.main_content_header(contentHeader = contentHeader.getOrElse(Html("")))}
 }
-}
+
     @*
     Removed for private beta
     @getHelpForm = {@{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
@@ -111,3 +123,5 @@
 }
 
 @hmrcGovUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
+
+<script src='@routes.Assets.versioned("javascripts/gaTracking.js")' type="text/javascript"></script>

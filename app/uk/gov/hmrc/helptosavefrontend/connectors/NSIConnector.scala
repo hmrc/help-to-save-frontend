@@ -53,19 +53,20 @@ object NSIConnector {
 @Singleton
 class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor) extends NSIConnector with Logging with AppName {
 
-  val httpProxy = new WSHttpProxy
+  val httpProxy: WSHttpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
     logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
 
-    FEATURE("log-account-creation-json", conf) enabled () thenDo {
-      logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}")
-    }
+    FEATURE("log-account-creation-json", conf, logger).thenOrElse(
+      logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}"),
+      ()
+    )
 
     httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
-      .map { response ⇒
+      .map[SubmissionResult] { response ⇒
         response.status match {
           case Status.CREATED ⇒
             auditor.sendEvent(new ApplicationSubmittedEvent(appName, userInfo))
@@ -93,7 +94,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor) exte
   }.recover {
     case e ⇒
       logger.warn("Encountered error while trying to create account", e)
-      SubmissionFailure(None, s"Encountered error while trying to create account", e.getMessage)
+      SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage)
   }
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {

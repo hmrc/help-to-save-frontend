@@ -22,7 +22,7 @@ import hts.utils.Configuration
 object ConfirmDetailsPage extends WebPage {
 
   def goToPage()(implicit driver: WebDriver): Unit =
-    go to s"${Configuration.host}/help-to-save/register/check-and-confirm-your-details"
+    go to s"${Configuration.host}/help-to-save/check-and-confirm-your-details"
 
   def continue()(implicit driver: WebDriver): Unit = click on "continue"
 

@@ -21,7 +21,7 @@ import play.api.data.Forms._
 import play.api.i18n.Lang
 
 object UpdateEmailForm {
-  val verifyEmailForm = Form(
+  val verifyEmailForm: Form[UpdateEmail] = Form(
     mapping("value" -> email
     )(UpdateEmail.apply)(UpdateEmail.unapply)
   )
