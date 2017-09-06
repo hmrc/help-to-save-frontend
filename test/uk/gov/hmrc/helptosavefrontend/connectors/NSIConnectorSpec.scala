@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import com.kenshoo.play.metrics.Metrics
 import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
@@ -37,7 +38,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory {
   lazy val mockHTTPProxy = mock[WSHttpProxy]
   val mockAuditor = mock[HTSAuditor]
 
-  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration, mockAuditor) {
+  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration, mockAuditor, mockMetrics) {
     override val httpProxy = mockHTTPProxy
   }
 
