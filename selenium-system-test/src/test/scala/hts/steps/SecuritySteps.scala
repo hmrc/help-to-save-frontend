@@ -46,7 +46,6 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Given("""^a user has logged in$""") { () ⇒
-
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
   }
 
