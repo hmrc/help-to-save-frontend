@@ -18,7 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.libs.json.{Reads, Writes}
+import cats.syntax.either._
+import play.api.libs.json.{JsValue, Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
@@ -38,10 +39,10 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
-  def mockSessionCacheConnectorPut(session: HTSSession)(result: Either[String, CacheMap]): Unit =
+  def mockSessionCacheConnectorPut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
     (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier, _: ExecutionContext))
-      .expects(session, *, *, *)
-      .returning(EitherT.fromEither[Future](result))
+      .expects(expectedSession, *, *, *)
+      .returning(EitherT.fromEither[Future](result.map(_ ⇒ CacheMap("1", Map.empty[String, JsValue]))))
 
   def mockSessionCacheConnectorGet(result: Either[String, Option[HTSSession]]): Unit =
     (mockSessionCacheConnector.get(_: Reads[HTSSession], _: HeaderCarrier, _: ExecutionContext))

@@ -26,4 +26,5 @@ object AboutPage extends WebPage {
     go to s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
   }
 
+  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h2", "1. About Help to Save")
 }

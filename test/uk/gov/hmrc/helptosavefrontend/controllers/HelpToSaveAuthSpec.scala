@@ -26,6 +26,9 @@ import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{checkEligibilityUrl, encoded}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.util.toJavaDate
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -55,23 +58,16 @@ class HelpToSaveAuthSpec extends AuthSupport {
 
     "return UserInfo after successful authentication" in {
       val userInfo =
-        Json.parse(
-          s"""{
-        "forename":"$firstName",
-        "surname":"$lastName",
-        "nino":"$nino",
-        "dateOfBirth":"$dobStr",
-        "email":"$emailStr",
-        "address":{
-          "lines":[
-          "$line1",
-          "$line2",
-          "$line3"
-          ],
-          "postcode":"$postCode",
-          "country":"$countryCode"
-        }
-      }""")
+        Json.toJson(NSIUserInfo(
+          firstName,
+          lastName,
+          toJavaDate(dob),
+          nino,
+          ContactDetails(
+            line1, line2, Some(line3), None, None, postCode, Some(countryCode), emailStr, None, "02"
+          ),
+          "online"
+        ))
 
       mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
 

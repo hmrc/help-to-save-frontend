@@ -20,6 +20,7 @@ import cats.data.ValidatedNel
 import cats.instances.string._
 import cats.syntax.cartesian._
 import cats.syntax.eq._
+import cats.syntax.either._
 import cats.syntax.option._
 import org.joda.time.LocalDate
 import play.api.mvc._
@@ -32,8 +33,7 @@ import uk.gov.hmrc.auth.frontend.Redirects
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{encoded, identityCallbackUrl}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
-import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfos
-import uk.gov.hmrc.helptosavefrontend.models.{Address, HtsContext, MissingUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, toJavaDate}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -65,7 +65,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
               toFuture(InternalServerError("could not find NINO for logged in user"))
             )(nino ⇒ {
                 val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
-                action(request)(HtsContext(Some(nino), Some(userDetails), isAuthorised = true))
+                action(request)(HtsContext(Some(nino), Some(userDetails.map(NSIUserInfo.apply)), isAuthorised = true))
               })
 
         }.recover {
@@ -128,8 +128,10 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
     val validation: ValidatedNel[MissingUserInfo, UserInfo] =
       (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| emailValidation)
-        .map((givenName, surname, jodaDob, email) ⇒
-          UserInfo(givenName, surname, nino, jodaDob, email, Address(itmpAddress)))
+        .map{
+          case (givenName, surname, jodaDob, email) ⇒
+            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email, Address(itmpAddress))
+        }
 
     validation
       .leftMap(m ⇒ MissingUserInfos(m.toList.toSet, nino))
