@@ -62,7 +62,7 @@ object Driver {
   private val driverDirectory: String = "selenium-system-test/drivers"
 
   private def createChromeDriver(): WebDriver = {
-    if (systemProperties.getProperty("webdriver.chrome.driver") == null) {
+    if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
       if (isMac) {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
       } else if (isLinux && linuxArch === "amd32") {

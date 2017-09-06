@@ -41,14 +41,6 @@ function get_tags {
 # Return the necessary java options as a single string. Each java option is surrounded by double quotes and
 # separated by a comma
 
-function get_driver_location {
-local driverLocation=$@
-
-driver+=$driverLocation
-
-echo $driver
-
-}
 function get_java_opts {
   local auth_host
   local tags
@@ -57,7 +49,8 @@ function get_java_opts {
   # get the driver location
   if [ ! -z $3 ]
   then
-    driverLocation=$(get_driver_location ${@:3})
+#    driverLocation=$(get_driver_location $3)
+    driverLocation=$3
   fi
 
   # get the tags
@@ -100,5 +93,6 @@ function join_by {
 # Doing `sbt -Doption1=value1 -Doption2="value2 with spaces" selenium:test` works on some
 # environments but doesn't work with others - here we run sbt and add java system properties
 # within the sbt session and then run the tests
-JAVA_OPTS=$(get_java_opts $1 $2 ${@:3} ${@:4})
+JAVA_OPTS=$(get_java_opts $1 $2 $3 ${@:4})
+echo $JAVA_OPTS
 sbt "; set javaOptions in SeleniumTest ++= Seq($JAVA_OPTS); selenium:test"
