@@ -63,7 +63,7 @@ object Driver {
 
   private def createChromeDriver(): WebDriver = {
     if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
-      val _ = if (isMac) {
+      if (isMac) {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
       } else if (isLinux && linuxArch === "amd32") {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")

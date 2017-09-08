@@ -22,7 +22,7 @@ import org.openqa.selenium.WebDriver
 object AuthorityWizardPage extends WebPage {
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    goToPage()
+    AuthorityWizardPage.goToPage()
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
   }
 
