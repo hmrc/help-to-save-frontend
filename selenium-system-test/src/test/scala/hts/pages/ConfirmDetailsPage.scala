@@ -26,4 +26,6 @@ object ConfirmDetailsPage extends WebPage {
 
   def continue()(implicit driver: WebDriver): Unit = click on "continue"
 
+  def changeEmail()(implicit driver: WebDriver): Unit = click on linkText("Change")
+
 }

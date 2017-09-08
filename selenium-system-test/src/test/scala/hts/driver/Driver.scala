@@ -59,7 +59,7 @@ object Driver {
 
   private val isJsEnabled: Boolean = true
 
-  private val driverDirectory: String = "selenium-system-test/drivers"
+  private val driverDirectory: String = Option(systemProperties.getProperty("drivers")).getOrElse("/usr/local/bin")
 
   private def createChromeDriver(): WebDriver = {
     if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
