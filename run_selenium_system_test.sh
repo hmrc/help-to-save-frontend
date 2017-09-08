@@ -40,9 +40,17 @@ function get_tags {
 
 # Return the necessary java options as a single string. Each java option is surrounded by double quotes and
 # separated by a comma
+
 function get_java_opts {
   local auth_host
   local tags
+  local driverLocation
+
+  # get the driver location
+  if [ ! -z $3 ]
+  then
+    driverLocation=$3
+  fi
 
   # get the tags
   if [ ! -z $4 ]
@@ -51,7 +59,12 @@ function get_java_opts {
   fi
 
   # create an array with the java options
-  local opts=(-Denvironment=$1 -Dbrowser=$2 -Ddrivers=$3)
+  local opts=(-Denvironment=$1 -Dbrowser=$2)
+
+  if [ ! -z "${driverLocation}" ]
+  then
+    opts+=("-Dwebdriver.$2.driver=${driverLocation}")
+  fi
 
   if [ ! -z "${tags}" ]
   then

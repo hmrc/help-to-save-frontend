@@ -18,7 +18,9 @@ package uk.gov.hmrc.helptosavefrontend
 
 import java.util.UUID
 
-import com.typesafe.config.{Config, ConfigValueFactory}
+import com.codahale.metrics.MetricRegistry
+import com.kenshoo.play.metrics.Metrics
+import com.typesafe.config.Config
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Suite}
@@ -55,6 +57,11 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
   override def afterAll() {
     Play.stop(fakeApplication)
     super.afterAll()
+  }
+
+  val mockMetrics = new Metrics {
+    override def defaultRegistry: MetricRegistry = new MetricRegistry
+    override def toJson: String = sys.error("toJSON method not used")
   }
 
 }
