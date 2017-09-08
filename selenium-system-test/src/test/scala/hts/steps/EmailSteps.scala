@@ -21,11 +21,8 @@ import hts.utils.{Configuration, NINOGenerator}
 
 class EmailSteps extends Steps with NINOGenerator {
 
-  var nino: Option[String] = None
-
   Given("""^an applicant is viewing their applicant details$"""){ () ⇒
-    nino = Some(generateEligibleNINO)
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", nino.getOrElse(""))
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", currentEligibleNINO)
     EligiblePage.startCreatingAccount()
   }
 
