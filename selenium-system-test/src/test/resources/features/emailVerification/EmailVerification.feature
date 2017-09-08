@@ -1,12 +1,13 @@
-#TODO Finish email scenarios and associated steps
+#To be completed when journey redesign is complete (speak to G)
 #@RunOnlyInDev
 #
-#Feature: Uses wishes to change their email address associated with their HTS account
+#Feature: Uses changes their email address
 #
-#  Scenario: A user wishes to indicate that they want to change their email address
-#    Given A user has logged in and is on the confirm details page
-#    When they wish to change their email
-#    Then they will be on the change email page
+#  @HTS-399
+#  Scenario: An applicant changes their email
+#    Given an applicant is viewing their applicant details
+#    When they choose to change their email address
+#    Then they are asked to check their email account for a verification email
 #
 #  Scenario: A user wishes to change their email address
 #    Given A user has logged in and is on the confirm details page

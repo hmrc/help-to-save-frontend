@@ -16,33 +16,22 @@
 
 package hts.steps
 
-class EmailSteps extends Steps {
+import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, EligiblePage}
+import hts.utils.{Configuration, NINOGenerator}
 
-  Given("""^A user has logged in and is on the confirm details page$"""){ () ⇒
+class EmailSteps extends Steps with NINOGenerator {
+
+  Given("""^an applicant is viewing their applicant details$"""){ () ⇒
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", currentEligibleNINO)
+    EligiblePage.startCreatingAccount()
+  }
+
+  When("""^they choose to change their email address$"""){ () ⇒
+    ConfirmDetailsPage.changeEmail()
 
   }
 
-  Given("""^A user is on the verification email page$"""){ () ⇒
-
-  }
-
-  When("""^they wish to change their email$"""){ () ⇒
-
-  }
-
-  When("""^they enter in a new email and confirm$"""){ () ⇒
-
-  }
-
-  When("""^they indicate that they wish to provide an alternative email address$"""){ () ⇒
-
-  }
-
-  Then("""^they will be on the change email page$"""){ () ⇒
-
-  }
-
-  Then("""^the user will be on the verification email page$"""){ () ⇒
+  Then("""^they are asked to check their email account for a verification email$"""){ () ⇒
 
   }
 
