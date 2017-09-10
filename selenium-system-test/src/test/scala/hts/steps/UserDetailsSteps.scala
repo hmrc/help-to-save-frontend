@@ -16,6 +16,9 @@
 
 package hts.steps
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import cucumber.api.DataTable
 import hts.pages.{AuthorityWizardPage, EligiblePage, Page}
 import hts.utils.{Configuration, NINOGenerator}
@@ -25,9 +28,10 @@ import scala.collection.mutable
 
 class UserDetailsSteps extends Steps with NINOGenerator {
 
-  var name: Option[String] = None
+  var firstName: Option[String] = None
+  var lastName: Option[String] = None
   var nino: Option[String] = None
-  var dateOfBirth: Option[String] = None
+  var dateOfBirth: Option[Date] = None
   var email: Option[String] = None
 
   Given("""^an applicant has the following details:$"""){ (applicantDetails: DataTable) ⇒
@@ -40,9 +44,13 @@ class UserDetailsSteps extends Steps with NINOGenerator {
       row.get("field") -> row.get("value") match {
         case (Some(field), value @ Some(_)) ⇒
           field match {
-            case "name"          ⇒ name = value
-            case "NINO"          ⇒ nino = value
-            case "date of birth" ⇒ dateOfBirth = value
+            case "first name" ⇒ firstName = value
+            case "last name"  ⇒ lastName = value
+            case "NINO"       ⇒ nino = value
+            case "date of birth" ⇒ {
+              val simpleDateFormat: SimpleDateFormat = new SimpleDateFormat("dd/mm/yyyy")
+              dateOfBirth = Some(simpleDateFormat.parse(value.getOrElse(sys.error("Could not find date of birth"))))
+            }
             case "email address" ⇒ email = value
             case other           ⇒ sys.error(s"Unexpected field: $other")
           }
@@ -54,20 +62,31 @@ class UserDetailsSteps extends Steps with NINOGenerator {
 
   When("""^an applicant passes the eligibility check$"""){ () ⇒
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/check-eligibility")
+    AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
     nino = Some(generateEligibleNINO)
     println("NINO: " + nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.setNino(nino.getOrElse(sys.error("Could not find NINO")))
+    AuthorityWizardPage.setGivenName(firstName.getOrElse(sys.error("Could not find first name")))
+    AuthorityWizardPage.setFamilyName(lastName.getOrElse(sys.error("Could not find last name")))
+
+    val date = new SimpleDateFormat("yyyy-mm-dd").format(dateOfBirth.getOrElse(sys.error("Could not find date of birth")))
+    AuthorityWizardPage.setDateOfBirth(date)
+    AuthorityWizardPage.setEmail(email.getOrElse(sys.error("Could not find email")))
+    AuthorityWizardPage.setAddressLine1("Address line 1")
+    AuthorityWizardPage.setAddressLine2("Address line 2")
+    AuthorityWizardPage.setPostCode("BN2 3EF")
+    AuthorityWizardPage.setCountryCode("01")
     AuthorityWizardPage.submit()
     EligiblePage.startCreatingAccount()
   }
 
   Then("""^they see their details$"""){ () ⇒
-    Page.getPageContent should include("Name: " + name.getOrElse(sys.error("Could not find name")))
-    Page.getPageContent should include("National Insurance number: " + nino.getOrElse(sys.error("Could not find NINO")))
-    Page.getPageContent should include("Date of Birth: " + dateOfBirth.getOrElse(sys.error("Could not find DoB")))
-    Page.getPageContent should include("Email: " + email.getOrElse(sys.error("Could not find email")))
+    Page.getPageContent should include(firstName.getOrElse(sys.error("Could not find first name")) + " " + lastName.getOrElse(sys.error("Could not find last name")))
+    Page.getPageContent should include(nino.getOrElse(sys.error("Could not find NINO")))
+    val date = new SimpleDateFormat("dd/mm/yyyy").format(dateOfBirth.getOrElse(sys.error("Could not find date of birth")))
+    Page.getPageContent should include(date)
+    Page.getPageContent should include(email.getOrElse(sys.error("Could not find email")))
   }
 }

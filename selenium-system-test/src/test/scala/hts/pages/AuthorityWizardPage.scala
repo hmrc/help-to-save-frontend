@@ -71,6 +71,9 @@ object AuthorityWizardPage extends WebPage {
   def setDateOfBirth(dateOfBirth: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.dateOfBirth")).foreach(_.underlying.sendKeys(dateOfBirth))
 
+  def setEmail(email: String)(implicit driver: WebDriver): Unit =
+    find(name("itmp.email")).foreach(_.underlying.sendKeys(email))
+
   def setAddressLine1(addressLine1: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.address.line1")).foreach(_.underlying.sendKeys(addressLine1))
 

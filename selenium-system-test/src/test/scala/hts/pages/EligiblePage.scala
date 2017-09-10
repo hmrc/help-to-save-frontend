@@ -16,11 +16,13 @@
 
 package hts.pages
 
+import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object EligiblePage extends WebPage {
 
   val pageTitle: String = "You're eligible"
+  val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
 
   def startCreatingAccount()(implicit driver: WebDriver): Unit = click on xpath(".//*[@type='submit']")
 

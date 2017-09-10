@@ -33,7 +33,7 @@ class SecuritySteps extends Steps with NINOGenerator {
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
-  Given(s"""^a user has logged in with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
+  Given(s"""^a user has logged in to Government Gateway with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
     AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", level, "Strong", generateEligibleNINO)
   }
 
@@ -41,7 +41,7 @@ class SecuritySteps extends Steps with NINOGenerator {
     Page.getCurrentUrl should include regex ("/iv/journey-result|iv%2Fjourney-result")
   }
 
-  Given("""^a user has NOT logged in$""") { () ⇒
+  Given("""^a user has NOT logged in to Government Gateway$""") { () ⇒
     // Do nothing
   }
 
@@ -62,7 +62,7 @@ class SecuritySteps extends Steps with NINOGenerator {
     CreateAccountPage.goToPage()
   }
 
-  Then("""^they are prompted to log in$""") { () ⇒
+  Then("""^they are prompted to log in to Government Gateway$""") { () ⇒
     Page.getCurrentUrl should include("gg/sign-in")
   }
 

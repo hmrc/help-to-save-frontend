@@ -62,11 +62,6 @@ class CreateAccountSteps extends Steps with NINOGenerator {
     ApplyPage.clickSignInLink()
   }
 
-  When("""^they choose to not create an account$""") { () ⇒
-    ConfirmDetailsPage.continue()
-    CreateAccountPage.exitWithoutCreatingAccount()
-  }
-
   When("""^they choose to create an account$""") { () ⇒
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
@@ -85,10 +80,6 @@ class CreateAccountSteps extends Steps with NINOGenerator {
     Page.getPageContent should include("Successfully created account")
   }
 
-  Then("""^they see the about page$""") { () ⇒
-    on(AboutPage)
-  }
-
   Then("""^they will be on the eligibility question page$""") { () ⇒
     on(EligibilityQuestionPage)
   }
@@ -99,5 +90,16 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   Then("""^they will be on the account home page$"""){ () ⇒
     Page.getPageContent contains "You've already got an account - yay!"
+  }
+
+  When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
+    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
+    EligiblePage.startCreatingAccount()
+    ConfirmDetailsPage.continue()
+    CreateAccountPage.exitWithoutCreatingAccount()
+  }
+
+  Then("""^they see the Help to Save landing page \(with information about Help to Save\)$"""){ () ⇒
+    on(AboutPage)
   }
 }
