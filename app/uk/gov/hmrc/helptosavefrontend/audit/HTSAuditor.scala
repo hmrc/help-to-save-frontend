@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.util
+package uk.gov.hmrc.helptosavefrontend.audit
 
 import javax.inject.{Inject, Singleton}
 
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuditConnector
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
+import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global

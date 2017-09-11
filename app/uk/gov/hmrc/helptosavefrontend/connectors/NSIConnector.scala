@@ -23,6 +23,7 @@ import com.google.inject.ImplementedBy
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
@@ -30,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO}
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http._
 
@@ -54,7 +55,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metrics: Metrics) extends NSIConnector with Logging with AppName {
+class NSIConnectorImpl @Inject()(conf: Configuration, auditor: HTSAuditor, metrics: Metrics) extends NSIConnector with Logging with AppName {
 
   val httpProxy: WSHttpProxy = new WSHttpProxy
 
@@ -72,25 +73,25 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
 
     httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
       .map[SubmissionResult] { response ⇒
-        val time = timeContext.stop()
+      val time = timeContext.stop()
 
-        response.status match {
-          case Status.CREATED ⇒
-            auditor.sendEvent(ApplicationSubmittedEvent(appName, userInfo))
-            logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino} ${timeString(time)}")
-            SubmissionSuccess()
+      response.status match {
+        case Status.CREATED ⇒
+          auditor.sendEvent(ApplicationSubmittedEvent(appName, userInfo))
+          logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino} ${timeString(time)}")
+          SubmissionSuccess()
 
-          case other ⇒
-            handleErrorStatus(other, response, userInfo.nino, time)
-        }
-      }.recover {
-        case e ⇒
-          val time = timeContext.stop()
-          metrics.nsiAccountCreationErrorCounter.inc()
-
-          logger.warn(s"Encountered error while trying to create account ${timeString(time)}", e)
-          SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage)
+        case other ⇒
+          handleErrorStatus(other, response, userInfo.nino, time)
       }
+    }.recover {
+      case e ⇒
+        val time = timeContext.stop()
+        metrics.nsiAccountCreationErrorCounter.inc()
+
+        logger.warn(s"Encountered error while trying to create account ${timeString(time)}", e)
+        SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage)
+    }
   }
 
   private def handleErrorStatus(status: Int, response: HttpResponse, nino: NINO, time: Long) = {
@@ -122,7 +123,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
     response.parseJson[SubmissionFailure] match {
       case Right(submissionFailure) ⇒ submissionFailure
-      case Left(error)              ⇒ SubmissionFailure(None, "", error)
+      case Left(error) ⇒ SubmissionFailure(None, "", error)
     }
   }
 }

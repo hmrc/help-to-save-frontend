@@ -96,6 +96,9 @@ class WSHttpProxy extends ws.WSHttp with WSProxy with RunMode with HttpAuditing 
   def post[A](url:     String,
               body:    A,
               headers: Map[String, String] = Map.empty[String, String]
-  )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] =
-    doPost(url, body, headers.toSeq)
+  )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
+    val httpResponse = doPost(url, body, headers.toSeq)
+    executeHooks(url, POST_VERB, None, httpResponse)
+    httpResponse
+  }
 }
