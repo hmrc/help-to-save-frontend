@@ -33,7 +33,7 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
 
     val cacheMap = CacheMap("1", Map("htsSession" -> Json.toJson(htsSession)))
 
-    val sessionCacheConnector = new SessionCacheConnectorImpl(mockWsHttp)
+    val sessionCacheConnector = new SessionCacheConnectorImpl(mockWsHttp, mockMetrics)
 
     val sessionId = headerCarrier.sessionId.getOrElse(sys.error("Could not find session iD"))
 

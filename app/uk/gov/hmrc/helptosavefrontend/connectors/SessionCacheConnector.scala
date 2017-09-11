@@ -21,6 +21,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{keyStoreDomain, keyStoreUrl, sessionCacheKey}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
@@ -42,7 +43,8 @@ trait SessionCacheConnector {
 }
 
 @Singleton
-class SessionCacheConnectorImpl @Inject() (val http: WSHttp) extends SessionCacheConnector with SessionCache with ServicesConfig with AppName {
+class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
+  extends SessionCacheConnector with SessionCache with ServicesConfig with AppName {
 
   override def defaultSource: String = appName
 
@@ -53,16 +55,31 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp) extends SessionCach
   override def domain: String = keyStoreDomain
 
   def put(body: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[CacheMap] =
-    EitherT[Future, String, CacheMap](
-      cache[HTSSession](sessionKey, body)(writes, hc).map(Right(_)).recover {
-        case NonFatal(e) ⇒ Left(e.getMessage)
+    EitherT[Future, String, CacheMap]{
+      val timerContext = metrics.keystoreWriteTimer.time()
+
+      cache[HTSSession](sessionKey, body)(writes, hc).map{ cacheMap ⇒
+        val _ = timerContext.stop()
+        Right(cacheMap)
+      }.recover {
+        case NonFatal(e) ⇒
+          val _ = timerContext.stop()
+          Left(e.getMessage)
       }
-    )
+    }
 
   def get(implicit reads: Reads[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[Option[HTSSession]] =
-    EitherT[Future, String, Option[HTSSession]](
-      fetchAndGetEntry[HTSSession](sessionKey)(hc, reads).map(Right(_)).recover {
-        case NonFatal(e) ⇒ Left(e.getMessage)
-      })
+    EitherT[Future, String, Option[HTSSession]]{
+      val timerContext = metrics.keystoreReadTimer.time()
+
+      fetchAndGetEntry[HTSSession](sessionKey)(hc, reads).map{ session ⇒
+        val _ = timerContext.stop()
+        Right(session)
+      }.recover {
+        case NonFatal(e) ⇒
+          val _ = timerContext.stop()
+          Left(e.getMessage)
+      }
+    }
 
 }

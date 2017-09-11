@@ -18,8 +18,8 @@ package uk.gov.hmrc.helptosavefrontend
 
 import java.util.UUID
 
-import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
+import com.codahale.metrics.Timer
+import com.kenshoo.play.metrics.{Metrics ⇒ PlayMetrics}
 import com.typesafe.config.Config
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
@@ -27,6 +27,7 @@ import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.{Headers, Session}
 import play.api.{Application, Configuration, Play}
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -59,9 +60,8 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
     super.afterAll()
   }
 
-  val mockMetrics = new Metrics {
-    override def defaultRegistry: MetricRegistry = new MetricRegistry
-    override def toJson: String = sys.error("toJSON method not used")
+  val mockMetrics = new Metrics(stub[PlayMetrics]) {
+    override def timer(name: String): Timer = new Timer()
   }
 
 }

@@ -14,14 +14,30 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.util
+package uk.gov.hmrc.helptosavefrontend.metrics
 
 import cats.instances.long._
 import cats.syntax.eq._
 
+import com.codahale.metrics.Timer
+import com.google.inject.{Inject, Singleton}
+
 import scala.annotation.tailrec
 
-object Time {
+@Singleton
+class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
+
+  protected def timer(name: String): Timer = metrics.defaultRegistry.timer(name)
+
+  val nsiAccountCreationTimer: Timer = timer("frontend.nsi-account-creation-time")
+
+  val keystoreWriteTimer: Timer = timer("frontend.keystore-write-time")
+
+  val keystoreReadTimer: Timer = timer("frontend.keystore-read-time")
+
+}
+
+object Metrics {
 
   private val timeWordToDenomination = List(
     "ns" → 1000L,

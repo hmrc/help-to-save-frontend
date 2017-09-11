@@ -20,17 +20,17 @@ import javax.inject.{Inject, Singleton}
 
 import com.codahale.metrics.Timer
 import com.google.inject.ImplementedBy
-import com.kenshoo.play.metrics.Metrics
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging}
-import uk.gov.hmrc.helptosavefrontend.util.Time.nanosToPrettyString
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http._
 
@@ -56,8 +56,6 @@ object NSIConnector {
 @Singleton
 class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metrics: Metrics) extends NSIConnector with Logging with AppName {
 
-  val timer: Timer = metrics.defaultRegistry.timer("nsi-account-creation-time-ns")
-
   val httpProxy: WSHttpProxy = new WSHttpProxy
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
@@ -70,7 +68,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
       ()
     )
 
-    val timeContext: Timer.Context = timer.time()
+    val timeContext: Timer.Context = metrics.nsiAccountCreationTimer.time()
 
     httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
       .map[SubmissionResult] { response ⇒
@@ -78,7 +76,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
 
         response.status match {
           case Status.CREATED ⇒
-            auditor.sendEvent(new ApplicationSubmittedEvent(appName, userInfo))
+            auditor.sendEvent(ApplicationSubmittedEvent(appName, userInfo))
             logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino} ${timeString(time)}")
             SubmissionSuccess()
 
