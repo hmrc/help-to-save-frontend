@@ -90,17 +90,14 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
     status match {
       case BAD_REQUEST ⇒
-        metrics.emailVerificationErrorCounter.inc()
         logger.warn(s"[EmailVerification] - Bad Request from email verification service (time: ${nanosToPrettyString(time)})")
         Left(RequestNotValidError)
 
       case CONFLICT ⇒
-        metrics.emailVerificationErrorCounter.inc()
         logger.info(s"[EmailVerification] - Email address already verified (time: ${nanosToPrettyString(time)})")
         Left(AlreadyVerified)
 
       case SERVICE_UNAVAILABLE ⇒
-        metrics.emailVerificationErrorCounter.inc()
         logger.warn(s"[EmailVerification] - Email Verification service not currently available (time: ${nanosToPrettyString(time)})")
         Left(VerificationServiceUnavailable)
 
