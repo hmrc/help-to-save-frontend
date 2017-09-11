@@ -93,28 +93,28 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
       }
   }
 
-  private def handleErrorStatus(status: Int, response: HttpResponse, nino: NINO, time: Long) = status match {
-    case Status.BAD_REQUEST ⇒
-      metrics.nsiAccountCreationErrorCounter.inc()
-      logger.warn(s"Failed to create an account for $nino due to bad request ${timeString(time)}")
-      handleBadRequestResponse(response)
+  private def handleErrorStatus(status: Int, response: HttpResponse, nino: NINO, time: Long) = {
+    metrics.nsiAccountCreationErrorCounter.inc()
 
-    case Status.INTERNAL_SERVER_ERROR ⇒
-      metrics.nsiAccountCreationErrorCounter.inc()
-      logger.warn(s"Received 500 from NSI, failed to create account for $nino as there was an " +
-        s"internal server error ${timeString(time)}")
-      handleBadRequestResponse(response)
+    status match {
+      case Status.BAD_REQUEST ⇒
+        logger.warn(s"Failed to create an account for $nino due to bad request ${timeString(time)}")
+        handleBadRequestResponse(response)
 
-    case Status.SERVICE_UNAVAILABLE ⇒
-      metrics.nsiAccountCreationErrorCounter.inc()
-      logger.warn(s"Received 503 from NSI, failed to create account for $nino as NSI " +
-        s"service is unavailable ${timeString(time)}")
-      handleBadRequestResponse(response)
+      case Status.INTERNAL_SERVER_ERROR ⇒
+        logger.warn(s"Received 500 from NSI, failed to create account for $nino as there was an " +
+          s"internal server error ${timeString(time)}")
+        handleBadRequestResponse(response)
 
-    case other ⇒
-      metrics.nsiAccountCreationErrorCounter.inc()
-      logger.warn(s"Unexpected error during creating account for $nino, status : $other ${timeString(time)}")
-      SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
+      case Status.SERVICE_UNAVAILABLE ⇒
+        logger.warn(s"Received 503 from NSI, failed to create account for $nino as NSI " +
+          s"service is unavailable ${timeString(time)}")
+        handleBadRequestResponse(response)
+
+      case other ⇒
+        logger.warn(s"Unexpected error during creating account for $nino, status : $other ${timeString(time)}")
+        SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
+    }
   }
 
   private def timeString(nanos: Long): String = s"(time: ${nanosToPrettyString(nanos)})"
