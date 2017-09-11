@@ -29,7 +29,7 @@ Run the Selenium tests separately by executing:
  ./run_selenium_system_test.sh ${ENV} ${BROWSER} ${DRIVERS}
 ```
 where `${ENV}` indicates the environment the tests should run on (one of `dev`, `qa` or `local`), `${BROWSER}` is
-the browser the tests should run on (one of `chrome` or `phantomjs`) and `${DRIVERS}` is the path to the folder
+the browser the tests should run on `chrome` and `${DRIVERS}` is the path to the folder
 containing the Selenium driver files. This command will not run the unit tests. To run only a subset of
 Selenium scenarios, tag the relevant scenarios and then run the command
  ```
@@ -39,9 +39,9 @@ where `${TAGS}` is a space separated list containing the relevant tags. Examples
 
 ```
 ./run_selenium_system_test.sh dev chrome /usr/local/bin/chromedriver           # (1) runs all selenium tests on the dev environment using chrome
-./run_selenium_system_test.sh qa phantomjs /usr/local/bin/chromedriver wip     # (2) runs selenium scenarios tagged with the '@wip' tag on the
-                                                                                #     QA environment using phantomJS
-./run_selenium_system_test.sh dev phantomjs /usr/local/bin/chromedriver @wip   # (3) the same as (2)
+./run_selenium_system_test.sh qa chrome /usr/local/bin/chromedriver wip     # (2) runs selenium scenarios tagged with the '@wip' tag on the
+                                                                                #     QA environment using chrome
+./run_selenium_system_test.sh dev chrome /usr/local/bin/chromedriver @wip   # (3) the same as (2)
 ./run_selenium_system_test.sh local chrome /usr/local/bin/chromedriver wip sit # (4) runs selenium scenarios tagged with either the '@wip' or '@sit'
                                                                                 #     tags locally using chrome
 ```
