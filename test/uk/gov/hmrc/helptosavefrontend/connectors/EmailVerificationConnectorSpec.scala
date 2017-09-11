@@ -57,7 +57,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       Map("email" → email, "nino" → nino))
 
   lazy val connector: EmailVerificationConnectorImpl =
-    new EmailVerificationConnectorImpl(mockHttp)
+    new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
 
   def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
@@ -129,7 +129,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
       val testConfig = Configuration("x" → "y")
 
       val http = mock[WSHttp]
-      an[Exception] should be thrownBy new EmailVerificationConnectorImpl(http) {
+      an[Exception] should be thrownBy new EmailVerificationConnectorImpl(http, mockMetrics) {
         override protected def runModeConfiguration: Configuration = testConfig
       }
     }

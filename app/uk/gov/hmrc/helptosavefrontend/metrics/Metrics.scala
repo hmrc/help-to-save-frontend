@@ -42,6 +42,10 @@ class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
 
   val keystoreReadErrorCounter: Counter = counter("frontend.keystore-read-error-counter")
 
+  val emailVerificationTimer: Timer = timer("frontend.email-verification-timer")
+
+  val emailVerificationErrorCounter: Counter = counter("frontend.email-verification-error-counter")
+
 }
 
 object Metrics {

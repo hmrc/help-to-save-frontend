@@ -19,9 +19,10 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import java.time.Duration
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.Configuration
 import play.api.http.Status._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging}
@@ -40,7 +41,7 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http: WSHttp)(implicit crypto: Crypto)
+class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(implicit crypto: Crypto)
   extends EmailVerificationConnector with ServicesConfig with Logging {
 
   val linkTTLMinutes: Int = getInt("microservice.services.email-verification.linkTTLMinutes")
@@ -61,31 +62,51 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp)(implicit crypto: C
       continueUrlWithParams,
       Map.empty[String, String])
 
+    val timerContext = metrics.emailVerificationTimer.time()
+
     http.post[EmailVerificationRequest](verifyEmailURL, verificationRequest).map[Either[VerifyEmailError, Unit]]{ (response: HttpResponse) ⇒
+      val time = timerContext.stop()
+
       response.status match {
         case OK | CREATED ⇒
-          logger.info(s"[EmailVerification] - Email verification successfully triggered")
+          logger.info(s"[EmailVerification] - Email verification successfully triggered (time: ${nanosToPrettyString(time)})")
           Right(())
 
-        case BAD_REQUEST ⇒
-          logger.warn("[EmailVerification] - Bad Request from email verification service")
-          Left(RequestNotValidError)
-
-        case CONFLICT ⇒
-          logger.info("[EmailVerification] - Email address already verified")
-          Left(AlreadyVerified)
-
-        case SERVICE_UNAVAILABLE ⇒
-          logger.warn("[EmailVerification] - Email Verification service not currently available")
-          Left(VerificationServiceUnavailable)
-
-        case status ⇒
-          logger.warn(s"[EmailVerification] - Unexpected status $status received from email verification body = ${response.body}")
-          Left(BackendError)
+        case other ⇒
+          handleErrorStatus(other, response, time)
       }
     }.recover{
       case NonFatal(e) ⇒
-        logger.warn(s"Error while calling email verification service: ${e.getMessage}")
+        val time = timerContext.stop()
+        metrics.emailVerificationErrorCounter.inc()
+
+        logger.warn(s"Error while calling email verification service: ${e.getMessage} (time: ${nanosToPrettyString(time)})")
+        Left(BackendError)
+    }
+  }
+
+  private def handleErrorStatus(status: Int, response: HttpResponse, time: Long): Either[VerifyEmailError, Unit] = {
+    metrics.emailVerificationErrorCounter.inc()
+
+    status match {
+      case BAD_REQUEST ⇒
+        metrics.emailVerificationErrorCounter.inc()
+        logger.warn(s"[EmailVerification] - Bad Request from email verification service (time: ${nanosToPrettyString(time)})")
+        Left(RequestNotValidError)
+
+      case CONFLICT ⇒
+        metrics.emailVerificationErrorCounter.inc()
+        logger.info(s"[EmailVerification] - Email address already verified (time: ${nanosToPrettyString(time)})")
+        Left(AlreadyVerified)
+
+      case SERVICE_UNAVAILABLE ⇒
+        metrics.emailVerificationErrorCounter.inc()
+        logger.warn(s"[EmailVerification] - Email Verification service not currently available (time: ${nanosToPrettyString(time)})")
+        Left(VerificationServiceUnavailable)
+
+      case other ⇒
+        logger.warn(s"[EmailVerification] - Unexpected status $other received from email verification" +
+          s" body = ${response.body} (time: ${nanosToPrettyString(time)})")
         Left(BackendError)
     }
   }
