@@ -19,18 +19,16 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import cats.instances.future._
-import cats.instances.string._
-import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -51,9 +49,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
   def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { _ ⇒
       checkIfDoneEligibilityChecks {
-        case (nsiUserInfo, _) ⇒ {
+        case (nsiUserInfo, _) ⇒
           Ok(views.html.register.confirm_details(nsiUserInfo))
-        }
       }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
