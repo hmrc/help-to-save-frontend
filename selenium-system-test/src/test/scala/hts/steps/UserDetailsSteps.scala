@@ -46,7 +46,7 @@ class UserDetailsSteps extends Steps with NINOGenerator {
           field match {
             case "first name" ⇒ firstName = value
             case "last name"  ⇒ lastName = value
-            case "NINO"       ⇒ nino = value
+            case "NINO"       ⇒ nino = Some(generateEligibleNINO)
             case "date of birth" ⇒ {
               val simpleDateFormat: SimpleDateFormat = new SimpleDateFormat("dd/mm/yyyy")
               dateOfBirth = Some(simpleDateFormat.parse(value.getOrElse(sys.error("Could not find date of birth"))))
@@ -65,7 +65,6 @@ class UserDetailsSteps extends Steps with NINOGenerator {
     AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
-    nino = Some(generateEligibleNINO)
     println("NINO: " + nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.setNino(nino.getOrElse(sys.error("Could not find NINO")))
     AuthorityWizardPage.setGivenName(firstName.getOrElse(sys.error("Could not find first name")))
