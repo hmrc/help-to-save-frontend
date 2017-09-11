@@ -21,11 +21,11 @@ import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object ApplyPage extends WebPage {
+  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply"
+
+  def navigate()(implicit driver: WebDriver): Unit = go to url
 
   def clickStartNow()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='button button--get-started']")
 
   def clickSignInLink()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='service-info']/ul/li/a")
-
-  def navigateToApplyPage()(implicit driver: WebDriver): Unit = go to s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply"
-
 }

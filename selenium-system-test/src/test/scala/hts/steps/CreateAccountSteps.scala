@@ -23,24 +23,24 @@ import hts.utils.{Configuration, NINOGenerator}
 class CreateAccountSteps extends Steps with NINOGenerator {
 
   Given("""^A user is at the start of the registration process$""") { () ⇒
-    AboutPage.navigateToAboutPage
+    AboutPage.navigate
   }
 
   Given("""^An authenticated user is at the start of the registration process$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save", 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(AboutPage.url, 200, "Strong", generateEligibleNINO)
   }
 
   Given("""^a user is on the apply page$""") { () ⇒
-    ApplyPage.navigateToApplyPage
+    ApplyPage.navigate
   }
 
   Given("""^an authenticated user is on the apply page$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply", 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(ApplyPage.url, 200, "Strong", generateEligibleNINO)
   }
 
   Given("""^a user has previously created an account$"""){ () ⇒
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
@@ -49,7 +49,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   When("""^they proceed through to the apply page$""") { () ⇒
     AboutPage.nextPage()
-    EligibilityPage.nextPage()
+    CheckEligibilityPage.nextPage()
     HowTheAccountWorksPage.nextPage()
     HowWeCalculateBonusesPage.nextPage()
   }
@@ -60,11 +60,6 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   When("""^they click on the sign in link$""") { () ⇒
     ApplyPage.clickSignInLink()
-  }
-
-  When("""^they choose to not create an account$""") { () ⇒
-    ConfirmDetailsPage.continue()
-    CreateAccountPage.exitWithoutCreatingAccount()
   }
 
   When("""^they choose to create an account$""") { () ⇒
@@ -78,15 +73,11 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
     driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", currentEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", currentEligibleNINO)
   }
 
   Then("""^they see that the account is created$""") { () ⇒
     Page.getPageContent should include("Successfully created account")
-  }
-
-  Then("""^they see the about page$""") { () ⇒
-    on(AboutPage)
   }
 
   Then("""^they will be on the eligibility question page$""") { () ⇒
@@ -99,5 +90,16 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   Then("""^they will be on the account home page$"""){ () ⇒
     Page.getPageContent contains "You've already got an account - yay!"
+  }
+
+  When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
+    EligiblePage.startCreatingAccount()
+    ConfirmDetailsPage.continue()
+    CreateAccountPage.exitWithoutCreatingAccount()
+  }
+
+  Then("""^they see the Help to Save landing page \(with information about Help to Save\)$"""){ () ⇒
+    on(AboutPage)
   }
 }

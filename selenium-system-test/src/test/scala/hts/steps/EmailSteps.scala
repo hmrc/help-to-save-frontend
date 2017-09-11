@@ -16,13 +16,14 @@
 
 package hts.steps
 
+import hts.pages.registrationPages.CheckEligibilityPage
 import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, EligiblePage}
 import hts.utils.{Configuration, NINOGenerator}
 
 class EmailSteps extends Steps with NINOGenerator {
 
   Given("""^an applicant is viewing their applicant details$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", currentEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", currentEligibleNINO)
     EligiblePage.startCreatingAccount()
   }
 

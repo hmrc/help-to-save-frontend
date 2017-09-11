@@ -23,7 +23,6 @@ import cats.syntax.eq._
 import cats.syntax.either._
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
-import org.openqa.selenium.phantomjs.{PhantomJSDriver, PhantomJSDriverService}
 import org.openqa.selenium.remote.DesiredCapabilities
 
 object Driver {
@@ -32,10 +31,9 @@ object Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome")    ⇒ Right(createChromeDriver())
-      case Some("phantomjs") ⇒ Right(createPhantomJsDriver())
-      case Some(other)       ⇒ Left(s"Unrecognised browser: $other")
-      case None              ⇒ Left("No browser set")
+      case Some("chrome") ⇒ Right(createChromeDriver())
+      case Some(other)    ⇒ Left(s"Unrecognised browser: $other")
+      case None           ⇒ Left("No browser set")
     }
 
     selectedDriver.foreach { driver ⇒
@@ -85,26 +83,4 @@ object Driver {
 
     new ChromeDriver(capabilities)
   }
-
-  private def createPhantomJsDriver(): WebDriver = {
-    val _ = if (isMac) {
-      systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs")
-    } else if (isLinux && linuxArch === "amd32") {
-      systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs_linux32")
-    } else {
-      systemProperties.setProperty("webdriver.phantomjs.binary", driverDirectory + "/phantomjs_linux64")
-    }
-
-    val capabilities = new DesiredCapabilities
-
-    capabilities.setJavascriptEnabled(isJsEnabled)
-    capabilities.setCapability(
-      PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
-      systemProperties.getProperty("webdriver.phantomjs.binary"))
-
-    capabilities.setCapability(PhantomJSDriverService.PHANTOMJS_CLI_ARGS, Array("--ignore-ssl-errors=yes", "--web-security=false", "--ssl-protocol=any"))
-
-    new PhantomJSDriver(capabilities)
-  }
-
 }

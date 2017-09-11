@@ -16,7 +16,8 @@
 
 package hts.steps
 
-import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, CreateAccountPage, Page}
+import hts.pages.registrationPages.CheckEligibilityPage
+import hts.pages._
 import hts.utils.{Configuration, NINOGenerator}
 
 class SecuritySteps extends Steps with NINOGenerator {
@@ -29,49 +30,48 @@ class SecuritySteps extends Steps with NINOGenerator {
 
   Given(s"""^a user has a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.setRedirect(Configuration.host + "/help-to-save/register/confirm-details")
+    AuthorityWizardPage.setRedirect(CheckEligibilityPage.url)
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
-  Given(s"""^a user has logged in with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", level, "Strong", generateEligibleNINO)
+  Given(s"""^a user has logged in to Government Gateway with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, level, "Strong", generateEligibleNINO)
   }
 
   Then("""^they are forced into going through IV before being able to proceed with their HtS application$""") { () ⇒
     Page.getCurrentUrl should include regex ("/iv/journey-result|iv%2Fjourney-result")
   }
 
-  Given("""^a user has NOT logged in$""") { () ⇒
+  Given("""^a user has NOT logged in to Government Gateway$""") { () ⇒
     // Do nothing
   }
 
   Given("""^a user has logged in$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
   }
 
   When("""^they have logged in and passed IV$"""){ () ⇒
     AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/access-account", 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(AccessAccountPage.url, 200, "Strong", generateEligibleNINO)
   }
 
   When("""^they try to view the user details page$""") { () ⇒
-    ConfirmDetailsPage.goToPage()
+    ConfirmDetailsPage.navigate()
   }
 
   When("""^they try to view the create-an-account page$""") { () ⇒
-    CreateAccountPage.goToPage()
+    CreateAccountPage.navigate()
   }
 
-  Then("""^they are prompted to log in$""") { () ⇒
+  Then("""^they are prompted to log in to Government Gateway$""") { () ⇒
     Page.getCurrentUrl should include("gg/sign-in")
   }
 
   Given("""^a user has logged in and passed IV$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
   }
 
   Then("""^the GG sign in page is visible$"""){ () ⇒
     driver.getCurrentUrl should include ("gg/sign-in?")
   }
-
 }

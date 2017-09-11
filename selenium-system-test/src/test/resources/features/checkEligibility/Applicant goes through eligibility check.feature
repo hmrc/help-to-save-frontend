@@ -1,5 +1,5 @@
-@RunOnlyInDev
-Feature: User undergoes eligibility check
+@HTS-90
+Feature: Applicant goes through eligibility check
 
   Scenario: User is in receipt of working tax credit and so is eligible
     Given an user is in receipt of working tax credit

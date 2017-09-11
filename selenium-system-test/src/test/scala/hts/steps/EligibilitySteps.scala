@@ -16,6 +16,7 @@
 
 package hts.steps
 
+import hts.pages.registrationPages.CheckEligibilityPage
 import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage, Page}
 import hts.utils.{Configuration, NINOGenerator}
 
@@ -28,10 +29,11 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   When("""^they apply for Help to Save$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(s"${Configuration.host}/help-to-save/check-eligibility", 200, "Strong", nino.getOrElse(""))
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", nino.getOrElse(""))
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () ⇒
+    on(EligiblePage)
     Page.getPageContent should include("You're eligible")
   }
 
