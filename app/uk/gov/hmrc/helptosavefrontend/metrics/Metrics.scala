@@ -14,14 +14,41 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.util
+package uk.gov.hmrc.helptosavefrontend.metrics
 
 import cats.instances.long._
 import cats.syntax.eq._
+import com.codahale.metrics.{Counter, Timer}
+import com.google.inject.{Inject, Singleton}
 
 import scala.annotation.tailrec
 
-object Time {
+@Singleton
+class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
+
+  protected def timer(name: String): Timer = metrics.defaultRegistry.timer(name)
+
+  protected def counter(name: String): Counter = metrics.defaultRegistry.counter(name)
+
+  val nsiAccountCreationTimer: Timer = timer("frontend.nsi-account-creation-time")
+
+  val nsiAccountCreationErrorCounter: Counter = counter("frontend.nsi-account-creation-error-counter")
+
+  val keystoreWriteTimer: Timer = timer("frontend.keystore-write-time")
+
+  val keystoreWriteErrorCounter: Counter = counter("frontend.keystore-write-error-counter")
+
+  val keystoreReadTimer: Timer = timer("frontend.keystore-read-time")
+
+  val keystoreReadErrorCounter: Counter = counter("frontend.keystore-read-error-counter")
+
+  val emailVerificationTimer: Timer = timer("frontend.email-verification-timer")
+
+  val emailVerificationErrorCounter: Counter = counter("frontend.email-verification-error-counter")
+
+}
+
+object Metrics {
 
   private val timeWordToDenomination = List(
     "ns" → 1000L,
