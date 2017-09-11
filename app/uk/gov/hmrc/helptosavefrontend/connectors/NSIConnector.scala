@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging}
+import uk.gov.hmrc.helptosavefrontend.util.{HTSAuditor, Logging, NINO}
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http._
 
@@ -80,30 +80,41 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
             logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino} ${timeString(time)}")
             SubmissionSuccess()
 
-          case Status.BAD_REQUEST ⇒
-            logger.warn(s"Failed to create an account for ${userInfo.nino} due to bad request ${timeString(time)}")
-            handleBadRequestResponse(response)
-
-          case Status.INTERNAL_SERVER_ERROR ⇒
-            logger.warn(s"Received 500 from NSI, failed to create account for ${userInfo.nino} as there was an " +
-              s"internal server error ${timeString(time)}")
-            handleBadRequestResponse(response)
-
-          case Status.SERVICE_UNAVAILABLE ⇒
-            logger.warn(s"Received 503 from NSI, failed to create account for ${userInfo.nino} as NSI " +
-              s"service is unavailable ${timeString(time)}")
-            handleBadRequestResponse(response)
-
           case other ⇒
-            logger.warn(s"Unexpected error during creating account for ${userInfo.nino}, status : $other ${timeString(time)}")
-            SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
+            handleErrorStatus(other, response, userInfo.nino, time)
         }
       }.recover {
         case e ⇒
           val time = timeContext.stop()
+          metrics.nsiAccountCreationErrorCounter.inc()
+
           logger.warn(s"Encountered error while trying to create account ${timeString(time)}", e)
           SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage)
       }
+  }
+
+  private def handleErrorStatus(status: Int, response: HttpResponse, nino: NINO, time: Long) = status match {
+    case Status.BAD_REQUEST ⇒
+      metrics.nsiAccountCreationErrorCounter.inc()
+      logger.warn(s"Failed to create an account for $nino due to bad request ${timeString(time)}")
+      handleBadRequestResponse(response)
+
+    case Status.INTERNAL_SERVER_ERROR ⇒
+      metrics.nsiAccountCreationErrorCounter.inc()
+      logger.warn(s"Received 500 from NSI, failed to create account for $nino as there was an " +
+        s"internal server error ${timeString(time)}")
+      handleBadRequestResponse(response)
+
+    case Status.SERVICE_UNAVAILABLE ⇒
+      metrics.nsiAccountCreationErrorCounter.inc()
+      logger.warn(s"Received 503 from NSI, failed to create account for $nino as NSI " +
+        s"service is unavailable ${timeString(time)}")
+      handleBadRequestResponse(response)
+
+    case other ⇒
+      metrics.nsiAccountCreationErrorCounter.inc()
+      logger.warn(s"Unexpected error during creating account for $nino, status : $other ${timeString(time)}")
+      SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
   }
 
   private def timeString(nanos: Long): String = s"(time: ${nanosToPrettyString(nanos)})"

@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend
 
 import java.util.UUID
 
-import com.codahale.metrics.Timer
+import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.{Metrics ⇒ PlayMetrics}
 import com.typesafe.config.Config
 import org.scalamock.scalatest.MockFactory
@@ -62,6 +62,7 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
 
   val mockMetrics = new Metrics(stub[PlayMetrics]) {
     override def timer(name: String): Timer = new Timer()
+    override def counter(name: String): Counter = new Counter()
   }
 
 }

@@ -64,6 +64,7 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
       }.recover {
         case NonFatal(e) ⇒
           val _ = timerContext.stop()
+          metrics.keystoreWriteErrorCounter.inc()
           Left(e.getMessage)
       }
     }
@@ -78,6 +79,7 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
       }.recover {
         case NonFatal(e) ⇒
           val _ = timerContext.stop()
+          metrics.keystoreReadErrorCounter.inc()
           Left(e.getMessage)
       }
     }
