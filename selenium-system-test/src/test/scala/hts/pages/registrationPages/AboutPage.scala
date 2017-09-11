@@ -21,9 +21,10 @@ import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object AboutPage extends WebPage {
+  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
 
-  def navigateToAboutPage()(implicit driver: WebDriver): Unit = {
-    go to s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
+  def navigate()(implicit driver: WebDriver): Unit = {
+    go to url
   }
 
   override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h2", "1. About Help to Save")

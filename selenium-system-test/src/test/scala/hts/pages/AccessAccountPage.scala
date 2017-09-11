@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package hts.pages.registrationPages
+package hts.pages
 
-import hts.pages.WebPage
+import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
-object EligibilityPage extends WebPage {
-
+object AccessAccountPage extends WebPage {
+  val url: String = s"${Configuration.host}/help-to-save/access-account"
 }

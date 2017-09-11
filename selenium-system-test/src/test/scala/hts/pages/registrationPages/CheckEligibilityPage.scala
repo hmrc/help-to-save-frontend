@@ -14,17 +14,11 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.registrationPages
 
+import hts.pages.WebPage
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
-object CreateAccountPage extends WebPage {
-
-  def navigate()(implicit driver: WebDriver): Unit = go to s"${Configuration.host}/help-to-save/register/create-an-account"
-
-  def createAccount()(implicit driver: WebDriver): Unit = click on "accept-and-create-account"
-
-  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit = click on "exit-without-creating-account"
-
+object CheckEligibilityPage extends WebPage {
+  val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
 }
