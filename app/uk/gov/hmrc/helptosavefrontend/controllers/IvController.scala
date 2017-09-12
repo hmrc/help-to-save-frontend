@@ -24,6 +24,7 @@ import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.util.Logging
@@ -37,7 +38,8 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
                               ivConnector:               IvConnector,
                               val messagesApi:           MessagesApi,
                               implicit val app:          Application,
-                              frontendAuthConnector:     FrontendAuthConnector)
+                              frontendAuthConnector:     FrontendAuthConnector,
+                              metrics:                   Metrics)
   extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport with Logging {
 
   def journeyResult(continueURL: String): Action[AnyContent] = authorisedForHts { // scalastyle:ignore cyclomatic.complexity method.length
@@ -50,47 +52,57 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
       case Some(id) ⇒
         ivConnector.getJourneyStatus(JourneyId(id)).map {
           case Some(Success) ⇒
+            metrics.ivSuccessCounter.inc()
             Ok(iv_success(decoded(continueURL)))
 
           case Some(Incomplete) ⇒
+            metrics.ivIncompleteCounter.inc()
             //The journey has not been completed yet.
             //This result can only occur when a service asks for the result too early (before receiving the redirect from IV)
             InternalServerError(user_aborted_or_incomplete(IvRetryUrl, allowContinue))
 
           case Some(FailedMatching) ⇒
+            metrics.ivFailedMatchingCounter.inc()
             //The user entered details on the Designatory Details page that could not be matched to an appropriate record in CID
             Unauthorized(failed_matching(IvRetryUrl))
 
           case Some(FailedIV) ⇒
+            metrics.ivFailedIVCounter.inc()
             //The user couldn't answer enough questions correctly to pass verification
             Unauthorized(failed_matching(IvRetryUrl))
 
           case Some(InsufficientEvidence) ⇒
+            metrics.ivInsufficientEvidenceCounter.inc()
             //The user was matched, but we do not have enough information about them to be able to produce the necessary set of questions
             // to ask them to meet the required Confidence Level
             Unauthorized(insufficient_evidence())
 
           case Some(UserAborted) ⇒
+            metrics.ivUserAbortedCounter.inc()
             //The user specifically chose to end the journey
             Unauthorized(user_aborted_or_incomplete(IvRetryUrl, allowContinue))
 
           case Some(LockedOut) ⇒
+            metrics.ivLockedOutCounter.inc()
             //The user failed to answer questions correctly and exceeded the lockout threshold
             Unauthorized(locked_out())
 
           case Some(PrecondFailed) ⇒
+            metrics.ivPreconditionFailedCounter.inc()
             // The user's authority does not meet the criteria for starting an IV journey.
             // This result implies the service should not have sent this user to IV,
             // as this condition can get determined by the user's authority. See below for a list of conditions that lead to this result
             Unauthorized(cant_confirm_identity(IvRetryUrl, allowContinue))
 
           case Some(TechnicalIssue) ⇒
+            metrics.ivTechnicalIssueCounter.inc()
             //A technical issue on the platform caused the journey to end.
             // This is usually a transient issue, so that the user should try again later
             logger.warn(s"TechnicalIssue response from identityVerificationFrontendService")
             Unauthorized(user_aborted_or_incomplete(IvRetryUrl, allowContinue))
 
           case Some(Timeout) ⇒
+            metrics.ivTimeoutCounter.inc()
             //The user took to long to proceed the journey and was timed-out
             Unauthorized(cant_confirm_identity(IvRetryUrl, allowContinue))
 
