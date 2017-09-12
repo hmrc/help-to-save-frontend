@@ -57,7 +57,8 @@ class IvControllerSpec extends AuthSupport {
                                            ivConnector,
                                            fakeApplication.injector.instanceOf[MessagesApi],
                                            fakeApplication,
-                                           mockAuthConnector)
+                                           mockAuthConnector,
+                                           mockMetrics)
 
   private val fakeRequest = FakeRequest("GET", s"/iv/journey-result?journeyId=${journeyId.Id}")
 

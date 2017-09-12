@@ -46,6 +46,26 @@ class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
 
   val emailVerificationErrorCounter: Counter = counter("frontend.email-verification-error-counter")
 
+  val ivSuccessCounter: Counter = counter("frontend.iv.success-counter")
+
+  val ivIncompleteCounter: Counter = counter("frontend.iv.incomplete-counter")
+
+  val ivFailedMatchingCounter: Counter = counter("frontend.iv.failed-matching-counter")
+
+  val ivFailedIVCounter: Counter = counter("frontend.iv.failed-iv-counter")
+
+  val ivInsufficientEvidenceCounter: Counter = counter("frontend.iv.insufficient-evidence-counter")
+
+  val ivUserAbortedCounter: Counter = counter("frontend.iv.user-aborted-counter")
+
+  val ivLockedOutCounter: Counter = counter("frontend.iv.locked-out-counter")
+
+  val ivPreconditionFailedCounter: Counter = counter("frontend.iv.precondition-failed-counter")
+
+  val ivTechnicalIssueCounter: Counter = counter("frontend.iv.technical-issue-counter")
+
+  val ivTimeoutCounter: Counter = counter("frontend.iv.timeout-counter")
+
 }
 
 object Metrics {
