@@ -17,7 +17,7 @@ fi
 
 # Returns a single string which contains the requested tags. Each tag is prepended with a single '@' character
 # and separated by a comma
-function get_tags {
+get_tags() {
  # convert the arguments into a string array
  local rawTags=("$@")
  # loop through the array and create a string which contains the tags each prepended with an '@' symbol
@@ -41,7 +41,7 @@ function get_tags {
 # Return the necessary java options as a single string. Each java option is surrounded by double quotes and
 # separated by a comma
 
-function get_java_opts {
+get_java_opts() {
   local auth_host
   local tags
   local driverLocation
@@ -83,7 +83,7 @@ function get_java_opts {
 }
 
 # Join a space delimited string with a given delimiter, e.g. 'join_by , "A B C"' returns the string "A,B,C"
-function join_by {
+join_by() {
   local IFS="$1"
   shift
   echo "$*"
