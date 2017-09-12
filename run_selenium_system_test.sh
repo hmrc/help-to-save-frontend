@@ -1,4 +1,4 @@
-    #!/bin/bash
+    #!/bin/sh
 
 USAGE="run_selenium_system_test.sh [env] [browser] [drivers] [tags: optional]
 
