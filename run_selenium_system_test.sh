@@ -1,10 +1,10 @@
-    #!/bin/sh
+#!/bin/bash
 
-USAGE="run_selenium_system_test.sh [env] [browser] [drivers] [tags: optional]
+USAGE="run_selenium_system_test.sh [env] [browser] [driver] [tags: optional]
 
 env     - The environment to run the tests on [ dev | qa | local ]
 browser - The browser to run the tests on [ chrome ]
-drivers - The path to the folder containing Selenium driver files
+driver  - The path to the folder containing Selenium driver files
 tags    - Space separated list of tags. Only run tests with the given
           tags. Not specifying any tags will run all tests.
           Tags with an '@' symbol."
