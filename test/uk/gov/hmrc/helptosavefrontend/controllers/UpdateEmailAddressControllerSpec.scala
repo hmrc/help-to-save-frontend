@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.net.URLDecoder
+
 import play.api.http.Status
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.Injector
@@ -33,6 +35,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.models.randomIneligibilityReason
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
 
@@ -113,9 +116,10 @@ class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndElig
       contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content")) shouldBe true
     }
 
-    "return an AlreadyVerified status and redirect the user to the email-verify-error page," +
+    "return an AlreadyVerified status and redirect the user to email verified page," +
       " given an email address of an already verified user " in {
-        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → "email@gmail.com")
+        val email = "email@gmail.com"
+        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
@@ -123,9 +127,26 @@ class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndElig
           mockEmailVerificationConn(Left(AlreadyVerified))
         }
         val result = await(controller.onSubmit()(fakePostRequest))
-        status(result) shouldBe Status.OK
-        contentAsString(result).contains(messagesApi("hts.email-verification.error.title")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.error.already-verified.content")) shouldBe true
+        status(result) shouldBe Status.SEE_OTHER
+
+        val redirectURL = redirectLocation(result)
+
+        redirectURL
+          .getOrElse(fail("Could not find redirect location"))
+          .split('=')
+          .toList match {
+            case _ :: param :: Nil ⇒
+              EmailVerificationParams.decode(URLDecoder.decode(param)) match {
+                case Success(params) ⇒
+                  params.nino shouldBe nino
+                  params.email shouldBe email
+
+                case Failure(e) ⇒ fail(s"Could not decode email verification parameters string: $param", e)
+              }
+
+            case _ ⇒ fail(s"Unexpected redirect location found: $redirectURL")
+          }
+
       }
 
     "return an OK status and redirect the user to the email_verify_error page with request not valid message" in {
