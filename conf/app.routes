@@ -28,3 +28,4 @@ GET        /iv/journey-result                               @uk.gov.hmrc.helptos
 GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.email.NewApplicantUpdateEmailAddressController.emailVerified(p: String)
 
 GET        /account/update-your-email-address               @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
+GET        /account/email-verified                          @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.emailVerified(p: String)

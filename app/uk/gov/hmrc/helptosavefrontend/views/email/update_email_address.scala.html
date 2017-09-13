@@ -18,7 +18,8 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
 
-@(emailAddress: String, returningUser: Boolean, form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.controllers.email.UserType
+@(emailAddress: String, form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, userType: UserType)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.introduction.title"),
@@ -29,11 +30,10 @@
 
 
     @defining(
-        if(returningUser) {
+        userType.fold(
+            uk.gov.hmrc.helptosavefrontend.controllers.email.routes.NewApplicantUpdateEmailAddressController.onSubmit(),
             uk.gov.hmrc.helptosavefrontend.controllers.email.routes.AccountHolderUpdateEmailAddressController.onSubmit()
-        } else {
-            uk.gov.hmrc.helptosavefrontend.controllers.email.routes.NewApplicantUpdateEmailAddressController.onSubmit()
-        }
+        )
     ) { callback =>
         @helpers.form(callback) {
             @defining(form.error("value").map(_.message)) { ek =>

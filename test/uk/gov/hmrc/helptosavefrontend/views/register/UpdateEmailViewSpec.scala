@@ -17,14 +17,15 @@
 package uk.gov.hmrc.helptosavefrontend.views.register
 
 import org.jsoup.Jsoup
+import uk.gov.hmrc.helptosavefrontend.controllers.email.UserType
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-import uk.gov.hmrc.helptosavefrontend.views.html.register.update_email_address
+import uk.gov.hmrc.helptosavefrontend.views.html.email.update_email_address
 
 class UpdateEmailViewSpec extends ViewBehavioursSpec {
 
   val mockHtsContext = mock[HtsContext]
-  lazy val view = update_email_address("email@gmail.com", false, UpdateEmailForm.verifyEmailForm)(mockHtsContext, request, messages)
+  lazy val view = update_email_address("email@gmail.com", UpdateEmailForm.verifyEmailForm)(mockHtsContext, request, messages, UserType.NewApplicant)
   lazy val document = Jsoup.parse(view.toString())
 
   "UpdateEmailView" should {

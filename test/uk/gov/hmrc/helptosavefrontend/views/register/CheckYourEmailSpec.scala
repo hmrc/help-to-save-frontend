@@ -17,13 +17,14 @@
 package uk.gov.hmrc.helptosavefrontend.views.register
 
 import org.jsoup.Jsoup
+import uk.gov.hmrc.helptosavefrontend.controllers.email.UserType
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-import uk.gov.hmrc.helptosavefrontend.views.html.register.check_your_email
+import uk.gov.hmrc.helptosavefrontend.views.html.email.check_your_email
 
 class CheckYourEmailSpec extends ViewBehavioursSpec {
 
   val mockHtsContext = mock[HtsContext]
-  lazy val view = check_your_email("")(mockHtsContext, request, messages)
+  lazy val view = check_your_email("")(mockHtsContext, request, messages, UserType.NewApplicant)
   lazy val document = Jsoup.parse(view.toString())
 
   "CheckYourEmail" when {

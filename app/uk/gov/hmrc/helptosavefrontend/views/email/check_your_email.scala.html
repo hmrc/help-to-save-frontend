@@ -18,7 +18,8 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 
-@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.controllers.email.UserType
+@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, userType: UserType)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.introduction.title"),
     sidebarLinks = None,
@@ -31,22 +32,35 @@
 
     <h2>Didn't receive an email?</h2>
     <p class="content">Click here to resend the verify email</p>
-    @helpers.form(routes.NewApplicantUpdateEmailAddressController.onSubmit())(
-        Html(
-            s"""
+    @defining(
+        userType.fold(
+            routes.NewApplicantUpdateEmailAddressController.onSubmit(),
+            routes.AccountHolderUpdateEmailAddressController.onSubmit()
+        )
+    ){ callback =>
+        @helpers.form(callback)(
+            Html(
+                s"""
              |<input type="hidden" name="value" value="$email">
              |${helpers.submit('_buttonClass -> "", 'id → "resend-verification") (Html("Resend email"))}
              |""".stripMargin
+            )
         )
-    )
+    }
 
     <br>
 
     <h2>Want to change your email address?</h2>
     <p class="content">Click here to change email address</p>
-    <a href=@routes.NewApplicantUpdateEmailAddressController.getUpdateYourEmailAddress()
-    id="update-email"
-    class="button">Change email address</a>
+    @defining(
+        userType.fold(
+            routes.NewApplicantUpdateEmailAddressController.getUpdateYourEmailAddress(),
+            routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress()
+        )
+    ){ callback =>
+        <a href=@callback id="update-email" class="button">Change email address</a>
+    }
+
 
 }
     

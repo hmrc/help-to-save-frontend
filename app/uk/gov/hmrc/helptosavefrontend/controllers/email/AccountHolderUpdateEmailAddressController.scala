@@ -23,6 +23,7 @@ import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
@@ -33,20 +34,34 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService: HelpToSaveService,
-                                                           frontendAuthConnector: FrontendAuthConnector
-)(implicit app: Application, val messagesApi: MessagesApi, ec: ExecutionContext)
-  extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport {
+class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService:          HelpToSaveService,
+                                                           frontendAuthConnector:          FrontendAuthConnector,
+                                                           val emailVerificationConnector: EmailVerificationConnector
+)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
+  extends HelpToSaveAuth(app, frontendAuthConnector) with VerifyEmailBehaviour with I18nSupport {
+
+  implicit val userType: UserType = UserType.AccountHolder
 
   def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled{
-      case (nino, email) ⇒
-        Ok(views.html.register.update_email_address(email, true, UpdateEmailForm.verifyEmailForm))
+      case (_, email) ⇒
+        Ok(views.html.email.update_email_address(email, UpdateEmailForm.verifyEmailForm))
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    Ok
+    checkIfAlreadyEnrolled{
+      case (nino, _) ⇒
+        sendEmailVerificationRequest(nino)
+    }
+  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
+    handleEmailVerified(
+      emailVerificationParams,
+      // TODO: this is where the call to update NS&I with the new email will happen
+      _ ⇒ Ok
+    )
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   /**
