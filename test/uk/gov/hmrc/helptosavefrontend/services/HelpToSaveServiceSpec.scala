@@ -92,6 +92,20 @@ class HelpToSaveServiceSpec extends TestSupport {
       }
     }
 
+    "get email" must {
+
+      val nino = "WM123456C"
+
+      "return a successful response" in {
+
+        (htsConnector.getEmail(_: String)(_: HeaderCarrier)).expects(nino, *)
+          .returning(EitherT.pure(None))
+
+        val result = htsService.getConfirmedEmail(nino)
+        result.value.futureValue.isRight should be(true)
+      }
+    }
+
     "checking eligibility" must {
 
       val nino = "WM123456C"

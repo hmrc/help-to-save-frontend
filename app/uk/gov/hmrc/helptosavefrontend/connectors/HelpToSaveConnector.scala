@@ -24,7 +24,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.EligibilityCheckResponse
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, GetEmailResponse}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
@@ -46,6 +46,8 @@ trait HelpToSaveConnector {
   def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
 
   def storeEmail(email: Email, nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
+
+  def getEmail(nino: NINO)(implicit hc: HeaderCarrier): Result[Option[String]]
 
 }
 
@@ -75,6 +77,9 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
     val encodedEmail = new String(base64Encoder.encode(email.getBytes()))
     handle(storeEmailURL(encodedEmail, nino), _ ⇒ Right(()), "store email", identity)
   }
+
+  def getEmail(nino: NINO)(implicit hc: HeaderCarrier): Result[Option[String]] =
+    handle(getEmailURL(nino), _.parseJson[GetEmailResponse].map(_.email), "get email", identity)
 
   private def handle[A, B](url:         String,
                            ifHTTP200:   HttpResponse ⇒ Either[B, A],
@@ -134,6 +139,9 @@ object HelpToSaveConnectorImpl {
 
     def storeEmailURL(email: Email, nino: NINO) =
       s"$helpToSaveUrl/help-to-save/store-email?email=$email&nino=$nino"
+
+    def getEmailURL(nino: NINO) =
+      s"$helpToSaveUrl/help-to-save/get-email?nino=$nino"
   }
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
@@ -144,6 +152,12 @@ object HelpToSaveConnectorImpl {
 
     implicit val format: Format[EligibilityCheckResponse] = Json.format[EligibilityCheckResponse]
 
+  }
+
+  private[connectors] case class GetEmailResponse(email: Option[String])
+
+  private[connectors] object GetEmailResponse {
+    implicit val format: Format[GetEmailResponse] = Json.format[GetEmailResponse]
   }
 
 }

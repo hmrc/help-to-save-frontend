@@ -18,26 +18,37 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
 
-@(emailAddress: String, form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(emailAddress: String, returningUser: Boolean, form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-  title = messages("hts.introduction.title"),
-  sidebarLinks = None,
-  bodyClasses = None) {
+    title = messages("hts.introduction.title"),
+    sidebarLinks = None,
+    bodyClasses = None) {
 
     <h1>@messages("hts.email-verification.title")</h1>
 
-    @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.UpdateEmailAddressController.onSubmit()) {
-        @defining(form.error("value").map(_.message)) { ek =>
-            @helpers.input_text(
-                id = "value",
-                label = messages("hts.email-verification.input.label"),
-                errorKey = ek.getOrElse(""),
-                value = ek.fold(emailAddress)(_ => "")
-            )
-            @helpers.submit('_buttonClass -> "") {
-                @messages("hts.email-verification.submit.text")
+
+    @defining(
+        if(returningUser) {
+            uk.gov.hmrc.helptosavefrontend.controllers.email.routes.AccountHolderUpdateEmailAddressController.onSubmit()
+        } else {
+            uk.gov.hmrc.helptosavefrontend.controllers.email.routes.NewApplicantUpdateEmailAddressController.onSubmit()
+        }
+    ) { callback =>
+        @helpers.form(callback) {
+            @defining(form.error("value").map(_.message)) { ek =>
+                @helpers.input_text(
+                    id = "value",
+                    label = messages("hts.email-verification.input.label"),
+                    errorKey = ek.getOrElse(""),
+                    value = ek.fold(emailAddress)(_ => "")
+                )
+                @helpers.submit('_buttonClass -> "") {
+                    @messages("hts.email-verification.submit.text")
+                }
             }
         }
+
     }
+
 }

@@ -15,7 +15,7 @@
  *@
 
 @import cats.syntax.show._
-@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.controllers.email.routes
 @import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 @import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.localDateShow
 
@@ -36,7 +36,7 @@
 <div class="divider--bottom">
     <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.email")
         <span><a style="float: right; font-weight: normal;"
-                 href=@routes.UpdateEmailAddressController.getUpdateYourEmailAddress()
+                 href=@routes.NewApplicantUpdateEmailAddressController.getUpdateYourEmailAddress()
                  data-ga-event-category = "links"
                  data-ga-event-action = "Change"
                  data-ga-event-label= "Confirm details page"

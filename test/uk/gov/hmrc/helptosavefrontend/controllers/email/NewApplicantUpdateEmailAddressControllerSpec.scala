@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+package uk.gov.hmrc.helptosavefrontend.controllers.email
 
 import java.net.URLDecoder
 
@@ -26,18 +26,18 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.NSIUserInfoOps
+import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, EnrolmentAndEligibilityCheckBehaviour}
+
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, VerifyEmailError, validNSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.helptosavefrontend.models.randomIneligibilityReason
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
+class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
 
   lazy val injector: Injector = fakeApplication.injector
   lazy val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -53,11 +53,16 @@ class UpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndElig
 
   val mockHttp: WSHttp = mock[WSHttp]
 
-  lazy val controller: UpdateEmailAddressController = new UpdateEmailAddressController(mockSessionCacheConnector, mockHelpToSaveService, frontendAuthConnector, mockEmailVerificationConnector
-  )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto, ec) {
+  lazy val controller: NewApplicantUpdateEmailAddressController =
+    new NewApplicantUpdateEmailAddressController(
+      mockSessionCacheConnector,
+      mockHelpToSaveService,
+      frontendAuthConnector,
+      mockEmailVerificationConnector
+    )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto, ec) {
 
-    override val authConnector = mockAuthConnector
-  }
+      override val authConnector = mockAuthConnector
+    }
 
   def mockEmailVerificationConn(result: Either[VerifyEmailError, Unit]) = {
     (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier)).expects(*, *, *)

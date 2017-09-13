@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+package uk.gov.hmrc.helptosavefrontend.controllers.email
 
 import javax.inject.Singleton
 
 import cats.data.EitherT
-import cats.instances.option._
 import cats.instances.future._
+import cats.instances.option._
 import cats.instances.string._
-import cats.syntax.traverse._
 import cats.syntax.eq._
+import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
-import uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.NSIUserInfoOps
+import uk.gov.hmrc.helptosavefrontend.controllers.{EnrolmentCheckBehaviour, HelpToSaveAuth, SessionBehaviour}
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
-import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture}
-import uk.gov.hmrc.helptosavefrontend.util.{Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -44,22 +43,22 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
-class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  SessionCacheConnector,
-                                              val helpToSaveService:      HelpToSaveService,
-                                              frontendAuthConnector:      FrontendAuthConnector,
-                                              emailVerificationConnector: EmailVerificationConnector
+class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnector:  SessionCacheConnector,
+                                                          val helpToSaveService:      HelpToSaveService,
+                                                          frontendAuthConnector:      FrontendAuthConnector,
+                                                          emailVerificationConnector: EmailVerificationConnector
 )(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, ec: ExecutionContext)
   extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport {
 
   def getUpdateYourEmailAddress: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { _ ⇒
       checkSession {
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
       } {
         _.eligibilityCheckResult.fold(
           Ok(views.html.core.not_eligible())
         )(userInfo ⇒ {
-            Ok(views.html.register.update_email_address(userInfo.contactDetails.email, UpdateEmailForm.verifyEmailForm))
+            Ok(views.html.register.update_email_address(userInfo.contactDetails.email, false, UpdateEmailForm.verifyEmailForm))
           })
       }
     }
@@ -68,11 +67,11 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { nino ⇒
       checkSession {
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
       } { _ ⇒
         UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
           formWithErrors ⇒ {
-            Future.successful(BadRequest(views.html.register.update_email_address("errors", formWithErrors)))
+            Future.successful(BadRequest(views.html.register.update_email_address("errors", false, formWithErrors)))
           },
           (details: UpdateEmail) ⇒ {
             emailVerificationConnector.verifyEmail(nino, details.email).map {
@@ -81,7 +80,7 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
 
               case Left(AlreadyVerified) ⇒
                 val encodedParams = EmailVerificationParams(nino, details.email).encode()
-                SeeOther(routes.UpdateEmailAddressController.emailVerified(encodedParams).url)
+                SeeOther(routes.NewApplicantUpdateEmailAddressController.emailVerified(encodedParams).url)
 
               case Left(other) ⇒
                 Ok(views.html.register.email_verify_error(other))
@@ -164,11 +163,3 @@ class UpdateEmailAddressController @Inject() (val sessionCacheConnector:  Sessio
 
 }
 
-object UpdateEmailAddressController {
-
-  implicit class NSIUserInfoOps(val nsiUserInfo: NSIUserInfo) {
-    def updateEmail(newEmail: String): NSIUserInfo =
-      nsiUserInfo.copy(contactDetails = nsiUserInfo.contactDetails.copy(email = newEmail))
-  }
-
-}

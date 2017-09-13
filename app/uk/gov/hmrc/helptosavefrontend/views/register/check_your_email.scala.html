@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.controllers.email.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 
@@ -31,7 +31,7 @@
 
     <h2>Didn't receive an email?</h2>
     <p class="content">Click here to resend the verify email</p>
-    @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.UpdateEmailAddressController.onSubmit())(
+    @helpers.form(routes.NewApplicantUpdateEmailAddressController.onSubmit())(
         Html(
             s"""
              |<input type="hidden" name="value" value="$email">
@@ -44,7 +44,7 @@
 
     <h2>Want to change your email address?</h2>
     <p class="content">Click here to change email address</p>
-    <a href=@routes.UpdateEmailAddressController.getUpdateYourEmailAddress()
+    <a href=@routes.NewApplicantUpdateEmailAddressController.getUpdateYourEmailAddress()
     id="update-email"
     class="button">Change email address</a>
 

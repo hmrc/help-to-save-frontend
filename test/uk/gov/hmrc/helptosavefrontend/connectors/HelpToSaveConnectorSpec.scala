@@ -25,7 +25,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.EligibilityCheckResponse
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, GetEmailResponse}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
@@ -265,6 +265,30 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           await(connector.storeEmail(email, nino).value) shouldBe Right(())
         }
     }
+
+    "getting emails" must {
+
+      val nino = "nino"
+
+      val email = "email"
+
+      behave like testCommon(
+        mockHttpGet(getEmailURL(nino)),
+        () ⇒ connector.getEmail(nino),
+        GetEmailResponse(None),
+        false
+      )
+
+      "return a Right if the call comes back with HTTP status 200 and " +
+        "valid JSON in the body" in {
+          mockHttpGet(getEmailURL(nino))(Some(HttpResponse(200, Some(Json.toJson(GetEmailResponse(Some(email)))))))
+          await(connector.getEmail(nino).value) shouldBe Right(Some(email))
+
+          mockHttpGet(getEmailURL(nino))(Some(HttpResponse(200, Some(Json.toJson(GetEmailResponse(None))))))
+          await(connector.getEmail(nino).value) shouldBe Right(None)
+        }
+    }
+
   }
 
   private def testCommon[E, A, B](mockGet:         ⇒ Option[HttpResponse] ⇒ Unit,
