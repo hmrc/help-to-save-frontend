@@ -41,6 +41,8 @@ trait HelpToSaveService {
 
   def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit]
 
+  def getConfirmedEmail(nino: NINO)(implicit hv: HeaderCarrier): Result[Option[String]]
+
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
 
 }
@@ -62,6 +64,9 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
 
   def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit] =
     helpToSaveConnector.storeEmail(email, nino)
+
+  def getConfirmedEmail(nino: NINO)(implicit hv: HeaderCarrier): Result[Option[String]] =
+    helpToSaveConnector.getEmail(nino)
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure, SubmissionSuccess]] {

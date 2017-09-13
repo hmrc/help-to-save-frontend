@@ -15,13 +15,16 @@ GET        /check-eligibility                               @uk.gov.hmrc.helptos
 GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 
-GET        /register/update-your-email-address              @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.getUpdateYourEmailAddress
+GET        /register/update-your-email-address              @uk.gov.hmrc.helptosavefrontend.controllers.email.NewApplicantUpdateEmailAddressController.getUpdateYourEmailAddress
 POST       /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
 GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 
-POST       /email/update                                    @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.onSubmit
+POST       /email/new-applicant-update                      @uk.gov.hmrc.helptosavefrontend.controllers.email.NewApplicantUpdateEmailAddressController.onSubmit
+POST       /email/account-holder-update                     @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.onSubmit
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String)
 
-GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.UpdateEmailAddressController.emailVerified(p: String)
+GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.email.NewApplicantUpdateEmailAddressController.emailVerified(p: String)
+
+GET        /account/update-your-email-address               @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
