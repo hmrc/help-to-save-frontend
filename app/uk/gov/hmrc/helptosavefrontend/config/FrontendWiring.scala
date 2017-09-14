@@ -23,20 +23,24 @@ import play.api.libs.ws.WSProxyServer
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.config.{AuditingConfig, LoadAuditingConfig}
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector ⇒ Auditing}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.http.hooks.HttpHook
 import uk.gov.hmrc.play.http.ws._
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse, ws}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpDelete, HttpGet, HttpPost, HttpPut, HttpResponse}
 
 import scala.concurrent.Future
 
-object FrontendAuditConnector extends Auditing with AppName {
+object FrontendAuditConnector extends AuditConnector with AppName {
   override lazy val auditingConfig: AuditingConfig = LoadAuditingConfig("auditing")
 }
 
 @ImplementedBy(classOf[WSHttpExtension])
-trait WSHttp extends WSGet with WSPut with WSPost with WSDelete {
+trait WSHttp
+  extends HttpGet with WSGet
+  with HttpPost with WSPost
+  with HttpPut with WSPut
+  with HttpDelete with WSDelete {
 
   def get(url: String)(implicit rhc: HeaderCarrier): Future[HttpResponse]
 
@@ -48,9 +52,13 @@ trait WSHttp extends WSGet with WSPut with WSPost with WSDelete {
 }
 
 @Singleton
-class WSHttpExtension extends WSHttp {
+class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
 
-  override val hooks: Seq[HttpHook] = NoneRequired
+  override val hooks: Seq[HttpHook] = Seq(AuditingHook)
+
+  override def auditConnector: AuditConnector = FrontendAuditConnector
+
+  override def appName: String = getString("appName")
 
   /**
    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
@@ -80,14 +88,14 @@ class WSHttpExtension extends WSHttp {
 class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector with ServicesConfig {
   override lazy val serviceUrl: String = baseUrl("auth")
 
-  override def http = wsHttp
+  override def http: WSHttp = wsHttp
 }
 
-class WSHttpProxy extends ws.WSHttp with WSProxy with RunMode with HttpAuditing with ServicesConfig {
+class WSHttpProxy extends WSPost with WSProxy with RunMode with HttpAuditing with ServicesConfig {
   override lazy val appName: String = getString("appName")
   override lazy val wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy")
   override val hooks: Seq[HttpHook] = Seq(AuditingHook)
-  override lazy val auditConnector: Auditing = FrontendAuditConnector
+  override lazy val auditConnector: AuditConnector = FrontendAuditConnector
 
   /**
    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
