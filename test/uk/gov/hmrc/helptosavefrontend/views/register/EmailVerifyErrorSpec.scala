@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.views.register
 import org.jsoup.Jsoup
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, VerifyEmailError}
-import uk.gov.hmrc.helptosavefrontend.views.html.register.email_verify_error
+import uk.gov.hmrc.helptosavefrontend.views.html.email.email_verify_error
 
 class EmailVerifyErrorSpec extends ViewBehavioursSpec {
 
