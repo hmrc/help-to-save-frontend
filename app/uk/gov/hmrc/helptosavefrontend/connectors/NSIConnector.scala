@@ -18,20 +18,21 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import javax.inject.{Inject, Singleton}
 
+import cats.data.EitherT
 import com.codahale.metrics.Timer
 import com.google.inject.ImplementedBy
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, Result}
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http._
 
@@ -40,6 +41,9 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[NSIConnectorImpl])
 trait NSIConnector {
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult]
+
+  def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit]
+
 }
 
 object NSIConnector {
@@ -62,7 +66,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
-    logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiUrl")
+    logger.info(s"Trying to create an account for ${userInfo.nino} using NSI endpoint $nsiCreateAccountUrl")
 
     FEATURE("log-account-creation-json", conf, logger).thenOrElse(
       logger.info(s"CreateAccount json for ${userInfo.nino} is ${Json.toJson(userInfo)}"),
@@ -71,7 +75,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
 
     val timeContext: Timer.Context = metrics.nsiAccountCreationTimer.time()
 
-    httpProxy.post(nsiUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
+    httpProxy.post(nsiCreateAccountUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
       .map[SubmissionResult] { response ⇒
         val time = timeContext.stop()
 
@@ -91,6 +95,33 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
 
           logger.warn(s"Encountered error while trying to create account ${timeString(time)}", e)
           SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage)
+      }
+  }
+
+  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
+    val timeContext: Timer.Context = metrics.nsiUpdateEmailTimer.time()
+
+    httpProxy.post(nsiUpdateEmailUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
+      .map[Either[String, Unit]] { response ⇒
+        val time = timeContext.stop()
+
+        response.status match {
+          case Status.OK ⇒
+            logger.info(s"Received 200 from NSI, successfully updated email for ${userInfo.nino} ${timeString(time)}")
+            Right(())
+
+          case other ⇒
+            metrics.nsiUpdateEmailErrorCounter.inc()
+            Left(s"Received unexpected status $other from NS&I while trying to update email ${timeString(time)}. " +
+              s"Body was ${response.body}")
+
+        }
+      }.recover {
+        case e ⇒
+          val time = timeContext.stop()
+          metrics.nsiUpdateEmailErrorCounter.inc()
+
+          Left(s"Encountered error while trying to create account: ${e.getMessage} ${timeString(time)}")
       }
   }
 

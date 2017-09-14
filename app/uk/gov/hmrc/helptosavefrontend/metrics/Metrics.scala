@@ -34,6 +34,10 @@ class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
 
   val nsiAccountCreationErrorCounter: Counter = counter("frontend.nsi-account-creation-error-counter")
 
+  val nsiUpdateEmailTimer: Timer = timer("frontend.nsi-update-email-time")
+
+  val nsiUpdateEmailErrorCounter: Counter = counter("frontend.nsi-update-email-error-counter")
+
   val keystoreWriteTimer: Timer = timer("frontend.keystore-write-time")
 
   val keystoreWriteErrorCounter: Counter = counter("frontend.keystore-write-error-counter")
