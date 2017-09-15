@@ -38,7 +38,7 @@
         @helpers.form(callback) {
             @defining(form.error("value").map(_.message)) { ek =>
                 @helpers.input_text(
-                    id = "value",
+                    id = "new-email-address",
                     label = messages("hts.email-verification.input.label"),
                     errorKey = ek.getOrElse(""),
                     value = ek.fold(emailAddress)(_ => "")
