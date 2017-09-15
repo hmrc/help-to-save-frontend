@@ -61,7 +61,7 @@ class UserDetailsSteps extends Steps with NINOGenerator {
   }
 
   When("""^an applicant passes the eligibility check$"""){ () ⇒
-    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.navigate()
     AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.setCredentialStrength("strong")
     AuthorityWizardPage.setConfidenceLevel(200)
