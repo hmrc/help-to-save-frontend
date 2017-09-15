@@ -25,17 +25,17 @@ import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, NSIUserInfo, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
@@ -45,6 +45,8 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
   val mockHelpToSaveService = mock[HelpToSaveService]
 
   val mockEmailVerificationConnector = mock[EmailVerificationConnector]
+
+  val mockNSIConnector = mock[NSIConnector]
 
   def mockEnrolmentCheck(input: NINO)(result: Either[String, EnrolmentStatus]): Unit =
     (mockHelpToSaveService.getUserEnrolmentStatus(_: NINO)(_: HeaderCarrier))
@@ -59,16 +61,21 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
   lazy val controller = new AccountHolderUpdateEmailAddressController(
     mockHelpToSaveService,
     mockAuthConnector,
-    mockEmailVerificationConnector
+    mockEmailVerificationConnector,
+    mockNSIConnector
   )(fakeApplication, crypto, fakeApplication.injector.instanceOf[MessagesApi], ec) {
     override val authConnector = mockAuthConnector
   }
 
-  def mockEmailVerificationConn(nino: String, email: String)(result: Either[VerifyEmailError, Unit]) = {
+  def mockEmailVerificationConn(nino: String, email: String)(result: Either[VerifyEmailError, Unit]) =
     (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier, _: UserType))
       .expects(nino, email, *, UserType.AccountHolder)
       .returning(Future.successful(result))
-  }
+
+  def mockUpdateEmailWithNSI(userInfo: NSIUserInfo)(result: Either[String, Unit]): Unit =
+    (mockNSIConnector.updateEmail(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(userInfo, *, *)
+      .returning(EitherT.fromEither[Future](result))
 
   "The AccountHolderUpdateEmailAddressController" when {
 
@@ -195,9 +202,79 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       }
 
     }
+
+    "handling verified emails" must {
+
+      val verifiedEmail = "new email"
+      val emailVerificationParams = EmailVerificationParams(nino, verifiedEmail)
+
+        def verifyEmail(params: String): Future[Result] =
+          controller.emailVerified(params)(FakeRequest())
+
+      behave like commonEnrolmentBehaviour(() ⇒ verifyEmail(emailVerificationParams.encode()))
+
+      "return an OK if the NINO in the URL matches the NINO from auth and the update with " +
+        "NS&I is successful" in {
+          inSequence{
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockEnrolmentCheck(nino)(Right(Enrolled(true)))
+            mockEmailGet(nino)(Right(Some("email")))
+            mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
+          }
+
+          val result = verifyEmail(emailVerificationParams.encode())
+          status(result) shouldBe OK
+        }
+
+      "return an error" when {
+
+        "the parameter in the URL cannot be decoded" in {
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+
+          val result = verifyEmail("random crap")
+          status(result) shouldBe OK
+          contentAsString(result) should include("Email verification error")
+        }
+
+        "the NINO in the URL does not match the NINO from auth" in {
+          inSequence{
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockEnrolmentCheck(nino)(Right(Enrolled(true)))
+            mockEmailGet(nino)(Right(Some("email")))
+          }
+
+          val result = verifyEmail(emailVerificationParams.copy(nino = "other nino").encode())
+          status(result) shouldBe INTERNAL_SERVER_ERROR
+        }
+
+        "there is missing user info from auth" in {
+          inSequence{
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
+            mockEnrolmentCheck(nino)(Right(Enrolled(true)))
+            mockEmailGet(nino)(Right(Some("email")))
+          }
+
+          val result = verifyEmail(emailVerificationParams.copy(nino = "other nino").encode())
+          status(result) shouldBe INTERNAL_SERVER_ERROR
+        }
+
+        "the call to NS&I to update the email is unsuccessful" in {
+          inSequence{
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockEnrolmentCheck(nino)(Right(Enrolled(true)))
+            mockEmailGet(nino)(Right(Some("email")))
+            mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Left(""))
+          }
+
+          val result = verifyEmail(emailVerificationParams.encode())
+          status(result) shouldBe INTERNAL_SERVER_ERROR
+        }
+
+      }
+    }
   }
 
-  def commonEnrolmentBehaviour(getResult: () ⇒ Future[Result]) = { // scalastyle:ignore method.length
+  def commonEnrolmentBehaviour(getResult: () ⇒ Future[Result]): Unit = { // scalastyle:ignore method.length
 
     "return an error" when {
 

@@ -18,17 +18,19 @@ package uk.gov.hmrc.helptosavefrontend.controllers.email
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.string._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
-import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -36,7 +38,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService:          HelpToSaveService,
                                                            frontendAuthConnector:          FrontendAuthConnector,
-                                                           val emailVerificationConnector: EmailVerificationConnector
+                                                           val emailVerificationConnector: EmailVerificationConnector,
+                                                           nSIConnector:                   NSIConnector
 )(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
   extends HelpToSaveAuth(app, frontendAuthConnector) with VerifyEmailBehaviour with I18nSupport {
 
@@ -59,10 +62,47 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
       emailVerificationParams,
-      // TODO: this is where the call to update NS&I with the new email will happen
-      _ ⇒ Ok
+      params ⇒
+        checkIfAlreadyEnrolled {
+          case (nino, _) ⇒
+            handleEmailVerified(nino, params)
+        }
     )
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  private def handleEmailVerified(nino: NINO, emailVerificationParams: EmailVerificationParams)(
+      implicit
+      request:    Request[AnyContent],
+      htsContext: HtsContext
+  ): Future[Result] = {
+    if (emailVerificationParams.nino =!= nino) {
+      logger.warn("Email was verified but nino in URL did not match nino for user")
+      InternalServerError
+    } else {
+      htsContext.userDetails match {
+
+        case None ⇒
+          logger.warn(s"For NINO [$nino]: email was verified but could not find user info ")
+          InternalServerError
+
+        case Some(Left(missingUserInfos)) ⇒
+          logger.warn(s"For NINO [$nino]: email was verified but missing some user info " +
+            s"(${missingUserInfos.missingInfo.mkString(",")}")
+          InternalServerError
+
+        case Some(Right(nsiUserInfo)) ⇒
+          nSIConnector.updateEmail(nsiUserInfo.updateEmail(emailVerificationParams.email)).fold(
+            { e ⇒
+              logger.warn(s"For NINO [$nino]: Could not update email with NS&I: $e")
+              InternalServerError
+            }, { _ ⇒
+              logger.info(s"For NINO [$nino]: successfully updated email with NS&I")
+              Ok("you've updated your email!")
+            }
+          )
+      }
+    }
+  }
 
   /**
    * Use the enrolment store and email store to see if the user is enrolled

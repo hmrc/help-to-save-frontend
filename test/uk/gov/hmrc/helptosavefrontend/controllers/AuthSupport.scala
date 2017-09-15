@@ -23,6 +23,9 @@ import uk.gov.hmrc.auth.core.retrieve.{AuthProviders, ItmpAddress, ItmpName, Nam
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserRetrievals
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.util.toJavaDate
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -65,6 +68,12 @@ trait AuthSupport extends TestSupport {
   val postCode = "BA148FY"
   val countryCode = "GB"
   val itmpAddress = ItmpAddress(Some(line1), Some(line2), Some(line3), None, None, Some(postCode), Some(countryCode), Some(countryCode))
+
+  val nsiUserInfo = NSIUserInfo(
+    firstName, lastName, toJavaDate(dob), nino, ContactDetails(
+    line1, line2, Some(line3), None, None, postCode, Some(countryCode), emailStr
+  )
+  )
 
   val mockedRetrievals = new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
   val mockedMissingUserInfo = new ~(name, noEmail) and Option(dob) and itmpName and itmpDob and itmpAddress.copy(line1 = None) and Enrolments(Set(enrolment))
