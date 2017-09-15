@@ -39,7 +39,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   Given("""^a user has previously created an account$"""){ () ⇒
-    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.navigate()
     AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()

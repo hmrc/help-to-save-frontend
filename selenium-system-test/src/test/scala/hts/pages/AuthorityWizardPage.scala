@@ -22,7 +22,7 @@ import org.openqa.selenium.WebDriver
 object AuthorityWizardPage extends WebPage {
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.navigate()
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
   }
 
@@ -44,7 +44,7 @@ object AuthorityWizardPage extends WebPage {
     submit()
   }
 
-  def goToPage()(implicit driver: WebDriver): Unit =
+  def navigate()(implicit driver: WebDriver): Unit =
     go to s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =

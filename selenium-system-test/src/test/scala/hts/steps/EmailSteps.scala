@@ -16,23 +16,63 @@
 
 package hts.steps
 
+import hts.pages._
 import hts.pages.registrationPages.CheckEligibilityPage
-import hts.pages.{AuthorityWizardPage, ConfirmDetailsPage, EligiblePage}
-import hts.utils.{Configuration, NINOGenerator}
+import hts.utils.NINOGenerator
 
 class EmailSteps extends Steps with NINOGenerator {
 
-  Given("""^an applicant is viewing their applicant details$"""){ () ⇒
+  Given("""^I am viewing my applicant details$"""){ () ⇒
     AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", currentEligibleNINO)
     EligiblePage.startCreatingAccount()
   }
 
-  When("""^they choose to change their email address$"""){ () ⇒
+  When("""^I choose to change my email address$"""){ () ⇒
     ConfirmDetailsPage.changeEmail()
+    ChangeEmailPage.setAndVerifyNewEmail("newemail@mail.com")
+  }
+
+  Then("""^I am asked to check my email account for a verification email$"""){ () ⇒
+    Page.getPageContent contains "Check your email"
+  }
+
+  Given("""^I've chosen to change my email address from A to B during the application process$"""){ () ⇒
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", currentEligibleNINO)
+    EligiblePage.startCreatingAccount()
+    ConfirmDetailsPage.changeEmail()
+    ChangeEmailPage.setAndVerifyNewEmail("newemail@mail.com")
+  }
+
+  Given("""^I want to receive a second verification email$"""){ () ⇒
+    //Do nothing
+  }
+
+  When("""^I request a re-send of the verification email$"""){ () ⇒
+    CheckYourEmailPage.resendVerificationEmail()
+  }
+
+  When("""^I verify email address B using the second verification email$"""){ () ⇒
 
   }
 
-  Then("""^they are asked to check their email account for a verification email$"""){ () ⇒
+  Then("""^I see that my saved email address is B$"""){ () ⇒
+
+  }
+
+  Given("""^I haven't yet verified new email address B$"""){ () ⇒
+    //Do nothing
+  }
+
+  When("""^I then choose to change the email address from B to C$"""){ () ⇒
+    CheckYourEmailPage.changeEmail()
+    ChangeEmailPage.setAndVerifyNewEmail("secondnewemail@mail.com")
+  }
+
+  When("""^I verify email address C$"""){ () ⇒
+
+  }
+
+  Then("""^I see that my saved email address is C$"""){ () ⇒
 
   }
 

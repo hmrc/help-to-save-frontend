@@ -29,7 +29,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   val credentialStrengthsRegex: String = oneOfRegex(Set("weak", "strong", "none"))
 
   Given(s"""^a user has a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
-    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.navigate()
     AuthorityWizardPage.setRedirect(CheckEligibilityPage.url)
     AuthorityWizardPage.setConfidenceLevel(level)
   }
@@ -51,7 +51,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   When("""^they have logged in and passed IV$"""){ () ⇒
-    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.navigate()
     AuthorityWizardPage.authenticateUser(AccessAccountPage.url, 200, "Strong", generateEligibleNINO)
   }
 
