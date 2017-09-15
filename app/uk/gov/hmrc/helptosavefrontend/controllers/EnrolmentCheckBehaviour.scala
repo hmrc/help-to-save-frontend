@@ -56,7 +56,7 @@ trait EnrolmentCheckBehaviour {
           }
         }
 
-        Ok("You've already got an account - yay!")
+        SeeOther(routes.NSIController.goToNSI().url)
 
       case (nino, EnrolmentStatus.NotEnrolled) ⇒
         ifNotEnrolled(nino)

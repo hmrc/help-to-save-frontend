@@ -69,7 +69,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = true)))
       }
 
-      status(getResult()) shouldBe OK
+      val result = getResult()
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
     }
 
     "redirect to NS&I if the user is already enrolled and set the ITMP flag " +
@@ -80,7 +82,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
           mockWriteITMPFlag(nino)(Right(()))
         }
 
-        status(getResult()) shouldBe OK
+        val result = getResult()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
       }
 
     "redirect to NS&I if the user is already enrolled even if there is an " +
@@ -91,7 +95,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
           mockWriteITMPFlag(nino)(Left(""))
         }
 
-        status(getResult()) shouldBe OK
+        val result = getResult()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
       }
 
     if (testRedirectOnNoSession) {
