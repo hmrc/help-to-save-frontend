@@ -29,7 +29,7 @@ GET        /email-verified                                  @uk.gov.hmrc.helptos
 
 GET        /account/update-your-email-address               @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
 GET        /account/email-verified                          @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.emailVerified(p: String)
-GET        /account/email-update                            @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getEmailUpdated
+GET        /account/email-updated                           @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getEmailUpdated
 GET        /account/email-update-error                      @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getEmailUpdateError
 
 GET        /nsi                                             @uk.gov.hmrc.helptosavefrontend.controllers.NSIController.goToNSI
