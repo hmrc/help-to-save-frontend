@@ -32,7 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, NSIUserInfo, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,6 +56,11 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
   def mockEmailGet(input: NINO)(result: Either[String, Option[String]]): Unit =
     (mockHelpToSaveService.getConfirmedEmail(_: NINO)(_: HeaderCarrier))
       .expects(input, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockStoreEmail(nino: NINO, email: Email)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveService.storeConfirmedEmail(_: Email, _: NINO)(_: HeaderCarrier))
+      .expects(email, nino, *)
       .returning(EitherT.fromEither[Future](result))
 
   lazy val controller = new AccountHolderUpdateEmailAddressController(
@@ -146,7 +151,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
             .split('=')
             .toList match {
               case _ :: param :: Nil ⇒
-                EmailVerificationParams.decode(URLDecoder.decode(param)) match {
+                EmailVerificationParams.decode(URLDecoder.decode(param, "UTF-8")) match {
                   case Success(params) ⇒
                     params.nino shouldBe nino
                     params.email shouldBe email
@@ -213,18 +218,39 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
       behave like commonEnrolmentBehaviour(() ⇒ verifyEmail(emailVerificationParams.encode()))
 
-      "return an OK if the NINO in the URL matches the NINO from auth and the update with " +
-        "NS&I is successful" in {
+      "show a success page if the NINO in the URL matches the NINO from auth, the update with " +
+        "NS&I is successful and the email is successfully updated in mongo" in {
           inSequence{
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Right(Enrolled(true)))
             mockEmailGet(nino)(Right(Some("email")))
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
+            mockStoreEmail(nino, verifiedEmail)(Right(()))
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
-          status(result) shouldBe OK
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
         }
+
+      "redirect to NS&I" when {
+
+        "the NINO in the URL matches the NINO from auth, the update with " +
+          "NS&I is successful but the email is not successfully updated in mongo" in {
+            inSequence{
+              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockEnrolmentCheck(nino)(Right(Enrolled(true)))
+              mockEmailGet(nino)(Right(Some("email")))
+              mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
+              mockStoreEmail(nino, verifiedEmail)(Left(""))
+            }
+
+            val result = verifyEmail(emailVerificationParams.encode())
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
+          }
+
+      }
 
       "return an error" when {
 
@@ -233,7 +259,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
           val result = verifyEmail("random crap")
           status(result) shouldBe OK
-          contentAsString(result) should include("Email verification error")
+          contentAsString(result) should include("There is an error with this verification link")
         }
 
         "the NINO in the URL does not match the NINO from auth" in {
@@ -267,7 +293,8 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
         }
 
       }

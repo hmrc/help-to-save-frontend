@@ -27,6 +27,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
+import uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.UpdateEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
@@ -50,14 +51,14 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
       case (_, email) ⇒
         Ok(views.html.email.update_email_address(email, UpdateEmailForm.verifyEmailForm))
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled{
       case (nino, _) ⇒
         sendEmailVerificationRequest(nino)
     }
-  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  } (redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.onSubmit().url)
 
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
@@ -68,7 +69,15 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             handleEmailVerified(nino, params)
         }
     )
-  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  } (redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
+
+  def getEmailUpdated: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
+    Ok(views.html.email.we_updated_your_email())
+  } (redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
+
+  def getEmailUpdateError: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
+    Ok(views.html.email.we_couldnt_update_your_email())
+  } (redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
 
   private def handleEmailVerified(nino: NINO, emailVerificationParams: EmailVerificationParams)(
       implicit
@@ -91,15 +100,23 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
           InternalServerError
 
         case Some(Right(nsiUserInfo)) ⇒
-          nSIConnector.updateEmail(nsiUserInfo.updateEmail(emailVerificationParams.email)).fold(
-            { e ⇒
+          val result: EitherT[Future, UpdateEmailError, Unit] = for {
+            _ ← nSIConnector.updateEmail(nsiUserInfo.updateEmail(emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
+            _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email, nino).leftMap[UpdateEmailError](UpdateEmailError.EmailMongoError)
+          } yield ()
+
+          result.fold({
+            case UpdateEmailError.NSIError(e) ⇒
               logger.warn(s"For NINO [$nino]: Could not update email with NS&I: $e")
-              InternalServerError
-            }, { _ ⇒
-              logger.info(s"For NINO [$nino]: successfully updated email with NS&I")
-              Ok("you've updated your email!")
-            }
-          )
+              SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
+
+            case UpdateEmailError.EmailMongoError(e) ⇒
+              logger.warn(s"For NINO [$nino]: Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I")
+              SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
+          }, { _ ⇒
+            logger.info(s"For NINO [$nino]: successfully updated email with NS&I")
+            SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
+          })
       }
     }
   }
@@ -138,5 +155,19 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         }
     }).flatMap(identity)
   }
+}
+
+object AccountHolderUpdateEmailAddressController {
+
+  private sealed trait UpdateEmailError
+
+  private object UpdateEmailError {
+
+    case class NSIError(message: String) extends UpdateEmailError
+
+    case class EmailMongoError(message: String) extends UpdateEmailError
+
+  }
+
 }
 

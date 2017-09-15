@@ -110,7 +110,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                     case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Process started to enrol user")
                   }
 
-                  Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page("Successfully created account"))
+                  SeeOther(routes.NSIController.goToNSI().url)
                 }
               )
             }

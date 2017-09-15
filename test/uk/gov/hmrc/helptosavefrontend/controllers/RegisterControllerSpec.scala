@@ -231,9 +231,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           }
 
           val result = doCreateAccountRequest()
-
-          val html = contentAsString(result)
-          html should include("Successfully created account")
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
         }
 
       "indicate to the user that the creation was successful " +
@@ -247,8 +246,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           }
 
           val result = doCreateAccountRequest()
-          val html = contentAsString(result)
-          html should include("Successfully created account")
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
         }
 
       "redirect the user to the confirm details page if the session indicates they have not done so already" in {

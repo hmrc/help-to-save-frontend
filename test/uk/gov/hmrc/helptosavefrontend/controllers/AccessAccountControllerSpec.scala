@@ -43,8 +43,8 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
       }
 
       val result = doRequest()
-      status(result) shouldBe 200
-      contentAsString(result) should include("You've already got an account - yay!")
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
     }
 
     "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
@@ -56,8 +56,8 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
         }
 
         val result = doRequest()
-        status(result) shouldBe 200
-        contentAsString(result) should include("You've already got an account - yay!")
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
       }
 
     "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {
