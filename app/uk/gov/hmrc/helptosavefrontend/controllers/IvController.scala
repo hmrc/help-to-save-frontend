@@ -23,10 +23,11 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
+import uk.gov.hmrc.helptosavefrontend.repositories.SessionCache
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.helptosavefrontend.views.html.access_denied
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
@@ -34,7 +35,7 @@ import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import scala.concurrent.Future
 
 @Singleton
-class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
+class IvController @Inject() (val sessionCacheConnector: SessionCache,
                               ivConnector:               IvConnector,
                               val messagesApi:           MessagesApi,
                               implicit val app:          Application,

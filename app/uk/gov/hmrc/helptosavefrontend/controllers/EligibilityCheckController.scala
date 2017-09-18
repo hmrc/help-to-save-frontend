@@ -27,9 +27,9 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
-import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.repositories.SessionCache
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -41,7 +41,7 @@ import scala.util.{Failure, Success}
 
 class EligibilityCheckController @Inject() (val messagesApi:             MessagesApi,
                                             val helpToSaveService:       HelpToSaveService,
-                                            val sessionCacheConnector:   SessionCacheConnector,
+                                            val sessionCacheConnector:   SessionCache,
                                             jsonSchemaValidationService: JSONSchemaValidationService,
                                             val app:                     Application,
                                             auditor:                     HTSAuditor,
@@ -117,7 +117,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
         val maybeUserInfo = eligible.result.fold(_ ⇒ None, _ ⇒ Some(nsiUserInfo))
         HTSSession(maybeUserInfo, None)
       }
-      _ ← sessionCacheConnector.put(session).leftMap[Error](Error.apply)
+      _ ← sessionCacheConnector.store(session).leftMap[Error](Error.apply)
     } yield EligibilityResultWithUserInfo(eligible.result.map(e ⇒ e -> nsiUserInfo))
 
   private def getUserInformation()(implicit htsContext: HtsContext): EitherT[Future, Error, NSIUserInfo] =

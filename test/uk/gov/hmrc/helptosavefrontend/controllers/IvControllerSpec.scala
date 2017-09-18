@@ -27,8 +27,9 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.retrieve.{AuthProviders, EmptyRetrieval, Retrieval}
-import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
+import uk.gov.hmrc.helptosavefrontend.repositories.SessionCache
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -46,7 +47,7 @@ class IvControllerSpec extends AuthSupport {
     (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
       .returning(Future.successful(IvSuccessResponse.fromString(ivServiceResponse)))
 
-  val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
+  val mockSessionCacheConnector: SessionCache = mock[SessionCache]
 
   private def mockAuthConnectorResult() = {
     (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))

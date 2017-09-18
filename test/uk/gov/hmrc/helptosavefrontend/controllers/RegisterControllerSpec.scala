@@ -30,8 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
-import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -48,7 +47,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
   val controller: RegisterController = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
-    mockSessionCacheConnector,
+    mockSessionCache,
     fakeApplication,
     frontendAuthConnector)(
     ec, crypto) {
@@ -90,7 +89,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+            mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           }
 
           val result = doRequest()
@@ -116,8 +115,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+            mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+            mockSessionCachePut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(()))
             mockEmailUpdate(email, nino)(Left(""))
           }
           await(doRequest(email))
@@ -127,8 +126,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+          mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          mockSessionCachePut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(()))
           mockEmailUpdate(email, nino)(Right(()))
         }
 
@@ -143,8 +142,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Left(""))
+            mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+            mockSessionCachePut(HTSSession(Some(validNSIUserInfo), Some(email)))(Left(""))
           }
 
           val result = doRequest(email)
@@ -155,8 +154,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+            mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+            mockSessionCachePut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(()))
             mockEmailUpdate(email, nino)(Left(""))
           }
 
@@ -179,7 +178,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
         val result = doRequest()
@@ -191,7 +190,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(email)))))
+          mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(email)))))
         }
 
         val result = doRequest()
@@ -213,7 +212,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
+            mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
             mockEnrolUser(nino)(Right(()))
           }
@@ -228,7 +227,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
+            mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
             mockEnrolUser(nino)(Left("Oh no"))
           }
@@ -242,7 +241,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
         val result = doCreateAccountRequest()
@@ -256,7 +255,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
+            mockSessionCacheGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }
 
