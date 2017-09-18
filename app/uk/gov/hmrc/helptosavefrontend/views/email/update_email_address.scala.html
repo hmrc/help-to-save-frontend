@@ -39,6 +39,7 @@
             @defining(form.error("new-email-address").map(_.message)) { ek =>
                 @helpers.input_text(
                     id = "new-email-address",
+                    name = "new-email-address",
                     label = messages("hts.email-verification.input.label"),
                     errorKey = ek.getOrElse(""),
                     value = ek.fold(emailAddress)(_ => "")
