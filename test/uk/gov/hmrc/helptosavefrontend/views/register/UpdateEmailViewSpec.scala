@@ -44,11 +44,11 @@ class UpdateEmailViewSpec extends ViewBehavioursSpec {
     }
 
     "contain a label for the value" in {
-      assertContainsLabel(document, "value", messages("hts.email-verification.input.label"))
+      assertContainsLabel(document, "new-email-address", messages("hts.email-verification.input.label"))
     }
 
     "contain an input for the value" in {
-      assertRenderedById(document, "value")
+      assertRenderedById(document, "new-email-address")
     }
 
     "contains the correct text on the submit button" in {

@@ -41,7 +41,7 @@
         @helpers.form(callback)(
             Html(
                 s"""
-             |<input type="hidden" name="value" value="$email">
+             |<input type="hidden" name="new-email-address" value="$email">
              |${helpers.submit('_buttonClass -> "", 'id → "resend-verification") (Html("Resend email"))}
              |""".stripMargin
             )
