@@ -112,7 +112,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     val email = "email@gmail.com"
 
     "return the check your email page with a status of Ok, given a valid email address " in {
-      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
@@ -128,7 +128,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     "return an AlreadyVerified status and redirect the user to email verified page," +
       " given an email address of an already verified user " in {
         val email = "email@gmail.com"
-        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
@@ -159,7 +159,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       }
 
     "return an OK status and redirect the user to the email_verify_error page with request not valid message" in {
-      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
@@ -173,7 +173,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     }
 
     "return an OK status and redirect the user to the email_verify_error page with verification service unavailable message" in {
-      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
@@ -187,7 +187,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     }
 
     "return an OK status and redirect the user to the email_verify_error page with backend error message" in {
-      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))

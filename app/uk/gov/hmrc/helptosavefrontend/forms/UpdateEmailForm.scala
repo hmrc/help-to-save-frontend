@@ -22,7 +22,7 @@ import play.api.i18n.Lang
 
 object UpdateEmailForm {
   val verifyEmailForm: Form[UpdateEmail] = Form(
-    mapping("value" -> email
+    mapping("new-email-address" -> email
     )(UpdateEmail.apply)(UpdateEmail.unapply)
   )
 }

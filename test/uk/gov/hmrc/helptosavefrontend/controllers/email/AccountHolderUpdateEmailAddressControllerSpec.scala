@@ -113,10 +113,10 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
       lazy val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
-      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
 
         def submit(email: String): Future[Result] =
-          controller.onSubmit()(FakeRequest().withFormUrlEncodedBody("value" → email))
+          controller.onSubmit()(FakeRequest().withFormUrlEncodedBody("new-email-address" → email))
 
       behave like commonEnrolmentBehaviour(() ⇒ submit("email"))
 
@@ -165,7 +165,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
         }
 
       "return an OK status and redirect the user to the email_verify_error page with request not valid message" in {
-        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(enrolled))
@@ -179,7 +179,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       }
 
       "return an OK status and redirect the user to the email_verify_error page with verification service unavailable message" in {
-        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(enrolled))
@@ -193,7 +193,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       }
 
       "return an OK status and redirect the user to the email_verify_error page with backend error message" in {
-        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("value" → email)
+        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(enrolled))
