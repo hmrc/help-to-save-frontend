@@ -54,7 +54,7 @@ trait WSHttp
 @Singleton
 class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
 
-  override val hooks: Seq[HttpHook] = Seq(AuditingHook)
+  override val hooks: Seq[HttpHook] = NoneRequired
 
   override def auditConnector: AuditConnector = FrontendAuditConnector
 
@@ -94,7 +94,7 @@ class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector
 class WSHttpProxy extends WSPost with WSProxy with RunMode with HttpAuditing with ServicesConfig {
   override lazy val appName: String = getString("appName")
   override lazy val wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy")
-  override val hooks: Seq[HttpHook] = Seq(AuditingHook)
+  override val hooks: Seq[HttpHook] = NoneRequired
   override lazy val auditConnector: AuditConnector = FrontendAuditConnector
 
   /**
