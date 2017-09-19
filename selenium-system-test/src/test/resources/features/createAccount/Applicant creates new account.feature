@@ -8,6 +8,7 @@ Feature: Applicant creates new account
     And they choose to create an account
     Then they see that the account is created
 
+  @zap
   Scenario: An unauthenticated eligible user wishes to create an account but comes through the sign in link
     Given a user is on the apply page
     When they click on the sign in link
@@ -19,6 +20,7 @@ Feature: Applicant creates new account
     And they choose to create an account
     Then they see that the account is created
 
+  @zap
   Scenario: An authenticated eligible user wishes to create an account but comes through the sign in link
     Given an authenticated user is on the apply page
     When they click on the sign in link

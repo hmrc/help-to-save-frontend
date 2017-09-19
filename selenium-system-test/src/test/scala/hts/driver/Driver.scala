@@ -31,9 +31,10 @@ object Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome") ⇒ Right(createChromeDriver())
-      case Some(other)    ⇒ Left(s"Unrecognised browser: $other")
-      case None           ⇒ Left("No browser set")
+      case Some("chrome")     ⇒ Right(createChromeDriver())
+      case Some("zap-chrome") ⇒ Right(createZapChromeDriver())
+      case Some(other)        ⇒ Left(s"Unrecognised browser: $other")
+      case None               ⇒ Left("No browser set")
     }
 
     selectedDriver.foreach { driver ⇒
@@ -82,5 +83,31 @@ object Driver {
     capabilities.setCapability(ChromeOptions.CAPABILITY, options)
 
     new ChromeDriver(capabilities)
+  }
+
+  private def createZapChromeDriver(): WebDriver = {
+    if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
+      if (isMac) {
+        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
+      } else if (isLinux && linuxArch === "amd32") {
+        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")
+      } else if (isLinux) {
+        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver")
+      } else {
+        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
+      }
+    }
+
+    val capabilities = DesiredCapabilities.chrome()
+    val options = new ChromeOptions()
+    options.addArguments("test-type")
+    options.addArguments("--proxy-server=http://localhost:11000")
+    capabilities.setCapability(ChromeOptions.CAPABILITY, options)
+    val driver = new ChromeDriver(capabilities)
+    val caps = driver.getCapabilities
+    val browserName = caps.getBrowserName
+    val browserVersion = caps.getVersion
+    println("Browser name & version: " + browserName + " " + browserVersion)
+    driver
   }
 }
