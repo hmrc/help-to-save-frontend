@@ -11,7 +11,7 @@ Feature: Applicant changes their email
     Given I've chosen to change my email address from A to B during the application process
     But I want to receive a second verification email
     When I request a re-send of the verification email
-    #Query: see HTS-400
+    Then I am asked to check my email account for a verification email
 
   @HTS-399
   Scenario: Applicant changes their mind about the new address they provided

@@ -34,7 +34,6 @@ class EligibilitySteps extends Steps with NINOGenerator {
 
   Then("""^they see that they are eligible for Help to Save$""") { () ⇒
     on(EligiblePage)
-    Page.getPageContent should include("You're eligible")
   }
 
   When("""^they start to create an account$"""){ () ⇒

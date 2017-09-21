@@ -14,14 +14,31 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.utils
 
-import org.openqa.selenium.WebDriver
+import scala.collection.mutable.Map
 
-object NotEligiblePage extends WebPage {
+object ScenarioContext {
+  var map = Map.empty[String, Any]
 
-  private val pageTitle = "You're not eligible for Help to Save"
+  def set(key: String, value: Any) {
+    map.put(key, value)
+  }
 
-  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h1", pageTitle)
+  def get[T: Manifest](key: String): T = {
+    map.get(key) match {
+      case Some(obj) ⇒ obj.asInstanceOf[T]
+      case None      ⇒ throw new Exception("Map not found")
+    }
+  }
+  //  def get(key: String): Any = {
+  //    map.get(key) match {
+  //      case Some(obj) ⇒ obj
+  //      case None      ⇒ throw new Exception("Map not found")
+  //    }
+  //  }
 
+  def reset() {
+    map = Map.empty[String, Any]
+  }
 }

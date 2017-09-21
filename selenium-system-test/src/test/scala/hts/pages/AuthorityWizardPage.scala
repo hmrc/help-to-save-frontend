@@ -18,6 +18,9 @@ package hts.pages
 
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
+import uk.gov.hmrc.helptosavefrontend.models.UserInfo
+
+import scala.util.Try
 
 object AuthorityWizardPage extends WebPage {
 
@@ -42,6 +45,30 @@ object AuthorityWizardPage extends WebPage {
     setPostCode("S24AH")
     setCountryCode("01")
     submit()
+  }
+
+  def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: Option[UserInfo])(implicit driver: WebDriver): Unit = {
+    navigate()
+    setConfidenceLevel(confidence)
+    setCredentialStrength(credentialStrength)
+
+    println("userInfo: " + userInfo.toString)
+    val info = userInfo.getOrElse(fail("User info not found"))
+
+    Option(info.address.lines(0)).map(line0 ⇒ setAddressLine1(line0))
+    Option(info.address.lines(1)).map(line1 ⇒ setAddressLine2(line1))
+    Try(info.address.lines(2)).toOption.map(line2 ⇒ setAddressLine3(line2))
+    Try(info.address.lines(3)).toOption.map(line3 ⇒ setAddressLine4(line3))
+    Try(info.address.lines(4)).toOption.map(line4 ⇒ setAddressLine5(line4))
+
+    info.address.postcode.map(postcode ⇒ setPostCode(postcode))
+    info.address.country.map(countryCode ⇒ setCountryCode(countryCode))
+
+    Option(info.forename).map(forename ⇒ setGivenName(forename))
+    Option(info.surname).map(familyName ⇒ setFamilyName(familyName))
+    Option(info.nino).map(nino ⇒ setNino(nino))
+
+    setDateOfBirth(info.dateOfBirth.toString)
   }
 
   def navigate()(implicit driver: WebDriver): Unit =
