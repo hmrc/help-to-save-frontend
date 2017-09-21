@@ -16,12 +16,6 @@
 
 package hts.pages
 
-import org.openqa.selenium.WebDriver
-
-object NotEligiblePage extends WebPage {
-
-  private val pageTitle = "You're not eligible for Help to Save"
-
-  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h1", pageTitle)
-
+object NSIManageAccountPage extends WebPage {
+  val url: String = "https://www.nsandi.com/"
 }

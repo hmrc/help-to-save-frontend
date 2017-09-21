@@ -18,12 +18,13 @@ package hts.steps
 
 import hts.pages._
 import hts.pages.registrationPages._
-import hts.utils.{Configuration, NINOGenerator}
+import hts.utils.{Configuration, NINOGenerator, ScenarioContext}
+import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 
 class CreateAccountSteps extends Steps with NINOGenerator {
 
   Given("""^A user is at the start of the registration process$""") { () ⇒
-    AboutPage.navigate
+    AboutPage.navigate()
   }
 
   Given("""^An authenticated user is at the start of the registration process$""") { () ⇒
@@ -31,7 +32,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   Given("""^a user is on the apply page$""") { () ⇒
-    ApplyPage.navigate
+    ApplyPage.navigate()
   }
 
   Given("""^an authenticated user is on the apply page$""") { () ⇒
@@ -77,7 +78,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   Then("""^they see that the account is created$""") { () ⇒
-    Page.getPageContent should include("Successfully created account")
+    Page.getCurrentUrl should include("www.nsandi.com")
   }
 
   Then("""^they will be on the eligibility question page$""") { () ⇒
@@ -89,7 +90,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   Then("""^they will be on the account home page$"""){ () ⇒
-    Page.getPageContent contains "You've already got an account - yay!"
+    Page.getCurrentUrl should include(NSIManageAccountPage.url)
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
@@ -101,5 +102,14 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   Then("""^they see the Help to Save landing page \(with information about Help to Save\)$"""){ () ⇒
     on(AboutPage)
+  }
+
+  When("""^they choose to go ahead with creating an account$"""){ () ⇒
+    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.get[Option[UserInfo]]("userInfo"))
+    AuthorityWizardPage.setRedirect(EligiblePage.url)
+    AuthorityWizardPage.submit()
+    EligiblePage.startCreatingAccount()
+    ConfirmDetailsPage.continue()
+    CreateAccountPage.createAccount()
   }
 }

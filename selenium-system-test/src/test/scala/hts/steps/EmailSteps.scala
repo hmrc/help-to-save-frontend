@@ -33,7 +33,7 @@ class EmailSteps extends Steps with NINOGenerator {
   }
 
   Then("""^I am asked to check my email account for a verification email$"""){ () ⇒
-    Page.getPageContent contains "Check your email"
+    Page.getCurrentUrl contains CheckYourEmailPage.url
   }
 
   Given("""^I've chosen to change my email address from A to B during the application process$"""){ () ⇒
@@ -75,5 +75,4 @@ class EmailSteps extends Steps with NINOGenerator {
   Then("""^I see that my saved email address is C$"""){ () ⇒
 
   }
-
 }
