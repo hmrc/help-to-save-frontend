@@ -22,6 +22,8 @@ trait MicroService {
   lazy val plugins: Seq[Plugins] = Seq.empty
   lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
+  val hmrcRepoHost = java.lang.System.getProperty("hmrc.repo.host", "https://nexus-dev.tax.service.gov.uk")
+
   lazy val scoverageSettings = {
     import scoverage.ScoverageKeys
     Seq(
@@ -39,6 +41,10 @@ trait MicroService {
   def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name)
 
   lazy val SeleniumTest = config("selenium") extend (Test)
+
+  lazy val ZapTest = config("zap") extend (Test)
+  //
+  //  def zapFilter(name: String): Boolean = name endsWith "ZapRunner"
 
   lazy val scalariformSettings = {
     import com.typesafe.sbt.SbtScalariform.ScalariformKeys
@@ -140,6 +146,34 @@ trait MicroService {
       testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
       testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
     )
+    .configs(ZapTest)
+    .settings(
+      inConfig(ZapTest)(Defaults.testTasks),
+      Keys.fork in ZapTest := true,
+      unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/scala",
+      unmanagedResourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/resources",
+      testOptions in Test := Seq(Tests.Filter(unitTestFilter)),
+      testOptions in ZapTest := Seq(Tests.Filter(seleniumTestFilter)),
+      testOptions in ZapTest += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
+      testOptions in ZapTest += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
+      testOptions in ZapTest += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
+    )
+  //    .configs(Zap)
+  //    .settings(defaultSettings(): _*)
+  //    .settings(targetJvm := "jvm-1.8")
+  //    .settings(scalaVersion := "2.11.8")
+  //    .settings(inConfig(Zap)(Defaults.testTasks))
+  //    .settings(testOptions in Zap := Seq(Tests.Filter(zapFilter)))
+  //    .settings(libraryDependencies ++= appDependencies)
+  //    .settings(resolvers ++= Seq("saucelabs-repository" at "http://repository-saucelabs.forge.cloudbees.com/release"))
+  //    .settings(parallelExecution in Test := false)
+  //    .settings(evictionWarningOptions in update := EvictionWarningOptions.default.withWarnTransitiveEvictions(true).withWarnDirectEvictions(true).withWarnScalaVersionEviction(true))
+  //    .settings(resolvers ++= Seq("hmrc-snapshots" at hmrcRepoHost + "/content/repositories/hmrc-snapshots",
+  //      "hmrc-releases" at hmrcRepoHost + "/content/repositories/hmrc-releases",
+  //      "typesafe-releases" at hmrcRepoHost + "/content/repositories/typesafe-releases",
+  //      Resolver.url("hmrc-sbt-plugin-releases", url("https://dl.bintray.com/hmrc/sbt-plugin-releases"))(Resolver.ivyStylePatterns),
+  //      Resolver.bintrayRepo("hmrc", "releases"),
+  //      Resolver.jcenterRepo))
 }
 
 private object TestPhases {

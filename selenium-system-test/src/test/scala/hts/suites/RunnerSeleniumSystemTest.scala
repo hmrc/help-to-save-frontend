@@ -28,4 +28,3 @@ import org.junit.runner.RunWith
   tags     = Array("~@ignore")
 )
 class RunnerSeleniumSystemTest {}
-
