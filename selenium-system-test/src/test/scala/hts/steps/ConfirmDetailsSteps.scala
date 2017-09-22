@@ -25,6 +25,7 @@ import hts.utils.{NINOGenerator, ScenarioContext}
 import uk.gov.hmrc.helptosavefrontend.models.{Address, UserInfo}
 
 import scala.collection.JavaConverters._
+import hts.utils.Helpers
 
 class ConfirmDetailsSteps extends Steps with NINOGenerator {
 
@@ -75,13 +76,13 @@ class ConfirmDetailsSteps extends Steps with NINOGenerator {
     val info: UserInfo = ScenarioContext.get[Option[UserInfo]]("userInfo").getOrElse(fail("User info not found"))
     val fullName = info.forename + " " + info.surname
 
-    fullName.r.findAllIn(Page.getPageContent).length should be >= 1
-    info.nino.r.findAllIn(Page.getPageContent).length should be >= 1
+    Helpers.isTextOnPage(fullName) shouldBe true
+    Helpers.isTextOnPage(info.nino) shouldBe true
 
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
     val date = info.dateOfBirth.format(dateFormatter)
 
-    date.r.findAllIn(Page.getPageContent).length should be >= 1
-    info.email.r.findAllIn(Page.getPageContent).length should be >= 1
+    Helpers.isTextOnPage(date) shouldBe true
+    Helpers.isTextOnPage(info.email) shouldBe true
   }
 }
