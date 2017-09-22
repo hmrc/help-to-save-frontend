@@ -17,19 +17,17 @@
 package hts.steps
 
 import hts.pages.registrationPages.CheckEligibilityPage
-import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage, Page}
-import hts.utils.{Configuration, NINOGenerator}
+import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage}
+import hts.utils.ScenarioContext
 
-class EligibilitySteps extends Steps with NINOGenerator {
-
-  var nino: Option[String] = None
+class EligibilitySteps extends Steps {
 
   Given("""^an user is in receipt of working tax credit$""") { () ⇒
-    nino = Some(generateEligibleNINO)
+    val _ = ScenarioContext.generateEligibleNINO()
   }
 
   When("""^they apply for Help to Save$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", nino.getOrElse(""))
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentEligibleNINO)
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () ⇒
@@ -41,7 +39,7 @@ class EligibilitySteps extends Steps with NINOGenerator {
   }
 
   Given("""^an user is NOT in receipt of working tax credit$""") { () ⇒
-    nino = Some(generateIneligibleNINO)
+    val _ = ScenarioContext.generateIneligibleNINO()
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒

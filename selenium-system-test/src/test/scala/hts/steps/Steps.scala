@@ -22,6 +22,7 @@ import cats.syntax.either._
 import cucumber.api.scala.{EN, ScalaDsl}
 import hts.driver.Driver
 import hts.pages.WebPage
+import hts.utils.ScenarioContext
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, WebDriver}
 import org.scalatest.Matchers
@@ -41,6 +42,8 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
 
   // create a new driver for each scenario
   Before { _ ⇒
+    ScenarioContext.reset()
+
     if (_driver.isEmpty) {
       val d = Driver.newWebDriver()
         // map the left to Nothing

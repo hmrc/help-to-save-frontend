@@ -16,10 +16,13 @@
 
 package hts.pages
 
-import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
-import uk.gov.hmrc.helptosavefrontend.models.UserInfo
+import java.time.format.DateTimeFormatter
 
+import hts.utils.{Configuration, TestUserInfo}
+import org.openqa.selenium.WebDriver
+import uk.gov.hmrc.helptosavefrontend.models.{Address, UserInfo}
+
+import scala.annotation.tailrec
 import scala.util.Try
 
 object AuthorityWizardPage extends WebPage {
@@ -47,28 +50,21 @@ object AuthorityWizardPage extends WebPage {
     submit()
   }
 
-  def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: Option[UserInfo])(implicit driver: WebDriver): Unit = {
+  def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: TestUserInfo)(implicit driver: WebDriver): Unit = {
     navigate()
     setConfidenceLevel(confidence)
     setCredentialStrength(credentialStrength)
 
-    println("userInfo: " + userInfo.toString)
-    val info = userInfo.getOrElse(fail("User info not found"))
+    setAddressLines(userInfo.address)
 
-    Option(info.address.lines(0)).map(line0 ⇒ setAddressLine1(line0))
-    Option(info.address.lines(1)).map(line1 ⇒ setAddressLine2(line1))
-    Try(info.address.lines(2)).toOption.map(line2 ⇒ setAddressLine3(line2))
-    Try(info.address.lines(3)).toOption.map(line3 ⇒ setAddressLine4(line3))
-    Try(info.address.lines(4)).toOption.map(line4 ⇒ setAddressLine5(line4))
+    userInfo.address.postcode.foreach(setPostCode)
+    userInfo.address.country.foreach(setCountryCode)
 
-    info.address.postcode.map(postcode ⇒ setPostCode(postcode))
-    info.address.country.map(countryCode ⇒ setCountryCode(countryCode))
-
-    Option(info.forename).map(forename ⇒ setGivenName(forename))
-    Option(info.surname).map(familyName ⇒ setFamilyName(familyName))
-    Option(info.nino).map(nino ⇒ setNino(nino))
-
-    setDateOfBirth(info.dateOfBirth.toString)
+    userInfo.forename.foreach(setGivenName)
+    userInfo.surname.foreach(setFamilyName)
+    userInfo.nino.foreach(setNino)
+    userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.BASIC_ISO_DATE)))
+    setDateOfBirth(userInfo.dateOfBirth.toString)
   }
 
   def navigate()(implicit driver: WebDriver): Unit =
@@ -121,5 +117,27 @@ object AuthorityWizardPage extends WebPage {
 
   def setCountryCode(countryCode: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.address.countryCode")).foreach(_.underlying.sendKeys(countryCode))
+
+  private def setAddressLines(address: Address)(implicit driver: WebDriver): Unit = {
+    val setFunctions: List[String ⇒ Unit] = List(
+      setAddressLine1 _,
+      setAddressLine2 _,
+      setAddressLine3 _,
+      setAddressLine4 _,
+      setAddressLine5 _
+    )
+
+      @tailrec
+      def loop(acc: List[(String, String ⇒ Unit)]): Unit = acc match {
+        case Nil ⇒
+          ()
+
+        case (line, f) :: tail ⇒
+          f(line)
+          loop(tail)
+      }
+
+    loop(address.lines.zip(setFunctions))
+  }
 
 }

@@ -18,17 +18,18 @@ package hts.steps
 
 import hts.pages._
 import hts.pages.registrationPages._
-import hts.utils.{Configuration, NINOGenerator, ScenarioContext}
+import hts.utils.{Configuration, ScenarioContext}
 import uk.gov.hmrc.helptosavefrontend.models.UserInfo
+import hts.utils.EitherOps._
 
-class CreateAccountSteps extends Steps with NINOGenerator {
+class CreateAccountSteps extends Steps {
 
   Given("""^A user is at the start of the registration process$""") { () ⇒
     AboutPage.navigate()
   }
 
   Given("""^An authenticated user is at the start of the registration process$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(AboutPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(AboutPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO)
   }
 
   Given("""^a user is on the apply page$""") { () ⇒
@@ -36,12 +37,12 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   Given("""^an authenticated user is on the apply page$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(ApplyPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(ApplyPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO)
   }
 
   Given("""^a user has previously created an account$"""){ () ⇒
     AuthorityWizardPage.navigate()
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO)
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
@@ -74,7 +75,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
     driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", currentEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentEligibleNINO)
   }
 
   Then("""^they see that the account is created$""") { () ⇒
@@ -94,7 +95,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO)
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.exitWithoutCreatingAccount()
@@ -105,7 +106,7 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   When("""^they choose to go ahead with creating an account$"""){ () ⇒
-    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.get[Option[UserInfo]]("userInfo"))
+    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
     AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.submit()
     EligiblePage.startCreatingAccount()

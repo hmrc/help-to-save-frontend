@@ -18,9 +18,9 @@ package hts.steps
 
 import hts.pages.registrationPages.CheckEligibilityPage
 import hts.pages._
-import hts.utils.{Configuration, NINOGenerator}
+import hts.utils.ScenarioContext
 
-class SecuritySteps extends Steps with NINOGenerator {
+class SecuritySteps extends Steps {
 
   def oneOfRegex(options: Set[String]): String = s"(${options.mkString("|")})"
 
@@ -35,11 +35,11 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Given(s"""^a user has logged in to Government Gateway with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, level, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, level, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Then("""^they are forced into going through IV before being able to proceed with their HtS application$""") { () ⇒
-    Page.getCurrentUrl should include regex ("/iv/journey-result|iv%2Fjourney-result")
+    Page.getCurrentUrl should include regex "/iv/journey-result|iv%2Fjourney-result"
   }
 
   Given("""^a user has NOT logged in to Government Gateway$""") { () ⇒
@@ -47,12 +47,12 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Given("""^a user has logged in$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   When("""^they have logged in and passed IV$"""){ () ⇒
     AuthorityWizardPage.navigate()
-    AuthorityWizardPage.authenticateUser(AccessAccountPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(AccessAccountPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   When("""^they try to view the user details page$""") { () ⇒
@@ -68,7 +68,7 @@ class SecuritySteps extends Steps with NINOGenerator {
   }
 
   Given("""^a user has logged in and passed IV$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Then("""^the GG sign in page is visible$"""){ () ⇒

@@ -16,73 +16,43 @@
 
 package hts.steps
 
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import cucumber.api.DataTable
-import hts.pages.{AuthorityWizardPage, EligiblePage, Page}
-import hts.utils.{NINOGenerator, ScenarioContext}
-import uk.gov.hmrc.helptosavefrontend.models.{Address, UserInfo}
+import hts.pages.{AuthorityWizardPage, EligiblePage}
+import hts.utils.{Helpers, ScenarioContext, TestUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.UserInfo
+import hts.utils.EitherOps._
 
-import scala.collection.JavaConverters._
-import hts.utils.Helpers
-
-class ConfirmDetailsSteps extends Steps with NINOGenerator {
-
-  private def toUserInfo(applicantDetails: DataTable): Option[UserInfo] = {
-    val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
-    val data = applicantDetails.asMap(classOf[String], classOf[String]).asScala
-
-      def getField(name: String): Option[String] = {
-        val value = data.get(name) match {
-          case Some(f) if f.equals("<eligible>") ⇒ generateEligibleNINO
-          case Some(x)                           ⇒ x
-          case None                              ⇒ ""
-        }
-        Some(value)
-      }
-
-    for {
-      firstName ← getField("first name")
-      lastName ← getField("last name")
-      dateOfBirth ← getField("date of birth").map(s ⇒ LocalDate.parse(s, dateFormatter))
-      email ← getField("email address")
-      nino ← getField("NINO")
-      address1 ← getField("address line 1")
-      address2 ← getField("address line 2")
-      address3 ← getField("address line 3")
-      address4 ← getField("address line 4")
-      address5 ← getField("address line 5")
-      postcode ← getField("postcode")
-      countryCode ← getField("country code")
-    } yield UserInfo(firstName, lastName, nino, dateOfBirth, email,
-                     Address(List(address1, address2, address3, address4, address5), Some(postcode), Some(countryCode)))
-
-  }
+class ConfirmDetailsSteps extends Steps {
 
   Given("""^an applicant has the following details:$"""){ (applicantDetails: DataTable) ⇒
-    ScenarioContext.set("userInfo", toUserInfo(applicantDetails))
+    ScenarioContext.setDataTable(applicantDetails)
   }
 
   When("""^an applicant passes the eligibility check$"""){ () ⇒
-    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.get[Option[UserInfo]]("userInfo"))
+    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
     AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.submit()
     EligiblePage.startCreatingAccount()
   }
 
   Then("""^they see their details$"""){ () ⇒
-    val info: UserInfo = ScenarioContext.get[Option[UserInfo]]("userInfo").getOrElse(fail("User info not found"))
-    val fullName = info.forename + " " + info.surname
+    val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+    val info: TestUserInfo = ScenarioContext.userInfo().getOrElse(sys.error)
+    val forename = info.forename.getOrElse(sys.error("Could not get forename"))
+    val surname = info.surname.getOrElse(sys.error("Could not get surname"))
+    val nino = info.nino.getOrElse(sys.error("Could not get NINO"))
+    val email = info.email.getOrElse(sys.error("Could not get email"))
+    val date = info.dateOfBirth.map(_.format(dateFormatter)).getOrElse(sys.error("Could not get date of birth"))
+
+    val fullName = forename + " " + surname
 
     Helpers.isTextOnPage(fullName) shouldBe true
-    Helpers.isTextOnPage(info.nino) shouldBe true
-
-    val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val date = info.dateOfBirth.format(dateFormatter)
+    Helpers.isTextOnPage(nino) shouldBe true
 
     Helpers.isTextOnPage(date) shouldBe true
-    Helpers.isTextOnPage(info.email) shouldBe true
+    Helpers.isTextOnPage(email) shouldBe true
   }
 }

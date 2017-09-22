@@ -16,29 +16,88 @@
 
 package hts.utils
 
-import scala.collection.mutable.Map
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
-object ScenarioContext {
-  var map = Map.empty[String, Any]
+import cucumber.api.DataTable
+import uk.gov.hmrc.domain.Generator
+import uk.gov.hmrc.helptosavefrontend.models.Address
 
-  def set(key: String, value: Any) {
-    map.put(key, value)
-  }
+import scala.collection.JavaConverters._
 
-  def get[T: Manifest](key: String): T = {
-    map.get(key) match {
-      case Some(obj) ⇒ obj.asInstanceOf[T]
-      case None      ⇒ throw new Exception("Map not found")
+object ScenarioContext extends NINOGenerator {
+
+  private var dataTable: Option[DataTable] = None
+
+  def setDataTable(table: DataTable): Unit = dataTable = Some(table)
+
+  def userInfo(): Either[String, TestUserInfo] = dataTable.fold[Either[String, TestUserInfo]](
+    Left("No data table found")
+  ){ table ⇒
+      val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+
+      val info: TestUserInfo = TestUserInfo(
+        getField(table)("first name"),
+        getField(table)("last name"),
+        getField(table)("NINO"),
+        getField(table)("date of birth").map(s ⇒ LocalDate.parse(s, dateFormatter)),
+        getField(table)("email address"),
+        Address(
+          List(
+            getField(table)("address line 1"),
+            getField(table)("address line 2"),
+            getField(table)("address line 3"),
+            getField(table)("address line 4"),
+            getField(table)("address line 5")
+          ).collect{ case Some(s) ⇒ s },
+          getField(table)("postcode"),
+          getField(table)("country code")
+        ))
+
+      Right(info)
     }
-  }
-  //  def get(key: String): Any = {
-  //    map.get(key) match {
-  //      case Some(obj) ⇒ obj
-  //      case None      ⇒ throw new Exception("Map not found")
-  //    }
-  //  }
 
-  def reset() {
-    map = Map.empty[String, Any]
+  override def reset(): Unit = {
+    super.reset()
+    dataTable = None
   }
+
+  private def getField(table: DataTable)(name: String): Option[String] = {
+    val data = table.asMap(classOf[String], classOf[String]).asScala
+    val value = data.get(name) match {
+      case Some(f) if f.equals("<eligible>") ⇒ generateEligibleNINO
+      case Some(x)                           ⇒ x
+      case None                              ⇒ ""
+    }
+    Some(value)
+  }
+}
+
+private[utils] trait NINOGenerator {
+
+  private var generator = new Generator()
+
+  private var current = generator.nextNino.value
+
+  private def generateNINO(): String = {
+    current = generator.nextNino.value
+    current
+  }
+
+  private def toEligible(nino: String) = "AE" + nino.drop(2)
+
+  protected def reset(): Unit = {
+    generator = new Generator()
+    current = generator.nextNino.value
+  }
+
+  def generateEligibleNINO(): String = toEligible(generateNINO())
+
+  def generateIneligibleNINO(): String = {
+    val ineligibleNino = "NA" + generateNINO().drop(2)
+    ineligibleNino
+  }
+
+  def currentEligibleNINO(): String = toEligible(current)
+
 }

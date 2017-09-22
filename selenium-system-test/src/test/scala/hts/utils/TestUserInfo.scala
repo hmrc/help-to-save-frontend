@@ -16,28 +16,15 @@
 
 package hts.utils
 
-import uk.gov.hmrc.domain.Generator
+import java.time.LocalDate
 
-trait NINOGenerator {
+import uk.gov.hmrc.helptosavefrontend.models.Address
 
-  private val generator = new Generator()
+case class TestUserInfo(forename:    Option[String],
+                        surname:     Option[String],
+                        nino:        Option[String],
+                        dateOfBirth: Option[LocalDate],
+                        email:       Option[String],
+                        address:     Address
+)
 
-  private var current = generator.nextNino.value
-
-  private def generateNINO: String = {
-    current = generator.nextNino.value
-    current
-  }
-
-  private def toEligible(nino: String) = "AE" + nino.drop(2)
-
-  def generateEligibleNINO: String = toEligible(generateNINO)
-
-  def generateIneligibleNINO: String = {
-    val ineligibleNino = "NA" + generateNINO.drop(2)
-    ineligibleNino
-  }
-
-  def currentEligibleNINO: String = toEligible(current)
-
-}

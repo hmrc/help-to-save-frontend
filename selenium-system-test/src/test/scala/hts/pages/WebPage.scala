@@ -16,7 +16,6 @@
 
 package hts.pages
 
-import hts.utils.NINOGenerator
 import org.openqa.selenium.WebDriver
 import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
@@ -27,8 +26,7 @@ trait WebPage extends Matchers
   with WebBrowser
   with Eventually
   with PatienceConfiguration
-  with Assertions
-  with NINOGenerator {
+  with Assertions {
 
   override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout  = scaled(Span(5, Seconds)), interval = scaled(Span(500, Millis)))
 
