@@ -120,7 +120,7 @@ class WSHttpProxy extends WSPost with WSPut with WSProxy with RunMode with HttpA
   )(implicit rds: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
     // cannot use `doPut` over here because it doesn't allow for headers
     val httpResponse = buildRequest(url).withHeaders(headers.toList: _*).put(Json.toJson(body)).map(new WSHttpResponse(_))
-    executeHooks(url, POST_VERB, None, httpResponse)
+    executeHooks(url, PUT_VERB, None, httpResponse)
     httpResponse
   }
 }
