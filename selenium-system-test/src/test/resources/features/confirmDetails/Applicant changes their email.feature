@@ -1,6 +1,6 @@
 Feature: Applicant changes their email
 
-  @HTS-33 @HTS-398
+  @HTS-33 @HTS-398 @zap
   Scenario: An applicant changes their email
     Given I am viewing my applicant details
     When I choose to change my email address
