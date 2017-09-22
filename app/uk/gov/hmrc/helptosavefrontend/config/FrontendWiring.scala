@@ -17,8 +17,8 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.HttpVerbs.{GET ⇒ GET_VERB, POST ⇒ POST_VERB}
-import play.api.libs.json.Writes
+import play.api.http.HttpVerbs.{GET ⇒ GET_VERB, POST ⇒ POST_VERB, PUT ⇒ PUT_VERB}
+import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSProxyServer
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.play.audit.http.HttpAuditing
@@ -29,7 +29,7 @@ import uk.gov.hmrc.play.http.hooks.HttpHook
 import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpDelete, HttpGet, HttpPost, HttpPut, HttpResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object FrontendAuditConnector extends AuditConnector with AppName {
   override lazy val auditingConfig: AuditingConfig = LoadAuditingConfig("auditing")
@@ -91,7 +91,7 @@ class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector
   override def http: WSHttp = wsHttp
 }
 
-class WSHttpProxy extends WSPost with WSProxy with RunMode with HttpAuditing with ServicesConfig {
+class WSHttpProxy extends WSPost with WSPut with WSProxy with RunMode with HttpAuditing with ServicesConfig {
   override lazy val appName: String = getString("appName")
   override lazy val wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy")
   override val hooks: Seq[HttpHook] = Seq(AuditingHook)
@@ -106,6 +106,20 @@ class WSHttpProxy extends WSPost with WSProxy with RunMode with HttpAuditing wit
               headers: Map[String, String] = Map.empty[String, String]
   )(implicit rds: Writes[A], hc: HeaderCarrier): Future[HttpResponse] = {
     val httpResponse = doPost(url, body, headers.toSeq)
+    executeHooks(url, POST_VERB, None, httpResponse)
+    httpResponse
+  }
+
+  /**
+   * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
+   * to replace [[PUT]] method provided by the hmrc library which will throw exceptions in such cases.
+   */
+  def put[A](url:     String,
+             body:    A,
+             headers: Map[String, String] = Map.empty[String, String]
+  )(implicit rds: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    // cannot use `doPut` over here because it doesn't allow for headers
+    val httpResponse = buildRequest(url).withHeaders(headers.toList: _*).put(Json.toJson(body)).map(new WSHttpResponse(_))
     executeHooks(url, POST_VERB, None, httpResponse)
     httpResponse
   }

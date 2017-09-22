@@ -101,7 +101,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
   override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
     val timeContext: Timer.Context = metrics.nsiUpdateEmailTimer.time()
 
-    httpProxy.post(nsiUpdateEmailUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
+    httpProxy.put(nsiUpdateEmailUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
       .map[Either[String, Unit]] { response ⇒
         val time = timeContext.stop()
 
