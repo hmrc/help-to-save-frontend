@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import cats.instances.int._
 import cats.instances.future._
 import cats.syntax.eq._
-
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
@@ -35,7 +34,7 @@ import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDrivenPropertyChecks {
 
@@ -59,9 +58,19 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
         ))
   }
 
+  def mockUpdateEmail[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit = {
+    (mockHTTPProxy.put(_: String, _: I, _: Map[String, String])(_: Writes[I], _: HeaderCarrier, _: ExecutionContext))
+      .expects(url, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *, *)
+      .returning(
+        result.fold(
+          e ⇒ Future.failed(new Exception(e)),
+          r ⇒ Future.successful(r)
+        ))
+  }
+
   "the updateEmail method" must {
     "return a Right when the status is OK" in {
-      mockCreateAccount(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(Status.OK)))
+      mockUpdateEmail(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(Status.OK)))
 
       val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
       Await.result(result.value, 3.seconds) shouldBe Right(())
@@ -71,7 +80,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       "the status is not OK" in {
         forAll{ status: Int ⇒
           whenever(status =!= Status.OK && status > 0){
-            mockCreateAccount(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(status)))
+            mockUpdateEmail(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(status)))
 
             val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
             Await.result(result.value, 3.seconds).isLeft shouldBe true
@@ -80,7 +89,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       }
 
       "the POST to NS&I fails" in {
-        mockCreateAccount(validNSIUserInfo, nsiUpdateEmailUrl)(Left("Oh no!"))
+        mockUpdateEmail(validNSIUserInfo, nsiUpdateEmailUrl)(Left("Oh no!"))
 
         val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
         Await.result(result.value, 3.seconds).isLeft shouldBe true

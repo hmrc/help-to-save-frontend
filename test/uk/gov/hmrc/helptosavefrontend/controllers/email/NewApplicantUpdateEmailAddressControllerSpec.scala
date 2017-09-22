@@ -145,7 +145,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
           .split('=')
           .toList match {
             case _ :: param :: Nil ⇒
-              EmailVerificationParams.decode(URLDecoder.decode(param)) match {
+              EmailVerificationParams.decode(URLDecoder.decode(param, "UTF-8")) match {
                 case Success(params) ⇒
                   params.nino shouldBe nino
                   params.email shouldBe email
