@@ -18,29 +18,30 @@ package hts.steps
 
 import hts.pages._
 import hts.pages.registrationPages._
-import hts.utils.{Configuration, NINOGenerator}
+import hts.utils.{Configuration, ScenarioContext}
+import hts.utils.EitherOps._
 
-class CreateAccountSteps extends Steps with NINOGenerator {
+class CreateAccountSteps extends Steps {
 
   Given("""^A user is at the start of the registration process$""") { () ⇒
-    AboutPage.navigate
+    AboutPage.navigate()
   }
 
   Given("""^An authenticated user is at the start of the registration process$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(AboutPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(AboutPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Given("""^a user is on the apply page$""") { () ⇒
-    ApplyPage.navigate
+    ApplyPage.navigate()
   }
 
   Given("""^an authenticated user is on the apply page$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(ApplyPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(ApplyPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Given("""^a user has previously created an account$"""){ () ⇒
-    AuthorityWizardPage.goToPage()
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.navigate()
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
@@ -73,11 +74,11 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
     driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", currentEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentEligibleNINO())
   }
 
   Then("""^they see that the account is created$""") { () ⇒
-    Page.getPageContent should include("Successfully created account")
+    Page.getCurrentUrl should include("www.nsandi.com")
   }
 
   Then("""^they will be on the eligibility question page$""") { () ⇒
@@ -89,11 +90,11 @@ class CreateAccountSteps extends Steps with NINOGenerator {
   }
 
   Then("""^they will be on the account home page$"""){ () ⇒
-    Page.getPageContent contains "You've already got an account - yay!"
+    Page.getCurrentUrl should include(NSIManageAccountPage.url)
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.exitWithoutCreatingAccount()
@@ -101,5 +102,14 @@ class CreateAccountSteps extends Steps with NINOGenerator {
 
   Then("""^they see the Help to Save landing page \(with information about Help to Save\)$"""){ () ⇒
     on(AboutPage)
+  }
+
+  When("""^they choose to go ahead with creating an account$"""){ () ⇒
+    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
+    AuthorityWizardPage.setRedirect(EligiblePage.url)
+    AuthorityWizardPage.submit()
+    EligiblePage.startCreatingAccount()
+    ConfirmDetailsPage.continue()
+    CreateAccountPage.createAccount()
   }
 }

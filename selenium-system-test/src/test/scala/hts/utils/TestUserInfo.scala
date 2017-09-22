@@ -14,10 +14,17 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.utils
 
-import hts.utils.Configuration
+import java.time.LocalDate
 
-object AccessAccountPage extends WebPage {
-  val url: String = s"${Configuration.host}/help-to-save/access-account"
-}
+import uk.gov.hmrc.helptosavefrontend.models.Address
+
+case class TestUserInfo(forename:    Option[String],
+                        surname:     Option[String],
+                        nino:        Option[String],
+                        dateOfBirth: Option[LocalDate],
+                        email:       Option[String],
+                        address:     Address
+)
+

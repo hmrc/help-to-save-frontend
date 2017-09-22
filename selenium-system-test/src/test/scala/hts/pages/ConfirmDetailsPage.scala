@@ -16,7 +16,7 @@
 
 package hts.pages
 
-import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.WebDriver
 import hts.utils.Configuration
 
 object ConfirmDetailsPage extends WebPage {

@@ -1,24 +1,21 @@
-#To be completed when journey redesign is complete (speak to G)
-#Feature: Applicant changes their email
-#
-#  @HTS-33 @HTS-398
-#  Scenario: An applicant changes their email
-#    Given an applicant is viewing their applicant details
-#    When they choose to change their email address
-#    Then they are asked to check their email account for a verification email
-#
-#  Remove scenario below after scenario above is complete
-#  Scenario: A user wishes to change their email address
-#    Given A user has logged in and is on the confirm details page
-#    When they wish to change their email
-#    Then they will be on the change email page
-#    When they enter in a new email and confirm
-#    Then the user will be on the verification email page
-#
-#  @HTS-399
-#  Scenario: A user wishes to enter in an alternative email address
-#    Given A user is on the verification email page
-#    When they indicate that they wish to provide an alternative email address
-#    Then the user will be on the change email page
-#    When they enter in a new email and confirm
-#    Then the user will be on the verification email page
+Feature: Applicant changes their email
+
+  @HTS-33 @HTS-398
+  Scenario: An applicant changes their email
+    Given I am viewing my applicant details
+    When I choose to change my email address
+    Then I am asked to check my email account for a verification email
+
+  @HTS-400
+  Scenario: Applicant requests a re-send of the verification email
+    Given I've chosen to change my email address from A to B during the application process
+    But I want to receive a second verification email
+    When I request a re-send of the verification email
+    Then I am asked to check my email account for a verification email
+
+  @HTS-399
+  Scenario: Applicant changes their mind about the new address they provided
+    Given I've chosen to change my email address from A to B during the application process
+    But I haven't yet verified new email address B
+    When I then choose to change the email address from B to C
+    Then I am asked to check my email account for a verification email

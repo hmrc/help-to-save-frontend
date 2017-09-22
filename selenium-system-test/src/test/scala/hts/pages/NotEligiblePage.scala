@@ -16,7 +16,6 @@
 
 package hts.pages
 
-import hts.pages.EligiblePage.{checkHeader, pageTitle}
 import org.openqa.selenium.WebDriver
 
 object NotEligiblePage extends WebPage {

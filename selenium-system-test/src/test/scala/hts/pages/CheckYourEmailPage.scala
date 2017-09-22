@@ -17,7 +17,13 @@
 package hts.pages
 
 import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
-object AccessAccountPage extends WebPage {
-  val url: String = s"${Configuration.host}/help-to-save/access-account"
+object CheckYourEmailPage extends WebPage {
+
+  val url: String = s"${Configuration.host}/help-to-save/email/new-applicant-update"
+
+  def resendVerificationEmail()(implicit driver: WebDriver): Unit = click on "resend-verification"
+
+  def changeEmail()(implicit driver: WebDriver): Unit = click on "update-email"
 }

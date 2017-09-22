@@ -14,30 +14,22 @@
  * limitations under the License.
  */
 
-package hts.utils
+package hts.pages
 
-import uk.gov.hmrc.domain.Generator
+import org.openqa.selenium.WebDriver
 
-trait NINOGenerator {
+object ChangeEmailPage extends WebPage {
 
-  private val generator = new Generator()
-
-  private var current = generator.nextNino.value
-
-  private def generateNINO: String = {
-    current = generator.nextNino.value
-    current
+  def setNewEmail(email: String)(implicit driver: WebDriver): Unit = {
+    val el = find(name("value"))
+    el.foreach(_.underlying.clear())
+    el.foreach(_.underlying.sendKeys(email))
   }
 
-  private def toEligible(nino: String) = "AE" + nino.drop(2)
+  def verifyYourEmail()(implicit driver: WebDriver): Unit = click on xpath(".//*[@type='submit']")
 
-  def generateEligibleNINO: String = toEligible(generateNINO)
-
-  def generateIneligibleNINO: String = {
-    val ineligibleNino = "NA" + generateNINO.drop(2)
-    ineligibleNino
+  def setAndVerifyNewEmail(email: String)(implicit driver: WebDriver): Unit = {
+    setNewEmail(email)
+    verifyYourEmail()
   }
-
-  def currentEligibleNINO: String = toEligible(current)
-
 }

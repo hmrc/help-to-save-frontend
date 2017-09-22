@@ -16,13 +16,18 @@
 
 package hts.pages
 
-import hts.utils.Configuration
+import java.time.format.DateTimeFormatter
+
+import hts.utils.{Configuration, TestUserInfo}
 import org.openqa.selenium.WebDriver
+import uk.gov.hmrc.helptosavefrontend.models.Address
+
+import scala.annotation.tailrec
 
 object AuthorityWizardPage extends WebPage {
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    AuthorityWizardPage.goToPage()
+    AuthorityWizardPage.navigate()
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
   }
 
@@ -44,7 +49,24 @@ object AuthorityWizardPage extends WebPage {
     submit()
   }
 
-  def goToPage()(implicit driver: WebDriver): Unit =
+  def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: TestUserInfo)(implicit driver: WebDriver): Unit = {
+    navigate()
+    setConfidenceLevel(confidence)
+    setCredentialStrength(credentialStrength)
+
+    setAddressLines(userInfo.address)
+
+    userInfo.address.postcode.foreach(setPostCode)
+    userInfo.address.country.foreach(setCountryCode)
+
+    userInfo.forename.foreach(setGivenName)
+    userInfo.surname.foreach(setFamilyName)
+    userInfo.nino.foreach(setNino)
+    userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.BASIC_ISO_DATE)))
+    setDateOfBirth(userInfo.dateOfBirth.toString)
+  }
+
+  def navigate()(implicit driver: WebDriver): Unit =
     go to s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
@@ -94,5 +116,27 @@ object AuthorityWizardPage extends WebPage {
 
   def setCountryCode(countryCode: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.address.countryCode")).foreach(_.underlying.sendKeys(countryCode))
+
+  private def setAddressLines(address: Address)(implicit driver: WebDriver): Unit = {
+    val setFunctions: List[String ⇒ Unit] = List(
+      setAddressLine1 _,
+      setAddressLine2 _,
+      setAddressLine3 _,
+      setAddressLine4 _,
+      setAddressLine5 _
+    )
+
+      @tailrec
+      def loop(acc: List[(String, String ⇒ Unit)]): Unit = acc match {
+        case Nil ⇒
+          ()
+
+        case (line, f) :: tail ⇒
+          f(line)
+          loop(tail)
+      }
+
+    loop(address.lines.zip(setFunctions))
+  }
 
 }

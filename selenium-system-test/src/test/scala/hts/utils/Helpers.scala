@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.utils
 
-import hts.utils.Configuration
+import hts.pages.Page
+import org.openqa.selenium.WebDriver
 
-object AccessAccountPage extends WebPage {
-  val url: String = s"${Configuration.host}/help-to-save/access-account"
+object Helpers {
+  def isTextOnPage(text: String)(implicit driver: WebDriver): Boolean =
+    text.r.findAllIn(Page.getPageContent).nonEmpty
+
 }

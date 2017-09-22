@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.utils
 
-import hts.utils.Configuration
+import cats.syntax.either._
 
-object AccessAccountPage extends WebPage {
-  val url: String = s"${Configuration.host}/help-to-save/access-account"
+object EitherOps {
+
+  implicit class EitherOps[A, B](val e: Either[A, B]) extends AnyVal {
+    def getOrElse[BB <: B](f: A ⇒ BB): B = e.leftMap(f).merge
+  }
+
 }

@@ -16,8 +16,6 @@
 
 package hts.pages
 
-import hts.utils.Configuration
-
-object AccessAccountPage extends WebPage {
-  val url: String = s"${Configuration.host}/help-to-save/access-account"
+object NSIManageAccountPage extends WebPage {
+  val url: String = "https://www.nsandi.com/"
 }
