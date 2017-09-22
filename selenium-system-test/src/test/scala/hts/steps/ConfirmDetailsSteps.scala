@@ -21,7 +21,6 @@ import java.time.format.DateTimeFormatter
 import cucumber.api.DataTable
 import hts.pages.{AuthorityWizardPage, EligiblePage}
 import hts.utils.{Helpers, ScenarioContext, TestUserInfo}
-import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import hts.utils.EitherOps._
 
 class ConfirmDetailsSteps extends Steps {

@@ -20,10 +20,9 @@ import java.time.format.DateTimeFormatter
 
 import hts.utils.{Configuration, TestUserInfo}
 import org.openqa.selenium.WebDriver
-import uk.gov.hmrc.helptosavefrontend.models.{Address, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.Address
 
 import scala.annotation.tailrec
-import scala.util.Try
 
 object AuthorityWizardPage extends WebPage {
 

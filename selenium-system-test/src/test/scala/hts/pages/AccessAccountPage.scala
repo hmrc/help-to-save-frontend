@@ -17,7 +17,6 @@
 package hts.pages
 
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
 object AccessAccountPage extends WebPage {
   val url: String = s"${Configuration.host}/help-to-save/access-account"

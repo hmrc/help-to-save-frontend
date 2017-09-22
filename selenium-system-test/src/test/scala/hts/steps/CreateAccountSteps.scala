@@ -19,7 +19,6 @@ package hts.steps
 import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.{Configuration, ScenarioContext}
-import uk.gov.hmrc.helptosavefrontend.models.UserInfo
 import hts.utils.EitherOps._
 
 class CreateAccountSteps extends Steps {
@@ -29,7 +28,7 @@ class CreateAccountSteps extends Steps {
   }
 
   Given("""^An authenticated user is at the start of the registration process$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(AboutPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(AboutPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Given("""^a user is on the apply page$""") { () ⇒
@@ -37,12 +36,12 @@ class CreateAccountSteps extends Steps {
   }
 
   Given("""^an authenticated user is on the apply page$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(ApplyPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(ApplyPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Given("""^a user has previously created an account$"""){ () ⇒
     AuthorityWizardPage.navigate()
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
@@ -75,7 +74,7 @@ class CreateAccountSteps extends Steps {
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
     driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentEligibleNINO())
   }
 
   Then("""^they see that the account is created$""") { () ⇒
@@ -95,7 +94,7 @@ class CreateAccountSteps extends Steps {
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO)
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.continue()
     CreateAccountPage.exitWithoutCreatingAccount()
