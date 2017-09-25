@@ -74,7 +74,7 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
         logger.info(s"Successfully created an account for ${userInfo.nino}")
         Right(success)
       case failure: SubmissionFailure ⇒
-        logger.error(s"Could not create an account for ${userInfo.nino} due to $failure")
+        logger.error(s"Could not create an account for ${userInfo.nino} due to ${failure.errorDetail}")
         Left(failure)
     })
 }

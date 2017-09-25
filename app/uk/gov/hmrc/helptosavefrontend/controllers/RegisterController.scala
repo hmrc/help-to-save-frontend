@@ -81,7 +81,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks {
         case (_, confirmedEmail) ⇒
           confirmedEmail.fold[Future[Result]](
-            SeeOther(routes.RegisterController.getConfirmDetailsPage.url))(
+            SeeOther(routes.RegisterController.getConfirmDetailsPage().url))(
               _ ⇒ Ok(views.html.register.create_account_help_to_save()))
       }
     }
@@ -92,18 +92,13 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, confirmedEmail) ⇒
           confirmedEmail.fold[Future[Result]](
-            SeeOther(routes.RegisterController.getConfirmDetailsPage.url)
+            SeeOther(routes.RegisterController.getConfirmDetailsPage().url)
           ) { email ⇒
               // TODO: plug in actual pages below
               helpToSaveService.createAccount(nsiUserInfo.updateEmail(email)).leftMap(submissionFailureToString).fold(
-                error ⇒ {
-                  // TODO: error or warning?
-                  logger.error(s"Could not create account: $error")
-                  Ok(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(s"Account creation failed: $error"))
-                },
+                error ⇒ InternalServerError(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error)),
                 _ ⇒ {
-                  logger.info(s"Successfully created account for $nino")
-                  // start the process to enrol the user but don't worry about the result
+                  // Account creation is successful, start the process to enrol the user but don't worry about the result
                   helpToSaveService.enrolUser(nino).value.onComplete{
                     case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user, future failed: $e")
                     case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user: $e")
@@ -140,9 +135,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
-    s"Call to NS&I failed: message ID was ${failure.errorMessageId.getOrElse("-")},  " +
-      s"error was ${failure.errorMessage}, error detail was ${failure.errorDetail}}"
-
+    s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, error: ${failure.errorMessage}}"
 }
 
 object RegisterController {
