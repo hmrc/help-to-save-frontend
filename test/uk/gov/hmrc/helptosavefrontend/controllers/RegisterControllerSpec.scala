@@ -208,19 +208,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
       behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 
-      "retrieve the user info from session cache and post it with the confirmed email using " +
-        "the help to save service" in {
-          inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
-            mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Left(SubmissionFailure(None, "", "")))
-          }
-          val result = Await.result(doCreateAccountRequest(), 5.seconds)
-          status(result) shouldBe Status.OK
-        }
-
-      "indicate to the user that the creation was successful " +
+      "retrieve the user info from session cache and indicate to the user that the creation was successful " +
         "and enrol the user if the creation was successful" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -259,7 +247,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage.url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage().url)
       }
 
       "indicate to the user that the creation was not successful " when {
@@ -273,6 +261,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           }
 
           val result = doCreateAccountRequest()
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
           val html = contentAsString(result)
           html should include("Account creation failed")
         }
