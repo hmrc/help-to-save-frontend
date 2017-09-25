@@ -18,16 +18,13 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
-import play.api.libs.json.{JsValue, Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
+import uk.gov.hmrc.helptosavefrontend.repositories.SessionCache
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -35,18 +32,18 @@ import scala.concurrent.{ExecutionContext, Future}
 trait EnrolmentAndEligibilityCheckBehaviour {
   this: AuthSupport ⇒
 
-  val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
+  val mockSessionCache: SessionCache = mock[SessionCache]
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
-  def mockSessionCacheConnectorPut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
-    (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier, _: ExecutionContext))
-      .expects(expectedSession, *, *, *)
-      .returning(EitherT.fromEither[Future](result.map(_ ⇒ CacheMap("1", Map.empty[String, JsValue]))))
+  def mockSessionCachePut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
+    (mockSessionCache.store(_: HTSSession)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(expectedSession, *, *)
+      .returning(EitherT.fromEither[Future](result))
 
-  def mockSessionCacheConnectorGet(result: Either[String, Option[HTSSession]]): Unit =
-    (mockSessionCacheConnector.get(_: Reads[HTSSession], _: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *)
+  def mockSessionCacheGet(result: Either[String, Option[HTSSession]]): Unit =
+    (mockSessionCache.get()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEnrolmentCheck(input: NINO)(result: Either[String, EnrolmentStatus]): Unit =
@@ -105,7 +102,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionCacheGet(Right(None))
         }
 
         val result = getResult()
@@ -130,7 +127,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Left(""))
+          mockSessionCacheGet(Left(""))
         }
 
         status(getResult()) shouldBe INTERNAL_SERVER_ERROR

@@ -18,8 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
 import play.api.mvc.Result
-import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContext}
+import uk.gov.hmrc.helptosavefrontend.repositories.SessionCache
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -29,10 +29,10 @@ import scala.concurrent.Future
 trait SessionBehaviour {
   this: FrontendController with Logging ⇒
 
-  val sessionCacheConnector: SessionCacheConnector
+  val sessionCacheConnector: SessionCache
 
   def checkSession(noSession: ⇒ Future[Result])(whenSession: HTSSession ⇒ Future[Result])(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
-    sessionCacheConnector.get.fold({
+    sessionCacheConnector.get().fold({
       e ⇒
         logger.warn(s"Could not read sessions data from keystore: $e")
         Future.successful(InternalServerError)

@@ -25,8 +25,8 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
-import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.repositories.SessionCache
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -38,7 +38,7 @@ import scala.util.{Failure, Success}
 @Singleton
 class RegisterController @Inject() (val messagesApi:           MessagesApi,
                                     val helpToSaveService:     HelpToSaveService,
-                                    val sessionCacheConnector: SessionCacheConnector,
+                                    val sessionCacheConnector: SessionCache,
                                     val app:                   Application,
                                     frontendAuthConnector:     FrontendAuthConnector
 )(implicit ec: ExecutionContext, crypto: Crypto)
@@ -60,7 +60,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, _) ⇒
           val result = for {
-            _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
+            _ ← sessionCacheConnector.store(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
             _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail, nino)
           } yield ()
 
