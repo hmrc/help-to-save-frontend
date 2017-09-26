@@ -60,7 +60,7 @@ object Driver {
 
   private val driverDirectory: String = Option(systemProperties.getProperty("drivers")).getOrElse("/usr/local/bin")
 
-  private def createChromeDriver(): WebDriver = {
+  private def setChromeDriver() = {
     if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
       if (isMac) {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
@@ -72,31 +72,22 @@ object Driver {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
       }
     }
+  }
+
+  private def createChromeDriver(): WebDriver = {
+    setChromeDriver
 
     val capabilities = DesiredCapabilities.chrome()
     val options = new ChromeOptions()
-
     options.addArguments("test-type")
     options.addArguments("--disable-gpu")
-
     capabilities.setJavascriptEnabled(isJsEnabled)
     capabilities.setCapability(ChromeOptions.CAPABILITY, options)
-
     new ChromeDriver(capabilities)
   }
 
   private def createZapChromeDriver(): WebDriver = {
-    if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
-      if (isMac) {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
-      } else if (isLinux && linuxArch === "amd32") {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")
-      } else if (isLinux) {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver")
-      } else {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
-      }
-    }
+    setChromeDriver
 
     val capabilities = DesiredCapabilities.chrome()
     val options = new ChromeOptions()
@@ -105,9 +96,6 @@ object Driver {
     capabilities.setCapability(ChromeOptions.CAPABILITY, options)
     val driver = new ChromeDriver(capabilities)
     val caps = driver.getCapabilities
-    val browserName = caps.getBrowserName
-    val browserVersion = caps.getVersion
-    println("Browser name & version: " + browserName + " " + browserVersion)
     driver
   }
 }

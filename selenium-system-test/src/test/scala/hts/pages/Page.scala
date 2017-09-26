@@ -16,11 +16,41 @@
 
 package hts.pages
 
+import hts.utils.Configuration
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import org.openqa.selenium.WebDriver
+import org.openqa.selenium.remote.http.HttpMethod
+import org.scalatest.selenium.WebBrowser.go
+import uk.gov.hmrc.play.http.HttpResponse
+
+import scala.concurrent.Future
 
 object Page {
+
+  //val http: WSHttp
 
   def getCurrentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
 
   def getPageContent(implicit driver: WebDriver): String = driver.getPageSource
+
+  //  def constructHttpRequest(httpMethod: String, uri: String, postBody: String): Future[HttpResponse] = {
+  //    val path = s"${Configuration.host}/help-to-save/$uri"
+  //    httpMethod match {
+  //      case "GET" ⇒ http.get(path)
+  //      case "POST"  ⇒ http.post(path, postBody)
+  //    }
+  //  }
+  //
+  //  def hitPage(implicit driver: WebDriver, httpMethod: String, uri: String): Future[Int] = {
+  //    val request = constructHttpRequest(httpMethod, uri, "")
+  //    request.map{
+  //      x ⇒ x.status
+  //    }
+  //  }
+
+  def url(uri: String): String = s"${Configuration.host}/help-to-save/$uri"
+
+  def navigate(uri: String)(implicit driver: WebDriver): Unit =
+    go to url(uri)
+
 }

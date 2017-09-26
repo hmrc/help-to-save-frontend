@@ -40,8 +40,6 @@ trait MicroService {
 
   lazy val SeleniumTest = config("selenium") extend (Test)
 
-  lazy val ZapTest = config("zap") extend (Test)
-
   lazy val scalariformSettings = {
     import com.typesafe.sbt.SbtScalariform.ScalariformKeys
     import scalariform.formatter.preferences._
@@ -141,18 +139,6 @@ trait MicroService {
       testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
       testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
       testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
-    )
-    .configs(ZapTest)
-    .settings(
-      inConfig(ZapTest)(Defaults.testTasks),
-      Keys.fork in ZapTest := true,
-      unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/scala",
-      unmanagedResourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/resources",
-      testOptions in Test := Seq(Tests.Filter(unitTestFilter)),
-      testOptions in ZapTest := Seq(Tests.Filter(seleniumTestFilter)),
-      testOptions in ZapTest += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
-      testOptions in ZapTest += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
-      testOptions in ZapTest += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
     )
 }
 
