@@ -43,7 +43,7 @@ object Configuration {
     environment match {
       case Environment.Local   ⇒ ("http://localhost:7000", "http://localhost:9949")
       case Environment.Dev     ⇒ ("https://www-dev.tax.service.gov.uk", "https://www-dev.tax.service.gov.uk")
-      case Environment.Qa      ⇒ ("https://www-qa.tax.service.gov.uk", "https://www-qa.tax.service.gov.uk")
+      case Environment.Qa      ⇒ ("https://www.qa.tax.service.gov.uk", "https://www.qa.tax.service.gov.uk")
       case Environment.Staging ⇒ ("https://www-staging.tax.service.gov.uk", "https://www-staging.tax.service.gov.uk")
       case _                   ⇒ sys.error(s"Environment '$environment' not known")
     }
