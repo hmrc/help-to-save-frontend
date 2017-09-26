@@ -17,13 +17,8 @@
 package hts.pages
 
 import hts.utils.Configuration
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.remote.http.HttpMethod
 import org.scalatest.selenium.WebBrowser.go
-import uk.gov.hmrc.play.http.HttpResponse
-
-import scala.concurrent.Future
 
 object Page {
 

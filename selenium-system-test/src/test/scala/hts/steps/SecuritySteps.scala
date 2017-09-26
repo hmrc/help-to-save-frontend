@@ -76,44 +76,15 @@ class SecuritySteps extends Steps {
     driver.getCurrentUrl should include ("gg/sign-in?")
   }
 
-  //  When("""^I call URI /access-account with HTTP method GET$"""){ () =>
-  //    //// Write code here that turns the phrase above into concrete actions
-  //    throw new PendingException()
-  //  }
-
-  Then("""^I see a response$"""){ () ⇒
-    driver.getCurrentUrl should include ("")
-  }
-
-  //  When("^I enter Username as \"([^\"]*)\" and Password as \"([^\"]*)\"$")
-  //  public void I_enter_Username_as_and_Password_as(String arg1, String arg2) {
-  //    driver.findElement(By.id("email")).sendKeys(arg1);
-  //    driver.findElement(By.id("pass")).sendKeys(arg2);
-  //    driver.findElement(By.id("u_0_v")).click();
-  //  }
-
-  //  When("""^I call URI \".+\" with HTTP method \".+\"$"""){ (uri: String, httpMethod: String) ⇒
-  //
-  //    //http.httpMethod(s"${Configuration.host}/help-to-save/uri")
-  //    val path = s"${Configuration.host}/help-to-save/uri"
-  //    //Page.hitPage(httpMethod, path)
-  //    Page.navigate(path)
-  //  }
-
-  //  When("""^I call URI \"([^\"]*)\ with HTTP method \"([^\"]*)\"$"""){ (uri: String, httpMethod: String) ⇒
-  //
-  //    //http.httpMethod(s"${Configuration.host}/help-to-save/uri")
-  //    val path = s"${Configuration.host}/help-to-save/uri"
-  //    //Page.hitPage(httpMethod, path)
-  //    Page.navigate(path)
-  //  }
-
   When("""^I call URI (.+) with HTTP method (.+)$"""){ (uri: String, httpMethod: String) ⇒
-
     //http.httpMethod(s"${Configuration.host}/help-to-save/uri")
     val path = s"${Configuration.host}/help-to-save/uri"
     //Page.hitPage(httpMethod, path)
     Page.navigate(path)
+  }
+
+  Then("""^I see a response$"""){ () ⇒
+    driver.getCurrentUrl should include ("")
   }
 
 }
