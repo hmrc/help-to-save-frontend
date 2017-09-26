@@ -23,7 +23,8 @@ object FrontendBuild extends Build with MicroService {
     "uk.gov.hmrc" %% "domain" % "4.1.0",
     "com.github.kxbmap" %% "configs" % "0.4.4",
     "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9",
-    "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0"
+    "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
+    "uk.gov.hmrc" %% "zap-automation" % "0.15.0"
   )
 
   def test(scope: String = "test") = Seq(
@@ -38,7 +39,8 @@ object FrontendBuild extends Build with MicroService {
     "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
     "info.cukes" %% "cucumber-scala" % "1.2.4" % scope,
     "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % scope,
-    "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1" % scope
+    "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1" % scope,
+    "uk.gov.hmrc" %% "zap-automation" % "0.15.0" % scope
   )
 
 }

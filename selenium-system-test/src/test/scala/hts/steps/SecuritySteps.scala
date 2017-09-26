@@ -18,7 +18,8 @@ package hts.steps
 
 import hts.pages.registrationPages.CheckEligibilityPage
 import hts.pages._
-import hts.utils.ScenarioContext
+import hts.utils.{Configuration, ScenarioContext}
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 
 class SecuritySteps extends Steps {
 
@@ -74,4 +75,16 @@ class SecuritySteps extends Steps {
   Then("""^the GG sign in page is visible$"""){ () ⇒
     driver.getCurrentUrl should include ("gg/sign-in?")
   }
+
+  When("""^I call URI (.+) with HTTP method (.+)$"""){ (uri: String, httpMethod: String) ⇒
+    //http.httpMethod(s"${Configuration.host}/help-to-save/uri")
+    val path = s"${Configuration.host}/help-to-save/uri"
+    //Page.hitPage(httpMethod, path)
+    Page.navigate(path)
+  }
+
+  Then("""^I see a response$"""){ () ⇒
+    driver.getCurrentUrl should include ("")
+  }
+
 }

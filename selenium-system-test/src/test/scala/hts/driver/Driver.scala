@@ -31,9 +31,10 @@ object Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome") ⇒ Right(createChromeDriver())
-      case Some(other)    ⇒ Left(s"Unrecognised browser: $other")
-      case None           ⇒ Left("No browser set")
+      case Some("chrome")     ⇒ Right(createChromeDriver())
+      case Some("zap-chrome") ⇒ Right(createZapChromeDriver())
+      case Some(other)        ⇒ Left(s"Unrecognised browser: $other")
+      case None               ⇒ Left("No browser set")
     }
 
     selectedDriver.foreach { driver ⇒
@@ -59,7 +60,7 @@ object Driver {
 
   private val driverDirectory: String = Option(systemProperties.getProperty("drivers")).getOrElse("/usr/local/bin")
 
-  private def createChromeDriver(): WebDriver = {
+  private def setChromeDriver() = {
     if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
       if (isMac) {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
@@ -71,16 +72,30 @@ object Driver {
         systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
       }
     }
+  }
+
+  private def createChromeDriver(): WebDriver = {
+    setChromeDriver
 
     val capabilities = DesiredCapabilities.chrome()
     val options = new ChromeOptions()
-
     options.addArguments("test-type")
     options.addArguments("--disable-gpu")
-
     capabilities.setJavascriptEnabled(isJsEnabled)
     capabilities.setCapability(ChromeOptions.CAPABILITY, options)
-
     new ChromeDriver(capabilities)
+  }
+
+  private def createZapChromeDriver(): WebDriver = {
+    setChromeDriver
+
+    val capabilities = DesiredCapabilities.chrome()
+    val options = new ChromeOptions()
+    options.addArguments("test-type")
+    options.addArguments("--proxy-server=http://localhost:11000")
+    capabilities.setCapability(ChromeOptions.CAPABILITY, options)
+    val driver = new ChromeDriver(capabilities)
+    val caps = driver.getCapabilities
+    driver
   }
 }
