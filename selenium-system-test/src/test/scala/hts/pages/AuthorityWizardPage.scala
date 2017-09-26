@@ -62,8 +62,9 @@ object AuthorityWizardPage extends WebPage {
     userInfo.forename.foreach(setGivenName)
     userInfo.surname.foreach(setFamilyName)
     userInfo.nino.foreach(setNino)
-    userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.BASIC_ISO_DATE)))
-    setDateOfBirth(userInfo.dateOfBirth.toString)
+    userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+
+    //setDateOfBirth(userInfo.dateOfBirth.toString)
   }
 
   def navigate()(implicit driver: WebDriver): Unit =
@@ -81,8 +82,9 @@ object AuthorityWizardPage extends WebPage {
   def setConfidenceLevel(level: Int)(implicit driver: WebDriver): Unit =
     find(name("confidenceLevel")).foreach(_.underlying.sendKeys(level.toString))
 
-  def submit()(implicit driver: WebDriver): Unit =
-    find(cssSelector("input.button")).foreach(_.underlying.click())
+  def submit()(implicit driver: WebDriver): Unit = {
+    find(cssSelector("input.button")).foreach(_.underlying.submit())
+  }
 
   def setGivenName(givenName: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.givenName")).foreach(_.underlying.sendKeys(givenName))
@@ -90,8 +92,9 @@ object AuthorityWizardPage extends WebPage {
   def setFamilyName(familyName: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.familyName")).foreach(_.underlying.sendKeys(familyName))
 
-  def setDateOfBirth(dateOfBirth: String)(implicit driver: WebDriver): Unit =
+  def setDateOfBirth(dateOfBirth: String)(implicit driver: WebDriver): Unit = {
     find(name("itmp.dateOfBirth")).foreach(_.underlying.sendKeys(dateOfBirth))
+  }
 
   def setEmail(email: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.email")).foreach(_.underlying.sendKeys(email))

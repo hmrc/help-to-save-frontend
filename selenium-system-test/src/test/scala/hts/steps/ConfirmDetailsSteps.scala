@@ -39,10 +39,11 @@ class ConfirmDetailsSteps extends Steps {
   Then("""^they see their details$"""){ () ⇒
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
+    val nino = ScenarioContext.currentEligibleNINO
+
     val info: TestUserInfo = ScenarioContext.userInfo().getOrElse(sys.error)
     val forename = info.forename.getOrElse(sys.error("Could not get forename"))
     val surname = info.surname.getOrElse(sys.error("Could not get surname"))
-    val nino = info.nino.getOrElse(sys.error("Could not get NINO"))
     val email = info.email.getOrElse(sys.error("Could not get email"))
     val date = info.dateOfBirth.map(_.format(dateFormatter)).getOrElse(sys.error("Could not get date of birth"))
 
