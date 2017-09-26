@@ -22,8 +22,6 @@ trait MicroService {
   lazy val plugins: Seq[Plugins] = Seq.empty
   lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-  val hmrcRepoHost = java.lang.System.getProperty("hmrc.repo.host", "https://nexus-dev.tax.service.gov.uk")
-
   lazy val scoverageSettings = {
     import scoverage.ScoverageKeys
     Seq(
