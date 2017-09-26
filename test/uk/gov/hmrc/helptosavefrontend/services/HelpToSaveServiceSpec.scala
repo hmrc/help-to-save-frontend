@@ -41,10 +41,10 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.getUserEnrolmentStatus(_: String)(_: HeaderCarrier)).expects(nino, *)
+        (htsConnector.getUserEnrolmentStatus()(_: HeaderCarrier)).expects(*)
           .returning(EitherT.pure(EnrolmentStatus.Enrolled(true)))
 
-        val result = htsService.getUserEnrolmentStatus(nino)
+        val result = htsService.getUserEnrolmentStatus()
         result.value.futureValue should be(Right(EnrolmentStatus.Enrolled(true)))
       }
     }
@@ -55,10 +55,10 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.enrolUser(_: String)(_: HeaderCarrier)).expects(nino, *)
+        (htsConnector.enrolUser()(_: HeaderCarrier)).expects(*)
           .returning(EitherT.pure(Unit))
 
-        val result = htsService.enrolUser(nino)
+        val result = htsService.enrolUser()
         result.value.futureValue.isRight should be(true)
       }
     }
@@ -69,10 +69,10 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.setITMPFlag(_: String)(_: HeaderCarrier)).expects(nino, *)
+        (htsConnector.setITMPFlag()(_: HeaderCarrier)).expects(*)
           .returning(EitherT.pure(Unit))
 
-        val result = htsService.setITMPFlag(nino)
+        val result = htsService.setITMPFlag()
         result.value.futureValue.isRight should be(true)
       }
     }
@@ -84,10 +84,10 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.storeEmail(_: String, _: String)(_: HeaderCarrier)).expects(email, nino, *)
+        (htsConnector.storeEmail(_: String)(_: HeaderCarrier)).expects(email, *)
           .returning(EitherT.pure(Unit))
 
-        val result = htsService.storeConfirmedEmail(email, nino)
+        val result = htsService.storeConfirmedEmail(email)
         result.value.futureValue.isRight should be(true)
       }
     }
@@ -98,10 +98,10 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.getEmail(_: String)(_: HeaderCarrier)).expects(nino, *)
+        (htsConnector.getEmail()(_: HeaderCarrier)).expects(*)
           .returning(EitherT.pure(None))
 
-        val result = htsService.getConfirmedEmail(nino)
+        val result = htsService.getConfirmedEmail()
         result.value.futureValue.isRight should be(true)
       }
     }
@@ -114,18 +114,18 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val eligibilityCheckResult = randomEligibilityCheckResult()
 
-        (htsConnector.getEligibility(_: String)(_: HeaderCarrier)).expects(nino, *)
+        (htsConnector.getEligibility()(_: HeaderCarrier)).expects(*)
           .returning(EitherT.pure(eligibilityCheckResult))
 
-        val result = htsService.checkEligibility(nino)
+        val result = htsService.checkEligibility()
         result.value.futureValue should be(Right(eligibilityCheckResult))
       }
 
       "return an unsuccessful response if the connector returns an unsuccessful response" in {
-        (htsConnector.getEligibility(_: String)(_: HeaderCarrier)).expects(nino, *)
+        (htsConnector.getEligibility()(_: HeaderCarrier)).expects(*)
           .returning(EitherT.fromEither[Future](Left("uh oh")))
 
-        val result = htsService.checkEligibility(nino)
+        val result = htsService.checkEligibility()
         result.value.futureValue should be(Left("uh oh"))
       }
     }

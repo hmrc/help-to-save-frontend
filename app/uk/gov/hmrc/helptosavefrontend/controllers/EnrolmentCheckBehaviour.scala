@@ -40,7 +40,7 @@ trait EnrolmentCheckBehaviour {
   )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
     val enrolled: EitherT[Future, EnrolmentCheckError, (String, EnrolmentStatus)] = for {
       nino ← EitherT.fromOption[Future](htsContext.nino, NoNINO)
-      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus(nino).leftMap[EnrolmentCheckError](e ⇒ EnrolmentServiceError(nino, e))
+      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus().leftMap[EnrolmentCheckError](e ⇒ EnrolmentServiceError(nino, e))
     } yield (nino, enrolmentStatus)
 
     enrolled.fold[Future[Result]](initialError ⇒
@@ -49,7 +49,7 @@ trait EnrolmentCheckBehaviour {
         // if the user is enrolled but the itmp flag is not set then just
         // start the process to set the itmp flag here without worrying about the result
         if (!itmpHtSFlag) {
-          helpToSaveService.setITMPFlag(nino).value.onComplete{
+          helpToSaveService.setITMPFlag().value.onComplete{
             case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to set ITMP flag, future failed: $e")
             case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not start process to set ITMP flag: $e")
             case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Process started to set ITMP flag")

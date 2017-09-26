@@ -21,7 +21,7 @@ import java.net.URLDecoder
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
-import play.api.i18n.{Messages, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -49,18 +49,18 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
   val mockNSIConnector = mock[NSIConnector]
 
   def mockEnrolmentCheck(input: NINO)(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus(_: NINO)(_: HeaderCarrier))
-      .expects(input, *)
+    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
+      .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEmailGet(input: NINO)(result: Either[String, Option[String]]): Unit =
-    (mockHelpToSaveService.getConfirmedEmail(_: NINO)(_: HeaderCarrier))
-      .expects(input, *)
+    (mockHelpToSaveService.getConfirmedEmail()(_: HeaderCarrier))
+      .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
   def mockStoreEmail(nino: NINO, email: Email)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.storeConfirmedEmail(_: Email, _: NINO)(_: HeaderCarrier))
-      .expects(email, nino, *)
+    (mockHelpToSaveService.storeConfirmedEmail(_: Email)(_: HeaderCarrier))
+      .expects(email, *)
       .returning(EitherT.fromEither[Future](result))
 
   lazy val controller = new AccountHolderUpdateEmailAddressController(

@@ -50,13 +50,13 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .returning(EitherT.fromEither[Future](result))
 
   def mockEnrolmentCheck(input: NINO)(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus(_: NINO)(_: HeaderCarrier))
-      .expects(input, *)
+    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
+      .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
   def mockWriteITMPFlag(nino: NINO)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.setITMPFlag(_: NINO)(_: HeaderCarrier))
-      .expects(nino, *)
+    (mockHelpToSaveService.setITMPFlag()(_: HeaderCarrier))
+      .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
   def commonEnrolmentAndSessionBehaviour(getResult:               () ⇒ Future[Result], // scalastyle:ignore method.length

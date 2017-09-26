@@ -37,17 +37,17 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult]
+  def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult]
 
-  def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
+  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
 
-  def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
+  def enrolUser()(implicit hc: HeaderCarrier): Result[Unit]
 
-  def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
+  def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit]
 
-  def storeEmail(email: Email, nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
+  def storeEmail(email: Email)(implicit hc: HeaderCarrier): Result[Unit]
 
-  def getEmail(nino: NINO)(implicit hc: HeaderCarrier): Result[Option[String]]
+  def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]]
 
 }
 
@@ -56,30 +56,30 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
 
   val base64Encoder: Base64.Encoder = Base64.getEncoder
 
-  def getEligibility(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
+  def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
     handle(
-      eligibilityURL(nino),
+      eligibilityURL,
       _.parseJson[EligibilityCheckResponse].flatMap(toEligibilityCheckResponse),
       "check eligibility",
       identity
     )
 
-  def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
-    handle(enrolmentStatusURL(nino), _.parseJson[EnrolmentStatus], "get user enrolment status", identity)
+  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
+    handle(enrolmentStatusURL, _.parseJson[EnrolmentStatus], "get user enrolment status", identity)
 
-  def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
-    handle(enrolUserURL(nino), _ ⇒ Right(()), "enrol users", identity)
+  def enrolUser()(implicit hc: HeaderCarrier): Result[Unit] =
+    handle(enrolUserURL, _ ⇒ Right(()), "enrol users", identity)
 
-  def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
-    handle(setITMPFlagURL(nino), _ ⇒ Right(()), "set ITMP flag", identity)
+  def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit] =
+    handle(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag", identity)
 
-  def storeEmail(email: Email, nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] = {
+  def storeEmail(email: Email)(implicit hc: HeaderCarrier): Result[Unit] = {
     val encodedEmail = new String(base64Encoder.encode(email.getBytes()))
-    handle(storeEmailURL(encodedEmail, nino), _ ⇒ Right(()), "store email", identity)
+    handle(storeEmailURL(encodedEmail), _ ⇒ Right(()), "store email", identity)
   }
 
-  def getEmail(nino: NINO)(implicit hc: HeaderCarrier): Result[Option[String]] =
-    handle(getEmailURL(nino), _.parseJson[GetEmailResponse].map(_.email), "get email", identity)
+  def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]] =
+    handle(getEmailURL, _.parseJson[GetEmailResponse].map(_.email), "get email", identity)
 
   private def handle[A, B](url:         String,
                            ifHTTP200:   HttpResponse ⇒ Either[B, A],
@@ -96,7 +96,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
 
-  private def eligibilityURL(nino: NINO) = s"$helpToSaveUrl/help-to-save/eligibility-check?nino=$nino"
+  private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
 
   private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
     val reasonInt = eligibilityCheckResponse.reason
@@ -125,23 +125,23 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
 object HelpToSaveConnectorImpl {
 
   private[connectors] object URLS {
-    def eligibilityURL(nino: NINO) =
-      s"$helpToSaveUrl/help-to-save/eligibility-check?nino=$nino"
+    val eligibilityURL =
+      s"$helpToSaveUrl/help-to-save/eligibility-check"
 
-    def enrolmentStatusURL(nino: NINO) =
-      s"$helpToSaveUrl/help-to-save/enrolment-status?nino=$nino"
+    val enrolmentStatusURL =
+      s"$helpToSaveUrl/help-to-save/enrolment-status"
 
-    def enrolUserURL(nino: NINO) =
-      s"$helpToSaveUrl/help-to-save/enrol-user?nino=$nino"
+    val enrolUserURL =
+      s"$helpToSaveUrl/help-to-save/enrol-user"
 
-    def setITMPFlagURL(nino: NINO) =
-      s"$helpToSaveUrl/help-to-save/set-itmp-flag?nino=$nino"
+    val setITMPFlagURL =
+      s"$helpToSaveUrl/help-to-save/set-itmp-flag"
 
-    def storeEmailURL(email: Email, nino: NINO) =
-      s"$helpToSaveUrl/help-to-save/store-email?email=$email&nino=$nino"
+    def storeEmailURL(email: Email) =
+      s"$helpToSaveUrl/help-to-save/store-email?email=$email"
 
-    def getEmailURL(nino: NINO) =
-      s"$helpToSaveUrl/help-to-save/get-email?nino=$nino"
+    val getEmailURL =
+      s"$helpToSaveUrl/help-to-save/get-email"
   }
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
