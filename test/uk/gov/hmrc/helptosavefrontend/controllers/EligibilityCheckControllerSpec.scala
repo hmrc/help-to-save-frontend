@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.eq._
 import org.scalacheck.Arbitrary
@@ -34,7 +33,6 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.IneligibilityReason.AccountAlreadyOpened
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -59,8 +57,8 @@ class EligibilityCheckControllerSpec
     mockAuthConnector)(ec)
 
   def mockEligibilityResult(nino: String)(result: Either[String, EligibilityCheckResult]): Unit =
-    (mockHelpToSaveService.checkEligibility(_: String)(_: HeaderCarrier))
-      .expects(nino, *)
+    (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier))
+      .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
   def mockSendAuditEvent(): Unit =

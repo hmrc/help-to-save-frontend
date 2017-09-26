@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -61,13 +61,13 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       .returning(EitherT.fromEither[Future](response))
 
   def mockEnrolUser(nino: NINO)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.enrolUser(_: NINO)(_: HeaderCarrier))
-      .expects(nino, *)
+    (mockHelpToSaveService.enrolUser()(_: HeaderCarrier))
+      .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEmailUpdate(email: String, nino: NINO)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.storeConfirmedEmail(_: String, _: NINO)(_: HeaderCarrier))
-      .expects(email, nino, *)
+    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier))
+      .expects(email, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockDecrypt(expected: String)(result: Option[String]) =

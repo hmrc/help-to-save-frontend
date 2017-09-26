@@ -24,7 +24,7 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.UpdateEmailError
@@ -102,7 +102,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         case Some(Right(nsiUserInfo)) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
             _ ← nSIConnector.updateEmail(nsiUserInfo.updateEmail(emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
-            _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email, nino).leftMap[UpdateEmailError](UpdateEmailError.EmailMongoError)
+            _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap[UpdateEmailError](UpdateEmailError.EmailMongoError)
           } yield ()
 
           result.fold({
@@ -127,8 +127,8 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   private def checkIfAlreadyEnrolled(ifEnrolled: (NINO, Email) ⇒ Future[Result])(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
     val enrolled: EitherT[Future, String, (NINO, EnrolmentStatus, Option[Email])] = for {
       nino ← EitherT.fromOption[Future](htsContext.nino, "Could not find NINO")
-      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus(nino)
-      maybeEmail ← helpToSaveService.getConfirmedEmail(nino)
+      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
+      maybeEmail ← helpToSaveService.getConfirmedEmail()
     } yield (nino, enrolmentStatus, maybeEmail)
 
     enrolled.fold[Future[Result]]({
