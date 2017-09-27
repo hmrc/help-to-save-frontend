@@ -102,6 +102,6 @@ private[utils] trait NINOGenerator {
     ineligibleNino
   }
 
-  def currentEligibleNINO(): String = current
+  def currentNINO(): String = current
 
 }

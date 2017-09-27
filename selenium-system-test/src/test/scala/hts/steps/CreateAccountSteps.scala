@@ -74,7 +74,7 @@ class CreateAccountSteps extends Steps {
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
     driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentEligibleNINO())
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO())
   }
 
   Then("""^they see that the account is created$""") { () ⇒

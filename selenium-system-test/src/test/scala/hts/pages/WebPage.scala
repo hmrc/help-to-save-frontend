@@ -16,7 +16,8 @@
 
 package hts.pages
 
-import org.openqa.selenium.WebDriver
+import org.openqa.selenium.interactions.Actions
+import org.openqa.selenium.{By, JavascriptExecutor, Keys, WebDriver}
 import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
@@ -34,7 +35,10 @@ trait WebPage extends Matchers
 
   def back()(implicit driver: WebDriver): Unit = clickOn("ButtonBack")
 
-  def nextPage()(implicit driver: WebDriver): Unit = find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
+  def nextPage()(implicit driver: WebDriver): Unit = {
+    driver.findElement(By.id("get-help")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
+    find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
+  }
 
   def checkHeader(heading: String, text: String)(implicit driver: WebDriver): Boolean =
     find(cssSelector(heading)).exists(_.text === text)
