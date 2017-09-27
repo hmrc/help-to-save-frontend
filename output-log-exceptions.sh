@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+function printExceptionsFromLog {
+    echo "Printing log exception for:" $1
+    sm --logs $1 | grep -i '^[[:space:]]*at' --before-context=7
+}
+
+printExceptionsFromLog HELP_TO_SAVE_FRONTEND
+printExceptionsFromLog HELP_TO_SAVE
+printExceptionsFromLog HELP_TO_SAVE_STUB
+printExceptionsFromLog ASSETS_FRONTEND
+printExceptionsFromLog AUTH
+printExceptionsFromLog AUTH_LOGIN_API
+printExceptionsFromLog AUTH_LOGIN_STUB
+printExceptionsFromLog AUTH_DES_STUB
+printExceptionsFromLog AUTHENTICATOR
+printExceptionsFromLog CITIZEN_FRONTEND
+printExceptionsFromLog DATASTREAM
+printExceptionsFromLog GG_STUBS
+printExceptionsFromLog GG
+printExceptionsFromLog GG_AUTHENTICATION
+printExceptionsFromLog IDENTITY_VERIFICATION
+printExceptionsFromLog IDENTITY_VERIFICATION_FRONTEND
+printExceptionsFromLog IDENTITY_VERIFICATION_STUB
+printExceptionsFromLog KEYSTORE
+printExceptionsFromLog PERTAX_FRONTEND
+printExceptionsFromLog USER_DETAILS
+printExceptionsFromLog CA_FRONTEND
+printExceptionsFromLog EMAIL_VERIFICATION
+printExceptionsFromLog EMAIL_VERIFICATION_FRONTEND
+printExceptionsFromLog EMAIL_VERIFICATION_STUBS
+printExceptionsFromLog EMAIL
+printExceptionsFromLog HMRC_EMAIL_RENDERER
+printExceptionsFromLog MAILGUN_STUB
