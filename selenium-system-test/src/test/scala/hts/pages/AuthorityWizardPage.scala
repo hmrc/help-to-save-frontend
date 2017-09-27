@@ -63,8 +63,6 @@ object AuthorityWizardPage extends WebPage {
     userInfo.surname.foreach(setFamilyName)
     userInfo.nino.foreach(setNino)
     userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
-
-    //setDateOfBirth(userInfo.dateOfBirth.toString)
   }
 
   def navigate()(implicit driver: WebDriver): Unit =
