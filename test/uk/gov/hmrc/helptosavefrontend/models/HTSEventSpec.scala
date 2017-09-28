@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class HTSEventSpec extends TestSupport {
 
@@ -68,17 +68,17 @@ class HTSEventSpec extends TestSupport {
 
   "EligibilityCheckEvent" must {
     "be created with the appropriate auditSource" in {
-      val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
+      val event = EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
       event.auditSource shouldBe "hts-frontend"
     }
 
     "be created with the appropriate auditType" in {
-      val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
+      val event = EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
       event.value.auditType shouldBe "eligibilityCheck"
     }
 
     "be created with the eligible tag set true, no reason tag, and the nino, if the errorDetailString is None" in {
-      val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
+      val event = EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
       event.value.detail.size shouldBe 2
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "true") shouldBe true
@@ -86,7 +86,7 @@ class HTSEventSpec extends TestSupport {
 
     "be created with the eligible tag set false, a reason tag, and the nino, if the errorDetailString is given" in {
       val reason = "reason"
-      val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, Some(reason))(new HeaderCarrier)
+      val event = EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, Some(reason))(new HeaderCarrier)
       event.value.detail.size shouldBe 3
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "false") shouldBe true

@@ -20,7 +20,6 @@ import javax.inject.Singleton
 
 import cats.instances.future._
 import com.google.inject.Inject
-import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
@@ -30,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -39,10 +38,9 @@ import scala.util.{Failure, Success}
 class RegisterController @Inject() (val messagesApi:           MessagesApi,
                                     val helpToSaveService:     HelpToSaveService,
                                     val sessionCacheConnector: SessionCacheConnector,
-                                    val app:                   Application,
                                     frontendAuthConnector:     FrontendAuthConnector
 )(implicit ec: ExecutionContext, crypto: Crypto)
-  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+  extends HelpToSaveAuth(frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
   import RegisterController.NSIUserInfoOps
 

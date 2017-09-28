@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.iv
 
-import uk.gov.hmrc.play.http.HttpResponse
+import uk.gov.hmrc.http.HttpResponse
 
 sealed trait IvResponse
 

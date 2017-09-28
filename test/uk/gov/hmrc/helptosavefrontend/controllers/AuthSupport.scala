@@ -17,18 +17,19 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.auth.core.authorise.{ConfidenceLevel, Enrolment, EnrolmentIdentifier, Enrolments, Predicate}
-import uk.gov.hmrc.auth.core.retrieve.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.retrieve.{AuthProviders, ItmpAddress, ItmpName, Name, Retrieval, Retrievals, ~}
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.authorise._
+import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserRetrievals
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.util.toJavaDate
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 object AuthSupport {
 
@@ -80,18 +81,18 @@ trait AuthSupport extends TestSupport {
   val mockedMissingNinoEnrolment = new ~(name, noEmail) and Option(dob) and itmpName and itmpDob and itmpAddress.copy(line1 = None) and Enrolments(Set())
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier))
-      .expects(AuthProviders(GovernmentGateway), *, *)
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(AuthProviders(GovernmentGateway), *, *, *)
       .returning(Future.failed(ex))
 
   def mockAuthWithRetrievalsWithFail(predicate: Predicate)(ex: Throwable): Unit =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier))
-      .expects(predicate, *, *)
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(predicate, *, *, *)
       .returning(Future.failed(ex))
 
   def mockAuthWithRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[UserRetrievalType])(_: HeaderCarrier))
-      .expects(predicate, UserRetrievals and Retrievals.authorisedEnrolments, *)
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[UserRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(predicate, UserRetrievals and Retrievals.authorisedEnrolments, *, *)
       .returning(Future.successful(result))
 
 }

@@ -18,10 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.util
 
 import java.util.Base64
 
-import cats.instances.int._
-import cats.syntax.eq._
-
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 case class EmailVerificationParams(nino: String, email: String) {
   private val encoder = Base64.getEncoder

@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 import java.net.{URI, URLDecoder, URLEncoder}
 import java.util.Base64
 
+import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -40,24 +41,28 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
-  val ivUrl: String = s"${baseUrl("identity-verification-frontend")}/mdtp/journey/journeyId"
+  val ivFrontendUrl: String = getString("microservice.services.identity-verification-frontend.url")
+
+  def ivJourneyResultUrl(journeyId: JourneyId): String = s"$ivFrontendUrl/mdtp/journey/journeyId/${journeyId.Id}"
 
   def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
 
   def decoded(url: String): String = URLDecoder.decode(url, "UTF-8")
 
-  val ivUpliftUrl: String = getConfString("microservice.services.identity-verification-uplift.url", "") //TODO: this doesnt work ATM
-
-  val sosOrigin: String = getString("appName")
+  val origin: String = getString("appName")
 
   val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
 
-  val IvRetryUrl: String =
-    new URI(s"$ivUpliftUrl?origin=$sosOrigin&" +
-      s"completionURL=${URLEncoder.encode(identityCallbackUrl, "UTF-8")}&" +
-      s"failureURL=${URLEncoder.encode(identityCallbackUrl, "UTF-8")}" +
-      "&confidenceLevel=200")
-      .toString
+  val IvUrl: String = {
+    val ivUpliftUrl: String = s"$ivFrontendUrl/mdtp/uplift"
+    val encodedCallbackUrl = encoded(identityCallbackUrl)
+    new URI(s"$ivUpliftUrl" +
+      s"?origin=$origin" +
+      s"&completionURL=$encodedCallbackUrl" +
+      s"&failureURL=$encodedCallbackUrl" +
+      s"&confidenceLevel=200"
+    ).toString
+  }
 
   val nsiAuthHeaderKey: String = getString("microservice.services.nsi.authorization.header-key")
 
@@ -84,11 +89,11 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val feedbackSurveyUrl: String = getString("microservice.services.feedback-survey.url")
 
-  val caFrontendUrl: String = getString("microservice.services.ca-frontend.url")
+  val caFrontendUrl: String = getString("microservice.services.company-auth-frontend.url")
 
-  val ggSignOutUrl: String = s"$caFrontendUrl/sign-out"
+  val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
 
-  val signOutUrl: String = s"$ggSignOutUrl?continue=$feedbackSurveyUrl?origin=HTS"
+  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
 
   override lazy val analyticsToken: String = getString("google-analytics.token")
   override lazy val analyticsHost: String = getString("google-analytics.host")

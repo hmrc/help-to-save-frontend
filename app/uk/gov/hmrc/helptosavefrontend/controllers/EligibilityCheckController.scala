@@ -34,7 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaVal
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.config.AppName
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -46,7 +46,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
                                             val app:                     Application,
                                             auditor:                     HTSAuditor,
                                             frontendAuthConnector:       FrontendAuthConnector)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
+  extends HelpToSaveAuth(frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   import EligibilityCheckController._
 

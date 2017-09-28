@@ -21,13 +21,15 @@ import play.api.http.HttpVerbs.{GET ⇒ GET_VERB, POST ⇒ POST_VERB, PUT ⇒ PU
 import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSProxyServer
 import uk.gov.hmrc.auth.core.PlayAuthConnector
+import uk.gov.hmrc.http._
+import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.audit.http.config.{AuditingConfig, LoadAuditingConfig}
+import uk.gov.hmrc.play.audit.http.config.AuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
-import uk.gov.hmrc.play.http.hooks.HttpHook
+import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 import uk.gov.hmrc.play.http.ws._
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpDelete, HttpGet, HttpPost, HttpPut, HttpResponse}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -91,10 +93,17 @@ class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector
   override def http: WSHttp = wsHttp
 }
 
-class WSHttpProxy extends WSPost with WSPut with WSProxy with RunMode with HttpAuditing with ServicesConfig {
+class WSHttpProxy
+  extends HttpPost with WSPost
+  with HttpPut with WSPut
+  with WSProxy
+  with RunMode
+  with HttpAuditing
+  with ServicesConfig
+  with HttpHooks {
   override lazy val appName: String = getString("appName")
   override lazy val wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy")
-  override val hooks: Seq[HttpHook] = NoneRequired
+  override val hooks: Seq[HttpHook] = Seq(AuditingHook)
   override lazy val auditConnector: AuditConnector = FrontendAuditConnector
 
   /**
