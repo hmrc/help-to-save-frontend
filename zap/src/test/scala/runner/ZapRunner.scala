@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-import uk.gov.hmrc.{ZapAlertFilter, ZapTest}
+package runner
+
+import uk.gov.hmrc.ZapTest
 
 class ZapRunner extends ZapTest {
 
