@@ -21,6 +21,12 @@ import org.openqa.selenium.WebDriver
 
 object CreateAccountPage extends WebPage {
 
+  override def expectedUrl: Option[String] = Some("")
+
+  override def expectedPageTitle: Option[String] = Some("")
+
+  override def expectedPageHeader: Option[String] = Some("")
+
   def navigate()(implicit driver: WebDriver): Unit = go to s"${Configuration.host}/help-to-save/register/create-an-account"
 
   def createAccount()(implicit driver: WebDriver): Unit = click on "accept-and-create-account"

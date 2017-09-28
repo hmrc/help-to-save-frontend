@@ -26,6 +26,12 @@ import scala.annotation.tailrec
 
 object AuthorityWizardPage extends WebPage {
 
+  override def expectedUrl: Option[String] = Some("")
+
+  override def expectedPageTitle: Option[String] = Some("")
+
+  override def expectedPageHeader: Option[String] = Some("")
+
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     AuthorityWizardPage.navigate()
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)

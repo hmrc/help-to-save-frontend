@@ -21,6 +21,12 @@ import org.openqa.selenium.WebDriver
 
 object EligiblePage extends WebPage {
 
+  override def expectedUrl: Option[String] = Some(s"${Configuration.host}/help-to-save/eligible")
+
+  override def expectedPageTitle: Option[String] = Some("You are eligible")
+
+  override def expectedPageHeader: Option[String] = Some("You're eligible")
+
   val pageTitle: String = "You're eligible"
   val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
 

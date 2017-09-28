@@ -21,6 +21,13 @@ import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object ApplyPage extends WebPage {
+
+  override def expectedUrl: Option[String] = Some("")
+
+  override def expectedPageTitle: Option[String] = Some("")
+
+  override def expectedPageHeader: Option[String] = Some("")
+
   val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply"
 
   def navigate()(implicit driver: WebDriver): Unit = go to url
@@ -28,4 +35,5 @@ object ApplyPage extends WebPage {
   def clickStartNow()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='button button--get-started']")
 
   def clickSignInLink()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='service-info']/ul/li/a")
+
 }

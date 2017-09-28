@@ -16,9 +16,18 @@
 
 package hts.pages
 
+import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object NotEligiblePage extends WebPage {
+
+  override def expectedUrl: Option[String] = Some(s"${Configuration.host}/help-to-save/not-eligible")
+
+  override def expectedPageTitle: Option[String] = Some("Help to Save")
+
+  override def expectedPageHeader: Option[String] = Some("You're not eligible for Help to Save")
+
+  val url: String = s"${Configuration.host}/help-to-save/not-eligible"
 
   private val pageTitle = "You're not eligible for Help to Save"
 

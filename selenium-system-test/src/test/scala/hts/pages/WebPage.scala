@@ -16,12 +16,11 @@
 
 package hts.pages
 
-import org.openqa.selenium.interactions.Actions
-import org.openqa.selenium.{By, JavascriptExecutor, Keys, WebDriver}
-import org.scalatest.{Assertions, Matchers}
+import org.openqa.selenium.{By, Keys, WebDriver}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{Assertions, Matchers}
 
 trait WebPage extends Matchers
   with WebBrowser
@@ -38,6 +37,20 @@ trait WebPage extends Matchers
   def nextPage()(implicit driver: WebDriver): Unit = {
     driver.findElement(By.id("get-help")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
     find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
+  }
+
+  /*
+   * CONFIRM CURRENT PAGE INFO
+   */
+
+  def expectedUrl: Option[String]
+  def expectedPageTitle: Option[String]
+  def expectedPageHeader: Option[String]
+
+  def pageInfoIsCorrect()(implicit driver: WebDriver): Unit = {
+    expectedUrl shouldBe Some(currentUrl)
+    expectedPageTitle shouldBe Some(pageTitle)
+    expectedPageHeader shouldBe Some(driver.findElement(By.tagName("h1")).getText)
   }
 
   def checkHeader(heading: String, text: String)(implicit driver: WebDriver): Boolean =

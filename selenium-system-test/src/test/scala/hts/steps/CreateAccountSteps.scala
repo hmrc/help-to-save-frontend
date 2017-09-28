@@ -82,11 +82,14 @@ class CreateAccountSteps extends Steps {
   }
 
   Then("""^they will be on the eligibility question page$""") { () ⇒
-    on(EligibilityQuestionPage)
+    //on(EligibilityQuestionPage)
+    Thread.sleep(10000)
+    EligibilityQuestionPage.pageInfoIsCorrect
   }
 
   Then("""^they will be on the you're eligible page$""") { () ⇒
-    on(EligiblePage)
+    //on(EligiblePage)
+    EligiblePage.pageInfoIsCorrect
   }
 
   Then("""^they will be on the account home page$"""){ () ⇒
@@ -101,7 +104,8 @@ class CreateAccountSteps extends Steps {
   }
 
   Then("""^they see the Help to Save landing page \(with information about Help to Save\)$"""){ () ⇒
-    on(AboutPage)
+    //on(AboutPage)
+    AboutPage.pageInfoIsCorrect
   }
 
   When("""^they choose to go ahead with creating an account$"""){ () ⇒

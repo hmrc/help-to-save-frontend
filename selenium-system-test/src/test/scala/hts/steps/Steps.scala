@@ -34,6 +34,9 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
   /** Tries to get the value of [[_driver]] - will throw an exception if it doesn't exist */
   implicit def driver: WebDriver = _driver.getOrElse(sys.error("Driver does not exist"))
 
+  /*
+   * method "on" not currently in use
+   */
   def on(page: WebPage)(implicit driver: WebDriver) = {
     val wait = new WebDriverWait(driver, 5)
     val _ = wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")))

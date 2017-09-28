@@ -19,5 +19,13 @@ package hts.pages
 import hts.utils.Configuration
 
 object AccessAccountPage extends WebPage {
+
+  override def expectedUrl: Option[String] = Some(s"${Configuration.host}/help-to-save/access-account")
+
+  override def expectedPageTitle: Option[String] = Some("")
+
+  override def expectedPageHeader: Option[String] = Some("")
+
   val url: String = s"${Configuration.host}/help-to-save/access-account"
+
 }

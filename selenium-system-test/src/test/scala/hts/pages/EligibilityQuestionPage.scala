@@ -16,9 +16,16 @@
 
 package hts.pages
 
+import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object EligibilityQuestionPage extends WebPage {
+
+  override def expectedUrl: Option[String] = Some(s"${Configuration.host}/help-to-save/access-account")
+
+  override def expectedPageTitle: Option[String] = Some("TBD")
+
+  override def expectedPageHeader: Option[String] = Some("TBD")
 
   //TODO This page is still under construction
   val pageTitle: String = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"

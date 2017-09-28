@@ -20,6 +20,12 @@ import org.openqa.selenium.WebDriver
 
 object ChangeEmailPage extends WebPage {
 
+  override def expectedUrl: Option[String] = Some("")
+
+  override def expectedPageTitle: Option[String] = Some("")
+
+  override def expectedPageHeader: Option[String] = Some("")
+
   def setNewEmail(email: String)(implicit driver: WebDriver): Unit = {
     val el = find(name("value"))
     el.foreach(_.underlying.clear())
