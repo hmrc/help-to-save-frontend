@@ -150,7 +150,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector)
       "origin" -> Seq(origin)
     ))
 
-  private def toPersonalIV(callbackUrl: String, confidenceLevel: ConfidenceLevel): Result = Redirect(IvUrl, 303)
+  private def toPersonalIV(callbackUrl: String, confidenceLevel: ConfidenceLevel): Result = SeeOther(IvUrl)
 
 }
 
