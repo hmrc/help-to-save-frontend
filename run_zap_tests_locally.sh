@@ -13,5 +13,5 @@ echo "Running zap browser tests"
 
 sleep 5
 
-echo "Running ZapRunner"
-sbt "testOnly ZapRunner"
+echo "Running src.test.scala.runner.ZapRunner"
+sbt zap:test
