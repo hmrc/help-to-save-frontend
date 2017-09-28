@@ -28,7 +28,7 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector, FrontendGlobal}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.{EnrolmentCheckBehaviour, HelpToSaveAuth, SessionBehaviour}
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
@@ -86,7 +86,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         result.fold({
           e ⇒
             logger.warn(e)
-            InternalServerError
+            FrontendGlobal.resolveError(request, new Exception)
         }, { maybeNSIUserInfo ⇒
           maybeNSIUserInfo.fold{
             // this means they were ineligible
