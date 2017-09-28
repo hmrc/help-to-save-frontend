@@ -23,7 +23,7 @@ import hts.utils.ScenarioContext
 class EmailSteps extends Steps {
 
   Given("""^I am viewing my applicant details$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentEligibleNINO())
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO())
     EligiblePage.startCreatingAccount()
   }
 
@@ -37,7 +37,7 @@ class EmailSteps extends Steps {
   }
 
   Given("""^I've chosen to change my email address from A to B during the application process$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentEligibleNINO())
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO())
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.changeEmail()
     ChangeEmailPage.setAndVerifyNewEmail("newemail@mail.com")
