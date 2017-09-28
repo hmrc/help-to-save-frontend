@@ -24,7 +24,20 @@ sbt test
 ```
 This command will not run the Selenium tests.
 
-Run the Selenium tests separately by executing:
+Only if you want to run the Selenium tests locally, execute the following commands to start the relevant services:
+
+sm --start HTS_DEP -f
+
+cd <front end path>
+sbt "run 7000"
+
+cd <back end path>
+sbt "run 7001"
+
+cd <stub path>
+sbt "run 7002"
+
+Then (to run against any environment) execute:
  ```
  ./run_selenium_system_test.sh ${ENV} ${BROWSER} ${DRIVERS}
 ```
@@ -50,3 +63,12 @@ If you wish to run the Selenium tests from Intellij, you'll need to:
 1. Install the Cucumber for Java plugin.
 2. In "Edit configurations" > "Cucumber java" > "VM options" enter, for example: -Dbrowser=chrome -Denvironment=dev -Ddrivers=/usr/local/bin
 3. In "Edit configurations" > "Cucumber java" > "Glue" enter: hts.steps
+
+
+##ZAP (pen testing)
+
+You need to have ZAP installed and running locally via command:
+zap.sh -daemon -config api.disableKey=true -port 11000
+from inside your zaproxy folder
+download and install ZAP from here:
+https://github.com/zaproxy/zaproxy/wiki/Downloads

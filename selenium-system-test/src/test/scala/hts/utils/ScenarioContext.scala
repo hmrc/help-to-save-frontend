@@ -98,6 +98,8 @@ private[utils] trait NINOGenerator {
     ineligibleNino
   }
 
-  def currentEligibleNINO(): String = toEligible(current)
-
+  def currentNINO(): String = {
+    println("Current NINO: " + current)
+    current
+  }
 }
