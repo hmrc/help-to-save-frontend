@@ -150,13 +150,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector)
       "origin" -> Seq(origin)
     ))
 
-  private def toPersonalIV(callbackUrl: String, confidenceLevel: ConfidenceLevel): Result =
-    Redirect(ivUpliftUrl, Map(
-      "origin" -> Seq(origin),
-      "confidenceLevel" -> Seq(confidenceLevel.toString),
-      "completionURL" -> Seq(callbackUrl),
-      "failureURL" -> Seq(callbackUrl)
-    ))
+  private def toPersonalIV(callbackUrl: String, confidenceLevel: ConfidenceLevel): Result = Redirect(IvUrl, 303)
 
 }
 

@@ -43,8 +43,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val ivFrontendUrl: String = getString("microservice.services.identity-verification-frontend.url")
 
-  val ivUpliftUrl: String = s"$ivFrontendUrl/mdtp/uplift"
-
   def ivJourneyResultUrl(journeyId: JourneyId): String = s"$ivFrontendUrl/mdtp/journey/journeyId/${journeyId.Id}"
 
   def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
@@ -55,12 +53,16 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
 
-  val IvRetryUrl: String =
-    new URI(s"$ivUpliftUrl?origin=$origin&" +
-      s"completionURL=${URLEncoder.encode(identityCallbackUrl, "UTF-8")}&" + //todo: fix callback as do in HTSAuth class
-      s"failureURL=${URLEncoder.encode(identityCallbackUrl, "UTF-8")}" +
-      "&confidenceLevel=200")
-      .toString
+  val IvUrl: String = {
+    val ivUpliftUrl: String = s"$ivFrontendUrl/mdtp/uplift"
+    val encodedCallbackUrl = encoded(identityCallbackUrl)
+    new URI(s"$ivUpliftUrl" +
+      s"?origin=$origin" +
+      s"&completionURL=$encodedCallbackUrl" +
+      s"&failureURL=$encodedCallbackUrl" +
+      s"&confidenceLevel=200"
+    ).toString
+  }
 
   val nsiAuthHeaderKey: String = getString("microservice.services.nsi.authorization.header-key")
 
