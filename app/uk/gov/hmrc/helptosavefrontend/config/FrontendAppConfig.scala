@@ -89,7 +89,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val caFrontendUrl: String = getString("microservice.services.company-auth-frontend.url")
 
-  val ggLoginUrl: String = s"$caFrontendUrl/login"
+  val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
 
   val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
 
