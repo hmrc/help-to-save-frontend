@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, 
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, NSIUserInfo, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

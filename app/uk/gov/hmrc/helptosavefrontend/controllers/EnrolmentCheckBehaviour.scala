@@ -23,7 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}

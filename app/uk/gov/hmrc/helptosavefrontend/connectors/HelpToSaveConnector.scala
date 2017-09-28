@@ -28,8 +28,8 @@ import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{Eligib
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, NINO, Result}
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Result}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal

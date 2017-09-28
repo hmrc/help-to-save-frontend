@@ -28,7 +28,6 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
   lazy val controller = new AccessAccountController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
-    fakeApplication,
     mockAuthConnector
   )
 

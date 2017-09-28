@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait HTSEvent {
   val value: DataEvent

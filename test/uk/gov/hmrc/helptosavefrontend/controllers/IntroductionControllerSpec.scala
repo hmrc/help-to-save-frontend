@@ -22,18 +22,18 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class IntroductionControllerSpec extends AuthSupport {
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new IntroductionController()(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector)
+  val helpToSave = new IntroductionController(fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector)
 
   def mockAuthorise(loggedIn: Boolean) =
-    (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier))
-      .expects(EmptyPredicate, EmptyRetrieval, *)
+    (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(EmptyPredicate, EmptyRetrieval, *, *)
       .returning(if (loggedIn) Future.successful(()) else Future.failed(new Exception("")))
 
   "GET /" should {

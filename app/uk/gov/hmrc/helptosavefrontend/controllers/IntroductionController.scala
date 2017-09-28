@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
@@ -27,8 +26,8 @@ import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
 
 @Singleton
-class IntroductionController @Inject() (implicit app: Application, val messagesApi: MessagesApi,
-                                        frontendAuthConnector: FrontendAuthConnector) extends HelpToSaveAuth(app, frontendAuthConnector) with I18nSupport {
+class IntroductionController @Inject() (val messagesApi:       MessagesApi,
+                                        frontendAuthConnector: FrontendAuthConnector) extends HelpToSaveAuth(frontendAuthConnector) with I18nSupport {
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.introduction.about_help_to_save())

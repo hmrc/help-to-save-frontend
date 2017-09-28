@@ -36,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -46,7 +46,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                                                           frontendAuthConnector:          FrontendAuthConnector,
                                                           val emailVerificationConnector: EmailVerificationConnector
 )(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, ec: ExecutionContext)
-  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
+  extends HelpToSaveAuth(frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
 
   implicit val userType: UserType = UserType.NewApplicant
 

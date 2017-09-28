@@ -24,9 +24,9 @@ import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.util.Result
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.play.config.{AppName, ServicesConfig}
-import uk.gov.hmrc.play.http._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -58,7 +58,7 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
     EitherT[Future, String, CacheMap]{
       val timerContext = metrics.keystoreWriteTimer.time()
 
-      cache[HTSSession](sessionKey, body)(writes, hc).map{ cacheMap ⇒
+      cache[HTSSession](sessionKey, body)(writes, hc, ec).map{ cacheMap ⇒
         val _ = timerContext.stop()
         Right(cacheMap)
       }.recover {
@@ -73,7 +73,7 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
     EitherT[Future, String, Option[HTSSession]]{
       val timerContext = metrics.keystoreReadTimer.time()
 
-      fetchAndGetEntry[HTSSession](sessionKey)(hc, reads).map{ session ⇒
+      fetchAndGetEntry[HTSSession](sessionKey)(hc, reads, ec).map{ session ⇒
         val _ = timerContext.stop()
         Right(session)
       }.recover {
