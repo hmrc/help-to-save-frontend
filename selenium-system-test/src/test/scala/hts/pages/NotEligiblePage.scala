@@ -18,7 +18,7 @@ package hts.pages
 
 import org.openqa.selenium.WebDriver
 
-object NotEligiblePage extends WebPage {
+object NotEligiblePage extends Page {
 
   private val pageTitle = "You're not eligible for Help to Save"
 

@@ -24,7 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.models.Address
 
 import scala.annotation.tailrec
 
-object AuthorityWizardPage extends WebPage {
+object AuthorityWizardPage extends Page {
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     AuthorityWizardPage.navigate()
@@ -72,8 +72,10 @@ object AuthorityWizardPage extends WebPage {
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
     find(name("redirectionUrl")).foreach(_.underlying.sendKeys(url))
 
-  def setNino(nino: String)(implicit driver: WebDriver): Unit =
+  def setNino(nino: String)(implicit driver: WebDriver): Unit = {
+    println("NINO entered in auth wizard: " + nino)
     find(name("nino")).foreach(_.underlying.sendKeys(nino))
+  }
 
   def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
     find(name("credentialStrength")).foreach(_.underlying.sendKeys(strength))
