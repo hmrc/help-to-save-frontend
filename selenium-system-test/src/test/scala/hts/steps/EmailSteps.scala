@@ -20,7 +20,7 @@ import hts.pages._
 import hts.pages.registrationPages.CheckEligibilityPage
 import hts.utils.ScenarioContext
 
-class EmailSteps extends Steps {
+class EmailSteps extends Steps with Page {
 
   Given("""^I am viewing my applicant details$"""){ () ⇒
     AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO())
@@ -33,7 +33,7 @@ class EmailSteps extends Steps {
   }
 
   Then("""^I am asked to check my email account for a verification email$"""){ () ⇒
-    Page.getCurrentUrl contains CheckYourEmailPage.url
+    getCurrentUrl contains CheckYourEmailPage.url
   }
 
   Given("""^I've chosen to change my email address from A to B during the application process$"""){ () ⇒

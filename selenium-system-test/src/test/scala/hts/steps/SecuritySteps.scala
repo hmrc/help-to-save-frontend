@@ -21,7 +21,7 @@ import hts.pages._
 import hts.utils.{Configuration, Helpers, ScenarioContext}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 
-class SecuritySteps extends Steps {
+class SecuritySteps extends Steps with Page {
 
   def oneOfRegex(options: Set[String]): String = s"(${options.mkString("|")})"
 
@@ -40,7 +40,7 @@ class SecuritySteps extends Steps {
   }
 
   Then("""^I am forced into going through IV before being able to proceed with their HtS application$""") { () ⇒
-    Page.getCurrentUrl should include regex "/iv/journey-result|iv%2Fjourney-result"
+    getCurrentUrl should include regex "/iv/journey-result|iv%2Fjourney-result"
   }
 
   Given("""^I have NOT logged in to Government Gateway$""") { () ⇒
@@ -65,7 +65,7 @@ class SecuritySteps extends Steps {
   }
 
   Then("""^I am prompted to log in to Government Gateway$""") { () ⇒
-    Page.getCurrentUrl should include("gg/sign-in")
+    getCurrentUrl should include("gg/sign-in")
   }
 
   Given("""^a user has logged in and passed IV$""") { () ⇒
@@ -73,18 +73,16 @@ class SecuritySteps extends Steps {
   }
 
   Then("""^the GG sign in page is visible$"""){ () ⇒
-    driver.getCurrentUrl should include ("gg/sign-in?")
+    getCurrentUrl should include ("gg/sign-in?")
   }
 
   When("""^I call URI (.+) with HTTP method (.+)$"""){ (uri: String, httpMethod: String) ⇒
-    //http.httpMethod(s"${Configuration.host}/help-to-save/uri")
     val path = s"${Configuration.host}/help-to-save/uri"
-    //Page.hitPage(httpMethod, path)
-    Page.navigate(path)
+    navigate(path)
   }
 
   Then("""^I see a response$"""){ () ⇒
-    driver.getCurrentUrl should include ("")
+    getCurrentUrl should include ("")
   }
 
   Given("""^I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save$"""){ () ⇒

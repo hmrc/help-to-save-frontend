@@ -19,7 +19,7 @@ package hts.pages
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object CreateAccountPage extends WebPage {
+object CreateAccountPage extends Page {
 
   def navigate()(implicit driver: WebDriver): Unit = go to s"${Configuration.host}/help-to-save/register/create-an-account"
 

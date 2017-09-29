@@ -18,7 +18,7 @@ package hts.pages
 
 import org.openqa.selenium.WebDriver
 
-object EligibilityQuestionPage extends WebPage {
+object EligibilityQuestionPage extends Page {
 
   //TODO This page is still under construction
   val pageTitle: String = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"

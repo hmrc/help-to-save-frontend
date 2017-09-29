@@ -21,7 +21,7 @@ import hts.pages.registrationPages._
 import hts.utils.{Configuration, ScenarioContext}
 import hts.utils.EitherOps._
 
-class CreateAccountSteps extends Steps {
+class CreateAccountSteps extends Steps with Page {
 
   Given("""^A user is at the start of the registration process$""") { () ⇒
     AboutPage.navigate()
@@ -78,7 +78,7 @@ class CreateAccountSteps extends Steps {
   }
 
   Then("""^they see that the account is created$""") { () ⇒
-    Page.getCurrentUrl should include("www.nsandi.com")
+    getCurrentUrl should include(NSIManageAccountPage.url)
   }
 
   Then("""^they will be on the eligibility question page$""") { () ⇒
@@ -90,7 +90,7 @@ class CreateAccountSteps extends Steps {
   }
 
   Then("""^they will be on the account home page$"""){ () ⇒
-    Page.getCurrentUrl should include(NSIManageAccountPage.url)
+    getCurrentUrl should include(NSIManageAccountPage.url)
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒

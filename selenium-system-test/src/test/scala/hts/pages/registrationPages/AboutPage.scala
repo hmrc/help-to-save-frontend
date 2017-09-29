@@ -16,11 +16,11 @@
 
 package hts.pages.registrationPages
 
-import hts.pages.WebPage
+import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object AboutPage extends WebPage {
+object AboutPage extends Page {
   val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
 
   def navigate()(implicit driver: WebDriver): Unit = {
