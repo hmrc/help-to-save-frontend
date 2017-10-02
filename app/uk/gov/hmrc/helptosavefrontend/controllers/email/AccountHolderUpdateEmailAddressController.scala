@@ -44,7 +44,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                                                            val emailVerificationConnector: EmailVerificationConnector,
                                                            nSIConnector:                   NSIConnector,
                                                            metrics:                        Metrics,
-                                                           auditor:                        HTSAuditor)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
+                                                           val auditor:                    HTSAuditor)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with VerifyEmailBehaviour with I18nSupport {
 
   implicit val userType: UserType = UserType.AccountHolder
@@ -88,7 +88,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
       htsContext: HtsContext
   ): Future[Result] = {
     if (emailVerificationParams.nino =!= nino) {
-      auditor.sendEvent(SuspiciousActivity("nino_mismatch"))
+      auditor.sendEvent(SuspiciousActivity(nino, "nino_mismatch"))
       logger.warn("Email was verified but nino in URL did not match nino for user")
       InternalServerError
     } else {
@@ -144,6 +144,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         (enrolmentStatus, maybeEmail) match {
           case (EnrolmentStatus.NotEnrolled, _) ⇒
             // user is not enrolled in this case
+            auditor.sendEvent(SuspiciousActivity(nino, "missing_enrolment"))
             logger.warn(s"For NINO [$nino]: user was not enrolled")
             InternalServerError
 
@@ -151,6 +152,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             // this should never happen since we cannot have created an account
             // without a successful write to our email store
             logger.warn(s"For NINO [$nino]: user was enrolled but had no stored email")
+            auditor.sendEvent(SuspiciousActivity(nino, "missing_email_record"))
             InternalServerError
 
           case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒

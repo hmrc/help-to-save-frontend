@@ -18,10 +18,11 @@ package uk.gov.hmrc.helptosavefrontend.controllers.email
 
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request, Result}
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
-import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BadContinueURL}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
@@ -35,6 +36,8 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
   implicit val userType: UserType
 
   val emailVerificationConnector: EmailVerificationConnector
+
+  val auditor: HTSAuditor
 
   def sendEmailVerificationRequest(nino: NINO)(implicit request: Request[AnyContent],
                                                htsContext: HtsContext,
@@ -76,6 +79,7 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
 
       case Failure(e) ⇒
         logger.warn(s"Could not decode email verification parameters: ${e.getMessage}", e)
+        auditor.sendEvent(SuspiciousActivity(htsContext.nino.getOrElse("UNKNOWN_NINO"), "malformed_redirect"))
         Ok(views.html.email.email_verify_error(BadContinueURL))
 
       case Success(params) ⇒

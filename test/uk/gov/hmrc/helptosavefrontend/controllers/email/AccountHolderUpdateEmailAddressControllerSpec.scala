@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{AccountCreated, EnrolmentStatus, NSIUserInfo, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.{AccountCreated, EnrolmentStatus, NSIUserInfo, SuspiciousActivity, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -68,7 +68,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       .returning(EitherT.fromEither[Future](result))
 
   def mockAudit() =
-    (mockAuditor.sendEvent(_: AccountCreated))
+    (mockAuditor.sendEvent(_: SuspiciousActivity))
       .expects(*)
       .returning(Future.successful(AuditResult.Success))
 
@@ -266,7 +266,10 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       "return an error" when {
 
         "the parameter in the URL cannot be decoded" in {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          inSequence {
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAudit()
+          }
 
           val result = verifyEmail("random crap")
           status(result) shouldBe OK
@@ -347,6 +350,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(NotEnrolled))
           mockEmailGet()(Right(Some("email")))
+          mockAudit()
         }
 
         status(getResult()) shouldBe INTERNAL_SERVER_ERROR
@@ -358,6 +362,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockEmailGet()(Right(None))
+          mockAudit()
         }
 
         status(getResult()) shouldBe INTERNAL_SERVER_ERROR

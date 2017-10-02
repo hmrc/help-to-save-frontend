@@ -70,25 +70,27 @@ class HTSEventSpec extends TestSupport {
 
   "EligibilityResult" must {
     "be created with the appropriate auditSource" in {
-      val event = EligibilityResult(validNSIUserInfo.nino, None)(new HeaderCarrier)
+      val event = EligibilityResult(validNSIUserInfo.nino, "reason")(new HeaderCarrier)
       event.value.auditSource shouldBe appName
     }
 
     "be created with the appropriate auditType" in {
-      val event = EligibilityResult(validNSIUserInfo.nino, None)(new HeaderCarrier)
+      val event = EligibilityResult(validNSIUserInfo.nino, "reason")(new HeaderCarrier)
       event.value.auditType shouldBe "EligibilityResult"
     }
 
-    "be created with the eligible tag set true, no reason tag, and the nino, if the errorDetailString is None" in {
-      val event = EligibilityResult(validNSIUserInfo.nino, None)(new HeaderCarrier)
-      event.value.detail.size shouldBe 2
+    "be created with the eligible tag set true, a reason tag, and the nino" in {
+      val reason = "reason"
+      val event = EligibilityResult(validNSIUserInfo.nino, reason)(new HeaderCarrier)
+      event.value.detail.size shouldBe 3
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "true") shouldBe true
+      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === reason) shouldBe true
     }
 
-    "be created with the eligible tag set false, a reason tag, and the nino, if the errorDetailString is given" in {
+    "be created with the eligible tag set false, a reason tag, and the nino" in {
       val reason = "reason"
-      val event = EligibilityResult(validNSIUserInfo.nino, Some(reason))(new HeaderCarrier)
+      val event = EligibilityResult(validNSIUserInfo.nino, reason, isEligible = false)(new HeaderCarrier)
       event.value.detail.size shouldBe 3
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "false") shouldBe true
@@ -107,10 +109,10 @@ class HTSEventSpec extends TestSupport {
 
   "SuspiciousActivity" must {
     "be created with the appropriate auditSource and auditDetails" in {
-      val event = SuspiciousActivity("ninos not matched")(new HeaderCarrier)
+      val event = SuspiciousActivity("nino", "nino_mismatch")(new HeaderCarrier)
       event.value.auditSource shouldBe appName
       event.value.auditType shouldBe "SuspiciousActivity"
-      event.value.detail shouldBe Map[String, String]("Suspicious activity detected" -> "ninos not matched")
+      event.value.detail shouldBe Map[String, String]("nino" -> "nino", "reason" -> "nino_mismatch")
     }
   }
 }
