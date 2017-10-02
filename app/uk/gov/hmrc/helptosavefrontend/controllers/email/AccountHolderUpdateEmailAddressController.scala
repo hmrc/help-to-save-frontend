@@ -44,8 +44,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                                                            val emailVerificationConnector: EmailVerificationConnector,
                                                            nSIConnector:                   NSIConnector,
                                                            metrics:                        Metrics,
-                                                           auditor:                        HTSAuditor)
-                                                          (implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
+                                                           auditor:                        HTSAuditor)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with VerifyEmailBehaviour with I18nSupport {
 
   implicit val userType: UserType = UserType.AccountHolder
