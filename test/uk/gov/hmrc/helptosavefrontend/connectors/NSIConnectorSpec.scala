@@ -23,13 +23,11 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.http.logging.Authorization
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.duration._
@@ -38,9 +36,8 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDrivenPropertyChecks {
 
   lazy val mockHTTPProxy = mock[WSHttpProxy]
-  val mockAuditor = mock[HTSAuditor]
 
-  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration, mockAuditor, mockMetrics) {
+  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration, mockMetrics) {
     override val httpProxy = mockHTTPProxy
   }
 
@@ -99,12 +96,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
 
   "the createAccount Method" must {
     "Return a SubmissionSuccess when the status is Created" in {
-      inSequence {
-        mockCreateAccount(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.CREATED)))
-        (mockAuditor.sendEvent(_: ApplicationSubmittedEvent))
-          .expects(*)
-          .returning(Future.successful(AuditResult.Success))
-      }
+      mockCreateAccount(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.CREATED)))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
     }

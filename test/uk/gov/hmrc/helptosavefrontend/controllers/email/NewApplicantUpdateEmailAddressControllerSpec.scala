@@ -24,15 +24,16 @@ import play.api.inject.Injector
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, EnrolmentAndEligibilityCheckBehaviour}
-
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, VerifyEmailError, validNSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity, VerifyEmailError, validNSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -53,13 +54,16 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
   val mockHttp: WSHttp = mock[WSHttp]
 
+  val mockAuditor = mock[HTSAuditor]
+
   lazy val controller: NewApplicantUpdateEmailAddressController =
     new NewApplicantUpdateEmailAddressController(
       mockSessionCacheConnector,
       mockHelpToSaveService,
       frontendAuthConnector,
       mockEmailVerificationConnector,
-      mockMetrics
+      mockMetrics,
+      mockAuditor
     )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto, ec) {
 
       override val authConnector = mockAuthConnector
@@ -70,6 +74,11 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       .expects(nino, email, *, UserType.NewApplicant)
       .returning(Future.successful(result))
   }
+
+  def mockAudit() =
+    (mockAuditor.sendEvent(_: SuspiciousActivity))
+      .expects(*)
+      .returning(Future.successful(AuditResult.Success))
 
   "The UpdateEmailAddressController" when {
 
@@ -229,6 +238,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     "return an OK status when the link has been corrupted or is incorrect" in {
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockAudit()
       }
       val result = doRequestWithQueryParam("corrupt-link")
       status(result) shouldBe Status.OK

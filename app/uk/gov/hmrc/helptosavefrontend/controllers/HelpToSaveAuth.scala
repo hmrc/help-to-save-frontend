@@ -149,7 +149,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       toGGLogin(redirectOnLoginURL)
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
-      toPersonalIV(s"$identityCallbackUrl?continueURL=${encoded(redirectOnLoginURL)}", ConfidenceLevel.L200)
+      SeeOther(IvUrl)
 
     case ex: AuthorisationException ⇒
       logger.error(s"could not authenticate user due to: $ex")
@@ -162,8 +162,5 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       "accountType" -> Seq("individual"),
       "origin" -> Seq(origin)
     ))
-
-  private def toPersonalIV(callbackUrl: String, confidenceLevel: ConfidenceLevel): Result = SeeOther(IvUrl)
-
 }
 

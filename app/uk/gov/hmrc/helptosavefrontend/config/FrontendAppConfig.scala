@@ -60,7 +60,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
       s"?origin=$origin" +
       s"&completionURL=$encodedCallbackUrl" +
       s"&failureURL=$encodedCallbackUrl" +
-      s"&confidenceLevel=200"
+      "&confidenceLevel=200"
     ).toString
   }
 

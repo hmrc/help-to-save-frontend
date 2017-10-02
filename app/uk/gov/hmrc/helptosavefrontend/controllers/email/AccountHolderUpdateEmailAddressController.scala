@@ -24,13 +24,14 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.UpdateEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
+import uk.gov.hmrc.helptosavefrontend.models.{EmailChanged, EnrolmentStatus, HtsContext, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -42,27 +43,27 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                                                            frontendAuthConnector:          FrontendAuthConnector,
                                                            val emailVerificationConnector: EmailVerificationConnector,
                                                            nSIConnector:                   NSIConnector,
-                                                           metrics:                        Metrics
-)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
+                                                           metrics:                        Metrics,
+                                                           val auditor:                    HTSAuditor)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with VerifyEmailBehaviour with I18nSupport {
 
   implicit val userType: UserType = UserType.AccountHolder
 
-  def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled{
+  def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled {
       case (_, email) ⇒
         Ok(views.html.email.update_email_address(email, UpdateEmailForm.verifyEmailForm))
     }
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled{
+    checkIfAlreadyEnrolled {
       case (nino, _) ⇒
         sendEmailVerificationRequest(nino)
     }
-  } (redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.onSubmit().url)
+  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.onSubmit().url)
 
-  def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
+  def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
       emailVerificationParams,
       params ⇒
@@ -71,15 +72,15 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             handleEmailVerified(nino, params)
         }
     )
-  } (redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
+  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
 
   def getEmailUpdated: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
     Ok(views.html.email.we_updated_your_email())
-  } (redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
+  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
 
   def getEmailUpdateError: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
     Ok(views.html.email.we_couldnt_update_your_email())
-  } (redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
+  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
 
   private def handleEmailVerified(nino: NINO, emailVerificationParams: EmailVerificationParams)(
       implicit
@@ -87,6 +88,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
       htsContext: HtsContext
   ): Future[Result] = {
     if (emailVerificationParams.nino =!= nino) {
+      auditor.sendEvent(SuspiciousActivity(nino, "nino_mismatch"))
       logger.warn("Email was verified but nino in URL did not match nino for user")
       InternalServerError
     } else {
@@ -117,6 +119,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
               SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
           }, { _ ⇒
             logger.info(s"For NINO [$nino]: successfully updated email with NS&I")
+            auditor.sendEvent(EmailChanged(nino, nsiUserInfo.contactDetails.email, emailVerificationParams.nino))
             SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
           })
       }
@@ -142,6 +145,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         (enrolmentStatus, maybeEmail) match {
           case (EnrolmentStatus.NotEnrolled, _) ⇒
             // user is not enrolled in this case
+            auditor.sendEvent(SuspiciousActivity(nino, "missing_enrolment"))
             logger.warn(s"For NINO [$nino]: user was not enrolled")
             InternalServerError
 
@@ -149,6 +153,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             // this should never happen since we cannot have created an account
             // without a successful write to our email store
             logger.warn(s"For NINO [$nino]: user was enrolled but had no stored email")
+            auditor.sendEvent(SuspiciousActivity(nino, "missing_email_record"))
             InternalServerError
 
           case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒

@@ -22,6 +22,7 @@ import cats.instances.future._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -40,7 +41,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                                     val helpToSaveService:     HelpToSaveService,
                                     val sessionCacheConnector: SessionCacheConnector,
                                     frontendAuthConnector:     FrontendAuthConnector,
-                                    metrics:                   Metrics
+                                    metrics:                   Metrics,
+                                    auditor:                   HTSAuditor
 )(implicit ec: ExecutionContext, crypto: Crypto)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
@@ -95,9 +97,11 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
             SeeOther(routes.RegisterController.getConfirmDetailsPage().url)
           ) { email ⇒
               // TODO: plug in actual pages below
-              helpToSaveService.createAccount(nsiUserInfo.updateEmail(email)).leftMap(submissionFailureToString).fold(
+              val userInfo = nsiUserInfo.updateEmail(email)
+              helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString).fold(
                 error ⇒ InternalServerError(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error)),
                 _ ⇒ {
+                  auditor.sendEvent(AccountCreated(userInfo))
                   // Account creation is successful, start the process to enrol the user but don't worry about the result
                   helpToSaveService.enrolUser().value.onComplete{
                     case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user, future failed: $e")

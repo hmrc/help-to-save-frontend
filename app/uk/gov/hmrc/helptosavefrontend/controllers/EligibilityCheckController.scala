@@ -135,7 +135,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     result.value.fold(
       {
         case IneligibilityReason.AccountAlreadyOpened ⇒
-          auditor.sendEvent(EligibilityCheckEvent(appName, nino, Some(IneligibilityReason.AccountAlreadyOpened.legibleString)))
+          auditor.sendEvent(EligibilityResult(nino, IneligibilityReason.AccountAlreadyOpened.legibleString, isEligible = false))
 
           // set the ITMP flag here but don't worry about the result
           helpToSaveService.setITMPFlag().value.onComplete{
@@ -147,11 +147,11 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
           Ok("You've already got an account - yay!!!")
 
         case other ⇒
-          auditor.sendEvent(EligibilityCheckEvent(appName, nino, Some(other.legibleString)))
+          auditor.sendEvent(EligibilityResult(nino, other.legibleString, isEligible = false))
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
       }, {
-        case (eligibilityReason, nsiUserInfo) ⇒
-          auditor.sendEvent(EligibilityCheckEvent(appName, nino, None))
+        case (eligibilityReason, _) ⇒
+          auditor.sendEvent(EligibilityResult(nino, eligibilityReason.legibleString))
           SeeOther(routes.EligibilityCheckController.getIsEligible().url)
       })
   }
@@ -164,9 +164,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
       InternalServerError
 
     case Right(missingUserInfo) ⇒
-      val problemDescription = s"user ${missingUserInfo.nino} has missing information: ${missingUserInfo.missingInfo.mkString(",")}"
-      logger.warn(problemDescription)
-      auditor.sendEvent(EligibilityCheckEvent(appName, missingUserInfo.nino, Some(problemDescription)))
+      logger.warn(s"user ${missingUserInfo.nino} has missing information: ${missingUserInfo.missingInfo.mkString(",")}")
       Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalAccountUrl))
   }
 

@@ -28,6 +28,7 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector, FrontendGlobal}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.{EnrolmentCheckBehaviour, HelpToSaveAuth, SessionBehaviour}
@@ -46,7 +47,8 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                                                           val helpToSaveService:          HelpToSaveService,
                                                           frontendAuthConnector:          FrontendAuthConnector,
                                                           val emailVerificationConnector: EmailVerificationConnector,
-                                                          metrics:                        Metrics
+                                                          metrics:                        Metrics,
+                                                          val auditor:                    HTSAuditor
 )(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
 
