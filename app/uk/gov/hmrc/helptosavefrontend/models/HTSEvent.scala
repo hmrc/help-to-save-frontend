@@ -77,14 +77,8 @@ case class AccountCreated(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) ext
 
 case class EligibilityResult(nino: NINO, reason: String, isEligible: Boolean = true)(implicit hc: HeaderCarrier) extends HTSEvent {
   val value: DataEvent = HTSEvent(
-    "EligibilityResult", {
-      val details = Map[String, String]("nino" -> nino, "reason" -> reason)
-      if (isEligible) {
-        details + ("eligible" -> "true")
-      } else {
-        details + ("eligible" -> "false")
-      }
-    }
+    "EligibilityResult",
+    Map[String, String]("nino" -> nino, "reason" -> reason, "eligibile" -> isEligible.toString)
   )
 }
 
