@@ -20,22 +20,21 @@ import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.NSIUserInfoOps
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
-import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
@@ -50,7 +49,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
     mockHelpToSaveService,
     mockSessionCacheConnector,
     frontendAuthConnector,
-    mockMetrics)(
+    mockMetrics,
+    mockAuditor)(
     ec, crypto) {
     override lazy val authConnector = mockAuthConnector
   }
@@ -74,6 +74,11 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
     (crypto.decrypt(_: String))
       .expects(expected)
       .returning(result.fold[Try[String]](Failure(new Exception))(Success.apply))
+
+  def mockAudit() =
+    (mockAuditor.sendEvent(_: AccountCreated))
+      .expects(*)
+      .returning(Future.successful(AuditResult.Success))
 
   "The RegisterController" when {
 
@@ -215,6 +220,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
+            mockAudit()
             mockEnrolUser()(Right(()))
           }
 
@@ -230,6 +236,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
+            mockAudit()
             mockEnrolUser()(Left("Oh no"))
           }
 

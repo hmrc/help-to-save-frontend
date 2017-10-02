@@ -25,15 +25,17 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, NSIUserInfo, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.{AccountCreated, EnrolmentStatus, NSIUserInfo, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -47,6 +49,8 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
   val mockEmailVerificationConnector = mock[EmailVerificationConnector]
 
   val mockNSIConnector = mock[NSIConnector]
+
+  val mockAuditor = mock[HTSAuditor]
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
     (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
@@ -63,12 +67,18 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       .expects(email, *)
       .returning(EitherT.fromEither[Future](result))
 
+  def mockAudit() =
+    (mockAuditor.sendEvent(_: AccountCreated))
+      .expects(*)
+      .returning(Future.successful(AuditResult.Success))
+
   lazy val controller = new AccountHolderUpdateEmailAddressController(
     mockHelpToSaveService,
     mockAuthConnector,
     mockEmailVerificationConnector,
     mockNSIConnector,
-    mockMetrics
+    mockMetrics,
+    mockAuditor
   )(fakeApplication, crypto, fakeApplication.injector.instanceOf[MessagesApi], ec) {
     override val authConnector = mockAuthConnector
   }
@@ -268,6 +278,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
+            mockAudit()
           }
 
           val result = verifyEmail(emailVerificationParams.copy(nino = "other nino").encode())
@@ -281,7 +292,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
             mockEmailGet()(Right(Some("email")))
           }
 
-          val result = verifyEmail(emailVerificationParams.copy(nino = "other nino").encode())
+          val result = verifyEmail(emailVerificationParams.encode())
           status(result) shouldBe INTERNAL_SERVER_ERROR
         }
 

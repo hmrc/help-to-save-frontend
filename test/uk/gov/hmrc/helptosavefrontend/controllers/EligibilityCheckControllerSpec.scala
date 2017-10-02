@@ -319,7 +319,6 @@ class EligibilityCheckControllerSpec
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
-            mockSendAuditEvent
           }
 
           val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()

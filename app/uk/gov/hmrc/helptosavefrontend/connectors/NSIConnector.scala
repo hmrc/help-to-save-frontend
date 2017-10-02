@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
-import uk.gov.hmrc.helptosavefrontend.models.{ApplicationSubmittedEvent, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{AccountCreated, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, Result}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -59,7 +59,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metrics: Metrics) extends NSIConnector with Logging with AppName {
+class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends NSIConnector with Logging with AppName {
 
   val httpProxy: WSHttpProxy = new WSHttpProxy
 
@@ -81,7 +81,6 @@ class NSIConnectorImpl @Inject() (conf: Configuration, auditor: HTSAuditor, metr
 
         response.status match {
           case Status.CREATED ⇒
-            auditor.sendEvent(ApplicationSubmittedEvent(appName, userInfo))
             logger.info(s"Received 201 from NSI, successfully created account for ${userInfo.nino} ${timeString(time)}")
             SubmissionSuccess()
 

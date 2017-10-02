@@ -16,27 +16,26 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import uk.gov.hmrc.helptosavefrontend.util.NINO
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.AppName
 
 trait HTSEvent {
   val value: DataEvent
 }
 
 object HTSEvent {
-  def apply(auditSource: String,
-            auditType:   String,
-            detail:      Map[String, String]
-  )(implicit hc: HeaderCarrier): DataEvent =
-    DataEvent(auditSource = auditSource, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
+  def apply(auditType: String,
+            detail:    Map[String, String])(implicit hc: HeaderCarrier): DataEvent =
+    DataEvent(AppName.appName, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 }
 
-case class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) extends HTSEvent {
+case class AccountCreated(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) extends HTSEvent {
 
   val value: DataEvent = HTSEvent(
-    auditSource,
-    "applicationSubmitted",
+    "AccountCreated",
     Map[String, String](
       "forename" -> userInfo.forename,
       "surname" -> userInfo.surname,
@@ -76,13 +75,27 @@ case class ApplicationSubmittedEvent(auditSource: String, userInfo: NSIUserInfo)
   )
 }
 
-case class EligibilityCheckEvent(auditSource: String, nino: String, errorDescription: Option[String])(implicit hc: HeaderCarrier) extends HTSEvent {
+case class EligibilityResult(nino: NINO, errorDescription: Option[String])(implicit hc: HeaderCarrier) extends HTSEvent {
   val value: DataEvent = HTSEvent(
-    auditSource, "eligibilityCheck", {
-    val basicMap = Map[String, String]("nino" -> nino)
-    errorDescription.fold(basicMap + ("eligible" -> "true")) { reason ⇒
-      basicMap + ("eligible" -> "false") + ("reason" -> reason)
+    "EligibilityResult", {
+      val basicMap = Map[String, String]("nino" -> nino, "eligible" -> "true")
+      errorDescription.fold(basicMap) { reason ⇒
+        basicMap + ("eligible" -> "false") + ("reason" -> reason)
+      }
     }
-  }
+  )
+}
+
+case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit hc: HeaderCarrier) extends HTSEvent {
+  val value: DataEvent = HTSEvent(
+    "EmailChanged",
+    Map[String, String]("nino" -> nino, "oldEmail" -> oldEmail, "newEmail" -> newEmail)
+  )
+}
+
+case class SuspiciousActivity(activity: String)(implicit hc: HeaderCarrier) extends HTSEvent {
+  val value: DataEvent = HTSEvent(
+    "SuspiciousActivity",
+    Map[String, String]("Suspicious activity detected" -> activity)
   )
 }
