@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{AccountCreated, EnrolmentStatus, NSIUserInfo, SuspiciousActivity, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.{EmailChanged, EnrolmentStatus, HTSEvent, NSIUserInfo, SuspiciousActivity, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -67,8 +67,13 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       .expects(email, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockAudit() =
+  def mockAuditSuspiciousActivity() =
     (mockAuditor.sendEvent(_: SuspiciousActivity))
+      .expects(*)
+      .returning(Future.successful(AuditResult.Success))
+
+  def mockAuditEmailChanged() =
+    (mockAuditor.sendEvent(_: EmailChanged))
       .expects(*)
       .returning(Future.successful(AuditResult.Success))
 
@@ -237,6 +242,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
             mockEmailGet()(Right(Some("email")))
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
+            mockAuditEmailChanged()
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
@@ -268,7 +274,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
         "the parameter in the URL cannot be decoded" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockAudit()
+            mockAuditSuspiciousActivity()
           }
 
           val result = verifyEmail("random crap")
@@ -281,7 +287,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
-            mockAudit()
+            mockAuditSuspiciousActivity()
           }
 
           val result = verifyEmail(emailVerificationParams.copy(nino = "other nino").encode())
@@ -350,7 +356,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(NotEnrolled))
           mockEmailGet()(Right(Some("email")))
-          mockAudit()
+          mockAuditSuspiciousActivity()
         }
 
         status(getResult()) shouldBe INTERNAL_SERVER_ERROR
@@ -362,7 +368,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockEmailGet()(Right(None))
-          mockAudit()
+          mockAuditSuspiciousActivity()
         }
 
         status(getResult()) shouldBe INTERNAL_SERVER_ERROR
