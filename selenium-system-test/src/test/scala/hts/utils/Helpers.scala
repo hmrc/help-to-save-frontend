@@ -19,7 +19,7 @@ package hts.utils
 import hts.pages.Page
 import org.openqa.selenium.WebDriver
 
-object Helpers {
+object Helpers extends Page {
 
-  def isTextOnPage(text: String)(implicit driver: WebDriver): Boolean = text.r.findAllIn(Page.getPageContent).nonEmpty
+  def isTextOnPage(text: String)(implicit driver: WebDriver): Boolean = text.r.findAllIn(getPageContent).nonEmpty
 }

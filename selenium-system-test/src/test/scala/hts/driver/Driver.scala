@@ -31,8 +31,9 @@ object Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome")     ⇒ Right(createChromeDriver())
+      case Some("chrome")     ⇒ Right(createChromeDriver(false))
       case Some("zap-chrome") ⇒ Right(createZapChromeDriver())
+      case Some("headless")   ⇒ Right(createChromeDriver(true))
       case Some(other)        ⇒ Left(s"Unrecognised browser: $other")
       case None               ⇒ Left("No browser set")
     }
@@ -74,13 +75,14 @@ object Driver {
     }
   }
 
-  private def createChromeDriver(): WebDriver = {
+  private def createChromeDriver(headless: Boolean): WebDriver = {
     setChromeDriver
 
     val capabilities = DesiredCapabilities.chrome()
     val options = new ChromeOptions()
     options.addArguments("test-type")
     options.addArguments("--disable-gpu")
+    if (headless) options.addArguments("--headless")
     capabilities.setJavascriptEnabled(isJsEnabled)
     capabilities.setCapability(ChromeOptions.CAPABILITY, options)
     new ChromeDriver(capabilities)

@@ -24,7 +24,6 @@ Feature: User CANNOT proceed without going through security
     When I try to view the create-an-account page
     Then I am forced into going through IV before being able to proceed with their HtS application
 
-  @wip
   Scenario: Ineligible user cannot view the create-an-account page
     Given I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save
     When I try to view the create-an-account page

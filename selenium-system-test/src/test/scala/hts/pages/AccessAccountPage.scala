@@ -18,6 +18,6 @@ package hts.pages
 
 import hts.utils.Configuration
 
-object AccessAccountPage extends WebPage {
+object AccessAccountPage extends Page {
   val url: String = s"${Configuration.host}/help-to-save/access-account"
 }

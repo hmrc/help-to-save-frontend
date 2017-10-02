@@ -18,7 +18,7 @@ package hts.pages
 
 import org.openqa.selenium.WebDriver
 
-object ChangeEmailPage extends WebPage {
+object ChangeEmailPage extends Page {
 
   def setNewEmail(email: String)(implicit driver: WebDriver): Unit = {
     val el = find(name("value"))

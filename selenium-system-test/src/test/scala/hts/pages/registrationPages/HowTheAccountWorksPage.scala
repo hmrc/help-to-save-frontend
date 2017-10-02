@@ -16,8 +16,8 @@
 
 package hts.pages.registrationPages
 
-import hts.pages.WebPage
+import hts.pages.Page
 
-object HowTheAccountWorksPage extends WebPage {
+object HowTheAccountWorksPage extends Page {
 
 }
