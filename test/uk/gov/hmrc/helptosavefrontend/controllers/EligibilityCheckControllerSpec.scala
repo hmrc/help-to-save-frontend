@@ -33,6 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.IneligibilityReason.AccountAlreadyOpened
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -63,8 +64,8 @@ class EligibilityCheckControllerSpec
       .returning(EitherT.fromEither[Future](result))
 
   def mockSendAuditEvent(): Unit =
-    (mockAuditor.sendEvent(_: HTSEvent))
-      .expects(*)
+    (mockAuditor.sendEvent(_: HTSEvent, _: NINO))
+      .expects(*, nino)
       .returning(Future.successful(AuditResult.Success))
 
   def mockJsonSchemaValidation(input: NSIUserInfo)(result: Either[String, NSIUserInfo]): Unit =

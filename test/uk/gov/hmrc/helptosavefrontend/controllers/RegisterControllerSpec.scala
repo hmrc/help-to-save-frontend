@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
-import uk.gov.hmrc.helptosavefrontend.util.Crypto
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
@@ -77,8 +77,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       .returning(result.fold[Try[String]](Failure(new Exception))(Success.apply))
 
   def mockAudit() =
-    (mockAuditor.sendEvent(_: AccountCreated))
-      .expects(*)
+    (mockAuditor.sendEvent(_: AccountCreated, _: NINO))
+      .expects(*, nino)
       .returning(Future.successful(AuditResult.Success))
 
   "The RegisterController" when {

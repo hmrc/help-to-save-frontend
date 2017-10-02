@@ -23,6 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthCon
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.views
 
 class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
@@ -38,7 +39,7 @@ class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
       _ ⇒ Ok(views.html.confirm_check_eligibility())
     }, {
       e ⇒
-        logger.warn(s"Could not check enrolment for ${e.nino} - proceeding to check eligibility")
+        logger.warn(s"Could not check enrolment (${e.message}) - proceeding to check eligibility", e.nino)
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     }
     )

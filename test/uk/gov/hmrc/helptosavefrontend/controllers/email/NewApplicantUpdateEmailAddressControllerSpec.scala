@@ -31,11 +31,11 @@ import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, EnrolmentAndElig
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity, VerifyEmailError, validNSIUserInfo}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
@@ -70,14 +70,14 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     }
 
   def mockEmailVerificationConn(nino: String, email: String)(result: Either[VerifyEmailError, Unit]) = {
-    (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier, _: UserType))
-      .expects(nino, email, *, UserType.NewApplicant)
+    (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier, _: ExecutionContext, _: UserType))
+      .expects(nino, email, *, *, UserType.NewApplicant)
       .returning(Future.successful(result))
   }
 
   def mockAudit() =
-    (mockAuditor.sendEvent(_: SuspiciousActivity))
-      .expects(*)
+    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO))
+      .expects(*, *)
       .returning(Future.successful(AuditResult.Success))
 
   "The UpdateEmailAddressController" when {

@@ -34,6 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.{EmailChanged, EnrolmentStatus, HtsContext, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -88,19 +89,19 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
       htsContext: HtsContext
   ): Future[Result] = {
     if (emailVerificationParams.nino =!= nino) {
-      auditor.sendEvent(SuspiciousActivity(nino, "nino_mismatch"))
-      logger.warn("Email was verified but nino in URL did not match nino for user")
+      auditor.sendEvent(SuspiciousActivity(nino, "nino_mismatch"), nino)
+      logger.warn("Email was verified but nino in URL did not match nino for user", nino)
       InternalServerError
     } else {
       htsContext.userDetails match {
 
         case None ⇒
-          logger.warn(s"For NINO [$nino]: email was verified but could not find user info ")
+          logger.warn("Email was verified but could not find user info", nino)
           InternalServerError
 
         case Some(Left(missingUserInfos)) ⇒
-          logger.warn(s"For NINO [$nino]: email was verified but missing some user info " +
-            s"(${missingUserInfos.missingInfo.mkString(",")}")
+          logger.warn("Email was verified but missing some user info " +
+            s"(${missingUserInfos.missingInfo.mkString(",")}", nino)
           InternalServerError
 
         case Some(Right(nsiUserInfo)) ⇒
@@ -111,15 +112,15 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
 
           result.fold({
             case UpdateEmailError.NSIError(e) ⇒
-              logger.warn(s"For NINO [$nino]: Could not update email with NS&I: $e")
+              logger.warn(s"Could not update email with NS&I: $e", nino)
               SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
 
             case UpdateEmailError.EmailMongoError(e) ⇒
-              logger.warn(s"For NINO [$nino]: Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I")
+              logger.warn("Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I", nino)
               SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
           }, { _ ⇒
-            logger.info(s"For NINO [$nino]: successfully updated email with NS&I")
-            auditor.sendEvent(EmailChanged(nino, nsiUserInfo.contactDetails.email, emailVerificationParams.nino))
+            logger.info("Successfully updated email with NS&I", nino)
+            auditor.sendEvent(EmailChanged(nino, nsiUserInfo.contactDetails.email, nino), nino)
             SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
           })
       }
@@ -145,15 +146,15 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         (enrolmentStatus, maybeEmail) match {
           case (EnrolmentStatus.NotEnrolled, _) ⇒
             // user is not enrolled in this case
-            auditor.sendEvent(SuspiciousActivity(nino, "missing_enrolment"))
-            logger.warn(s"For NINO [$nino]: user was not enrolled")
+            auditor.sendEvent(SuspiciousActivity(nino, "missing_enrolment"), nino)
+            logger.warn("User was not enrolled", nino)
             InternalServerError
 
           case (EnrolmentStatus.Enrolled(_), None) ⇒
             // this should never happen since we cannot have created an account
             // without a successful write to our email store
-            logger.warn(s"For NINO [$nino]: user was enrolled but had no stored email")
-            auditor.sendEvent(SuspiciousActivity(nino, "missing_email_record"))
+            logger.warn("User was enrolled but had no stored email", nino)
+            auditor.sendEvent(SuspiciousActivity(nino, "missing_email_record"), nino)
             InternalServerError
 
           case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒

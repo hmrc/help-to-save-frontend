@@ -68,13 +68,13 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       .returning(EitherT.fromEither[Future](result))
 
   def mockAuditSuspiciousActivity() =
-    (mockAuditor.sendEvent(_: SuspiciousActivity))
-      .expects(*)
+    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO))
+      .expects(*, nino)
       .returning(Future.successful(AuditResult.Success))
 
   def mockAuditEmailChanged() =
-    (mockAuditor.sendEvent(_: EmailChanged))
-      .expects(*)
+    (mockAuditor.sendEvent(_: EmailChanged, _: NINO))
+      .expects(*, nino)
       .returning(Future.successful(AuditResult.Success))
 
   lazy val controller = new AccountHolderUpdateEmailAddressController(
@@ -89,8 +89,8 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
   }
 
   def mockEmailVerificationConn(nino: String, email: String)(result: Either[VerifyEmailError, Unit]) =
-    (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier, _: UserType))
-      .expects(nino, email, *, UserType.AccountHolder)
+    (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier, _: ExecutionContext, _: UserType))
+      .expects(nino, email, *, *, UserType.AccountHolder)
       .returning(Future.successful(result))
 
   def mockUpdateEmailWithNSI(userInfo: NSIUserInfo)(result: Either[String, Unit]): Unit =
