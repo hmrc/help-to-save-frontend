@@ -75,12 +75,14 @@ case class AccountCreated(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) ext
   )
 }
 
-case class EligibilityResult(nino: NINO, errorDescription: Option[String])(implicit hc: HeaderCarrier) extends HTSEvent {
+case class EligibilityResult(nino: NINO, reason: String, isEligible: Boolean = true)(implicit hc: HeaderCarrier) extends HTSEvent {
   val value: DataEvent = HTSEvent(
     "EligibilityResult", {
-      val basicMap = Map[String, String]("nino" -> nino, "eligible" -> "true")
-      errorDescription.fold(basicMap) { reason ⇒
-        basicMap + ("eligible" -> "false") + ("reason" -> reason)
+      val details = Map[String, String]("nino" -> nino, "eligible" -> "true")
+      if (isEligible) {
+        details + ("reason" -> reason)
+      } else {
+        details + ("eligible" -> "false", "reason" -> reason)
       }
     }
   )
@@ -93,9 +95,9 @@ case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit
   )
 }
 
-case class SuspiciousActivity(activity: String)(implicit hc: HeaderCarrier) extends HTSEvent {
+case class SuspiciousActivity(reason: String)(implicit hc: HeaderCarrier) extends HTSEvent {
   val value: DataEvent = HTSEvent(
     "SuspiciousActivity",
-    Map[String, String]("Suspicious activity detected" -> activity)
+    Map[String, String]("reason" -> reason)
   )
 }

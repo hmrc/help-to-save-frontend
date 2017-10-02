@@ -88,7 +88,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
       htsContext: HtsContext
   ): Future[Result] = {
     if (emailVerificationParams.nino =!= nino) {
-      auditor.sendEvent(SuspiciousActivity(s"Logged in user nino $nino did not match the nino ${emailVerificationParams.nino} from email-verification"))
+      auditor.sendEvent(SuspiciousActivity("nino_mismatch"))
       logger.warn("Email was verified but nino in URL did not match nino for user")
       InternalServerError
     } else {

@@ -135,7 +135,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     result.value.fold(
       {
         case IneligibilityReason.AccountAlreadyOpened ⇒
-          auditor.sendEvent(EligibilityResult(nino, Some(IneligibilityReason.AccountAlreadyOpened.legibleString)))
+          auditor.sendEvent(EligibilityResult(nino, IneligibilityReason.AccountAlreadyOpened.legibleString))
 
           // set the ITMP flag here but don't worry about the result
           helpToSaveService.setITMPFlag().value.onComplete{
@@ -147,11 +147,11 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
           Ok("You've already got an account - yay!!!")
 
         case other ⇒
-          auditor.sendEvent(EligibilityResult(nino, Some(other.legibleString)))
+          auditor.sendEvent(EligibilityResult(nino, other.legibleString))
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
       }, {
-        case (eligibilityReason, nsiUserInfo) ⇒
-          auditor.sendEvent(EligibilityResult(nino, None))
+        case (eligibilityReason, _) ⇒
+          auditor.sendEvent(EligibilityResult(nino, eligibilityReason.legibleString))
           SeeOther(routes.EligibilityCheckController.getIsEligible().url)
       })
   }

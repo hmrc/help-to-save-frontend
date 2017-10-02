@@ -123,7 +123,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
    * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
    * given action if the the session data indicates that they are eligible
    */
-  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result])(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
+  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result])
+                                          (implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
     checkSession {
       // no session data => user has not gone through the journey this session => take them to eligibility checks
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
