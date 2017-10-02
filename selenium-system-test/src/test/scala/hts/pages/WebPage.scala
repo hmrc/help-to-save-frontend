@@ -43,14 +43,19 @@ trait WebPage extends Matchers
    * CONFIRM CURRENT PAGE INFO
    */
 
-  def expectedUrl: Option[String]
-  def expectedPageTitle: Option[String]
-  def expectedPageHeader: Option[String]
+  def expectedUrl: String
+  def expectedPageTitle: String
+  def expectedPageHeader: String
+
+  def pageHeading(implicit driver: WebDriver): String = {
+    val heading = driver.findElement(By.tagName("h1")).getText
+    if (heading != null) heading else ""
+  }
 
   def pageInfoIsCorrect()(implicit driver: WebDriver): Unit = {
-    expectedUrl shouldBe Some(currentUrl)
-    expectedPageTitle shouldBe Some(pageTitle)
-    expectedPageHeader shouldBe Some(driver.findElement(By.tagName("h1")).getText)
+    expectedUrl shouldBe currentUrl
+    expectedPageTitle shouldBe pageTitle
+    expectedPageHeader shouldBe pageHeading
   }
 
   def checkHeader(heading: String, text: String)(implicit driver: WebDriver): Boolean =

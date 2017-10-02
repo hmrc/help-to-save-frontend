@@ -21,11 +21,11 @@ import hts.utils.Configuration
 
 object ConfirmDetailsPage extends WebPage {
 
-  override def expectedUrl: Option[String] = Some(s"${Configuration.host}/help-to-save/check-and-confirm-your-details")
+  override def expectedUrl: String = s"${Configuration.host}/help-to-save/check-and-confirm-your-details"
 
-  override def expectedPageTitle: Option[String] = Some("")
+  override def expectedPageTitle: String = ""
 
-  override def expectedPageHeader: Option[String] = Some("")
+  override def expectedPageHeader: String = ""
 
   val url: String = s"${Configuration.host}/help-to-save/check-and-confirm-your-details"
 

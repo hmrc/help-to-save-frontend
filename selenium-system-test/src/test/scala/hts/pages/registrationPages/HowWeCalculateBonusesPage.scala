@@ -20,10 +20,10 @@ import hts.pages.WebPage
 
 object HowWeCalculateBonusesPage extends WebPage {
 
-  override def expectedUrl: Option[String] = Some("")
+  override def expectedUrl: String = ""
 
-  override def expectedPageTitle: Option[String] = Some("")
+  override def expectedPageTitle: String = ""
 
-  override def expectedPageHeader: Option[String] = Some("")
+  override def expectedPageHeader: String = ""
 
 }

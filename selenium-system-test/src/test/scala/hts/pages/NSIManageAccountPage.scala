@@ -18,11 +18,11 @@ package hts.pages
 
 object NSIManageAccountPage extends WebPage {
 
-  override def expectedUrl: Option[String] = Some("https://www.nsandi.com/")
+  override def expectedUrl: String = "https://www.nsandi.com/"
 
-  override def expectedPageTitle: Option[String] = Some("")
+  override def expectedPageTitle: String = ""
 
-  override def expectedPageHeader: Option[String] = Some("")
+  override def expectedPageHeader: String = ""
 
   val url: String = "https://www.nsandi.com/"
 }

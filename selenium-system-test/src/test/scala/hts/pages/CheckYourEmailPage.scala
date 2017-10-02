@@ -21,11 +21,11 @@ import org.openqa.selenium.WebDriver
 
 object CheckYourEmailPage extends WebPage {
 
-  override def expectedUrl: Option[String] = Some(s"${Configuration.host}/help-to-save/email/new-applicant-update\")
+  override def expectedUrl: String = s"${Configuration.host}/help-to-save/email/new-applicant-update"
 
-  override def expectedPageTitle: Option[String] = Some("")
+  override def expectedPageTitle: String = ""
 
-  override def expectedPageHeader: Option[String] = Some("")
+  override def expectedPageHeader: String = ""
 
   val url: String = s"${Configuration.host}/help-to-save/email/new-applicant-update"
 

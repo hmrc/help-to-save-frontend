@@ -21,11 +21,11 @@ import org.openqa.selenium.WebDriver
 
 object EligibilityQuestionPage extends WebPage {
 
-  override def expectedUrl: Option[String] = Some(s"${Configuration.host}/help-to-save/access-account")
+  override def expectedUrl: String = s"${Configuration.host}/help-to-save/access-account"
 
-  override def expectedPageTitle: Option[String] = Some("TBD")
+  override def expectedPageTitle: String = "TBD"
 
-  override def expectedPageHeader: Option[String] = Some("TBD")
+  override def expectedPageHeader: String = "TBD"
 
   //TODO This page is still under construction
   val pageTitle: String = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"

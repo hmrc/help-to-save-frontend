@@ -21,11 +21,11 @@ import hts.utils.Configuration
 
 object CheckEligibilityPage extends WebPage {
 
-  override def expectedUrl: Option[String] = Some("")
+  override def expectedUrl: String = ""
 
-  override def expectedPageTitle: Option[String] = Some("")
+  override def expectedPageTitle: String = ""
 
-  override def expectedPageHeader: Option[String] = Some("")
+  override def expectedPageHeader: String = ""
 
   val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
 
