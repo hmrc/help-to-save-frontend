@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.UpdateEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.models.{EmailChanged, EnrolmentStatus, HtsContext, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -119,6 +119,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
               SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
           }, { _ ⇒
             logger.info(s"For NINO [$nino]: successfully updated email with NS&I")
+            auditor.sendEvent(EmailChanged(nino, nsiUserInfo.contactDetails.email, emailVerificationParams.nino))
             SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
           })
       }
