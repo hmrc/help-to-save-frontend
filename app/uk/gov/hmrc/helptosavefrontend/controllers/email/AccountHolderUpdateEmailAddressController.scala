@@ -29,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NS
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.UpdateEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
@@ -40,9 +41,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService:          HelpToSaveService,
                                                            frontendAuthConnector:          FrontendAuthConnector,
                                                            val emailVerificationConnector: EmailVerificationConnector,
-                                                           nSIConnector:                   NSIConnector
+                                                           nSIConnector:                   NSIConnector,
+                                                           metrics:                        Metrics
 )(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
-  extends HelpToSaveAuth(frontendAuthConnector) with VerifyEmailBehaviour with I18nSupport {
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with VerifyEmailBehaviour with I18nSupport {
 
   implicit val userType: UserType = UserType.AccountHolder
 

@@ -58,7 +58,8 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       mockSessionCacheConnector,
       mockHelpToSaveService,
       frontendAuthConnector,
-      mockEmailVerificationConnector
+      mockEmailVerificationConnector,
+      mockMetrics
     )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto, ec) {
 
       override val authConnector = mockAuthConnector
@@ -83,7 +84,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           }
 
@@ -96,7 +97,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         "session data indicates that they are ineligible" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
           }
           val result = getResult()
@@ -115,7 +116,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(nino, email)(Right(()))
       }
@@ -131,7 +132,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
           mockEmailVerificationConn(nino, email)(Left(AlreadyVerified))
         }
@@ -162,7 +163,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(nino, email)(Left(RequestNotValidError))
       }
@@ -176,7 +177,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(nino, email)(Left(VerificationServiceUnavailable))
       }
@@ -190,7 +191,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(nino, email)(Left(BackendError))
       }

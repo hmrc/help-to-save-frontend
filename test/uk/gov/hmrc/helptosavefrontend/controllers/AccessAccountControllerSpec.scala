@@ -28,7 +28,8 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
   lazy val controller = new AccessAccountController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
-    mockAuthConnector
+    mockAuthConnector,
+    mockMetrics
   )
 
   "The AccessAccountController" must {
@@ -38,7 +39,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     "redirect to NS&I if the user is enrolled" in {
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(true)))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
       }
 
       val result = doRequest()
@@ -50,8 +51,8 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
       "it hasn't already been set" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(false)))
-          mockWriteITMPFlag(nino)(Right(()))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
+          mockWriteITMPFlag()(Right(()))
         }
 
         val result = doRequest()
@@ -62,7 +63,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       }
 
       val result = doRequest()
@@ -73,7 +74,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Left(""))
+        mockEnrolmentCheck()(Left(""))
       }
 
       val result = doRequest()

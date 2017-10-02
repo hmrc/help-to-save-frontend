@@ -25,6 +25,7 @@ import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
@@ -38,9 +39,10 @@ import scala.util.{Failure, Success}
 class RegisterController @Inject() (val messagesApi:           MessagesApi,
                                     val helpToSaveService:     HelpToSaveService,
                                     val sessionCacheConnector: SessionCacheConnector,
-                                    frontendAuthConnector:     FrontendAuthConnector
+                                    frontendAuthConnector:     FrontendAuthConnector,
+                                    metrics:                   Metrics
 )(implicit ec: ExecutionContext, crypto: Crypto)
-  extends HelpToSaveAuth(frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
   import RegisterController.NSIUserInfoOps
 

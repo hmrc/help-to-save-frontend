@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class IntroductionControllerSpec extends AuthSupport {
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new IntroductionController(fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector)
+  val helpToSave = new IntroductionController(fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector, mockMetrics)
 
   def mockAuthorise(loggedIn: Boolean) =
     (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))

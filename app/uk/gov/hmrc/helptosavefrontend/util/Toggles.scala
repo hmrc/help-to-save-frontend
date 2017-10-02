@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.util
 
 import com.typesafe.config.Config
 import play.api.{Configuration, Logger}
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 
 object Toggles {
 
@@ -38,7 +39,7 @@ object Toggles {
       val start = time()
       val result = if (enabled) ifEnabled else ifDisabled
       val end = time()
-      logger.info(s"Feature $name (enabled: $enabled) executed in ${end - start} ns")
+      logger.info(s"Feature $name (enabled: $enabled) executed in ${nanosToPrettyString(end - start)}")
       result
     }
 
