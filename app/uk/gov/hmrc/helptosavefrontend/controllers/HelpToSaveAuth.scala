@@ -29,6 +29,8 @@ import uk.gov.hmrc.auth.core.retrieve.Retrievals.authorisedEnrolments
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, toJavaDate}
@@ -36,7 +38,7 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector)
+class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metrics)
   extends FrontendController with AuthorisedFunctions with Logging {
 
   override def authConnector: AuthConnector = frontendAuthConnector
@@ -45,21 +47,32 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector)
 
   def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Future[Result])(redirectOnLoginURL: String): Action[AnyContent] =
     Action.async { implicit request ⇒
+      val timer = metrics.authTimer.time()
+
       authorised(AuthWithCL200)
         .retrieve(UserRetrievals and authorisedEnrolments) {
           case name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ authorisedEnrols ⇒
+            val time = timer.stop()
+            val timeString = s"(time: ${nanosToPrettyString(time)})"
 
             val mayBeNino = authorisedEnrols.enrolments
               .find(_.key === "HMRC-NI")
               .flatMap(_.getIdentifier("NINO"))
               .map(_.value)
 
-            mayBeNino.fold(
+            mayBeNino.fold{
+              logger.warn(s"Could not find NINO for user $timeString")
               toFuture(InternalServerError("could not find NINO for logged in user"))
-            )(nino ⇒ {
-                val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
-                action(request)(HtsContext(Some(nino), Some(userDetails.map(NSIUserInfo.apply)), isAuthorised = true))
-              })
+            }(nino ⇒ {
+              val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
+
+              userDetails.fold(
+                m ⇒ logger.warn(s"For NINO [$nino]: Could not find user info, missing details [${m.missingInfo.mkString(", ")}] $timeString"),
+                _ ⇒ logger.info(s"For NINO [$nino]: Successfully retrieved NINO and usr details $timeString")
+              )
+
+              action(request)(HtsContext(Some(nino), Some(userDetails.map(NSIUserInfo.apply)), isAuthorised = true))
+            })
 
         }.recover {
           handleFailure(redirectOnLoginURL)

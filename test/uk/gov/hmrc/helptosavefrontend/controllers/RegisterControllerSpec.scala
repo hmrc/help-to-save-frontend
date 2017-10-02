@@ -49,7 +49,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     mockSessionCacheConnector,
-    frontendAuthConnector)(
+    frontendAuthConnector,
+    mockMetrics)(
     ec, crypto) {
     override lazy val authConnector = mockAuthConnector
   }
@@ -59,12 +60,12 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       .expects(nSIUserInfo, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockEnrolUser(nino: NINO)(result: Either[String, Unit]): Unit =
+  def mockEnrolUser()(result: Either[String, Unit]): Unit =
     (mockHelpToSaveService.enrolUser()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockEmailUpdate(email: String, nino: NINO)(result: Either[String, Unit]): Unit =
+  def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier))
       .expects(email, *)
       .returning(EitherT.fromEither[Future](result))
@@ -88,7 +89,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         "the session data shows that they have been already found to be eligible" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           }
 
@@ -114,10 +115,10 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         "the session data shows that they have been already found to be eligible" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
             mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
-            mockEmailUpdate(email, nino)(Left(""))
+            mockEmailUpdate(email)(Left(""))
           }
           await(doRequest(email))
         }
@@ -125,10 +126,10 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       "redirect to the create an account page if the write to keystore and the email store was successful" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
-          mockEmailUpdate(email, nino)(Right(()))
+          mockEmailUpdate(email)(Right(()))
         }
 
         val result = doRequest(email)
@@ -141,7 +142,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         "the email cannot be written to keystore" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
             mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Left(""))
           }
@@ -153,10 +154,10 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         "the email cannot be written to the email store" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
             mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
-            mockEmailUpdate(email, nino)(Left(""))
+            mockEmailUpdate(email)(Left(""))
           }
 
           val result = doRequest(email)
@@ -177,7 +178,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       "redirect the user to the confirm details page if there is no email in the session data" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
@@ -189,7 +190,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       "show the user the create account page if the session data contains a confirmed email" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(email)))))
         }
 
@@ -211,10 +212,10 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         "and enrol the user if the creation was successful" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
-            mockEnrolUser(nino)(Right(()))
+            mockEnrolUser()(Right(()))
           }
 
           val result = doCreateAccountRequest()
@@ -226,10 +227,10 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         "and even if the user couldn't be enrolled" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
-            mockEnrolUser(nino)(Left("Oh no"))
+            mockEnrolUser()(Left("Oh no"))
           }
 
           val result = doCreateAccountRequest()
@@ -240,7 +241,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       "redirect the user to the confirm details page if the session indicates they have not done so already" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
@@ -254,7 +255,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         "the help to save service returns with an error" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }

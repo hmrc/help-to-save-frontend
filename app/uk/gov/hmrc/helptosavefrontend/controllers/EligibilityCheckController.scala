@@ -28,6 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
@@ -45,8 +46,9 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
                                             jsonSchemaValidationService: JSONSchemaValidationService,
                                             val app:                     Application,
                                             auditor:                     HTSAuditor,
-                                            frontendAuthConnector:       FrontendAuthConnector)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
+                                            frontendAuthConnector:       FrontendAuthConnector,
+                                            metrics:                     Metrics)(implicit ec: ExecutionContext)
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   import EligibilityCheckController._
 

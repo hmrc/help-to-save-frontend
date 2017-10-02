@@ -38,7 +38,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
                               val messagesApi:           MessagesApi,
                               frontendAuthConnector:     FrontendAuthConnector,
                               metrics:                   Metrics)
-  extends HelpToSaveAuth(frontendAuthConnector) with I18nSupport with Logging {
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport with Logging {
 
   def journeyResult(continueURL: String): Action[AnyContent] = authorisedForHts { // scalastyle:ignore cyclomatic.complexity method.length
   implicit request ⇒ implicit htsContext ⇒

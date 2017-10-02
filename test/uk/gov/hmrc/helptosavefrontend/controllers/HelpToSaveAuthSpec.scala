@@ -35,7 +35,7 @@ import scala.concurrent.{Await, Future}
 
 class HelpToSaveAuthSpec extends AuthSupport {
 
-  val htsAuth = new HelpToSaveAuth(mockAuthConnector)
+  val htsAuth = new HelpToSaveAuth(mockAuthConnector, mockMetrics)
 
   private def actionWithNoEnrols = htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Future.successful(Ok(""))

@@ -20,14 +20,16 @@ import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 
 class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
                                          val helpToSaveService: HelpToSaveService,
-                                         frontendAuthConnector: FrontendAuthConnector)
-  extends HelpToSaveAuth(frontendAuthConnector) with I18nSupport with Logging
+                                         frontendAuthConnector: FrontendAuthConnector,
+                                         metrics:               Metrics)
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport with Logging
   with EnrolmentCheckBehaviour {
 
   def accessAccount: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
