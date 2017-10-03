@@ -26,18 +26,18 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier, userType: UserType): Future[Either[VerifyEmailError, Unit]]
+  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, userType: UserType): Future[Either[VerifyEmailError, Unit]]
 
 }
 
@@ -54,7 +54,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
   val templateId: String = "awrs_email_verification"
 
-  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier, userType: UserType): Future[Either[VerifyEmailError, Unit]] = {
+  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, userType: UserType): Future[Either[VerifyEmailError, Unit]] = {
     val continueUrlWithParams = {
       val continueURL = userType.fold(newApplicantContinueURL, accountHolderContinueURL)
       continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()
@@ -75,41 +75,41 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
       response.status match {
         case OK | CREATED ⇒
-          logger.info(s"[EmailVerification] - Email verification successfully triggered (time: ${nanosToPrettyString(time)})")
+          logger.info(s"[EmailVerification] - Email verification successfully triggered (time: ${nanosToPrettyString(time)})", nino)
           Right(())
 
         case other ⇒
-          handleErrorStatus(other, response, time)
+          handleErrorStatus(other, response, time, nino)
       }
     }.recover{
       case NonFatal(e) ⇒
         val time = timerContext.stop()
         metrics.emailVerificationErrorCounter.inc()
 
-        logger.warn(s"Error while calling email verification service: ${e.getMessage} (time: ${nanosToPrettyString(time)})")
+        logger.warn(s"Error while calling email verification service: ${e.getMessage} (time: ${nanosToPrettyString(time)})", nino)
         Left(BackendError)
     }
   }
 
-  private def handleErrorStatus(status: Int, response: HttpResponse, time: Long): Either[VerifyEmailError, Unit] = {
+  private def handleErrorStatus(status: Int, response: HttpResponse, time: Long, nino: NINO): Either[VerifyEmailError, Unit] = {
     metrics.emailVerificationErrorCounter.inc()
 
     status match {
       case BAD_REQUEST ⇒
-        logger.warn(s"[EmailVerification] - Bad Request from email verification service (time: ${nanosToPrettyString(time)})")
+        logger.warn(s"[EmailVerification] - Bad Request from email verification service (time: ${nanosToPrettyString(time)})", nino)
         Left(RequestNotValidError)
 
       case CONFLICT ⇒
-        logger.info(s"[EmailVerification] - Email address already verified (time: ${nanosToPrettyString(time)})")
+        logger.info(s"[EmailVerification] - Email address already verified (time: ${nanosToPrettyString(time)})", nino)
         Left(AlreadyVerified)
 
       case SERVICE_UNAVAILABLE ⇒
-        logger.warn(s"[EmailVerification] - Email Verification service not currently available (time: ${nanosToPrettyString(time)})")
+        logger.warn(s"[EmailVerification] - Email Verification service not currently available (time: ${nanosToPrettyString(time)})", nino)
         Left(VerificationServiceUnavailable)
 
       case other ⇒
         logger.warn(s"[EmailVerification] - Unexpected status $other received from email verification" +
-          s" body = ${response.body} (time: ${nanosToPrettyString(time)})")
+          s" body = ${response.body} (time: ${nanosToPrettyString(time)})", nino)
         Left(BackendError)
     }
   }

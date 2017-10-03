@@ -17,19 +17,21 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class HTSEventSpec extends TestSupport {
 
-  "ApplicationSubmittedEvent" must {
+  val appName = "help-to-save-frontend"
+
+  "AccountCreated" must {
     "be created with the appropriate auditSource" in {
-      val event = new ApplicationSubmittedEvent("hts-frontend", validNSIUserInfo)(new HeaderCarrier)
-      event.auditSource shouldBe "hts-frontend"
+      val event = AccountCreated(validNSIUserInfo)(new HeaderCarrier)
+      event.value.auditSource shouldBe appName
     }
 
     "be created with the appropriate auditType" in {
-      val event = new ApplicationSubmittedEvent("hts-frontend", validNSIUserInfo)(new HeaderCarrier)
-      event.value.auditType shouldBe "applicationSubmitted"
+      val event = AccountCreated(validNSIUserInfo)(new HeaderCarrier)
+      event.value.auditType shouldBe "AccountCreated"
     }
 
     "have the correct detail" in {
@@ -46,9 +48,9 @@ class HTSEventSpec extends TestSupport {
             phoneNumber = Some(pNumber),
             communicationPreference = "02"))
 
-      val event = new ApplicationSubmittedEvent("hts-frontend", completeUserInfo)(new HeaderCarrier)
+      val event = AccountCreated(completeUserInfo)(new HeaderCarrier)
       event.value.detail.size shouldBe 15
-      event.value.detail.exists{ case (k, v) ⇒ k === "forename" && v === completeUserInfo.forename } shouldBe true
+      event.value.detail.exists { case (k, v) ⇒ k === "forename" && v === completeUserInfo.forename } shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "surname" && x._2 === completeUserInfo.surname) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "dateOfBirth" && x._2 === completeUserInfo.dateOfBirth.toString) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === completeUserInfo.nino) shouldBe true
@@ -66,31 +68,51 @@ class HTSEventSpec extends TestSupport {
     }
   }
 
-  "EligibilityCheckEvent" must {
+  "EligibilityResult" must {
     "be created with the appropriate auditSource" in {
-      val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
-      event.auditSource shouldBe "hts-frontend"
+      val event = EligibilityResult(validNSIUserInfo.nino, "reason")(new HeaderCarrier)
+      event.value.auditSource shouldBe appName
     }
 
     "be created with the appropriate auditType" in {
-      val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
-      event.value.auditType shouldBe "eligibilityCheck"
+      val event = EligibilityResult(validNSIUserInfo.nino, "reason")(new HeaderCarrier)
+      event.value.auditType shouldBe "EligibilityResult"
     }
 
-    "be created with the eligible tag set true, no reason tag, and the nino, if the errorDetailString is None" in {
-      val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, None)(new HeaderCarrier)
-      event.value.detail.size shouldBe 2
+    "be created with the eligible tag set true, a reason tag, and the nino" in {
+      val reason = "reason"
+      val event = EligibilityResult(validNSIUserInfo.nino, reason)(new HeaderCarrier)
+      event.value.detail.size shouldBe 3
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "true") shouldBe true
+      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === reason) shouldBe true
     }
 
-    "be created with the eligible tag set false, a reason tag, and the nino, if the errorDetailString is given" in {
+    "be created with the eligible tag set false, a reason tag, and the nino" in {
       val reason = "reason"
-      val event = new EligibilityCheckEvent("hts-frontend", validNSIUserInfo.nino, Some(reason))(new HeaderCarrier)
+      val event = EligibilityResult(validNSIUserInfo.nino, reason, isEligible = false)(new HeaderCarrier)
       event.value.detail.size shouldBe 3
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "false") shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === reason) shouldBe true
+    }
+  }
+
+  "EmailChanged" must {
+    "be created with the appropriate auditSource and auditDetails" in {
+      val event = EmailChanged("NINO", "old-email@test.com", "new-email@test.com")(new HeaderCarrier)
+      event.value.auditSource shouldBe appName
+      event.value.auditType shouldBe "EmailChanged"
+      event.value.detail shouldBe Map[String, String]("nino" -> "NINO", "oldEmail" -> "old-email@test.com", "newEmail" -> "new-email@test.com")
+    }
+  }
+
+  "SuspiciousActivity" must {
+    "be created with the appropriate auditSource and auditDetails" in {
+      val event = SuspiciousActivity("nino", "nino_mismatch")(new HeaderCarrier)
+      event.value.auditSource shouldBe appName
+      event.value.auditType shouldBe "SuspiciousActivity"
+      event.value.detail shouldBe Map[String, String]("nino" -> "nino", "reason" -> "nino_mismatch")
     }
   }
 }

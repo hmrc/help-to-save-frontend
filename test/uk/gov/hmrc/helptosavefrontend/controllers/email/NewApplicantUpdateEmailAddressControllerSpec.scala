@@ -24,17 +24,18 @@ import play.api.inject.Injector
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, EnrolmentAndEligibilityCheckBehaviour}
-
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, VerifyEmailError, validNSIUserInfo}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity, VerifyEmailError, validNSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
@@ -53,22 +54,31 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
   val mockHttp: WSHttp = mock[WSHttp]
 
+  val mockAuditor = mock[HTSAuditor]
+
   lazy val controller: NewApplicantUpdateEmailAddressController =
     new NewApplicantUpdateEmailAddressController(
       mockSessionCacheConnector,
       mockHelpToSaveService,
       frontendAuthConnector,
-      mockEmailVerificationConnector
+      mockEmailVerificationConnector,
+      mockMetrics,
+      mockAuditor
     )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto, ec) {
 
       override val authConnector = mockAuthConnector
     }
 
   def mockEmailVerificationConn(nino: String, email: String)(result: Either[VerifyEmailError, Unit]) = {
-    (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier, _: UserType))
-      .expects(nino, email, *, UserType.NewApplicant)
+    (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier, _: ExecutionContext, _: UserType))
+      .expects(nino, email, *, *, UserType.NewApplicant)
       .returning(Future.successful(result))
   }
+
+  def mockAudit() =
+    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO))
+      .expects(*, *)
+      .returning(Future.successful(AuditResult.Success))
 
   "The UpdateEmailAddressController" when {
 
@@ -83,7 +93,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           }
 
@@ -96,7 +106,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         "session data indicates that they are ineligible" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
           }
           val result = getResult()
@@ -115,7 +125,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(nino, email)(Right(()))
       }
@@ -131,7 +141,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
           mockEmailVerificationConn(nino, email)(Left(AlreadyVerified))
         }
@@ -162,7 +172,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(nino, email)(Left(RequestNotValidError))
       }
@@ -176,7 +186,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(nino, email)(Left(VerificationServiceUnavailable))
       }
@@ -190,7 +200,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         mockEmailVerificationConn(nino, email)(Left(BackendError))
       }
@@ -228,6 +238,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     "return an OK status when the link has been corrupted or is incorrect" in {
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockAudit()
       }
       val result = doRequestWithQueryParam("corrupt-link")
       status(result) shouldBe Status.OK

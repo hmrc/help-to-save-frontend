@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,12 +49,12 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .expects(*, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockEnrolmentCheck(input: NINO)(result: Either[String, EnrolmentStatus]): Unit =
+  def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
     (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockWriteITMPFlag(nino: NINO)(result: Either[String, Unit]): Unit =
+  def mockWriteITMPFlag()(result: Either[String, Unit]): Unit =
     (mockHelpToSaveService.setITMPFlag()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT.fromEither[Future](result))
@@ -66,7 +66,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     "redirect to NS&I if the user is already enrolled" in {
       inSequence {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = true)))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = true)))
       }
 
       val result = getResult()
@@ -78,8 +78,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       "if it has not already been set" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-          mockWriteITMPFlag(nino)(Right(()))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+          mockWriteITMPFlag()(Right(()))
         }
 
         val result = getResult()
@@ -91,8 +91,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       "setting the ITMP flag" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-          mockWriteITMPFlag(nino)(Left(""))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+          mockWriteITMPFlag()(Left(""))
         }
 
         val result = getResult()
@@ -104,7 +104,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       "redirect to the eligibility checks if there is no session data for the user" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(None))
         }
 
@@ -120,7 +120,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         "there is an error getting the enrolment status" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Left(""))
+            mockEnrolmentCheck()(Left(""))
           }
           status(getResult()) shouldBe INTERNAL_SERVER_ERROR
         }
@@ -129,7 +129,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       "there is an error getting the session data" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Left(""))
         }
 

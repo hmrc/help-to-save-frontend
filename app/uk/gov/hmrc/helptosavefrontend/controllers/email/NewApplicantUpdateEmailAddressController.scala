@@ -28,15 +28,18 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector, FrontendGlobal}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.{EnrolmentCheckBehaviour, HelpToSaveAuth, SessionBehaviour}
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,14 +47,16 @@ import scala.concurrent.{ExecutionContext, Future}
 class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnector:      SessionCacheConnector,
                                                           val helpToSaveService:          HelpToSaveService,
                                                           frontendAuthConnector:          FrontendAuthConnector,
-                                                          val emailVerificationConnector: EmailVerificationConnector
+                                                          val emailVerificationConnector: EmailVerificationConnector,
+                                                          metrics:                        Metrics,
+                                                          val auditor:                    HTSAuditor
 )(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, ec: ExecutionContext)
-  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
 
   implicit val userType: UserType = UserType.NewApplicant
 
   def getUpdateYourEmailAddress: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { _ ⇒
+    checkIfAlreadyEnrolled { nino ⇒
       checkSession {
         SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
       } {
@@ -60,7 +65,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         )(userInfo ⇒ {
             Ok(views.html.email.update_email_address(userInfo.contactDetails.email, UpdateEmailForm.verifyEmailForm))
           })
-      }
+      }(nino)
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
@@ -70,7 +75,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
       } { _ ⇒
         sendEmailVerificationRequest(nino)
-      }
+      }(nino)
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
@@ -86,7 +91,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         result.fold({
           e ⇒
             logger.warn(e)
-            InternalServerError
+            FrontendGlobal.resolveError(request, new Exception)
         }, { maybeNSIUserInfo ⇒
           maybeNSIUserInfo.fold{
             // this means they were ineligible

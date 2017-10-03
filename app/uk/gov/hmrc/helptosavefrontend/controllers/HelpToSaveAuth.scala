@@ -19,54 +19,61 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.ValidatedNel
 import cats.instances.string._
 import cats.syntax.cartesian._
-import cats.syntax.eq._
 import cats.syntax.either._
+import cats.syntax.eq._
 import cats.syntax.option._
 import org.joda.time.LocalDate
 import play.api.mvc._
-import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.ConfidenceLevel
 import uk.gov.hmrc.auth.core.retrieve.Retrievals.authorisedEnrolments
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
-import uk.gov.hmrc.auth.frontend.Redirects
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{encoded, identityCallbackUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnector)
-  extends FrontendController with AuthorisedFunctions with Redirects with Logging {
+class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metrics)
+  extends FrontendController with AuthorisedFunctions with Logging {
 
   override def authConnector: AuthConnector = frontendAuthConnector
-
-  override def config: Configuration = app.configuration
-
-  override def env: Environment = Environment(app.path, app.classloader, app.mode)
 
   private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
 
   def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Future[Result])(redirectOnLoginURL: String): Action[AnyContent] =
     Action.async { implicit request ⇒
+      val timer = metrics.authTimer.time()
+
       authorised(AuthWithCL200)
         .retrieve(UserRetrievals and authorisedEnrolments) {
           case name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ authorisedEnrols ⇒
+            val time = timer.stop()
+            val timeString = s"(time: ${nanosToPrettyString(time)})"
 
             val mayBeNino = authorisedEnrols.enrolments
               .find(_.key === "HMRC-NI")
               .flatMap(_.getIdentifier("NINO"))
               .map(_.value)
 
-            mayBeNino.fold(
+            mayBeNino.fold{
+              logger.warn(s"Could not find NINO for user $timeString")
               toFuture(InternalServerError("could not find NINO for logged in user"))
-            )(nino ⇒ {
-                val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
-                action(request)(HtsContext(Some(nino), Some(userDetails.map(NSIUserInfo.apply)), isAuthorised = true))
-              })
+            }(nino ⇒ {
+              val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
+
+              userDetails.fold(
+                m ⇒ logger.warn(s"Could not find user info, missing details [${m.missingInfo.mkString(", ")}] $timeString", nino),
+                _ ⇒ logger.info(s"Successfully retrieved NINO and usr details $timeString", nino)
+              )
+
+              action(request)(HtsContext(Some(nino), Some(userDetails.map(NSIUserInfo.apply)), isAuthorised = true))
+            })
 
         }.recover {
           handleFailure(redirectOnLoginURL)
@@ -128,7 +135,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
     val validation: ValidatedNel[MissingUserInfo, UserInfo] =
       (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| emailValidation)
-        .map{
+        .map {
           case (givenName, surname, jodaDob, email) ⇒
             UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email, Address(itmpAddress))
         }
@@ -140,20 +147,22 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
   def handleFailure(redirectOnLoginURL: String): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
-      redirectToLogin(redirectOnLoginURL)
+      toGGLogin(redirectOnLoginURL)
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
-      toPersonalIV(s"$identityCallbackUrl?continueURL=${encoded(redirectOnLoginURL)}", ConfidenceLevel.L200)
+      SeeOther(IvUrl)
 
     case ex: AuthorisationException ⇒
       logger.error(s"could not authenticate user due to: $ex")
       InternalServerError("")
   }
 
-  private def redirectToLogin(redirectOnLoginURL: String) = Redirect(ggLoginUrl, Map(
-    "continue" -> Seq(redirectOnLoginURL),
-    "accountType" -> Seq("individual"),
-    "origin" -> Seq(origin)
-  ))
+  private def toGGLogin(redirectOnLoginURL: String) =
+    Redirect(ggLoginUrl, Map(
+      "continue" -> Seq(redirectOnLoginURL),
+      "accountType" -> Seq("individual"),
+      "origin" -> Seq(origin)
+    ))
+
 }
 

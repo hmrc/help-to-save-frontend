@@ -28,13 +28,15 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.config.AppName
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -45,8 +47,9 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
                                             jsonSchemaValidationService: JSONSchemaValidationService,
                                             val app:                     Application,
                                             auditor:                     HTSAuditor,
-                                            frontendAuthConnector:       FrontendAuthConnector)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
+                                            frontendAuthConnector:       FrontendAuthConnector,
+                                            metrics:                     Metrics)(implicit ec: ExecutionContext)
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   import EligibilityCheckController._
 
@@ -65,7 +68,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
               // user is eligible
               SeeOther(routes.EligibilityCheckController.getIsEligible().url)
             )
-        }
+        }(nino)
     }, { enrolmentCheckError ⇒
       // if there is an error checking the enrolment, do the eligibility checks
       getEligibilityActionResult(enrolmentCheckError.nino)
@@ -74,7 +77,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { _ ⇒
+    checkIfAlreadyEnrolled { nino ⇒
       checkSession {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } {
@@ -83,12 +86,12 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
         }(_ ⇒
           SeeOther(routes.EligibilityCheckController.getIsEligible().url)
         )
-      }
+      }(nino)
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   val getIsEligible: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { _ ⇒
+    checkIfAlreadyEnrolled { nino ⇒
       checkSession {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } {
@@ -97,7 +100,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
         )(_ ⇒
             Ok(views.html.register.you_are_eligible())
           )
-      }
+      }(nino)
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
@@ -105,7 +108,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
                                                      htsContext: HtsContext,
                                                      request:    Request[AnyContent]): Future[Result] =
     performEligibilityChecks().fold(
-      handleEligibilityCheckError,
+      e ⇒ handleEligibilityCheckError(e, nino),
       r ⇒ handleEligibilityResult(r, nino))
 
   private def performEligibilityChecks()(implicit hc: HeaderCarrier, htsContext: HtsContext): EitherT[Future, Error, EligibilityResultWithUserInfo] =
@@ -133,38 +136,38 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     result.value.fold(
       {
         case IneligibilityReason.AccountAlreadyOpened ⇒
-          auditor.sendEvent(EligibilityCheckEvent(appName, nino, Some(IneligibilityReason.AccountAlreadyOpened.legibleString)))
+          auditor.sendEvent(EligibilityResult(nino, IneligibilityReason.AccountAlreadyOpened.legibleString, isEligible = false), nino)
 
           // set the ITMP flag here but don't worry about the result
           helpToSaveService.setITMPFlag().value.onComplete{
-            case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not set ITMP flag, future failed: ${e.getMessage}")
-            case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not set ITMP flag: $e")
-            case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Successfully set ITMP flag for user")
+            case Failure(e)        ⇒ logger.warn(s"Could not set ITMP flag, future failed: ${e.getMessage}", nino)
+            case Success(Left(e))  ⇒ logger.warn(s"Could not set ITMP flag: $e", nino)
+            case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user", nino)
           }
 
           Ok("You've already got an account - yay!!!")
 
         case other ⇒
-          auditor.sendEvent(EligibilityCheckEvent(appName, nino, Some(other.legibleString)))
+          auditor.sendEvent(EligibilityResult(nino, other.legibleString, isEligible = false), nino)
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
       }, {
-        case (eligibilityReason, nsiUserInfo) ⇒
-          auditor.sendEvent(EligibilityCheckEvent(appName, nino, None))
+        case (eligibilityReason, _) ⇒
+          auditor.sendEvent(EligibilityResult(nino, eligibilityReason.legibleString), nino)
           SeeOther(routes.EligibilityCheckController.getIsEligible().url)
       })
   }
 
-  private def handleEligibilityCheckError(error: Error)(implicit request: Request[AnyContent],
-                                                        hc:         HeaderCarrier,
-                                                        htsContext: HtsContext): Result = error.value match {
+  private def handleEligibilityCheckError(error: Error,
+                                          nino:  NINO
+  )(implicit request: Request[AnyContent],
+    hc:         HeaderCarrier,
+    htsContext: HtsContext): Result = error.value match {
     case Left(e) ⇒
-      logger.warn(e)
+      logger.warn(e, nino)
       InternalServerError
 
     case Right(missingUserInfo) ⇒
-      val problemDescription = s"user ${missingUserInfo.nino} has missing information: ${missingUserInfo.missingInfo.mkString(",")}"
-      logger.warn(problemDescription)
-      auditor.sendEvent(EligibilityCheckEvent(appName, missingUserInfo.nino, Some(problemDescription)))
+      logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
       Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalAccountUrl))
   }
 

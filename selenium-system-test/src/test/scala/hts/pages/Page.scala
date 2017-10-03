@@ -18,30 +18,31 @@ package hts.pages
 
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
-import org.scalatest.selenium.WebBrowser.go
+import org.scalatest.{Assertions, Matchers}
+import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
+import org.scalatest.selenium.WebBrowser
+import org.scalatest.time.{Millis, Seconds, Span}
 
-object Page {
+trait Page extends Matchers
+  with WebBrowser
+  with Eventually
+  with PatienceConfiguration
+  with Assertions {
 
-  //val http: WSHttp
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(timeout  = scaled(Span(5, Seconds)), interval = scaled(Span(500, Millis)))
 
+  def isCurrentPage(implicit driver: WebDriver): Boolean = false
+
+  def back()(implicit driver: WebDriver): Unit = clickOn("ButtonBack")
+
+  def nextPage()(implicit driver: WebDriver): Unit = find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
+
+  def checkHeader(heading: String, text: String)(implicit driver: WebDriver): Boolean =
+    find(cssSelector(heading)).exists(_.text === text)
+currentUrl
   def getCurrentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
 
   def getPageContent(implicit driver: WebDriver): String = driver.getPageSource
-
-  //  def constructHttpRequest(httpMethod: String, uri: String, postBody: String): Future[HttpResponse] = {
-  //    val path = s"${Configuration.host}/help-to-save/$uri"
-  //    httpMethod match {
-  //      case "GET" ⇒ http.get(path)
-  //      case "POST"  ⇒ http.post(path, postBody)
-  //    }
-  //  }
-  //
-  //  def hitPage(implicit driver: WebDriver, httpMethod: String, uri: String): Future[Int] = {
-  //    val request = constructHttpRequest(httpMethod, uri, "")
-  //    request.map{
-  //      x ⇒ x.status
-  //    }
-  //  }
 
   def url(uri: String): String = s"${Configuration.host}/help-to-save/$uri"
 

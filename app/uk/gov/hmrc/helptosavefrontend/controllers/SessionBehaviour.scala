@@ -20,9 +20,10 @@ import cats.instances.future._
 import play.api.mvc.Result
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContext}
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -31,10 +32,10 @@ trait SessionBehaviour {
 
   val sessionCacheConnector: SessionCacheConnector
 
-  def checkSession(noSession: ⇒ Future[Result])(whenSession: HTSSession ⇒ Future[Result])(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
+  def checkSession(noSession: ⇒ Future[Result])(whenSession: HTSSession ⇒ Future[Result])(nino: NINO)(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
     sessionCacheConnector.get.fold({
       e ⇒
-        logger.warn(s"Could not read sessions data from keystore: $e")
+        logger.warn(s"Could not read sessions data from keystore: $e", nino)
         Future.successful(InternalServerError)
     }, _.fold(noSession)(whenSession)
     ).flatMap(identity)

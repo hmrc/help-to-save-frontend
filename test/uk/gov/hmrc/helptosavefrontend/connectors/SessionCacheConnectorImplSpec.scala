@@ -21,8 +21,10 @@ import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.http._
+
+import scala.concurrent.ExecutionContext
 
 class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
 
@@ -45,8 +47,8 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
 
     "be able to insert a HTSSession into the cache" in new TestApparatus {
 
-      (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier))
-        .expects(putUrl, htsSession, *, *, *)
+      (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+        .expects(putUrl, htsSession, *, *, *, *)
         .returning(cacheMap)
 
       val result = sessionCacheConnector.put(htsSession)
@@ -57,8 +59,8 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
 
     "be able to Get a HTSSession from the cache" in new TestApparatus {
 
-      (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier))
-        .expects(getUrl, *, *)
+      (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+        .expects(getUrl, *, *, *)
         .returning(cacheMap)
 
       val result = sessionCacheConnector.get

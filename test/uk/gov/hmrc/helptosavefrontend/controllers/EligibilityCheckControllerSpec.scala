@@ -33,8 +33,9 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.IneligibilityReason.AccountAlreadyOpened
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
+import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -54,16 +55,17 @@ class EligibilityCheckControllerSpec
     jsonSchemaValidationService,
     fakeApplication,
     mockAuditor,
-    mockAuthConnector)(ec)
+    mockAuthConnector,
+    mockMetrics)(ec)
 
-  def mockEligibilityResult(nino: String)(result: Either[String, EligibilityCheckResult]): Unit =
+  def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
     (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
   def mockSendAuditEvent(): Unit =
-    (mockAuditor.sendEvent(_: HTSEvent))
-      .expects(*)
+    (mockAuditor.sendEvent(_: HTSEvent, _: NINO))
+      .expects(*, nino)
       .returning(Future.successful(AuditResult.Success))
 
   def mockJsonSchemaValidation(input: NSIUserInfo)(result: Either[String, NSIUserInfo]): Unit =
@@ -82,7 +84,7 @@ class EligibilityCheckControllerSpec
       "show the you are eligible page if session data indicates that they are eligible" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
@@ -95,7 +97,7 @@ class EligibilityCheckControllerSpec
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
@@ -115,7 +117,7 @@ class EligibilityCheckControllerSpec
       "show the you are not eligible page if session data indicates that they are not eligible" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
 
@@ -128,7 +130,7 @@ class EligibilityCheckControllerSpec
       "redirect to the you are eligible page if session data indicates that they are eligible" in {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }
 
@@ -156,8 +158,8 @@ class EligibilityCheckControllerSpec
         "call the get eligibility endpoint of the help to save service" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Left("Oh no!"))
-            mockEligibilityResult(nino)(Left(""))
+            mockEnrolmentCheck()(Left("Oh no!"))
+            mockEligibilityResult()(Left(""))
           }
 
           await(doCheckEligibilityRequest())
@@ -166,11 +168,11 @@ class EligibilityCheckControllerSpec
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Left("Oh no!"))
-            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
+            mockEnrolmentCheck()(Left("Oh no!"))
+            mockEligibilityResult()(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
-            mockWriteITMPFlag(nino)(Right(()))
+            mockWriteITMPFlag()(Right(()))
           }
 
           val result = doCheckEligibilityRequest()
@@ -181,8 +183,8 @@ class EligibilityCheckControllerSpec
         "show the you are eligible page if the eligibility check indicates the user is eligible" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Left("Oh no!"))
-            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(EligibilityReason.WTCWithUC))))
+            mockEnrolmentCheck()(Left("Oh no!"))
+            mockEligibilityResult()(Right(EligibilityCheckResult(Right(EligibilityReason.WTCWithUC))))
             mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
             mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(()))
             mockSendAuditEvent()
@@ -196,8 +198,8 @@ class EligibilityCheckControllerSpec
         "show the you are not eligible page if the eligibility check indicates the user is eligible" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Left("Oh no!"))
-            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.NotEntitledToWTC(false)))))
+            mockEnrolmentCheck()(Left("Oh no!"))
+            mockEligibilityResult()(Right(EligibilityCheckResult(Left(IneligibilityReason.NotEntitledToWTC(false)))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
           }
@@ -212,8 +214,8 @@ class EligibilityCheckControllerSpec
           "the eligibility check call returns with an error" in {
             inSequence {
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck(nino)(Left("Oh no!"))
-              mockEligibilityResult(nino)(Left(""))
+              mockEnrolmentCheck()(Left("Oh no!"))
+              mockEligibilityResult()(Left(""))
             }
 
             val result = doCheckEligibilityRequest()
@@ -228,7 +230,7 @@ class EligibilityCheckControllerSpec
           "which indicates they are not eligible" in {
             inSequence {
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
             }
 
@@ -242,7 +244,7 @@ class EligibilityCheckControllerSpec
           "which indicates they are eligible" in {
             inSequence {
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
             }
             val result = doCheckEligibilityRequest()
@@ -254,12 +256,12 @@ class EligibilityCheckControllerSpec
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
-            mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
+            mockEligibilityResult()(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
-            mockWriteITMPFlag(nino)(Right(()))
+            mockWriteITMPFlag()(Right(()))
           }
 
           val result = doCheckEligibilityRequest()
@@ -273,9 +275,9 @@ class EligibilityCheckControllerSpec
 
             inSequence {
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
-              mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
+              mockEligibilityResult()(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
               mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Right(()))
               mockSendAuditEvent
@@ -296,9 +298,9 @@ class EligibilityCheckControllerSpec
               whenever(ineligibilityReason =!= AccountAlreadyOpened) {
                 inSequence {
                   mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                  mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+                  mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                   mockSessionCacheConnectorGet(Right(None))
-                  mockEligibilityResult(nino)(Right(EligibilityCheckResult(Left(ineligibilityReason))))
+                  mockEligibilityResult()(Right(EligibilityCheckResult(Left(ineligibilityReason))))
                   mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
                   mockSendAuditEvent
                 }
@@ -316,9 +318,8 @@ class EligibilityCheckControllerSpec
 
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
-            mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
-            mockSendAuditEvent
           }
 
           val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
@@ -358,7 +359,7 @@ class EligibilityCheckControllerSpec
             test(
               inSequence {
                 mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+                mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                 mockSessionCacheConnectorGet(Left(""))
               }
             )
@@ -369,9 +370,9 @@ class EligibilityCheckControllerSpec
               test(
                 inSequence {
                   mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                  mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+                  mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                   mockSessionCacheConnectorGet(Right(None))
-                  mockEligibilityResult(nino)(Left(checkError))
+                  mockEligibilityResult()(Left(checkError))
                 }
               )
             }
@@ -382,9 +383,9 @@ class EligibilityCheckControllerSpec
 
             test(inSequence {
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
-              mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
+              mockEligibilityResult()(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockJsonSchemaValidation(validNSIUserInfo)(Left("uh oh"))
             })
           }
@@ -394,9 +395,9 @@ class EligibilityCheckControllerSpec
 
             test(inSequence {
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck(nino)(Right(EnrolmentStatus.NotEnrolled))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
-              mockEligibilityResult(nino)(Right(EligibilityCheckResult(Right(eligibilityReason))))
+              mockEligibilityResult()(Right(EligibilityCheckResult(Right(eligibilityReason))))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
               mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Left("Bang"))
             })

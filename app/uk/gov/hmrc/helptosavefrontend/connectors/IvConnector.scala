@@ -18,14 +18,13 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import cats.instances.int._
 import cats.syntax.eq._
-
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.mvc.Http.Status.OK
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivUrl
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivJourneyResultUrl
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.iv._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,7 +39,7 @@ class IvConnectorImpl @Inject() (http: WSHttp) extends IvConnector with Logging 
 
   override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]] = {
 
-    http.GET(s"$ivUrl/${journeyId.Id}").flatMap {
+    http.GET(s"${ivJourneyResultUrl(journeyId)}").flatMap {
 
       case r if r.status === OK ⇒
         val result = (r.json \ "result").as[String]
