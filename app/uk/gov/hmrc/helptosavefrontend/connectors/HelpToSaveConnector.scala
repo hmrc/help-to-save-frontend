@@ -90,7 +90,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
       if (response.status == 200) {
         ifHTTP200(response)
       } else {
-        Left(toError(s"Call to $description came back with status ${response.status}"))
+        Left(toError(s"Call to $description came back with status ${response.status}. Body was ${response.body}"))
       }
     }.recover {
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
@@ -99,20 +99,18 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
 
   private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
-    val reasonInt = eligibilityCheckResponse.reason
+    val reason = eligibilityCheckResponse.reason
 
     eligibilityCheckResponse.result match {
-      case 1 ⇒
-        // user is eligible
+      case "Eligible to HtS Account" ⇒
         Either.fromOption(
-          EligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(r)),
-          s"Could not parse ineligibility reason '$reasonInt'")
+          EligibilityReason.fromString(reason).map(r ⇒ EligibilityCheckResult(r)),
+          s"Could not parse ineligibility reason '$reason'")
 
-      case 2 ⇒
-        // user is ineligible
+      case "Ineligible to HtS Account" ⇒
         Either.fromOption(
-          IneligibilityReason.fromInt(reasonInt).map(r ⇒ EligibilityCheckResult(r)),
-          s"Could not parse eligibility reason '$reasonInt'")
+          IneligibilityReason.fromString(reason).map(r ⇒ EligibilityCheckResult(r)),
+          s"Could not parse eligibility reason '$reason'")
 
       case other ⇒
         Left(s"Could not parse eligibility result '$other'")
@@ -146,7 +144,7 @@ object HelpToSaveConnectorImpl {
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
 
-  private[connectors] case class EligibilityCheckResponse(result: Int, reason: Int)
+  private[connectors] case class EligibilityCheckResponse(result: String, reason: String)
 
   private[connectors] object EligibilityCheckResponse {
 

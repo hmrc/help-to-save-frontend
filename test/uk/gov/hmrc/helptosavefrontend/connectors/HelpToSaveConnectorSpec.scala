@@ -20,6 +20,7 @@ import java.util.Base64
 
 import cats.data.EitherT
 import cats.instances.int._
+import cats.instances.string._
 import cats.syntax.eq._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
@@ -55,6 +56,10 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     }
   }
 
+  val eligibleString = "Eligible to HtS Account"
+
+  val ineligibleString = "Ineligible to HtS Account"
+
   "The HelpToSaveConnectorImpl" when {
 
     val nino = "nino"
@@ -64,34 +69,34 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       behave like testCommon(
         mockHttpGet(eligibilityURL),
         () ⇒ connector.getEligibility(),
-        EligibilityCheckResponse(2, 1)
+        EligibilityCheckResponse(eligibleString, EligibilityReason.UC.legibleString)
       )
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result " +
         "and a valid reason" in {
-          (6 to 8).foreach { eligibilityReason ⇒
+          EligibilityReason.reasons.map(_.legibleString).foreach { eligibilityReason ⇒
             mockHttpGet(eligibilityURL)(
-              Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(1, eligibilityReason))))))
+              Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(eligibleString, eligibilityReason))))))
 
             val result = connector.getEligibility()
             await(result.value) shouldBe Right(
               EligibilityCheckResult(Right(
-                EligibilityReason.fromInt(eligibilityReason).getOrElse(sys.error(s"Could not get eligibility reason for $eligibilityReason"))
+                EligibilityReason.fromString(eligibilityReason).getOrElse(sys.error(s"Could not get eligibility reason for $eligibilityReason"))
               )))
           }
         }
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result " +
         "and a valid reason" in {
-          (1 to 5).foreach { ineligibilityReason ⇒
+          IneligibilityReason.reasons.map(_.legibleString).foreach { ineligibilityReason ⇒
             mockHttpGet(eligibilityURL)(
               Some(HttpResponse(200, responseJson = Some(Json.toJson(
-                EligibilityCheckResponse(2, ineligibilityReason))))))
+                EligibilityCheckResponse(ineligibleString, ineligibilityReason))))))
 
             val result = connector.getEligibility()
             await(result.value) shouldBe Right(
               EligibilityCheckResult(Left(
-                IneligibilityReason.fromInt(ineligibilityReason).getOrElse(sys.error(s"Could not get ineligibility reason for $ineligibilityReason"))
+                IneligibilityReason.fromString(ineligibilityReason).getOrElse(sys.error(s"Could not get ineligibility reason for $ineligibilityReason"))
               )))
           }
         }
@@ -99,11 +104,11 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       "return an error" when {
         "the call comes back with a 200 status with a positive result " +
           "and an invalid reason" in {
-            forAll { eligibilityReason: Int ⇒
-              whenever(!(6 to 8).contains(eligibilityReason)) {
+            forAll { eligibilityReason: String ⇒
+              whenever(!EligibilityReason.reasons.map(_.legibleString).contains(eligibilityReason)) {
                 mockHttpGet(eligibilityURL)(
                   Some(HttpResponse(200, responseJson = Some(Json.toJson(
-                    EligibilityCheckResponse(1, eligibilityReason))))))
+                    EligibilityCheckResponse(eligibleString, eligibilityReason))))))
 
                 val result = connector.getEligibility()
                 await(result.value).isLeft shouldBe true
@@ -113,11 +118,11 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
         "the call comes back with a 200 status with a negative result " +
           "and an invalid reason" in {
-            forAll { ineligibilityReason: Int ⇒
-              whenever(!(1 to 5).contains(ineligibilityReason)) {
+            forAll { ineligibilityReason: String ⇒
+              whenever(!IneligibilityReason.reasons.map(_.legibleString).contains(ineligibilityReason)) {
                 mockHttpGet(eligibilityURL)(
                   Some(HttpResponse(200, responseJson = Some(Json.toJson(
-                    EligibilityCheckResponse(2, ineligibilityReason))))))
+                    EligibilityCheckResponse(ineligibleString, ineligibilityReason))))))
 
                 val result = connector.getEligibility()
                 await(result.value).isLeft shouldBe true
@@ -126,8 +131,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           }
 
         "the call comes back with a 200 and an unknown result" in {
-          forAll { (result: Int, reason: Int) ⇒
-            whenever(!(1 to 2).contains(result)) {
+          forAll { (result: String, reason: String) ⇒
+            whenever(result =!= eligibleString && result =!= ineligibleString) {
               mockHttpGet(eligibilityURL)(
                 Some(HttpResponse(200, responseJson = Some(Json.toJson(
                   EligibilityCheckResponse(result, reason))))))
