@@ -17,10 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.auth.core.authorise.ConfidenceLevel.L200
-import uk.gov.hmrc.auth.core.authorise.{Enrolment, Predicate}
-import uk.gov.hmrc.auth.core.retrieve.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.retrieve.{AuthProviders, ItmpAddress, ItmpName, Name, Retrieval, Retrievals, ~}
+import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
+import uk.gov.hmrc.auth.core.ConfidenceLevel.L200
+import uk.gov.hmrc.auth.core.authorise.Predicate
+import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.{AuthProviders, Enrolment}
 
 object HtsAuth {
 

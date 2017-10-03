@@ -34,11 +34,15 @@ trait MicroService {
     )
   }
 
-  def seleniumTestFilter(name: String): Boolean = name.contains("suites")
+  def seleniumTestFilter(name: String): Boolean = name.contains("suites") && !name.contains("Zap")
 
-  def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name)
+  def zapTestFilter(name: String): Boolean = name.contains("Zap") && !name.contains("suites")
 
-  lazy val SeleniumTest = config("selenium") extend (Test)
+  def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name) && !zapTestFilter(name)
+
+  lazy val SeleniumTest = config("selenium") extend Test
+
+  lazy val ZapTest = config("zap") extend Test
 
   lazy val scalariformSettings = {
     import com.typesafe.sbt.SbtScalariform.ScalariformKeys
@@ -129,13 +133,17 @@ trait MicroService {
       "emueller-bintray" at "http://dl.bintray.com/emueller/maven" // for play json schema validator
     ))
     .configs(SeleniumTest)
+    .configs(ZapTest)
     .settings(
       inConfig(SeleniumTest)(Defaults.testTasks),
+      inConfig(ZapTest)(Defaults.testTasks),
       Keys.fork in SeleniumTest := true,
       unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/scala",
       unmanagedResourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/resources",
+      unmanagedSourceDirectories in Test += baseDirectory.value / "zap/src/test/scala",
       testOptions in Test := Seq(Tests.Filter(unitTestFilter)),
       testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter)),
+      testOptions in ZapTest := Seq(Tests.Filter(zapTestFilter)),
       testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
       testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
       testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")

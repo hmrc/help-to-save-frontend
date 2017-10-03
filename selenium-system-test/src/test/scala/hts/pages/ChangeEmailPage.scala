@@ -18,13 +18,7 @@ package hts.pages
 
 import org.openqa.selenium.WebDriver
 
-object ChangeEmailPage extends WebPage {
-
-  override def expectedUrl: String = ""
-
-  override def expectedPageTitle: String = ""
-
-  override def expectedPageHeader: String = ""
+object ChangeEmailPage extends Page {
 
   def setNewEmail(email: String)(implicit driver: WebDriver): Unit = {
     val el = find(name("value"))

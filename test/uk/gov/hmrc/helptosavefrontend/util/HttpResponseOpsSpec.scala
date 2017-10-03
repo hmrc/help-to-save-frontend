@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.util
 
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.play.http.HttpResponse
+import uk.gov.hmrc.http.HttpResponse
 
 class HttpResponseOpsSpec extends TestSupport {
 

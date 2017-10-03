@@ -34,7 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaVal
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.config.AppName
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -46,7 +46,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
                                             val app:                     Application,
                                             auditor:                     HTSAuditor,
                                             frontendAuthConnector:       FrontendAuthConnector)(implicit ec: ExecutionContext)
-  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
+  extends HelpToSaveAuth(frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   import EligibilityCheckController._
 
@@ -104,14 +104,14 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
   private def getEligibilityActionResult(nino: NINO)(implicit hc: HeaderCarrier,
                                                      htsContext: HtsContext,
                                                      request:    Request[AnyContent]): Future[Result] =
-    performEligibilityChecks(nino).fold(
+    performEligibilityChecks().fold(
       handleEligibilityCheckError,
       r ⇒ handleEligibilityResult(r, nino))
 
-  private def performEligibilityChecks(nino: NINO)(implicit hc: HeaderCarrier, htsContext: HtsContext): EitherT[Future, Error, EligibilityResultWithUserInfo] =
+  private def performEligibilityChecks()(implicit hc: HeaderCarrier, htsContext: HtsContext): EitherT[Future, Error, EligibilityResultWithUserInfo] =
     for {
       nsiUserInfo ← getUserInformation()
-      eligible ← helpToSaveService.checkEligibility(nino).leftMap(Error.apply)
+      eligible ← helpToSaveService.checkEligibility().leftMap(Error.apply)
       _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(eligible, nsiUserInfo)).leftMap(Error.apply)
       session = {
         val maybeUserInfo = eligible.result.fold(_ ⇒ None, _ ⇒ Some(nsiUserInfo))
@@ -136,7 +136,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
           auditor.sendEvent(EligibilityCheckEvent(appName, nino, Some(IneligibilityReason.AccountAlreadyOpened.legibleString)))
 
           // set the ITMP flag here but don't worry about the result
-          helpToSaveService.setITMPFlag(nino).value.onComplete{
+          helpToSaveService.setITMPFlag().value.onComplete{
             case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not set ITMP flag, future failed: ${e.getMessage}")
             case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not set ITMP flag: $e")
             case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Successfully set ITMP flag for user")

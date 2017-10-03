@@ -19,13 +19,7 @@ package hts.pages
 import org.openqa.selenium.WebDriver
 import hts.utils.Configuration
 
-object ConfirmDetailsPage extends WebPage {
-
-  override def expectedUrl: String = s"${Configuration.host}/help-to-save/check-and-confirm-your-details"
-
-  override def expectedPageTitle: String = ""
-
-  override def expectedPageHeader: String = ""
+object ConfirmDetailsPage extends Page {
 
   val url: String = s"${Configuration.host}/help-to-save/check-and-confirm-your-details"
 

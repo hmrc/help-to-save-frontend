@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 import cats.syntax.either._
 import cucumber.api.scala.{EN, ScalaDsl}
 import hts.driver.Driver
-import hts.pages.WebPage
+import hts.pages.Page
 import hts.utils.ScenarioContext
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, WebDriver}
@@ -37,7 +37,7 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
   /*
    * method "on" not currently in use
    */
-  def on(page: WebPage)(implicit driver: WebDriver) = {
+  def on(page: Page)(implicit driver: WebDriver) = {
     val wait = new WebDriverWait(driver, 5)
     val _ = wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("body")))
     assert(page.isCurrentPage, s"Page was not loaded: ${page.currentUrl}")

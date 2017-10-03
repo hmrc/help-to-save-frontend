@@ -20,7 +20,6 @@ Feature: Air-gap tests for testing with NS&I
     When they choose to go ahead with creating an account
     Then they see that the account is created
 
-  @wip
   Scenario: Air-gap 2 - Only mandatory fields (in correct format) are populated
     Given an applicant has the following details:
       | field          | value         |

@@ -25,10 +25,10 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.{Headers, Session}
 import play.api.{Application, Configuration, Play}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext
@@ -46,7 +46,7 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
   implicit lazy val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
   implicit val headerCarrier: HeaderCarrier =
-    HeaderCarrier.fromHeadersAndSession(Headers(), Some(Session(Map("sessionId" -> UUID.randomUUID().toString))))
+    HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
 
   lazy val config: Config = fakeApplication.configuration.underlying
 
@@ -62,6 +62,7 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
 
   val mockMetrics = new Metrics(stub[PlayMetrics]) {
     override def timer(name: String): Timer = new Timer()
+
     override def counter(name: String): Counter = new Counter()
   }
 

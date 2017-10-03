@@ -23,25 +23,25 @@ import com.google.inject.{ImplementedBy, Inject}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, NINO, Result}
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[HelpToSaveServiceImpl])
 trait HelpToSaveService {
 
-  def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
+  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
 
-  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult]
+  def checkEligibility()(implicit hc: HeaderCarrier): Result[EligibilityCheckResult]
 
-  def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
+  def enrolUser()(implicit hc: HeaderCarrier): Result[Unit]
 
-  def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit]
+  def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit]
 
-  def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit]
+  def storeConfirmedEmail(email: Email)(implicit hv: HeaderCarrier): Result[Unit]
 
-  def getConfirmedEmail(nino: NINO)(implicit hv: HeaderCarrier): Result[Option[String]]
+  def getConfirmedEmail()(implicit hv: HeaderCarrier): Result[Option[String]]
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
 
@@ -50,23 +50,23 @@ trait HelpToSaveService {
 @Singleton
 class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends HelpToSaveService with Logging {
 
-  def getUserEnrolmentStatus(nino: NINO)(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
-    helpToSaveConnector.getUserEnrolmentStatus(nino)
+  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
+    helpToSaveConnector.getUserEnrolmentStatus()
 
-  def checkEligibility(nino: String)(implicit hc: HeaderCarrier): Result[EligibilityCheckResult] =
-    helpToSaveConnector.getEligibility(nino)
+  def checkEligibility()(implicit hc: HeaderCarrier): Result[EligibilityCheckResult] =
+    helpToSaveConnector.getEligibility()
 
-  def enrolUser(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
-    helpToSaveConnector.enrolUser(nino)
+  def enrolUser()(implicit hc: HeaderCarrier): Result[Unit] =
+    helpToSaveConnector.enrolUser()
 
-  def setITMPFlag(nino: NINO)(implicit hc: HeaderCarrier): Result[Unit] =
-    helpToSaveConnector.setITMPFlag(nino)
+  def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit] =
+    helpToSaveConnector.setITMPFlag()
 
-  def storeConfirmedEmail(email: Email, nino: NINO)(implicit hv: HeaderCarrier): Result[Unit] =
-    helpToSaveConnector.storeEmail(email, nino)
+  def storeConfirmedEmail(email: Email)(implicit hv: HeaderCarrier): Result[Unit] =
+    helpToSaveConnector.storeEmail(email)
 
-  def getConfirmedEmail(nino: NINO)(implicit hv: HeaderCarrier): Result[Option[String]] =
-    helpToSaveConnector.getEmail(nino)
+  def getConfirmedEmail()(implicit hv: HeaderCarrier): Result[Option[String]] =
+    helpToSaveConnector.getEmail()
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure, SubmissionSuccess]] {

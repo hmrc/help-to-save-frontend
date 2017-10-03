@@ -20,8 +20,6 @@ import cats.Eq
 import cats.instances.boolean._
 import cats.syntax.eq._
 
-import scala.concurrent.Future
-
 case class EligibilityCheckResult(result: Either[IneligibilityReason, EligibilityReason])
 
 object EligibilityCheckResult {

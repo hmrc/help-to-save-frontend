@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEm
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO}
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.Future

@@ -16,14 +16,8 @@
 
 package hts.pages.registrationPages
 
-import hts.pages.WebPage
+import hts.pages.Page
 
-object HowWeCalculateBonusesPage extends WebPage {
-
-  override def expectedUrl: String = ""
-
-  override def expectedPageTitle: String = ""
-
-  override def expectedPageHeader: String = ""
+object HowWeCalculateBonusesPage extends Page {
 
 }

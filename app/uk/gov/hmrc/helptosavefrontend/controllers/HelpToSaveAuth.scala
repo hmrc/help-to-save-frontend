@@ -19,18 +19,15 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.ValidatedNel
 import cats.instances.string._
 import cats.syntax.cartesian._
-import cats.syntax.eq._
 import cats.syntax.either._
+import cats.syntax.eq._
 import cats.syntax.option._
 import org.joda.time.LocalDate
 import play.api.mvc._
-import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.ConfidenceLevel
 import uk.gov.hmrc.auth.core.retrieve.Retrievals.authorisedEnrolments
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
-import uk.gov.hmrc.auth.frontend.Redirects
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{encoded, identityCallbackUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -39,14 +36,10 @@ import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
-class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnector)
-  extends FrontendController with AuthorisedFunctions with Redirects with Logging {
+class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector)
+  extends FrontendController with AuthorisedFunctions with Logging {
 
   override def authConnector: AuthConnector = frontendAuthConnector
-
-  override def config: Configuration = app.configuration
-
-  override def env: Environment = Environment(app.path, app.classloader, app.mode)
 
   private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
 
@@ -128,7 +121,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
     val validation: ValidatedNel[MissingUserInfo, UserInfo] =
       (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| emailValidation)
-        .map{
+        .map {
           case (givenName, surname, jodaDob, email) ⇒
             UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email, Address(itmpAddress))
         }
@@ -140,7 +133,7 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
 
   def handleFailure(redirectOnLoginURL: String): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
-      redirectToLogin(redirectOnLoginURL)
+      toGGLogin(redirectOnLoginURL)
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
       toPersonalIV(s"$identityCallbackUrl?continueURL=${encoded(redirectOnLoginURL)}", ConfidenceLevel.L200)
@@ -150,10 +143,14 @@ class HelpToSaveAuth(app: Application, frontendAuthConnector: FrontendAuthConnec
       InternalServerError("")
   }
 
-  private def redirectToLogin(redirectOnLoginURL: String) = Redirect(ggLoginUrl, Map(
-    "continue" -> Seq(redirectOnLoginURL),
-    "accountType" -> Seq("individual"),
-    "origin" -> Seq(origin)
-  ))
+  private def toGGLogin(redirectOnLoginURL: String) =
+    Redirect(ggLoginUrl, Map(
+      "continue" -> Seq(redirectOnLoginURL),
+      "accountType" -> Seq("individual"),
+      "origin" -> Seq(origin)
+    ))
+
+  private def toPersonalIV(callbackUrl: String, confidenceLevel: ConfidenceLevel): Result = SeeOther(IvUrl)
+
 }
 

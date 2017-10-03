@@ -18,10 +18,10 @@ package hts.steps
 
 import hts.pages.registrationPages.CheckEligibilityPage
 import hts.pages._
-import hts.utils.{Configuration, ScenarioContext}
+import hts.utils.{Configuration, Helpers, ScenarioContext}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 
-class SecuritySteps extends Steps {
+class SecuritySteps extends Steps with Page {
 
   def oneOfRegex(options: Set[String]): String = s"(${options.mkString("|")})"
 
@@ -35,15 +35,15 @@ class SecuritySteps extends Steps {
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
-  Given(s"""^a user has logged in to Government Gateway with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
+  Given(s"""^I have logged in to Government Gateway with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
     AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, level, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
-  Then("""^they are forced into going through IV before being able to proceed with their HtS application$""") { () ⇒
-    Page.getCurrentUrl should include regex "/iv/journey-result|iv%2Fjourney-result"
+  Then("""^I am forced into going through IV before being able to proceed with their HtS application$""") { () ⇒
+    getCurrentUrl should include regex "/iv/journey-result|iv%2Fjourney-result"
   }
 
-  Given("""^a user has NOT logged in to Government Gateway$""") { () ⇒
+  Given("""^I have NOT logged in to Government Gateway$""") { () ⇒
     // Do nothing
   }
 
@@ -56,16 +56,16 @@ class SecuritySteps extends Steps {
     AuthorityWizardPage.authenticateUser(AccessAccountPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
-  When("""^they try to view the user details page$""") { () ⇒
+  When("""^I try to view the user details page$""") { () ⇒
     ConfirmDetailsPage.navigate()
   }
 
-  When("""^they try to view the create-an-account page$""") { () ⇒
+  When("""^I try to view the create-an-account page$""") { () ⇒
     CreateAccountPage.navigate()
   }
 
-  Then("""^they are prompted to log in to Government Gateway$""") { () ⇒
-    Page.getCurrentUrl should include("gg/sign-in")
+  Then("""^I am prompted to log in to Government Gateway$""") { () ⇒
+    getCurrentUrl should include("gg/sign-in")
   }
 
   Given("""^a user has logged in and passed IV$""") { () ⇒
@@ -73,18 +73,24 @@ class SecuritySteps extends Steps {
   }
 
   Then("""^the GG sign in page is visible$"""){ () ⇒
-    driver.getCurrentUrl should include ("gg/sign-in?")
+    getCurrentUrl should include ("gg/sign-in?")
   }
 
   When("""^I call URI (.+) with HTTP method (.+)$"""){ (uri: String, httpMethod: String) ⇒
-    //http.httpMethod(s"${Configuration.host}/help-to-save/uri")
     val path = s"${Configuration.host}/help-to-save/uri"
-    //Page.hitPage(httpMethod, path)
-    Page.navigate(path)
+    navigate(path)
   }
 
   Then("""^I see a response$"""){ () ⇒
-    driver.getCurrentUrl should include ("")
+    getCurrentUrl should include ("")
+  }
+
+  Given("""^I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save$"""){ () ⇒
+    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateIneligibleNINO())
+  }
+
+  Then("""^I still see confirmation that I am NOT eligible$"""){ () ⇒
+    Helpers.isTextOnPage("You're not eligible for Help to Save") shouldBe true
   }
 
 }

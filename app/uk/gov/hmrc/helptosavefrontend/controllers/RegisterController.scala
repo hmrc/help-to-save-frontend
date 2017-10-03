@@ -20,7 +20,6 @@ import javax.inject.Singleton
 
 import cats.instances.future._
 import com.google.inject.Inject
-import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
@@ -30,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -39,10 +38,9 @@ import scala.util.{Failure, Success}
 class RegisterController @Inject() (val messagesApi:           MessagesApi,
                                     val helpToSaveService:     HelpToSaveService,
                                     val sessionCacheConnector: SessionCacheConnector,
-                                    val app:                   Application,
                                     frontendAuthConnector:     FrontendAuthConnector
 )(implicit ec: ExecutionContext, crypto: Crypto)
-  extends HelpToSaveAuth(app, frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+  extends HelpToSaveAuth(frontendAuthConnector) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
   import RegisterController.NSIUserInfoOps
 
@@ -61,7 +59,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
         case (nsiUserInfo, _) ⇒
           val result = for {
             _ ← sessionCacheConnector.put(HTSSession(Some(nsiUserInfo), Some(confirmedEmail)))
-            _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail, nino)
+            _ ← helpToSaveService.storeConfirmedEmail(confirmedEmail)
           } yield ()
 
           result.fold[Result](
@@ -99,7 +97,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                 error ⇒ InternalServerError(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error)),
                 _ ⇒ {
                   // Account creation is successful, start the process to enrol the user but don't worry about the result
-                  helpToSaveService.enrolUser(nino).value.onComplete{
+                  helpToSaveService.enrolUser().value.onComplete{
                     case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user, future failed: $e")
                     case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not start process to enrol user: $e")
                     case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Process started to enrol user")

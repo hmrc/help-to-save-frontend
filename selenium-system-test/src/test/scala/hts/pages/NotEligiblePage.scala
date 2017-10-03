@@ -19,7 +19,7 @@ package hts.pages
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object NotEligiblePage extends WebPage {
+object NotEligiblePage extends Page {
 
   override def expectedUrl: String = s"${Configuration.host}/help-to-save/not-eligible"
 
