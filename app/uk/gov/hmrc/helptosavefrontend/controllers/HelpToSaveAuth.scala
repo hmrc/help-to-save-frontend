@@ -33,7 +33,8 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
@@ -67,8 +68,8 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
               val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
               userDetails.fold(
-                m ⇒ logger.warn(s"For NINO [$nino]: Could not find user info, missing details [${m.missingInfo.mkString(", ")}] $timeString"),
-                _ ⇒ logger.info(s"For NINO [$nino]: Successfully retrieved NINO and usr details $timeString")
+                m ⇒ logger.warn(s"Could not find user info, missing details [${m.missingInfo.mkString(", ")}] $timeString", nino),
+                _ ⇒ logger.info(s"Successfully retrieved NINO and usr details $timeString", nino)
               )
 
               action(request)(HtsContext(Some(nino), Some(userDetails.map(NSIUserInfo.apply)), isAuthorised = true))
@@ -162,5 +163,6 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       "accountType" -> Seq("individual"),
       "origin" -> Seq(origin)
     ))
+
 }
 

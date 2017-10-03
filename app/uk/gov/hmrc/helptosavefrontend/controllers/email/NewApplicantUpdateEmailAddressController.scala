@@ -36,7 +36,8 @@ import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -55,7 +56,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   implicit val userType: UserType = UserType.NewApplicant
 
   def getUpdateYourEmailAddress: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { _ ⇒
+    checkIfAlreadyEnrolled { nino ⇒
       checkSession {
         SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
       } {
@@ -64,7 +65,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         )(userInfo ⇒ {
             Ok(views.html.email.update_email_address(userInfo.contactDetails.email, UpdateEmailForm.verifyEmailForm))
           })
-      }
+      }(nino)
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
@@ -74,7 +75,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
       } { _ ⇒
         sendEmailVerificationRequest(nino)
-      }
+      }(nino)
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 

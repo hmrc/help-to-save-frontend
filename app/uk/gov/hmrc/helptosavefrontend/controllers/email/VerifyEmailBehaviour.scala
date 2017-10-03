@@ -25,6 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BadContinueURL}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
 
@@ -70,16 +71,16 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
   }
 
   def handleEmailVerified(emailVerificationParams: String,
-                          ifValid:                 EmailVerificationParams ⇒ Future[Result]
-  )(implicit request: Request[AnyContent],
-    htsContext: HtsContext,
-    crypto:     Crypto,
-    messages:   Messages): Future[Result] =
+                          ifValid:                 EmailVerificationParams ⇒ Future[Result])(implicit request: Request[AnyContent],
+                                                                                             htsContext: HtsContext,
+                                                                                             crypto:     Crypto,
+                                                                                             messages:   Messages): Future[Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒
         logger.warn(s"Could not decode email verification parameters: ${e.getMessage}", e)
-        auditor.sendEvent(SuspiciousActivity(htsContext.nino.getOrElse("UNKNOWN_NINO"), "malformed_redirect"))
+        val nino = htsContext.nino.getOrElse("UNKNOWN_NINO")
+        auditor.sendEvent(SuspiciousActivity(nino, "malformed_redirect"), nino)
         Ok(views.html.email.email_verify_error(BadContinueURL))
 
       case Success(params) ⇒

@@ -24,6 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -71,10 +72,10 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure, SubmissionSuccess]] {
       case success: SubmissionSuccess ⇒
-        logger.info(s"Successfully created an account for ${userInfo.nino}")
+        logger.info(s"Successfully created an account", userInfo.nino)
         Right(success)
       case failure: SubmissionFailure ⇒
-        logger.error(s"Could not create an account for ${userInfo.nino} due to ${failure.errorDetail}")
+        logger.error(s"Could not create an account due to ${failure.errorDetail}", userInfo.nino)
         Left(failure)
     })
 }

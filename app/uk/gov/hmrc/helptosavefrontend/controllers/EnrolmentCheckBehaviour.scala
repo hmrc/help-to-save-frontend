@@ -22,6 +22,7 @@ import play.api.mvc.Result
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -50,9 +51,9 @@ trait EnrolmentCheckBehaviour {
         // start the process to set the itmp flag here without worrying about the result
         if (!itmpHtSFlag) {
           helpToSaveService.setITMPFlag().value.onComplete{
-            case Failure(e)        ⇒ logger.warn(s"For NINO [$nino]: Could not start process to set ITMP flag, future failed: $e")
-            case Success(Left(e))  ⇒ logger.warn(s"For NINO [$nino]: Could not start process to set ITMP flag: $e")
-            case Success(Right(_)) ⇒ logger.info(s"For NINO [$nino]: Process started to set ITMP flag")
+            case Failure(e)        ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
+            case Success(Left(e))  ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
+            case Success(Right(_)) ⇒ logger.info(s"Process started to set ITMP flag", nino)
           }
         }
 
@@ -72,7 +73,7 @@ trait EnrolmentCheckBehaviour {
       InternalServerError
 
     case e @ EnrolmentServiceError(nino, message) ⇒
-      logger.warn(s"For NINO [$nino]: Error while trying to check if user was already enrolled to HtS: $message")
+      logger.warn(s"Error while trying to check if user was already enrolled to HtS: $message", nino)
       handleEnrolmentServiceError(e)
 
   }
