@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import cats.Eq
 import cats.instances.boolean._
+import cats.instances.string._
 import cats.syntax.eq._
 
 case class EligibilityCheckResult(result: Either[IneligibilityReason, EligibilityReason])
@@ -60,12 +61,9 @@ object EligibilityReason {
       "Entitled to WTC and in receipt of positive WTC/CTC Tax Credit and in receipt of UC and income sufficient"
   }
 
-  def fromInt(i: Int): Option[EligibilityReason] = i match {
-    case 6 ⇒ Some(UC) // scalastyle:ignore magic.number
-    case 7 ⇒ Some(WTC) // scalastyle:ignore magic.number
-    case 8 ⇒ Some(WTCWithUC) // scalastyle:ignore magic.number
-    case _ ⇒ None
-  }
+  val reasons: Set[EligibilityReason] = Set[EligibilityReason](UC, WTC, WTCWithUC)
+
+  def fromString(s: String): Option[EligibilityReason] = reasons.find(_.legibleString === s)
 }
 
 object IneligibilityReason {
@@ -111,14 +109,15 @@ object IneligibilityReason {
     }
   }
 
-  def fromInt(i: Int): Option[IneligibilityReason] = i match {
-    case 1 ⇒ Some(AccountAlreadyOpened)
-    case 2 ⇒ Some(NotEntitledToWTC(receivingUC = false))
-    case 3 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = false))
-    case 4 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = true)) // scalastyle:ignore magic.number
-    case 5 ⇒ Some(NotEntitledToWTC(receivingUC = true)) // scalastyle:ignore magic.number
-    case _ ⇒ None
-  }
+  val reasons: Set[IneligibilityReason] = Set[IneligibilityReason](
+    AccountAlreadyOpened,
+    NotEntitledToWTC(true),
+    NotEntitledToWTC(false),
+    EntitledToWTCButNoWTC(true),
+    EntitledToWTCButNoWTC(false)
+  )
+
+  def fromString(s: String): Option[IneligibilityReason] = reasons.find(_.legibleString === s)
 
 }
 
