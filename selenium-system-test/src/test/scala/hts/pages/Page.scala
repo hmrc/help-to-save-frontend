@@ -39,7 +39,7 @@ trait Page extends Matchers
 
   def checkHeader(heading: String, text: String)(implicit driver: WebDriver): Boolean =
     find(cssSelector(heading)).exists(_.text === text)
-
+currentUrl
   def getCurrentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
 
   def getPageContent(implicit driver: WebDriver): String = driver.getPageSource

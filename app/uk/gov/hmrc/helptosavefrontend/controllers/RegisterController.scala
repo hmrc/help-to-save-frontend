@@ -69,7 +69,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
 
           result.fold[Result](
             { e ⇒
-              logger.warn(s"For NINO [$nino]: Could not write confirmed email: $e", nino)
+              logger.warn(s"Could not write confirmed email: $e", nino)
               InternalServerError
             }, { _ ⇒
               SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
