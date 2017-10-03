@@ -2,8 +2,9 @@ Feature: more ZAP tests to hit the rest of the URLS
 
   @zap
 Scenario Outline: Hit URIs for ZAP testing
-When I call URI <URI> with HTTP method <HTTP method>
-Then I see a response
+  Given a user has logged in and passed IV
+  When I call URI <URI> with HTTP method <HTTP method>
+  Then I see a response
 
 Examples:
 | URI                                | HTTP method |
