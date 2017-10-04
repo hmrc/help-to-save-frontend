@@ -27,7 +27,6 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -46,8 +45,8 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
   implicit val hc: HeaderCarrier = HeaderCarrier(authorization = Some(Authorization("auth")))
 
   def mockCreateAccount[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit = {
-    (mockHTTPProxy.post(_: String, _: I, _: Map[String, String])(_: Writes[I], _: HeaderCarrier))
-      .expects(url, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *)
+    (mockHTTPProxy.post(_: String, _: I, _: Map[String, String])(_: Writes[I], _: HeaderCarrier, _: ExecutionContext))
+      .expects(url, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *, *)
       .returning(
         result.fold(
           e ⇒ Future.failed(new Exception(e)),
