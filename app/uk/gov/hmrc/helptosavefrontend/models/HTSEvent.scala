@@ -30,6 +30,7 @@ object HTSEvent {
   def apply(auditType: String,
             detail:    Map[String, String])(implicit hc: HeaderCarrier): DataEvent =
     DataEvent(AppName.appName, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
+
 }
 
 case class AccountCreated(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) extends HTSEvent {

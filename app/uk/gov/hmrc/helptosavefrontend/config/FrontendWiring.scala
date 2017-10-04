@@ -28,7 +28,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 import uk.gov.hmrc.play.http.ws._
-import uk.gov.hmrc.helptosavefrontend.util.HeaderCarrierOps._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -118,7 +117,7 @@ class WSHttpProxy
               body:    A,
               headers: Map[String, String] = Map.empty[String, String]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    super.POST(url, body)(w, httpReads, hc.withExtraHeaders(headers), ec)
+    super.POST(url, body)(w, httpReads, hc.withExtraHeaders(headers.toSeq: _*), ec)
 
   /**
    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
@@ -128,6 +127,6 @@ class WSHttpProxy
              body:    A,
              headers: Map[String, String] = Map.empty[String, String]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    super.PUT(url, body)(w, httpReads, hc.withExtraHeaders(headers), ec)
+    super.PUT(url, body)(w, httpReads, hc.withExtraHeaders(headers.toSeq: _*), ec)
 
 }
