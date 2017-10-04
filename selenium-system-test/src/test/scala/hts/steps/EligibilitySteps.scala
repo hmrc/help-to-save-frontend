@@ -31,7 +31,6 @@ class EligibilitySteps extends Steps {
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () ⇒
-    //on(EligiblePage)
     EligiblePage.pageInfoIsCorrect
   }
 
@@ -44,7 +43,6 @@ class EligibilitySteps extends Steps {
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒
-    //on(NotEligiblePage)
     NotEligiblePage.pageInfoIsCorrect
 
   }
