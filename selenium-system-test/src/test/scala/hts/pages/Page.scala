@@ -47,7 +47,7 @@ trait Page extends Matchers
 
   def getPageContent(implicit driver: WebDriver): String = driver.getPageSource
 
-  def url(uri: String): String = s"${Configuration.host}/help-to-save/$uri"
+  private def url(uri: String): String = s"${Configuration.host}/help-to-save/$uri"
 
   def navigate(uri: String)(implicit driver: WebDriver): Unit =
     go to url(uri)
@@ -56,9 +56,9 @@ trait Page extends Matchers
  * CONFIRM CURRENT PAGE INFO
  */
 
-  def expectedUrl: String = ""
-  def expectedPageTitle: String = ""
-  def expectedPageHeader: String = ""
+  val expectedUrl: String = ""
+  val expectedPageTitle: String = ""
+  val expectedPageHeader: String = ""
 
   def pageHeading(implicit driver: WebDriver): String = {
     val heading = driver.findElement(By.tagName("h1")).getText

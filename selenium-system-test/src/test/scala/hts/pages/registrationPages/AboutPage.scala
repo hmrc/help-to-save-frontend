@@ -22,11 +22,11 @@ import org.openqa.selenium.WebDriver
 
 object AboutPage extends Page {
 
-  override def expectedUrl: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
+  override val expectedUrl: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
 
-  override def expectedPageTitle: String = "About Help to Save"
+  override val expectedPageTitle: String = "About Help to Save"
 
-  override def expectedPageHeader: String = "Apply for Help to Save"
+  override val expectedPageHeader: String = "Apply for Help to Save"
 
   val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
 

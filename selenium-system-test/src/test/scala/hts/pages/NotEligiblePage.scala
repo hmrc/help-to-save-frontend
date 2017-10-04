@@ -21,11 +21,11 @@ import org.openqa.selenium.WebDriver
 
 object NotEligiblePage extends Page {
 
-  override def expectedUrl: String = s"${Configuration.host}/help-to-save/not-eligible"
+  override val expectedUrl: String = s"${Configuration.host}/help-to-save/not-eligible"
 
-  override def expectedPageTitle: String = "Help to Save"
+  override val expectedPageTitle: String = "Help to Save"
 
-  override def expectedPageHeader: String = "You're not eligible for Help to Save"
+  override val expectedPageHeader: String = "You're not eligible for Help to Save"
 
   val url: String = s"${Configuration.host}/help-to-save/not-eligible"
 
