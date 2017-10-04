@@ -17,5 +17,6 @@
 package hts.pages
 
 object NSIManageAccountPage extends Page {
+
   val url: String = "https://www.nsandi.com/"
 }
