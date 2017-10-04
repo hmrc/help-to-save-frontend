@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{Eligib
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off magic.number
 class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyChecks {
@@ -42,8 +42,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
   lazy val connector: HelpToSaveConnector = new HelpToSaveConnectorImpl(mockHttp)
 
   def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
-    (mockHttp.get(_: String)(_: HeaderCarrier))
-      .expects(url, *)
+    (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(url, *, *)
       .returning(result.fold(
         Future.failed[HttpResponse](new Exception("")))(Future.successful))
 

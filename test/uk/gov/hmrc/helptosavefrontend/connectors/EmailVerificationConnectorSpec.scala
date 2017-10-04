@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with ServicesConfig with GeneratorDrivenPropertyChecks {
 
@@ -66,27 +66,27 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
-    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier))
-      .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *)
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
+      .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
 
   def mockPostFailure[A](expectedBody: A): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verification-requests"
-    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier))
-      .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *)
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
+      .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *, *)
       .returning(Future.failed(new Exception("Oh no!")))
   }
 
   def mockGet(returnedStatus: Int, email: String, returnedData: Option[JsValue]): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
-    (mockHttp.get(_: String)(_: HeaderCarrier)).expects(verifyEmailURL, *)
+    (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext)).expects(verifyEmailURL, *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
 
   def mockGetFailure(): Unit = {
     val verifyEmailURL = s"$emailVerifyBaseURL/email-verification/verified-email-addresses/$email"
-    (mockHttp.get(_: String)(_: HeaderCarrier)).expects(verifyEmailURL, *)
+    (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext)).expects(verifyEmailURL, *, *)
       .returning(Future.failed(new Exception("Uh oh!")))
   }
 
