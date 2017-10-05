@@ -69,7 +69,7 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   When("""^the user clicks on the check eligibility button$""") { () ⇒
-    EligibilityQuestionPage.clickCheckEligibility()
+    YouDoNotHaveAnAccountPage.clickCheckEligibility()
   }
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
@@ -81,8 +81,9 @@ class CreateAccountSteps extends Steps with Page {
     getCurrentUrl should include(NSIManageAccountPage.url)
   }
 
-  Then("""^they will be on the eligibility question page$""") { () ⇒
-    EligibilityQuestionPage.pageInfoIsCorrect
+  Then("""^they will be on a page which says you do not have an account$""") { () ⇒
+    //    TODO: Uncomment when the placeholder page is replaced with the final page
+    //    YouDoNotHaveAnAccountPage.pageInfoIsCorrectCorrect
   }
 
   Then("""^they will be on the you're eligible page$""") { () ⇒
