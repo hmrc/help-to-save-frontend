@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.mvc.Result
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContext}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -32,21 +32,20 @@ import scala.util.{Failure, Success}
 trait EnrolmentCheckBehaviour {
   this: FrontendController with Logging ⇒
 
-  import EnrolmentCheckBehaviour._
-
   val helpToSaveService: HelpToSaveService
 
-  def checkIfAlreadyEnrolled(ifNotEnrolled:               NINO ⇒ Future[Result],
-                             handleEnrolmentServiceError: EnrolmentServiceError ⇒ Future[Result] = _ ⇒ InternalServerError
-  )(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
-    val enrolled: EitherT[Future, EnrolmentCheckError, (String, EnrolmentStatus)] = for {
-      nino ← EitherT.fromOption[Future](htsContext.nino, NoNINO)
-      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus().leftMap[EnrolmentCheckError](e ⇒ EnrolmentServiceError(nino, e))
-    } yield (nino, enrolmentStatus)
+  def checkIfAlreadyEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
+                             handleEnrolmentServiceError: String ⇒ Future[Result] = _ ⇒ InternalServerError
+  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Future[Result] = {
+    val nino = htsContext.nino
 
-    enrolled.fold[Future[Result]](initialError ⇒
-      handleError(initialError, handleEnrolmentServiceError), {
-      case (nino, EnrolmentStatus.Enrolled(itmpHtSFlag)) ⇒
+    val enrolled: EitherT[Future, String, EnrolmentStatus] = helpToSaveService.getUserEnrolmentStatus()
+
+    enrolled.fold[Future[Result]]({ error ⇒
+      logger.warn(s"Error while trying to check if user was already enrolled to HtS: $error", nino)
+      handleEnrolmentServiceError(error)
+    }, {
+      case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
         // if the user is enrolled but the itmp flag is not set then just
         // start the process to set the itmp flag here without worrying about the result
         if (!itmpHtSFlag) {
@@ -59,33 +58,10 @@ trait EnrolmentCheckBehaviour {
 
         SeeOther(routes.NSIController.goToNSI().url)
 
-      case (nino, EnrolmentStatus.NotEnrolled) ⇒
-        ifNotEnrolled(nino)
+      case EnrolmentStatus.NotEnrolled ⇒
+        ifNotEnrolled()
     }
     ).flatMap(identity)
   }
-
-  private def handleError(enrolmentCheckError:         EnrolmentCheckError,
-                          handleEnrolmentServiceError: EnrolmentServiceError ⇒ Future[Result]
-  ): Future[Result] = enrolmentCheckError match {
-    case NoNINO ⇒
-      logger.warn("Could not get NINO")
-      InternalServerError
-
-    case e @ EnrolmentServiceError(nino, message) ⇒
-      logger.warn(s"Error while trying to check if user was already enrolled to HtS: $message", nino)
-      handleEnrolmentServiceError(e)
-
-  }
-
-}
-
-object EnrolmentCheckBehaviour {
-
-  sealed trait EnrolmentCheckError
-
-  case object NoNINO extends EnrolmentCheckError
-
-  case class EnrolmentServiceError(nino: NINO, message: String) extends EnrolmentCheckError
 
 }

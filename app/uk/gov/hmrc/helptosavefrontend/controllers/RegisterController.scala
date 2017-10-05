@@ -50,16 +50,17 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
   import RegisterController.NSIUserInfoOps
 
   def getConfirmDetailsPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { nino ⇒
+    checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, _) ⇒
           Ok(views.html.register.confirm_details(nsiUserInfo))
-      }(nino)
+      }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def confirmEmail(confirmedEmail: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { nino ⇒
+    val nino = htsContext.nino
+    checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, _) ⇒
           val result = for {
@@ -75,23 +76,24 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
               SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
             }
           )
-      }(nino)
+      }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { nino ⇒
+    checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
         case (_, confirmedEmail) ⇒
           confirmedEmail.fold[Future[Result]](
             SeeOther(routes.RegisterController.getConfirmDetailsPage().url))(
               _ ⇒ Ok(views.html.register.create_account_help_to_save()))
-      }(nino)
+      }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { nino ⇒
+    val nino = htsContext.nino
+    checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, confirmedEmail) ⇒
           confirmedEmail.fold[Future[Result]](
@@ -114,7 +116,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                 }
               )
             }
-      }(nino)
+      }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
@@ -124,7 +126,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
    * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
    * given action if the the session data indicates that they are eligible
    */
-  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result])(nino: NINO)(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] =
+  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Future[Result] =
     checkSession {
       // no session data => user has not gone through the journey this session => take them to eligibility checks
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
@@ -137,7 +139,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
             // user has gone through journey already this sessions and were found to be eligible
             ifEligible(userInfo, session.confirmedEmail)
           )
-    }(nino)
+    }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, error: ${failure.errorMessage}}"

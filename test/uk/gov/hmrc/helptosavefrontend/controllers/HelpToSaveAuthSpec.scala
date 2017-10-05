@@ -43,11 +43,8 @@ class HelpToSaveAuthSpec extends AuthSupport {
 
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     htsContext.userDetails match {
-      case Some(info) ⇒ info match {
-        case Left(missingUserInfo) ⇒ Future.successful(InternalServerError(""))
-        case Right(userInfo)       ⇒ Future.successful(Ok(Json.toJson(userInfo)))
-      }
-      case None ⇒ Future.successful(Ok(""))
+      case Left(missingUserInfo) ⇒ Future.successful(InternalServerError(""))
+      case Right(userInfo)       ⇒ Future.successful(Ok(Json.toJson(userInfo)))
     }
   }(FrontendAppConfig.checkEligibilityUrl)
 
@@ -77,7 +74,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
     }
 
     "handle when some user info is missing" in {
-      mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
+      mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrivalsMissingUserInfo)
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR

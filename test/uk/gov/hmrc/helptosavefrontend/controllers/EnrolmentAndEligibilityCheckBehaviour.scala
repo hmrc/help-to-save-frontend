@@ -26,7 +26,6 @@ import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -54,10 +53,13 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .expects(*)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockWriteITMPFlag()(result: Either[String, Unit]): Unit =
+  def mockWriteITMPFlag(result: Option[Either[String, Unit]]): Unit =
     (mockHelpToSaveService.setITMPFlag()(_: HeaderCarrier))
       .expects(*)
-      .returning(EitherT.fromEither[Future](result))
+      .returning(result.fold(EitherT.pure[Future, String, Unit](Future.failed(new Exception)))(r ⇒ EitherT.fromEither[Future](r)))
+
+  def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
+    mockWriteITMPFlag(Some(result))
 
   def commonEnrolmentAndSessionBehaviour(getResult:               () ⇒ Future[Result], // scalastyle:ignore method.length
                                          testRedirectOnNoSession: Boolean             = true,
@@ -79,7 +81,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-          mockWriteITMPFlag()(Right(()))
+          mockWriteITMPFlag(Right(()))
         }
 
         val result = getResult()
@@ -89,15 +91,24 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     "redirect to NS&I if the user is already enrolled even if there is an " +
       "setting the ITMP flag" in {
-        inSequence {
+          def test(mockActions: ⇒ Unit): Unit = {
+            mockActions
+            val result = getResult()
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+          }
+
+        test(inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-          mockWriteITMPFlag()(Left(""))
-        }
+          mockWriteITMPFlag(Left(""))
+        })
 
-        val result = getResult()
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+        test(inSequence {
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+          mockWriteITMPFlag(None)
+        })
       }
 
     if (testRedirectOnNoSession) {
@@ -124,6 +135,13 @@ trait EnrolmentAndEligibilityCheckBehaviour {
           }
           status(getResult()) shouldBe INTERNAL_SERVER_ERROR
         }
+      }
+
+      "there is no NINO returned by auth" in {
+        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
+
+        println("Hello!!\n")
+        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
       }
 
       "there is an error getting the session data" in {

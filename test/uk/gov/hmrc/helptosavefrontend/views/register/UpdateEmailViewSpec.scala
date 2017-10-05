@@ -24,7 +24,6 @@ import uk.gov.hmrc.helptosavefrontend.views.html.email.update_email_address
 
 class UpdateEmailViewSpec extends ViewBehavioursSpec {
 
-  val mockHtsContext = mock[HtsContext]
   lazy val view = update_email_address("email@gmail.com", UpdateEmailForm.verifyEmailForm)(mockHtsContext, request, messages, UserType.NewApplicant)
   lazy val document = Jsoup.parse(view.toString())
 
