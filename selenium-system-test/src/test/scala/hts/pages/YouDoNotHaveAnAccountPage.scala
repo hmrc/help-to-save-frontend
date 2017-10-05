@@ -19,7 +19,7 @@ package hts.pages
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object EligibilityQuestionPage extends Page {
+object YouDoNotHaveAnAccountPage extends Page {
 
   override val expectedUrl: String = s"${Configuration.host}/help-to-save/access-account"
 
