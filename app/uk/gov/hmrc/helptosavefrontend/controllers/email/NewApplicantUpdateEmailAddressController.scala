@@ -36,8 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO, toFuture, Result ⇒ EitherTResult}
-import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -56,7 +55,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   implicit val userType: UserType = UserType.NewApplicant
 
   def getUpdateYourEmailAddress: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { nino ⇒
+    checkIfAlreadyEnrolled { () ⇒
       checkSession {
         SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
       } {
@@ -65,17 +64,17 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         )(userInfo ⇒ {
             Ok(views.html.email.update_email_address(userInfo.contactDetails.email, UpdateEmailForm.verifyEmailForm))
           })
-      }(nino)
+      }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { nino ⇒
+    checkIfAlreadyEnrolled { () ⇒
       checkSession {
         SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
       } { _ ⇒
-        sendEmailVerificationRequest(nino)
-      }(nino)
+        sendEmailVerificationRequest()
+      }
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
@@ -104,7 +103,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   /** Return `None` if user is ineligible */
-  private def getEligibleUserInfo(session: Option[HTSSession])(implicit htsContext: HtsContext): Either[String, Option[NSIUserInfo]] = session match {
+  private def getEligibleUserInfo(session: Option[HTSSession])(implicit htsContext: HtsContextWithNINO): Either[String, Option[NSIUserInfo]] = session match {
 
     case Some(s) ⇒
       s.eligibilityCheckResult.fold[Either[String, Option[NSIUserInfo]]](
@@ -113,22 +112,17 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
       ) { userInfo ⇒ Right(Some(userInfo)) }
 
     case None ⇒
-      htsContext.userDetails
-        .fold[Either[String, Option[NSIUserInfo]]](
-          Left("No user info for user found")
-        ) {
-            _.fold[Either[String, Option[NSIUserInfo]]](
-              missingInfos ⇒ Left(s"Missing user info: ${missingInfos.missingInfo}"),
-              nsiUserInfo ⇒ Right(Some(nsiUserInfo))
-            )
-          }
+      htsContext.userDetails.fold[Either[String, Option[NSIUserInfo]]](
+        missingInfos ⇒ Left(s"Missing user info: ${missingInfos.missingInfo}"),
+        nsiUserInfo ⇒ Right(Some(nsiUserInfo))
+      )
   }
 
   /** Return `None` if user is ineligible */
   private def updateSession(session: Option[HTSSession],
                             params:  EmailVerificationParams)(
       implicit
-      htsContext: HtsContext,
+      htsContext: HtsContextWithNINO,
       hc:         HeaderCarrier): EitherT[Future, String, Option[NSIUserInfo]] = {
     EitherT.fromEither[Future](getEligibleUserInfo(session)).flatMap { maybeInfo ⇒
       val updatedInfo: Option[EitherT[Future, String, NSIUserInfo]] = maybeInfo.map{ info ⇒

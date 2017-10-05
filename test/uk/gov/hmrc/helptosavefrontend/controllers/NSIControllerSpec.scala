@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.controllers
 
-trait HtsContext {
-  val isAuthorised: Boolean
-}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 
-case class HtsContextWithNINO(nino: String, userDetails: Either[MissingUserInfos, NSIUserInfo], isAuthorised: Boolean) extends HtsContext
+class NSIControllerSpec extends TestSupport {
 
-object HtsContext {
+  val controller = new NSIController()
+  "The NSIController" must {
 
-  def apply(authorised: Boolean): HtsContext = new HtsContext { val isAuthorised: Boolean = authorised }
+    "redirect to NS&I" in {
+      val result = controller.goToNSI(FakeRequest())
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("https://www.nsandi.com/")
+    }
 
+  }
 }

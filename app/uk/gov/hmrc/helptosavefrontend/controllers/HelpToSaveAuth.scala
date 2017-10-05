@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, toJavaDate}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
@@ -46,7 +46,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
   private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
 
-  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContext ⇒ Future[Result])(redirectOnLoginURL: String): Action[AnyContent] =
+  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContextWithNINO ⇒ Future[Result])(redirectOnLoginURL: String): Action[AnyContent] =
     Action.async { implicit request ⇒
       val timer = metrics.authTimer.time()
 
@@ -72,7 +72,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
                 _ ⇒ logger.info(s"Successfully retrieved NINO and usr details $timeString", nino)
               )
 
-              action(request)(HtsContext(Some(nino), Some(userDetails.map(NSIUserInfo.apply)), isAuthorised = true))
+              action(request)(HtsContextWithNINO(nino, userDetails.map(NSIUserInfo.apply), isAuthorised = true))
             })
 
         }.recover {
@@ -83,7 +83,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
   def authorisedForHts(action: HtsAction)(redirectOnLoginURL: String): Action[AnyContent] = {
     Action.async { implicit request ⇒
       authorised(AuthProvider) {
-        action(request)(HtsContext(isAuthorised = true))
+        action(request)(HtsContext(authorised = true))
       }.recover {
         handleFailure(redirectOnLoginURL)
       }
@@ -93,7 +93,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
   def authorisedForHtsWithCL200(action: HtsAction)(redirectOnLoginURL: String): Action[AnyContent] = {
     Action.async { implicit request ⇒
       authorised(AuthWithCL200) {
-        action(request)(HtsContext(isAuthorised = true))
+        action(request)(HtsContext(authorised = true))
       }.recover {
         handleFailure(redirectOnLoginURL)
       }
@@ -103,10 +103,10 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
   def unprotected(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request ⇒
       authorised() {
-        action(request)(HtsContext(isAuthorised = true))
+        action(request)(HtsContext(authorised = true))
       }.recoverWith {
         case _ ⇒
-          action(request)(HtsContext(isAuthorised = false))
+          action(request)(HtsContext(authorised = false))
       }
     }
   }
@@ -136,8 +136,8 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
     val validation: ValidatedNel[MissingUserInfo, UserInfo] =
       (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| emailValidation)
         .map {
-          case (givenName, surname, jodaDob, email) ⇒
-            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email, Address(itmpAddress))
+          case (givenName, surname, jodaDob, emailAddress) ⇒
+            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), emailAddress, Address(itmpAddress))
         }
 
     validation

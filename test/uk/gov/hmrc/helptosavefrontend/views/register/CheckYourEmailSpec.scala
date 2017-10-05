@@ -23,7 +23,6 @@ import uk.gov.hmrc.helptosavefrontend.views.html.email.check_your_email
 
 class CheckYourEmailSpec extends ViewBehavioursSpec {
 
-  val mockHtsContext = mock[HtsContext]
   lazy val view = check_your_email("")(mockHtsContext, request, messages, UserType.NewApplicant)
   lazy val document = Jsoup.parse(view.toString())
 

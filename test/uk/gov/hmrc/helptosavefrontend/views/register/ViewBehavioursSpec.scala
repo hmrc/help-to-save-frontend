@@ -20,6 +20,7 @@ import org.jsoup.nodes.Document
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 class ViewBehavioursSpec extends TestSupport {
 
@@ -27,6 +28,10 @@ class ViewBehavioursSpec extends TestSupport {
   lazy val request = FakeRequest()
   def messagesApi = injector.instanceOf[MessagesApi]
   lazy val messages = messagesApi.preferred(request)
+
+  val mockHtsContext = new HtsContext {
+    val isAuthorised: Boolean = true
+  }
 
   def assertEqualsMessage(doc: Document, cssSelector: String, expectedMessageKey: String) = {
     val elements = doc.select(cssSelector)

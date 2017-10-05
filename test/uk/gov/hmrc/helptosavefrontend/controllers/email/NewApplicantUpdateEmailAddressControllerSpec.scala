@@ -298,7 +298,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "the user has missing info and they do not have a session" in {
         test(inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrivalsMissingUserInfo)
           mockSessionCacheConnectorGet(Right(None))
         },
              validNSIUserInfo.nino,

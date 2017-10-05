@@ -23,7 +23,6 @@ import uk.gov.hmrc.helptosavefrontend.views.html.email.email_verify_error
 
 class EmailVerifyErrorSpec extends ViewBehavioursSpec {
 
-  val mockHtsContext = mock[HtsContext]
   def view(messageKey: VerifyEmailError) = email_verify_error(messageKey)(mockHtsContext, request, messages)
   def document(messageKey: VerifyEmailError) = Jsoup.parse(view(messageKey).toString())
 
