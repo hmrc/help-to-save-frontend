@@ -22,10 +22,9 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
-import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BadContinueURL}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
-import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
 
@@ -40,21 +39,21 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
 
   val auditor: HTSAuditor
 
-  def sendEmailVerificationRequest(nino: NINO)(implicit request: Request[AnyContent],
-                                               htsContext: HtsContext,
-                                               crypto:     Crypto,
-                                               messages:   Messages): Future[Result] = {
+  def sendEmailVerificationRequest()(implicit request: Request[AnyContent],
+                                     htsContext: HtsContextWithNINO,
+                                     crypto:     Crypto,
+                                     messages:   Messages): Future[Result] = {
     UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
       formWithErrors ⇒ {
         Future.successful(BadRequest(views.html.email.update_email_address("errors", formWithErrors)))
       },
       (details: UpdateEmail) ⇒ {
-        emailVerificationConnector.verifyEmail(nino, details.email).map {
+        emailVerificationConnector.verifyEmail(htsContext.nino, details.email).map {
           case Right(_) ⇒
             Ok(views.html.email.check_your_email(details.email))
 
           case Left(AlreadyVerified) ⇒
-            val encodedParams = EmailVerificationParams(nino, details.email).encode()
+            val encodedParams = EmailVerificationParams(htsContext.nino, details.email).encode()
 
             val url = userType.fold(
               routes.NewApplicantUpdateEmailAddressController.emailVerified(encodedParams).url,
@@ -72,14 +71,14 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
 
   def handleEmailVerified(emailVerificationParams: String,
                           ifValid:                 EmailVerificationParams ⇒ Future[Result])(implicit request: Request[AnyContent],
-                                                                                             htsContext: HtsContext,
+                                                                                             htsContext: HtsContextWithNINO,
                                                                                              crypto:     Crypto,
                                                                                              messages:   Messages): Future[Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒
         logger.warn(s"Could not decode email verification parameters: ${e.getMessage}", e)
-        val nino = htsContext.nino.getOrElse("UNKNOWN_NINO")
+        val nino = htsContext.nino
         auditor.sendEvent(SuspiciousActivity(nino, "malformed_redirect"), nino)
         Ok(views.html.email.email_verify_error(BadContinueURL))
 

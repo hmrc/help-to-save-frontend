@@ -18,7 +18,7 @@ package hts.steps
 
 import hts.pages.registrationPages.CheckEligibilityPage
 import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage}
-import hts.utils.ScenarioContext
+import hts.utils.{Configuration, ScenarioContext}
 
 class EligibilitySteps extends Steps {
 
@@ -31,7 +31,7 @@ class EligibilitySteps extends Steps {
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () ⇒
-    on(EligiblePage)
+    EligiblePage.pageInfoIsCorrect
   }
 
   When("""^they start to create an account$"""){ () ⇒
@@ -43,6 +43,7 @@ class EligibilitySteps extends Steps {
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒
-    on(NotEligiblePage)
+    NotEligiblePage.pageInfoIsCorrect
+
   }
 }

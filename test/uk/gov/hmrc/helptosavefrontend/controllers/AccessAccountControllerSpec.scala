@@ -52,7 +52,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
         inSequence {
           mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
-          mockWriteITMPFlag()(Right(()))
+          mockWriteITMPFlag(Right(()))
         }
 
         val result = doRequest()

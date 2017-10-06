@@ -296,7 +296,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
         "there is missing user info from auth" in {
           inSequence{
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrivalsMissingUserInfo)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
           }
@@ -327,7 +327,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
     "return an error" when {
 
       "the user has no NINO" in {
-        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingNinoEnrolment)
+        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
 
         status(getResult()) shouldBe INTERNAL_SERVER_ERROR
       }

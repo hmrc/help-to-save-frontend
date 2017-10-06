@@ -172,7 +172,7 @@ class EligibilityCheckControllerSpec
             mockEligibilityResult()(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
-            mockWriteITMPFlag()(Right(()))
+            mockWriteITMPFlag(Right(()))
           }
 
           val result = doCheckEligibilityRequest()
@@ -261,7 +261,7 @@ class EligibilityCheckControllerSpec
             mockEligibilityResult()(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
-            mockWriteITMPFlag()(Right(()))
+            mockWriteITMPFlag(Right(()))
           }
 
           val result = doCheckEligibilityRequest()
@@ -317,7 +317,7 @@ class EligibilityCheckControllerSpec
           val eligibilityReason = randomEligibilityReason()
 
           inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingUserInfo)
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrivalsMissingUserInfo)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
           }
@@ -351,7 +351,7 @@ class EligibilityCheckControllerSpec
 
           "the nino is not available" in {
             test(
-              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedMissingNinoEnrolment)
+              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
             )
           }
 

@@ -21,6 +21,12 @@ import org.openqa.selenium.WebDriver
 
 object EligiblePage extends Page {
 
+  override val expectedUrl: String = s"${Configuration.host}/help-to-save/eligible"
+
+  override val expectedPageTitle: String = "You are eligible"
+
+  override val expectedPageHeader: String = "You're eligible"
+
   val pageTitle: String = "You're eligible"
   val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
 

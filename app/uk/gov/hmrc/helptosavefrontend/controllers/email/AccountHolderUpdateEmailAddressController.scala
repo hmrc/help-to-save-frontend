@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.UpdateEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.{EmailChanged, EnrolmentStatus, HtsContext, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -52,26 +52,20 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
 
   def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled {
-      case (_, email) ⇒
+      case email ⇒
         Ok(views.html.email.update_email_address(email, UpdateEmailForm.verifyEmailForm))
     }
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled {
-      case (nino, _) ⇒
-        sendEmailVerificationRequest(nino)
-    }
+    checkIfAlreadyEnrolled(_ ⇒ sendEmailVerificationRequest())
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.onSubmit().url)
 
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
       emailVerificationParams,
       params ⇒
-        checkIfAlreadyEnrolled {
-          case (nino, _) ⇒
-            handleEmailVerified(nino, params)
-        }
+        checkIfAlreadyEnrolled (_ ⇒ handleEmailVerified(params))
     )
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
 
@@ -83,11 +77,13 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     Ok(views.html.email.we_couldnt_update_your_email())
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
 
-  private def handleEmailVerified(nino: NINO, emailVerificationParams: EmailVerificationParams)(
+  private def handleEmailVerified(emailVerificationParams: EmailVerificationParams)(
       implicit
       request:    Request[AnyContent],
-      htsContext: HtsContext
+      htsContext: HtsContextWithNINO
   ): Future[Result] = {
+    val nino = htsContext.nino
+
     if (emailVerificationParams.nino =!= nino) {
       auditor.sendEvent(SuspiciousActivity(nino, "nino_mismatch"), nino)
       logger.warn("Email was verified but nino in URL did not match nino for user", nino)
@@ -95,16 +91,12 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     } else {
       htsContext.userDetails match {
 
-        case None ⇒
-          logger.warn("Email was verified but could not find user info", nino)
-          InternalServerError
-
-        case Some(Left(missingUserInfos)) ⇒
+        case Left(missingUserInfos) ⇒
           logger.warn("Email was verified but missing some user info " +
             s"(${missingUserInfos.missingInfo.mkString(",")}", nino)
           InternalServerError
 
-        case Some(Right(nsiUserInfo)) ⇒
+        case Right(nsiUserInfo) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
             _ ← nSIConnector.updateEmail(nsiUserInfo.updateEmail(emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
             _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap[UpdateEmailError](UpdateEmailError.EmailMongoError)
@@ -130,19 +122,20 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   /**
    * Use the enrolment store and email store to see if the user is enrolled
    */
-  private def checkIfAlreadyEnrolled(ifEnrolled: (NINO, Email) ⇒ Future[Result])(implicit htsContext: HtsContext, hc: HeaderCarrier): Future[Result] = {
-    val enrolled: EitherT[Future, String, (NINO, EnrolmentStatus, Option[Email])] = for {
-      nino ← EitherT.fromOption[Future](htsContext.nino, "Could not find NINO")
+  private def checkIfAlreadyEnrolled(ifEnrolled: Email ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Future[Result] = {
+    val enrolled: EitherT[Future, String, (EnrolmentStatus, Option[Email])] = for {
       enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
       maybeEmail ← helpToSaveService.getConfirmedEmail()
-    } yield (nino, enrolmentStatus, maybeEmail)
+    } yield (enrolmentStatus, maybeEmail)
 
     enrolled.fold[Future[Result]]({
       error ⇒
         logger.warn(s"Could not check enrolment status: $error")
         InternalServerError
     }, {
-      case (nino, enrolmentStatus, maybeEmail) ⇒
+      case (enrolmentStatus, maybeEmail) ⇒
+        val nino = htsContext.nino
+
         (enrolmentStatus, maybeEmail) match {
           case (EnrolmentStatus.NotEnrolled, _) ⇒
             // user is not enrolled in this case
@@ -158,7 +151,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             InternalServerError
 
           case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
-            ifEnrolled(nino, email)
+            ifEnrolled(email)
 
         }
     }).flatMap(identity)

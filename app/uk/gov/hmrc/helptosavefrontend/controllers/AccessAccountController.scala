@@ -36,10 +36,10 @@ class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
   def accessAccount: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
       // not enrolled
-      _ ⇒ Ok(views.html.confirm_check_eligibility())
+      () ⇒ Ok(views.html.confirm_check_eligibility())
     }, {
       e ⇒
-        logger.warn(s"Could not check enrolment (${e.message}) - proceeding to check eligibility", e.nino)
+        logger.warn(s"Could not check enrolment ($e) - proceeding to check eligibility", htsContext.nino)
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     }
     )

@@ -16,10 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-case class HtsContext(nino: Option[String], userDetails: Option[Either[MissingUserInfos, NSIUserInfo]], isAuthorised: Boolean)
+trait HtsContext {
+  val isAuthorised: Boolean
+}
+
+case class HtsContextWithNINO(nino: String, userDetails: Either[MissingUserInfos, NSIUserInfo], isAuthorised: Boolean) extends HtsContext
 
 object HtsContext {
 
-  def apply(isAuthorised: Boolean): HtsContext = HtsContext(None, None, isAuthorised)
+  def apply(authorised: Boolean): HtsContext = new HtsContext { val isAuthorised: Boolean = authorised }
 
 }

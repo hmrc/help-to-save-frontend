@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package hts.pages
+package uk.gov.hmrc.helptosavefrontend.controllers
 
-import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 
-object NotEligiblePage extends Page {
+class NSIControllerSpec extends TestSupport {
 
-  override val expectedUrl: String = s"${Configuration.host}/help-to-save/not-eligible"
+  val controller = new NSIController()
+  "The NSIController" must {
 
-  override val expectedPageTitle: String = "Help to Save"
+    "redirect to NS&I" in {
+      val result = controller.goToNSI(FakeRequest())
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some("https://www.nsandi.com/")
+    }
 
-  override val expectedPageHeader: String = "You're not eligible for Help to Save"
-
-  val url: String = s"${Configuration.host}/help-to-save/not-eligible"
-
-  private val pageTitle = "You're not eligible for Help to Save"
-
-  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h1", pageTitle)
-
+  }
 }

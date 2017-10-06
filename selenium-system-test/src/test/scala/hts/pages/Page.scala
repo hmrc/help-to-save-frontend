@@ -17,7 +17,7 @@
 package hts.pages
 
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
+import org.openqa.selenium.{By, Keys, WebDriver}
 import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
@@ -35,7 +35,10 @@ trait Page extends Matchers
 
   def back()(implicit driver: WebDriver): Unit = clickOn("ButtonBack")
 
-  def nextPage()(implicit driver: WebDriver): Unit = find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
+  def nextPage()(implicit driver: WebDriver): Unit = {
+    driver.findElement(By.id("get-help")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
+    find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
+  }
 
   def checkHeader(heading: String, text: String)(implicit driver: WebDriver): Boolean =
     find(cssSelector(heading)).exists(_.text === text)
@@ -44,9 +47,27 @@ trait Page extends Matchers
 
   def getPageContent(implicit driver: WebDriver): String = driver.getPageSource
 
-  def url(uri: String): String = s"${Configuration.host}/help-to-save/$uri"
+  private def url(uri: String): String = s"${Configuration.host}/help-to-save/$uri"
 
   def navigate(uri: String)(implicit driver: WebDriver): Unit =
     go to url(uri)
 
+  /*
+ * CONFIRM CURRENT PAGE INFO
+ */
+
+  val expectedUrl: String = ""
+  val expectedPageTitle: String = ""
+  val expectedPageHeader: String = ""
+
+  def pageHeading(implicit driver: WebDriver): String = {
+    val heading = driver.findElement(By.tagName("h1")).getText
+    if (heading != null) heading else ""
+  }
+
+  def pageInfoIsCorrect()(implicit driver: WebDriver): Unit = {
+    expectedUrl shouldBe currentUrl
+    expectedPageTitle shouldBe pageTitle
+    expectedPageHeader shouldBe pageHeading
+  }
 }

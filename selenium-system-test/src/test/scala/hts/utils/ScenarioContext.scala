@@ -91,10 +91,14 @@ private[utils] trait NINOGenerator {
     current = generator.nextNino.value
   }
 
-  def generateEligibleNINO(): String = toEligible(generateNINO())
+  def generateEligibleNINO(): String = {
+    current = toEligible(generateNINO())
+    current
+  }
 
   def generateIneligibleNINO(): String = {
     val ineligibleNino = "NA" + generateNINO().drop(2)
+    current = ineligibleNino
     ineligibleNino
   }
 
