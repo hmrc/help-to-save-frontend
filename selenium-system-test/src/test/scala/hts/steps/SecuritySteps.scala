@@ -65,7 +65,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   Then("""^I am prompted to log in to Government Gateway$""") { () ⇒
-    getCurrentUrl should include("gg/sign-in")
+    getCurrentUrl should include(s"${Configuration.host}/gg/sign-in")
   }
 
   Given("""^a user has logged in and passed IV$""") { () ⇒
@@ -77,7 +77,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   When("""^I call URI (.+) with HTTP method (.+)$"""){ (uri: String, httpMethod: String) ⇒
-    val path = s"${Configuration.host}/help-to-save/uri"
+    val path = s"${Configuration.host}/help-to-save/$uri"
     navigate(path)
   }
 
