@@ -29,9 +29,9 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EmailChanged, EnrolmentStatus, HTSEvent, NSIUserInfo, SuspiciousActivity, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.{EmailChanged, EnrolmentStatus, NSIUserInfo, SuspiciousActivity, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -318,6 +318,28 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
         }
 
+      }
+    }
+
+    "handling getEmailUpdated" must {
+
+      "return the email updated page" in {
+        mockAuthWithNoRetrievals(AuthProvider)
+
+        val result = controller.getEmailUpdated(FakeRequest())
+        status(result) shouldBe OK
+        contentAsString(result) should include("We've updated your email")
+      }
+    }
+
+    "handling getEmailUpdateError" must {
+
+      "return the email update error page" in {
+        mockAuthWithNoRetrievals(AuthProvider)
+
+        val result = controller.getEmailUpdateError(FakeRequest())
+        status(result) shouldBe OK
+        contentAsString(result) should include("We couldn't update your email")
       }
     }
   }

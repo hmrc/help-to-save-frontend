@@ -20,24 +20,28 @@ import cats.instances.int._
 import cats.syntax.eq._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.validNSIUserInfo
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.util.Random
 
 class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDrivenPropertyChecks {
 
   lazy val mockHTTPProxy = mock[WSHttpProxy]
 
-  lazy val testNSAndIConnectorImpl = new NSIConnectorImpl(fakeApplication.configuration, mockMetrics) {
+  def testNSAndIConnectorImpl = new NSIConnectorImpl(
+    fakeApplication.configuration ++ Configuration("feature-toggles.log-account-creation-json.enabled" → Random.nextBoolean()),
+    mockMetrics) {
     override val httpProxy = mockHTTPProxy
   }
 
