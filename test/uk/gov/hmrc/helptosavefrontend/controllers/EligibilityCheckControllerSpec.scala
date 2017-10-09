@@ -165,20 +165,42 @@ class EligibilityCheckControllerSpec
           await(doCheckEligibilityRequest())
         }
 
-        "redirect to NS&I if the eligibility check indicates the user already has an account" in {
-          inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck()(Left("Oh no!"))
-            mockEligibilityResult()(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
-            mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
-            mockSendAuditEvent()
-            mockWriteITMPFlag(Right(()))
+        "redirect to NS&I if the eligibility check indicates the user already has an account " +
+          "and update the ITMP flag if necessary" in {
+            inSequence {
+              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockEnrolmentCheck()(Left("Oh no!"))
+              mockEligibilityResult()(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
+              mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
+              mockSendAuditEvent()
+              mockWriteITMPFlag(Right(()))
+            }
+
+            val result = doCheckEligibilityRequest()
+            status(result) shouldBe OK
+            contentAsString(result) shouldBe "You've already got an account - yay!!!"
           }
 
-          val result = doCheckEligibilityRequest()
-          status(result) shouldBe OK
-          contentAsString(result) shouldBe "You've already got an account - yay!!!"
-        }
+        "redirect to NS&I if the eligibility check indicates the user already has an account" +
+          "even if the ITMP flag update is unsuccessful" in {
+            List(
+              () ⇒ mockWriteITMPFlag(Left("")),
+              () ⇒ mockWriteITMPFlag(None)
+            ).foreach{ mockWriteFailure ⇒
+                inSequence {
+                  mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+                  mockEnrolmentCheck()(Left("Oh no!"))
+                  mockEligibilityResult()(Right(EligibilityCheckResult(Left(IneligibilityReason.AccountAlreadyOpened))))
+                  mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
+                  mockSendAuditEvent()
+                  mockWriteFailure()
+                }
+
+                val result = doCheckEligibilityRequest()
+                status(result) shouldBe OK
+                contentAsString(result) shouldBe "You've already got an account - yay!!!"
+              }
+          }
 
         "show the you are eligible page if the eligibility check indicates the user is eligible" in {
           inSequence {

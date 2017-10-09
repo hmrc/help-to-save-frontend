@@ -209,6 +209,18 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       contentAsString(result).contains(messagesApi("hts.email-verification.error.title")) shouldBe true
       contentAsString(result).contains(messagesApi("hts.email-verification.error.backend-error.content")) shouldBe true
     }
+
+    "return a BadRequest if there are errors in the form" in {
+      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("crap" → "other-crap")
+      inSequence {
+        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
+      }
+      val result = await(controller.onSubmit()(fakePostRequest))
+      status(result) shouldBe Status.BAD_REQUEST
+      contentAsString(result) should include(messages("hts.email-verification.title"))
+    }
   }
 
   "emailVerified" should {
