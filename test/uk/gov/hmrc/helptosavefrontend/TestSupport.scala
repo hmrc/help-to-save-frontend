@@ -18,9 +18,9 @@ package uk.gov.hmrc.helptosavefrontend
 
 import java.util.UUID
 
-import com.codahale.metrics.{Counter, Timer}
+import com.codahale.metrics._
 import com.kenshoo.play.metrics.{Metrics ⇒ PlayMetrics}
-import com.typesafe.config.Config
+import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Suite}
@@ -40,15 +40,19 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
 
   lazy val fakeApplication: Application =
     new GuiceApplicationBuilder()
-      .configure(Configuration("metrics.enabled" → false) ++ additionalConfig)
+      .configure(Configuration(
+        ConfigFactory.parseString(
+          """
+            | metrics.enabled       = false
+            | play.modules.disabled = [ "uk.gov.hmrc.helptosavefrontend.config.HealthCheckModule" ]
+          """.stripMargin)
+      ) ++ additionalConfig)
       .build()
 
   implicit lazy val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
   implicit val headerCarrier: HeaderCarrier =
     HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
-
-  lazy val config: Config = fakeApplication.configuration.underlying
 
   override def beforeAll() {
     Play.start(fakeApplication)
@@ -64,6 +68,8 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
     override def timer(name: String): Timer = new Timer()
 
     override def counter(name: String): Counter = new Counter()
+
+    override def histogram(name: String): Histogram = new Histogram(new UniformReservoir())
   }
 
 }

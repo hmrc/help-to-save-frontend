@@ -24,14 +24,13 @@ import com.google.inject.ImplementedBy
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiUpdateEmailUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiTestUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.nsiUserInfoFormat
-import uk.gov.hmrc.helptosavefrontend.models.{AccountCreated, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, Result}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -45,6 +44,8 @@ trait NSIConnector {
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult]
 
   def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit]
+
+  def test(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit]
 
 }
 
@@ -127,6 +128,18 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
           metrics.nsiUpdateEmailErrorCounter.inc()
 
           Left(s"Encountered error while trying to create account: ${e.getMessage} ${timeString(time)}")
+      }
+  }
+
+  override def test(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
+    httpProxy.put(nsiTestUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
+      .map[Either[String, Unit]] { response ⇒
+        response.status match {
+          case Status.OK ⇒ Right(())
+          case other     ⇒ Left(s"Received unexpected status $other from NS&I while trying to update email. Body was ${response.body}")
+        }
+      }.recover {
+        case e ⇒ Left(s"Encountered error while trying to create account: ${e.getMessage}")
       }
   }
 

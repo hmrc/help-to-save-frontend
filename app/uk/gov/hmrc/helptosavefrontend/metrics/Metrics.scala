@@ -18,17 +18,19 @@ package uk.gov.hmrc.helptosavefrontend.metrics
 
 import cats.instances.long._
 import cats.syntax.eq._
-import com.codahale.metrics.{Counter, Timer}
+import com.codahale.metrics.{Counter, Histogram, Timer}
 import com.google.inject.{Inject, Singleton}
 
 import scala.annotation.tailrec
 
 @Singleton
-class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
+class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
 
-  protected def timer(name: String): Timer = metrics.defaultRegistry.timer(name)
+  def timer(name: String): Timer = metrics.defaultRegistry.timer(name)
 
-  protected def counter(name: String): Counter = metrics.defaultRegistry.counter(name)
+  def counter(name: String): Counter = metrics.defaultRegistry.counter(name)
+
+  def histogram(name: String): Histogram = metrics.defaultRegistry.histogram(name)
 
   val nsiAccountCreationTimer: Timer = timer("frontend.nsi-account-creation-time")
 
@@ -71,6 +73,10 @@ class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
   val ivTimeoutCounter: Counter = counter("frontend.iv.timeout-counter")
 
   val authTimer: Timer = timer("frontend.auth-timer")
+
+  val healthCheckFailuresHistogram: Histogram = histogram("frontend.health-check.nsi.failures")
+
+  val healthCheckTimer: Timer = timer("frontend.health-check.nsi.timer")
 
 }
 
