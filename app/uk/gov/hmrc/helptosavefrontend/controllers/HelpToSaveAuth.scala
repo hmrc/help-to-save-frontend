@@ -90,16 +90,6 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
     }
   }
 
-  def authorisedForHtsWithCL200(action: HtsAction)(redirectOnLoginURL: String): Action[AnyContent] = {
-    Action.async { implicit request ⇒
-      authorised(AuthWithCL200) {
-        action(request)(HtsContext(authorised = true))
-      }.recover {
-        handleFailure(redirectOnLoginURL)
-      }
-    }
-  }
-
   def unprotected(action: HtsAction): Action[AnyContent] = {
     Action.async { implicit request ⇒
       authorised() {
