@@ -1,7 +1,6 @@
 @HTS-37
 Feature: Applicant creates new account
 
-  @QA
   Scenario: An unauthenticated user creates new account
     Given a user has logged in and passed IV
     When they start to create an account
