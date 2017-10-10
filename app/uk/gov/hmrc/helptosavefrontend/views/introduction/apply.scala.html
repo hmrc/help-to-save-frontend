@@ -51,7 +51,7 @@
                 @Messages("hts.introduction.apply.button-1")
             }
         }
-        <a href="#"  data-ga-event-category = "links" data-ga-event-action = "Eligibility" data-ga-event-label= "Apply page" class="ga-track-event">@Messages("hts.introduction.apply.sign-in-link")</a>
+        <a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ggLoginUrlWithRedirect" data-ga-event-category = "links" data-ga-event-action = "Eligibility" data-ga-event-label= "Apply page" class="ga-track-event">@Messages("hts.introduction.apply.sign-in-link")</a>
     </section>
     <a class="page-nav__link page-nav__link--previous"
     title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">

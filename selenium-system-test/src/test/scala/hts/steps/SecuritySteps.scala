@@ -65,7 +65,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   Then("""^I am prompted to log in to Government Gateway$""") { () ⇒
-    getCurrentUrl should include(s"${Configuration.host}/gg/sign-in")
+    getCurrentUrl should include(s"${Configuration.ggHost}/gg/sign-in")
   }
 
   Given("""^a user has logged in and passed IV$""") { () ⇒

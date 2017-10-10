@@ -93,6 +93,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
 
+  val ggLoginUrlWithRedirect: String = s"$ggLoginUrl?continue=${encoded(accessAccountUrl)}&accountType=individual&origin=$origin"
+
   val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
 
   override lazy val analyticsToken: String = getString("google-analytics.token")
