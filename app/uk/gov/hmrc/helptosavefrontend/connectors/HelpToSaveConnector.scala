@@ -97,24 +97,20 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
                                body:        String,
                                ifHTTP200:   HttpResponse ⇒ Either[B, A],
                                description: ⇒ String,
-                               toError:     String ⇒ B
-  )(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
-    EitherT(http.post(url, body).map { response ⇒
-      if (response.status == 200) {
-        ifHTTP200(response)
-      } else {
-        Left(toError(s"Call to $description came back with status ${response.status}. Body was ${response.body}"))
-      }
-    }.recover {
-      case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
-    })
+                               toError:     String ⇒ B)(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+    handle(http.post(url, body), ifHTTP200, description, toError)
 
   private def handleGet[A, B](url:         String,
                               ifHTTP200:   HttpResponse ⇒ Either[B, A],
                               description: ⇒ String,
-                              toError:     String ⇒ B
-  )(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
-    EitherT(http.get(url).map { response ⇒
+                              toError:     String ⇒ B)(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+    handle(http.get(url), ifHTTP200, description, toError)
+
+  private def handle[A, B](resF:        Future[HttpResponse],
+                           ifHTTP200:   HttpResponse ⇒ Either[B, A],
+                           description: ⇒ String,
+                           toError:     String ⇒ B) = {
+    EitherT(resF.map { response ⇒
       if (response.status == 200) {
         ifHTTP200(response)
       } else {
@@ -123,6 +119,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
     }.recover {
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
+  }
 
   private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
 

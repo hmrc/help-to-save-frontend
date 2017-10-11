@@ -54,10 +54,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, _) ⇒
           checkIfAccountCreateAllowed(
-            Ok(views.html.register.confirm_details(nsiUserInfo)),
-            SeeOther(routes.RegisterController.getUserCapReachedPage().url)
+            Ok(views.html.register.confirm_details(nsiUserInfo))
           )
-
       }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
@@ -133,14 +131,21 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Future[Result], ifNotAllowed: ⇒ Future[Result])(implicit hc: HeaderCarrier) = {
+  private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Future[Result])(implicit hc: HeaderCarrier) = {
     helpToSaveService.isAccountCreationAllowed().fold(
       error ⇒ {
         logger.warn(s"Could not check if account create is allowed, due to: $error")
         true
       },
       identity
-    ).flatMap(allowed ⇒ if (allowed) ifAllowed else ifNotAllowed)
+    ).flatMap{
+        allowed ⇒
+          if (allowed) {
+            ifAllowed
+          } else {
+            SeeOther(routes.RegisterController.getUserCapReachedPage().url)
+          }
+      }
   }
 
   /**
