@@ -131,21 +131,19 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Future[Result])(implicit hc: HeaderCarrier) = {
+  private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Result)(implicit hc: HeaderCarrier) = {
     helpToSaveService.isAccountCreationAllowed().fold(
       error ⇒ {
         logger.warn(s"Could not check if account create is allowed, due to: $error")
-        true
-      },
-      identity
-    ).flatMap{
-        allowed ⇒
-          if (allowed) {
-            ifAllowed
-          } else {
-            SeeOther(routes.RegisterController.getUserCapReachedPage().url)
-          }
+        ifAllowed
+      }, { allowed ⇒
+        if (allowed) {
+          ifAllowed
+        } else {
+          SeeOther(routes.RegisterController.getUserCapReachedPage().url)
+        }
       }
+    )
   }
 
   /**
