@@ -19,6 +19,7 @@ GET        /register/update-your-email-address              @uk.gov.hmrc.helptos
 POST       /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
 GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
+GET       /register/user-cap-reached                        @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getUserCapReachedPage
 
 POST       /email/new-applicant-update                      @uk.gov.hmrc.helptosavefrontend.controllers.email.NewApplicantUpdateEmailAddressController.onSubmit
 POST       /email/account-holder-update                     @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.onSubmit

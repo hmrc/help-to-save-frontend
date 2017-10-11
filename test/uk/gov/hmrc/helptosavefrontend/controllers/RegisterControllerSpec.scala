@@ -33,7 +33,6 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import uk.gov.hmrc.helptosavefrontend.controllers.email._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -71,6 +70,16 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       .expects(email, *)
       .returning(EitherT.fromEither[Future](result))
 
+  def mockAccountCreationAllowed(result: Either[String, Boolean]): Unit =
+    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier))
+      .expects(*)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockUpdateUserCount(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveService.updateUserCount()(_: HeaderCarrier))
+      .expects(*)
+      .returning(EitherT.fromEither[Future](result))
+
   def mockDecrypt(expected: String)(result: Option[String]) =
     (crypto.decrypt(_: String))
       .expects(expected)
@@ -97,6 +106,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+            mockAccountCreationAllowed(Right(true))
           }
 
           val result = doRequest()
@@ -106,6 +116,19 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           contentAsString(result) should include(validNSIUserInfo.forename)
           contentAsString(result) should include(validNSIUserInfo.surname)
         }
+
+      "indicate to the user that user-cap has already reached and account creation not possible" in {
+        inSequence {
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          mockAccountCreationAllowed(Right(false))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getUserCapReachedPage().url)
+      }
     }
 
     "handling a confirmEmail" must {
@@ -222,6 +245,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
             mockAudit()
+            mockUpdateUserCount(Right(Unit))
             mockEnrolUser()(Right(()))
           }
 
@@ -238,6 +262,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), Some(confirmedEmail)))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
             mockAudit()
+            mockUpdateUserCount(Right(Unit))
             mockEnrolUser()(Left("Oh no"))
           }
 

@@ -46,6 +46,10 @@ trait HelpToSaveService {
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
 
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean]
+
+  def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit]
+
 }
 
 @Singleton
@@ -78,5 +82,11 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
         logger.error(s"Could not create an account due to ${failure.errorDetail}", userInfo.nino)
         Left(failure)
     })
+
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean] =
+    helpToSaveConnector.isAccountCreationAllowed()
+
+  def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit] =
+    helpToSaveConnector.updateUserCount()
 }
 

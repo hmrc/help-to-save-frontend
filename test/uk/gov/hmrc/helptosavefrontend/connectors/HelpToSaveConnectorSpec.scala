@@ -47,6 +47,12 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       .returning(result.fold(
         Future.failed[HttpResponse](new Exception("")))(Future.successful))
 
+  def mockHttpPost[A](url: String, body: A)(result: Option[HttpResponse]): Unit =
+    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
+      .expects(url, body, Seq.empty[(String, String)], *, *, *)
+      .returning(result.fold(
+        Future.failed[HttpResponse](new Exception("")))(Future.successful))
+
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
 
@@ -294,22 +300,54 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         }
     }
 
+    "getting account-creation-allowed response" must {
+      behave like testCommon(
+        mockHttpGet(accountCreateAllowedURL),
+        () ⇒ connector.isAccountCreationAllowed(),
+        Json.toJson(true),
+        false
+      )
+
+      "return a Right if the call comes with with HHTP 200 and valid boolean in the body" in {
+        mockHttpGet(accountCreateAllowedURL)(Some(HttpResponse(200, Some(Json.toJson(true)))))
+        await(connector.isAccountCreationAllowed().value) shouldBe Right(true)
+
+        mockHttpGet(accountCreateAllowedURL)(Some(HttpResponse(200, Some(Json.toJson(false)))))
+        await(connector.isAccountCreationAllowed().value) shouldBe Right(false)
+      }
+    }
+
+    "updating user-cap-count" must {
+
+      behave like testCommon(
+        mockHttpPost(updateUserCountURL, ""),
+        () ⇒ connector.updateUserCount(),
+        Json.toJson(()),
+        false
+      )
+
+      "return a Right if the call comes with with HTTP 200" in {
+        mockHttpPost(updateUserCountURL, "")(Some(HttpResponse(200, Some(Json.toJson(())))))
+        await(connector.updateUserCount().value) shouldBe Right(())
+      }
+    }
+
   }
 
-  private def testCommon[E, A, B](mockGet:         ⇒ Option[HttpResponse] ⇒ Unit,
-                                  getResult:       () ⇒ EitherT[Future, E, A],
+  private def testCommon[E, A, B](mockHttp:        ⇒ Option[HttpResponse] ⇒ Unit,
+                                  result:          () ⇒ EitherT[Future, E, A],
                                   validBody:       B,
                                   testInvalidJSON: Boolean                       = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
     "perform a GET request to the help-to-save-service" in {
-      mockGet(Some(HttpResponse(200)))
-      await(getResult())
+      mockHttp(Some(HttpResponse(200)))
+      await(result())
     }
 
     "return an error" when {
 
       if (testInvalidJSON) {
         "the call comes back with a 200 and an unknown JSON format" in {
-          mockGet(
+          mockHttp(
             Some(HttpResponse(200, responseJson = Some(Json.parse(
               """
                 |{
@@ -319,7 +357,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
                 stripMargin
             )))))
 
-          await(getResult().value).isLeft shouldBe
+          await(result().value).isLeft shouldBe
             true
         }
       }
@@ -328,16 +366,16 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         forAll { status: Int ⇒
           whenever(status =!= 200) {
             // check we get an error even though there was valid JSON in the response
-            mockGet(Some(HttpResponse(status, Some(Json.toJson(validBody)))))
-            await(getResult().value).isLeft shouldBe true
+            mockHttp(Some(HttpResponse(status, Some(Json.toJson(validBody)))))
+            await(result().value).isLeft shouldBe true
 
           }
         }
       }
 
       "the future fails" in {
-        mockGet(None)
-        await(getResult().value).isLeft shouldBe true
+        mockHttp(None)
+        await(result().value).isLeft shouldBe true
       }
     }
   }
