@@ -7,3 +7,4 @@ sleep 5
 
 echo "Running src.test.scala.runner.ZapRunner"
 sbt zap:test
+
