@@ -79,7 +79,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val nsiUpdateEmailUrl: String = s"${baseUrl("nsi")}${getString("microservice.services.nsi.update-email-url")}"
 
-  val nsiTestUrl: String = s"${baseUrl("nsi")}${getString("microservice.services.nsi.test-url")}"
+  val nsiHealthCheckUrl: String = s"${baseUrl("nsi")}${getString("microservice.services.nsi.health-check-url")}"
 
   val sessionCacheKey: String = getString("microservice.services.keystore.session-key")
 

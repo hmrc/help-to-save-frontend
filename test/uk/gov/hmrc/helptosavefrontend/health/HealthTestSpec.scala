@@ -346,7 +346,7 @@ object HealthTestSpec {
     override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] =
       sys.error("Not used")
 
-    override def test(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] = {
+    override def healthCheck(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] = {
       val result: Future[Option[Either[String, Unit]]] = (reportTo ? GetTestResult(userInfo)).mapTo[GetTestResultResponse].map(_.result)
       EitherT(result.flatMap{
         _.fold[Future[Either[String, Unit]]](Future.failed(new Exception("")))(Future.successful)

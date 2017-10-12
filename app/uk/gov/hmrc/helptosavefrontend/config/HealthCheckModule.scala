@@ -17,12 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import com.google.inject.AbstractModule
-import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthTest
+import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck
 
 class HealthCheckModule extends AbstractModule {
 
   override def configure() = {
-    bind(classOf[NSIConnectionHealthTest])
+    bind(classOf[NSIConnectionHealthCheck])
       .asEagerSingleton()
   }
 }

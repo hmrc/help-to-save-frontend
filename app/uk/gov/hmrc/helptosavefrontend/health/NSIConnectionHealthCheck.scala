@@ -22,8 +22,8 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import com.google.inject.Inject
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
-import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthTest.NSIConnectionHealthCheckRunner
-import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthTest.NSIConnectionHealthCheckRunner.Payload
+import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
+import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner.Payload
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
@@ -33,7 +33,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-class NSIConnectionHealthTest @Inject() (system: ActorSystem, configuration: Configuration, metrics: Metrics, nSIConnector: NSIConnector) {
+class NSIConnectionHealthCheck @Inject()(system: ActorSystem, configuration: Configuration, metrics: Metrics, nSIConnector: NSIConnector) {
 
   val healthCheck: ActorRef = system.actorOf(
     HealthCheck.props(
@@ -43,14 +43,14 @@ class NSIConnectionHealthTest @Inject() (system: ActorSystem, configuration: Con
       metrics.metrics,
       () ⇒ (),
       () ⇒ (),
-      Props(new NSIConnectionHealthCheckRunner(nSIConnector, metrics, Payload.Payload1)),
-      Props(new NSIConnectionHealthCheckRunner(nSIConnector, metrics, Payload.Payload2))
+      NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload1),
+      NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload2)
     )
   )
 
 }
 
-object NSIConnectionHealthTest {
+object NSIConnectionHealthCheck {
 
   class NSIConnectionHealthCheckRunner(nsiConnector: NSIConnector, metrics: Metrics, payload: Payload) extends Actor with HealthCheckRunner {
 
@@ -61,7 +61,7 @@ object NSIConnectionHealthTest {
     override def performTest(): Future[HealthCheckResult] = {
       val timer = metrics.healthCheckTimer.time()
 
-      nsiConnector.test(payload.value).value
+      nsiConnector.healthCheck(payload.value).value
         .map { result ⇒
           val time = timer.stop()
           result.fold[HealthCheckResult](e ⇒ HealthCheckResult.Failure(e, time), _ ⇒ HealthCheckResult.Success(time))
@@ -76,6 +76,9 @@ object NSIConnectionHealthTest {
   }
 
   object NSIConnectionHealthCheckRunner {
+
+    def props(nsiConnector: NSIConnector, metrics: Metrics, payload: Payload): Props =
+      Props(new NSIConnectionHealthCheckRunner(nsiConnector, metrics, payload))
 
     sealed trait Payload {
       val value: NSIUserInfo

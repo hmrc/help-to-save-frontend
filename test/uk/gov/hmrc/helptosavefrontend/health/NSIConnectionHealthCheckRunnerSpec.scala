@@ -20,8 +20,8 @@ import akka.actor.{ActorRef, Props}
 import cats.data.EitherT
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
 import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformTest
-import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthTest.NSIConnectionHealthCheckRunner
-import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthTest.NSIConnectionHealthCheckRunner.Payload
+import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
+import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner.Payload
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -40,7 +40,7 @@ class NSIConnectionHealthCheckRunnerSpec extends ActorTestSupport("NSIConnection
   )))
 
   def mockNSIConnectorTest(result: Option[Either[String, Unit]]): Unit =
-    (nsiConnector.test(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
+    (nsiConnector.healthCheck(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
       .expects(payload.value, *, *)
       .returning(
         EitherT(

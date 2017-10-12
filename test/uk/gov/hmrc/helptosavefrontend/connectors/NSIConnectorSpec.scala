@@ -24,7 +24,7 @@ import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiTestUrl, nsiUpdateEmailUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiHealthCheckUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.validNSIUserInfo
@@ -150,16 +150,16 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
 
     "the test Method" must {
       "Return a Right when the status is OK" in {
-        mockPut(validNSIUserInfo, nsiTestUrl)(Right(HttpResponse(Status.OK)))
-        val result = testNSAndIConnectorImpl.test(validNSIUserInfo)
+        mockPut(validNSIUserInfo, nsiHealthCheckUrl)(Right(HttpResponse(Status.OK)))
+        val result = testNSAndIConnectorImpl.healthCheck(validNSIUserInfo)
         Await.result(result.value, 3.seconds) shouldBe Right(())
       }
 
       "Return a Left when the status is OK" in {
         forAll{ status: Int ⇒
           whenever(status > 0 && status =!= Status.OK){
-            mockPut(validNSIUserInfo, nsiTestUrl)(Right(HttpResponse(status)))
-            val result = testNSAndIConnectorImpl.test(validNSIUserInfo)
+            mockPut(validNSIUserInfo, nsiHealthCheckUrl)(Right(HttpResponse(status)))
+            val result = testNSAndIConnectorImpl.healthCheck(validNSIUserInfo)
             Await.result(result.value, 3.seconds).isLeft shouldBe true
           }
         }

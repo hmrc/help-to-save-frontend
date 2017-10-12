@@ -24,7 +24,7 @@ import com.google.inject.ImplementedBy
 import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiTestUrl, nsiUpdateEmailUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiHealthCheckUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -45,7 +45,7 @@ trait NSIConnector {
 
   def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit]
 
-  def test(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit]
+  def healthCheck(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit]
 
 }
 
@@ -131,8 +131,8 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
       }
   }
 
-  override def test(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
-    httpProxy.put(nsiTestUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
+  override def healthCheck(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
+    httpProxy.put(nsiHealthCheckUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(nsiUserInfoFormat, hc.copy(authorization = None), ex)
       .map[Either[String, Unit]] { response ⇒
         response.status match {
           case Status.OK ⇒ Right(())
