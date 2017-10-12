@@ -30,6 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
+import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.nsiUserInfoFormat
 import uk.gov.hmrc.helptosavefrontend.models.{AccountCreated, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, Result}
@@ -64,7 +65,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
   val httpProxy: WSHttpProxy = new WSHttpProxy
 
-  override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult] = {
+  override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[SubmissionResult] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
     val nino = userInfo.nino
@@ -78,7 +79,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
     val timeContext: Timer.Context = metrics.nsiAccountCreationTimer.time()
 
-    httpProxy.post(nsiCreateAccountUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
+    httpProxy.post(nsiCreateAccountUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(nsiUserInfoFormat, hc.copy(authorization = None), ec)
       .map[SubmissionResult] { response ⇒
         val time = timeContext.stop()
 
@@ -100,12 +101,12 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
       }
   }
 
-  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
+  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
     val nino = userInfo.nino
 
     val timeContext: Timer.Context = metrics.nsiUpdateEmailTimer.time()
 
-    httpProxy.put(nsiUpdateEmailUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))
+    httpProxy.put(nsiUpdateEmailUrl, userInfo, Map(nsiAuthHeaderKey → nsiBasicAuth))(nsiUserInfoFormat, hc.copy(authorization = None), ec)
       .map[Either[String, Unit]] { response ⇒
         val time = timeContext.stop()
 
