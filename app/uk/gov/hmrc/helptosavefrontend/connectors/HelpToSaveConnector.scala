@@ -49,6 +49,10 @@ trait HelpToSaveConnector {
 
   def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]]
 
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean]
+
+  def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit]
+
 }
 
 @Singleton
@@ -57,7 +61,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   val base64Encoder: Base64.Encoder = Base64.getEncoder
 
   def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
-    handle(
+    handleGet(
       eligibilityURL,
       _.parseJson[EligibilityCheckResponse].flatMap(toEligibilityCheckResponse),
       "check eligibility",
@@ -65,28 +69,48 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
     )
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
-    handle(enrolmentStatusURL, _.parseJson[EnrolmentStatus], "get user enrolment status", identity)
+    handleGet(enrolmentStatusURL, _.parseJson[EnrolmentStatus], "get user enrolment status", identity)
 
   def enrolUser()(implicit hc: HeaderCarrier): Result[Unit] =
-    handle(enrolUserURL, _ ⇒ Right(()), "enrol users", identity)
+    handleGet(enrolUserURL, _ ⇒ Right(()), "enrol users", identity)
 
   def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit] =
-    handle(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag", identity)
+    handleGet(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier): Result[Unit] = {
     val encodedEmail = new String(base64Encoder.encode(email.getBytes()))
-    handle(storeEmailURL(encodedEmail), _ ⇒ Right(()), "store email", identity)
+    handleGet(storeEmailURL(encodedEmail), _ ⇒ Right(()), "store email", identity)
   }
 
   def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]] =
-    handle(getEmailURL, _.parseJson[GetEmailResponse].map(_.email), "get email", identity)
+    handleGet(getEmailURL, _.parseJson[GetEmailResponse].map(_.email), "get email", identity)
 
-  private def handle[A, B](url:         String,
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean] = {
+    handleGet(accountCreateAllowedURL, _.parseJson[Boolean], "account creation allowed", identity)
+  }
+
+  def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit] = {
+    handlePost(updateUserCountURL, "", _ ⇒ Right(()), "update user count", identity)
+  }
+
+  private def handlePost[A, B](url:         String,
+                               body:        String,
+                               ifHTTP200:   HttpResponse ⇒ Either[B, A],
+                               description: ⇒ String,
+                               toError:     String ⇒ B)(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+    handle(http.post(url, body), ifHTTP200, description, toError)
+
+  private def handleGet[A, B](url:         String,
+                              ifHTTP200:   HttpResponse ⇒ Either[B, A],
+                              description: ⇒ String,
+                              toError:     String ⇒ B)(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+    handle(http.get(url), ifHTTP200, description, toError)
+
+  private def handle[A, B](resF:        Future[HttpResponse],
                            ifHTTP200:   HttpResponse ⇒ Either[B, A],
                            description: ⇒ String,
-                           toError:     String ⇒ B
-  )(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
-    EitherT(http.get(url).map { response ⇒
+                           toError:     String ⇒ B) = {
+    EitherT(resF.map { response ⇒
       if (response.status == 200) {
         ifHTTP200(response)
       } else {
@@ -95,6 +119,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
     }.recover {
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
+  }
 
   private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
 
@@ -140,6 +165,12 @@ object HelpToSaveConnectorImpl {
 
     val getEmailURL =
       s"$helpToSaveUrl/help-to-save/get-email"
+
+    val accountCreateAllowedURL =
+      s"$helpToSaveUrl/help-to-save/account-create-allowed"
+
+    val updateUserCountURL =
+      s"$helpToSaveUrl/help-to-save/update-user-count"
   }
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])

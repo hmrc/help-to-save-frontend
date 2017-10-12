@@ -156,5 +156,33 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       }
     }
+
+    "checking if isAccountCreationAllowed" must {
+      "return true" in {
+        (htsConnector.isAccountCreationAllowed()(_: HeaderCarrier)).expects(*)
+          .returning(EitherT.pure(true))
+
+        val result = htsService.isAccountCreationAllowed()
+        result.value.futureValue should be(Right(true))
+      }
+
+      "return false" in {
+        (htsConnector.isAccountCreationAllowed()(_: HeaderCarrier)).expects(*)
+          .returning(EitherT.pure(false))
+
+        val result = htsService.isAccountCreationAllowed()
+        result.value.futureValue should be(Right(false))
+      }
+    }
+
+    "updating user-cap-count" must {
+      "return a successful response" in {
+        (htsConnector.updateUserCount()(_: HeaderCarrier)).expects(*)
+          .returning(EitherT.pure(()))
+
+        val result = htsService.updateUserCount()
+        result.value.futureValue should be(Right(()))
+      }
+    }
   }
 }

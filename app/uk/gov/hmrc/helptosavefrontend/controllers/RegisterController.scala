@@ -53,7 +53,9 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
         case (nsiUserInfo, _) ⇒
-          Ok(views.html.register.confirm_details(nsiUserInfo))
+          checkIfAccountCreateAllowed(
+            Ok(views.html.register.confirm_details(nsiUserInfo))
+          )
       }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
@@ -91,6 +93,10 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
+  def getUserCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.user_cap_reached())
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl) //TODO
+
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
@@ -104,9 +110,14 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
               helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString).fold(
                 error ⇒ InternalServerError(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error)),
                 _ ⇒ {
+                  //Account creation is successful, trigger background taks but don't worry about the result
                   auditor.sendEvent(AccountCreated(userInfo), nino)
-                  // Account creation is successful, start the process to enrol the user but don't worry about the result
-                  helpToSaveService.enrolUser().value.onComplete{
+
+                  helpToSaveService.updateUserCount().value.onFailure {
+                    case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
+                  }
+
+                  helpToSaveService.enrolUser().value.onComplete {
                     case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
                     case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
                     case Success(Right(_)) ⇒ logger.info(s"Process started to enrol user", nino)
@@ -119,6 +130,21 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Result)(implicit hc: HeaderCarrier) = {
+    helpToSaveService.isAccountCreationAllowed().fold(
+      error ⇒ {
+        logger.warn(s"Could not check if account create is allowed, due to: $error")
+        ifAllowed
+      }, { allowed ⇒
+        if (allowed) {
+          ifAllowed
+        } else {
+          SeeOther(routes.RegisterController.getUserCapReachedPage().url)
+        }
+      }
+    )
+  }
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
