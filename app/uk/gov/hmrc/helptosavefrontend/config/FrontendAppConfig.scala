@@ -41,9 +41,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val createAccountUrl: String = s"$helpToSaveUrl/help-to-save/create-an-account"
 
-  val ivFrontendUrl: String = getString("microservice.services.identity-verification-frontend.url")
-
-  def ivJourneyResultUrl(journeyId: JourneyId): String = s"$ivFrontendUrl/mdtp/journey/journeyId/${journeyId.Id}"
+  val ivJourneyResultUrl: String = getString("microservice.services.identity-verification-journey-result.url")
 
   def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
 
@@ -51,13 +49,12 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val origin: String = getString("appName")
 
-  val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
-
   def ivUrl(redirectOnLoginURL: String): String = {
 
-    val ivUpliftUrl: String = s"$ivFrontendUrl/mdtp/uplift"
-
+    val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
     val encodedCallbackUrl = encoded(s"$identityCallbackUrl?continueURL=$redirectOnLoginURL")
+
+    val ivUpliftUrl: String = getString("microservice.services.identity-verification-uplift.url")
 
     new URI(s"$ivUpliftUrl" +
       s"?origin=$origin" +
