@@ -95,10 +95,16 @@ class HealthCheck(name:             String,
 
   override def receive: Receive = ok(0)
 
-  def ok(count: Int): Receive = performTest orElse {
+  /**
+    * In this state the previous check was a success.
+    *
+    * @param successCount This count determines when the props used to perform
+    *                     the next health check switches
+    */
+  def ok(successCount: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
       log.info(s"$loggingPrefix - health check is passing ${timeString(nanos)}")
-      val newCount = count + 1
+      val newCount = successCount + 1
 
       if (newCount === numberOfChecksBetweenUpdates - 1) {
         currentRunnerProps = propsQueue.next()
@@ -118,6 +124,10 @@ class HealthCheck(name:             String,
 
   }
 
+  /**
+    * In this state the previous check was a failure and the number of failures had
+    * not reached the maximum allowed yet.
+    */
   def failing(fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
       log.info(s"$loggingPrefix - health check was failing but now OK ${timeString(nanos)}")
@@ -136,6 +146,10 @@ class HealthCheck(name:             String,
 
   }
 
+  /**
+    * In this state the previous check was a failure and the maximum allowed failures had
+    * been reached
+    */
   def failed(fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
       log.info(s"$loggingPrefix - health check had failed but now OK ${timeString(nanos)}")
