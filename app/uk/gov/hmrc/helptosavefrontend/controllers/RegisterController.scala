@@ -108,8 +108,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
               // TODO: plug in actual pages below
               val userInfo = nsiUserInfo.updateEmail(email)
               helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString).fold(
-                error ⇒
-                  internalServerError(),
+                error ⇒ internalServerError(),
                 _ ⇒ {
                   //Account creation is successful, trigger background taks but don't worry about the result
                   auditor.sendEvent(AccountCreated(userInfo), nino)
