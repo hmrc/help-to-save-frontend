@@ -24,7 +24,7 @@ import play.api.Configuration
 import play.api.http.Status
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiUpdateEmailUrl}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiHealthCheckUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.validNSIUserInfo
@@ -48,7 +48,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
   // put in fake authorization details - these should be removed by the call to create an account
   implicit val hc: HeaderCarrier = HeaderCarrier(authorization = Some(Authorization("auth")))
 
-  def mockCreateAccount[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit = {
+  def mockPost[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit = {
     (mockHTTPProxy.post(_: String, _: I, _: Map[String, String])(_: Writes[I], _: HeaderCarrier, _: ExecutionContext))
       .expects(url, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *, *)
       .returning(
@@ -58,7 +58,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
         ))
   }
 
-  def mockUpdateEmail[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit = {
+  def mockPut[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit = {
     (mockHTTPProxy.put(_: String, _: I, _: Map[String, String])(_: Writes[I], _: HeaderCarrier, _: ExecutionContext))
       .expects(url, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *, *)
       .returning(
@@ -70,7 +70,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
 
   "the updateEmail method" must {
     "return a Right when the status is OK" in {
-      mockUpdateEmail(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(Status.OK)))
+      mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(Status.OK)))
 
       val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
       Await.result(result.value, 3.seconds) shouldBe Right(())
@@ -80,7 +80,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       "the status is not OK" in {
         forAll{ status: Int ⇒
           whenever(status =!= Status.OK && status > 0){
-            mockUpdateEmail(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(status)))
+            mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(status)))
 
             val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
             Await.result(result.value, 3.seconds).isLeft shouldBe true
@@ -89,7 +89,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       }
 
       "the POST to NS&I fails" in {
-        mockUpdateEmail(validNSIUserInfo, nsiUpdateEmailUrl)(Left("Oh no!"))
+        mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Left("Oh no!"))
 
         val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
         Await.result(result.value, 3.seconds).isLeft shouldBe true
@@ -100,38 +100,38 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
 
   "the createAccount Method" must {
     "Return a SubmissionSuccess when the status is Created" in {
-      mockCreateAccount(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.CREATED)))
+      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.CREATED)))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
     }
 
     "Return a SubmissionFailure when the status is BAD_REQUEST" in {
       val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-      mockCreateAccount(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
-                                                                                  Some(Json.toJson(submissionFailure)))))
+      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
+                                                                         Some(Json.toJson(submissionFailure)))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
 
     "Return a SubmissionFailure when the status is INTERNAL_SERVER_ERROR" in {
       val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-      mockCreateAccount(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.INTERNAL_SERVER_ERROR,
-                                                                                  Some(Json.toJson(submissionFailure)))))
+      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.INTERNAL_SERVER_ERROR,
+                                                                         Some(Json.toJson(submissionFailure)))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
 
     "Return a SubmissionFailure when the status is SERVICE_UNAVAILABLE" in {
       val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-      mockCreateAccount(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.SERVICE_UNAVAILABLE,
-                                                                                  Some(Json.toJson(submissionFailure)))))
+      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.SERVICE_UNAVAILABLE,
+                                                                         Some(Json.toJson(submissionFailure)))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
 
     "Return a SubmissionFailure in case there is an invalid json" in {
-      mockCreateAccount(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
-                                                                                  Some(Json.parse("""{"invalidJson":"foo"}""")))))
+      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
+                                                                         Some(Json.parse("""{"invalidJson":"foo"}""")))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) match {
         case SubmissionSuccess()  ⇒ fail()
@@ -140,7 +140,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
     }
 
     "Return a SubmissionFailure when the status is anything else" in {
-      mockCreateAccount(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_GATEWAY)))
+      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_GATEWAY)))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) match {
         case SubmissionSuccess()  ⇒ fail()
@@ -148,5 +148,22 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       }
     }
 
+    "the test Method" must {
+      "Return a Right when the status is OK" in {
+        mockPut(validNSIUserInfo, nsiHealthCheckUrl)(Right(HttpResponse(Status.OK)))
+        val result = testNSAndIConnectorImpl.healthCheck(validNSIUserInfo)
+        Await.result(result.value, 3.seconds) shouldBe Right(())
+      }
+
+      "Return a Left when the status is OK" in {
+        forAll{ status: Int ⇒
+          whenever(status > 0 && status =!= Status.OK){
+            mockPut(validNSIUserInfo, nsiHealthCheckUrl)(Right(HttpResponse(status)))
+            val result = testNSAndIConnectorImpl.healthCheck(validNSIUserInfo)
+            Await.result(result.value, 3.seconds).isLeft shouldBe true
+          }
+        }
+      }
+    }
   }
 }
