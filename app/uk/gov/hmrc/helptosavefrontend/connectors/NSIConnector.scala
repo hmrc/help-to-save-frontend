@@ -86,7 +86,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
         response.status match {
           case Status.CREATED ⇒
-            logger.info(s"Received 201 from NSI, successfully created account ${timeString(time)}", nino)
+            logger.info(s"successfully created accountm, received status 201 from NSI ${timeString(time)}", nino)
             SubmissionSuccess()
 
           case other ⇒
@@ -113,7 +113,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
         response.status match {
           case Status.OK ⇒
-            logger.info(s"Received 200 from NSI, successfully updated email ${timeString(time)}", nino)
+            logger.info(s"successfully updated email, received status 200 from NSI,  ${timeString(time)}", nino)
             Right(())
 
           case other ⇒
@@ -148,21 +148,19 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
     status match {
       case Status.BAD_REQUEST ⇒
-        logger.warn(s"Failed to create an account due to bad request ${timeString(time)}", nino)
+        logger.warn(s"Failed to create account as NSI, received status 400 (Bad Request) from NSI ${timeString(time)}", nino)
         handleBadRequestResponse(response)
 
       case Status.INTERNAL_SERVER_ERROR ⇒
-        logger.warn("Received 500 from NSI, failed to create account as there was an " +
-          s"internal server error ${timeString(time)}", nino)
+        logger.warn(s"Failed to create account as NSI, received status 500 (Internal Server Error) from NSI ${timeString(time)}", nino)
         handleBadRequestResponse(response)
 
       case Status.SERVICE_UNAVAILABLE ⇒
-        logger.warn("Received 503 from NSI, failed to create account as NSI " +
-          s"service is unavailable ${timeString(time)}", nino)
+        logger.warn(s"Failed to create account as NSI, received status 503 (Service Unavailable) from NSI ${timeString(time)}", nino)
         handleBadRequestResponse(response)
 
       case other ⇒
-        logger.warn(s"Unexpected error during creating account, status : $other ${timeString(time)}", nino)
+        logger.warn(s"Unexpected error during creating account, received status $other ${timeString(time)}", nino)
         SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
     }
   }

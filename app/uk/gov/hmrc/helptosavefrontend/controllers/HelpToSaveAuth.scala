@@ -69,7 +69,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
               userDetails.fold(
                 m ⇒ logger.warn(s"Could not find user info, missing details [${m.missingInfo.mkString(", ")}] $timeString", nino),
-                _ ⇒ logger.info(s"Successfully retrieved NINO and usr details $timeString", nino)
+                _ ⇒ logger.info(s"Successfully retrieved NINO and user details $timeString", nino)
               )
 
               action(request)(HtsContextWithNINO(nino, userDetails.map(NSIUserInfo.apply), isAuthorised = true))
