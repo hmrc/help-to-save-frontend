@@ -117,6 +117,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
       status(result) shouldBe Status.SEE_OTHER
       val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
       redirectTo should include("/mdtp/uplift")
+      redirectTo should include("continueURL")
     }
 
     "handle any other AuthorisationException and display access denied to user" in {

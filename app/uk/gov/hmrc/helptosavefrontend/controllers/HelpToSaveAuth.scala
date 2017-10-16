@@ -140,7 +140,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       toGGLogin(redirectOnLoginURL)
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
-      SeeOther(IvUrl)
+      SeeOther(ivUrl(redirectOnLoginURL))
 
     case ex: AuthorisationException ⇒
       logger.error(s"could not authenticate user due to: $ex")
