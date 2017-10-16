@@ -20,6 +20,7 @@ import java.time.LocalDate
 
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 import com.google.inject.Inject
+import configs.syntax._
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
@@ -27,17 +28,21 @@ import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnect
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
-import uk.gov.hmrc.helptosavefrontend.util.Email
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.util.control.NonFatal
 
-class NSIConnectionHealthCheck @Inject()(system: ActorSystem, configuration: Configuration, metrics: Metrics, nSIConnector: NSIConnector) {
+class NSIConnectionHealthCheck @Inject() (system: ActorSystem, configuration: Configuration, metrics: Metrics, nSIConnector: NSIConnector) extends Logging {
 
-  val healthCheck: ActorRef = system.actorOf(
+  val name: String = "nsi-connection"
+
+  val enabled: Boolean = configuration.underlying.get[Boolean](s"health.$name.enabled").value
+
+  lazy val healthCheck: ActorRef = system.actorOf(
     HealthCheck.props(
-      "nsi-connection",
+      name,
       configuration.underlying,
       system.scheduler,
       metrics.metrics,
@@ -47,6 +52,14 @@ class NSIConnectionHealthCheck @Inject()(system: ActorSystem, configuration: Con
       NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload2)
     )
   )
+
+  // start the health check only if it is enabled
+  if (enabled) {
+    logger.info(s"$name health test enabled - starting HealthCheck actor")
+    val _ = healthCheck
+  } else {
+    logger.info(s"$name health test not enabled - will not start HealthCheck actor")
+  }
 
 }
 
