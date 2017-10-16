@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.health
 
 import akka.actor.{Actor, ActorLogging, Cancellable, PoisonPill, Props, Scheduler}
 import akka.pattern.{after, ask, pipe}
-import cats.data.{NonEmptyVector, OptionT}
+import cats.data.{NonEmptyList, OptionT}
 import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.eq._
@@ -60,7 +60,7 @@ class HealthCheck(name:             String,
                   metrics:          Metrics,
                   pagerDutyAlert:   () ⇒ Unit,
                   pagerDutyResolve: () ⇒ Unit,
-                  runnerProps:      NonEmptyVector[Props])
+                  runnerProps:      NonEmptyList[Props])
   extends Actor with ActorLogging {
 
   import uk.gov.hmrc.helptosavefrontend.health.HealthCheck._
@@ -213,7 +213,7 @@ object HealthCheck {
       otherRunnerProps: Props*): Props =
     Props(
       new HealthCheck(
-        name, config, scheduler, metrics, pagerDutyAlert, pagerDutyResolve, NonEmptyVector(runnerProps, otherRunnerProps.toVector))
+        name, config, scheduler, metrics, pagerDutyAlert, pagerDutyResolve, NonEmptyList(runnerProps, otherRunnerProps.toList))
     )
 
   case object PerformTest
@@ -235,21 +235,24 @@ object HealthCheck {
    *   ...
    * }}}
    */
-  private[health] case class NonEmptyCyclicalQueue[A](xs: NonEmptyVector[A]) {
+  private[health] case class NonEmptyCyclicalQueue[A](xs: NonEmptyList[A]) {
 
-    private var current = dequeueCyclical(xs)
+    private var queue: List[A] = xs.toList
 
-    private def dequeueCyclical(as: NonEmptyVector[A]): (A, NonEmptyVector[A]) = as match {
-      case NonEmptyVector(h, Vector()) ⇒ h → NonEmptyVector(h, Vector())
-      case NonEmptyVector(h, t +: ts)  ⇒ h → NonEmptyVector(t, ts :+ h)
+    val next: () ⇒ A = xs.tail match {
+      case Nil ⇒
+        () ⇒ xs.head
+
+      case _ ⇒
+        () ⇒ queue.headOption.fold{
+          // we've exhausted the list - start from the beginning
+          queue = xs.tail
+          xs.head
+        }{ next ⇒
+          queue = queue.tail
+          next
+        }
     }
-
-    def next(): A = {
-      val nextValue = current._1
-      current = dequeueCyclical(current._2)
-      nextValue
-    }
-
   }
 
 }

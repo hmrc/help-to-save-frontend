@@ -54,7 +54,8 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
   val templateId: String = "awrs_email_verification"
 
-  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, userType: UserType): Future[Either[VerifyEmailError, Unit]] = {
+  def verifyEmail(nino:     String,
+                  newEmail: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, userType: UserType): Future[Either[VerifyEmailError, Unit]] = {
     val continueUrlWithParams = {
       val continueURL = userType.fold(newApplicantContinueURL, accountHolderContinueURL)
       continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()
@@ -75,7 +76,8 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
       response.status match {
         case OK | CREATED ⇒
-          logger.info(s"[EmailVerification] - Email verification successfully triggered (time: ${nanosToPrettyString(time)})", nino)
+          logger.info(s"[EmailVerification] - Email verification successfully triggered, received status ${response.status} " +
+            s"(time: ${nanosToPrettyString(time)})", nino)
           Right(())
 
         case other ⇒
@@ -96,15 +98,16 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
     status match {
       case BAD_REQUEST ⇒
-        logger.warn(s"[EmailVerification] - Bad Request from email verification service (time: ${nanosToPrettyString(time)})", nino)
+        logger.warn(s"[EmailVerification] - received status 400 (Bad Request) (time: ${nanosToPrettyString(time)})", nino)
         Left(RequestNotValidError)
 
       case CONFLICT ⇒
-        logger.info(s"[EmailVerification] - Email address already verified (time: ${nanosToPrettyString(time)})", nino)
+        logger.info("[EmailVerification] - email address already verified, received status 409 (Conflict) " +
+          s"(time: ${nanosToPrettyString(time)})", nino)
         Left(AlreadyVerified)
 
       case SERVICE_UNAVAILABLE ⇒
-        logger.warn(s"[EmailVerification] - Email Verification service not currently available (time: ${nanosToPrettyString(time)})", nino)
+        logger.warn(s"[EmailVerification] - received status 504 (Service Unavailable) (time: ${nanosToPrettyString(time)})", nino)
         Left(VerificationServiceUnavailable)
 
       case other ⇒
