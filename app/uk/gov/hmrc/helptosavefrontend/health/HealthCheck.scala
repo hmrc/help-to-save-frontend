@@ -163,7 +163,7 @@ class HealthCheck(name:             String,
    */
   def failed(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
-      log.info(s"$loggingPrefix - health check had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - health check had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}")
       pagerDutyResolve()
       becomeOK()
 
