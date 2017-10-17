@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.health
 
+import java.time.format.DateTimeFormatter
+import java.time.{Clock, LocalDateTime, ZoneId}
+
 import akka.actor.{Actor, ActorLogging, Cancellable, PoisonPill, Props, Scheduler}
 import akka.pattern.{after, ask, pipe}
 import cats.data.{NonEmptyList, OptionT}
@@ -85,6 +88,10 @@ class HealthCheck(name:             String,
   val numberOfChecksBetweenAlerts: Int =
     config.get[Int](s"health.$name.poll-count-between-pager-duty-alerts").value
 
+  val clock: Clock = Clock.systemUTC()
+
+  val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
   val failureHistogram: Histogram = metrics.defaultRegistry.histogram(s"health.$name.number-of-failures")
 
   val propsQueue: NonEmptyCyclicalQueue[Props] = NonEmptyCyclicalQueue(runnerProps)
@@ -92,6 +99,8 @@ class HealthCheck(name:             String,
   var currentRunnerProps: Props = propsQueue.next()
 
   var performTestTask: Option[Cancellable] = None
+
+  def prettyString(d: LocalDateTime): String = d.format(dateTimeFormatter)
 
   override def receive: Receive = ok(0)
 
@@ -113,13 +122,15 @@ class HealthCheck(name:             String,
       becomeOK(newCount % numberOfChecksBetweenUpdates)
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - health check has started to fail $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - health check has just started to fail $message ${timeString(nanos)}")
+
+      val now = LocalDateTime.now(clock)
 
       if (maximumConsecutiveFailures > 1) {
-        becomeFailing()
+        becomeFailing(now)
       } else {
         pagerDutyAlert()
-        becomeFailed()
+        becomeFailed(now)
       }
 
   }
@@ -128,20 +139,20 @@ class HealthCheck(name:             String,
    * In this state the previous check was a failure and the number of failures had
    * not reached the maximum allowed yet.
    */
-  def failing(fails: Int): Receive = performTest orElse {
+  def failing(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
-      log.info(s"$loggingPrefix - health check was failing but now OK ${timeString(nanos)}")
+      log.info(s"$loggingPrefix - health check was failing since ${prettyString(downSince)} but now OK ${timeString(nanos)}")
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - health check still failing: $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - health check still failing since ${prettyString(downSince)}: $message ${timeString(nanos)}")
       val newFails = fails + 1
 
       if (newFails < maximumConsecutiveFailures) {
-        becomeFailing(newFails)
+        becomeFailing(downSince, newFails)
       } else {
         pagerDutyAlert()
-        becomeFailed()
+        becomeFailed(downSince)
       }
 
   }
@@ -150,16 +161,16 @@ class HealthCheck(name:             String,
    * In this state the previous check was a failure and the maximum allowed failures had
    * been reached
    */
-  def failed(fails: Int): Receive = performTest orElse {
+  def failed(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
-      log.info(s"$loggingPrefix - health check had failed but now OK ${timeString(nanos)}")
+      log.info(s"$loggingPrefix - health check had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}")
       pagerDutyResolve()
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - health check still failing: $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - health check still failing since ${prettyString(downSince)}: $message ${timeString(nanos)}")
       val newFails = fails + 1
-      becomeFailed(newFails)
+      becomeFailed(downSince, newFails)
 
       if (newFails % numberOfChecksBetweenAlerts === 0) {
         pagerDutyAlert()
@@ -185,14 +196,14 @@ class HealthCheck(name:             String,
     context become ok(count)
   }
 
-  def becomeFailing(fails: Int = 1): Unit = {
+  def becomeFailing(downSince: LocalDateTime, fails: Int = 1): Unit = {
     failureHistogram.update(fails)
-    context become failing(fails)
+    context become failing(downSince, fails)
   }
 
-  def becomeFailed(fails: Int = maximumConsecutiveFailures): Unit = {
+  def becomeFailed(downSince: LocalDateTime, fails: Int = maximumConsecutiveFailures): Unit = {
     failureHistogram.update(fails)
-    context become failed(fails)
+    context become failed(downSince, fails)
   }
 
   def withTimeout[A](f: Future[A], timeout: FiniteDuration): OptionT[Future, A] =
