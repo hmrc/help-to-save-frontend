@@ -74,7 +74,7 @@ class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
 
   val authTimer: Timer = timer("frontend.auth-timer")
 
-  val healthCheckTimer: Timer = timer("frontend.health-check.nsi.timer")
+  val healthCheckTimer: Timer = timer("health.nsi-connection.timer")
 
 }
 
