@@ -77,7 +77,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
       response.status match {
         case OK | CREATED ⇒
           logger.info(s"[EmailVerification] - Email verification successfully triggered, received status ${response.status} " +
-            s"(time: ${nanosToPrettyString(time)})", nino)
+            s"(round-trip time: ${nanosToPrettyString(time)})", nino)
           Right(())
 
         case other ⇒
@@ -103,7 +103,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
       case CONFLICT ⇒
         logger.info("[EmailVerification] - email address already verified, received status 409 (Conflict) " +
-          s"(time: ${nanosToPrettyString(time)})", nino)
+          s"(round-trip time: ${nanosToPrettyString(time)})", nino)
         Left(AlreadyVerified)
 
       case SERVICE_UNAVAILABLE ⇒

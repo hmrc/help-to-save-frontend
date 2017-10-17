@@ -214,7 +214,7 @@ class HealthCheck(name:             String,
 
   val loggingPrefix: String = s"[HealthCheck: $name]"
 
-  def timeString(nanos: Long): String = s"(time: ${nanosToPrettyString(nanos)})"
+  def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
   override def preStart(): Unit = {
     super.preStart()

@@ -53,7 +53,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
         .retrieve(UserRetrievals and authorisedEnrolments) {
           case name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ authorisedEnrols ⇒
             val time = timer.stop()
-            val timeString = s"(time: ${nanosToPrettyString(time)})"
+            val timeString = s"(round-trip time: ${nanosToPrettyString(time)})"
 
             val mayBeNino = authorisedEnrols.enrolments
               .find(_.key === "HMRC-NI")
