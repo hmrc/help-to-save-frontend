@@ -87,14 +87,14 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     if (emailVerificationParams.nino =!= nino) {
       auditor.sendEvent(SuspiciousActivity(nino, "nino_mismatch"), nino)
       logger.warn("Email was verified but nino in URL did not match nino for user", nino)
-      InternalServerError(internalServerError())
+      internalServerError()
     } else {
       htsContext.userDetails match {
 
         case Left(missingUserInfos) ⇒
           logger.warn("Email was verified but missing some user info " +
             s"(${missingUserInfos.missingInfo.mkString(",")}", nino)
-          InternalServerError(internalServerError())
+          internalServerError()
 
         case Right(nsiUserInfo) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
@@ -131,7 +131,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     enrolled.fold[Future[Result]]({
       error ⇒
         logger.warn(s"Could not check enrolment status: $error")
-        InternalServerError(internalServerError())
+        internalServerError()
     }, {
       case (enrolmentStatus, maybeEmail) ⇒
         val nino = htsContext.nino
@@ -141,14 +141,14 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             // user is not enrolled in this case
             auditor.sendEvent(SuspiciousActivity(nino, "missing_enrolment"), nino)
             logger.warn("User was not enrolled", nino)
-            InternalServerError(internalServerError())
+            internalServerError()
 
           case (EnrolmentStatus.Enrolled(_), None) ⇒
             // this should never happen since we cannot have created an account
             // without a successful write to our email store
             logger.warn("User was enrolled but had no stored email", nino)
             auditor.sendEvent(SuspiciousActivity(nino, "missing_email_record"), nino)
-            InternalServerError(internalServerError())
+            internalServerError()
 
           case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
             ifEnrolled(email)

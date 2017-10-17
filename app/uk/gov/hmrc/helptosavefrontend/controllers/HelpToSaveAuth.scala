@@ -62,7 +62,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
             mayBeNino.fold{
               logger.warn(s"Could not find NINO for user $timeString")
-              toFuture(InternalServerError(internalServerError()))
+              toFuture(internalServerError())
             }(nino ⇒ {
               val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
@@ -143,7 +143,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
     case ex: AuthorisationException ⇒
       logger.error(s"could not authenticate user due to: $ex")
-      InternalServerError(internalServerError())
+      internalServerError()
   }
 
   private def toGGLogin(redirectOnLoginURL: String) =

@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import play.api.mvc.Request
-import play.twirl.api.Html
+import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendGlobal
 import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 trait HelpToSaveFrontendController extends FrontendController {
 
-  def internalServerError()(implicit request: Request[_]): Html = FrontendGlobal.internalServerErrorTemplate(request)
+  def internalServerError()(implicit request: Request[_]): Result =
+    InternalServerError(FrontendGlobal.internalServerErrorTemplate(request))
 
 }

@@ -22,6 +22,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -37,7 +38,7 @@ trait SessionBehaviour {
     sessionCacheConnector.get.fold({
       e ⇒
         logger.warn(s"Could not read sessions data from keystore: $e", htsContext.nino)
-        Future.successful(InternalServerError(internalServerError()))
+        toFuture(internalServerError())
     }, _.fold(noSession)(whenSession)
     ).flatMap(identity)
 

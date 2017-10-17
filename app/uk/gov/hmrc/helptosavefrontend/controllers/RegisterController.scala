@@ -73,7 +73,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
           result.fold[Result](
             { e ⇒
               logger.warn(s"Could not write confirmed email: $e", nino)
-              InternalServerError(internalServerError())
+              internalServerError()
             }, { _ ⇒
               SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
             }
@@ -109,7 +109,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
               val userInfo = nsiUserInfo.updateEmail(email)
               helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString).fold(
                 error ⇒
-                  InternalServerError(internalServerError()),
+                  internalServerError(),
                 _ ⇒ {
                   //Account creation is successful, trigger background taks but don't worry about the result
                   auditor.sendEvent(AccountCreated(userInfo), nino)
