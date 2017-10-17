@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import java.time.LocalDate
-
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json._
 

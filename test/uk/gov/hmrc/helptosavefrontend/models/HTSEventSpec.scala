@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
 class HTSEventSpec extends TestSupport {

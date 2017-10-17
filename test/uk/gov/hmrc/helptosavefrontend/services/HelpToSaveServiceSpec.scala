@@ -21,7 +21,9 @@ import cats.instances.future._
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.{TestSupport, models}
+import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibilityCheckResult
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -132,7 +134,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
     "createAccount" must {
 
-      val nsiUserInfo = models.validNSIUserInfo
+      val nsiUserInfo = validNSIUserInfo
 
       "return a successful response" in {
 
