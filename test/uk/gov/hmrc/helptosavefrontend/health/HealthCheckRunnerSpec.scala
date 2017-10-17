@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.health
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.testkit.TestProbe
-import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformTest
+import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformHealthCheck
 
 import scala.concurrent.Future
 
@@ -40,7 +40,7 @@ class HealthCheckRunnerSpec extends ActorTestSupport("HealthCheckRunnerSpec") {
       val result = HealthCheckResult.Success(0L)
       val runner = system.actorOf(Props(new TestRunner(probe.ref, result)))
 
-      runner ! PerformTest
+      runner ! PerformHealthCheck
       probe.expectMsg("Hello!")
       expectMsg(result)
     }

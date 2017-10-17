@@ -26,7 +26,7 @@ import com.kenshoo.play.metrics.Metrics
 import com.miguno.akka.testing.VirtualTime
 import com.typesafe.config.ConfigFactory
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
-import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformTest
+import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformHealthCheck
 import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.PagerDutyMessage.{PagerDutyAlert, PagerDutyResolved}
 import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.ProxyActor.Created
 import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.ProxyActor
@@ -114,7 +114,7 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
     // watch child here to check that it dies later on
     runnerListener.watch(created.ref)
 
-    runnerListener.expectMsg(PerformTest)
+    runnerListener.expectMsg(PerformHealthCheck)
     runnerListener.reply(
       result.fold[HealthCheckResult](e ⇒ HealthCheckResult.Failure(e, 0L), _ ⇒ HealthCheckResult.Success(0L))
     )
@@ -157,7 +157,7 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
         }
 
         "ask it to perform a test" in {
-          runnerListener.expectMsg(PerformTest)
+          runnerListener.expectMsg(PerformHealthCheck)
         }
 
         "kill the child once it has replied" in {
@@ -249,7 +249,7 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
           created.name shouldBe runnerName1
           runnerListener.watch(created.ref)
 
-          runnerListener.expectMsg(PerformTest)
+          runnerListener.expectMsg(PerformHealthCheck)
           // don't reply - advance time to the configured test timeout
           time.advance(testTimeout)
 
@@ -371,7 +371,7 @@ object HealthTestSpec {
     }
 
     override def receive: Receive = {
-      case PerformTest ⇒ (ref ? PerformTest) pipeTo sender()
+      case PerformHealthCheck ⇒ (ref ? PerformHealthCheck) pipeTo sender()
     }
 
   }
