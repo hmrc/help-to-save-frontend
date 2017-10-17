@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.health
 import akka.actor.{ActorRef, Props}
 import cats.data.EitherT
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
-import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformTest
+import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformHealthCheck
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner.Payload
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
@@ -56,7 +56,7 @@ class NSIConnectionHealthCheckRunnerSpec extends ActorTestSupport("NSIConnection
       "call the NSIConnector to do the test and reply back with a successful result " +
         "if the NSIConnector returns a success" in {
           mockNSIConnectorTest(Some(Right(())))
-          runner ! PerformTest
+          runner ! PerformHealthCheck
 
           expectMsgType[HealthCheckResult.Success]
         }
@@ -66,7 +66,7 @@ class NSIConnectionHealthCheckRunnerSpec extends ActorTestSupport("NSIConnection
             def test(mockActions: ⇒ Unit): Unit = {
               mockActions
 
-              runner ! PerformTest
+              runner ! PerformHealthCheck
               expectMsgType[HealthCheckResult.Failure]
             }
 

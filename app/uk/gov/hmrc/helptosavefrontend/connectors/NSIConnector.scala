@@ -165,7 +165,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
     }
   }
 
-  private def timeString(nanos: Long): String = s"(time: ${nanosToPrettyString(nanos)})"
+  private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
     response.parseJson[SubmissionFailure] match {
