@@ -35,7 +35,7 @@ trait EnrolmentCheckBehaviour {
 
   def checkIfAlreadyEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
                              handleEnrolmentServiceError: String ⇒ Future[Result]
-  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Future[Result] = {
     val nino = htsContext.nino
 
     val enrolled: EitherT[Future, String, EnrolmentStatus] = helpToSaveService.getUserEnrolmentStatus()
