@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.health
 
 import akka.actor.Actor
 import akka.pattern.pipe
-import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformTest
+import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformHealthCheck
 
 import scala.concurrent.Future
 
@@ -29,7 +29,7 @@ trait HealthCheckRunner { this: Actor ⇒
   def performTest(): Future[HealthCheckResult]
 
   override def receive: Receive = {
-    case PerformTest ⇒ performTest() pipeTo sender
+    case PerformHealthCheck ⇒ performTest() pipeTo sender
   }
 
 }

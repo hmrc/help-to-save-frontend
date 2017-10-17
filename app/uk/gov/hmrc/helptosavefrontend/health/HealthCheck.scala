@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.health
 
+import java.time.format.DateTimeFormatter
+import java.time.{Clock, LocalDateTime, ZoneId}
+
 import akka.actor.{Actor, ActorLogging, Cancellable, PoisonPill, Props, Scheduler}
 import akka.pattern.{after, ask, pipe}
 import cats.data.{NonEmptyList, OptionT}
@@ -33,10 +36,10 @@ import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 /**
- * An actor which handles the results of a generic health test. The tests that will be run are
+ * An actor which handles the results of a generic health check. The checks that will be run are
  * defined by `runnerProps`. The [[HealthCheck]] actor will repeatedly create a child using these props
  * at a configured time interval. These children will have to respond to a
- * [[uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformTest]] message and respond with a [[HealthCheckResult]].
+ * [[uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformHealthCheck]] message and respond with a [[HealthCheckResult]].
  * The appropriate interface of the children is handily provided by the [[HealthCheckRunner]] trait. After a
  * configured number of successful tests the [[HealthCheck]] actor will switch tests by using the next [[Props]] in
  * `runnerProps`. When the last [[Props]] in `runnerProps` is used, the next switch will result in the first
@@ -67,23 +70,27 @@ class HealthCheck(name:             String,
 
   import context.dispatcher
 
-  val minimumTimeBetweenTests: FiniteDuration =
+  val minimumTimeBetweenChecks: FiniteDuration =
     config.get[FiniteDuration](s"health.$name.minimum-poll-period").value
 
-  val timeBetweenTests: FiniteDuration =
-    config.get[FiniteDuration](s"health.$name.poll-period").value.max(minimumTimeBetweenTests)
+  val timeBetweenChecks: FiniteDuration =
+    config.get[FiniteDuration](s"health.$name.poll-period").value.max(minimumTimeBetweenChecks)
 
-  val testTimeout: FiniteDuration =
+  val healthCheckTimeout: FiniteDuration =
     config.get[FiniteDuration](s"health.$name.poll-timeout").value
 
-  val numberOfTestsBetweenUpdates: Int =
+  val numberOfChecksBetweenUpdates: Int =
     config.get[Int](s"health.$name.poll-count-between-updates").value
 
   val maximumConsecutiveFailures: Int =
     config.get[Int](s"health.$name.poll-count-failures-to-alert").value
 
-  val numberOfTestsBetweenAlerts: Int =
+  val numberOfChecksBetweenAlerts: Int =
     config.get[Int](s"health.$name.poll-count-between-pager-duty-alerts").value
+
+  val clock: Clock = Clock.systemUTC()
+
+  val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
   val failureHistogram: Histogram = metrics.defaultRegistry.histogram(s"health.$name.number-of-failures")
 
@@ -93,73 +100,91 @@ class HealthCheck(name:             String,
 
   var performTestTask: Option[Cancellable] = None
 
+  def prettyString(d: LocalDateTime): String = d.format(dateTimeFormatter)
+
   override def receive: Receive = ok(0)
 
-  def ok(count: Int): Receive = performTest orElse {
+  /**
+   * In this state the previous check was a success.
+   *
+   * @param successCount This count determines when the props used to perform
+   *                     the next health check switches
+   */
+  def ok(successCount: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
-      log.info(s"Health check $name OK ${timeString(nanos)}")
-      val newCount = count + 1
+      log.info(s"$loggingPrefix - health check is passing ${timeString(nanos)}")
+      val newCount = successCount + 1
 
-      if (newCount === numberOfTestsBetweenUpdates - 1) {
+      if (newCount === numberOfChecksBetweenUpdates - 1) {
         currentRunnerProps = propsQueue.next()
       }
 
-      becomeOK(newCount % numberOfTestsBetweenUpdates)
+      becomeOK(newCount % numberOfChecksBetweenUpdates)
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"Health check $name has started to fail $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - health check has just started to fail $message ${timeString(nanos)}")
+
+      val now = LocalDateTime.now(clock)
 
       if (maximumConsecutiveFailures > 1) {
-        becomeFailing()
+        becomeFailing(now)
       } else {
         pagerDutyAlert()
-        becomeFailed()
+        becomeFailed(now)
       }
 
   }
 
-  def failing(fails: Int): Receive = performTest orElse {
+  /**
+   * In this state the previous check was a failure and the number of failures had
+   * not reached the maximum allowed yet.
+   */
+  def failing(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
-      log.info(s"Health check $name was failing but now OK ${timeString(nanos)}")
+      log.info(s"$loggingPrefix - health check was failing since ${prettyString(downSince)} but now OK ${timeString(nanos)}")
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"Health check $name still failing: $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - health check still failing since ${prettyString(downSince)}: $message ${timeString(nanos)}")
       val newFails = fails + 1
 
       if (newFails < maximumConsecutiveFailures) {
-        becomeFailing(newFails)
+        becomeFailing(downSince, newFails)
       } else {
         pagerDutyAlert()
-        becomeFailed()
+        becomeFailed(downSince)
       }
 
   }
 
-  def failed(fails: Int): Receive = performTest orElse {
+  /**
+   * In this state the previous check was a failure and the maximum allowed failures had
+   * been reached
+   */
+  def failed(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(nanos) ⇒
-      log.info(s"Health check $name had failed but now OK ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - health check had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}")
       pagerDutyResolve()
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"Health check $name still failing: $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - health check still failing since ${prettyString(downSince)}: $message ${timeString(nanos)}")
       val newFails = fails + 1
-      becomeFailed(newFails)
+      becomeFailed(downSince, newFails)
 
-      if (newFails % numberOfTestsBetweenAlerts === 0) {
+      if (newFails % numberOfChecksBetweenAlerts === 0) {
         pagerDutyAlert()
       }
   }
 
   def performTest: Receive = {
-    case PerformTest ⇒
+    case PerformHealthCheck ⇒
       val runner = context.actorOf(currentRunnerProps)
       val result: Future[HealthCheckResult] =
         withTimeout(
-          runner.ask(PerformTest)(testTimeout).mapTo[HealthCheckResult],
-          testTimeout
-        ).getOrElse(HealthCheckResult.Failure("Test timed out", testTimeout.toNanos))
+          runner.ask(PerformHealthCheck)(healthCheckTimeout).mapTo[HealthCheckResult],
+          healthCheckTimeout
+        ).getOrElse(HealthCheckResult.Failure("Health check timed out", healthCheckTimeout.toNanos))
           .recover{ case NonFatal(e) ⇒ HealthCheckResult.Failure(e.getMessage, 0L) }
 
       result.onComplete{ _ ⇒ runner ! PoisonPill }
@@ -171,14 +196,14 @@ class HealthCheck(name:             String,
     context become ok(count)
   }
 
-  def becomeFailing(fails: Int = 1): Unit = {
+  def becomeFailing(downSince: LocalDateTime, fails: Int = 1): Unit = {
     failureHistogram.update(fails)
-    context become failing(fails)
+    context become failing(downSince, fails)
   }
 
-  def becomeFailed(fails: Int = maximumConsecutiveFailures): Unit = {
+  def becomeFailed(downSince: LocalDateTime, fails: Int = maximumConsecutiveFailures): Unit = {
     failureHistogram.update(fails)
-    context become failed(fails)
+    context become failed(downSince, fails)
   }
 
   def withTimeout[A](f: Future[A], timeout: FiniteDuration): OptionT[Future, A] =
@@ -187,17 +212,21 @@ class HealthCheck(name:             String,
       after(timeout, scheduler)(Future.successful(None))
     )))
 
+  val loggingPrefix: String = s"[HealthCheck: $name]"
+
   def timeString(nanos: Long): String = s"(time: ${nanosToPrettyString(nanos)})"
 
   override def preStart(): Unit = {
     super.preStart()
-    performTestTask = Some(scheduler.schedule(timeBetweenTests, timeBetweenTests, self, PerformTest))
+    log.info(s"$loggingPrefix Starting scheduler to poll every $timeBetweenChecks")
+    performTestTask = Some(scheduler.schedule(timeBetweenChecks, timeBetweenChecks, self, PerformHealthCheck))
   }
 
   override def postStop(): Unit = {
     super.postStop()
     performTestTask.foreach(_.cancel())
   }
+
 }
 
 object HealthCheck {
@@ -216,7 +245,7 @@ object HealthCheck {
         name, config, scheduler, metrics, pagerDutyAlert, pagerDutyResolve, NonEmptyList(runnerProps, otherRunnerProps.toList))
     )
 
-  case object PerformTest
+  case object PerformHealthCheck
 
   /**
    * Uses the `NonEmptyVector` to produce a queue which when dequeueing an element will
