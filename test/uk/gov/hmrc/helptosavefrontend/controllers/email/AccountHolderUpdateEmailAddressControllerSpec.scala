@@ -260,6 +260,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
               mockEmailGet()(Right(Some("email")))
               mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
               mockStoreEmail(verifiedEmail)(Left(""))
+              mockAuditEmailChanged()
             }
 
             val result = verifyEmail(emailVerificationParams.encode())
