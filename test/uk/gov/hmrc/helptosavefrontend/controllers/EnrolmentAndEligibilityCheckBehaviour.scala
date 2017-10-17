@@ -133,15 +133,14 @@ trait EnrolmentAndEligibilityCheckBehaviour {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Left(""))
           }
-          status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+          checkIsTechnicalErrorPage(getResult())
         }
       }
 
       "there is no NINO returned by auth" in {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
 
-        println("Hello!!\n")
-        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+        checkIsTechnicalErrorPage(getResult())
       }
 
       "there is an error getting the session data" in {
@@ -151,7 +150,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
           mockSessionCacheConnectorGet(Left(""))
         }
 
-        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+        checkIsTechnicalErrorPage(getResult())
       }
 
     }

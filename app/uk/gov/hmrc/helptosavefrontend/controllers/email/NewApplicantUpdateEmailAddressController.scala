@@ -90,7 +90,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         result.fold({
           e ⇒
             logger.warn(e)
-            FrontendGlobal.resolveError(request, new Exception)
+            internalServerError()
         }, { maybeNSIUserInfo ⇒
           maybeNSIUserInfo.fold{
             // this means they were ineligible

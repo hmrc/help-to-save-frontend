@@ -241,7 +241,7 @@ class EligibilityCheckControllerSpec
             }
 
             val result = doCheckEligibilityRequest()
-            status(result) shouldBe INTERNAL_SERVER_ERROR
+            checkIsTechnicalErrorPage(result)
           }
         }
       }

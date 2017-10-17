@@ -274,7 +274,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
           mockActions
           val params = EmailVerificationParams(nino, email)
           val result = doRequestWithQueryParam(params.encode())
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+          checkIsTechnicalErrorPage(result)
         }
 
       "the user has not already enrolled and the given nino doesn't match the session nino" in {

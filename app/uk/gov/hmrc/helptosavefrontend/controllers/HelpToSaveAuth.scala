@@ -35,12 +35,11 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL20
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, toJavaDate}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 import scala.concurrent.Future
 
 class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metrics)
-  extends FrontendController with AuthorisedFunctions with Logging {
+  extends HelpToSaveFrontendController with AuthorisedFunctions with Logging {
 
   override def authConnector: AuthConnector = frontendAuthConnector
 
@@ -63,7 +62,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
             mayBeNino.fold{
               logger.warn(s"Could not find NINO for user $timeString")
-              toFuture(InternalServerError("could not find NINO for logged in user"))
+              toFuture(internalServerError())
             }(nino ⇒ {
               val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
@@ -135,7 +134,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       .toEither
   }
 
-  def handleFailure(redirectOnLoginURL: String): PartialFunction[Throwable, Result] = {
+  def handleFailure(redirectOnLoginURL: String)(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
       toGGLogin(redirectOnLoginURL)
 
@@ -144,7 +143,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
     case ex: AuthorisationException ⇒
       logger.error(s"could not authenticate user due to: $ex")
-      InternalServerError("")
+      internalServerError()
   }
 
   private def toGGLogin(redirectOnLoginURL: String) =
@@ -155,4 +154,3 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
     ))
 
 }
-

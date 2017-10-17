@@ -291,7 +291,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           }
 
           val result = verifyEmail(emailVerificationParams.copy(nino = "other nino").encode())
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+          checkIsTechnicalErrorPage(result)
         }
 
         "there is missing user info from auth" in {
@@ -302,7 +302,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+          checkIsTechnicalErrorPage(result)
         }
 
         "the call to NS&I to update the email is unsuccessful" in {
@@ -351,7 +351,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       "the user has no NINO" in {
         mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
 
-        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+        checkIsTechnicalErrorPage(getResult())
       }
 
       "there is an error getting the enrolment status" in {
@@ -360,7 +360,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockEnrolmentCheck()(Left(""))
         }
 
-        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+        checkIsTechnicalErrorPage(getResult())
       }
 
       "there is an error getting the confirmed email" in {
@@ -370,7 +370,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockEmailGet()(Left(""))
         }
 
-        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+        checkIsTechnicalErrorPage(getResult())
       }
 
       "the user is not enrolled" in {
@@ -381,8 +381,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuditSuspiciousActivity()
         }
 
-        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
-
+        checkIsTechnicalErrorPage(getResult())
       }
 
       "the user is enrolled but has no stored email" in {
@@ -393,7 +392,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuditSuspiciousActivity()
         }
 
-        status(getResult()) shouldBe INTERNAL_SERVER_ERROR
+        checkIsTechnicalErrorPage(getResult())
       }
 
     }

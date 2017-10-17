@@ -24,7 +24,7 @@ import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, FrontendGlobal}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -178,7 +178,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           }
 
           val result = doRequest(email)
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+          checkIsTechnicalErrorPage(result)
         }
 
         "the email cannot be written to the email store" in {
@@ -191,7 +191,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           }
 
           val result = doRequest(email)
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+          checkIsTechnicalErrorPage(result)
         }
       }
     }
@@ -295,9 +295,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           }
 
           val result = doCreateAccountRequest()
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-          val html = contentAsString(result)
-          html should include("Account creation failed")
+          checkIsTechnicalErrorPage(result)
         }
       }
     }
