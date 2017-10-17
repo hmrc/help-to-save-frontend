@@ -55,10 +55,10 @@ class NSIConnectionHealthCheck @Inject() (system: ActorSystem, configuration: Co
 
   // start the health check only if it is enabled
   if (enabled) {
-    logger.info(s"HealthCheck $name enabled - starting HealthCheck actor")
+    logger.info(s"HealthCheck $name enabled")
     val _ = healthCheck
   } else {
-    logger.info(s"HealthCheck $name not enabled - will not start HealthCheck actor")
+    logger.info(s"HealthCheck $name not enabled")
   }
 
 }
