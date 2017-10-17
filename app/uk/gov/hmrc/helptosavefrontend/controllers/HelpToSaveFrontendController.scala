@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.Request
+import play.twirl.api.Html
+import uk.gov.hmrc.helptosavefrontend.config.FrontendGlobal
+import uk.gov.hmrc.play.frontend.controller.FrontendController
 
-class NSIController extends HelpToSaveFrontendController {
+trait HelpToSaveFrontendController extends FrontendController {
 
-  def goToNSI: Action[AnyContent] = Action { implicit request ⇒
-    SeeOther("https://www.nsandi.com/")
-  }
+  def internalServerError()(implicit request: Request[_]): Html = FrontendGlobal.internalServerErrorTemplate(request)
 
 }

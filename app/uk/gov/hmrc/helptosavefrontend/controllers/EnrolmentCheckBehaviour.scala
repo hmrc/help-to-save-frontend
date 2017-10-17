@@ -18,25 +18,24 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.play.frontend.controller.FrontendController
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait EnrolmentCheckBehaviour {
-  this: FrontendController with Logging ⇒
+  this: HelpToSaveFrontendController with Logging ⇒
 
   val helpToSaveService: HelpToSaveService
 
   def checkIfAlreadyEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
-                             handleEnrolmentServiceError: String ⇒ Future[Result] = _ ⇒ InternalServerError
-  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Future[Result] = {
+                             handleEnrolmentServiceError: String ⇒ Future[Result]
+  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     val nino = htsContext.nino
 
     val enrolled: EitherT[Future, String, EnrolmentStatus] = helpToSaveService.getUserEnrolmentStatus()
@@ -63,5 +62,9 @@ trait EnrolmentCheckBehaviour {
     }
     ).flatMap(identity)
   }
+
+  def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] =
+    checkIfAlreadyEnrolled(ifNotEnrolled,
+      _ ⇒ Future.successful(InternalServerError(internalServerError())))
 
 }

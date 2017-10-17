@@ -21,7 +21,7 @@ import javax.inject.Singleton
 import cats.instances.future._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
@@ -73,7 +73,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
           result.fold[Result](
             { e ⇒
               logger.warn(s"Could not write confirmed email: $e", nino)
-              InternalServerError
+              InternalServerError(internalServerError())
             }, { _ ⇒
               SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
             }
@@ -108,7 +108,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
               // TODO: plug in actual pages below
               val userInfo = nsiUserInfo.updateEmail(email)
               helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString).fold(
-                error ⇒ InternalServerError(uk.gov.hmrc.helptosavefrontend.views.html.core.stub_page(error)),
+                error ⇒
+                  InternalServerError(internalServerError()),
                 _ ⇒ {
                   //Account creation is successful, trigger background taks but don't worry about the result
                   auditor.sendEvent(AccountCreated(userInfo), nino)
@@ -152,7 +153,9 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
    * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
    * given action if the the session data indicates that they are eligible
    */
-  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Future[Result] =
+  private def checkIfDoneEligibilityChecks(ifEligible: (NSIUserInfo, Option[Email]) ⇒ Future[Result])(
+      implicit
+      htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] =
     checkSession {
       // no session data => user has not gone through the journey this session => take them to eligibility checks
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)

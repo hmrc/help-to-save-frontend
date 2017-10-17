@@ -125,7 +125,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
       mockAuthWith("UnsupportedCredentialRole")
 
       val result = actionWithEnrols(FakeRequest())
-      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      checkIsTechnicalErrorPage(result)
     }
 
     "handle any other error and display technical error page to user" in {
@@ -133,7 +133,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
       mockAuthWith("some other reason")
 
       val result = actionWithEnrols(FakeRequest())
-      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      checkIsTechnicalErrorPage(result)
     }
   }
 }

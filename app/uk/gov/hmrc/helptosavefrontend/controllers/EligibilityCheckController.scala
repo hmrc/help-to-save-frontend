@@ -157,7 +157,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
                                                         htsContext: HtsContextWithNINO): Result = error.value match {
     case Left(e) ⇒
       logger.warn(e, htsContext.nino)
-      InternalServerError
+      InternalServerError(internalServerError())
 
     case Right(missingUserInfo) ⇒
       logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)

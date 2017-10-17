@@ -25,13 +25,17 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Suite}
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.Result
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import play.api.{Application, Configuration, Play}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendGlobal
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with ScalaFutures {
   this: Suite ⇒
@@ -62,6 +66,13 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
   override def afterAll() {
     Play.stop(fakeApplication)
     super.afterAll()
+  }
+
+  private lazy val technicalErrorPageContent: String = FrontendGlobal.internalServerErrorTemplate(FakeRequest()).body
+
+  def checkIsTechnicalErrorPage(result: Future[Result]): Unit = {
+    status(result) shouldBe INTERNAL_SERVER_ERROR
+    contentAsString(result) shouldBe technicalErrorPageContent
   }
 
   val mockMetrics = new Metrics(stub[PlayMetrics]) {
