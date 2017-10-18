@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter
 
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.models.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 
 class JSONSchemaValidationServiceImplSpec extends TestSupport {
 

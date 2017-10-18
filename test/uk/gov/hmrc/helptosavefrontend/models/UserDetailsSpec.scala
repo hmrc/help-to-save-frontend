@@ -20,6 +20,7 @@ import org.scalacheck.Arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsSuccess, Json}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.userInfoGen
 
 class UserDetailsSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 

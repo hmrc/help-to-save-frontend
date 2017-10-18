@@ -30,7 +30,8 @@ import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, EnrolmentAndEligibilityCheckBehaviour}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity, VerifyEmailError, validNSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult

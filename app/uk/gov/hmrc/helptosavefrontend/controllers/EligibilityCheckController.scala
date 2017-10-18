@@ -32,7 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfos
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.config.AppName
@@ -111,45 +111,43 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
       e ⇒ handleEligibilityCheckError(e),
       r ⇒ handleEligibilityResult(r))
 
-  private def performEligibilityChecks()(implicit hc: HeaderCarrier, htsContext: HtsContextWithNINO): EitherT[Future, Error, EligibilityResultWithUserInfo] =
+  private def performEligibilityChecks()(implicit hc: HeaderCarrier, htsContext: HtsContextWithNINO): EitherT[Future, Error, EligibilityCheckResult] =
     for {
       nsiUserInfo ← getUserInformation()
       eligible ← helpToSaveService.checkEligibility().leftMap(Error.apply)
-      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(eligible, nsiUserInfo)).leftMap(Error.apply)
       session = {
-        val maybeUserInfo = eligible.result.fold(_ ⇒ None, _ ⇒ Some(nsiUserInfo))
+        val maybeUserInfo = eligible.fold(_ ⇒ Some(nsiUserInfo), _ ⇒ None, _ ⇒ None)
         HTSSession(maybeUserInfo, None)
       }
+      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(session.eligibilityCheckResult)).leftMap(Error.apply)
       _ ← sessionCacheConnector.put(session).leftMap[Error](Error.apply)
-    } yield EligibilityResultWithUserInfo(eligible.result.map(e ⇒ e -> nsiUserInfo))
+    } yield eligible
 
   private def getUserInformation()(implicit htsContext: HtsContextWithNINO): EitherT[Future, Error, NSIUserInfo] =
     EitherT.fromEither[Future](htsContext.userDetails.leftMap(missingInfo ⇒ Error(missingInfo)))
 
-  private def handleEligibilityResult(result: EligibilityResultWithUserInfo)(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Result = {
+  private def handleEligibilityResult(result: EligibilityCheckResult)(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Result = {
     val nino = htsContext.nino
-    result.value.fold(
-      {
-        case IneligibilityReason.AccountAlreadyOpened ⇒
-          auditor.sendEvent(EligibilityResult(nino, IneligibilityReason.AccountAlreadyOpened.legibleString, isEligible = false), nino)
+    result.fold(
+      { eligibilityReason ⇒
+        auditor.sendEvent(EligibilityResult(nino, eligibilityReason.description), nino)
+        SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+      }, { ineligibilityReason ⇒
+        auditor.sendEvent(EligibilityResult(nino, ineligibilityReason.description, isEligible = false), nino)
+        SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
+      }, { alreadyHasAccount ⇒
+        auditor.sendEvent(EligibilityResult(nino, alreadyHasAccount.description, isEligible = false), nino)
 
-          // set the ITMP flag here but don't worry about the result
-          helpToSaveService.setITMPFlag().value.onComplete{
-            case Failure(e)        ⇒ logger.warn(s"Could not set ITMP flag, future failed: ${e.getMessage}", nino)
-            case Success(Left(e))  ⇒ logger.warn(s"Could not set ITMP flag: $e", nino)
-            case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user", nino)
-          }
+        // set the ITMP flag here but don't worry about the result
+        helpToSaveService.setITMPFlag().value.onComplete{
+          case Failure(e)        ⇒ logger.warn(s"Could not set ITMP flag, future failed: ${e.getMessage}", nino)
+          case Success(Left(e))  ⇒ logger.warn(s"Could not set ITMP flag: $e", nino)
+          case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user", nino)
+        }
 
-          Ok("You've already got an account - yay!!!")
-
-        case other ⇒
-          auditor.sendEvent(EligibilityResult(nino, other.legibleString, isEligible = false), nino)
-          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-      }, {
-        case (eligibilityReason, _) ⇒
-          auditor.sendEvent(EligibilityResult(nino, eligibilityReason.legibleString), nino)
-          SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-      })
+        SeeOther(routes.NSIController.goToNSI().url)
+      }
+    )
   }
 
   private def handleEligibilityCheckError(error: Error)(implicit request: Request[AnyContent],
@@ -164,19 +162,16 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
       Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalAccountUrl))
   }
 
-  private def validateCreateAccountJsonSchema(eligibilityCheckResult: EligibilityCheckResult,
-                                              userInfo:               NSIUserInfo): Either[String, NSIUserInfo] = {
+  private def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Unit] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
-    eligibilityCheckResult.result.fold(
-      _ ⇒ Right(userInfo),
-      _ ⇒ {
-        FEATURE("outgoing-json-validation", app.configuration, logger).thenOrElse(
-          jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ userInfo),
-          Right(userInfo)
+    userInfo.fold[Either[String, Unit]](Right(())) { userInfo ⇒
+      FEATURE("outgoing-json-validation", app.configuration, logger).thenOrElse(
+        jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ ()),
+        Right(()
         )
-      }
-    )
+      )
+    }
   }
 
 }

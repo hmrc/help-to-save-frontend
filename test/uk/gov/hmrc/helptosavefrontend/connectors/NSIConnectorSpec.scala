@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl, nsiHealthCheckUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.models.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 

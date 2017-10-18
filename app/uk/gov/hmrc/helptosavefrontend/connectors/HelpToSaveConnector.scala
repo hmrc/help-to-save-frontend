@@ -124,21 +124,24 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
 
   private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
-    val reason = eligibilityCheckResponse.reason
+    val (reasonCode, reason) = eligibilityCheckResponse.reasonCode → eligibilityCheckResponse.reason
 
-    eligibilityCheckResponse.result match {
-      case "Eligible to HtS Account" ⇒
+    eligibilityCheckResponse.resultCode match {
+      case 1 ⇒
         Either.fromOption(
-          EligibilityReason.fromString(reason).map(r ⇒ EligibilityCheckResult(r)),
-          s"Could not parse ineligibility reason '$reason'")
+          EligibilityReason.fromInt(reasonCode, reason).map(EligibilityCheckResult.Eligible),
+          s"Could not parse ineligibility reasonCode '$reasonCode'. Reason string was '$reason'")
 
-      case "Ineligible to HtS Account" ⇒
+      case 2 ⇒
         Either.fromOption(
-          IneligibilityReason.fromString(reason).map(r ⇒ EligibilityCheckResult(r)),
-          s"Could not parse eligibility reason '$reason'")
+          IneligibilityReason.fromInt(reasonCode, reason).map(EligibilityCheckResult.Ineligible),
+          s"Could not parse eligibility reasonCode '$reasonCode'. Reason string was '$reason'")
+
+      case 3 ⇒
+        Right(EligibilityCheckResult.AlreadyHasAccount(reason))
 
       case other ⇒
-        Left(s"Could not parse eligibility result '$other'")
+        Left(s"Could not parse eligibility result code '$other'. Result string was '$reason'")
 
     }
   }
@@ -175,7 +178,7 @@ object HelpToSaveConnectorImpl {
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
 
-  private[connectors] case class EligibilityCheckResponse(result: String, reason: String)
+  private[connectors] case class EligibilityCheckResponse(result: String, resultCode: Int, reason: String, reasonCode: Int)
 
   private[connectors] object EligibilityCheckResponse {
 

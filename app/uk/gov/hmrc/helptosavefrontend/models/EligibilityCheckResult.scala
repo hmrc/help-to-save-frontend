@@ -16,108 +16,78 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import cats.Eq
-import cats.instances.boolean._
-import cats.instances.string._
-import cats.syntax.eq._
-
-case class EligibilityCheckResult(result: Either[IneligibilityReason, EligibilityReason])
+sealed trait EligibilityCheckResult
 
 object EligibilityCheckResult {
 
-  def apply(ineligibilityReason: IneligibilityReason): EligibilityCheckResult =
-    EligibilityCheckResult(Left(ineligibilityReason))
+  case class Eligible(reason: EligibilityReason) extends EligibilityCheckResult
 
-  def apply(eligibilityReason: EligibilityReason): EligibilityCheckResult =
-    EligibilityCheckResult(Right(eligibilityReason))
+  case class Ineligible(reason: IneligibilityReason) extends EligibilityCheckResult
 
+  case class AlreadyHasAccount(description: String) extends EligibilityCheckResult
+
+  implicit class Ops(val result: EligibilityCheckResult) extends AnyVal {
+    def fold[A](ifEligible:          EligibilityReason ⇒ A,
+                ifIneligible:        IneligibilityReason ⇒ A,
+                ifAlreadyHasAccount: AlreadyHasAccount ⇒ A): A = result match {
+      case Eligible(reason)     ⇒ ifEligible(reason)
+      case Ineligible(reason)   ⇒ ifIneligible(reason)
+      case a: AlreadyHasAccount ⇒ ifAlreadyHasAccount(a)
+    }
+
+  }
 }
 
 sealed trait EligibilityReason {
-  val legibleString: String
+  val description: String
 }
 
 sealed trait IneligibilityReason {
-  val legibleString: String
+  val description: String
 }
 
 object EligibilityReason {
 
   /** In receipt of UC and income sufficient */
-  case object UC extends EligibilityReason {
-    val legibleString: String =
-      "In receipt of UC and income sufficient"
-  }
+  case class UC(description: String) extends EligibilityReason
 
   /** Entitled to WTC and in receipt of positive WTC/CTC Tax Credit */
-  case object WTC extends EligibilityReason {
-    val legibleString: String =
-      "Entitled to WTC and in receipt of positive WTC/CTC Tax Credit"
-  }
+  case class WTC(description: String) extends EligibilityReason
 
   /** Entitled to WTC and in receipt of positive WTC/CTC Tax Credit and in receipt of UC and income sufficient */
-  case object WTCWithUC extends EligibilityReason {
-    val legibleString: String =
-      "Entitled to WTC and in receipt of positive WTC/CTC Tax Credit and in receipt of UC and income sufficient"
+  case class WTCWithUC(description: String) extends EligibilityReason
+
+  def fromInt(i: Int, s: String): Option[EligibilityReason] = i match {
+    case 6 ⇒ Some(UC(s)) // scalastyle:ignore magic.number
+    case 7 ⇒ Some(WTC(s)) // scalastyle:ignore magic.number
+    case 8 ⇒ Some(WTCWithUC(s)) // scalastyle:ignore magic.number
+    case _ ⇒ None
   }
-
-  val reasons: Set[EligibilityReason] = Set[EligibilityReason](UC, WTC, WTCWithUC)
-
-  def fromString(s: String): Option[EligibilityReason] = reasons.find(_.legibleString === s)
 }
 
 object IneligibilityReason {
-
-  implicit def eqInstance: Eq[IneligibilityReason] = new Eq[IneligibilityReason] {
-    override def eqv(x: IneligibilityReason, y: IneligibilityReason): Boolean = (x, y) match {
-      case (AccountAlreadyOpened, AccountAlreadyOpened) ⇒ true
-      case (NotEntitledToWTC(r1), NotEntitledToWTC(r2)) if r1 === r2 ⇒ true
-      case (EntitledToWTCButNoWTC(r1), EntitledToWTCButNoWTC(r2)) if r1 === r2 ⇒ true
-      case _ ⇒ false
-    }
-  }
-
-  /** An HtS account was opened previously (the HtS account may have been closed or inactive) */
-  case object AccountAlreadyOpened extends IneligibilityReason {
-    val legibleString: String =
-      "An HtS account was opened previously (the HtS account may have been closed or inactive)"
-  }
 
   /**
    * Not entitled to WTC and
    * (if receivingUC = true)  in receipt of UC but income is insufficient
    * (if receivingUC = false) not in receipt of UC
    */
-  case class NotEntitledToWTC(receivingUC: Boolean) extends IneligibilityReason {
-    val legibleString: String = if (receivingUC) {
-      "Not entitled to WTC and in receipt of UC but income is insufficient"
-    } else {
-      "Not entitled to WTC and not in receipt of UC"
-    }
-  }
+  case class NotEntitledToWTC(receivingUC: Boolean, description: String) extends IneligibilityReason
 
   /**
    * Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and
    * (if receivingUC = true)  in receipt of UC but income is insufficient
    * (if receivingUC = false) not in receipt of UC
    */
-  case class EntitledToWTCButNoWTC(receivingUC: Boolean) extends IneligibilityReason {
-    val legibleString: String = if (receivingUC) {
-      "Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and in receipt of UC but income is insufficient"
-    } else {
-      "Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and not in receipt of UC"
-    }
+  case class EntitledToWTCButNoWTC(receivingUC: Boolean, description: String) extends IneligibilityReason
+
+  def fromInt(i: Int, s: String): Option[IneligibilityReason] = i match {
+    case 2 ⇒ Some(NotEntitledToWTC(receivingUC = false, s))
+    case 3 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = false, s))
+    case 4 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = true, s)) // scalastyle:ignore magic.number
+    case 5 ⇒ Some(NotEntitledToWTC(receivingUC = true, s)) // scalastyle:ignore magic.number
+    case _ ⇒ None
   }
-
-  val reasons: Set[IneligibilityReason] = Set[IneligibilityReason](
-    AccountAlreadyOpened,
-    NotEntitledToWTC(true),
-    NotEntitledToWTC(false),
-    EntitledToWTCButNoWTC(true),
-    EntitledToWTCButNoWTC(false)
-  )
-
-  def fromString(s: String): Option[IneligibilityReason] = reasons.find(_.legibleString === s)
 
 }
 
