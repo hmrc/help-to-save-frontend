@@ -16,11 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import cats.Eq
-import cats.instances.boolean._
-import cats.instances.string._
-import cats.syntax.eq._
-
 sealed trait EligibilityCheckResult
 
 object EligibilityCheckResult {
@@ -71,14 +66,6 @@ object EligibilityReason {
 }
 
 object IneligibilityReason {
-
-  implicit def eqInstance: Eq[IneligibilityReason] = new Eq[IneligibilityReason] {
-    override def eqv(x: IneligibilityReason, y: IneligibilityReason): Boolean = (x, y) match {
-      case (NotEntitledToWTC(r1, s1), NotEntitledToWTC(r2, s2)) if r1 === r2 && s1 === s2 ⇒ true
-      case (EntitledToWTCButNoWTC(r1, s1), EntitledToWTCButNoWTC(r2, s2)) if r1 === r2 && s1 === s2 ⇒ true
-      case _ ⇒ false
-    }
-  }
 
   /**
    * Not entitled to WTC and

@@ -294,7 +294,7 @@ class EligibilityCheckControllerSpec
 
         "return user details if the user is eligible for help-to-save and the " +
           "user is not already enrolled and they have no session data" in {
-           inSequence {
+            inSequence {
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
