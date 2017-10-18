@@ -115,11 +115,11 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     for {
       nsiUserInfo ← getUserInformation()
       eligible ← helpToSaveService.checkEligibility().leftMap(Error.apply)
-      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(eligible, nsiUserInfo)).leftMap(Error.apply)
       session = {
         val maybeUserInfo = eligible.fold(_ ⇒ Some(nsiUserInfo), _ ⇒ None, _ ⇒ None)
         HTSSession(maybeUserInfo, None)
       }
+      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(session.eligibilityCheckResult)).leftMap(Error.apply)
       _ ← sessionCacheConnector.put(session).leftMap[Error](Error.apply)
     } yield eligible
 
@@ -162,24 +162,16 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
       Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalAccountUrl))
   }
 
-  /**
-   * Perform the validation checks if the given `eligibilityCheckResult` indicates eligibility. Otherwise,
-   * return the given `userInfo` without doing any validation
-   */
-  private def validateCreateAccountJsonSchema(eligibilityCheckResult: EligibilityCheckResult,
-                                              userInfo:               NSIUserInfo): Either[String, NSIUserInfo] = {
+  private def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Unit] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
-    eligibilityCheckResult.fold(
-      _ ⇒ {
-        FEATURE("outgoing-json-validation", app.configuration, logger).thenOrElse(
-          jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ userInfo),
-          Right(userInfo)
+    userInfo.fold[Either[String, Unit]](Right(())) { userInfo ⇒
+      FEATURE("outgoing-json-validation", app.configuration, logger).thenOrElse(
+        jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ ()),
+        Right(()
         )
-      },
-      _ ⇒ Right(userInfo),
-      _ ⇒ Right(userInfo)
-    )
+      )
+    }
   }
 
 }
