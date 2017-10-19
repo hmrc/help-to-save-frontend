@@ -29,14 +29,13 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUr
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.MissingUserInfos
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.{MissingUserInfos, _}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.AppName
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -128,18 +127,13 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
 
   private def handleEligibilityResult(result: EligibilityCheckResult)(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Result = {
     val nino = htsContext.nino
+    auditor.sendEvent(EligibilityResultEvent(nino, result), nino)
     result.fold(
-      { eligibilityReason ⇒
-        auditor.sendEvent(EligibilityResult(nino, eligibilityReason.description), nino)
-        SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-      }, { ineligibilityReason ⇒
-        auditor.sendEvent(EligibilityResult(nino, ineligibilityReason.description, isEligible = false), nino)
-        SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-      }, { alreadyHasAccount ⇒
-        auditor.sendEvent(EligibilityResult(nino, alreadyHasAccount.description, isEligible = false), nino)
-
+      _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url),
+      _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+      _ ⇒ {
         // set the ITMP flag here but don't worry about the result
-        helpToSaveService.setITMPFlag().value.onComplete{
+        helpToSaveService.setITMPFlag().value.onComplete {
           case Failure(e)        ⇒ logger.warn(s"Could not set ITMP flag, future failed: ${e.getMessage}", nino)
           case Success(Left(e))  ⇒ logger.warn(s"Could not set ITMP flag: $e", nino)
           case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user", nino)
@@ -185,7 +179,4 @@ object EligibilityCheckController {
 
     def apply(u: MissingUserInfos): Error = Error(Right(u))
   }
-
-  private case class EligibilityResultWithUserInfo(value: Either[IneligibilityReason, (EligibilityReason, NSIUserInfo)])
-
 }

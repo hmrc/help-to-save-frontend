@@ -20,14 +20,14 @@ import java.util.Base64
 
 import cats.data.EitherT
 import cats.instances.int._
-import cats.instances.string._
 import cats.syntax.eq._
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, GetEmailResponse}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
+import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -96,26 +96,24 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       "return an EligibilityResult if the call comes back with a 200 status with a positive result " +
         "and a valid reason" in {
           forAll(eligibleResponseGen){ response ⇒
-            val reason =
-              EligibilityReason.fromInt(response.reasonCode, response.reason).getOrElse(sys.error("Could not find eligibility reason"))
+            val reason = Eligible(response)
 
             mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
 
             val result = connector.getEligibility()
-            await(result.value) shouldBe Right(EligibilityCheckResult.Eligible(reason))
+            await(result.value) shouldBe Right(reason)
           }
         }
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result " +
         "and a valid reason" in {
           forAll(ineligibleResponseGen){ response ⇒
-            val reason =
-              IneligibilityReason.fromInt(response.reasonCode, response.reason).getOrElse(sys.error("Could not find ineligibility reason"))
+            val reason = Ineligible(response)
 
             mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
 
             val result = connector.getEligibility()
-            await(result.value) shouldBe Right(EligibilityCheckResult.Ineligible(reason))
+            await(result.value) shouldBe Right(reason)
           }
         }
 
@@ -123,43 +121,15 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         "indicating an account has already been opened" in {
           val reasonString = "already has account"
 
-          val response = EligibilityCheckResponse("", 3, reasonString, 0)
+          val response = EligibilityCheckResponse("HtS account already exists", 3, reasonString, 1)
 
           mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
 
           val result = connector.getEligibility()
-          await(result.value) shouldBe Right(EligibilityCheckResult.AlreadyHasAccount(reasonString))
+          await(result.value) shouldBe Right(AlreadyHasAccount(response))
         }
 
       "return an error" when {
-        "the call comes back with a 200 status with a positive result " +
-          "and an invalid reason" in {
-            forAll { reasonCode: Int ⇒
-              whenever(!(6 to 8).contains(reasonCode)) {
-                mockHttpGet(eligibilityURL)(
-                  Some(HttpResponse(200, responseJson = Some(Json.toJson(
-                    EligibilityCheckResponse("", 1, "", reasonCode))))))
-
-                val result = connector.getEligibility()
-                await(result.value).isLeft shouldBe true
-              }
-            }
-          }
-
-        "the call comes back with a 200 status with a negative result " +
-          "and an invalid reason" in {
-            forAll { reasonCode: Int ⇒
-              whenever(!(2 to 5).contains(reasonCode)) {
-                mockHttpGet(eligibilityURL)(
-                  Some(HttpResponse(200, responseJson = Some(Json.toJson(
-                    EligibilityCheckResponse("", 2, "", reasonCode))))))
-
-                val result = connector.getEligibility()
-                await(result.value).isLeft shouldBe true
-              }
-            }
-          }
-
         "the call comes back with a 200 and an unknown result code" in {
           forAll { (resultCode: Int) ⇒
             whenever(!(1 to 3).contains(resultCode)) {

@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import play.api.Logger
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult.{AlreadyHasAccount, Eligible}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -70,28 +72,23 @@ class HTSEventSpec extends TestSupport {
   }
 
   "EligibilityResult" must {
-    "be created with the appropriate auditSource and auditType" in {
-      val event = EligibilityResult(validNSIUserInfo.nino, "reason")(new HeaderCarrier)
+    val eligibilityResult = AlreadyHasAccount(EligibilityCheckResponse("HtS account was previously created", 3, "HtS account already exists", 1))
+    "be created with the appropriate auditSource" in {
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResult)(new HeaderCarrier)
       event.value.auditSource shouldBe source
+    }
+
+    "be created with the appropriate auditType" in {
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResult)(new HeaderCarrier)
       event.value.auditType shouldBe "EligibilityResult"
     }
 
-    "be created with the eligible tag set true, a reason tag, and the nino" in {
-      val reason = "Entitled to WTC and in receipt of positive WTC/CTC Tax Credit"
-      val event = EligibilityResult(validNSIUserInfo.nino, reason)(new HeaderCarrier)
-      event.value.detail.size shouldBe 3
+    "be created with details in the correct format" in {
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResult)(new HeaderCarrier)
+      Logger.info(s"details= ${event.value.detail}")
+      event.value.detail.size shouldBe 2
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
-      event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "true") shouldBe true
-      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === reason) shouldBe true
-    }
-
-    "be created with the eligible tag set false, a reason tag, and the nino" in {
-      val reason = "Not entitled to WTC and in receipt of UC but income is insufficient"
-      val event = EligibilityResult(validNSIUserInfo.nino, reason, isEligible = false)(new HeaderCarrier)
-      event.value.detail.size shouldBe 3
-      event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
-      event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "false") shouldBe true
-      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === reason) shouldBe true
+      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === "3, 1, meaning 'HtS account was previously created', 'HtS account already exists'") shouldBe true
     }
   }
 

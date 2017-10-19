@@ -75,11 +75,15 @@ case class AccountCreated(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) ext
   )
 }
 
-case class EligibilityResult(nino: NINO, reason: String, isEligible: Boolean = true)(implicit hc: HeaderCarrier) extends HTSEvent {
-  val value: DataEvent = HTSEvent(
-    "EligibilityResult",
-    Map[String, String]("nino" -> nino, "reason" -> reason, "eligible" -> isEligible.toString)
-  )
+case class EligibilityResultEvent(nino: NINO, eligibilityResult: EligibilityCheckResult)(implicit hc: HeaderCarrier) extends HTSEvent {
+
+  val value: DataEvent = {
+    val response = eligibilityResult.value
+    HTSEvent(
+      "EligibilityResult",
+      Map[String, String]("nino" -> nino, "reason" -> s"${response.resultCode}, ${response.reasonCode}, meaning '${response.result}', '${response.reason}'")
+    )
+  }
 }
 
 case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit hc: HeaderCarrier) extends HTSEvent {
