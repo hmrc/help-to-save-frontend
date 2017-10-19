@@ -126,17 +126,10 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   // scalastyle:off magic.number
   private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
     response.resultCode match {
-      case 1 ⇒
-        Right(EligibilityCheckResult.Eligible(response))
-
-      case 2 ⇒
-        Right(EligibilityCheckResult.Ineligible(response))
-
-      case 3 ⇒
-        Right(EligibilityCheckResult.AlreadyHasAccount(response))
-
-      case other ⇒
-        Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
+      case 1     ⇒ Right(EligibilityCheckResult.Eligible(response))
+      case 2     ⇒ Right(EligibilityCheckResult.Ineligible(response))
+      case 3     ⇒ Right(EligibilityCheckResult.AlreadyHasAccount(response))
+      case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
 
     }
   }
