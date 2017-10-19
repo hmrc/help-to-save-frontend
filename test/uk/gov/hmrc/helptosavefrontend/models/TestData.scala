@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 import java.time.LocalDate
 
 import org.scalacheck.Gen
+import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.testutil._
 import uk.gov.hmrc.smartstub.AutoGen.{GenProvider, instance}
@@ -28,17 +29,17 @@ object TestData {
 
   object Eligibility {
 
-    implicit val eligibilityCheckResultGen: Gen[EligibilityCheckResult] = AutoGen[EligibilityCheckResult]
+    implicit val eligibilityCheckResponseGen: Gen[EligibilityCheckResponse] = AutoGen[EligibilityCheckResponse]
 
-    implicit val eligibilityReasonGen: Gen[EligibilityReason] = AutoGen[EligibilityReason]
+    implicit val eligibilityGen: Gen[Eligible] = AutoGen[Eligible]
 
-    implicit val ineligibilityReasonGen: Gen[IneligibilityReason] = AutoGen[IneligibilityReason]
+    implicit val ineligibilityGen: Gen[Ineligible] = AutoGen[Ineligible]
 
-    def randomEligibilityCheckResult() = sample(eligibilityCheckResultGen)
+    def randomEligibilityResponse() = sample(eligibilityCheckResponseGen)
 
-    def randomEligibilityReason() = sample(eligibilityReasonGen)
+    def randomEligibility() = sample(eligibilityGen)
 
-    def randomIneligibilityReason() = sample(ineligibilityReasonGen)
+    def randomIneligibility() = sample(ineligibilityGen)
   }
 
   object UserData {

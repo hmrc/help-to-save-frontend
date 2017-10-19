@@ -16,78 +16,36 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-sealed trait EligibilityCheckResult
+import play.api.libs.json.{Format, Json}
+
+case class EligibilityCheckResponse(result: String, resultCode: Int, reason: String, reasonCode: Int)
+
+object EligibilityCheckResponse {
+
+  implicit val format: Format[EligibilityCheckResponse] = Json.format[EligibilityCheckResponse]
+
+}
+
+sealed trait EligibilityCheckResult {
+  val value: EligibilityCheckResponse
+
+}
 
 object EligibilityCheckResult {
 
-  case class Eligible(reason: EligibilityReason) extends EligibilityCheckResult
+  case class Eligible(value: EligibilityCheckResponse) extends EligibilityCheckResult
 
-  case class Ineligible(reason: IneligibilityReason) extends EligibilityCheckResult
+  case class Ineligible(value: EligibilityCheckResponse) extends EligibilityCheckResult
 
-  case class AlreadyHasAccount(description: String) extends EligibilityCheckResult
+  case class AlreadyHasAccount(value: EligibilityCheckResponse) extends EligibilityCheckResult
 
   implicit class Ops(val result: EligibilityCheckResult) extends AnyVal {
-    def fold[A](ifEligible:          EligibilityReason ⇒ A,
-                ifIneligible:        IneligibilityReason ⇒ A,
-                ifAlreadyHasAccount: AlreadyHasAccount ⇒ A): A = result match {
-      case Eligible(reason)     ⇒ ifEligible(reason)
-      case Ineligible(reason)   ⇒ ifIneligible(reason)
-      case a: AlreadyHasAccount ⇒ ifAlreadyHasAccount(a)
+    def fold[A](ifEligible:          EligibilityCheckResponse ⇒ A,
+                ifIneligible:        EligibilityCheckResponse ⇒ A,
+                ifAlreadyHasAccount: EligibilityCheckResponse ⇒ A): A = result match {
+      case Eligible(reason)          ⇒ ifEligible(reason)
+      case Ineligible(reason)        ⇒ ifIneligible(reason)
+      case AlreadyHasAccount(reason) ⇒ ifAlreadyHasAccount(reason)
     }
-
   }
 }
-
-sealed trait EligibilityReason {
-  val description: String
-}
-
-sealed trait IneligibilityReason {
-  val description: String
-}
-
-object EligibilityReason {
-
-  /** In receipt of UC and income sufficient */
-  case class UC(description: String) extends EligibilityReason
-
-  /** Entitled to WTC and in receipt of positive WTC/CTC Tax Credit */
-  case class WTC(description: String) extends EligibilityReason
-
-  /** Entitled to WTC and in receipt of positive WTC/CTC Tax Credit and in receipt of UC and income sufficient */
-  case class WTCWithUC(description: String) extends EligibilityReason
-
-  def fromInt(i: Int, s: String): Option[EligibilityReason] = i match {
-    case 6 ⇒ Some(UC(s)) // scalastyle:ignore magic.number
-    case 7 ⇒ Some(WTC(s)) // scalastyle:ignore magic.number
-    case 8 ⇒ Some(WTCWithUC(s)) // scalastyle:ignore magic.number
-    case _ ⇒ None
-  }
-}
-
-object IneligibilityReason {
-
-  /**
-   * Not entitled to WTC and
-   * (if receivingUC = true)  in receipt of UC but income is insufficient
-   * (if receivingUC = false) not in receipt of UC
-   */
-  case class NotEntitledToWTC(receivingUC: Boolean, description: String) extends IneligibilityReason
-
-  /**
-   * Entitled to WTC but not in receipt of positive WTC/CTC Tax Credit (nil TC) and
-   * (if receivingUC = true)  in receipt of UC but income is insufficient
-   * (if receivingUC = false) not in receipt of UC
-   */
-  case class EntitledToWTCButNoWTC(receivingUC: Boolean, description: String) extends IneligibilityReason
-
-  def fromInt(i: Int, s: String): Option[IneligibilityReason] = i match {
-    case 2 ⇒ Some(NotEntitledToWTC(receivingUC = false, s))
-    case 3 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = false, s))
-    case 4 ⇒ Some(EntitledToWTCButNoWTC(receivingUC = true, s)) // scalastyle:ignore magic.number
-    case 5 ⇒ Some(NotEntitledToWTC(receivingUC = true, s)) // scalastyle:ignore magic.number
-    case _ ⇒ None
-  }
-
-}
-
