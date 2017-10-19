@@ -109,11 +109,11 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
 
             case UpdateEmailError.EmailMongoError(e) ⇒
               logger.warn("Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I", nino)
-              auditor.sendEvent(EmailChanged(nino, nsiUserInfo.contactDetails.email, nino), nino)
+              auditor.sendEvent(EmailChanged(nino, emailVerificationParams.email), nino)
               SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
           }, { _ ⇒
             logger.info("Successfully updated email with NS&I", nino)
-            auditor.sendEvent(EmailChanged(nino, nsiUserInfo.contactDetails.email, nino), nino)
+            auditor.sendEvent(EmailChanged(nino, emailVerificationParams.email), nino)
             SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
           })
       }
