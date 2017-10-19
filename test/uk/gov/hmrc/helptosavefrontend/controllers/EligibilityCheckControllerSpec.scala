@@ -277,12 +277,12 @@ class EligibilityCheckControllerSpec
           }
 
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
-          val reason = EligibilityCheckResponse("account already exists", 3, "account already opened", 1)
+          val response = EligibilityCheckResponse("account already exists", 3, "account already opened", 1)
           inSequence {
             mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
-            mockEligibilityResult()(Right(AlreadyHasAccount(reason)))
+            mockEligibilityResult()(Right(AlreadyHasAccount(response)))
             mockSessionCacheConnectorPut(HTSSession(None, None))(Right(()))
             mockSendAuditEvent()
             mockWriteITMPFlag(Right(()))
@@ -401,7 +401,7 @@ class EligibilityCheckControllerSpec
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
-              mockEligibilityResult()(Right(Eligible(randomEligibilityResponse())))
+              mockEligibilityResult()(Right(randomEligibility()))
               mockJsonSchemaValidation(validNSIUserInfo)(Left("uh oh"))
             })
           }
@@ -411,7 +411,7 @@ class EligibilityCheckControllerSpec
               mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
-              mockEligibilityResult()(Right(Eligible(randomEligibilityResponse())))
+              mockEligibilityResult()(Right(randomEligibility()))
               mockJsonSchemaValidation(validNSIUserInfo)(Right(validNSIUserInfo))
               mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo), None))(Left("Bang"))
             })
