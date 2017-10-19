@@ -17,13 +17,8 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
+@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 
-@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.RequestNotValidError
-@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.VerificationServiceUnavailable
-@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.AlreadyVerified
-@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
-
-@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BadContinueURL
 @(error: VerifyEmailError)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
 title = messages("hts.introduction.title"),

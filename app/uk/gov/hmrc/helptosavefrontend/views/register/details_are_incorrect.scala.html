@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,23 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.helptosavefrontend.controllers.email
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-sealed trait UserType
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-object UserType {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+    title = "",
+    sidebarLinks = None,
+    bodyClasses = None) {
 
-  case object NewApplicant extends UserType
 
-  case object AccountHolder extends UserType
-
-  implicit class UserTypeOps(val userType: UserType) extends AnyVal {
-    def fold[A](ifNewApplicant: ⇒ A, ifAccountHolder: ⇒ A): A = userType match {
-      case NewApplicant  ⇒ ifNewApplicant
-      case AccountHolder ⇒ ifAccountHolder
-    }
-  }
+<h1>😡 There's nothing you can do about it! 😡</h1>
 
 }
+

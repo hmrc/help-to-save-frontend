@@ -34,6 +34,11 @@ case class NSIUserInfo(forename:            String,
 
 object NSIUserInfo {
 
+  implicit class NSIUserInfoOps(val nsiUserInfo: NSIUserInfo) {
+    def updateEmail(newEmail: String): NSIUserInfo =
+      nsiUserInfo.copy(contactDetails = nsiUserInfo.contactDetails.copy(email = newEmail))
+  }
+
   case class ContactDetails(address1:                String,
                             address2:                String,
                             address3:                Option[String],

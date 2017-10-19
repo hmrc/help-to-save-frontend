@@ -23,18 +23,19 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.filters.csrf.CSRF.{Token, TokenProvider}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
-import uk.gov.hmrc.helptosavefrontend.controllers.email._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -92,32 +93,19 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       .expects(*, nino)
       .returning(Future.successful(AuditResult.Success))
 
+  lazy val tokenProvider: TokenProvider =
+    fakeApplication.injector.instanceOf[TokenProvider]
+
+  val fakeRequest = FakeRequest().copyFakeRequest(tags = Map(
+    Token.NameRequestTag → "csrfToken",
+    Token.RequestTag → tokenProvider.generateToken))
+
   "The RegisterController" when {
 
-    "handling getConfirmDetailsPage" must {
+    "handling getConfirmEmailPage" must {
 
-        def doRequest(): Future[PlayResult] = controller.getConfirmDetailsPage(FakeRequest())
-
-      //def doRequestWithQueryParam(p: String): Future[PlayResult] = controller.getConfirmDetailsPage(Some(p))(FakeRequest())
-
-      behave like commonEnrolmentAndSessionBehaviour(doRequest)
-
-      "show the users details if the user has not already enrolled and " +
-        "the session data shows that they have been already found to be eligible" in {
-          inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
-            mockAccountCreationAllowed(Right(true))
-          }
-
-          val result = doRequest()
-          status(result) shouldBe Status.OK
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
-          contentAsString(result) should include(validNSIUserInfo.forename)
-          contentAsString(result) should include(validNSIUserInfo.surname)
-        }
+        def doRequest(): Future[PlayResult] =
+          controller.getConfirmEmailPage(fakeRequest)
 
       "indicate to the user that user-cap has already reached and account creation not possible" in {
         inSequence {
@@ -130,6 +118,100 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
         val result = doRequest()
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.RegisterController.getUserCapReachedPage().url)
+      }
+
+      "return the confirm email page" in {
+        inSequence {
+          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          mockAccountCreationAllowed(Right(true))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
+      }
+    }
+
+    "handling getConfirmEmailSubmit" must {
+
+        def doRequest(newEmail: Option[String]): Future[PlayResult] = {
+          newEmail.fold(
+            controller.confirmEmailSubmit()(fakeRequest)
+          ){ e ⇒
+              controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("new-email" → e))
+            }
+
+        }
+
+      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest(None))
+
+      "redirect to confirm email if the session data shows that they have been already found to be eligible " +
+        "and the form contains no new email" in {
+          inSequence {
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          }
+
+          val result = doRequest(None)
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.RegisterController.confirmEmail(validNSIUserInfo.contactDetails.email).url)
+        }
+
+      "redirect to verify email if the session data shows that they have been already found to be eligible " +
+        "and the form contains a valid new email" in {
+          val newEmail = "email@test.com"
+
+          inSequence {
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          }
+
+          val result = doRequest(Some(newEmail))
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail(newEmail).url)
+        }
+
+      "redirect to the confirm email page if the session data shows that they have been already found to be eligible " +
+        "and the form contains a invalid new email" in {
+          val invalidEmail = "not-an-email"
+
+          inSequence {
+            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
+          }
+
+          val result = doRequest(Some(invalidEmail))
+          status(result) shouldBe Status.OK
+          contentAsString(result) should include("Which email")
+        }
+
+    }
+
+    "handling getUserCapReachedPage" must {
+
+      "return the user cap reached page" in {
+        mockAuthWithNoRetrievals(AuthProvider)
+
+        val result = controller.getUserCapReachedPage(FakeRequest())
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("User Limit Reached")
+      }
+
+    }
+
+    "handling getDetailsAreIncorrect" must {
+
+      "return the details are incorrect page" in {
+        mockAuthWithNoRetrievals(AuthProvider)
+
+        val result = controller.getDetailsAreIncorrect(FakeRequest())
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("nothing you can do")
       }
     }
 
@@ -215,7 +297,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage.url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmEmailPage().url)
       }
 
       "show the user the create account page if the session data contains a confirmed email" in {
@@ -282,7 +364,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmEmailPage().url)
       }
 
       "indicate to the user that the creation was not successful " when {

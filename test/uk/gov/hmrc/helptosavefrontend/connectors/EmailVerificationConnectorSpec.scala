@@ -22,7 +22,6 @@ import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.controllers.email.UserType
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO}
@@ -50,15 +49,12 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
   implicit val crypto: Crypto = mock[Crypto]
 
-  def emailVerificationRequest(implicit userType: UserType): EmailVerificationRequest =
+  def emailVerificationRequest(isNewApplicant: Boolean): EmailVerificationRequest =
     EmailVerificationRequest(
       email,
       "awrs_email_verification",
       "PT2H",
-      userType.fold(
-        "http://localhost:7000/help-to-save/email-verified?p=",
-        "http://localhost:7000/help-to-save/account/email-verified?p="
-      ),
+      if (isNewApplicant) "http://localhost:7000/help-to-save/email-verified?p=" else "http://localhost:7000/help-to-save/account/email-verified?p=",
       Map("email" → email, "nino" → nino))
 
   lazy val connector: EmailVerificationConnectorImpl =
@@ -96,37 +92,39 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
   "verifyEmail" when {
 
     "handling new applicants" must {
-      test(UserType.NewApplicant)
+      test(isNewApplicant = true)
     }
 
     "handling returning users" must {
-      test(UserType.AccountHolder)
+      test(isNewApplicant = false)
     }
 
-      def test(implicit userType: UserType): Unit = { // scalastyle:ignore method.length
+      def test(isNewApplicant: Boolean): Unit = { // scalastyle:ignore method.length
+
+        val verificationRequest = emailVerificationRequest(isNewApplicant)
 
         "return 201 when given good json" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(emailVerificationRequest)(Status.OK, None)
-          await(connector.verifyEmail(nino, email)) shouldBe Right(())
+          mockPost(verificationRequest)(Status.OK, None)
+          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Right(())
         }
 
         "return 400 when given bad json" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(emailVerificationRequest)(Status.BAD_REQUEST, None)
-          await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.RequestNotValidError)
+          mockPost(verificationRequest)(Status.BAD_REQUEST, None)
+          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(VerifyEmailError.RequestNotValidError)
         }
 
         "return 409 when the email has already been verified" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(emailVerificationRequest)(Status.CONFLICT, None)
-          await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.AlreadyVerified)
+          mockPost(verificationRequest)(Status.CONFLICT, None)
+          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
         }
 
         "return a verification service unavailable error when the email verification service is down" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(emailVerificationRequest)(Status.SERVICE_UNAVAILABLE, None)
-          await(connector.verifyEmail(nino, email)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
+          mockPost(verificationRequest)(Status.SERVICE_UNAVAILABLE, None)
+          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
         }
 
         "return a Left if the call comes back with an unexpected status" in {
@@ -135,8 +133,8 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
           forAll { (status: Int) ⇒
             whenever(!statuses.contains(status)) {
               mockEncrypt(nino + "#" + email)("")
-              mockPost(emailVerificationRequest)(status, None)
-              await(connector.verifyEmail(nino, email)) shouldBe Left(BackendError)
+              mockPost(verificationRequest)(status, None)
+              await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(BackendError)
             }
           }
         }
@@ -152,8 +150,8 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Serv
 
         "should return a back end error if the future failed" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPostFailure(emailVerificationRequest)
-          await(connector.verifyEmail(nino, email)) shouldBe Left(BackendError)
+          mockPostFailure(verificationRequest)
+          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(BackendError)
         }
       }
   }

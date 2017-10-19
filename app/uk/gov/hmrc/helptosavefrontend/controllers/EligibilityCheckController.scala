@@ -96,8 +96,8 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
       } {
         _.eligibilityCheckResult.fold(
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-        )(_ ⇒
-            Ok(views.html.register.you_are_eligible())
+        )(userInfo ⇒
+            Ok(views.html.register.you_are_eligible(userInfo))
           )
       }
     }

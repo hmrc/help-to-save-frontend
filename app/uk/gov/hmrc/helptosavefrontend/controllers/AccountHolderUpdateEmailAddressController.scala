@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers.email
+package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -27,14 +27,15 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
-import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.UpdateEmailError
-import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
+import uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.UpdateEmailError
+import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -50,8 +51,6 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with VerifyEmailBehaviour with I18nSupport {
 
-  implicit val userType: UserType = UserType.AccountHolder
-
   def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled(email ⇒
       Ok(views.html.email.update_email_address(email, UpdateEmailForm.verifyEmailForm))
@@ -59,7 +58,19 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled(_ ⇒ sendEmailVerificationRequest())
+    checkIfAlreadyEnrolled(_ ⇒
+      UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
+        formWithErrors ⇒ {
+          Future.successful(BadRequest(views.html.email.update_email_address("errors", formWithErrors)))
+        },
+        (details: UpdateEmail) ⇒
+          sendEmailVerificationRequest(
+            details.email,
+            Ok(views.html.register.check_your_email(details.email)),
+            params ⇒ routes.AccountHolderUpdateEmailAddressController.emailVerified(params.encode()).url,
+            isNewApplicant = false)
+
+      ))
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.onSubmit().url)
 
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -129,7 +140,8 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
       implicit
       htsContext: HtsContextWithNINO,
       hc:         HeaderCarrier,
-      request:    Request[_]): Future[Result] = {
+      request:    Request[_]
+  ): Future[Result] = {
     val enrolled: EitherT[Future, String, (EnrolmentStatus, Option[Email])] = for {
       enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
       maybeEmail ← helpToSaveService.getConfirmedEmail()

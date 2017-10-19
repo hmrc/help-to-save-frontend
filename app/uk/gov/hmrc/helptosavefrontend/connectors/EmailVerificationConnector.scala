@@ -21,7 +21,6 @@ import java.time.Duration
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.controllers.email.UserType
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
@@ -37,7 +36,9 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(nino: String, newEmail: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, userType: UserType): Future[Either[VerifyEmailError, Unit]]
+  def verifyEmail(nino:           String,
+                  newEmail:       String,
+                  isNewApplicant: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]]
 
 }
 
@@ -54,10 +55,11 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
   val templateId: String = "awrs_email_verification"
 
-  def verifyEmail(nino:     String,
-                  newEmail: String)(implicit hc: HeaderCarrier, ec: ExecutionContext, userType: UserType): Future[Either[VerifyEmailError, Unit]] = {
+  def verifyEmail(nino:           String,
+                  newEmail:       String,
+                  isNewApplicant: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]] = {
     val continueUrlWithParams = {
-      val continueURL = userType.fold(newApplicantContinueURL, accountHolderContinueURL)
+      val continueURL = if (isNewApplicant) newApplicantContinueURL else accountHolderContinueURL
       continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()
     }
 
