@@ -27,6 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, 
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -77,8 +78,8 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒
-        logger.warn(s"Could not decode email verification parameters: ${e.getMessage}", e)
         val nino = htsContext.nino
+        logger.warn(s"SuspiciousActivity: malformed redirect from email verification service back to HtS, could not decode email verification parameters: ${e.getMessage}", e, nino)
         auditor.sendEvent(SuspiciousActivity(Some(nino), "malformed_redirect"), nino)
         Ok(views.html.email.email_verify_error(BadContinueURL))
 
