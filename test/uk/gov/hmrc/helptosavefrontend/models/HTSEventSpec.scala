@@ -72,23 +72,24 @@ class HTSEventSpec extends TestSupport {
   }
 
   "EligibilityResult" must {
-    val eligibilityResult = AlreadyHasAccount(EligibilityCheckResponse("HtS account was previously created", 3, "HtS account already exists", 1))
+    val eligibilityResponse = AlreadyHasAccount(EligibilityCheckResponse("HtS account was previously created", 3, "HtS account already exists", 1))
     "be created with the appropriate auditSource" in {
-      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResult)(new HeaderCarrier)
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResponse)(new HeaderCarrier)
       event.value.auditSource shouldBe source
     }
 
     "be created with the appropriate auditType" in {
-      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResult)(new HeaderCarrier)
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResponse)(new HeaderCarrier)
       event.value.auditType shouldBe "EligibilityResult"
     }
 
     "be created with details in the correct format" in {
-      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResult)(new HeaderCarrier)
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResponse)(new HeaderCarrier)
       Logger.info(s"details= ${event.value.detail}")
-      event.value.detail.size shouldBe 2
+      event.value.detail.size shouldBe 3
+      event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "false") shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
-      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === "3, 1, meaning 'HtS account was previously created', 'HtS account already exists'") shouldBe true
+      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === "Response: resultCode=3, reasonCode=1, meaning result='HtS account was previously created', reason='HtS account already exists'") shouldBe true
     }
   }
 
@@ -103,10 +104,10 @@ class HTSEventSpec extends TestSupport {
 
   "SuspiciousActivity" must {
     "be created with the appropriate auditSource and auditDetails" in {
-      val event = SuspiciousActivity(validNSIUserInfo.nino, "nino_mismatch")(new HeaderCarrier)
+      val event = SuspiciousActivity(None, "nino_mismatch, expected foo, received bar")(new HeaderCarrier)
       event.value.auditSource shouldBe source
       event.value.auditType shouldBe "SuspiciousActivity"
-      event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "reason" -> "nino_mismatch")
+      event.value.detail shouldBe Map[String, String]("reason" -> "nino_mismatch, expected foo, received bar")
     }
   }
 }

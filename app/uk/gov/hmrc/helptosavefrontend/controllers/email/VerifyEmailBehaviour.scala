@@ -79,7 +79,7 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
       case Failure(e) ⇒
         logger.warn(s"Could not decode email verification parameters: ${e.getMessage}", e)
         val nino = htsContext.nino
-        auditor.sendEvent(SuspiciousActivity(nino, "malformed_redirect"), nino)
+        auditor.sendEvent(SuspiciousActivity(Some(nino), "malformed_redirect"), nino)
         Ok(views.html.email.email_verify_error(BadContinueURL))
 
       case Success(params) ⇒
