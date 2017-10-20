@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import play.api.Logger
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult.{AlreadyHasAccount, Eligible}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
@@ -72,20 +71,26 @@ class HTSEventSpec extends TestSupport {
   }
 
   "EligibilityResult" must {
-    val eligibilityResponse = AlreadyHasAccount(EligibilityCheckResponse("HtS account was previously created", 3, "HtS account already exists", 1))
-    "be created with the appropriate auditSource" in {
-      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResponse)(new HeaderCarrier)
-      event.value.auditSource shouldBe source
-    }
 
-    "be created with the appropriate auditType" in {
-      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResponse)(new HeaderCarrier)
+    "be created with the appropriate auditSource and auditType" in {
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, Eligible(TestData.Eligibility.randomEligibilityResponse()))(new HeaderCarrier)
+      event.value.auditSource shouldBe source
       event.value.auditType shouldBe "EligibilityResult"
     }
 
-    "be created with details in the correct format" in {
-      val event = EligibilityResultEvent(validNSIUserInfo.nino, eligibilityResponse)(new HeaderCarrier)
-      Logger.info(s"details= ${event.value.detail}")
+    "be created with details in the correct format incase the user is eligible" in {
+      val userEligible = Eligible(EligibilityCheckResponse("Eligible to HtS Account", 1, "In receipt of UC and income sufficient", 6))
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, userEligible)(new HeaderCarrier)
+
+      event.value.detail.size shouldBe 2
+      event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "true") shouldBe true
+      event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
+    }
+
+    "be created with details in the correct format incase the user is not eligible" in {
+      val accountOpenedAlready = AlreadyHasAccount(EligibilityCheckResponse("HtS account was previously created", 3, "HtS account already exists", 1))
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, accountOpenedAlready)(new HeaderCarrier)
+
       event.value.detail.size shouldBe 3
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "false") shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
@@ -103,11 +108,18 @@ class HTSEventSpec extends TestSupport {
   }
 
   "SuspiciousActivity" must {
-    "be created with the appropriate auditSource and auditDetails" in {
+    "be created with the appropriate auditSource and auditDetails incase of nino_mismatch" in {
       val event = SuspiciousActivity(None, "nino_mismatch, expected foo, received bar")(new HeaderCarrier)
       event.value.auditSource shouldBe source
       event.value.auditType shouldBe "SuspiciousActivity"
       event.value.detail shouldBe Map[String, String]("reason" -> "nino_mismatch, expected foo, received bar")
+    }
+
+    "be created with the appropriate auditSource and auditDetails incase of missing_email_record" in {
+      val event = SuspiciousActivity(Some(validNSIUserInfo.nino), "missing_email_record")(new HeaderCarrier)
+      event.value.auditSource shouldBe source
+      event.value.auditType shouldBe "SuspiciousActivity"
+      event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "reason" -> "missing_email_record")
     }
   }
 }
