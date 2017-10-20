@@ -20,7 +20,6 @@ import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.config.AppName
 
 trait HTSEvent {
   val value: DataEvent
@@ -29,7 +28,7 @@ trait HTSEvent {
 object HTSEvent {
   def apply(auditType: String,
             detail:    Map[String, String])(implicit hc: HeaderCarrier): DataEvent =
-    DataEvent(AppName.appName, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
+    DataEvent("hts-frontend", auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
 }
 
@@ -86,7 +85,7 @@ case class EligibilityResult(nino: NINO, reason: String, isEligible: Boolean = t
 case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit hc: HeaderCarrier) extends HTSEvent {
   val value: DataEvent = HTSEvent(
     "EmailChanged",
-    Map[String, String]("nino" -> nino, "oldEmail" -> oldEmail, "newEmail" -> newEmail)
+    Map[String, String]("nino" -> nino, "originalEmail" -> oldEmail, "newEmail" -> newEmail)
   )
 }
 

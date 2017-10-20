@@ -22,12 +22,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 class HTSEventSpec extends TestSupport {
 
-  val appName = "help-to-save-frontend"
+  val source = "hts-frontend"
 
   "AccountCreated" must {
     "be created with the appropriate auditSource" in {
       val event = AccountCreated(validNSIUserInfo)(new HeaderCarrier)
-      event.value.auditSource shouldBe appName
+      event.value.auditSource shouldBe source
     }
 
     "be created with the appropriate auditType" in {
@@ -70,18 +70,14 @@ class HTSEventSpec extends TestSupport {
   }
 
   "EligibilityResult" must {
-    "be created with the appropriate auditSource" in {
+    "be created with the appropriate auditSource and auditType" in {
       val event = EligibilityResult(validNSIUserInfo.nino, "reason")(new HeaderCarrier)
-      event.value.auditSource shouldBe appName
-    }
-
-    "be created with the appropriate auditType" in {
-      val event = EligibilityResult(validNSIUserInfo.nino, "reason")(new HeaderCarrier)
+      event.value.auditSource shouldBe source
       event.value.auditType shouldBe "EligibilityResult"
     }
 
     "be created with the eligible tag set true, a reason tag, and the nino" in {
-      val reason = "reason"
+      val reason = "Entitled to WTC and in receipt of positive WTC/CTC Tax Credit"
       val event = EligibilityResult(validNSIUserInfo.nino, reason)(new HeaderCarrier)
       event.value.detail.size shouldBe 3
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
@@ -90,7 +86,7 @@ class HTSEventSpec extends TestSupport {
     }
 
     "be created with the eligible tag set false, a reason tag, and the nino" in {
-      val reason = "reason"
+      val reason = "Not entitled to WTC and in receipt of UC but income is insufficient"
       val event = EligibilityResult(validNSIUserInfo.nino, reason, isEligible = false)(new HeaderCarrier)
       event.value.detail.size shouldBe 3
       event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
@@ -101,19 +97,19 @@ class HTSEventSpec extends TestSupport {
 
   "EmailChanged" must {
     "be created with the appropriate auditSource and auditDetails" in {
-      val event = EmailChanged("NINO", "old-email@test.com", "new-email@test.com")(new HeaderCarrier)
-      event.value.auditSource shouldBe appName
+      val event = EmailChanged(validNSIUserInfo.nino, "old-email@test.com", "new-email@test.com")(new HeaderCarrier)
+      event.value.auditSource shouldBe source
       event.value.auditType shouldBe "EmailChanged"
-      event.value.detail shouldBe Map[String, String]("nino" -> "NINO", "oldEmail" -> "old-email@test.com", "newEmail" -> "new-email@test.com")
+      event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "originalEmail" -> "old-email@test.com", "newEmail" -> "new-email@test.com")
     }
   }
 
   "SuspiciousActivity" must {
     "be created with the appropriate auditSource and auditDetails" in {
-      val event = SuspiciousActivity("nino", "nino_mismatch")(new HeaderCarrier)
-      event.value.auditSource shouldBe appName
+      val event = SuspiciousActivity(validNSIUserInfo.nino, "nino_mismatch")(new HeaderCarrier)
+      event.value.auditSource shouldBe source
       event.value.auditType shouldBe "SuspiciousActivity"
-      event.value.detail shouldBe Map[String, String]("nino" -> "nino", "reason" -> "nino_mismatch")
+      event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "reason" -> "nino_mismatch")
     }
   }
 }
