@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult.{AlreadyHasAccount, Eligible}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -70,28 +71,30 @@ class HTSEventSpec extends TestSupport {
   }
 
   "EligibilityResult" must {
+
     "be created with the appropriate auditSource and auditType" in {
-      val event = EligibilityResult(validNSIUserInfo.nino, "reason")(new HeaderCarrier)
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, Eligible(TestData.Eligibility.randomEligibilityResponse()))(new HeaderCarrier)
       event.value.auditSource shouldBe source
       event.value.auditType shouldBe "EligibilityResult"
     }
 
-    "be created with the eligible tag set true, a reason tag, and the nino" in {
-      val reason = "Entitled to WTC and in receipt of positive WTC/CTC Tax Credit"
-      val event = EligibilityResult(validNSIUserInfo.nino, reason)(new HeaderCarrier)
-      event.value.detail.size shouldBe 3
-      event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
+    "be created with details in the correct format incase the user is eligible" in {
+      val userEligible = Eligible(EligibilityCheckResponse("Eligible to HtS Account", 1, "In receipt of UC and income sufficient", 6))
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, userEligible)(new HeaderCarrier)
+
+      event.value.detail.size shouldBe 2
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "true") shouldBe true
-      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === reason) shouldBe true
+      event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
     }
 
-    "be created with the eligible tag set false, a reason tag, and the nino" in {
-      val reason = "Not entitled to WTC and in receipt of UC but income is insufficient"
-      val event = EligibilityResult(validNSIUserInfo.nino, reason, isEligible = false)(new HeaderCarrier)
+    "be created with details in the correct format incase the user is not eligible" in {
+      val accountOpenedAlready = AlreadyHasAccount(EligibilityCheckResponse("HtS account was previously created", 3, "HtS account already exists", 1))
+      val event = EligibilityResultEvent(validNSIUserInfo.nino, accountOpenedAlready)(new HeaderCarrier)
+
       event.value.detail.size shouldBe 3
-      event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
       event.value.detail.exists(x ⇒ x._1 === "eligible" && x._2 === "false") shouldBe true
-      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === reason) shouldBe true
+      event.value.detail.exists(x ⇒ x._1 === "nino" && x._2 === validNSIUserInfo.nino) shouldBe true
+      event.value.detail.exists(x ⇒ x._1 === "reason" && x._2 === "Response: resultCode=3, reasonCode=1, meaning result='HtS account was previously created', reason='HtS account already exists'") shouldBe true
     }
   }
 
@@ -105,11 +108,18 @@ class HTSEventSpec extends TestSupport {
   }
 
   "SuspiciousActivity" must {
-    "be created with the appropriate auditSource and auditDetails" in {
-      val event = SuspiciousActivity(validNSIUserInfo.nino, "nino_mismatch")(new HeaderCarrier)
+    "be created with the appropriate auditSource and auditDetails incase of nino_mismatch" in {
+      val event = SuspiciousActivity(None, "nino_mismatch, expected foo, received bar")(new HeaderCarrier)
       event.value.auditSource shouldBe source
       event.value.auditType shouldBe "SuspiciousActivity"
-      event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "reason" -> "nino_mismatch")
+      event.value.detail shouldBe Map[String, String]("reason" -> "nino_mismatch, expected foo, received bar")
+    }
+
+    "be created with the appropriate auditSource and auditDetails incase of missing_email_record" in {
+      val event = SuspiciousActivity(Some(validNSIUserInfo.nino), "missing_email_record")(new HeaderCarrier)
+      event.value.auditSource shouldBe source
+      event.value.auditType shouldBe "SuspiciousActivity"
+      event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "reason" -> "missing_email_record")
     }
   }
 }

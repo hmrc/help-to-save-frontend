@@ -24,7 +24,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{EligibilityCheckResponse, GetEmailResponse}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
@@ -63,7 +63,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
       eligibilityURL,
-      _.parseJson[EligibilityCheckResponse].flatMap(toEligibilityCheckResponse),
+      _.parseJson[EligibilityCheckResponse].flatMap(toEligibilityCheckResult),
       "check eligibility",
       identity
     )
@@ -123,29 +123,16 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
 
   private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
 
-  private def toEligibilityCheckResponse(eligibilityCheckResponse: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
-    val (reasonCode, reason) = eligibilityCheckResponse.reasonCode → eligibilityCheckResponse.reason
-
-    eligibilityCheckResponse.resultCode match {
-      case 1 ⇒
-        Either.fromOption(
-          EligibilityReason.fromInt(reasonCode, reason).map(EligibilityCheckResult.Eligible),
-          s"Could not parse ineligibility reasonCode '$reasonCode'. Reason string was '$reason'")
-
-      case 2 ⇒
-        Either.fromOption(
-          IneligibilityReason.fromInt(reasonCode, reason).map(EligibilityCheckResult.Ineligible),
-          s"Could not parse eligibility reasonCode '$reasonCode'. Reason string was '$reason'")
-
-      case 3 ⇒
-        Right(EligibilityCheckResult.AlreadyHasAccount(reason))
-
-      case other ⇒
-        Left(s"Could not parse eligibility result code '$other'. Result string was '$reason'")
+  // scalastyle:off magic.number
+  private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
+    response.resultCode match {
+      case 1     ⇒ Right(EligibilityCheckResult.Eligible(response))
+      case 2     ⇒ Right(EligibilityCheckResult.Ineligible(response))
+      case 3     ⇒ Right(EligibilityCheckResult.AlreadyHasAccount(response))
+      case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
 
     }
   }
-
 }
 
 object HelpToSaveConnectorImpl {
@@ -178,18 +165,9 @@ object HelpToSaveConnectorImpl {
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
 
-  private[connectors] case class EligibilityCheckResponse(result: String, resultCode: Int, reason: String, reasonCode: Int)
-
-  private[connectors] object EligibilityCheckResponse {
-
-    implicit val format: Format[EligibilityCheckResponse] = Json.format[EligibilityCheckResponse]
-
-  }
-
   private[connectors] case class GetEmailResponse(email: Option[String])
 
   private[connectors] object GetEmailResponse {
     implicit val format: Format[GetEmailResponse] = Json.format[GetEmailResponse]
   }
-
 }

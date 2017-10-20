@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmailForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
@@ -51,10 +51,9 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   implicit val userType: UserType = UserType.AccountHolder
 
   def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled {
-      case email ⇒
-        Ok(views.html.email.update_email_address(email, UpdateEmailForm.verifyEmailForm))
-    }
+    checkIfAlreadyEnrolled(email ⇒
+      Ok(views.html.email.update_email_address(email, UpdateEmailForm.verifyEmailForm))
+    )
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -85,8 +84,8 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     val nino = htsContext.nino
 
     if (emailVerificationParams.nino =!= nino) {
-      auditor.sendEvent(SuspiciousActivity(nino, "nino_mismatch"), nino)
-      logger.warn("Email was verified but nino in URL did not match nino for user", nino)
+      auditor.sendEvent(SuspiciousActivity(None, s"nino_mismatch, expected=$nino, received=${emailVerificationParams.nino}"), nino)
+      logger.warn(s"SuspiciousActivity: email was verified but nino [${emailVerificationParams.nino}] in URL did not match user's nino", nino)
       internalServerError()
     } else {
       htsContext.userDetails match {
@@ -97,6 +96,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
           internalServerError()
 
         case Right(nsiUserInfo) ⇒
+          val oldEmail = nsiUserInfo.contactDetails.email
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
             _ ← nSIConnector.updateEmail(nsiUserInfo.updateEmail(emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
             _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap[UpdateEmailError](UpdateEmailError.EmailMongoError)
@@ -109,11 +109,11 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
 
             case UpdateEmailError.EmailMongoError(e) ⇒
               logger.warn("Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I", nino)
-              auditor.sendEvent(EmailChanged(nino, nsiUserInfo.contactDetails.email, nino), nino)
+              auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
               SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
           }, { _ ⇒
             logger.info("Successfully updated email with NS&I", nino)
-            auditor.sendEvent(EmailChanged(nino, nsiUserInfo.contactDetails.email, nino), nino)
+            auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
             SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
           })
       }
@@ -140,15 +140,15 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         (enrolmentStatus, maybeEmail) match {
           case (EnrolmentStatus.NotEnrolled, _) ⇒
             // user is not enrolled in this case
-            auditor.sendEvent(SuspiciousActivity(nino, "missing_enrolment"), nino)
-            logger.warn("User was not enrolled", nino)
+            logger.warn(s"SuspiciousActivity: missing HtS enrolment record for user", nino)
+            auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_enrolment"), nino)
             internalServerError()
 
           case (EnrolmentStatus.Enrolled(_), None) ⇒
             // this should never happen since we cannot have created an account
             // without a successful write to our email store
-            logger.warn("User was enrolled but had no stored email", nino)
-            auditor.sendEvent(SuspiciousActivity(nino, "missing_email_record"), nino)
+            logger.warn("SuspiciousActivity: user is enrolled but the HtS email record does not exist", nino)
+            auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_email_record"), nino)
             internalServerError()
 
           case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
