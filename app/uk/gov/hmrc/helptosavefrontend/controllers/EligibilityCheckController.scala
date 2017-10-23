@@ -160,8 +160,9 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
     userInfo.fold[Either[String, Unit]](Right(())) { userInfo ⇒
-      FEATURE("outgoing-json-validation", app.configuration, logger).thenOrElse(
-        jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ ()),
+      FEATURE("create-account-json-validation", app.configuration, logger, Some(userInfo.nino)).thenOrElse(
+        jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ {
+        }),
         Right(()
         )
       )

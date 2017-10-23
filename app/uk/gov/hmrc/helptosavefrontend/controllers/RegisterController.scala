@@ -113,6 +113,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                   internalServerError()
                 },
                 _ ⇒ {
+                  logger.info("Successfully created account", nino)
+
                   // Account creation is successful, trigger background tasks but don't worry about the result
                   auditor.sendEvent(AccountCreated(userInfo), nino)
 

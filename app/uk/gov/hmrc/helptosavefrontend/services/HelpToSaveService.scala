@@ -76,10 +76,8 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
     EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure, SubmissionSuccess]] {
       case success: SubmissionSuccess ⇒
-        logger.info(s"Successfully created an account", userInfo.nino)
         Right(success)
       case failure: SubmissionFailure ⇒
-        logger.error(s"Could not create an account due to ${failure.errorDetail}", userInfo.nino)
         Left(failure)
     })
 

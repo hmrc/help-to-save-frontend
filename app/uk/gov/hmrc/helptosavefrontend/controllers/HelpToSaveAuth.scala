@@ -61,13 +61,13 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
               .map(_.value)
 
             mayBeNino.fold{
-              logger.warn(s"Could not find NINO for user $timeString")
+              logger.warn(s"NINO retrieval failed $timeString")
               toFuture(internalServerError())
             }(nino ⇒ {
               val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
               userDetails.fold(
-                m ⇒ logger.warn(s"Could not find user info, missing details [${m.missingInfo.mkString(", ")}] $timeString", nino),
+                m ⇒ logger.warn(s"User details retrieval failed, missing details [${m.missingInfo.mkString(", ")}] $timeString", nino),
                 _ ⇒ logger.info(s"Successfully retrieved NINO and user details $timeString", nino)
               )
 
