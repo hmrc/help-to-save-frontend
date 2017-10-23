@@ -38,4 +38,8 @@ object HtsAuth {
       Retrievals.itmpName and
       Retrievals.itmpDateOfBirth and
       Retrievals.itmpAddress
+
+  val internalIdRetrieval: Retrieval[Option[String]] =
+    Retrievals.internalId
 }
+
