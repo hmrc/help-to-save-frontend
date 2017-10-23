@@ -67,8 +67,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   val nsiAuthHeaderKey: String = getString("microservice.services.nsi.client.httpheader.header-key")
 
   val nsiBasicAuth: String = {
-    val user = getString("microservice.services.nsi.client.httpheader.basicauth.Base64User")
-    val password = getString("microservice.services.nsi.client.httpheader.basicauth.Base64Password")
+    val user = Base64.getDecoder.decode(getString("microservice.services.nsi.client.httpheader.basicauth.Base64User"))
+    val password = Base64.getDecoder.decode(getString("microservice.services.nsi.client.httpheader.basicauth.Base64Password"))
     val encoding = getString("microservice.services.nsi.client.httpheader.encoding")
 
     val encoded = Base64.getEncoder.encode(s"$user:$password".getBytes)
