@@ -6,7 +6,6 @@
 
 Frontend for application process for Help to Save. Runs on port 7000 when started locally by the service manager.
 
-
 Start service manager with the following dependencies:
 
 ```
