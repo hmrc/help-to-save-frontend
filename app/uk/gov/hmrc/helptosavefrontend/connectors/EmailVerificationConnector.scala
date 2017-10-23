@@ -107,7 +107,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
         Left(AlreadyVerified)
 
       case SERVICE_UNAVAILABLE ⇒
-        logger.warn(s"Received status 504 (Service Unavailable) (round-trip time: ${nanosToPrettyString(time)})", nino)
+        logger.warn(s"Received status 503 (Service Unavailable) (round-trip time: ${nanosToPrettyString(time)})", nino)
         Left(VerificationServiceUnavailable)
 
       case other ⇒
