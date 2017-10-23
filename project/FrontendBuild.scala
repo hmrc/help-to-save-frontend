@@ -11,6 +11,7 @@ object FrontendBuild extends Build with MicroService {
   val compile = Seq(
     ws,
     "uk.gov.hmrc" %% "frontend-bootstrap" % "8.7.0",
+    "uk.gov.hmrc" %% "play-partials" % "6.1.0",
     "uk.gov.hmrc" %% "http-caching-client" % "7.0.0",
     "org.typelevel" %% "cats" % "0.9.0",
     "uk.gov.hmrc" %% "auth-client" % "1.0.0",
@@ -31,6 +32,10 @@ object FrontendBuild extends Build with MicroService {
     "uk.gov.hmrc" %% "stub-data-generator" % "0.4.0" % scope,
     "com.typesafe.akka" %% "akka-testkit" % "2.3.11" % scope,
     "com.miguno.akka" % "akka-mock-scheduler_2.11" % "0.5.1" % scope,
+    "org.mockito" % "mockito-all" % "1.10.19" % scope,
+
+    "com.github.tomakehurst" % "wiremock" % "1.58" % scope,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
 
     // below for selenium tests
     "info.cukes" % "cucumber-junit" % "1.2.4" % scope,

@@ -29,6 +29,8 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 import uk.gov.hmrc.play.http.ws._
+import uk.gov.hmrc.play.partials._
+import uk.gov.hmrc.play.frontend.filters.SessionCookieCryptoFilter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -54,6 +56,31 @@ trait WSHttp
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 
+  def postForm(url:     String,
+               form:    Map[String, Seq[String]],
+               headers: Seq[(String, String)]    = Seq.empty[(String, String)]
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
+
+}
+
+class FormPartialProvider extends FormPartialRetriever with SessionCookieCryptoFilterWrapper {
+  override val httpGet: WSHttpExtension = new WSHttpExtension
+  override val crypto: (String) ⇒ String = encryptCookieString _
+}
+
+object CachedStaticHtmlPartialProvider extends CachedStaticHtmlPartialRetriever {
+  override val httpGet: WSHttpExtension = new WSHttpExtension
+}
+
+object HtsHeaderCarrierForPartialsConverter extends HeaderCarrierForPartialsConverter with SessionCookieCryptoFilterWrapper {
+  override val crypto: (String) ⇒ String = encryptCookieString _
+}
+
+trait SessionCookieCryptoFilterWrapper {
+
+  def encryptCookieString(cookie: String): String = {
+    SessionCookieCryptoFilter.encrypt(cookie)
+  }
 }
 
 @Singleton
@@ -83,6 +110,11 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
               body:    A,
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POST(url, body)(w, httpReads, hc, ec)
+
+  def postForm(url:     String,
+               form:    Map[String, Seq[String]],
+               headers: Seq[(String, String)]    = Seq.empty[(String, String)]
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POSTForm(url, form)(httpReads, hc, ec)
 }
 
 @Singleton

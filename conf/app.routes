@@ -40,3 +40,7 @@ GET        /account/email-update-error                      @uk.gov.hmrc.helptos
 
 GET        /nsi                                             @uk.gov.hmrc.helptosavefrontend.controllers.NSIController.goToNSI
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
+
+POST       /help/ticket-submission                          @uk.gov.hmrc.helptosavefrontend.controllers.HelpAndContactController.submitContactHmrcForm
+GET        /help/thank-you                                  @uk.gov.hmrc.helptosavefrontend.controllers.HelpAndContactController.contactHmrcThankYou
+GET        /help                                            @uk.gov.hmrc.helptosavefrontend.controllers.HelpAndContactController.getHelpAndContactPage

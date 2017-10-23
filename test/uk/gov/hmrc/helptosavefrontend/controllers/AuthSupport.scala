@@ -43,7 +43,7 @@ trait AuthSupport extends TestSupport {
 
   import AuthSupport._
 
-  type UserRetrievalType = Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Enrolments
+  type UserRetrievalType = Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Enrolments ~ Option[String]
 
   val mockAuthConnector: FrontendAuthConnector = mock[FrontendAuthConnector]
 
@@ -77,14 +77,14 @@ trait AuthSupport extends TestSupport {
 
   val mockedNINORetrieval = Enrolments(Set(enrolment))
 
-  val mockedRetrievals: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
-    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+  val mockedRetrievals: ~[~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments], Option[String]] =
+    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment)) and Option("internalId")
 
-  val mockedRetrievalsMissingUserInfo: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
-    new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+  val mockedRetrievalsMissingUserInfo: ~[~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments], Option[String]] =
+    new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and itmpAddress and Enrolments(Set(enrolment))and Option("internalId")
 
-  val mockedRetrievalsMissingNinoEnrolment: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
-    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set())
+  val mockedRetrievalsMissingNinoEnrolment: ~[~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments], Option[String]] =
+    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set())and Option("internalId")
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
@@ -103,7 +103,7 @@ trait AuthSupport extends TestSupport {
 
   def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[UserRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(predicate, UserRetrievals and Retrievals.authorisedEnrolments, *, *)
+      .expects(predicate, UserRetrievals and Retrievals.authorisedEnrolments and Retrievals.internalId, *, *)
       .returning(Future.successful(result))
 
   def mockAuthWithNoRetrievals(predicate: Predicate): Unit =
