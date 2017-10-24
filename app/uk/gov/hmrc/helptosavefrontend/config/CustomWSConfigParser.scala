@@ -19,13 +19,13 @@ package uk.gov.hmrc.helptosavefrontend.config
 import java.io._
 import java.security.KeyStore
 import java.security.cert.{Certificate, CertificateFactory, X509Certificate}
-import java.util.Base64
 import javax.inject.{Inject, Singleton}
 
 import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
 import play.api.libs.ws.{WSClientConfig, WSConfigParser}
 import play.api.{Configuration, Environment}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.base64Decode
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 
 import scala.collection.JavaConverters._
@@ -131,7 +131,7 @@ class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environ
     file.deleteOnExit()
     val os = new FileOutputStream(file)
     try {
-      val bytes = Base64.getDecoder.decode(data.trim)
+      val bytes = base64Decode(data.trim)
       os.write(bytes)
       os.flush()
       file.getAbsolutePath → bytes
@@ -146,8 +146,8 @@ class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environ
     logger.info(s"Successfully wrote keystore data to file: $ksFilePath")
 
     val decryptedPass = ks.password
-      .map(password ⇒ Base64.getDecoder.decode(password))
-      .map(bytes ⇒ new String(bytes))
+      .map(base64Decode)
+      .map(new String(_))
 
     ks.copy(data     = None, filePath = Some(ksFilePath), password = decryptedPass)
   }
