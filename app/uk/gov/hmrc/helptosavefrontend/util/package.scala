@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend
 
+import java.net.{URLDecoder, URLEncoder}
+import java.util.Base64
+
 import cats.data.EitherT
 import org.joda.time.LocalDate
 
@@ -36,4 +39,12 @@ package object util {
   implicit def toJavaDate(jodaDate: LocalDate): java.time.LocalDate = {
     java.time.LocalDate.of(jodaDate.getYear, jodaDate.getMonthOfYear, jodaDate.getDayOfMonth)
   }
+
+  def base64Encode(input: String): Array[Byte] = Base64.getEncoder.encode(input.getBytes)
+
+  def base64Decode(input: String): Array[Byte] = Base64.getDecoder.decode(input)
+
+  def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
+
+  def decoded(url: String): String = URLDecoder.decode(url, "UTF-8")
 }

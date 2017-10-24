@@ -29,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.helptosavefrontend.views.html.access_denied
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
+import uk.gov.hmrc.helptosavefrontend.util.decoded
 
 import scala.concurrent.Future
 

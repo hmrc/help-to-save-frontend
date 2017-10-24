@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{base64Decode, base64Encode}
-
 import scala.util.Try
 
 case class EmailVerificationParams(nino: String, email: String) {
