@@ -32,25 +32,14 @@
 
     <h2>Didn't receive an email?</h2>
     <p class="content">Click here to resend the verify email</p>
-
-    @{
-        helpers.form(routes.AccountHolderUpdateEmailAddressController.onSubmit())(
-            Html(
-                s"""
-             |<input type="hidden" name="new-email-address" value="$email">
-             |${helpers.submit('_buttonClass -> "", 'id → "resend-verification")(Html("Resend email"))}
-             |""".stripMargin
-            )
-        )
-    }
-
+    <a href=@routes.NewApplicantUpdateEmailAddressController.verifyEmail(email) class="button">Resend email</a>
+    
     <br>
 
     <h2>Want to change your email address?</h2>
     <p class="content">Click here to change email address</p>
-    <a href=@routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress() id="update-email" class="button">Change email address</a>
+    <a href=@routes.RegisterController.getConfirmEmailPage() class="button">Change email address</a>
 
 
 
 }
-    

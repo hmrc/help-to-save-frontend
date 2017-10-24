@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.forms
 
 import play.api.data._
 import play.api.data.Forms._
-import play.api.i18n.Lang
 
 object UpdateEmailForm {
   val verifyEmailForm: Form[UpdateEmail] = Form(

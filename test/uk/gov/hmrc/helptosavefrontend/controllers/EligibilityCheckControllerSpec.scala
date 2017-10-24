@@ -91,7 +91,10 @@ class EligibilityCheckControllerSpec
         val result = getIsEligible()
         status(result) shouldBe OK
 
-        contentAsString(result) should include("You are eligible")
+        val content = contentAsString(result)
+        content should include("You are eligible")
+        content should include(validNSIUserInfo.forename)
+        content should include(validNSIUserInfo.surname)
       }
 
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {

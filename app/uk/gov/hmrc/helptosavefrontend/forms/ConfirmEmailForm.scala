@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+package uk.gov.hmrc.helptosavefrontend.forms
 
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
+import play.api.data._
+import play.api.data.Forms._
 
-package object email {
-
-  implicit class NSIUserInfoOps(val nsiUserInfo: NSIUserInfo) {
-    def updateEmail(newEmail: String): NSIUserInfo =
-      nsiUserInfo.copy(contactDetails = nsiUserInfo.contactDetails.copy(email = newEmail))
-  }
-
+object ConfirmEmailForm {
+  val confirmEmailForm: Form[ConfirmEmail] = Form(
+    mapping("new-email" -> optional(email)
+    )(ConfirmEmail.apply)(ConfirmEmail.unapply)
+  )
 }
+
+case class ConfirmEmail(newEmail: Option[String])

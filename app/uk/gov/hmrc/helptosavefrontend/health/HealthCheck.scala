@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.health
 
 import java.time.format.DateTimeFormatter
-import java.time.{Clock, LocalDateTime, ZoneId}
+import java.time.{Clock, LocalDateTime}
 
 import akka.actor.{Actor, ActorLogging, Cancellable, PoisonPill, Props, Scheduler}
 import akka.pattern.{after, ask, pipe}

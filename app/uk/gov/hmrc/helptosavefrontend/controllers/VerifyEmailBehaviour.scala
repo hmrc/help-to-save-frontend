@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers.email
+package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
-import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BadContinueURL}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
-import uk.gov.hmrc.helptosavefrontend.util.toFuture
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 
@@ -34,41 +31,22 @@ import scala.util.{Failure, Success}
 
 trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
 
-  implicit val userType: UserType
-
   val emailVerificationConnector: EmailVerificationConnector
 
   val auditor: HTSAuditor
 
-  def sendEmailVerificationRequest()(implicit request: Request[AnyContent],
-                                     htsContext: HtsContextWithNINO,
-                                     crypto:     Crypto,
-                                     messages:   Messages): Future[Result] = {
-    UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
-      formWithErrors ⇒ {
-        Future.successful(BadRequest(views.html.email.update_email_address("errors", formWithErrors)))
-      },
-      (details: UpdateEmail) ⇒ {
-        emailVerificationConnector.verifyEmail(htsContext.nino, details.email).map {
-          case Right(_) ⇒
-            Ok(views.html.email.check_your_email(details.email))
-
-          case Left(AlreadyVerified) ⇒
-            val encodedParams = EmailVerificationParams(htsContext.nino, details.email).encode()
-
-            val url = userType.fold(
-              routes.NewApplicantUpdateEmailAddressController.emailVerified(encodedParams).url,
-              routes.AccountHolderUpdateEmailAddressController.emailVerified(encodedParams).url
-            )
-
-            SeeOther(url)
-
-          case Left(other) ⇒
-            Ok(views.html.email.email_verify_error(other))
-        }
-      }
-    )
-  }
+  def sendEmailVerificationRequest(email:                String,
+                                   ifSuccess:            ⇒ Result,
+                                   ifAlreadyVerifiedURL: EmailVerificationParams ⇒ String,
+                                   isNewApplicant:       Boolean)(implicit request: Request[AnyContent],
+                                                                  htsContext: HtsContextWithNINO,
+                                                                  crypto:     Crypto,
+                                                                  messages:   Messages): Future[Result] =
+    emailVerificationConnector.verifyEmail(htsContext.nino, email, isNewApplicant).map {
+      case Right(_)              ⇒ ifSuccess
+      case Left(AlreadyVerified) ⇒ SeeOther(ifAlreadyVerifiedURL(EmailVerificationParams(htsContext.nino, email)))
+      case Left(other)           ⇒ Ok(views.html.email.email_verify_error(other))
+    }
 
   def handleEmailVerified(emailVerificationParams: String,
                           ifValid:                 EmailVerificationParams ⇒ Future[Result])(implicit request: Request[AnyContent],

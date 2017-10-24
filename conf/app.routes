@@ -9,28 +9,30 @@ GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptos
 GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
 GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
 
-GET        /check-and-confirm-your-details                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmDetailsPage
+GET        /check-and-confirm-your-email                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmEmailPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
 GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
+GET        /details-are-incorrect                           @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDetailsAreIncorrect
 
-GET        /register/update-your-email-address              @uk.gov.hmrc.helptosavefrontend.controllers.email.NewApplicantUpdateEmailAddressController.getUpdateYourEmailAddress
-POST       /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
+POST       /register/confirm-email-submit                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmailSubmit
+GET        /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
+GET        /register/verify-email/:email                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail(email)
+GET        /register/email-verified                         @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerified(p: String)
+GET        /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
 GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
-GET       /register/user-cap-reached                        @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getUserCapReachedPage
+GET        /register/user-cap-reached                       @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getUserCapReachedPage
 
-POST       /email/new-applicant-update                      @uk.gov.hmrc.helptosavefrontend.controllers.email.NewApplicantUpdateEmailAddressController.onSubmit
-POST       /email/account-holder-update                     @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.onSubmit
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String)
 
-GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.email.NewApplicantUpdateEmailAddressController.emailVerified(p: String)
 
-GET        /account/update-your-email-address               @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
-GET        /account/email-verified                          @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.emailVerified(p: String)
-GET        /account/email-updated                           @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getEmailUpdated
-GET        /account/email-update-error                      @uk.gov.hmrc.helptosavefrontend.controllers.email.AccountHolderUpdateEmailAddressController.getEmailUpdateError
+GET        /account/update-your-email-address               @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
+POST       /account/verify-email                            @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.onSubmit
+GET        /account/email-verified                          @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.emailVerified(p: String)
+GET        /account/email-updated                           @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdated
+GET        /account/email-update-error                      @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdateError
 
 GET        /nsi                                             @uk.gov.hmrc.helptosavefrontend.controllers.NSIController.goToNSI

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers.email
+package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.net.URLDecoder
 
@@ -27,11 +27,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
-import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EmailChanged, EnrolmentStatus, NSIUserInfo, SuspiciousActivity, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -89,8 +88,8 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
   }
 
   def mockEmailVerificationConn(nino: String, email: String)(result: Either[VerifyEmailError, Unit]) =
-    (mockEmailVerificationConnector.verifyEmail(_: String, _: String)(_: HeaderCarrier, _: ExecutionContext, _: UserType))
-      .expects(nino, email, *, *, UserType.AccountHolder)
+    (mockEmailVerificationConnector.verifyEmail(_: String, _: String, _: Boolean)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, email, false, *, *)
       .returning(Future.successful(result))
 
   def mockUpdateEmailWithNSI(userInfo: NSIUserInfo)(result: Either[String, Unit]): Unit =

@@ -15,7 +15,6 @@
  *@
 
 @import cats.syntax.show._
-@import uk.gov.hmrc.helptosavefrontend.controllers.email.routes
 @import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 @import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.localDateShow
 
@@ -32,16 +31,4 @@
 <div class="divider--bottom">
     <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.dob")</h4>
     <p>@(userDetails.dateOfBirth.show)</p>
-</div>
-<div class="divider--bottom">
-    <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.email")
-        <span><a style="float: right; font-weight: normal;"
-                 href=@routes.NewApplicantUpdateEmailAddressController.getUpdateYourEmailAddress()
-                 data-ga-event-category = "links"
-                 data-ga-event-action = "Change"
-                 data-ga-event-label= "Confirm details page"
-                 class="ga-track-event">
-            @Messages("hts.register.check-and-confirm-your-details.change-button-label")</a></span>
-    </h4>
-    <p>@(userDetails.contactDetails.email)</p>
 </div>
