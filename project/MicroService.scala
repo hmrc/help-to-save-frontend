@@ -109,9 +109,9 @@ trait MicroService {
     .settings(wartremoverErrors in (Test, compile) --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference))
     .settings(wartremoverExcluded ++=
       routes.in(Compile).value ++
-      (baseDirectory ** "*.sc").value ++
-      (baseDirectory ** "HealthCheck.scala").value ++
-      (baseDirectory ** "HealthCheckRunner.scala").value ++
+      (baseDirectory.value ** "*.sc").get ++
+      (baseDirectory.value ** "HealthCheck.scala").get ++
+      (baseDirectory.value ** "HealthCheckRunner.scala").get ++
       Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
     )
     .settings(
@@ -125,7 +125,7 @@ trait MicroService {
     .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
     .settings(
       Keys.fork in IntegrationTest := false,
-      unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest) (base ⇒ Seq(base / "it")),
+      unmanagedSourceDirectories in IntegrationTest := Seq((baseDirectory in IntegrationTest).value / "it"),
       addTestReportOption(IntegrationTest, "int-test-reports"),
       testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
       parallelExecution in IntegrationTest := false)

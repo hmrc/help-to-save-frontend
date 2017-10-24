@@ -45,8 +45,10 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                                                            val emailVerificationConnector: EmailVerificationConnector,
                                                            nSIConnector:                   NSIConnector,
                                                            metrics:                        Metrics,
-                                                           val auditor:                    HTSAuditor)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
-  extends HelpToSaveAuth(frontendAuthConnector, metrics) with VerifyEmailBehaviour with I18nSupport {
+                                                           val auditor:                    HTSAuditor
+)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
+  extends HelpToSaveAuth(frontendAuthConnector, metrics)
+  with VerifyEmailBehaviour with I18nSupport {
 
   implicit val userType: UserType = UserType.AccountHolder
 
@@ -123,7 +125,11 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   /**
    * Use the enrolment store and email store to see if the user is enrolled
    */
-  private def checkIfAlreadyEnrolled(ifEnrolled: Email ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+  private def checkIfAlreadyEnrolled(ifEnrolled: Email ⇒ Future[Result])(
+      implicit
+      htsContext: HtsContextWithNINO,
+      hc:         HeaderCarrier,
+      request:    Request[_]): Future[Result] = {
     val enrolled: EitherT[Future, String, (EnrolmentStatus, Option[Email])] = for {
       enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
       maybeEmail ← helpToSaveService.getConfirmedEmail()
@@ -140,7 +146,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         (enrolmentStatus, maybeEmail) match {
           case (EnrolmentStatus.NotEnrolled, _) ⇒
             // user is not enrolled in this case
-            logger.warn(s"SuspiciousActivity: missing HtS enrolment record for user", nino)
+            logger.warn("SuspiciousActivity: missing HtS enrolment record for user", nino)
             auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_enrolment"), nino)
             internalServerError()
 

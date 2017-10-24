@@ -39,41 +39,41 @@ case class AccountCreated(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) ext
   val value: DataEvent = HTSEvent(
     "AccountCreated",
     Map[String, String](
-      "forename" -> userInfo.forename,
-      "surname" -> userInfo.surname,
-      "dateOfBirth" -> userInfo.dateOfBirth.toString,
-      "nino" -> userInfo.nino,
-      "address1" -> userInfo.contactDetails.address1,
-      "address2" -> userInfo.contactDetails.address2,
-      "address3" -> {
+      "forename" → userInfo.forename,
+      "surname" → userInfo.surname,
+      "dateOfBirth" → userInfo.dateOfBirth.toString,
+      "nino" → userInfo.nino,
+      "address1" → userInfo.contactDetails.address1,
+      "address2" → userInfo.contactDetails.address2,
+      "address3" → {
         userInfo.contactDetails.address3.fold("") {
           identity
         }
       },
-      "address4" -> {
+      "address4" → {
         userInfo.contactDetails.address4.fold("") {
           identity
         }
       },
-      "address5" -> {
+      "address5" → {
         userInfo.contactDetails.address5.fold("") {
           identity
         }
       },
-      "postcode" -> userInfo.contactDetails.postcode,
-      "countryCode" -> {
+      "postcode" → userInfo.contactDetails.postcode,
+      "countryCode" → {
         userInfo.contactDetails.countryCode.fold("") {
           identity
         }
       },
-      "email" -> userInfo.contactDetails.email,
-      "phoneNumber" -> {
+      "email" → userInfo.contactDetails.email,
+      "phoneNumber" → {
         userInfo.contactDetails.phoneNumber.fold("") {
           identity
         }
       },
-      "communicationPreference" -> userInfo.contactDetails.communicationPreference,
-      "registrationChannel" -> userInfo.registrationChannel)
+      "communicationPreference" → userInfo.contactDetails.communicationPreference,
+      "registrationChannel" → userInfo.registrationChannel)
   )
 }
 
@@ -83,10 +83,13 @@ case class EligibilityResultEvent(nino: NINO, eligibilityResult: EligibilityChec
     val response = eligibilityResult.value
     val details =
       if (response.resultCode === 1) {
-        Map[String, String]("nino" -> nino, "eligible" -> "true")
+        Map[String, String]("nino" → nino, "eligible" → "true")
       } else {
-        Map[String, String]("nino" -> nino, "eligible" -> "false",
-          "reason" -> s"Response: resultCode=${response.resultCode}, reasonCode=${response.reasonCode}, meaning result='${response.result}', reason='${response.reason}'")
+        Map[String, String]("nino" → nino, "eligible" → "false",
+          "reason" → ("Response: " +
+            s"resultCode=${response.resultCode}, reasonCode=${response.reasonCode}, " +
+            s"meaning result='${response.result}' reason='${response.reason}'")
+        )
       }
 
     HTSEvent("EligibilityResult", details)
@@ -96,15 +99,15 @@ case class EligibilityResultEvent(nino: NINO, eligibilityResult: EligibilityChec
 case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit hc: HeaderCarrier) extends HTSEvent {
   val value: DataEvent = HTSEvent(
     "EmailChanged",
-    Map[String, String]("nino" -> nino, "originalEmail" -> oldEmail, "newEmail" -> newEmail)
+    Map[String, String]("nino" → nino, "originalEmail" → oldEmail, "newEmail" → newEmail)
   )
 }
 
 case class SuspiciousActivity(nino: Option[NINO], activity: String)(implicit hc: HeaderCarrier) extends HTSEvent {
   val value: DataEvent = {
     val details = nino match {
-      case Some(p) ⇒ Map[String, String]("nino" -> p, "reason" -> activity)
-      case None    ⇒ Map[String, String]("reason" -> activity)
+      case Some(p) ⇒ Map[String, String]("nino" → p, "reason" → activity)
+      case None    ⇒ Map[String, String]("reason" → activity)
     }
     HTSEvent("SuspiciousActivity", details)
   }
