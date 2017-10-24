@@ -25,7 +25,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalAccountUrl
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalTaxAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -153,7 +153,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
 
     case Right(missingUserInfo) ⇒
       logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
-      Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalAccountUrl))
+      Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalTaxAccountUrl))
   }
 
   private def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Unit] = {
