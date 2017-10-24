@@ -97,7 +97,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   def getEmailUpdated(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkSession {
-        SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility().url)
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } { session ⇒
         session.eligibilityCheckResult.fold(
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)

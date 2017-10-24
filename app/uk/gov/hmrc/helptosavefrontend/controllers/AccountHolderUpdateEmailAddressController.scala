@@ -61,7 +61,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     checkIfAlreadyEnrolled(_ ⇒
       UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
         formWithErrors ⇒ {
-          Future.successful(BadRequest(views.html.email.update_email_address("errors", formWithErrors)))
+          BadRequest(views.html.email.update_email_address("errors", formWithErrors))
         },
         (details: UpdateEmail) ⇒
           sendEmailVerificationRequest(
