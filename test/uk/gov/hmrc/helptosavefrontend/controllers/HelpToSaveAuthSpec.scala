@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.checkEligibilityU
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
-import uk.gov.hmrc.helptosavefrontend.util.{encoded, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.{urlEncode, toJavaDate}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -95,7 +95,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
         val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
-        redirectTo should include(encoded(checkEligibilityUrl))
+        redirectTo should include(urlEncode(checkEligibilityUrl))
       }
     }
 

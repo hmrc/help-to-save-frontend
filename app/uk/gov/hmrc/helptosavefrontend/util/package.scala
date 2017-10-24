@@ -44,7 +44,7 @@ package object util {
 
   def base64Decode(input: String): Array[Byte] = Base64.getDecoder.decode(input)
 
-  def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
+  def urlEncode(url: String): String = URLEncoder.encode(url, "UTF-8")
 
-  def decoded(url: String): String = URLDecoder.decode(url, "UTF-8")
+  def urlDecode(url: String): String = URLDecoder.decode(url, "UTF-8")
 }

@@ -48,7 +48,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   def ivUrl(redirectOnLoginURL: String): String = {
 
     val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
-    val encodedCallbackUrl = encoded(s"$identityCallbackUrl?continueURL=$redirectOnLoginURL")
+    val encodedCallbackUrl = urlEncode(s"$identityCallbackUrl?continueURL=$redirectOnLoginURL")
 
     val ivUpliftUrl: String = getString("microservice.services.identity-verification-uplift.url")
 

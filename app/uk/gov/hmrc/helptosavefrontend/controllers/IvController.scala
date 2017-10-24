@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.helptosavefrontend.views.html.access_denied
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
-import uk.gov.hmrc.helptosavefrontend.util.decoded
+import uk.gov.hmrc.helptosavefrontend.util.urlDecode
 
 import scala.concurrent.Future
 
@@ -53,7 +53,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
         ivConnector.getJourneyStatus(JourneyId(id)).map {
           case Some(Success) ⇒
             metrics.ivSuccessCounter.inc()
-            Ok(iv_success(decoded(continueURL)))
+            Ok(iv_success(urlDecode(continueURL)))
 
           case Some(Incomplete) ⇒
             metrics.ivIncompleteCounter.inc()
