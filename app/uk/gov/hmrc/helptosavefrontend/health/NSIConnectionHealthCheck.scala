@@ -65,7 +65,7 @@ class NSIConnectionHealthCheck @Inject() (system: ActorSystem, configuration: Co
 
 object NSIConnectionHealthCheck {
 
-  class NSIConnectionHealthCheckRunner(nsiConnector: NSIConnector, metrics: Metrics, payload: Payload) extends Actor with HealthCheckRunner {
+  class NSIConnectionHealthCheckRunner(nsiConnector: NSIConnector, metrics: Metrics, payload: Payload) extends Actor with HealthCheckRunner with Logging {
 
     import context.dispatcher
 

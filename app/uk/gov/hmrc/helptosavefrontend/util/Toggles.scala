@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.util
 import com.typesafe.config.Config
 import play.api.{Configuration, Logger}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 
 object Toggles {
 
@@ -31,7 +32,8 @@ object Toggles {
    */
   case class FEATURE private (name:    String,
                               enabled: Boolean,
-                              logger:  Logger) {
+                              logger:  Logger,
+                              nino:    Option[NINO]) {
 
     @inline private def time(): Long = System.nanoTime()
 
@@ -39,7 +41,11 @@ object Toggles {
       val start = time()
       val result = if (enabled) ifEnabled else ifDisabled
       val end = time()
-      logger.info(s"Feature $name (enabled: $enabled) executed in ${nanosToPrettyString(end - start)}")
+      nino.fold(
+        logger.info(s"Feature $name (enabled: $enabled) executed in ${nanosToPrettyString(end - start)}")
+      )(n ⇒
+          logger.info(s"Feature $name (enabled: $enabled) executed in ${nanosToPrettyString(end - start)}", n)
+        )
       result
     }
 
@@ -56,9 +62,9 @@ object Toggles {
      * @param configuration The global configuration
      * @param logger The logger to be used by the feature
      */
-    def apply(name: String, configuration: Configuration, logger: Logger): FEATURE = {
+    def apply(name: String, configuration: Configuration, logger: Logger, nino: Option[NINO] = None): FEATURE = {
       val config = getConfig(name, configuration)
-      FEATURE(name, config.getBoolean("enabled"), logger)
+      FEATURE(name, config.getBoolean("enabled"), logger, nino)
     }
 
   }

@@ -86,7 +86,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
         response.status match {
           case Status.CREATED ⇒
-            logger.info(s"successfully created accountm, received status 201 from NSI ${timeString(time)}", nino)
+            logger.info(s"createAccount/insert returned 201 (Created) ${timeString(time)}", nino)
             SubmissionSuccess()
 
           case other ⇒
@@ -113,7 +113,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
         response.status match {
           case Status.OK ⇒
-            logger.info(s"successfully updated email, received status 200 from NSI,  ${timeString(time)}", nino)
+            logger.info(s"createAccount/update returned 200 OK from NSI ${timeString(time)}", nino)
             Right(())
 
           case other ⇒

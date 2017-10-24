@@ -76,7 +76,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
       response.status match {
         case OK | CREATED ⇒
-          logger.info(s"[EmailVerification] - Email verification successfully triggered, received status ${response.status} " +
+          logger.info(s"Email verification successfully triggered, received status ${response.status} " +
             s"(round-trip time: ${nanosToPrettyString(time)})", nino)
           Right(())
 
@@ -98,20 +98,20 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
     status match {
       case BAD_REQUEST ⇒
-        logger.warn(s"[EmailVerification] - received status 400 (Bad Request) (round-trip time: ${nanosToPrettyString(time)})", nino)
+        logger.warn(s"Received status 400 (Bad Request) (round-trip time: ${nanosToPrettyString(time)})", nino)
         Left(RequestNotValidError)
 
       case CONFLICT ⇒
-        logger.info("[EmailVerification] - email address already verified, received status 409 (Conflict) " +
+        logger.info("Email address already verified, received status 409 (Conflict) " +
           s"(round-trip time: ${nanosToPrettyString(time)})", nino)
         Left(AlreadyVerified)
 
       case SERVICE_UNAVAILABLE ⇒
-        logger.warn(s"[EmailVerification] - received status 504 (Service Unavailable) (round-trip time: ${nanosToPrettyString(time)})", nino)
+        logger.warn(s"Received status 503 (Service Unavailable) (round-trip time: ${nanosToPrettyString(time)})", nino)
         Left(VerificationServiceUnavailable)
 
       case other ⇒
-        logger.warn(s"[EmailVerification] - Unexpected status $other received from email verification" +
+        logger.warn(s"Received unexpected status $other from email verification" +
           s" body = ${response.body} (round-trip time: ${nanosToPrettyString(time)})", nino)
         Left(BackendError)
     }
