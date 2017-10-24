@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.util.Base64
-
 import cats.data.EitherT
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
@@ -58,8 +56,6 @@ trait HelpToSaveConnector {
 @Singleton
 class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
 
-  val base64Encoder: Base64.Encoder = Base64.getEncoder
-
   def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
       eligibilityURL,
@@ -78,7 +74,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
     handleGet(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier): Result[Unit] = {
-    val encodedEmail = new String(base64Encoder.encode(email.getBytes()))
+    val encodedEmail = new String(base64Encode(email))
     handleGet(storeEmailURL(encodedEmail), _ ⇒ Right(()), "store email", identity)
   }
 
