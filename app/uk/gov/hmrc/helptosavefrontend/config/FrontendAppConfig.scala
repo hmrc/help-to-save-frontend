@@ -48,6 +48,9 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val origin: String = getString("appName")
 
+  def base64Encode(input: String): Array[Byte] = Base64.getEncoder.encode(input.getBytes)
+  def base64Decode(input: String): String = new String(Base64.getDecoder.decode(input))
+
   def ivUrl(redirectOnLoginURL: String): String = {
 
     val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
@@ -66,12 +69,11 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   val nsiAuthHeaderKey: String = getString("microservice.services.nsi.client.httpheader.header-key")
 
   val nsiBasicAuth: String = {
-    val user = new String(Base64.getDecoder.decode(getString("microservice.services.nsi.client.httpheader.basicauth.Base64User")))
-    val password = new String(Base64.getDecoder.decode(getString("microservice.services.nsi.client.httpheader.basicauth.Base64Password")))
+    val user = base64Decode(getString("microservice.services.nsi.client.httpheader.basicauth.Base64User"))
+    val password = base64Decode(getString("microservice.services.nsi.client.httpheader.basicauth.Base64Password"))
     val encoding = getString("microservice.services.nsi.client.httpheader.encoding")
 
-    val encoded = Base64.getEncoder.encode(s"$user:$password".getBytes)
-    s"Basic: ${new String(encoded, encoding)}"
+    s"Basic: ${new String(base64Encode(s"$user:$password"), encoding)}"
   }
 
   val nsiCreateAccountUrl: String = s"${baseUrl("nsi")}${getString("microservice.services.nsi.create-account-url")}"
