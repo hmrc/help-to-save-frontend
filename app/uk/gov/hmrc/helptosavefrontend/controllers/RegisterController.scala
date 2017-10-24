@@ -20,14 +20,13 @@ import javax.inject.Singleton
 
 import cats.instances.future._
 import com.google.inject.Inject
-import play.api.data.Form
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.forms.{ConfirmEmail, ConfirmEmailForm}
+import uk.gov.hmrc.helptosavefrontend.forms.ConfirmEmailForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService

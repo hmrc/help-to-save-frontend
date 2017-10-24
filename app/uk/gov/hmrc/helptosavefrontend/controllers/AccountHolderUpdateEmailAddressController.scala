@@ -30,10 +30,8 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NS
 import uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.UpdateEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
