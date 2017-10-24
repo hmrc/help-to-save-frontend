@@ -63,7 +63,11 @@ trait EnrolmentCheckBehaviour {
     ).flatMap(identity)
   }
 
-  def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] =
+  def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result])(
+      implicit
+      htsContext: HtsContextWithNINO,
+      hc:         HeaderCarrier,
+      request:    Request[_]): Future[Result] =
     checkIfAlreadyEnrolled(ifNotEnrolled, _ ⇒ internalServerError())
 
 }

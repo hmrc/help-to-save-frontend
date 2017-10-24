@@ -108,7 +108,7 @@ class CustomWSConfigParser @Inject() (configuration: Configuration, env: Environ
   @SuppressWarnings(Array("org.wartremover.warts.Null"))
   private def initKeystore(): KeyStore = {
     val keystore = KeyStore.getInstance(KeyStore.getDefaultType)
-    keystore.load(null, null)
+    keystore.load(null, null) // scalastyle:ignore null
     keystore
   }
 
