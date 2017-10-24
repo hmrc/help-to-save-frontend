@@ -39,7 +39,7 @@ class IvConnectorImpl @Inject() (http: WSHttp) extends IvConnector with Logging 
 
   override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]] = {
 
-    http.get(s"$ivJourneyResultUrl/${journeyId.Id}").flatMap {
+    http.get(ivJourneyResultUrl(journeyId)).flatMap {
 
       case r if r.status === OK ⇒
         val result = (r.json \ "result").as[String]

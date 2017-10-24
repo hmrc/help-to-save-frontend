@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 import java.net.{URI, URLDecoder, URLEncoder}
 import java.util.Base64
 
+import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -65,6 +66,8 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
       "&confidenceLevel=200"
     ).toString
   }
+
+  def ivJourneyResultUrl(journeyId: JourneyId): String = new URI(s"$ivJourneyResultUrl/${journeyId.Id}").toString
 
   val nsiAuthHeaderKey: String = getString("microservice.services.nsi.client.httpheader.header-key")
 

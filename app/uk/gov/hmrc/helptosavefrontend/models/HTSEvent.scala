@@ -88,7 +88,7 @@ case class EligibilityResultEvent(nino: NINO, eligibilityResult: EligibilityChec
         Map[String, String]("nino" → nino, "eligible" → "false",
           "reason" → ("Response: " +
             s"resultCode=${response.resultCode}, reasonCode=${response.reasonCode}, " +
-            s"meaning result='${response.result}' reason='${response.reason}'")
+            s"meaning result='${response.result}', reason='${response.reason}'")
         )
       }
 
