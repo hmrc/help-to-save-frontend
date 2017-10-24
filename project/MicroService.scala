@@ -116,7 +116,7 @@ trait MicroService {
     )
     .settings(
       libraryDependencies ++= appDependencies,
-      //retrieveManaged := true,
+      retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
       //testGrouping in Test := oneForkedJvmPerTest((definedTests in Test).value),
       routesGenerator := StaticRoutesGenerator
