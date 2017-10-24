@@ -17,6 +17,7 @@ object FrontendBuild extends Build with MicroService {
     "uk.gov.hmrc" %% "domain" % "4.1.0",
     "com.github.kxbmap" %% "configs" % "0.4.4",
     "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9",
+    "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
     "uk.gov.hmrc" %% "zap-automation" % "0.15.0"
   )
 

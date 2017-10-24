@@ -20,7 +20,7 @@ import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
 import play.api.Play.current
 import play.api.i18n.Messages.Implicits._
-import play.api.mvc.Request
+import play.api.mvc.{EssentialFilter, Request}
 import play.api.{Configuration, _}
 import play.twirl.api.Html
 import uk.gov.hmrc.crypto.ApplicationCrypto
@@ -48,6 +48,20 @@ object FrontendGlobal extends DefaultFrontendGlobal {
   }
 
   override def microserviceMetricsConfig(implicit app: Application): Option[Configuration] = app.configuration.getConfig("microservice.metrics")
+
+  private lazy val whiteListFilter: Seq[WhitelistFilter] = {
+    val filter = Some(new WhitelistFilter(configuration, mat)).filterNot(_.whitelist.isEmpty)
+
+    filter.fold[Seq[WhitelistFilter]]{
+      Logger.info("IP whitelisting disabled")
+      Seq.empty
+    }{ f ⇒
+      Logger.info("IP whitelisting enabled")
+      Seq(f)
+    }
+  }
+
+  override def filters: Seq[EssentialFilter] = super.filters ++ whiteListFilter
 
 }
 
