@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import java.net.{URI, URLDecoder, URLEncoder}
-import java.util.Base64
+import java.net.URI
 
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
+import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.config.ServicesConfig
 
 trait AppConfig {
@@ -43,19 +43,12 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val ivJourneyResultUrl: String = getString("microservice.services.identity-verification-journey-result.url")
 
-  def encoded(url: String): String = URLEncoder.encode(url, "UTF-8")
-
-  def decoded(url: String): String = URLDecoder.decode(url, "UTF-8")
-
   val origin: String = getString("appName")
-
-  def base64Encode(input: String): Array[Byte] = Base64.getEncoder.encode(input.getBytes)
-  def base64Decode(input: String): Array[Byte] = Base64.getDecoder.decode(input)
 
   def ivUrl(redirectOnLoginURL: String): String = {
 
     val identityCallbackUrl: String = getString("microservice.services.identity-callback.url")
-    val encodedCallbackUrl = encoded(s"$identityCallbackUrl?continueURL=$redirectOnLoginURL")
+    val encodedCallbackUrl = urlEncode(s"$identityCallbackUrl?continueURL=$redirectOnLoginURL")
 
     val ivUpliftUrl: String = getString("microservice.services.identity-verification-uplift.url")
 

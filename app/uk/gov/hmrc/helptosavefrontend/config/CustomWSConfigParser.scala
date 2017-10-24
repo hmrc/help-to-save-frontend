@@ -25,8 +25,7 @@ import play.api.inject.{Binding, Module}
 import play.api.libs.ws.ssl.{KeyStoreConfig, TrustStoreConfig}
 import play.api.libs.ws.{WSClientConfig, WSConfigParser}
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.base64Decode
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, base64Decode}
 
 import scala.collection.JavaConverters._
 
