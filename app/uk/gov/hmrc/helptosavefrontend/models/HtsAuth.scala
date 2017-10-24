@@ -25,7 +25,7 @@ import uk.gov.hmrc.auth.core.{AuthProviders, Enrolment}
 
 object HtsAuth {
 
-  val NinoWithCL200: Enrolment = Enrolment("HMRC-NI").withConfidenceLevel(L200)
+  val NinoWithCL200: Enrolment = Enrolment("HMRC-NI")
 
   val AuthProvider: AuthProviders = AuthProviders(GovernmentGateway)
 
