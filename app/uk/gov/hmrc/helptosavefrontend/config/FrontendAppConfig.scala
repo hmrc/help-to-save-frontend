@@ -41,7 +41,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val ivJourneyResultUrl: String = s"${baseUrl("identity-verification")}/mdtp/journey/journeyId"
 
-  val origin: String = getString("appName")
+  val appName: String = getString("appName")
 
   def encodedCallbackUrl(redirectOnLoginURL: String): String =
     urlEncode(s"${baseUrl("help-to-save-frontend")}/iv/journey-result?continueURL=$redirectOnLoginURL")
@@ -51,7 +51,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   def ivUrl(redirectOnLoginURL: String): String = {
 
     new URI(s"$ivUpliftUrl" +
-      s"?origin=$origin" +
+      s"?origin=$appName" +
       s"&completionURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
       s"&failureURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
       "&confidenceLevel=200"
@@ -98,7 +98,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val analyticsHost: String = getString("google-analytics.host")
 
   val contactUrl: String = s"${baseUrl("contact-frontend")}/contact"
-  override lazy val reportAProblemPartialUrl: String = s"$contactUrl/contact/problem_reports_ajax?service=$origin"
-  override lazy val reportAProblemNonJSUrl: String = s"$contactUrl/contact/problem_reports_nonjs?service=$origin"
+  override lazy val reportAProblemPartialUrl: String = s"$contactUrl/contact/problem_reports_ajax?service=$appName"
+  override lazy val reportAProblemNonJSUrl: String = s"$contactUrl/contact/problem_reports_nonjs?service=$appName"
 
 }

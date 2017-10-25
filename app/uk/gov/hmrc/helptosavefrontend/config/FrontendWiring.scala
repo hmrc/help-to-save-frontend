@@ -98,13 +98,11 @@ class WSHttpProxy
   with WSProxy
   with RunMode
   with HttpAuditing
-  with ServicesConfig
-  with HttpHooks
   with HttpVerbs {
 
   val httpReads: HttpReads[HttpResponse] = new RawHttpReads
 
-  override lazy val appName: String = getString("appName")
+  override lazy val appName: String = FrontendAppConfig.appName
   override lazy val wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy")
   override val hooks: Seq[HttpHook] = Seq(AuditingHook)
   override lazy val auditConnector: AuditConnector = FrontendAuditConnector
