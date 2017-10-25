@@ -56,7 +56,7 @@ object FrontendGlobal extends DefaultFrontendGlobal {
       Logger.info("IP whitelisting disabled")
       Seq.empty
     }{ f ⇒
-      Logger.info("IP whitelisting enabled")
+      Logger.warn("IP whitelisting enabled")
       Seq(f)
     }
   }
