@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.Writes
+import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSProxyServer
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.authUrl
@@ -99,7 +99,8 @@ class WSHttpProxy
   with RunMode
   with HttpAuditing
   with ServicesConfig
-  with HttpHooks {
+  with HttpHooks
+  with HttpVerbs {
 
   val httpReads: HttpReads[HttpResponse] = new RawHttpReads
 
@@ -124,10 +125,15 @@ class WSHttpProxy
    * Returns a [[Future[HttpResponse]] without throwing exceptions if the status us not `2xx`. Needed
    * to replace [[PUT]] method provided by the hmrc library which will throw exceptions in such cases.
    */
-  def put[A](url:     String,
-             body:    A,
-             headers: Map[String, String] = Map.empty[String, String]
-  )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    super.PUT(url, body)(w, httpReads, hc.withExtraHeaders(headers.toSeq: _*), ec)
-
+  def put[A](url:           String,
+             body:          A,
+             needsAuditing: Boolean             = true,
+             headers:       Map[String, String] = Map.empty[String, String]
+  )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
+    val httpResponse = doPut(url, body)(w, hc.withExtraHeaders(headers.toSeq: _*))
+    if (needsAuditing) {
+      executeHooks(url, PUT, Option(Json.stringify(w.writes(body))), httpResponse)
+    }
+    mapErrors(PUT, url, httpResponse).map(response ⇒ httpReads.read(PUT, url, response))
+  }
 }
