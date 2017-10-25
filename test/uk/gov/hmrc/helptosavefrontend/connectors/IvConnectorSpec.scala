@@ -21,7 +21,8 @@ import java.util.UUID
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivJourneyResultUrl
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -36,7 +37,7 @@ class IvConnectorSpec extends TestSupport with ScalaFutures {
 
     val journeyId = JourneyId(UUID.randomUUID().toString)
 
-    val url = s"http://localhost:9948/mdtp/journey/journeyId/${journeyId.Id}"
+    val url = s"$ivJourneyResultUrl/${journeyId.Id}"
 
     val ivConnector = new IvConnectorImpl(mockHttp)
 

@@ -20,7 +20,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.verifyEmailURL
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{accountHolderContinueURL, newApplicantContinueURL, verifyEmailURL}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.BackendError
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
@@ -44,7 +44,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
       email,
       "awrs_email_verification",
       "PT2H",
-      if (isNewApplicant) "http://localhost:7000/help-to-save/register/email-verified?p=" else "http://localhost:7000/help-to-save/account/email-verified?p=",
+      if (isNewApplicant) s"$newApplicantContinueURL?p=" else s"$accountHolderContinueURL?p=",
       Map("email" → email, "nino" → nino))
 
   lazy val connector: EmailVerificationConnectorImpl =

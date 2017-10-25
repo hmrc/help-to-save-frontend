@@ -31,8 +31,6 @@ trait AppConfig {
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
 
-  def getUrlFor(service: String): String = getString(s"microservice.services.$service.url")
-
   val authUrl: String = baseUrl("auth")
 
   val helpToSaveUrl: String = baseUrl("help-to-save")
@@ -48,7 +46,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   def encodedCallbackUrl(redirectOnLoginURL: String): String =
     urlEncode(s"${baseUrl("help-to-save-frontend")}/iv/journey-result?continueURL=$redirectOnLoginURL")
 
-  val ivUpliftUrl: String = s"${baseUrl("identity-verification")}${getUrlFor("identity-verification")}"
+  val ivUpliftUrl: String = s"${baseUrl("identity-verification")}/mdtp/uplift"
 
   def ivUrl(redirectOnLoginURL: String): String = {
 
@@ -62,7 +60,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   def ivJourneyResultUrl(journeyId: JourneyId): String = new URI(s"$ivJourneyResultUrl/${journeyId.Id}").toString
 
-  val verifyEmailURL: String = s"${baseUrl("email-verification")}${getUrlFor("email-verification")}"
+  val verifyEmailURL: String = s"${baseUrl("email-verification")}/email-verification/verification-requests"
   val linkTTLMinutes: Int = getInt("microservice.services.email-verification.linkTTLMinutes")
   val helpToSaveFrontendUrl: String = baseUrl("help-to-save-frontend")
   val newApplicantContinueURL: String = s"$helpToSaveFrontendUrl/help-to-save/register/email-verified"
@@ -80,21 +78,17 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val nsiCreateAccountUrl: String = s"${baseUrl("nsi")}/nsihts/createaccount"
 
-  val nsiUpdateEmailUrl: String = s"${baseUrl("nsi")}/nsihts/updateemail"
-
-  val nsiHealthCheckUrl: String = s"${baseUrl("nsi")}/nsihts/healthcheck"
-
   val sessionCacheKey: String = getString("microservice.services.keystore.session-key")
 
   val keyStoreUrl: String = baseUrl("keystore")
 
   val keyStoreDomain: String = getString("microservice.services.keystore.domain")
 
-  val personalTaxAccountUrl: String = s"${baseUrl("pertax-frontend")}${getUrlFor("pertax-frontend")}"
+  val personalTaxAccountUrl: String = s"${baseUrl("pertax-frontend")}/personal-account"
 
-  val feedbackSurveyUrl: String = s"${baseUrl("feedback-survey")}${getUrlFor("feedback-survey")}"
+  val feedbackSurveyUrl: String = s"${baseUrl("feedback-survey")}/feedback-survey"
 
-  val caFrontendUrl: String = s"${baseUrl("company-auth-frontend")}${getUrlFor("company-auth-frontend")}"
+  val caFrontendUrl: String = s"${baseUrl("company-auth-frontend")}/gg"
 
   val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
 
@@ -103,7 +97,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val analyticsToken: String = getString("google-analytics.token")
   override lazy val analyticsHost: String = getString("google-analytics.host")
 
-  val contactUrl: String = s"${baseUrl("contact-frontend")}${getUrlFor("contact-frontend")}"
+  val contactUrl: String = s"${baseUrl("contact-frontend")}/contact"
   override lazy val reportAProblemPartialUrl: String = s"$contactUrl/contact/problem_reports_ajax?service=$origin"
   override lazy val reportAProblemNonJSUrl: String = s"$contactUrl/contact/problem_reports_nonjs?service=$origin"
 
