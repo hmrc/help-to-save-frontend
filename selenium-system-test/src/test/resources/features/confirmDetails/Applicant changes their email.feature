@@ -1,3 +1,4 @@
+@ignore
 Feature: Applicant changes their email
 
   @HTS-33 @HTS-398 @zap
