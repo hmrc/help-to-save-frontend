@@ -20,15 +20,15 @@ import java.time.Duration
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status._
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{accountHolderContinueURL, linkTTLMinutes, newApplicantContinueURL, verifyEmailURL}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -44,14 +44,7 @@ trait EmailVerificationConnector {
 
 @Singleton
 class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(implicit crypto: Crypto)
-  extends EmailVerificationConnector with ServicesConfig with Logging {
-
-  val linkTTLMinutes: Int = getInt("microservice.services.email-verification.linkTTLMinutes")
-  val emailVerifyBaseURL: String = baseUrl("email-verification")
-  val verifyEmailURL: String = s"$emailVerifyBaseURL/email-verification/verification-requests"
-
-  val newApplicantContinueURL: String = getString("microservice.services.email-verification.continue-url.new-applicant")
-  val accountHolderContinueURL: String = getString("microservice.services.email-verification.continue-url.account-holder")
+  extends EmailVerificationConnector with Logging {
 
   val templateId: String = "awrs_email_verification"
 
@@ -73,7 +66,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
     val timerContext = metrics.emailVerificationTimer.time()
 
-    http.post[EmailVerificationRequest](verifyEmailURL, verificationRequest).map[Either[VerifyEmailError, Unit]]{ (response: HttpResponse) ⇒
+    http.post[EmailVerificationRequest](verifyEmailURL, verificationRequest).map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) ⇒
       val time = timerContext.stop()
 
       response.status match {
@@ -85,7 +78,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
         case other ⇒
           handleErrorStatus(other, response, time, nino)
       }
-    }.recover{
+    }.recover {
       case NonFatal(e) ⇒
         val time = timerContext.stop()
         metrics.emailVerificationErrorCounter.inc()

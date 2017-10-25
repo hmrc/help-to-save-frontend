@@ -20,6 +20,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.Writes
 import play.api.libs.ws.WSProxyServer
 import uk.gov.hmrc.auth.core.PlayAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.authUrl
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
 import uk.gov.hmrc.play.audit.http.HttpAuditing
@@ -85,8 +86,8 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
 }
 
 @Singleton
-class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector with ServicesConfig {
-  override lazy val serviceUrl: String = baseUrl("auth")
+class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector {
+  override lazy val serviceUrl: String = authUrl
 
   override def http: WSHttp = wsHttp
 }
