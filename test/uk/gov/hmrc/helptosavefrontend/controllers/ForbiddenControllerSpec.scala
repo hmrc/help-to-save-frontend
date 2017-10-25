@@ -16,14 +16,23 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import com.google.inject.Singleton
-import play.api.mvc.{Action, AnyContent}
+import play.api.http.Status
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 
-@Singleton
-class NSIController extends HelpToSaveFrontendController {
+class ForbiddenControllerSpec extends TestSupport {
 
-  def goToNSI: Action[AnyContent] = Action { implicit request ⇒
-    SeeOther("https://www.nsandi.com/")
+  "The ForbiddenController" must {
+
+    val controller = new ForbiddenController
+
+    "return a forbidden status" in {
+      val result = controller.forbidden(FakeRequest())
+      status(result) shouldBe Status.FORBIDDEN
+      contentAsString(result) shouldBe "Please ask the HtS Dev team for permissions to access this site"
+    }
+
   }
 
 }
