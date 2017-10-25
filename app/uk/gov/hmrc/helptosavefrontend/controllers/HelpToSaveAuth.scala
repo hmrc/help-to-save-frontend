@@ -150,7 +150,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
     Redirect(ggLoginUrl, Map(
       "continue" -> Seq(redirectOnLoginURL),
       "accountType" -> Seq("individual"),
-      "origin" -> Seq(origin)
+      "origin" -> Seq(appName)
     ))
 
 }

@@ -58,9 +58,9 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
         ))
   }
 
-  def mockPut[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit = {
-    (mockHTTPProxy.put(_: String, _: I, _: Map[String, String])(_: Writes[I], _: HeaderCarrier, _: ExecutionContext))
-      .expects(url, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *, *)
+  def mockPut[I](body: I, url: String, needsAuditing: Boolean = true)(result: Either[String, HttpResponse]): Unit = {
+    (mockHTTPProxy.put(_: String, _: I, _: Boolean, _: Map[String, String])(_: Writes[I], _: HeaderCarrier, _: ExecutionContext))
+      .expects(url, body, needsAuditing, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *, *)
       .returning(
         result.fold(
           e ⇒ Future.failed(new Exception(e)),
@@ -148,9 +148,9 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       }
     }
 
-    "the test Method" must {
+    "the health-check Method" must {
       "Return a Right when the status is OK" in {
-        mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.OK)))
+        mockPut(validNSIUserInfo, nsiCreateAccountUrl, false)(Right(HttpResponse(Status.OK)))
         val result = testNSAndIConnectorImpl.healthCheck(validNSIUserInfo)
         Await.result(result.value, 3.seconds) shouldBe Right(())
       }
@@ -158,7 +158,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       "Return a Left when the status is OK" in {
         forAll{ status: Int ⇒
           whenever(status > 0 && status =!= Status.OK){
-            mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(status)))
+            mockPut(validNSIUserInfo, nsiCreateAccountUrl, false)(Right(HttpResponse(status)))
             val result = testNSAndIConnectorImpl.healthCheck(validNSIUserInfo)
             Await.result(result.value, 3.seconds).isLeft shouldBe true
           }
