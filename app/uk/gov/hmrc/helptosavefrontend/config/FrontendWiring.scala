@@ -22,7 +22,7 @@ import play.api.libs.ws.WSProxyServer
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.authUrl
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.http.hooks.{HttpHook, HttpHooks}
+import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.config.AuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -128,10 +128,12 @@ class WSHttpProxy
              needsAuditing: Boolean             = true,
              headers:       Map[String, String] = Map.empty[String, String]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
-    val httpResponse = doPut(url, body)(w, hc.withExtraHeaders(headers.toSeq: _*))
-    if (needsAuditing) {
-      executeHooks(url, PUT, Option(Json.stringify(w.writes(body))), httpResponse)
+    withTracing(PUT, url) {
+      val httpResponse = doPut(url, body)(w, hc.withExtraHeaders(headers.toSeq: _*))
+      if (needsAuditing) {
+        executeHooks(url, PUT, Option(Json.stringify(w.writes(body))), httpResponse)
+      }
+      mapErrors(PUT, url, httpResponse).map(response ⇒ httpReads.read(PUT, url, response))
     }
-    mapErrors(PUT, url, httpResponse).map(response ⇒ httpReads.read(PUT, url, response))
   }
 }
