@@ -49,13 +49,13 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with VerifyEmailBehaviour with I18nSupport {
 
-  def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled(email ⇒
       Ok(views.html.email.update_email_address(email, UpdateEmailForm.verifyEmailForm))
     )
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
 
-  def onSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled(_ ⇒
       UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
         formWithErrors ⇒ {
@@ -74,8 +74,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
       emailVerificationParams,
-      params ⇒
-        checkIfAlreadyEnrolled (_ ⇒ handleEmailVerified(params))
+      params ⇒ checkIfAlreadyEnrolled (oldEmail ⇒ handleEmailVerified(params, oldEmail))
     )
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
 
@@ -87,10 +86,10 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     Ok(views.html.email.we_couldnt_update_your_email())
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
 
-  private def handleEmailVerified(emailVerificationParams: EmailVerificationParams)(
+  private def handleEmailVerified(emailVerificationParams: EmailVerificationParams, oldEmail: String)(
       implicit
       request:    Request[AnyContent],
-      htsContext: HtsContextWithNINO
+      htsContext: HtsContextWithNINOAndUserDetails
   ): Future[Result] = {
     val nino = htsContext.nino
 
@@ -106,10 +105,9 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             s"(${missingUserInfos.missingInfo.mkString(",")}", nino)
           internalServerError()
 
-        case Right(nsiUserInfo) ⇒
-          val oldEmail = nsiUserInfo.contactDetails.email
+        case Right(userInfo) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
-            _ ← nSIConnector.updateEmail(nsiUserInfo.updateEmail(emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
+            _ ← nSIConnector.updateEmail(NSIUserInfo(userInfo, emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
             _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap[UpdateEmailError](UpdateEmailError.EmailMongoError)
           } yield ()
 

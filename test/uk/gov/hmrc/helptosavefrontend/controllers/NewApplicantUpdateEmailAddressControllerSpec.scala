@@ -88,7 +88,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "redirect to 'You're not Eligible' if the session data indicates they are ineligible" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
@@ -99,7 +99,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "redirect to the eligibility check if there is no session data" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(None))
         }
@@ -111,7 +111,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       "return the check your email page with a status of Ok" in {
         val newEmail = "e"
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           mockEmailVerificationConn(nino, newEmail)(Right(()))
@@ -125,7 +125,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       "return an AlreadyVerified status and redirect the user to email verified page," +
         " given an email address of an already verified user " in {
           inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
             mockEmailVerificationConn(nino, email)(Left(AlreadyVerified))
@@ -154,7 +154,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "show an email verificatino error page if the email verification is unsuccessful" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           mockEmailVerificationConn(nino, email)(Left(BackendError))
@@ -179,7 +179,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         "matches that passed in via the params" in {
 
           inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
             mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo.updateEmail(testEmail)), Some(testEmail)))(Right(()))
           }
@@ -192,7 +192,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "return an OK status when the link has been corrupted or is incorrect" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockAudit()
         }
         val result = doRequestWithQueryParam("corrupt-link")
@@ -202,7 +202,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "return an OK status with a not eligible view when an ineligible user comes in via email verified" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
         val params = EmailVerificationParams(validNSIUserInfo.nino, testEmail)
@@ -222,7 +222,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
         "the user has not already enrolled and the given nino doesn't match the session nino" in {
           test(inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
           },
             "AE1234XXX",
@@ -232,7 +232,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
         "the sessionCacheConnector.get method returns an error" in {
           test(inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockSessionCacheConnectorGet(Left("An error occurred"))
           },
                validNSIUserInfo.nino,
@@ -242,7 +242,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
         "the sessionCacheConnector.put method returns an error" in {
           test(inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
             mockSessionCacheConnectorPut(HTSSession(Some(validNSIUserInfo.updateEmail(testEmail)), Some(testEmail)))(Left("An error occurred"))
           },
@@ -253,7 +253,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
         "the user has missing info and they do not have a session" in {
           test(inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrivalsMissingUserInfo)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
             mockSessionCacheConnectorGet(Right(None))
           },
                validNSIUserInfo.nino,
@@ -272,7 +272,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "redirect to NS&I if they are already enrolled to HtS" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 
@@ -283,7 +283,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "redirect to the eligibility checks is there is no session data" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(None))
         }
@@ -295,7 +295,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "redirect to the not eligible page if the session data indicates they are ineligible" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
         }
@@ -307,7 +307,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
       "show the email updated page otherwise" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validNSIUserInfo), None))))
         }

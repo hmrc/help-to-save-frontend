@@ -38,7 +38,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
     "redirect to NS&I if the user is enrolled" in {
       inSequence {
-        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
       }
 
@@ -50,7 +50,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
       "it hasn't already been set" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
           mockWriteITMPFlag(Right(()))
         }
@@ -62,7 +62,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
     "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {
       inSequence {
-        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
       }
 
@@ -73,7 +73,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
     "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
       inSequence {
-        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Left(""))
       }
 

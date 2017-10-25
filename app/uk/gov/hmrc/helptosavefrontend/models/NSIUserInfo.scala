@@ -63,7 +63,7 @@ object NSIUserInfo {
    * Performs validation checks on the given [[UserInfo]] and converts to [[NSIUserInfo]]
    * if successful.
    */
-  def apply(userInfo: UserInfo): NSIUserInfo = {
+  def apply(userInfo: UserInfo, email: String): NSIUserInfo = {
       def extractContactDetails(userInfo: UserInfo): ContactDetails = {
         val (line1, line2, line3, line4, line5) =
           userInfo.address.lines.map(_.cleanupSpecialCharacters).filter(_.nonEmpty) match {
@@ -80,7 +80,7 @@ object NSIUserInfo {
           line1, line2, line3, line4, line5,
           userInfo.address.postcode.getOrElse("").cleanupSpecialCharacters.removeAllSpaces,
           userInfo.address.country.map(_.cleanupSpecialCharacters.removeAllSpaces),
-          userInfo.email
+          email
         )
       }
 

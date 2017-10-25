@@ -21,7 +21,7 @@ import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BadContinueURL}
-import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, HtsContextWithNINOAndUserDetails, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -50,7 +50,7 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
 
   def handleEmailVerified(emailVerificationParams: String,
                           ifValid:                 EmailVerificationParams ⇒ Future[Result])(implicit request: Request[AnyContent],
-                                                                                             htsContext: HtsContextWithNINO,
+                                                                                             htsContext: HtsContextWithNINOAndUserDetails,
                                                                                              crypto:     Crypto,
                                                                                              messages:   Messages): Future[Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {

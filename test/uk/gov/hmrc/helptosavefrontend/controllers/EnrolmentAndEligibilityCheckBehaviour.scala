@@ -22,6 +22,7 @@ import cats.syntax.either._
 import play.api.libs.json.{JsValue, Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
@@ -62,12 +63,14 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     mockWriteITMPFlag(Some(result))
 
   def commonEnrolmentAndSessionBehaviour(getResult:               () ⇒ Future[Result], // scalastyle:ignore method.length
+                                         mockSuccessfulAuth:      () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
+                                         mockNoNINOAuth:          () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Enrolments(Set.empty)),
                                          testRedirectOnNoSession: Boolean             = true,
                                          testEnrolmentCheckError: Boolean             = true): Unit = {
 
     "redirect to NS&I if the user is already enrolled" in {
       inSequence {
-        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockSuccessfulAuth()
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = true)))
       }
 
@@ -79,7 +82,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     "redirect to NS&I if the user is already enrolled and set the ITMP flag " +
       "if it has not already been set" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
           mockWriteITMPFlag(Right(()))
         }
@@ -99,13 +102,13 @@ trait EnrolmentAndEligibilityCheckBehaviour {
           }
 
         test(inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
           mockWriteITMPFlag(Left(""))
         })
 
         test(inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
           mockWriteITMPFlag(None)
         })
@@ -114,7 +117,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     if (testRedirectOnNoSession) {
       "redirect to the eligibility checks if there is no session data for the user" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(None))
         }
@@ -130,7 +133,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       if (testEnrolmentCheckError) {
         "there is an error getting the enrolment status" in {
           inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockSuccessfulAuth()
             mockEnrolmentCheck()(Left(""))
           }
           checkIsTechnicalErrorPage(getResult())
@@ -138,14 +141,14 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       }
 
       "there is no NINO returned by auth" in {
-        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
+        mockNoNINOAuth()
 
         checkIsTechnicalErrorPage(getResult())
       }
 
       "there is an error getting the session data" in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Left(""))
         }

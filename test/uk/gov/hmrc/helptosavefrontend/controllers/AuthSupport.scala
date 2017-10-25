@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.{retrieve, _}
 import uk.gov.hmrc.auth.core.authorise._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
@@ -56,7 +56,6 @@ trait AuthSupport extends TestSupport {
 
   val emailStr = "tyrion_lannister@gmail.com"
   val email: Option[String] = Some(emailStr)
-  val noEmail: Option[String] = None
 
   val dobStr = "1970-01-01"
   val dob: LocalDate = LocalDate.parse(dobStr)
@@ -76,9 +75,16 @@ trait AuthSupport extends TestSupport {
   )
   )
 
-  val mockedRetrievals = new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
-  val mockedRetrivalsMissingUserInfo = new ~(name, noEmail) and Option(dob) and itmpName and itmpDob and itmpAddress.copy(line1 = None) and Enrolments(Set(enrolment))
-  val mockedRetrievalsMissingNinoEnrolment = new ~(name, noEmail) and Option(dob) and itmpName and itmpDob and itmpAddress.copy(line1 = None) and Enrolments(Set())
+  val mockedNINORetrieval = Enrolments(Set(enrolment))
+
+  val mockedRetrievals: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
+    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+
+  val mockedRetrievalsMissingUserInfo: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
+    new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+
+  val mockedRetrievalsMissingNinoEnrolment: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
+    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set())
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
@@ -90,7 +96,12 @@ trait AuthSupport extends TestSupport {
       .expects(predicate, *, *, *)
       .returning(Future.failed(ex))
 
-  def mockAuthWithRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =
+  def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: Enrolments) =
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(predicate, Retrievals.authorisedEnrolments, *, *)
+      .returning(Future.successful(result))
+
+  def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[UserRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, UserRetrievals and Retrievals.authorisedEnrolments, *, *)
       .returning(Future.successful(result))
