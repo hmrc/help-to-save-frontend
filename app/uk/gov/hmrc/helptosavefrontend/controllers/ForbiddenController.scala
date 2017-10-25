@@ -18,12 +18,13 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import com.google.inject.Singleton
 import play.api.mvc.{Action, AnyContent}
+import uk.gov.hmrc.play.frontend.controller.FrontendController
 
 @Singleton
-class NSIController extends HelpToSaveFrontendController {
+class ForbiddenController extends FrontendController {
 
-  def goToNSI: Action[AnyContent] = Action { implicit request ⇒
-    SeeOther("https://www.nsandi.com/")
+  def forbidden: Action[AnyContent] = Action {
+    Forbidden("Please ask the HtS Dev team for permissions to access this site")
   }
 
 }
