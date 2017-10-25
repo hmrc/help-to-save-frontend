@@ -30,7 +30,6 @@ class WhitelistFilter(configuration: Configuration, materializer: Materializer) 
   override def whitelist: Seq[String] =
     configuration.underlying.get[List[String]]("http-header-ip-whitelist").value
 
-
   // This is the `Call` used in the `Redirect` when an IP is present in the header
   // of the HTTP request but is not in the whitelist
   override def destination: Call = Call("GET", "http://not-allowed")
@@ -40,7 +39,7 @@ class WhitelistFilter(configuration: Configuration, materializer: Materializer) 
   // if there is no IP address in the header return a `Forbidden` status
   override def noHeaderAction(f:  (RequestHeader) ⇒ Future[Result],
                               rh: RequestHeader): Future[Result] = {
-    logger.info("Whitelisting enabled but no IP found in header")
+    logger.info("No IP found in header of request")
     Future.successful(Results.Forbidden)
   }
 
