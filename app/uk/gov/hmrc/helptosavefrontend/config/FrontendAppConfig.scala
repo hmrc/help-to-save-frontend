@@ -45,7 +45,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val accessAccountUrl: String = s"${getUrlFor("help-to-save-frontend")}/access-account"
 
-  val ivJourneyResultUrl: String = s"${getUrlFor("identity-verification")}/journey/journeyId"
+  val ivJourneyResultUrl: String = s"${getUrlFor("identity-verification-journey-result")}/journey/journeyId"
 
   def encodedCallbackUrl(redirectOnLoginURL: String): String =
     urlEncode(s"${getUrlFor("help-to-save-frontend")}/iv/journey-result?continueURL=$redirectOnLoginURL")
