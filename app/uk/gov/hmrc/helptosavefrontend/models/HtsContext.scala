@@ -16,14 +16,41 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-trait HtsContext {
+import uk.gov.hmrc.helptosavefrontend.util.NINO
+
+abstract class HtsContext {
   val isAuthorised: Boolean
 }
 
-case class HtsContextWithNINO(nino: String, userDetails: Either[MissingUserInfos, NSIUserInfo], isAuthorised: Boolean) extends HtsContext
+abstract class HtsContextWithNINO extends HtsContext {
+  val nino: NINO
+}
+
+abstract class HtsContextWithNINOAndUserDetails extends HtsContextWithNINO {
+  val userDetails: Either[MissingUserInfos, UserInfo]
+}
 
 object HtsContext {
 
   def apply(authorised: Boolean): HtsContext = new HtsContext { val isAuthorised: Boolean = authorised }
 
+}
+
+object HtsContextWithNINO {
+  def apply(authorised: Boolean, NINO: NINO): HtsContextWithNINO =
+    new HtsContextWithNINO {
+      override val nino: NINO = NINO
+      override val isAuthorised: Boolean = authorised
+    }
+}
+
+object HtsContextWithNINOAndUserDetails {
+  def apply(authorised: Boolean,
+            NINO:       NINO,
+            details:    Either[MissingUserInfos, UserInfo]): HtsContextWithNINOAndUserDetails =
+    new HtsContextWithNINOAndUserDetails {
+      override val nino: NINO = NINO
+      override val isAuthorised: Boolean = authorised
+      override val userDetails: Either[MissingUserInfos, UserInfo] = details
+    }
 }

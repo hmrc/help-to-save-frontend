@@ -50,8 +50,6 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
                                             metrics:                     Metrics)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
-  import EligibilityCheckController._
-
   def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
       () ⇒
@@ -75,7 +73,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     )
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkSession {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
@@ -89,7 +87,7 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  val getIsEligible: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  val getIsEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkSession {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
@@ -104,28 +102,40 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
-                                           htsContext: HtsContextWithNINO,
-                                           request:    Request[AnyContent]): Future[Result] =
-    performEligibilityChecks().fold(
-      e ⇒ handleEligibilityCheckError(e),
-      r ⇒ handleEligibilityResult(r))
+                                           htsContext: HtsContextWithNINOAndUserDetails,
+                                           request:    Request[AnyContent]): Future[Result] = {
+    htsContext.userDetails.fold[Future[Result]](
+      { missingUserInfo ⇒
+        logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
+        Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalTaxAccountUrl))
+      }, { userInfo ⇒
+        userInfo.email.fold[Future[Result]](
+          // TODO: at this point we need to ask the user to give us their email
+          Ok("")
+        ){ email ⇒
+            performEligibilityChecks(NSIUserInfo(userInfo, email)).fold(
+              { e ⇒
+                logger.warn(e, htsContext.nino)
+                internalServerError()
+              }, handleEligibilityResult
+            )
+          }
+      }
+    )
+  }
 
-  private def performEligibilityChecks()(implicit hc: HeaderCarrier, htsContext: HtsContextWithNINO): EitherT[Future, Error, EligibilityCheckResult] =
+  private def performEligibilityChecks(nsiUserInfo: NSIUserInfo)(implicit hc: HeaderCarrier, htsContext: HtsContextWithNINOAndUserDetails): EitherT[Future, String, EligibilityCheckResult] =
     for {
-      nsiUserInfo ← getUserInformation()
-      eligible ← helpToSaveService.checkEligibility().leftMap(Error.apply)
+      eligible ← helpToSaveService.checkEligibility()
       session = {
         val maybeUserInfo = eligible.fold(_ ⇒ Some(nsiUserInfo), _ ⇒ None, _ ⇒ None)
         HTSSession(maybeUserInfo, None)
       }
-      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(session.eligibilityCheckResult)).leftMap(Error.apply)
-      _ ← sessionCacheConnector.put(session).leftMap[Error](Error.apply)
+      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(session.eligibilityCheckResult))
+      _ ← sessionCacheConnector.put(session)
     } yield eligible
 
-  private def getUserInformation()(implicit htsContext: HtsContextWithNINO): EitherT[Future, Error, NSIUserInfo] =
-    EitherT.fromEither[Future](htsContext.userDetails.leftMap(missingInfo ⇒ Error(missingInfo)))
-
-  private def handleEligibilityResult(result: EligibilityCheckResult)(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Result = {
+  private def handleEligibilityResult(result: EligibilityCheckResult)(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): Result = {
     val nino = htsContext.nino
     auditor.sendEvent(EligibilityResultEvent(nino, result), nino)
     result.fold(
@@ -144,18 +154,6 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
     )
   }
 
-  private def handleEligibilityCheckError(error: Error)(implicit request: Request[AnyContent],
-                                                        hc:         HeaderCarrier,
-                                                        htsContext: HtsContextWithNINO): Result = error.value match {
-    case Left(e) ⇒
-      logger.warn(e, htsContext.nino)
-      internalServerError()
-
-    case Right(missingUserInfo) ⇒
-      logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
-      Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalTaxAccountUrl))
-  }
-
   private def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Unit] = {
     import uk.gov.hmrc.helptosavefrontend.util.Toggles._
 
@@ -171,13 +169,3 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
 
 }
 
-object EligibilityCheckController {
-
-  private case class Error(value: Either[String, MissingUserInfos])
-
-  private object Error {
-    def apply(error: String): Error = Error(Left(error))
-
-    def apply(u: MissingUserInfos): Error = Error(Right(u))
-  }
-}

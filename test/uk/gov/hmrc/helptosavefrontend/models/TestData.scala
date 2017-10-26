@@ -70,7 +70,7 @@ object TestData {
       val nino = "WM123456C"
       val email = "tyrion_lannister@gmail.com"
 
-      val userInfo = UserInfo(forename, surname, nino, dateOfBirth, email, address)
+      val userInfo = UserInfo(forename, surname, nino, dateOfBirth, Some(email), address)
       val nsiValidContactDetails = ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
       val nsiUserInfo =
         NSIUserInfo(forename, surname, dateOfBirth, nino,

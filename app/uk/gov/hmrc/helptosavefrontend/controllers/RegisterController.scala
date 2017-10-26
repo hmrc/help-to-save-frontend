@@ -52,7 +52,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
   import RegisterController.NSIUserInfoOps
 
   def getConfirmEmailPage: Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks {
           case (nsiUserInfo, _) ⇒
@@ -64,7 +64,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def confirmEmailSubmit(): Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks {
           case (nsiUserInfo, _) ⇒
@@ -80,7 +80,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       }
     }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def confirmEmail(email: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def confirmEmail(email: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
@@ -102,7 +102,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
         case (_, confirmedEmail) ⇒
@@ -121,7 +121,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     Ok(views.html.register.details_are_incorrect())
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {

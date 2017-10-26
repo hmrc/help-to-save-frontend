@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.ValidatedNel
 import cats.instances.string._
 import cats.syntax.cartesian._
-import cats.syntax.either._
 import cats.syntax.eq._
 import cats.syntax.option._
 import org.joda.time.LocalDate
@@ -33,7 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 
 import scala.concurrent.Future
@@ -43,9 +42,27 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
   override def authConnector: AuthConnector = frontendAuthConnector
 
-  private type HtsAction = Request[AnyContent] ⇒ HtsContext ⇒ Future[Result]
+  private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
 
-  def authorisedForHtsWithInfo(action: Request[AnyContent] ⇒ HtsContextWithNINO ⇒ Future[Result])(redirectOnLoginURL: String): Action[AnyContent] =
+  def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
+    Action.async { implicit request ⇒
+      val timer = metrics.authTimer.time()
+
+      authorised(AuthWithCL200)
+        .retrieve(authorisedEnrolments) {
+          case authorisedEnrols ⇒
+            val time = timer.stop()
+
+            withNINO(authorisedEnrols.enrolments, time){ nino ⇒
+              action(request)(HtsContextWithNINO(authorised = true, nino))
+            }
+
+        }.recover {
+          handleFailure(redirectOnLoginURL)
+        }
+    }
+
+  def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
     Action.async { implicit request ⇒
       val timer = metrics.authTimer.time()
 
@@ -53,33 +70,23 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
         .retrieve(UserRetrievals and authorisedEnrolments) {
           case name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ authorisedEnrols ⇒
             val time = timer.stop()
-            val timeString = s"(round-trip time: ${nanosToPrettyString(time)})"
 
-            val mayBeNino = authorisedEnrols.enrolments
-              .find(_.key === "HMRC-NI")
-              .flatMap(_.getIdentifier("NINO"))
-              .map(_.value)
-
-            mayBeNino.fold{
-              logger.warn(s"NINO retrieval failed $timeString")
-              toFuture(internalServerError())
-            }(nino ⇒ {
+            withNINO(authorisedEnrols.enrolments, time){ nino ⇒
               val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
               userDetails.fold(
-                m ⇒ logger.warn(s"User details retrieval failed, missing details [${m.missingInfo.mkString(", ")}] $timeString", nino),
-                _ ⇒ logger.info(s"Successfully retrieved NINO and user details $timeString", nino)
+                m ⇒ logger.warn(s"User details retrieval failed, missing details [${m.missingInfo.mkString(", ")}] ${timeString(time)}", nino),
+                _ ⇒ logger.info(s"Successfully retrieved NINO and user details ${timeString(time)}", nino)
               )
 
-              action(request)(HtsContextWithNINO(nino, userDetails.map(NSIUserInfo.apply), isAuthorised = true))
-            })
-
+              action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
+            }
         }.recover {
           handleFailure(redirectOnLoginURL)
         }
     }
 
-  def authorisedForHts(action: HtsAction)(redirectOnLoginURL: String): Action[AnyContent] = {
+  def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] = {
     Action.async { implicit request ⇒
       authorised(AuthProvider) {
         action(request)(HtsContext(authorised = true))
@@ -89,7 +96,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
     }
   }
 
-  def unprotected(action: HtsAction): Action[AnyContent] = {
+  def unprotected(action: HtsAction[HtsContext]): Action[AnyContent] = {
     Action.async { implicit request ⇒
       authorised() {
         action(request)(HtsContext(authorised = true))
@@ -99,6 +106,16 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       }
     }
   }
+
+  private def withNINO[A](enrolments: Set[Enrolment], nanos: Long)(withNINO: NINO ⇒ Future[Result])(implicit request: Request[_]): Future[Result] =
+    enrolments
+      .find(_.key === "HMRC-NI")
+      .flatMap(_.getIdentifier("NINO"))
+      .map(_.value)
+      .fold{
+        logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
+        toFuture(internalServerError())
+      }(withNINO)
 
   private def getUserInfo(nino:        String,
                           name:        Name,
@@ -120,13 +137,11 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       itmpDob.orElse(dob)
         .toValidNel(MissingUserInfo.DateOfBirth)
 
-    val emailValidation = email.toValidNel(MissingUserInfo.Email)
-
     val validation: ValidatedNel[MissingUserInfo, UserInfo] =
-      (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| emailValidation)
+      (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation)
         .map {
-          case (givenName, surname, jodaDob, emailAddress) ⇒
-            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), emailAddress, Address(itmpAddress))
+          case (givenName, surname, jodaDob) ⇒
+            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email, Address(itmpAddress))
         }
 
     validation
@@ -152,5 +167,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       "accountType" -> Seq("individual"),
       "origin" -> Seq(appName)
     ))
+
+  private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
 }

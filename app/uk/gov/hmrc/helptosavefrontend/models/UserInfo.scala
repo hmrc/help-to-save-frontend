@@ -25,7 +25,7 @@ case class UserInfo(forename:    String,
                     surname:     String,
                     nino:        String,
                     dateOfBirth: LocalDate,
-                    email:       String,
+                    email:       Option[String],
                     address:     Address
 )
 

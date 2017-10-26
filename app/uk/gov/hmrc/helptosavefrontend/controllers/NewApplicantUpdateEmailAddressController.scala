@@ -50,7 +50,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
 )(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
 
-  def verifyEmail(email: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def verifyEmail(email: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkSession {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
@@ -93,7 +93,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
       })
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def getEmailUpdated(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def getEmailUpdated(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkSession {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
@@ -108,7 +108,11 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   /** Return `None` if user is ineligible */
-  private def getEligibleUserInfo(session: Option[HTSSession])(implicit htsContext: HtsContextWithNINO): Either[String, Option[NSIUserInfo]] = session match {
+  private def getEligibleUserInfo(session:  Option[HTSSession],
+                                  newEmail: String
+  )(
+      implicit
+      htsContext: HtsContextWithNINOAndUserDetails): Either[String, Option[NSIUserInfo]] = session match {
 
     case Some(s) ⇒
       s.eligibilityCheckResult.fold[Either[String, Option[NSIUserInfo]]](
@@ -119,7 +123,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
     case None ⇒
       htsContext.userDetails.fold[Either[String, Option[NSIUserInfo]]](
         missingInfos ⇒ Left(s"Missing user info: ${missingInfos.missingInfo}"),
-        nsiUserInfo ⇒ Right(Some(nsiUserInfo))
+        nsiUserInfo ⇒ Right(Some(NSIUserInfo(nsiUserInfo, newEmail)))
       )
   }
 
@@ -127,9 +131,9 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   private def updateSession(session: Option[HTSSession],
                             params:  EmailVerificationParams)(
       implicit
-      htsContext: HtsContextWithNINO,
+      htsContext: HtsContextWithNINOAndUserDetails,
       hc:         HeaderCarrier): EitherT[Future, String, Option[NSIUserInfo]] = {
-    EitherT.fromEither[Future](getEligibleUserInfo(session)).flatMap { maybeInfo ⇒
+    EitherT.fromEither[Future](getEligibleUserInfo(session, params.email)).flatMap { maybeInfo ⇒
       val updatedInfo: Option[EitherT[Future, String, NSIUserInfo]] = maybeInfo.map{ info ⇒
         if (info.nino =!= params.nino) {
           EitherT.fromEither[Future](Left[String, NSIUserInfo]("NINO in confirm details parameters did not match NINO from auth"))

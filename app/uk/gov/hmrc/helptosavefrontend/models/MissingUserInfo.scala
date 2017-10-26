@@ -26,8 +26,6 @@ object MissingUserInfo {
 
   case object Surname extends MissingUserInfo
 
-  case object Email extends MissingUserInfo
-
   case object DateOfBirth extends MissingUserInfo
 
   case object Contact extends MissingUserInfo

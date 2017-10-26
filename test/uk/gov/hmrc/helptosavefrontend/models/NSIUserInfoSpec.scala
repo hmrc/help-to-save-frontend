@@ -23,6 +23,8 @@ import play.api.libs.json._
 
 class NSIUserInfoSpec extends WordSpec with Matchers {
 
+  val email = validNSIUserInfo.contactDetails.email
+
   "The NSIUSerInfo" must {
 
     "have JSON format" which {
@@ -53,47 +55,47 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
       "takes in a UserInfo" which {
 
         "converts appropriately" in {
-          NSIUserInfo(validUserInfo) shouldBe validNSIUserInfo
+          NSIUserInfo(validUserInfo, email) shouldBe validNSIUserInfo
         }
 
         "removes new line, tab and carriage return in forename" in {
           val modifiedForename = "\n\t\rname\t"
-          val userInfo = NSIUserInfo(validUserInfo.copy(forename = modifiedForename))
+          val userInfo = NSIUserInfo(validUserInfo.copy(forename = modifiedForename), email)
           userInfo.forename shouldBe "name"
         }
 
         "removes white spaces in forename" in {
           val forenameWithSpaces = " " + "forename" + " "
-          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameWithSpaces))
+          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameWithSpaces), email)
           userInfo.forename shouldBe "forename"
         }
 
         "removes spaces, tabs, new lines and carriage returns from a double barrel forename" in {
           val forenameDoubleBarrel = "   John\t\n\r   Paul\t\n\r   "
-          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel))
+          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel), email)
           userInfo.forename shouldBe "John Paul"
         }
 
         "removes spaces, tabs, new lines and carriage returns from a double barrel forename with a hyphen" in {
           val forenameDoubleBarrel = "   John\t\n\r-Paul\t\n\r   "
-          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel))
+          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel), email)
           userInfo.forename shouldBe "John -Paul"
         }
 
         "removes whitespace from surname" in {
-          val userInfo = NSIUserInfo(validUserInfo.copy(surname = " surname"))
+          val userInfo = NSIUserInfo(validUserInfo.copy(surname = " surname"), email)
           userInfo.surname shouldBe "surname"
         }
 
         "removes leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname" in {
           val modifiedSurname = "   Luis\t\n\r   Guerra\t\n\r   "
-          val userInfo = NSIUserInfo(validUserInfo.copy(surname = modifiedSurname))
+          val userInfo = NSIUserInfo(validUserInfo.copy(surname = modifiedSurname), email)
           userInfo.surname shouldBe "Luis Guerra"
         }
 
         "removes leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname with a hyphen" in {
           val modifiedSurname = "   Luis\t\n\r-Guerra\t\n\r   "
-          val userInfo = NSIUserInfo(validUserInfo.copy(surname = " " + modifiedSurname))
+          val userInfo = NSIUserInfo(validUserInfo.copy(surname = " " + modifiedSurname), email)
           userInfo.surname shouldBe "Luis -Guerra"
         }
 
@@ -111,7 +113,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
               None
             )
           val ui: UserInfo = validUserInfo.copy(address = specialAddress)
-          val userInfo = NSIUserInfo(ui)
+          val userInfo = NSIUserInfo(ui, email)
           userInfo.contactDetails.address1 shouldBe "address line1"
           userInfo.contactDetails.address2 shouldBe "line2"
           userInfo.contactDetails.address3 shouldBe Some("line3")
@@ -131,7 +133,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
           )
 
           val ui: UserInfo = validUserInfo.copy(address = specialAddress)
-          val userInfo = NSIUserInfo(ui)
+          val userInfo = NSIUserInfo(ui, email)
           userInfo.contactDetails.address1 shouldBe "Address line1"
           userInfo.contactDetails.address2 shouldBe "Address line2"
           userInfo.contactDetails.address3 shouldBe Some("Address line3")
@@ -155,7 +157,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
 
           val ui: UserInfo = validUserInfo.copy(forename = longName, surname = longSurname, address = specialAddress)
 
-          val userInfo = NSIUserInfo(ui)
+          val userInfo = NSIUserInfo(ui, email)
           userInfo.forename shouldBe "John Paul Harry"
           userInfo.surname shouldBe "Smith Brown"
           userInfo.contactDetails.address1 shouldBe "Address line1"
@@ -169,7 +171,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
 
         "returns a blank string for the postcode if it is not present" in {
           val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(postcode = None))
-          NSIUserInfo(ui).contactDetails.postcode shouldBe ""
+          NSIUserInfo(ui, email).contactDetails.postcode shouldBe ""
         }
 
         "returns a blank string for address lines 1 or 2 if they are missing" in {
@@ -177,21 +179,21 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
           val ui1: UserInfo = validUserInfo.copy(address =
             validUserInfo.address.copy(lines = List()))
 
-          NSIUserInfo(ui1).contactDetails.address1 shouldBe ""
-          NSIUserInfo(ui1).contactDetails.address2 shouldBe ""
-          NSIUserInfo(ui1).contactDetails.address3 shouldBe None
-          NSIUserInfo(ui1).contactDetails.address4 shouldBe None
-          NSIUserInfo(ui1).contactDetails.address5 shouldBe None
+          NSIUserInfo(ui1, email).contactDetails.address1 shouldBe ""
+          NSIUserInfo(ui1, email).contactDetails.address2 shouldBe ""
+          NSIUserInfo(ui1, email).contactDetails.address3 shouldBe None
+          NSIUserInfo(ui1, email).contactDetails.address4 shouldBe None
+          NSIUserInfo(ui1, email).contactDetails.address5 shouldBe None
 
           // check when there is only one address line
           val ui2: UserInfo = validUserInfo.copy(address =
             validUserInfo.address.copy(lines = List("line")))
 
-          NSIUserInfo(ui2).contactDetails.address1 shouldBe "line"
-          NSIUserInfo(ui2).contactDetails.address2 shouldBe ""
-          NSIUserInfo(ui2).contactDetails.address3 shouldBe None
-          NSIUserInfo(ui2).contactDetails.address4 shouldBe None
-          NSIUserInfo(ui2).contactDetails.address5 shouldBe None
+          NSIUserInfo(ui2, email).contactDetails.address1 shouldBe "line"
+          NSIUserInfo(ui2, email).contactDetails.address2 shouldBe ""
+          NSIUserInfo(ui2, email).contactDetails.address3 shouldBe None
+          NSIUserInfo(ui2, email).contactDetails.address4 shouldBe None
+          NSIUserInfo(ui2, email).contactDetails.address5 shouldBe None
         }
 
         "filter out address lines which are empty" in {
@@ -204,11 +206,11 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
           val ui: UserInfo = validUserInfo.copy(address =
             validUserInfo.address.copy(lines = willBeFilteredOut ::: List("line")))
 
-          NSIUserInfo(ui).contactDetails.address1 shouldBe "line"
-          NSIUserInfo(ui).contactDetails.address2 shouldBe ""
-          NSIUserInfo(ui).contactDetails.address3 shouldBe None
-          NSIUserInfo(ui).contactDetails.address4 shouldBe None
-          NSIUserInfo(ui).contactDetails.address5 shouldBe None
+          NSIUserInfo(ui, email).contactDetails.address1 shouldBe "line"
+          NSIUserInfo(ui, email).contactDetails.address2 shouldBe ""
+          NSIUserInfo(ui, email).contactDetails.address3 shouldBe None
+          NSIUserInfo(ui, email).contactDetails.address4 shouldBe None
+          NSIUserInfo(ui, email).contactDetails.address5 shouldBe None
         }
 
       }

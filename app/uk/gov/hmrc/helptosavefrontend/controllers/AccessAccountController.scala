@@ -33,7 +33,7 @@ class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport with Logging
   with EnrolmentCheckBehaviour {
 
-  def accessAccount: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def accessAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
       // not enrolled
       () ⇒ Ok(views.html.confirm_check_eligibility())

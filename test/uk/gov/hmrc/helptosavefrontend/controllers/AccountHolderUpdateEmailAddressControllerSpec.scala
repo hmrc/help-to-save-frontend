@@ -25,6 +25,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
@@ -104,12 +105,15 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
         def getUpdateYourEmailAddress(): Future[Result] =
           controller.getUpdateYourEmailAddress()(FakeRequest())
 
-      behave like (commonEnrolmentBehaviour(() ⇒ getUpdateYourEmailAddress()))
+      behave like commonEnrolmentBehaviour(
+        () ⇒ getUpdateYourEmailAddress(),
+        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
+        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Enrolments(Set.empty)))
 
       "show a page which allows the user to change their email if they are already " +
         "enrolled and we have an email stored for them" in {
           inSequence{
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
           }
@@ -133,11 +137,15 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
         def submit(email: String): Future[Result] =
           controller.onSubmit()(FakeRequest().withFormUrlEncodedBody("new-email-address" → email))
 
-      behave like commonEnrolmentBehaviour(() ⇒ submit("email"))
+      behave like commonEnrolmentBehaviour(
+        () ⇒ submit("email"),
+        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
+        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Enrolments(Set.empty))
+      )
 
       "return the check your email page with a status of Ok, given a valid email address " in {
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
           mockEmailVerificationConn(nino, email)(Right(()))
@@ -151,7 +159,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       "return an AlreadyVerified status and redirect the user to email verified page," +
         " given an email address of an already verified user " in {
           inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(enrolled))
             mockEmailGet()(Right(Some("email")))
             mockEmailVerificationConn(nino, email)(Left(AlreadyVerified))
@@ -182,7 +190,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       "return an OK status and redirect the user to the email_verify_error page with request not valid message" in {
         val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
           mockEmailVerificationConn(nino, email)(Left(RequestNotValidError))
@@ -196,7 +204,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       "return an OK status and redirect the user to the email_verify_error page with verification service unavailable message" in {
         val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
           mockEmailVerificationConn(nino, email)(Left(VerificationServiceUnavailable))
@@ -210,7 +218,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       "return an OK status and redirect the user to the email_verify_error page with backend error message" in {
         val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
           mockEmailVerificationConn(nino, email)(Left(BackendError))
@@ -231,12 +239,16 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
         def verifyEmail(params: String): Future[Result] =
           controller.emailVerified(params)(FakeRequest())
 
-      behave like commonEnrolmentBehaviour(() ⇒ verifyEmail(emailVerificationParams.encode()))
+      behave like commonEnrolmentBehaviour(
+        () ⇒ verifyEmail(emailVerificationParams.encode()),
+        () ⇒ mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals),
+        () ⇒ mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
+      )
 
       "show a success page if the NINO in the URL matches the NINO from auth, the update with " +
         "NS&I is successful and the email is successfully updated in mongo" in {
           inSequence{
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
@@ -254,7 +266,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
         "the NINO in the URL matches the NINO from auth, the update with " +
           "NS&I is successful but the email is not successfully updated in mongo" in {
             inSequence{
-              mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(Enrolled(true)))
               mockEmailGet()(Right(Some("email")))
               mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
@@ -273,7 +285,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
         "the parameter in the URL cannot be decoded" in {
           inSequence {
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockAuditSuspiciousActivity()
           }
 
@@ -284,7 +296,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
         "the NINO in the URL does not match the NINO from auth" in {
           inSequence{
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
             mockAuditSuspiciousActivity()
@@ -296,7 +308,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
         "there is missing user info from auth" in {
           inSequence{
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrivalsMissingUserInfo)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
           }
@@ -307,7 +319,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
         "the call to NS&I to update the email is unsuccessful" in {
           inSequence{
-            mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Left(""))
@@ -344,19 +356,22 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
     }
   }
 
-  def commonEnrolmentBehaviour(getResult: () ⇒ Future[Result]): Unit = { // scalastyle:ignore method.length
+  def commonEnrolmentBehaviour(getResult:          () ⇒ Future[Result],
+                               mockSuccessfulAuth: () ⇒ Unit,
+                               mockNoNINOAuth:     () ⇒ Unit
+  ): Unit = { // scalastyle:ignore method.length
 
     "return an error" when {
 
       "the user has no NINO" in {
-        mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
+        mockNoNINOAuth()
 
         checkIsTechnicalErrorPage(getResult())
       }
 
       "there is an error getting the enrolment status" in {
         inSequence{
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Left(""))
         }
 
@@ -365,7 +380,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
       "there is an error getting the confirmed email" in {
         inSequence{
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockEmailGet()(Left(""))
         }
@@ -375,7 +390,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
       "the user is not enrolled" in {
         inSequence{
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(NotEnrolled))
           mockEmailGet()(Right(Some("email")))
           mockAuditSuspiciousActivity()
@@ -386,7 +401,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
       "the user is enrolled but has no stored email" in {
         inSequence{
-          mockAuthWithRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockEmailGet()(Right(None))
           mockAuditSuspiciousActivity()
