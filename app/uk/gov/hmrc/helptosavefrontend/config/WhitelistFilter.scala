@@ -31,7 +31,7 @@ class WhitelistFilter(configuration: Configuration, val mat: Materializer) exten
   override def whitelist: Seq[String] =
     configuration.underlying.get[List[String]]("http-header-ip-whitelist").value
 
-  override def excludedPaths: Seq[Call] = Seq(forbiddenCall)
+  override def excludedPaths: Seq[Call] = Seq(forbiddenCall, healthCheckCall)
 
   // This is the `Call` used in the `Redirect` when an IP is present in the header
   // of the HTTP request but is not in the whitelist
@@ -44,5 +44,7 @@ class WhitelistFilter(configuration: Configuration, val mat: Materializer) exten
   }
 
   val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden().url)
+
+  val healthCheckCall: Call = Call("GET", uk.gov.hmrc.play.health.routes.AdminController.ping().url)
 
 }
