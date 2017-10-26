@@ -39,7 +39,7 @@ class WhitelistFilter(configuration: Configuration, val mat: Materializer) exten
 
   override def noHeaderAction(f:  (RequestHeader) ⇒ Future[Result],
                               rh: RequestHeader): Future[Result] = {
-    logger.warn("SuspiciousActivity: No IP found in header of request")
+    logger.warn("SuspiciousActivity: No client IP found in http request header")
     Future.successful(Results.Redirect(forbiddenCall))
   }
 
