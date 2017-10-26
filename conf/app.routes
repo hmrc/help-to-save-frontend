@@ -2,7 +2,8 @@
 
 GET        /assets/*file                                    controllers.Assets.versioned(path="/public", file: Asset)
 
-GET        /apply-for-help-to-save                          @controllers.Default.redirect(to = "apply-for-help-to-save/about-help-to-save")
+GET        /                                                @controllers.Default.redirect(to = "/help-to-save/apply-for-help-to-save/about-help-to-save")
+GET        /apply-for-help-to-save                          @controllers.Default.redirect(to = "/help-to-save/apply-for-help-to-save/about-help-to-save")
 GET        /apply-for-help-to-save/about-help-to-save       @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getAboutHelpToSave
 GET        /apply-for-help-to-save/eligibility              @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getEligibility
 GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowTheAccountWorks
