@@ -64,7 +64,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         (details: UpdateEmail) ⇒
           sendEmailVerificationRequest(
             details.email,
-            Ok(views.html.register.check_your_email(details.email)),
+            Ok(views.html.email.check_your_email(details.email)),
             params ⇒ routes.AccountHolderUpdateEmailAddressController.emailVerified(params.encode()).url,
             isNewApplicant = false)
 

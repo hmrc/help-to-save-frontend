@@ -21,14 +21,14 @@
 @import views.html.helper.CSRF
 
 
-@(userDetails: NSIUserInfo, form: Form[ConfirmEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String, form: Form[ConfirmEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "confirm-email", bodyClasses = None) {
 
  <h1> Which email address do you want us to use for your Help to Save account? </h1>
 
  <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
-  <input type="radio" name="email"> @userDetails.contactDetails.email <br>
+  <input type="radio" name="email"> @email <br>
   <span>@{form.error("new-email").map(_ ⇒ "Please enter a valid email address").getOrElse("")}</span> <br>
   <input type="radio" name="email"> Other email: <input type="text" name="new-email">  <br>
   <input type="submit" />

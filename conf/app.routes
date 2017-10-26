@@ -17,6 +17,8 @@ GET        /not-eligible                                    @uk.gov.hmrc.helptos
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 GET        /details-are-incorrect                           @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDetailsAreIncorrect
 
+GET        /register/give-email                             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getGiveEmailPage
+POST       /register/give-email-submit                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit
 POST       /register/confirm-email-submit                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmailSubmit
 GET        /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
 GET        /register/verify-email/:email                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail(email)

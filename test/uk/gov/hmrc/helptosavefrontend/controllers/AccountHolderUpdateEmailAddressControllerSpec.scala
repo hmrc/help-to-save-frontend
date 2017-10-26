@@ -38,6 +38,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
@@ -164,7 +165,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
             mockEmailGet()(Right(Some("email")))
             mockEmailVerificationConn(nino, email)(Left(AlreadyVerified))
           }
-          val result = await(controller.onSubmit()(fakePostRequest))
+          val result = await(controller.onSubmit()(fakePostRequest))(10.seconds)
           status(result) shouldBe Status.SEE_OTHER
 
           val redirectURL = redirectLocation(result)

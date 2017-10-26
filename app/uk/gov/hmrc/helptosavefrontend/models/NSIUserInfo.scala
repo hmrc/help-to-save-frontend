@@ -50,8 +50,6 @@ object NSIUserInfo {
                             phoneNumber:             Option[String] = None,
                             communicationPreference: String         = "02")
 
-  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")))
-
   private implicit class StringOps(val s: String) {
     def removeAllSpaces: String = s.replaceAll(" ", "")
 

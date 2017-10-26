@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
  * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
  *                               if they haven't
  */
-case class HTSSession(eligibilityCheckResult: Option[NSIUserInfo], confirmedEmail: Option[Email])
+case class HTSSession(eligibilityCheckResult: Option[UserInfo], confirmedEmail: Option[Email])
 
 object HTSSession {
   implicit val htsSessionFormat: Format[HTSSession] = Json.format[HTSSession]

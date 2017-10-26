@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 
-@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String, oldEmail: Option[String])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.introduction.title"),
     sidebarLinks = None,
@@ -38,7 +38,12 @@
 
     <h2>Want to change your email address?</h2>
     <p class="content">Click here to change email address</p>
-    <a href=@routes.RegisterController.getConfirmEmailPage() class="button">Change email address</a>
+
+    @defining(
+        oldEmail.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getConfirmEmailPage)
+    ){ call =>
+        <a href=@call class="button">Change email address</a>
+    }
 
 
 
