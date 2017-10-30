@@ -157,7 +157,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       SeeOther(ivUrl(redirectOnLoginURL))
 
     case ex: AuthorisationException ⇒
-      logger.error(s"could not authenticate user due to: $ex")
+      logger.warn(s"could not authenticate user due to: $ex")
       internalServerError()
   }
 

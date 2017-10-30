@@ -19,6 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.config
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSProxyServer
+import play.api.mvc.RequestHeader
+import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.authUrl
 import uk.gov.hmrc.http._
@@ -42,6 +44,21 @@ class RawHttpReads extends HttpReads[HttpResponse] {
   override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
 }
 
+@ImplementedBy(classOf[FormPartialProvider])
+trait PartialRetriever {
+  def getPartialContent(url:                String,
+                        templateParameters: Map[String, String] = Map.empty,
+                        errorMessage:       Html                = HtmlFormat.empty
+  )(implicit request: RequestHeader): Html
+
+}
+
+@Singleton
+class FormPartialProvider extends PartialRetriever with FormPartialRetriever {
+  override val httpGet: WSHttpExtension = new WSHttpExtension
+  override val crypto: (String) ⇒ String = cookie ⇒ SessionCookieCryptoFilter.encrypt(cookie)
+}
+
 @ImplementedBy(classOf[WSHttpExtension])
 trait WSHttp
   extends HttpGet with WSGet
@@ -57,30 +74,10 @@ trait WSHttp
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 
   def postForm(url:     String,
-               form:    Map[String, Seq[String]],
-               headers: Seq[(String, String)]    = Seq.empty[(String, String)]
+               form:    Map[String, List[String]],
+               headers: Seq[(String, String)]     = Seq.empty[(String, String)]
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 
-}
-
-class FormPartialProvider extends FormPartialRetriever with SessionCookieCryptoFilterWrapper {
-  override val httpGet: WSHttpExtension = new WSHttpExtension
-  override val crypto: (String) ⇒ String = encryptCookieString _
-}
-
-object CachedStaticHtmlPartialProvider extends CachedStaticHtmlPartialRetriever {
-  override val httpGet: WSHttpExtension = new WSHttpExtension
-}
-
-object HtsHeaderCarrierForPartialsConverter extends HeaderCarrierForPartialsConverter with SessionCookieCryptoFilterWrapper {
-  override val crypto: (String) ⇒ String = encryptCookieString _
-}
-
-trait SessionCookieCryptoFilterWrapper {
-
-  def encryptCookieString(cookie: String): String = {
-    SessionCookieCryptoFilter.encrypt(cookie)
-  }
 }
 
 @Singleton
@@ -112,8 +109,8 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POST(url, body)(w, httpReads, hc, ec)
 
   def postForm(url:     String,
-               form:    Map[String, Seq[String]],
-               headers: Seq[(String, String)]    = Seq.empty[(String, String)]
+               form:    Map[String, List[String]],
+               headers: Seq[(String, String)]     = Seq.empty[(String, String)]
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POSTForm(url, form)(httpReads, hc, ec)
 }
 

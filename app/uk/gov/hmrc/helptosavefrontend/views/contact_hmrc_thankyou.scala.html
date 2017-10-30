@@ -16,9 +16,9 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.play.frontend.auth.AuthContext
-@import uk.gov.hmrc.helptosavefrontend.config.FormPartialProvider
+@import uk.gov.hmrc.helptosavefrontend.config.PartialRetriever
 
-@(partialUrl: String, formProvider: FormPartialProvider)(implicit request: Request[_], lang: Lang, messages: Messages, htsContext: HtsContext)
+@(partialUrl: String, formProvider: PartialRetriever)(implicit request: Request[_], lang: Lang, messages: Messages, htsContext: HtsContext)
 
 @import uk.gov.hmrc.helptosavefrontend.config._
 

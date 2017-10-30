@@ -16,97 +16,80 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.net.URLEncoder
 import javax.inject.Singleton
 
 import com.google.inject.Inject
-import play.api.Logger
 import play.api.mvc._
 import play.twirl.api.{Html, HtmlFormat}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
-import uk.gov.hmrc.play.frontend.controller.FrontendController
-import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
 import uk.gov.hmrc.helptosavefrontend.config._
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.contactUrl
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, urlEncode}
 
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.i18n.Messages.Implicits._
-import play.api.Play.current
-import play.api.http.Status
 import play.api.i18n.{I18nSupport, MessagesApi}
-import uk.gov.hmrc.helptosavefrontend.util.Crypto
 
 @Singleton
 class HelpAndContactController @Inject() (val messagesApi:       MessagesApi,
                                           frontendAuthConnector: FrontendAuthConnector,
                                           metrics:               Metrics,
-                                          formProvider:          FormPartialProvider,
-                                          http:                  WSHttpExtension)(implicit ec: ExecutionContext, crypto: Crypto)
-  extends HelpToSaveAuth(frontendAuthConnector, metrics) with FrontendController with ServicesConfig {
-
-  val contactFrontendService: String = baseUrl("contact-frontend")
+                                          formProvider:          PartialRetriever,
+                                          http:                  WSHttp)(implicit ec: ExecutionContext)
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with HelpToSaveFrontendController with I18nSupport with Logging {
 
   val contactFormServiceIdentifier: String = "HTS"
 
   val TICKET_ID: String = "ticketId"
 
-  private val submitUrl = routes.HelpAndContactController.submitContactHmrcForm().url
+  val submitUrl: String = routes.HelpAndContactController.submitContactHmrcForm().url
 
-  private val contactHmrcFormPartialUrl = s"$contactFrontendService/contact/contact-hmrc/form?service=${contactFormServiceIdentifier}" +
+  val contactHmrcFormPartialUrl: String = s"$contactUrl/contact/contact-hmrc/form?service=$contactFormServiceIdentifier" +
     s"&submitUrl=${urlEncode(submitUrl)}"
 
-  private lazy val contactHmrcSubmitPartialUrl = s"$contactFrontendService/contact/contact-hmrc/form?resubmitUrl=${urlEncode(submitUrl)}"
+  val contactHmrcSubmitPartialUrl: String = s"$contactUrl/contact/contact-hmrc/form?resubmitUrl=${urlEncode(submitUrl)}"
 
   private def contactHmrcThankYouPartialUrl(ticketId: String) =
-    s"$contactFrontendService/contact/contact-hmrc/form/confirmation?ticketId=${urlEncode(ticketId)}"
+    s"$contactUrl/contact/contact-hmrc/form/confirmation?ticketId=${urlEncode(ticketId)}"
 
-  private def urlEncode(value: String) = URLEncoder.encode(value, "UTF-8")
+  def getHelpAndContactPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.contact_hmrc(contactHmrcFormPartialUrl, None, formProvider))
+  }(redirectOnLoginURL = routes.HelpAndContactController.getHelpAndContactPage().url)
 
-  def getHelpAndContactPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    Future(Ok(views.html.contact_hmrc(contactHmrcFormPartialUrl, None, formProvider)))
-  }(redirectOnLoginURL = FrontendAppConfig.ggLoginUrl)
-
-  def submitContactHmrcForm: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def submitContactHmrcForm: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     submitContactHmrc(contactHmrcSubmitPartialUrl,
                       routes.HelpAndContactController.contactHmrcThankYou(),
-      (body: Html) ⇒ Future.successful(views.html.contact_hmrc(contactHmrcFormPartialUrl, Some(body), formProvider)))
-  }(redirectOnLoginURL = FrontendAppConfig.ggLoginUrl)
+      body ⇒ views.html.contact_hmrc(contactHmrcFormPartialUrl, Some(body), formProvider))
+  }(redirectOnLoginURL = routes.HelpAndContactController.getHelpAndContactPage().url)
 
-  def contactHmrcThankYou: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def contactHmrcThankYou: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     val ticketId = request.session.get(TICKET_ID).getOrElse("N/A")
-    Future.successful(Ok(views.html.contact_hmrc_thankyou(contactHmrcThankYouPartialUrl(ticketId), formProvider)))
-  }(redirectOnLoginURL = FrontendAppConfig.ggLoginUrl)
+    Ok(views.html.contact_hmrc_thankyou(contactHmrcThankYouPartialUrl(ticketId), formProvider))
+  }(redirectOnLoginURL = routes.HelpAndContactController.getHelpAndContactPage().url)
 
-  private def submitContactHmrc(formUrl: String,
-                                successRedirect: Call,
-                                failedValidationResponseContent: (Html) ⇒ Future[HtmlFormat.Appendable])(
+  private def submitContactHmrc(formUrl:                         String,
+                                successRedirect:                 Call,
+                                failedValidationResponseContent: (Html) ⇒ HtmlFormat.Appendable)(
       implicit
       request: Request[AnyContent]): Future[Result] = {
-    request.body.asFormUrlEncoded.map { formData ⇒
-      http.postForm(formUrl, formData)
-        .flatMap {
+    request.body.asFormUrlEncoded.fold[Future[Result]] {
+      logger.warn("Trying to submit an empty contact form")
+      internalServerError()
+    }{ formData ⇒
+      http.postForm(formUrl, formData.mapValues(_.toList))
+        .map {
           resp ⇒
             resp.status match {
-              case 200 ⇒ Future.successful(Redirect(successRedirect).withSession(request.session + (TICKET_ID -> resp.body)))
-              case 400 ⇒ failedValidationResponseContent(Html(resp.body)).map(BadRequest(_))
-              case 500 ⇒ Future.successful(InternalServerError(Html(resp.body)))
+              case 200 ⇒ Redirect(successRedirect).withSession(request.session + (TICKET_ID -> resp.body))
+              case 400 ⇒ BadRequest(failedValidationResponseContent(Html(resp.body)))
+              case 500 ⇒ InternalServerError(Html(resp.body))
               case status ⇒
-                Logger.warn(s"Unexpected status code from contact HMRC form: $status")
-                Future.successful(Status(status)(Html(resp.body)))
+                logger.warn(s"Unexpected status code from contact HMRC form: $status")
+                Status(status)(Html(resp.body))
             }
         }
-    }.getOrElse {
-      Logger.warn("Trying to submit an empty contact form")
-      Future.successful(InternalServerError)
     }
   }
 
 }
 
-object PartialsFormReads {
-  implicit val readPartialsForm: HttpReads[HttpResponse] = new HttpReads[HttpResponse] {
-    def read(method: String, url: String, response: HttpResponse) = response
-  }
-}
