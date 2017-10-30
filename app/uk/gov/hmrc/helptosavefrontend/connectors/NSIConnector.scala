@@ -136,7 +136,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
       .map[Either[String, Unit]] { response ⇒
         response.status match {
           case Status.OK ⇒ Right(())
-          case other     ⇒ Left(s"Received unexpected status $other from NS&I while trying to update email. Body was ${response.body}")
+          case other     ⇒ Left(s"Received unexpected status $other from NS&I while trying to do health-check. Body was ${response.body}")
         }
       }.recover {
         case e ⇒ Left(s"Encountered error while trying to create account: ${e.getMessage}")
@@ -168,6 +168,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
+    logger.warn(s"response body from NSI=${response.body}")
     response.parseJson[SubmissionFailure] match {
       case Right(submissionFailure) ⇒ submissionFailure
       case Left(error)              ⇒ SubmissionFailure(None, "", error)
