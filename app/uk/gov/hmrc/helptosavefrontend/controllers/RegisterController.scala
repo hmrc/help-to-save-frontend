@@ -254,7 +254,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
   }
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
-    s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, error: ${failure.errorMessage}}"
+    s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, errorMessage: ${failure.errorMessage}, errorDetails: ${failure.errorDetail}"
 }
 
 object RegisterController {
