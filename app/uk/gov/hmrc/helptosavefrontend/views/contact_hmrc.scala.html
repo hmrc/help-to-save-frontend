@@ -16,11 +16,11 @@
 
 @import uk.gov.hmrc.helptosavefrontend.config._
 @import uk.gov.hmrc.helptosavefrontend.helpers.pageTitle
-@import uk.gov.hmrc.helptosavefrontend.controllers.UserProfile
 @import uk.gov.hmrc.play.frontend.auth.AuthContext
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.PartialRetriever
 
-@(partialUrl: String, formBody: Option[Html], formProvider: FormPartialProvider)(implicit request: Request[_], lang: Lang, messages: Messages, htsContext: HtsContext)
+@(partialUrl: String, formBody: Option[Html], formProvider: PartialRetriever)(implicit request: Request[_], lang: Lang, messages: Messages, htsContext: HtsContext)
 
 @mainContent = {
     @formBody.getOrElse(formProvider.getPartialContent(partialUrl))
