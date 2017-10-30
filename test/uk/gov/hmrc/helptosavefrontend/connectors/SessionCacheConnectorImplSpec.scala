@@ -31,7 +31,7 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
   class TestApparatus {
     val mockWsHttp: WSHttp = mock[WSHttp]
 
-    val htsSession = HTSSession(Some(TestData.UserData.validNSIUserInfo), Some("hello"))
+    val htsSession = HTSSession(Some(TestData.UserData.validUserInfo), Some("hello"))
 
     val cacheMap = CacheMap("1", Map("htsSession" -> Json.toJson(htsSession)))
 

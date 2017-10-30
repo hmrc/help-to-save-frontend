@@ -18,8 +18,9 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 
-@import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
-@(userInfo: NSIUserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.models.UserInfo
+
+@(userInfo: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.register.you-are-eligible.title"),
@@ -39,14 +40,15 @@
     <p>@Messages("hts.register.you-are-eligible.p-3")</p>
     <p>@Messages("hts.register.you-are-eligible.p-4")</p>
 
-
-
-    @form(routes.RegisterController.getConfirmEmailPage, 'class -> "group") {
-        @submit('_buttonClass -> "") {
-            @Messages("hts.register.you-are-eligible.button-1")
+    @defining(
+        userInfo.email.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getConfirmEmailPage)
+    ){ call =>
+        @form(call, 'class -> "group") {
+            @submit('_buttonClass -> "") {
+                @Messages("hts.register.you-are-eligible.button-1")
+            }
         }
     }
-
 
     <a href=@routes.RegisterController.getDetailsAreIncorrect() class="button">My details are incorrect</a>
 

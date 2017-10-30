@@ -18,19 +18,16 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
 import com.google.inject.Inject
-import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalTaxAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.{MissingUserInfos, _}
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -40,14 +37,12 @@ import uk.gov.hmrc.play.config.AppName
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class EligibilityCheckController @Inject() (val messagesApi:             MessagesApi,
-                                            val helpToSaveService:       HelpToSaveService,
-                                            val sessionCacheConnector:   SessionCacheConnector,
-                                            jsonSchemaValidationService: JSONSchemaValidationService,
-                                            val app:                     Application,
-                                            auditor:                     HTSAuditor,
-                                            frontendAuthConnector:       FrontendAuthConnector,
-                                            metrics:                     Metrics)(implicit ec: ExecutionContext)
+class EligibilityCheckController @Inject() (val messagesApi:           MessagesApi,
+                                            val helpToSaveService:     HelpToSaveService,
+                                            val sessionCacheConnector: SessionCacheConnector,
+                                            auditor:                   HTSAuditor,
+                                            frontendAuthConnector:     FrontendAuthConnector,
+                                            metrics:                   Metrics)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -109,29 +104,23 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
         logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
         Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalTaxAccountUrl))
       }, { userInfo ⇒
-        userInfo.email.fold[Future[Result]](
-          // TODO: at this point we need to ask the user to give us their email
-          Ok("")
-        ){ email ⇒
-            performEligibilityChecks(NSIUserInfo(userInfo, email)).fold(
-              { e ⇒
-                logger.warn(e, htsContext.nino)
-                internalServerError()
-              }, handleEligibilityResult
-            )
-          }
+        performEligibilityChecks(userInfo).fold(
+          { e ⇒
+            logger.warn(e, htsContext.nino)
+            internalServerError()
+          }, handleEligibilityResult
+        )
       }
     )
   }
 
-  private def performEligibilityChecks(nsiUserInfo: NSIUserInfo)(implicit hc: HeaderCarrier, htsContext: HtsContextWithNINOAndUserDetails): EitherT[Future, String, EligibilityCheckResult] =
+  private def performEligibilityChecks(nsiUserInfo: UserInfo)(implicit hc: HeaderCarrier, htsContext: HtsContextWithNINOAndUserDetails): EitherT[Future, String, EligibilityCheckResult] =
     for {
       eligible ← helpToSaveService.checkEligibility()
       session = {
         val maybeUserInfo = eligible.fold(_ ⇒ Some(nsiUserInfo), _ ⇒ None, _ ⇒ None)
         HTSSession(maybeUserInfo, None)
       }
-      _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(session.eligibilityCheckResult))
       _ ← sessionCacheConnector.put(session)
     } yield eligible
 
@@ -152,19 +141,6 @@ class EligibilityCheckController @Inject() (val messagesApi:             Message
         SeeOther(routes.NSIController.goToNSI().url)
       }
     )
-  }
-
-  private def validateCreateAccountJsonSchema(userInfo: Option[NSIUserInfo]): Either[String, Unit] = {
-    import uk.gov.hmrc.helptosavefrontend.util.Toggles._
-
-    userInfo.fold[Either[String, Unit]](Right(())) { userInfo ⇒
-      FEATURE("create-account-json-validation", app.configuration, logger, Some(userInfo.nino)).thenOrElse(
-        jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ {
-        }),
-        Right(()
-        )
-      )
-    }
   }
 
 }

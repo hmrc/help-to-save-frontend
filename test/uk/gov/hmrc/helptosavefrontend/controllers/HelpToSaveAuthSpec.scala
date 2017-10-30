@@ -72,7 +72,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
       contentAsJson(result) shouldBe userInfo
     }
 
-    "handle when some user info is missing" ignore {
+    "handle when some user info is missing" in {
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)

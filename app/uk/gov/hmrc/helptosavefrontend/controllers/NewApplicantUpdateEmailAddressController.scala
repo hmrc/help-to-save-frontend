@@ -57,11 +57,10 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
       } { session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-        ){ _ ⇒
-            // TODO: check if applicant is actually eligible using the session
+        ){ userInfo ⇒
             sendEmailVerificationRequest(
               email,
-              Ok(views.html.register.check_your_email(email)),
+              Ok(views.html.register.check_your_email(email, userInfo.email)),
               params ⇒ routes.NewApplicantUpdateEmailAddressController.emailVerified(params.encode()).url,
               isNewApplicant = true)
           }
@@ -73,7 +72,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
     handleEmailVerified(
       emailVerificationParams,
       { params ⇒
-        val result: EitherT[Future, String, Option[NSIUserInfo]] = for {
+        val result: EitherT[Future, String, Option[UserInfo]] = for {
           session ← sessionCacheConnector.get
           userInfo ← updateSession(session, params)
         } yield userInfo
@@ -86,8 +85,8 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           maybeNSIUserInfo.fold{
             // this means they were ineligible
             Ok(views.html.core.not_eligible())
-          }{ updatedNSIUserInfo ⇒
-            Ok(views.html.register.email_updated(updatedNSIUserInfo))
+          }{ _ ⇒
+            Ok(views.html.register.email_updated(params.email))
           }
         })
       })
@@ -101,29 +100,29 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         session.eligibilityCheckResult.fold(
           SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
         ){ userInfo ⇒
-            Ok(views.html.register.email_updated(userInfo))
+            userInfo.email.fold(
+              SeeOther(routes.RegisterController.getGiveEmailPage().url)
+            ){ email ⇒ Ok(views.html.register.email_updated(email)) }
           }
       }
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   /** Return `None` if user is ineligible */
-  private def getEligibleUserInfo(session:  Option[HTSSession],
-                                  newEmail: String
-  )(
+  private def getEligibleUserInfo(session: Option[HTSSession])(
       implicit
-      htsContext: HtsContextWithNINOAndUserDetails): Either[String, Option[NSIUserInfo]] = session match {
+      htsContext: HtsContextWithNINOAndUserDetails): Either[String, Option[UserInfo]] = session match {
 
     case Some(s) ⇒
-      s.eligibilityCheckResult.fold[Either[String, Option[NSIUserInfo]]](
+      s.eligibilityCheckResult.fold[Either[String, Option[UserInfo]]](
         // IMPOSSIBLE - this means they are ineligible
         Right(None)
       ) { userInfo ⇒ Right(Some(userInfo)) }
 
     case None ⇒
-      htsContext.userDetails.fold[Either[String, Option[NSIUserInfo]]](
+      htsContext.userDetails.fold[Either[String, Option[UserInfo]]](
         missingInfos ⇒ Left(s"Missing user info: ${missingInfos.missingInfo}"),
-        nsiUserInfo ⇒ Right(Some(NSIUserInfo(nsiUserInfo, newEmail)))
+        nsiUserInfo ⇒ Right(Some(nsiUserInfo))
       )
   }
 
@@ -132,11 +131,11 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                             params:  EmailVerificationParams)(
       implicit
       htsContext: HtsContextWithNINOAndUserDetails,
-      hc:         HeaderCarrier): EitherT[Future, String, Option[NSIUserInfo]] = {
-    EitherT.fromEither[Future](getEligibleUserInfo(session, params.email)).flatMap { maybeInfo ⇒
-      val updatedInfo: Option[EitherT[Future, String, NSIUserInfo]] = maybeInfo.map{ info ⇒
+      hc:         HeaderCarrier): EitherT[Future, String, Option[UserInfo]] = {
+    EitherT.fromEither[Future](getEligibleUserInfo(session)).flatMap { maybeInfo ⇒
+      val updatedInfo: Option[EitherT[Future, String, UserInfo]] = maybeInfo.map{ info ⇒
         if (info.nino =!= params.nino) {
-          EitherT.fromEither[Future](Left[String, NSIUserInfo]("NINO in confirm details parameters did not match NINO from auth"))
+          EitherT.fromEither[Future](Left[String, UserInfo]("NINO in confirm details parameters did not match NINO from auth"))
         } else {
           val newInfo = info.updateEmail(params.email)
           val newSession = HTSSession(Some(newInfo), Some(params.email))
@@ -144,7 +143,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         }
       }
 
-      updatedInfo.traverse[EitherTResult, NSIUserInfo](identity)
+      updatedInfo.traverse[EitherTResult, UserInfo](identity)
     }
   }
 

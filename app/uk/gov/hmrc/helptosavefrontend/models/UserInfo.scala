@@ -17,8 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
+import cats.Show
 import play.api.libs.json._
+import uk.gov.hmrc.helptosavefrontend.util.Email
 
 /** Details of the user obtained from HMRC services */
 case class UserInfo(forename:    String,
@@ -32,5 +35,14 @@ case class UserInfo(forename:    String,
 object UserInfo {
 
   implicit val userDetailsFormat: Format[UserInfo] = Json.format[UserInfo]
+
+  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("dd/MM/YYYY")))
+
+  implicit class UserInfoOps(val u: UserInfo) extends AnyVal {
+
+    def updateEmail(email: Email): UserInfo = u.copy(email = Some(email))
+
+  }
+
 }
 
