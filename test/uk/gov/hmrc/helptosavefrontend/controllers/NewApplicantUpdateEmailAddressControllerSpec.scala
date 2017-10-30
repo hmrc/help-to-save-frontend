@@ -36,6 +36,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
@@ -130,7 +131,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validUserInfo), None))))
             mockEmailVerificationConn(nino, email)(Left(AlreadyVerified))
           }
-          val result = await(controller.verifyEmail(email)(FakeRequest()))
+          val result = await(controller.verifyEmail(email)(FakeRequest()))(10.seconds)
           status(result) shouldBe Status.SEE_OTHER
 
           val redirectURL = redirectLocation(result)

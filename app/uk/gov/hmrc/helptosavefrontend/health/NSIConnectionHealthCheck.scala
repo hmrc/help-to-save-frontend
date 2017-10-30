@@ -18,29 +18,38 @@ package uk.gov.hmrc.helptosavefrontend.health
 
 import java.time.LocalDate
 
-import akka.actor.{Actor, ActorRef, ActorSystem, Props}
+import akka.actor.{Actor, ActorRef, ActorSystem, PoisonPill, Props}
 import com.google.inject.Inject
 import configs.syntax._
 import play.api.Configuration
+import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner.Payload
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.util.lock.Lock
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
-class NSIConnectionHealthCheck @Inject() (system: ActorSystem, configuration: Configuration, metrics: Metrics, nSIConnector: NSIConnector) extends Logging {
+class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
+                                          configuration: Configuration,
+                                          metrics:       Metrics,
+                                          nSIConnector:  NSIConnector,
+                                          mongo:         ReactiveMongoComponent) extends Logging {
 
   val name: String = "nsi-connection"
 
   val enabled: Boolean = configuration.underlying.get[Boolean](s"health.$name.enabled").value
 
-  lazy val healthCheck: ActorRef = system.actorOf(
+  val lockPeriod: FiniteDuration = configuration.underlying.get[FiniteDuration](s"health.$name.lock-period").value
+
+  def newHealthCheck(): ActorRef = system.actorOf(
     HealthCheck.props(
       name,
       configuration.underlying,
@@ -53,10 +62,25 @@ class NSIConnectionHealthCheck @Inject() (system: ActorSystem, configuration: Co
     )
   )
 
+  lazy val lockedHealthCheck: ActorRef =
+    system.actorOf(Lock.props[Option[ActorRef]](
+      mongo.mongoConnector.db,
+      s"health-check-$name",
+      lockPeriod,
+      system.scheduler,
+      None,
+      _.fold(Some(newHealthCheck()))(Some(_)),
+      _.flatMap{ ref ⇒
+        ref ! PoisonPill
+        None
+      }),
+      s"health-check-$name-lock"
+    )
+
   // start the health check only if it is enabled
   if (enabled) {
     logger.info(s"HealthCheck $name enabled")
-    val _ = healthCheck
+    val _ = lockedHealthCheck
   } else {
     logger.info(s"HealthCheck $name not enabled")
   }

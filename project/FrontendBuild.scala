@@ -18,7 +18,8 @@ object FrontendBuild extends Build with MicroService {
     "com.github.kxbmap" %% "configs" % "0.4.4",
     "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9",
     "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
-    "uk.gov.hmrc" %% "zap-automation" % "0.15.0"
+    "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
+    "uk.gov.hmrc" %% "mongo-lock" % "5.0.0"
   )
 
   def test(scope: String = "test") = Seq(
@@ -28,7 +29,6 @@ object FrontendBuild extends Build with MicroService {
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
     "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope,
     "uk.gov.hmrc" %% "stub-data-generator" % "0.4.0" % scope,
-    "com.typesafe.akka" %% "akka-testkit" % "2.3.11" % scope,
     "com.typesafe.akka" %% "akka-testkit" % "2.3.11" % scope,
     "com.miguno.akka" % "akka-mock-scheduler_2.11" % "0.5.1" % scope,
 

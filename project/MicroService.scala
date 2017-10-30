@@ -112,6 +112,7 @@ trait MicroService {
       (baseDirectory.value ** "*.sc").get ++
       (baseDirectory.value ** "HealthCheck.scala").get ++
       (baseDirectory.value ** "HealthCheckRunner.scala").get ++
+      (baseDirectory.value ** "Lock.scala").get ++
       Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
     )
     .settings(
