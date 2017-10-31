@@ -19,8 +19,10 @@ package uk.gov.hmrc.helptosavefrontend.models
 import java.time.LocalDate
 
 import org.scalacheck.Gen
-import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult.{Eligible, Ineligible}
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.testutil._
 import uk.gov.hmrc.smartstub.AutoGen.{GenProvider, instance}
 import uk.gov.hmrc.smartstub.{AutoGen, _}

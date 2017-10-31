@@ -34,9 +34,10 @@ import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleInf
 import uk.gov.hmrc.helptosavefrontend.forms.{ConfirmEmailForm, GiveEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -118,7 +119,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         val result = for {
-          _ ← sessionCacheConnector.put(HTSSession(Some(eligibleWithEmail.userInfo), Some(email)))
+          _ ← sessionCacheConnector.put(HTSSession(Right(eligibleWithEmail.userInfo), Some(email)))
           _ ← helpToSaveService.storeConfirmedEmail(email)
         } yield ()
 
@@ -206,8 +207,8 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       error ⇒ {
         logger.warn(s"Could not check if account create is allowed, due to: $error")
         ifAllowed
-      }, { allowed ⇒
-        if (allowed) {
+      }, {
+        if (_) {
           ifAllowed
         } else {
           SeeOther(routes.RegisterController.getUserCapReachedPage().url)
@@ -234,13 +235,13 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
           // user has gone through journey already this sessions and were found to be ineligible
-          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-        )(userInfo ⇒
+          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+          userInfo ⇒
             // user has gone through journey already this sessions and were found to be eligible
             userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo)))(email ⇒
               ifEligibleWithEmail(EligibleWithEmail(userInfo, email, session.confirmedEmail))
             )
-          )
+        )
     }
 
   private def validateCreateAccountJsonSchema(userInfo: NSIUserInfo): Either[String, Unit] = {

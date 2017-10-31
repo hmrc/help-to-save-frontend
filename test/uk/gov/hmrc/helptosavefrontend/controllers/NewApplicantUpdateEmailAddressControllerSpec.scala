@@ -28,9 +28,11 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomIneligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, BackendError}
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
@@ -91,7 +93,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
         }
         val result = await(controller.verifyEmail(email)(FakeRequest()))
         status(result) shouldBe Status.SEE_OTHER
@@ -114,7 +116,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           mockEmailVerificationConn(nino, newEmail)(Right(()))
         }
         val result = await(controller.verifyEmail(newEmail)(FakeRequest()))
@@ -128,7 +130,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validUserInfo), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
             mockEmailVerificationConn(nino, email)(Left(AlreadyVerified))
           }
           val result = await(controller.verifyEmail(email)(FakeRequest()))(10.seconds)
@@ -157,7 +159,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           mockEmailVerificationConn(nino, email)(Left(BackendError))
         }
 
@@ -181,8 +183,8 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(validUserInfo.updateEmail(testEmail)), Some(testEmail)))(Right(()))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo.updateEmail(testEmail)), Some(testEmail)))(Right(()))
           }
 
           val params = EmailVerificationParams(validUserInfo.nino, testEmail)
@@ -204,7 +206,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       "return an OK status with a not eligible view when an ineligible user comes in via email verified" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
         }
         val params = EmailVerificationParams(validUserInfo.nino, testEmail)
         val result = doRequestWithQueryParam(params.encode())
@@ -224,7 +226,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         "the user has not already enrolled and the given nino doesn't match the session nino" in {
           test(inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validUserInfo), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           },
             "AE1234XXX",
                testEmail
@@ -244,8 +246,8 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         "the sessionCacheConnector.put method returns an error" in {
           test(inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(validUserInfo.updateEmail(testEmail)), Some(testEmail)))(Left("An error occurred"))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo.updateEmail(testEmail)), Some(testEmail)))(Left("An error occurred"))
           },
                validUserInfo.nino,
                testEmail
@@ -298,7 +300,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
         }
 
         val result = doRequest()
@@ -310,7 +312,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
         }
 
         val result = doRequest()

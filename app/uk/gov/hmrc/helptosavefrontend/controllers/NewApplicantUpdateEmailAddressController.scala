@@ -33,6 +33,8 @@ import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthCon
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -56,14 +58,14 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } { session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
-          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-        ){ userInfo ⇒
+          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+          userInfo ⇒
             sendEmailVerificationRequest(
               email,
               Ok(views.html.register.check_your_email(email, userInfo.email)),
               params ⇒ routes.NewApplicantUpdateEmailAddressController.emailVerified(params.encode()).url,
               isNewApplicant = true)
-          }
+        )
       }
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
@@ -84,7 +86,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         }, { maybeNSIUserInfo ⇒
           maybeNSIUserInfo.fold{
             // this means they were ineligible
-            Ok(views.html.core.not_eligible())
+            Ok(views.html.core.not_eligible(IneligibilityType.Unknown))
           }{ _ ⇒
             Ok(views.html.register.email_updated(params.email))
           }
@@ -98,12 +100,11 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } { session ⇒
         session.eligibilityCheckResult.fold(
-          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-        ){ userInfo ⇒
-            userInfo.email.fold(
-              SeeOther(routes.RegisterController.getGiveEmailPage().url)
-            ){ email ⇒ Ok(views.html.register.email_updated(email)) }
-          }
+          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+          userInfo ⇒ userInfo.email.fold(
+            SeeOther(routes.RegisterController.getGiveEmailPage().url)
+          ){ email ⇒ Ok(views.html.register.email_updated(email)) }
+        )
       }
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
@@ -115,9 +116,9 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
 
     case Some(s) ⇒
       s.eligibilityCheckResult.fold[Either[String, Option[UserInfo]]](
-        // IMPOSSIBLE - this means they are ineligible
-        Right(None)
-      ) { userInfo ⇒ Right(Some(userInfo)) }
+        _ ⇒ Right(None), // IMPOSSIBLE - this means they are ineligible
+        userInfo ⇒ Right(Some(userInfo))
+      )
 
     case None ⇒
       htsContext.userDetails.fold[Either[String, Option[UserInfo]]](
@@ -138,7 +139,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           EitherT.fromEither[Future](Left[String, UserInfo]("NINO in confirm details parameters did not match NINO from auth"))
         } else {
           val newInfo = info.updateEmail(params.email)
-          val newSession = HTSSession(Some(newInfo), Some(params.email))
+          val newSession = HTSSession(Right(newInfo), Some(params.email))
           sessionCacheConnector.put(newSession).map(_ ⇒ newInfo)
         }
       }

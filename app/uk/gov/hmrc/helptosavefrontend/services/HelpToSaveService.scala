@@ -23,6 +23,8 @@ import com.google.inject.{ImplementedBy, Inject}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier

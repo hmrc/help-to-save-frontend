@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.models.userinfo
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

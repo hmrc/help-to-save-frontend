@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.models.userinfo
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import cats.Show
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
 
 import scala.util.{Failure, Success, Try}
 

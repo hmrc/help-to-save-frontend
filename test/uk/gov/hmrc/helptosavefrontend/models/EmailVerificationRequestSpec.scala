@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.models.email.EmailVerificationRequest
 import uk.gov.hmrc.play.test.UnitSpec
 
 class EmailVerificationRequestSpec extends UnitSpec with TestSupport {

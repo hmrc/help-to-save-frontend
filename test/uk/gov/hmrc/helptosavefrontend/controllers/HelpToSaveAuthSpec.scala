@@ -26,8 +26,8 @@ import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.checkEligibilityUrl
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.{Address, NSIUserInfo, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{toJavaDate, urlEncode}
 
 import scala.concurrent.duration._

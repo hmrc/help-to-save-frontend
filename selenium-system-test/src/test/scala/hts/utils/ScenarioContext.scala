@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter
 
 import cucumber.api.DataTable
 import uk.gov.hmrc.domain.Generator
-import uk.gov.hmrc.helptosavefrontend.models.Address
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
 
 import scala.collection.JavaConverters._
 
