@@ -100,6 +100,10 @@ class Lock[State](lock:           LockProvider,
 
 object Lock {
 
+  /**
+    * These props uses the `ExclusiveTimePeriodLock` to implement the
+    * `LockProvider` behaviour required by the `Lock` actor
+    */
   def props[State](mongoDb:        () ⇒ DB,
                    lockID:         String,
                    lockDuration:   FiniteDuration,

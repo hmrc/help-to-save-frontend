@@ -47,7 +47,7 @@ class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
 
   val enabled: Boolean = configuration.underlying.get[Boolean](s"health.$name.enabled").value
 
-  val lockPeriod: FiniteDuration = configuration.underlying.get[FiniteDuration](s"health.$name.lock-period").value
+  val lockDuration: FiniteDuration = configuration.underlying.get[FiniteDuration](s"health.$name.lock-duration").value
 
   def newHealthCheck(): ActorRef = system.actorOf(
     HealthCheck.props(
@@ -62,11 +62,13 @@ class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
     )
   )
 
+  // make sure we only have one instance of the health check running across
+  // multiple instances of the application in the same environment
   lazy val lockedHealthCheck: ActorRef =
     system.actorOf(Lock.props[Option[ActorRef]](
       mongo.mongoConnector.db,
       s"health-check-$name",
-      lockPeriod,
+      lockDuration,
       system.scheduler,
       None,
       _.fold(Some(newHealthCheck()))(Some(_)),
