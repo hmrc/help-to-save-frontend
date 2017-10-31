@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Singleton
 
 import com.google.inject.Inject
+import play.api.http.{Status ⇒ HttpStatus}
 import play.api.mvc._
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.helptosavefrontend.config._
@@ -57,8 +58,9 @@ class HelpAndContactController @Inject() (val messagesApi:       MessagesApi,
   }(redirectOnLoginURL = routes.HelpAndContactController.getHelpAndContactPage().url)
 
   def submitContactHmrcForm: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    submitContactHmrc(contactHmrcSubmitPartialUrl,
-                      routes.HelpAndContactController.contactHmrcThankYou(),
+    submitContactHmrc(
+      contactHmrcSubmitPartialUrl,
+      routes.HelpAndContactController.contactHmrcThankYou(),
       body ⇒ views.html.contact_hmrc(contactHmrcFormPartialUrl, Some(body), formProvider))
   }(redirectOnLoginURL = routes.HelpAndContactController.getHelpAndContactPage().url)
 
@@ -69,27 +71,24 @@ class HelpAndContactController @Inject() (val messagesApi:       MessagesApi,
 
   private def submitContactHmrc(formUrl:                         String,
                                 successRedirect:                 Call,
-                                failedValidationResponseContent: (Html) ⇒ HtmlFormat.Appendable)(
-      implicit
-      request: Request[AnyContent]): Future[Result] = {
+                                failedValidationResponseContent: (Html) ⇒ HtmlFormat.Appendable
+  )(implicit request: Request[AnyContent]): Future[Result] =
     request.body.asFormUrlEncoded.fold[Future[Result]] {
       logger.warn("Trying to submit an empty contact form")
       internalServerError()
-    }{ formData ⇒
-      http.postForm(formUrl, formData)
-        .map {
-          resp ⇒
-            resp.status match {
-              case 200 ⇒ Redirect(successRedirect).withSession(request.session + (TICKET_ID -> resp.body))
-              case 400 ⇒ BadRequest(failedValidationResponseContent(Html(resp.body)))
-              case 500 ⇒ InternalServerError(Html(resp.body))
-              case status ⇒
-                logger.warn(s"Unexpected status code from contact HMRC form: $status")
-                Status(status)(Html(resp.body))
-            }
+    }{
+      http.postForm(formUrl, _)
+        .map { resp ⇒
+          resp.status match {
+            case HttpStatus.OK                    ⇒ Redirect(successRedirect).withSession(request.session + (TICKET_ID -> resp.body))
+            case HttpStatus.BAD_REQUEST           ⇒ BadRequest(failedValidationResponseContent(Html(resp.body)))
+            case HttpStatus.INTERNAL_SERVER_ERROR ⇒ InternalServerError(Html(resp.body))
+            case status ⇒
+              logger.warn(s"Unexpected status code from contact HMRC form: $status")
+              Status(status)(Html(resp.body))
+          }
         }
     }
-  }
 
 }
 
