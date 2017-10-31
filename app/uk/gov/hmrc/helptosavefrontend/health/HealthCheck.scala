@@ -112,7 +112,7 @@ class HealthCheck(name:             String,
    */
   def ok(successCount: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(message, nanos) ⇒
-      log.info(s"$loggingPrefix - OK ${timeString(nanos)}. $message")
+      log.info(s"$loggingPrefix - OK ${timeString(nanos)}. Missed-beat counter is 0. $message")
       val newCount = successCount + 1
 
       if (newCount === numberOfChecksBetweenUpdates - 1) {
@@ -122,7 +122,7 @@ class HealthCheck(name:             String,
       becomeOK(newCount % numberOfChecksBetweenUpdates)
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - just started to fail ${timeString(nanos)}. $message")
+      log.warning(s"$loggingPrefix - just started to fail ${timeString(nanos)}. Missed-beat counter is 1. $message")
 
       val now = LocalDateTime.now(clock)
 
@@ -141,12 +141,12 @@ class HealthCheck(name:             String,
    */
   def failing(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(message, nanos) ⇒
-      log.info(s"$loggingPrefix - was failing since ${prettyString(downSince)} but now OK ${timeString(nanos)}. $message")
+      log.info(s"$loggingPrefix - was failing since ${prettyString(downSince)} but now OK ${timeString(nanos)}. Missed-beat counter is 0. $message")
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - still failing since ${prettyString(downSince)} ${timeString(nanos)}. $message")
       val newFails = fails + 1
+      log.warning(s"$loggingPrefix - still failing since ${prettyString(downSince)} ${timeString(nanos)}. Missed-beat counter is $newFails. $message")
 
       if (newFails < maximumConsecutiveFailures) {
         becomeFailing(downSince, newFails)
@@ -163,13 +163,13 @@ class HealthCheck(name:             String,
    */
   def failed(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}. $message")
+      log.warning(s"$loggingPrefix - had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}. Missed-beat counter is 0. $message")
       pagerDutyResolve()
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - still failing since ${prettyString(downSince)} ${timeString(nanos)}. $message")
       val newFails = fails + 1
+      log.warning(s"$loggingPrefix - still failing since ${prettyString(downSince)} ${timeString(nanos)}. Missed-beat counter is $newFails. $message")
       becomeFailed(downSince, newFails)
 
       if (newFails % numberOfChecksBetweenAlerts === 0) {
