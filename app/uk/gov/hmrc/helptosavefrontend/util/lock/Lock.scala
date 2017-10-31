@@ -33,11 +33,11 @@ import scala.util.{Failure, Success}
  * This is an `Actor` which handles changing of state when a lock is acquired or a lock
  * is released. On start-up the `Lock` will try to acquire a lock using the given `LockProvider`.
  * If successful `onLockAcquired` is called on the `initialState`. Otherwise `onLockReleased` is
- * called on the `initialState`. The state is updated at this point.  When the lock duration has
- * passed this `Actor` will try to acquire/renew a lock again. If successful `onLockAcquired` is
- * called on the current state. Otherwise `onLockReleased` is called on the current state. This
- * continues until the `Actor` dies. Before death, this `Actor` will try to release the lock. If
- * successful `onLockReleased` is called on the current state.
+ * called on the `initialState`. The state is updated at this point.  When the lock duration defined
+ * in the `LockProvider` has passed this `Actor` will try to acquire/renew a lock again. If successful
+ * `onLockAcquired` is called on the current state. Otherwise `onLockReleased` is called on the
+ * current state. This continues until the `Actor` dies. Before death, this `Actor` will try to release
+ * the lock. If successful `onLockReleased` is called on the current state.
  *
  * N.B.: If the process of trying to acquire/renew a lock fails for any reason the state is not changed.
  */
