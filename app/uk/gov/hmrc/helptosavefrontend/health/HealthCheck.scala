@@ -111,8 +111,8 @@ class HealthCheck(name:             String,
    *                     the next health check switches
    */
   def ok(successCount: Int): Receive = performTest orElse {
-    case HealthCheckResult.Success(nanos) ⇒
-      log.info(s"$loggingPrefix - health check is passing ${timeString(nanos)}")
+    case HealthCheckResult.Success(message, nanos) ⇒
+      log.info(s"$loggingPrefix - OK ${timeString(nanos)}. $message")
       val newCount = successCount + 1
 
       if (newCount === numberOfChecksBetweenUpdates - 1) {
@@ -122,7 +122,7 @@ class HealthCheck(name:             String,
       becomeOK(newCount % numberOfChecksBetweenUpdates)
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - health check has just started to fail $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - just started to fail ${timeString(nanos)}. $message")
 
       val now = LocalDateTime.now(clock)
 
@@ -140,12 +140,12 @@ class HealthCheck(name:             String,
    * not reached the maximum allowed yet.
    */
   def failing(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
-    case HealthCheckResult.Success(nanos) ⇒
-      log.info(s"$loggingPrefix - health check was failing since ${prettyString(downSince)} but now OK ${timeString(nanos)}")
+    case HealthCheckResult.Success(message, nanos) ⇒
+      log.info(s"$loggingPrefix - was failing since ${prettyString(downSince)} but now OK ${timeString(nanos)}. $message")
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - health check still failing since ${prettyString(downSince)}: $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - still failing since ${prettyString(downSince)} ${timeString(nanos)}. $message")
       val newFails = fails + 1
 
       if (newFails < maximumConsecutiveFailures) {
@@ -162,13 +162,13 @@ class HealthCheck(name:             String,
    * been reached
    */
   def failed(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
-    case HealthCheckResult.Success(nanos) ⇒
-      log.warning(s"$loggingPrefix - health check had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}")
+    case HealthCheckResult.Success(message, nanos) ⇒
+      log.warning(s"$loggingPrefix - had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}. $message")
       pagerDutyResolve()
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
-      log.warning(s"$loggingPrefix - health check still failing since ${prettyString(downSince)}: $message ${timeString(nanos)}")
+      log.warning(s"$loggingPrefix - still failing since ${prettyString(downSince)} ${timeString(nanos)}. $message")
       val newFails = fails + 1
       becomeFailed(downSince, newFails)
 

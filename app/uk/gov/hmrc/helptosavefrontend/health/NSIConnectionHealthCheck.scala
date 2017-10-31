@@ -71,13 +71,15 @@ object NSIConnectionHealthCheck {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
+    val successMessage: String = s"For NINO [${payload.value.nino}]: createAccount/health check returned 200 OK"
+
     override def performTest(): Future[HealthCheckResult] = {
       val timer = metrics.healthCheckTimer.time()
 
       nsiConnector.healthCheck(payload.value).value
         .map { result ⇒
           val time = timer.stop()
-          result.fold[HealthCheckResult](e ⇒ HealthCheckResult.Failure(e, time), _ ⇒ HealthCheckResult.Success(time))
+          result.fold[HealthCheckResult](e ⇒ HealthCheckResult.Failure(e, time), _ ⇒ HealthCheckResult.Success(successMessage, time))
         }
         .recover{
           case NonFatal(e) ⇒

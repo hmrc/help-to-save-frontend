@@ -20,7 +20,7 @@ sealed trait HealthCheckResult
 
 object HealthCheckResult {
 
-  case class Success(nanos: Long) extends HealthCheckResult
+  case class Success(message: String, nanos: Long) extends HealthCheckResult
 
   case class Failure(message: String, nanos: Long) extends HealthCheckResult
 }
