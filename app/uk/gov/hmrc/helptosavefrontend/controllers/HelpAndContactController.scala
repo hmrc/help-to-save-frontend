@@ -76,7 +76,7 @@ class HelpAndContactController @Inject() (val messagesApi:       MessagesApi,
       logger.warn("Trying to submit an empty contact form")
       internalServerError()
     }{ formData ⇒
-      http.postForm(formUrl, formData.mapValues(_.toList))
+      http.postForm(formUrl, formData)
         .map {
           resp ⇒
             resp.status match {

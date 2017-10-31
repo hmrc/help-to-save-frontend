@@ -74,8 +74,8 @@ trait WSHttp
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 
   def postForm(url:     String,
-               form:    Map[String, List[String]],
-               headers: Seq[(String, String)]     = Seq.empty[(String, String)]
+               form:    Map[String, Seq[String]],
+               headers: Seq[(String, String)]    = Seq.empty[(String, String)]
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 
 }
@@ -109,8 +109,8 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POST(url, body)(w, httpReads, hc, ec)
 
   def postForm(url:     String,
-               form:    Map[String, List[String]],
-               headers: Seq[(String, String)]     = Seq.empty[(String, String)]
+               form:    Map[String, Seq[String]],
+               headers: Seq[(String, String)]    = Seq.empty[(String, String)]
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POSTForm(url, form)(httpReads, hc, ec)
 }
 
