@@ -24,14 +24,37 @@
 @(email: String, form: Form[ConfirmEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "confirm-email", bodyClasses = None) {
-
- <h1> Which email address do you want us to use for your Help to Save account? </h1>
-
  <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
-  <input type="radio" name="email"> @email <br>
-  <span>@{form.error("new-email").map(_ ⇒ "Please enter a valid email address").getOrElse("")}</span> <br>
-  <input type="radio" name="email"> Other email: <input type="text" name="new-email">  <br>
-  <input type="submit" />
+   <div class="form-group">
+    <fieldset>
+     <legend>
+      <h1 class="heading-large">
+        Which email address do you want us to use for your Help to Save account?
+      </h1>
+     </legend>
+
+     <div class="multiple-choice">
+      <input id="registered-email" type="radio" name="email" value="Yes">
+      <label for="registered-email">@email</label>
+     </div>
+
+     <div class="multiple-choice" data-target="collect-new-email">
+      <input id="add-new-email" type="radio" name="email" value="No">
+      <label for="add-new-email">I want to enter a new email address</label>
+     </div>
+     <div class="panel panel-border-narrow js-hidden" id="collect-new-email">
+       <span class="body-text">The email addess you use for other government services will not change.</span>
+       <label class="form-label" for="new-email">Enter a new email address</label>
+      <input class="form-control" name="new-email" type="text" id="new-email">
+     </div>
+
+    </fieldset>
+   </div>
+     <div class="form-field form-field--submit">
+         <button class="button " type="submit">
+             Submit
+         </button>
+     </div>
  </form>
 
 
