@@ -38,6 +38,4 @@ object HtsAuth {
       Retrievals.itmpName and
       Retrievals.itmpDateOfBirth and
       Retrievals.itmpAddress
-
 }
-
