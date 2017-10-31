@@ -104,7 +104,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   override lazy val analyticsHost: String = getString("google-analytics.host")
 
   val contactUrl: String = s"${getUrlFor("contact-frontend")}"
-  override lazy val reportAProblemPartialUrl: String = s"$contactUrl/contact/problem_reports_ajax?service=$appName"
-  override lazy val reportAProblemNonJSUrl: String = s"$contactUrl/contact/problem_reports_nonjs?service=$appName"
+  override lazy val reportAProblemPartialUrl: String = s"$contactUrl/problem_reports_ajax?service=$appName"
+  override lazy val reportAProblemNonJSUrl: String = s"$contactUrl/problem_reports_nonjs?service=$appName"
 
 }
