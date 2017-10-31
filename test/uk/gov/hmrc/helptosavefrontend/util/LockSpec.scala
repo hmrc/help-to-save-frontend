@@ -29,8 +29,6 @@ class LockSpec extends ActorTestSupport("LockSpec") {
 
   val testLockID = "lockID"
 
-  val testServerID = "serverID"
-
   val lockDuration: FiniteDuration = 1.hour
 
   val time: VirtualTime = new VirtualTime
@@ -38,8 +36,6 @@ class LockSpec extends ActorTestSupport("LockSpec") {
   trait TestableExclusiveTimePeriodLock extends LockProvider {
 
     override val lockId: String = testLockID
-
-    override val serverId: String = testServerID
 
     override val holdLockFor = lockDuration
 
@@ -73,8 +69,8 @@ class LockSpec extends ActorTestSupport("LockSpec") {
       .returning(result.fold(e ⇒ Future.failed(new Exception(e)), Future.successful))
 
   def mockReleaseLock(result: Either[String, Unit]) =
-    (internalLock.releaseLock(_: String, _: String))
-      .expects(testLockID, testServerID)
+    (internalLock.releaseLock: () ⇒ Future[Unit])
+      .expects()
       .returning(result.fold(e ⇒ Future.failed(new Exception(e)), Future.successful))
 
   "The Lock" must {

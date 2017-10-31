@@ -26,11 +26,9 @@ trait LockProvider {
 
   val lockId: String
 
-  val serverId: String
-
   val holdLockFor: FiniteDuration
 
-  def releaseLock(reqLockId: String, reqOwner: String): Future[Unit]
+  def releaseLock(): Future[Unit]
 
   def tryToAcquireOrRenewLock[T](body: ⇒ Future[T])(implicit ec: ExecutionContext): Future[Option[T]]
 
@@ -39,10 +37,10 @@ trait LockProvider {
 object LockProvider {
 
   /**
-    * This lock provider ensures that some operation is only performed once across multiple
-    * instances of an application. It is backed by [[ExclusiveTimePeriodLock]] from the
-    * `mongo-lock` library
-    */
+   * This lock provider ensures that some operation is only performed once across multiple
+   * instances of an application. It is backed by [[ExclusiveTimePeriodLock]] from the
+   * `mongo-lock` library
+   */
   case class ExclusiveTimePeriodLockProvider(lock: ExclusiveTimePeriodLock) extends LockProvider {
 
     val lockId: String = lock.lockId
@@ -51,8 +49,8 @@ object LockProvider {
 
     val holdLockFor: FiniteDuration = lock.holdLockFor.getMillis.millis
 
-    override def releaseLock(reqLockId: String, reqOwner: String): Future[Unit] =
-      lock.repo.releaseLock(reqLockId, reqOwner)
+    override def releaseLock(): Future[Unit] =
+      lock.repo.releaseLock(lockId, serverId)
 
     def tryToAcquireOrRenewLock[T](body: ⇒ Future[T])(implicit ec: ExecutionContext): Future[Option[T]] =
       lock.tryToAcquireOrRenewLock(body)

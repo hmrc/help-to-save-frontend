@@ -84,7 +84,7 @@ class Lock[State](lock:           LockProvider,
   }
 
   override def postStop(): Unit = {
-    lock.releaseLock(lock.lockId, lock.serverId).onComplete{
+    lock.releaseLock().onComplete{
       case Success(_) ⇒
         state = onLockReleased(state)
 
@@ -101,9 +101,9 @@ class Lock[State](lock:           LockProvider,
 object Lock {
 
   /**
-    * These props uses the `ExclusiveTimePeriodLock` to implement the
-    * `LockProvider` behaviour required by the `Lock` actor
-    */
+   * These props uses the `ExclusiveTimePeriodLock` to implement the
+   * `LockProvider` behaviour required by the `Lock` actor
+   */
   def props[State](mongoDb:        () ⇒ DB,
                    lockID:         String,
                    lockDuration:   FiniteDuration,
