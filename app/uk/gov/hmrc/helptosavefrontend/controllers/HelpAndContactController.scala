@@ -44,13 +44,13 @@ class HelpAndContactController @Inject() (val messagesApi:       MessagesApi,
 
   val submitUrl: String = routes.HelpAndContactController.submitContactHmrcForm().url
 
-  val contactHmrcFormPartialUrl: String = s"$contactUrl/contact/contact-hmrc/form?service=$contactFormServiceIdentifier" +
+  val contactHmrcFormPartialUrl: String = s"$contactUrl/contact-hmrc/form?service=$contactFormServiceIdentifier" +
     s"&submitUrl=${urlEncode(submitUrl)}"
 
-  val contactHmrcSubmitPartialUrl: String = s"$contactUrl/contact/contact-hmrc/form?resubmitUrl=${urlEncode(submitUrl)}"
+  val contactHmrcSubmitPartialUrl: String = s"$contactUrl/contact-hmrc/form?resubmitUrl=${urlEncode(submitUrl)}"
 
   private def contactHmrcThankYouPartialUrl(ticketId: String) =
-    s"$contactUrl/contact/contact-hmrc/form/confirmation?ticketId=${urlEncode(ticketId)}"
+    s"$contactUrl/contact-hmrc/form/confirmation?ticketId=${urlEncode(ticketId)}"
 
   def getHelpAndContactPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.contact_hmrc(contactHmrcFormPartialUrl, None, formProvider))

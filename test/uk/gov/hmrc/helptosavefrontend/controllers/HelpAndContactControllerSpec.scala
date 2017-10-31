@@ -16,9 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import org.scalamock.scalatest.MockFactory
-import org.scalatest.BeforeAndAfterAll
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc._
@@ -28,18 +26,20 @@ import play.twirl.api.Html
 import uk.gov.hmrc.helptosavefrontend.config.{PartialRetriever, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class HelpAndContactControllerSpec extends AuthSupport with UnitSpec with MockFactory with BeforeAndAfterAll with ScalaFutures {
+class HelpAndContactControllerSpec extends AuthSupport with GeneratorDrivenPropertyChecks {
 
   val mockHttp: WSHttp = mock[WSHttp]
 
   val mockFormProvider: PartialRetriever = mock[PartialRetriever]
 
-  lazy val testController = new HelpAndContactController(fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector, mockMetrics, mockFormProvider, mockHttp)
-  (ec)
+  lazy val testController = new HelpAndContactController(fakeApplication.injector.instanceOf[MessagesApi],
+                                                         mockAuthConnector,
+                                                         mockMetrics,
+                                                         mockFormProvider,
+                                                         mockHttp)(ec)
 
   val request = mock[RequestHeader]
 
@@ -48,12 +48,12 @@ class HelpAndContactControllerSpec extends AuthSupport with UnitSpec with MockFa
       .expects(testController.contactHmrcSubmitPartialUrl, expectedForm, Seq.empty[(String, String)], *, *)
       .returning(Future.successful(HttpResponse(status, responseString = response)))
 
-  def mockGetForm(result: Html) =
+  def mockGetForm(result: Html): Unit =
     (mockFormProvider.getPartialContent(_: String, _: Map[String, String], _: Html)(_: RequestHeader))
       .expects(testController.contactHmrcFormPartialUrl, *, *, *)
       .returning(result)
 
-  "submitContactHmrcForm" should {
+  "getHelpAndContactPage" should {
 
     "return a 200 status and redirect the user to the report a problem page" in {
       inSequence {
@@ -64,10 +64,12 @@ class HelpAndContactControllerSpec extends AuthSupport with UnitSpec with MockFa
       val result = testController.getHelpAndContactPage(FakeRequest())
       status(result) shouldBe Status.OK
     }
+  }
+
+  "submitContactHmrcForm" should {
 
     "return a 200 status and redirect an authenticated user to the contactHmrcThankYou page" in {
       val form = Map("key" → List("value1", "value2"))
-
       inSequence{
         mockAuthWithNoRetrievals(AuthProvider)
         mockPostForm(form)(200, Some("1234"))
@@ -78,10 +80,50 @@ class HelpAndContactControllerSpec extends AuthSupport with UnitSpec with MockFa
       redirectLocation(result) shouldBe Some(routes.HelpAndContactController.contactHmrcThankYou().url)
     }
 
+    "return a 400 status when request made to post a form to contact frontend is bad" in {
+      val form = Map("key" → List("value1", "value2"))
+      inSequence{
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockPostForm(form)(400, None)
+      }
+
+      val result = testController.submitContactHmrcForm(FakeRequest().withFormUrlEncodedBody("key" → "value1",
+        "key" → "value2"))
+      status(result) shouldBe Status.BAD_REQUEST
+    }
+
     "return a 500 status when there is no form data given" in {
+      val form = Map("key" → List(""))
+      inSequence{
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockPostForm(form)(500, None)
+      }
+      val result = testController.submitContactHmrcForm(FakeRequest().withFormUrlEncodedBody("key" → ""))
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
+    "return the correct status based on when the user is being silly" in {
+      forAll { s: Int ⇒
+        whenever(!Set(Status.BAD_REQUEST, Status.INTERNAL_SERVER_ERROR, Status.OK).contains(s) && s > 0){
+          val form = Map("key" → List(""))
+          inSequence {
+            mockAuthWithNoRetrievals(AuthProvider)
+            mockPostForm(form)(s, None)
+          }
+          val result = testController.submitContactHmrcForm(FakeRequest().withFormUrlEncodedBody("key" → ""))
+          status(result) shouldBe s
+        }
+      }
 
     }
-  }
 
+    "return an Internal Server Error when there is no form posted" in {
+      inSequence{
+        mockAuthWithNoRetrievals(AuthProvider)
+      }
+      val result = testController.submitContactHmrcForm(FakeRequest())
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+  }
 
 }
