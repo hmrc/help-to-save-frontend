@@ -19,6 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.config
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSProxyServer
+import play.api.mvc.RequestHeader
+import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.authUrl
 import uk.gov.hmrc.http._
@@ -29,6 +31,8 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 import uk.gov.hmrc.play.http.ws._
+import uk.gov.hmrc.play.partials._
+import uk.gov.hmrc.play.frontend.filters.SessionCookieCryptoFilter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,6 +42,21 @@ object FrontendAuditConnector extends AuditConnector with AppName {
 
 class RawHttpReads extends HttpReads[HttpResponse] {
   override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
+}
+
+@ImplementedBy(classOf[FormPartialProvider])
+trait PartialRetriever {
+  def getPartialContent(url:                String,
+                        templateParameters: Map[String, String] = Map.empty,
+                        errorMessage:       Html                = HtmlFormat.empty
+  )(implicit request: RequestHeader): Html
+
+}
+
+@Singleton
+class FormPartialProvider extends PartialRetriever with FormPartialRetriever {
+  override val httpGet: WSHttpExtension = new WSHttpExtension
+  override val crypto: (String) ⇒ String = cookie ⇒ SessionCookieCryptoFilter.encrypt(cookie)
 }
 
 @ImplementedBy(classOf[WSHttpExtension])
@@ -53,6 +72,11 @@ trait WSHttp
               body:    A,
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
+
+  def postForm(url:     String,
+               form:    Map[String, Seq[String]],
+               headers: Seq[(String, String)]    = Seq.empty[(String, String)]
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 
 }
 
@@ -83,6 +107,11 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
               body:    A,
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POST(url, body)(w, httpReads, hc, ec)
+
+  def postForm(url:     String,
+               form:    Map[String, Seq[String]],
+               headers: Seq[(String, String)]    = Seq.empty[(String, String)]
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POSTForm(url, form)(httpReads, hc, ec)
 }
 
 @Singleton
