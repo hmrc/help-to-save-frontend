@@ -88,7 +88,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks{ eligibleWithEmail ⇒
           checkIfAccountCreateAllowed(
-            Ok(views.html.register.confirm_email(eligibleWithEmail.email)))
+            Ok(views.html.register.confirm_email(eligibleWithEmail.email, ConfirmEmailForm.confirmEmailForm)))
         } { _ ⇒
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
         }
@@ -100,7 +100,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks{ eligibleWithEmail ⇒
           ConfirmEmailForm.confirmEmailForm.bindFromRequest().fold[Result](
-            _ ⇒ Ok(views.html.register.confirm_email(eligibleWithEmail.email)),
+            withErrors ⇒ Ok(views.html.register.confirm_email(eligibleWithEmail.email, withErrors)),
             _.newEmail.fold(
               SeeOther(routes.RegisterController.confirmEmail(eligibleWithEmail.email).url))(
                 newEmail ⇒

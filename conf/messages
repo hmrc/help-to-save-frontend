@@ -241,6 +241,8 @@ hts.check-and-confirm-your-email.title=Which email address do you want us to use
 hts.check-and-confirm-your-email.select-new-address=I want to enter a new email address
 hts.check-and-confirm-your-email.enter-new-address-body-text=The email address you use for other government services will not change.
 hts.check-and-confirm-your-email.enter-new-address-label=Enter a new email address
+hts.check-and-confirm-your-email.select-an-option=Please select an option
+hts.check-and-confirm-your-email.enter-valid-email=Please enter a valid email address
 
 hts.email-verification.title=Update your email
 hts.email-verification.input.label=New email address
