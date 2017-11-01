@@ -22,15 +22,16 @@ import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.config.AppName
 
 trait HTSEvent {
   val value: DataEvent
 }
 
-object HTSEvent {
+object HTSEvent extends AppName {
   def apply(auditType: String,
             detail:    Map[String, String])(implicit hc: HeaderCarrier): DataEvent =
-    DataEvent("hts-frontend", auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
+    DataEvent(appName, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
 }
 
