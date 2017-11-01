@@ -122,19 +122,6 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
     runnerListener.expectTerminated(created.ref)
   }
 
-  /**
-   * In the tests below we often need to use the mock VirtualTime to move forward time
-   * in order to trigger a health test. If we create the actor and immediately after
-   * move the time forward, a health test will not always be triggered because the actor
-   * hasn't had a chance to schedule the messages it needs to send to itself to trigger
-   * the tests. By waiting until the actor has replied an `Identify` message, we can
-   * be sure that the actor has scheduled the messages.
-   */
-  def awaitActorReady(ref: ActorRef): Unit = {
-    val msg = ref.ask(Identify(""))(4.seconds).mapTo[ActorIdentity]
-    Await.result(msg, 3.seconds).ref.contains(ref) shouldBe true
-  }
-
   "The HealthCheck" when {
 
     "it is in the OK state and" when {
