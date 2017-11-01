@@ -20,15 +20,14 @@ import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.EligibilityCheckResult.{AlreadyHasAccount, Eligible}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.config.AppName
 
-class HTSEventSpec extends TestSupport {
-
-  val source = "hts-frontend"
+class HTSEventSpec extends TestSupport with AppName {
 
   "AccountCreated" must {
     "be created with the appropriate auditSource" in {
       val event = AccountCreated(validNSIUserInfo)(new HeaderCarrier)
-      event.value.auditSource shouldBe source
+      event.value.auditSource shouldBe appName
     }
 
     "be created with the appropriate auditType" in {
