@@ -24,25 +24,22 @@
     sidebarLinks = None,
     bodyClasses = None) {
 
-    <h1>@messages("hts.email-verification.check-your-email.title")</h1>
-    <p>Your email is @email</p>
-    <p class="content">@messages("hts.email-verification.check-your-email.content")</p>
+    <h1 class="heading-large">@messages("hts.email-verification.check-your-email.title")</h1>
+    <p>@messages("hts.email-verification.check-your-email.we-have-sent-mail") @email</p>
+    <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.what-next")</h2>
+    <p class="content">@messages("hts.email-verification.check-your-email.content1")</p>
+    <p class="content">@messages("hts.email-verification.check-your-email.content2")</p>
+    <p class="content">@messages("hts.email-verification.check-your-email.content3")</p>
+    <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.where-used-heading")</h2>
+    <p class="content">@messages("hts.email-verification.check-your-email.where-used")</p>
 
-    <br>
+    <a href=@routes.NewApplicantUpdateEmailAddressController.verifyEmail(email) class="button">@messages("hts.email-verification.check-your-email.resend-email")</a>
 
-    <h2>Didn't receive an email?</h2>
-    <p class="content">Click here to resend the verify email</p>
-    <a href=@routes.NewApplicantUpdateEmailAddressController.verifyEmail(email) class="button">Resend email</a>
-    
-    <br>
-
-    <h2>Want to change your email address?</h2>
-    <p class="content">Click here to change email address</p>
 
     @defining(
         oldEmail.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getConfirmEmailPage)
     ){ call =>
-        <a href=@call class="button">Change email address</a>
+        <p class="content"><a href=@call>@messages("hts.email-verification.check-your-email.change-email-address")</a></p>
     }
 
 
