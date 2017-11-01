@@ -19,8 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.config
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSProxyServer
-import play.api.mvc.RequestHeader
-import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.authUrl
 import uk.gov.hmrc.http._
@@ -31,8 +29,6 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
 import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 import uk.gov.hmrc.play.http.ws._
-import uk.gov.hmrc.play.partials._
-import uk.gov.hmrc.play.frontend.filters.SessionCookieCryptoFilter
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -87,7 +83,6 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
               body:    A,
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POST(url, body)(w, httpReads, hc, ec)
-
 }
 
 @Singleton
