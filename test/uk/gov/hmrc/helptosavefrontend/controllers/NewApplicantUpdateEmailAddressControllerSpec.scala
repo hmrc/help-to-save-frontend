@@ -122,6 +122,8 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         val result = await(controller.verifyEmail(newEmail)(FakeRequest()))
         status(result) shouldBe Status.OK
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title")) shouldBe true
+        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content2")) shouldBe true
+
       }
 
       "return an AlreadyVerified status and redirect the user to email verified page," +
