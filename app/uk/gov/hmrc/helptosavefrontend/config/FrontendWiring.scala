@@ -44,21 +44,6 @@ class RawHttpReads extends HttpReads[HttpResponse] {
   override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
 }
 
-@ImplementedBy(classOf[FormPartialProvider])
-trait PartialRetriever {
-  def getPartialContent(url:                String,
-                        templateParameters: Map[String, String] = Map.empty,
-                        errorMessage:       Html                = HtmlFormat.empty
-  )(implicit request: RequestHeader): Html
-
-}
-
-@Singleton
-class FormPartialProvider extends PartialRetriever with FormPartialRetriever {
-  override val httpGet: WSHttpExtension = new WSHttpExtension
-  override val crypto: (String) ⇒ String = cookie ⇒ SessionCookieCryptoFilter.encrypt(cookie)
-}
-
 @ImplementedBy(classOf[WSHttpExtension])
 trait WSHttp
   extends HttpGet with WSGet
@@ -72,11 +57,6 @@ trait WSHttp
               body:    A,
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
-
-  def postForm(url:     String,
-               form:    Map[String, List[String]],
-               headers: Seq[(String, String)]     = Seq.empty[(String, String)]
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 
 }
 
@@ -108,10 +88,6 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POST(url, body)(w, httpReads, hc, ec)
 
-  def postForm(url:     String,
-               form:    Map[String, List[String]],
-               headers: Seq[(String, String)]     = Seq.empty[(String, String)]
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POSTForm(url, form)(httpReads, hc, ec)
 }
 
 @Singleton
