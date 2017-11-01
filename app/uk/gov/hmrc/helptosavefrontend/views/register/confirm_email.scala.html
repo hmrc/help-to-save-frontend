@@ -21,7 +21,7 @@
 @import views.html.helper.CSRF
 
 
-@(email: String, form: Form[ConfirmEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "confirm-email", bodyClasses = None) {
  <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
@@ -45,7 +45,7 @@
      <div class="panel panel-border-narrow js-hidden" id="collect-new-email">
        <span class="body-text">@messages("hts.check-and-confirm-your-email.enter-new-address-body-text")</span>
        <label class="form-label" for="new-email">@messages("hts.check-and-confirm-your-email.enter-new-address-label")</label>
-      <input class="form-control" name="new-email" type="text" id="new-email">
+      <input class="form-control" name="new-email" type="email" id="new-email">
      </div>
 
     </fieldset>

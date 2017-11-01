@@ -21,7 +21,7 @@ import play.api.data.Forms._
 
 object ConfirmEmailForm {
   val confirmEmailForm: Form[ConfirmEmail] = Form(
-    mapping("new-email" -> optional(email)
+    mapping("new-email" -> optional(text)
     )(ConfirmEmail.apply)(ConfirmEmail.unapply)
   )
 }
