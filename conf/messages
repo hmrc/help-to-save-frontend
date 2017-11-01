@@ -253,6 +253,3 @@ hts.email-verification.error.request-not-valid.content=Request not valid
 hts.email-verification.error.verification-service-unavailable.content=Email verification service is not available
 hts.email-verification.error.backend-error.content=There has been an error, please try again later
 hts.email-verification.error.bad-continue-url.content=There is an error with this verification link
-
-hts.contact.hmrc.help.text=Help and contact
-hts.application.title=Help to save
