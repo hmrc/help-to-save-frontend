@@ -18,20 +18,27 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.option._
+import cats.syntax.eq._
+import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc.{Action, AnyContent, Request, Result ⇒ PlayResult}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalTaxAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResult, IneligibilityType}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, Result, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.config.AppName
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -54,12 +61,9 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
         } { session ⇒
           // there is a session
           session.eligibilityCheckResult.fold(
-            // user is not eligible
-            SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-          )(_ ⇒
-              // user is eligible
-              SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-            )
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), // user is not eligible
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url) // user is eligible
+          )
         }
     }, { _ ⇒
       // if there is an error checking the enrolment, do the eligibility checks
@@ -73,10 +77,17 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
       checkSession {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } {
-        _.eligibilityCheckResult.fold {
-          Ok(views.html.core.not_eligible())
-        }(_ ⇒
-          SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+        _.eligibilityCheckResult.fold(
+          { ineligible ⇒
+            val ineligibilityType = IneligibilityType.fromIneligible(ineligible)
+            if (ineligibilityType === IneligibilityType.Unknown) {
+              logger.warn(s"Could not parse ineligibility reason: reason code was ${ineligible.value.reasonCode} " +
+                s"and reason description was ${ineligible.value.reason}")
+            }
+
+            Ok(views.html.core.not_eligible(ineligibilityType))
+          },
+          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
         )
       }
     }
@@ -88,18 +99,17 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } {
         _.eligibilityCheckResult.fold(
-          SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-        )(userInfo ⇒
-            Ok(views.html.register.you_are_eligible(userInfo))
-          )
+          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+          userInfo ⇒ Ok(views.html.register.you_are_eligible(userInfo))
+        )
       }
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
                                            htsContext: HtsContextWithNINOAndUserDetails,
-                                           request:    Request[AnyContent]): Future[Result] = {
-    htsContext.userDetails.fold[Future[Result]](
+                                           request:    Request[AnyContent]): Future[PlayResult] = {
+    htsContext.userDetails.fold[Future[PlayResult]](
       { missingUserInfo ⇒
         logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
         Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalTaxAccountUrl))
@@ -114,17 +124,23 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     )
   }
 
-  private def performEligibilityChecks(nsiUserInfo: UserInfo)(implicit hc: HeaderCarrier, htsContext: HtsContextWithNINOAndUserDetails): EitherT[Future, String, EligibilityCheckResult] =
+  private def performEligibilityChecks(userInfo: UserInfo)(
+      implicit
+      hc:         HeaderCarrier,
+      htsContext: HtsContextWithNINOAndUserDetails): EitherT[Future, String, EligibilityCheckResult] =
     for {
       eligible ← helpToSaveService.checkEligibility()
       session = {
-        val maybeUserInfo = eligible.fold(_ ⇒ Some(nsiUserInfo), _ ⇒ None, _ ⇒ None)
-        HTSSession(maybeUserInfo, None)
+        val result = eligible.fold[Option[Either[Ineligible, UserInfo]]](
+          _ ⇒ Some(Right(userInfo)),
+          ineligible ⇒ Some(Left(Ineligible(ineligible))),
+          _ ⇒ None)
+        result.map(r ⇒ HTSSession(r, None))
       }
-      _ ← sessionCacheConnector.put(session)
+      _ ← session.map(sessionCacheConnector.put).traverse[Result, CacheMap](identity)
     } yield eligible
 
-  private def handleEligibilityResult(result: EligibilityCheckResult)(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): Result = {
+  private def handleEligibilityResult(result: EligibilityCheckResult)(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
     val nino = htsContext.nino
     auditor.sendEvent(EligibilityResultEvent(nino, result), nino)
     result.fold(

@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.PagerDutyMessage.{Pa
 import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.ProxyActor.Created
 import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.ProxyActor
 import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.TestNSIConnector.{GetTestResult, GetTestResultResponse}
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.http.HeaderCarrier
 

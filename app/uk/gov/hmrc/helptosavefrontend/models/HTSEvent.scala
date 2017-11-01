@@ -18,6 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import cats.instances.int._
 import cats.syntax.eq._
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._

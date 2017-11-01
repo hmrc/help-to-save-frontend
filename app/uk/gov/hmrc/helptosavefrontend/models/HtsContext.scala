@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfos, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 
 abstract class HtsContext {

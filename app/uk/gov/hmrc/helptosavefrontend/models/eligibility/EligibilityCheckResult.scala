@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.models.eligibility
 
 import play.api.libs.json.{Format, Json}
 
-case class EligibilityCheckResponse(result: String, resultCode: Int, reason: String, reasonCode: Int)
-
-object EligibilityCheckResponse {
-
-  implicit val format: Format[EligibilityCheckResponse] = Json.format[EligibilityCheckResponse]
-
-}
-
 sealed trait EligibilityCheckResult {
   val value: EligibilityCheckResponse
-
 }
 
 object EligibilityCheckResult {
@@ -39,6 +30,10 @@ object EligibilityCheckResult {
 
   case class AlreadyHasAccount(value: EligibilityCheckResponse) extends EligibilityCheckResult
 
+  object Ineligible {
+    implicit val format: Format[Ineligible] = Json.format[Ineligible]
+  }
+
   implicit class Ops(val result: EligibilityCheckResult) extends AnyVal {
     def fold[A](ifEligible:          EligibilityCheckResponse ⇒ A,
                 ifIneligible:        EligibilityCheckResponse ⇒ A,
@@ -48,4 +43,6 @@ object EligibilityCheckResult {
       case AlreadyHasAccount(reason) ⇒ ifAlreadyHasAccount(reason)
     }
   }
+
 }
+

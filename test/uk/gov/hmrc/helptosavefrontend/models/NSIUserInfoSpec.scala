@@ -17,9 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import java.time.LocalDate
+
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json._
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIUserInfo, UserInfo}
 
 class NSIUserInfoSpec extends WordSpec with Matchers {
 

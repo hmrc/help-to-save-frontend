@@ -15,9 +15,8 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-
-@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError
-@import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
+@import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
+@import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 
 @(error: VerifyEmailError)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(

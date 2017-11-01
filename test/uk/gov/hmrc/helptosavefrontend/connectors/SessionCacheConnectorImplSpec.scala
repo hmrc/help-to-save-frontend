@@ -16,24 +16,34 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.ExecutionContext
 
-class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
+class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with GeneratorDrivenPropertyChecks {
 
   class TestApparatus {
     val mockWsHttp: WSHttp = mock[WSHttp]
 
-    val htsSession = HTSSession(Some(TestData.UserData.validUserInfo), Some("hello"))
+    implicit val htsSessionGen: Gen[HTSSession] =
+      for {
+        result ← Gen.oneOf[Either[Ineligible, UserInfo]](TestData.Eligibility.ineligibilityGen.map(Left(_)), TestData.UserData.userInfoGen.map(Right(_)))
+        email ← Gen.option(Gen.alphaStr)
+      } yield HTSSession(result, email)
 
-    val cacheMap = CacheMap("1", Map("htsSession" -> Json.toJson(htsSession)))
+    implicit val htsSessionArb: Arbitrary[HTSSession] = Arbitrary(htsSessionGen)
+
+    def cacheMap(htsSession: HTSSession) = CacheMap("1", Map("htsSession" -> Json.toJson(htsSession)))
 
     val sessionCacheConnector = new SessionCacheConnectorImpl(mockWsHttp, mockMetrics)
 
@@ -46,27 +56,33 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures {
   "The SessionCacheConnector" should {
 
     "be able to insert a HTSSession into the cache" in new TestApparatus {
+      forAll(htsSessionGen){ htsSession ⇒
+        val cache = cacheMap(htsSession)
 
-      (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
-        .expects(putUrl, htsSession, *, *, *, *)
-        .returning(cacheMap)
+        (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+          .expects(putUrl, htsSession, *, *, *, *)
+          .returning(cache)
 
-      val result = sessionCacheConnector.put(htsSession)
+        val result = sessionCacheConnector.put(htsSession)
 
-      result.value.futureValue should be(Right(cacheMap))
+        result.value.futureValue should be(Right(cache))
 
+      }
     }
 
     "be able to Get a HTSSession from the cache" in new TestApparatus {
+      forAll(htsSessionGen) { htsSession ⇒
+        val cache = cacheMap(htsSession)
 
-      (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
-        .expects(getUrl, *, *, *)
-        .returning(cacheMap)
+        (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+          .expects(getUrl, *, *, *)
+          .returning(cache)
 
-      val result = sessionCacheConnector.get
+        val result = sessionCacheConnector.get
 
-      result.value.futureValue should be(Right(Some(htsSession)))
+        result.value.futureValue should be(Right(Some(htsSession)))
 
+      }
     }
 
   }

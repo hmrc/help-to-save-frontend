@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 
 import hts.utils.{Configuration, TestUserInfo}
 import org.openqa.selenium.WebDriver
-import uk.gov.hmrc.helptosavefrontend.models.Address
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
 
 import scala.annotation.tailrec
 

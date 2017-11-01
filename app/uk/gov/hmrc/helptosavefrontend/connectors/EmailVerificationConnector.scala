@@ -24,8 +24,8 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{accountHolderCon
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
-import uk.gov.hmrc.helptosavefrontend.models.VerifyEmailError._
-import uk.gov.hmrc.helptosavefrontend.models.{EmailVerificationRequest, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}

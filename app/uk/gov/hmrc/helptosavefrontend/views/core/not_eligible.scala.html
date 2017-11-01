@@ -15,7 +15,11 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
+@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType.NotEntitledToWTC
+@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType.EntitledToWTCButNilTC
+@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType.Unknown
+@(ineligibilityType: IneligibilityType)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.not-eligible.header-page"),
@@ -26,6 +30,16 @@
                 <h1>@Messages("hts.core.not-eligible.header")</h1>
             </header>
                 &nbsp;
+
+            <span> @{
+                ineligibilityType match {
+                    case NotEntitledToWTC      ⇒ "You need to be receiving Working Tax Credit"
+                    case EntitledToWTCButNilTC ⇒ "You're entitled to Working Tax Credit, but are not receiving any tax credit payments"
+                    case Unknown               ⇒ "Dunno"
+                }
+            }
+            <span>
+
             <p> @Messages("hts.core.not-eligible.par-1") </p>
             <ul class="bullets">
                 <li>@Messages("hts.core.not-eligible.benefit.working.tax.credit")</li>

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.models.eligibility
 
-sealed trait VerifyEmailError
+import play.api.libs.json.{Format, Json}
 
-object VerifyEmailError {
-  case object RequestNotValidError extends VerifyEmailError
-  case object VerificationServiceUnavailable extends VerifyEmailError
-  case object AlreadyVerified extends VerifyEmailError
-  case object BackendError extends VerifyEmailError
-  case object BadContinueURL extends VerifyEmailError
+case class EligibilityCheckResponse(result: String, resultCode: Int, reason: String, reasonCode: Int)
+
+object EligibilityCheckResponse {
+
+  implicit val format: Format[EligibilityCheckResponse] = Json.format[EligibilityCheckResponse]
+
 }

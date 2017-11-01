@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.models.userinfo
 
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 

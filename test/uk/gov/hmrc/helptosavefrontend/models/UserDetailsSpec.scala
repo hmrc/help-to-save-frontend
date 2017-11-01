@@ -21,6 +21,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.userInfoGen
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 
 class UserDetailsSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 

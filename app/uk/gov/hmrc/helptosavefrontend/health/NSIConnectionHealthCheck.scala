@@ -27,8 +27,8 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner.Payload
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.util.lock.Lock
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging}
 import uk.gov.hmrc.http.HeaderCarrier

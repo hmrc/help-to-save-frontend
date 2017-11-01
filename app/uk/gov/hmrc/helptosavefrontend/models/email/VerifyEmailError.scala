@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package hts.utils
+package uk.gov.hmrc.helptosavefrontend.models.email
 
-import java.time.LocalDate
+sealed trait VerifyEmailError
 
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
-
-case class TestUserInfo(forename:    Option[String],
-                        surname:     Option[String],
-                        nino:        Option[String],
-                        dateOfBirth: Option[LocalDate],
-                        email:       Option[String],
-                        address:     Address
-)
-
+object VerifyEmailError {
+  case object RequestNotValidError extends VerifyEmailError
+  case object VerificationServiceUnavailable extends VerifyEmailError
+  case object AlreadyVerified extends VerifyEmailError
+  case object BackendError extends VerifyEmailError
+  case object BadContinueURL extends VerifyEmailError
+}

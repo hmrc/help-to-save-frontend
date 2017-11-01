@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models
+package uk.gov.hmrc.helptosavefrontend.models.userinfo
 
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress

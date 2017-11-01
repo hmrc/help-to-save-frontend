@@ -22,7 +22,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
 import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformHealthCheck
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner.Payload
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}

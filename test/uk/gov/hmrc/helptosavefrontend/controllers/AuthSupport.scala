@@ -24,8 +24,8 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserRetrievals
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.toJavaDate
 import uk.gov.hmrc.http.HeaderCarrier
 
