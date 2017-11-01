@@ -73,7 +73,7 @@ class HTSEventSpec extends TestSupport with AppName {
 
     "be created with the appropriate auditSource and auditType" in {
       val event = EligibilityResultEvent(validNSIUserInfo.nino, Eligible(TestData.Eligibility.randomEligibilityResponse()))(new HeaderCarrier)
-      event.value.auditSource shouldBe source
+      event.value.auditSource shouldBe appName
       event.value.auditType shouldBe "EligibilityResult"
     }
 
@@ -100,7 +100,7 @@ class HTSEventSpec extends TestSupport with AppName {
   "EmailChanged" must {
     "be created with the appropriate auditSource and auditDetails" in {
       val event = EmailChanged(validNSIUserInfo.nino, "old-email@test.com", "new-email@test.com")(new HeaderCarrier)
-      event.value.auditSource shouldBe source
+      event.value.auditSource shouldBe appName
       event.value.auditType shouldBe "EmailChanged"
       event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "originalEmail" -> "old-email@test.com", "newEmail" -> "new-email@test.com")
     }
@@ -109,14 +109,14 @@ class HTSEventSpec extends TestSupport with AppName {
   "SuspiciousActivity" must {
     "be created with the appropriate auditSource and auditDetails incase of nino_mismatch" in {
       val event = SuspiciousActivity(None, "nino_mismatch, expected foo, received bar")(new HeaderCarrier)
-      event.value.auditSource shouldBe source
+      event.value.auditSource shouldBe appName
       event.value.auditType shouldBe "SuspiciousActivity"
       event.value.detail shouldBe Map[String, String]("reason" -> "nino_mismatch, expected foo, received bar")
     }
 
     "be created with the appropriate auditSource and auditDetails incase of missing_email_record" in {
       val event = SuspiciousActivity(Some(validNSIUserInfo.nino), "missing_email_record")(new HeaderCarrier)
-      event.value.auditSource shouldBe source
+      event.value.auditSource shouldBe appName
       event.value.auditType shouldBe "SuspiciousActivity"
       event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "reason" -> "missing_email_record")
     }

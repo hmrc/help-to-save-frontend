@@ -37,7 +37,7 @@ class HealthCheckRunnerSpec extends ActorTestSupport("HealthCheckRunnerSpec") {
 
     "execute the implemented performTest logic when sent a PerformTest message" in {
       val probe = TestProbe()
-      val result = HealthCheckResult.Success(0L)
+      val result = HealthCheckResult.Success("", 0L)
       val runner = system.actorOf(Props(new TestRunner(probe.ref, result)))
 
       runner ! PerformHealthCheck

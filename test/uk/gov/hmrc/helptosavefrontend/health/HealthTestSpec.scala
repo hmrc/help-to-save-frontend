@@ -116,7 +116,7 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
 
     runnerListener.expectMsg(PerformHealthCheck)
     runnerListener.reply(
-      result.fold[HealthCheckResult](e ⇒ HealthCheckResult.Failure(e, 0L), _ ⇒ HealthCheckResult.Success(0L))
+      result.fold[HealthCheckResult](e ⇒ HealthCheckResult.Failure(e, 0L), _ ⇒ HealthCheckResult.Success("", 0L))
     )
 
     runnerListener.expectTerminated(created.ref)
@@ -161,7 +161,7 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
         }
 
         "kill the child once it has replied" in {
-          runnerListener.reply(HealthCheckResult.Success(0))
+          runnerListener.reply(HealthCheckResult.Success("", 0))
           runnerListener.expectTerminated(childRef.getOrElse(sys.error("Could not find child actor ref")))
         }
 
