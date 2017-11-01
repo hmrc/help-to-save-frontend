@@ -26,7 +26,7 @@
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "confirm-email", bodyClasses = None) {
     @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
         <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
-            <div class="@{"form-group" + {if(hasNotSelected && !hasInvalidEmail) " error" else "" }}">
+            <div class="@{"form-group" + {if(hasNotSelected) " error" else "" }}">
 
             <fieldset>
                 <legend>
@@ -35,7 +35,7 @@
                     </h1>
                 </legend>
 
-                @{if(hasNotSelected && !hasInvalidEmail) <span class="error-notification">{messages("hts.check-and-confirm-your-email.select-an-option")}</span> }
+                @{if(hasNotSelected) <span class="error-notification">{messages("hts.check-and-confirm-your-email.select-an-option")}</span> }
 
                 <div class="multiple-choice">
                     <input id="registered-email" type="radio" name="email" value="Yes">

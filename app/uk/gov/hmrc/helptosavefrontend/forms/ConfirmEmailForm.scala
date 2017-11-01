@@ -18,14 +18,36 @@ package uk.gov.hmrc.helptosavefrontend.forms
 
 import play.api.data._
 import play.api.data.Forms._
+import cats.syntax.either._
+import cats.syntax.eq._
+import cats.instances.string._
+import play.api.data.format.Formatter
 
 object ConfirmEmailForm {
-  val confirmEmailForm: Form[ConfirmEmail] = Form(
-    mapping(
-      "email" → checked("email"),
-      "new-email" → optional(email)
-    )(ConfirmEmail.apply)(ConfirmEmail.unapply)
-  )
+
+  val confirmEmailForm: Form[ConfirmEmail] = {
+    val emailFormatter = new Formatter[Option[String]] {
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
+        data.get("email") match {
+          // if "No" make sure that we have a new email
+          case Some("No") ⇒ email.withPrefix(key).bind(data).map(Some(_))
+
+          // the value for "email" should be "Yes" or "No" - this will get picked up in the mapping in the form below.
+          // if the value is "Yes" ignore any new email that has been enetered
+          case _          ⇒ Right(None)
+        }
+
+      override def unbind(key: String, value: Option[String]): Map[String, String] =
+        optional(email).withPrefix(key).unbind(value)
+    }
+
+    Form(
+      mapping(
+        "email" → text.verifying(l ⇒ l === "Yes" || l === "No"),
+        "new-email" → of(emailFormatter)
+      )(ConfirmEmail.apply)(ConfirmEmail.unapply)
+    )
+  }
 }
 
-case class ConfirmEmail(checked: Boolean, newEmail: Option[String])
+case class ConfirmEmail(checked: String, newEmail: Option[String])
