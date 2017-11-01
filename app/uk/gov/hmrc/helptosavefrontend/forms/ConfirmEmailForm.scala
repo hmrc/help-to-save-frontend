@@ -21,9 +21,11 @@ import play.api.data.Forms._
 
 object ConfirmEmailForm {
   val confirmEmailForm: Form[ConfirmEmail] = Form(
-    mapping("new-email" -> optional(email)
+    mapping(
+      "email" → checked("email"),
+      "new-email" → optional(email)
     )(ConfirmEmail.apply)(ConfirmEmail.unapply)
   )
 }
 
-case class ConfirmEmail(newEmail: Option[String])
+case class ConfirmEmail(checked: Boolean, newEmail: Option[String])

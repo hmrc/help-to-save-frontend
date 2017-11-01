@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, NSIUserInfo}
+@import uk.gov.hmrc.helptosavefrontend.models.{HtsContext}
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.forms.ConfirmEmail
@@ -24,38 +24,47 @@
 @(email: String, form: Form[ConfirmEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "confirm-email", bodyClasses = None) {
- <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
-   <div class="form-group">
-    <fieldset>
-     <legend>
-      <h1 class="heading-large">
-        @messages("hts.check-and-confirm-your-email.title")
-      </h1>
-     </legend>
+    @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
+        <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
+            <div class="@{"form-group" + {if(hasNotSelected && !hasInvalidEmail) " error" else "" }}">
 
-     <div class="multiple-choice">
-      <input id="registered-email" type="radio" name="email" value="Yes">
-      <label for="registered-email">@email</label>
-     </div>
+            <fieldset>
+                <legend>
+                    <h1 class="heading-large">
+                    @messages("hts.check-and-confirm-your-email.title")
+                    </h1>
+                </legend>
 
-     <div class="multiple-choice" data-target="collect-new-email">
-      <input id="add-new-email" type="radio" name="email" value="No">
-      <label for="add-new-email">@messages("hts.check-and-confirm-your-email.select-new-address")</label>
-     </div>
-     <div class="panel panel-border-narrow js-hidden" id="collect-new-email">
-       <span class="body-text">@messages("hts.check-and-confirm-your-email.enter-new-address-body-text")</span>
-       <label class="form-label" for="new-email">@messages("hts.check-and-confirm-your-email.enter-new-address-label")</label>
-      <input class="form-control" name="new-email" type="text" id="new-email">
-     </div>
+                @{if(hasNotSelected && !hasInvalidEmail) <span class="error-notification">{messages("hts.check-and-confirm-your-email.select-an-option")}</span> }
 
-    </fieldset>
-   </div>
-     <div class="form-field form-field--submit">
-         <button class="button " type="submit">
-           @messages("hts.global.continue-button")
-         </button>
-     </div>
- </form>
+                <div class="multiple-choice">
+                    <input id="registered-email" type="radio" name="email" value="Yes">
+                    <label for="registered-email">@email</label>
+                </div>
+
+                <div class="multiple-choice" data-target="collect-new-email">
+                    <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail){ checked }>
+                    <label for="add-new-email">@messages("hts.check-and-confirm-your-email.select-new-address")</label>
+                </div>
+                <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
+                    <span class="body-text">@messages("hts.check-and-confirm-your-email.enter-new-address-body-text")</span>
+                    <label class="form-label" for="new-email">@messages("hts.check-and-confirm-your-email.enter-new-address-label")</label>
+                    @{if(hasInvalidEmail) <span class="error-notification">{messages("hts.check-and-confirm-your-email.enter-valid-email")}</span> }
+                    <input class="form-control" name="new-email" type="text" id="new-email">
+                </div>
+
+            </fieldset>
+
+            </div>
+            <div class="form-field form-field--submit">
+                <button class="button " type="submit">
+                @messages("hts.global.continue-button")
+                </button>
+            </div>
+        </form>
+    }
+
+
 
 
 
