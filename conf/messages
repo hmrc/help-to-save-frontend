@@ -1,3 +1,5 @@
+hts.global.continue-button=Continue
+
 hts.introduction.title=Apply for Help to Save
 
 hts.introduction.about-help-to-save.title=About Help to Save
@@ -234,6 +236,11 @@ hts.iv.we_ve_confirmed_your_identity=We''ve now confirmed your identity
 hts.iv.you_now_access_hts_account=You can now access your help to save account.
 hts.access.denied.header=Access Denied
 hts.access.denied.message=You are not allowed to access this service
+
+hts.check-and-confirm-your-email.title=Which email address do you want us to use for your Help to Save account?
+hts.check-and-confirm-your-email.select-new-address=I want to enter a new email address
+hts.check-and-confirm-your-email.enter-new-address-body-text=The email address you use for other government services will not change.
+hts.check-and-confirm-your-email.enter-new-address-label=Enter a new email address
 
 hts.email-verification.title=Update your email
 hts.email-verification.input.label=New email address
