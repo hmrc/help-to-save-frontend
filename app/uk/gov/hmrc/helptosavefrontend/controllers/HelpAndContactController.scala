@@ -23,7 +23,7 @@ import play.api.mvc._
 import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.helptosavefrontend.config._
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.contactUrl
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture, urlEncode}
 
@@ -38,19 +38,17 @@ class HelpAndContactController @Inject() (val messagesApi:       MessagesApi,
                                           http:                  WSHttp)(implicit ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with HelpToSaveFrontendController with I18nSupport with Logging {
 
-  val contactFormServiceIdentifier: String = "HTS"
-
   val TICKET_ID: String = "ticketId"
 
   val submitUrl: String = routes.HelpAndContactController.submitContactHmrcForm().url
 
-  val contactHmrcFormPartialUrl: String = s"$contactUrl/contact-hmrc/form?service=$contactFormServiceIdentifier" +
+  val contactHmrcFormPartialUrl: String = s"$contactBaseUrl/contact/contact-hmrc/form?service=$contactFormServiceIdentifier" +
     s"&submitUrl=${urlEncode(submitUrl)}"
 
-  val contactHmrcSubmitPartialUrl: String = s"$contactUrl/contact-hmrc/form?resubmitUrl=${urlEncode(submitUrl)}"
+  val contactHmrcSubmitPartialUrl: String = s"$contactBaseUrl/contact/contact-hmrc/form?resubmitUrl=${urlEncode(submitUrl)}"
 
   private def contactHmrcThankYouPartialUrl(ticketId: String) =
-    s"$contactUrl/contact-hmrc/form/confirmation?ticketId=${urlEncode(ticketId)}"
+    s"$contactBaseUrl/contact/contact-hmrc/form/confirmation?ticketId=${urlEncode(ticketId)}"
 
   def getHelpAndContactPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.contact_hmrc(contactHmrcFormPartialUrl, None, formProvider))

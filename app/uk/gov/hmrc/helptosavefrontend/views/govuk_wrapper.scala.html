@@ -103,13 +103,9 @@
   @{uiLayouts.main_content_header(contentHeader = contentHeader.getOrElse(Html("")))}
 }
 
-    @*
-    Removed for private beta
-    @getHelpForm = {@{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
-    *@
-@getHelpForm = {
 
-}
+@getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
+
 
 @content = {
 @uiLayouts.main_content(

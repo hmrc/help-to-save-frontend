@@ -102,7 +102,7 @@ class HelpAndContactControllerSpec extends AuthSupport with GeneratorDrivenPrope
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
-    "return the correct status based on when the user is being silly" in {
+    "return the correct status based on a randomly generated response " in {
       forAll { s: Int ⇒
         whenever(!Set(Status.BAD_REQUEST, Status.INTERNAL_SERVER_ERROR, Status.OK).contains(s) && s > 0){
           val form = Map("key" → List(""))
