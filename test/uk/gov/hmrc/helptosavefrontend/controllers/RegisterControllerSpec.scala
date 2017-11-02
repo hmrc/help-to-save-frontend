@@ -18,7 +18,10 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.string._
 import cats.syntax.either._
+import cats.syntax.eq._
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json}
@@ -44,7 +47,7 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
+class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with GeneratorDrivenPropertyChecks {
 
   val jsonSchemaValidationService: JSONSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor: HTSAuditor = mock[HTSAuditor]
@@ -251,9 +254,9 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         def doRequest(newEmail: Option[String]): Future[PlayResult] = {
           newEmail.fold(
-            controller.confirmEmailSubmit()(fakeRequest)
+            controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
           ){ e ⇒
-              controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("new-email" → e))
+              controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e))
             }
 
         }
@@ -290,8 +293,9 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail(newEmail).url)
         }
 
-      "redirect to the confirm email page if the session data shows that they have been already found to be eligible " +
-        "and the form contains a invalid new email" in {
+      "redirect to the confirm email page if the session data shows that they have been already found to be eligible and " when {
+
+        "the form contains a invalid new email" in {
           val invalidEmail = "not-an-email"
 
           inSequence {
@@ -304,6 +308,53 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
           status(result) shouldBe Status.OK
           contentAsString(result) should include("Which email")
         }
+
+        "no option has been selected" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          }
+
+          val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("new-email" → "email@test.com"))
+
+          status(result) shouldBe Status.OK
+          contentAsString(result) should include("Which email")
+        }
+
+        "a new email has been selected but there is no new email given" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          }
+
+          val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No"))
+
+          status(result) shouldBe Status.OK
+          contentAsString(result) should include("Which email")
+        }
+
+        "the 'email' key of the form is not 'Yes' or 'No'" in {
+          forAll{ s: String ⇒
+            whenever(s =!= "Yes" | s =!= "No"){
+              inSequence {
+                mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+                mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+                mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+              }
+
+              val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → s))
+
+              status(result) shouldBe Status.OK
+              contentAsString(result) should include("Which email")
+
+            }
+
+          }
+        }
+
+      }
 
     }
 
