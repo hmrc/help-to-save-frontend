@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.filters.csrf.CSRF.{Token, TokenProvider}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -508,7 +508,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+          redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
         }
 
       "indicate to the user that the creation was successful " +
@@ -526,7 +526,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+          redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
         }
 
       "redirect the user to the confirm details page if the session indicates they have not done so already" in {

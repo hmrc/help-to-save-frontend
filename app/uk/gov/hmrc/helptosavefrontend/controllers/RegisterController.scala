@@ -192,7 +192,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                   case Success(Right(_)) ⇒ logger.info(s"Process started to enrol user", nino)
                 }
 
-                SeeOther(routes.NSIController.goToNSI().url)
+                SeeOther(FrontendAppConfig.nsiManageAccountUrl)
               }
             )
           }

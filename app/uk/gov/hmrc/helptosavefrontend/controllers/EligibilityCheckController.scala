@@ -154,7 +154,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user", nino)
         }
 
-        SeeOther(routes.NSIController.goToNSI().url)
+        SeeOther(FrontendAppConfig.nsiManageAccountUrl)
       }
     )
   }

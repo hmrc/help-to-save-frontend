@@ -38,5 +38,4 @@ GET        /account/email-verified                          @uk.gov.hmrc.helptos
 GET        /account/email-updated                           @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdated
 GET        /account/email-update-error                      @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdateError
 
-GET        /nsi                                             @uk.gov.hmrc.helptosavefrontend.controllers.NSIController.goToNSI
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden

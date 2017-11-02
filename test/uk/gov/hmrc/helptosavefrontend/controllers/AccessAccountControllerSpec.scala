@@ -20,6 +20,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 
@@ -44,7 +45,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
       val result = doRequest()
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+      redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
     }
 
     "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
@@ -57,7 +58,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+        redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
       }
 
     "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {

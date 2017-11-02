@@ -25,7 +25,7 @@ import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAuthConnector, WSHttp}
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomIneligibility
@@ -282,7 +282,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+        redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
       }
 
       "redirect to the eligibility checks is there is no session data" in {
