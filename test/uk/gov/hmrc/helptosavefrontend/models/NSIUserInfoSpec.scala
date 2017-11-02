@@ -172,8 +172,10 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
         }
 
         "filters out country codes equal to the string 'other'" in {
-          val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(country = Some("other")))
-          NSIUserInfo(ui, email).contactDetails.countryCode shouldBe None
+          Set("other", "OTHER", "Other").foreach{ other ⇒
+            val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(country = Some(other)))
+            NSIUserInfo(ui, email).contactDetails.countryCode shouldBe None
+          }
         }
 
         "takes the first two characters only of country codes" in {
