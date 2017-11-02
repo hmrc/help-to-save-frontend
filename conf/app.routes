@@ -13,6 +13,8 @@ GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptos
 GET        /check-and-confirm-your-email                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmEmailPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
+GET        /check-eligibility-hack                          @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibilityHack
+
 GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 GET        /details-are-incorrect                           @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDetailsAreIncorrect
