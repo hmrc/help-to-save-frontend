@@ -181,15 +181,13 @@ hts.helpers.sidebar.apply-for-universal-credit=Apply for Universal Credit
 hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 hts.helpers.phaseBanner.feedback=This is a new service – your feedback will help us to improve it.
 
+hts.register.you-are-eligible.notification.step=Step 1 of 4
 hts.register.you-are-eligible.title=You are eligible
-hts.register.you-are-eligible.notification.h1=You''re eligible
-hts.register.you-are-eligible.notification.p=for a Help to Save account
-hts.register.you-are-eligible.p-1=We''ve checked your details and you''re eligible for a Help to Save account.
-hts.register.you-are-eligible.p-2=You don''t have an account yet.
-hts.register.you-are-eligible.h2-1=What happens next?
-hts.register.you-are-eligible.p-3=If you choose to create an account, we''ll set it up for you immediately. You can start using it as soon as you enter your UK bank account details.
-hts.register.you-are-eligible.p-4=To start creating your account, you''ll need to follow a few simple steps.
+hts.register.you-are-eligible.notification.h1=You''re eligible for a Help to Save account
+hts.register.you-are-eligible.p-1=We''ve checked the details we hold for you and you''re eligible for an account.
+hts.register.you-are-eligible.p-3=By continuing you are confirming that, to the best of your knowledge, these are your details and they are correct.
 hts.register.you-are-eligible.button-1=Start creating your account
+hts.register.you-are-eligible.button-2=These details are not correct
 
 hts.register.check-and-confirm-your-details.title=Check and confirm your details
 hts.register.check-and-confirm-your-details.step=Step 1 of 4
