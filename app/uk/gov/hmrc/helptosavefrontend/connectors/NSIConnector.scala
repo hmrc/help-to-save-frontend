@@ -169,7 +169,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
   private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
     logger.warn(s"response body from NSI=${response.body}")
-    response.parseJson[SubmissionFailure] match {
+    response.parseJSON[SubmissionFailure](Some("error")) match {
       case Right(submissionFailure) ⇒ submissionFailure
       case Left(error)              ⇒ SubmissionFailure(None, "", error)
     }

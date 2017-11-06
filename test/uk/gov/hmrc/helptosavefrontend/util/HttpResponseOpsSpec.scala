@@ -44,16 +44,16 @@ class HttpResponseOpsSpec extends TestSupport {
       val data = Test1(0)
 
       // test when there is an exception
-      ThrowingHttpResponse().parseJson[Test1].isLeft shouldBe true
+      ThrowingHttpResponse().parseJSON[Test1]().isLeft shouldBe true
 
       // test when there is no JSON
-      HttpResponse(status).parseJson[Test1].isLeft shouldBe true
+      HttpResponse(status).parseJSON[Test1]().isLeft shouldBe true
 
       // test when the JSON isn't the right format
-      HttpResponse(status, Some(Json.toJson(data))).parseJson[Test2].isLeft shouldBe true
+      HttpResponse(status, Some(Json.toJson(data))).parseJSON[Test2]().isLeft shouldBe true
 
       // test when everything is ok
-      HttpResponse(status, Some(Json.toJson(data))).parseJson[Test1] shouldBe Right(data)
+      HttpResponse(status, Some(Json.toJson(data))).parseJSON[Test1]() shouldBe Right(data)
     }
   }
 }
