@@ -25,6 +25,7 @@ import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -175,7 +176,7 @@ class EligibilityCheckControllerSpec
 
             val result = doCheckEligibilityRequest()
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
           }
 
         "redirect to NS&I if the eligibility check indicates the user already has an account " +
@@ -195,7 +196,7 @@ class EligibilityCheckControllerSpec
 
                 val result = doCheckEligibilityRequest()
                 status(result) shouldBe SEE_OTHER
-                redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+                redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
               }
           }
 
@@ -286,7 +287,7 @@ class EligibilityCheckControllerSpec
 
           val result = doCheckEligibilityRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+          redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
         }
 
         "return user details if the user is eligible for help-to-save and the " +

@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
@@ -24,6 +25,6 @@
 
     <h1>We've updated your email!!</h1>
     <p>Click here to go back to managing account</p>
-    <a href=@{uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url} class="button">Back to account</a>
+    <a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">Back to account</a>
 
 }

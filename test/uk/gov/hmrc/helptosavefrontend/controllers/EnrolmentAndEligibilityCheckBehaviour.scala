@@ -23,6 +23,7 @@ import play.api.libs.json.{JsValue, Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.Enrolments
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
@@ -76,7 +77,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
       val result = getResult()
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+      redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
     }
 
     "redirect to NS&I if the user is already enrolled and set the ITMP flag " +
@@ -89,7 +90,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+        redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
       }
 
     "redirect to NS&I if the user is already enrolled even if there is an " +
@@ -98,7 +99,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
             mockActions
             val result = getResult()
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.NSIController.goToNSI().url)
+            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
           }
 
         test(inSequence {
