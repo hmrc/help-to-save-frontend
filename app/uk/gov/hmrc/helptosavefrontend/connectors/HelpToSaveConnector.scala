@@ -61,13 +61,13 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
       eligibilityURL,
-      _.parseJson[EligibilityCheckResponse].flatMap(toEligibilityCheckResult),
+      _.parseJSON[EligibilityCheckResponse]().flatMap(toEligibilityCheckResult),
       "check eligibility",
       identity
     )
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
-    handleGet(enrolmentStatusURL, _.parseJson[EnrolmentStatus], "get user enrolment status", identity)
+    handleGet(enrolmentStatusURL, _.parseJSON[EnrolmentStatus](), "get user enrolment status", identity)
 
   def enrolUser()(implicit hc: HeaderCarrier): Result[Unit] =
     handleGet(enrolUserURL, _ ⇒ Right(()), "enrol users", identity)
@@ -81,10 +81,10 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   }
 
   def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]] =
-    handleGet(getEmailURL, _.parseJson[GetEmailResponse].map(_.email), "get email", identity)
+    handleGet(getEmailURL, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean] = {
-    handleGet(accountCreateAllowedURL, _.parseJson[Boolean], "account creation allowed", identity)
+    handleGet(accountCreateAllowedURL, _.parseJSON[Boolean](), "account creation allowed", identity)
   }
 
   def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit] = {
