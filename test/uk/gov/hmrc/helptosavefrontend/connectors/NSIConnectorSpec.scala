@@ -22,7 +22,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{JsObject, Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey, nsiBasicAuth, nsiCreateAccountUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
@@ -108,7 +108,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
     "Return a SubmissionFailure when the status is BAD_REQUEST" in {
       val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
       mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
-                                                                         Some(Json.toJson(submissionFailure)))))
+                                                                         Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
@@ -116,7 +116,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
     "Return a SubmissionFailure when the status is INTERNAL_SERVER_ERROR" in {
       val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
       mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.INTERNAL_SERVER_ERROR,
-                                                                         Some(Json.toJson(submissionFailure)))))
+                                                                         Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
@@ -124,14 +124,14 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
     "Return a SubmissionFailure when the status is SERVICE_UNAVAILABLE" in {
       val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
       mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.SERVICE_UNAVAILABLE,
-                                                                         Some(Json.toJson(submissionFailure)))))
+                                                                         Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) shouldBe submissionFailure
     }
 
     "Return a SubmissionFailure in case there is an invalid json" in {
       mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
-                                                                         Some(Json.parse("""{"invalidJson":"foo"}""")))))
+                                                                         Some(JsObject(Seq("error" → Json.parse("""{"invalidJson":"foo"}""")))))))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
       Await.result(result, 3.seconds) match {
         case SubmissionSuccess()  ⇒ fail()
