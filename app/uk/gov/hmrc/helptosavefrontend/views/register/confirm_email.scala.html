@@ -31,11 +31,11 @@
             <fieldset>
                 <legend>
                     <h1 class="heading-large">
-                    @messages("hts.check-and-confirm-your-email.title")
+                    @messages("hts.select-email.title")
                     </h1>
                 </legend>
 
-                @{if(hasNotSelected) <span class="error-notification">{messages("hts.check-and-confirm-your-email.select-an-option")}</span> }
+                @{if(hasNotSelected) <span class="error-notification">{messages("hts.select-email.select-an-option")}</span> }
 
                 <div class="multiple-choice">
                     <input id="registered-email" type="radio" name="email" value="Yes">
@@ -44,12 +44,12 @@
 
                 <div class="multiple-choice" data-target="collect-new-email">
                     <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail){ checked }>
-                    <label for="add-new-email">@messages("hts.check-and-confirm-your-email.select-new-address")</label>
+                    <label for="add-new-email">@messages("hts.select-email.select-new-address")</label>
                 </div>
                 <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
-                    <span class="body-text">@messages("hts.check-and-confirm-your-email.enter-new-address-body-text")</span>
-                    <label class="form-label" for="new-email">@messages("hts.check-and-confirm-your-email.enter-new-address-label")</label>
-                    @{if(hasInvalidEmail) <span class="error-notification">{messages("hts.check-and-confirm-your-email.enter-valid-email")}</span> }
+                    <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
+                    <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
+                    @{if(hasInvalidEmail) <span class="error-notification">{messages("hts.select-email.enter-valid-email")}</span> }
                     <input class="form-control" name="new-email" type="text" id="new-email">
                 </div>
 
