@@ -72,6 +72,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     )
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
+  // $COVERAGE-OFF$
   def getCheckEligibilityHack: Action[AnyContent] = authorisedForHtsWithInfoHack { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
       () ⇒
@@ -91,6 +92,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     }
     )
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  // $COVERAGE-ON
 
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒

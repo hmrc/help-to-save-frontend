@@ -21,7 +21,7 @@ import uk.gov.hmrc.lock.ExclusiveTimePeriodLock
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
-//$COVERAGE-OFF$
+// $COVERAGE-OFF$
 trait LockProvider {
 
   val lockId: String
@@ -57,5 +57,5 @@ object LockProvider {
   }
 
 }
-//$COVERAGE-ON$
+// $COVERAGE-ON$
 

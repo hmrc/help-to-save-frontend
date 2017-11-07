@@ -22,6 +22,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
 import uk.gov.hmrc.helptosavefrontend.health.HealthCheck.PerformHealthCheck
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner.Payload
+import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner.Payload.{Payload1, Payload2}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -33,15 +34,15 @@ class NSIConnectionHealthCheckRunnerSpec extends ActorTestSupport("NSIConnection
 
   val payload: Payload = Payload.Payload1
 
-  val runner: ActorRef = system.actorOf(Props(new NSIConnectionHealthCheckRunner(
+  def newRunner(payload: Payload): ActorRef = system.actorOf(Props(new NSIConnectionHealthCheckRunner(
     nsiConnector,
     mockMetrics,
     payload
   )))
 
-  def mockNSIConnectorTest(result: Option[Either[String, Unit]]): Unit =
+  def mockNSIConnectorTest(expectedPayload: Payload)(result: Option[Either[String, Unit]]): Unit =
     (nsiConnector.healthCheck(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(payload.value, *, *)
+      .expects(expectedPayload.value, *, *)
       .returning(
         EitherT(
           result.fold[Future[Either[String, Unit]]](
@@ -55,7 +56,9 @@ class NSIConnectionHealthCheckRunnerSpec extends ActorTestSupport("NSIConnection
 
       "call the NSIConnector to do the test and reply back with a successful result " +
         "if the NSIConnector returns a success" in {
-          mockNSIConnectorTest(Some(Right(())))
+          mockNSIConnectorTest(Payload1)(Some(Right(())))
+
+          val runner = newRunner(Payload1)
           runner ! PerformHealthCheck
 
           expectMsgType[HealthCheckResult.Success]
@@ -66,12 +69,13 @@ class NSIConnectionHealthCheckRunnerSpec extends ActorTestSupport("NSIConnection
             def test(mockActions: ⇒ Unit): Unit = {
               mockActions
 
+              val runner = newRunner(Payload2)
               runner ! PerformHealthCheck
               expectMsgType[HealthCheckResult.Failure]
             }
 
-          test(mockNSIConnectorTest(Some(Left(""))))
-          test(mockNSIConnectorTest(None))
+          test(mockNSIConnectorTest(Payload2)(Some(Left(""))))
+          test(mockNSIConnectorTest(Payload2)(None))
         }
     }
   }

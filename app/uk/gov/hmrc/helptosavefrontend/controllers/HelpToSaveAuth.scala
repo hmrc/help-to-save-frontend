@@ -87,6 +87,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
         }
     }
 
+  // $COVERAGE-OFF$
   def authorisedForHtsWithInfoHack(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
     Action.async { implicit request ⇒
       val timer = metrics.authTimer.time()
@@ -112,6 +113,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
           handleFailure(redirectOnLoginURL)
         }
     }
+  // $COVERAGE-ON$
 
   def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] = {
     Action.async { implicit request ⇒
