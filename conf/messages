@@ -245,10 +245,10 @@ hts.select-email.enter-new-address-label=Enter a new email address
 hts.select-email.select-an-option=Please select an option
 hts.select-email.enter-valid-email=Please enter a valid email address
 
-hts.email-verification.page-title=Verify your email address - Help to Save - GOV.UK
 hts.email-verification.title=Update your email
 hts.email-verification.input.label=New email address
 hts.email-verification.submit.text=Verify your email
+hts.email-verification.check-your-email.page-title=Verify your email address - Help to Save - GOV.UK
 hts.email-verification.check-your-email.title=You have 30 minutes to verify your email address
 hts.email-verification.check-your-email.we-have-sent-mail=We''ve sent you an email to:
 hts.email-verification.check-your-email.what-next=What happens next?
