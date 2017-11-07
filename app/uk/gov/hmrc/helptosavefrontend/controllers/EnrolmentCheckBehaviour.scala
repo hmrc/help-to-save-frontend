@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.mvc.{Request, Result}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
@@ -55,7 +56,7 @@ trait EnrolmentCheckBehaviour {
           }
         }
 
-        SeeOther(routes.NSIController.goToNSI().url)
+        SeeOther(FrontendAppConfig.nsiManageAccountUrl)
 
       case EnrolmentStatus.NotEnrolled ⇒
         ifNotEnrolled()

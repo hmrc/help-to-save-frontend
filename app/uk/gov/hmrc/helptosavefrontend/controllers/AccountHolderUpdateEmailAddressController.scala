@@ -25,7 +25,7 @@ import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.UpdateEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
@@ -120,7 +120,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             case UpdateEmailError.EmailMongoError(e) ⇒
               logger.warn("Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I", nino)
               auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
-              SeeOther(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
+              SeeOther(FrontendAppConfig.nsiManageAccountUrl)
           }, { _ ⇒
             logger.info("Successfully updated email with NS&I", nino)
             auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)

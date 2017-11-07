@@ -79,7 +79,7 @@ object NSIUserInfo {
         ContactDetails(
           line1, line2, line3, line4, line5,
           userInfo.address.postcode.getOrElse("").cleanupSpecialCharacters.removeAllSpaces,
-          userInfo.address.country.map(_.cleanupSpecialCharacters.removeAllSpaces).filter(_ =!= "other").map(_.take(2)),
+          userInfo.address.country.map(_.cleanupSpecialCharacters.removeAllSpaces).filter(_.toLowerCase =!= "other").map(_.take(2)),
           email
         )
       }

@@ -41,6 +41,17 @@ class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenP
       }
     }
 
+    "have an Eq instance" in {
+      IneligibilityType.ineligibilityTypeEq.eqv(NotEntitledToWTC, NotEntitledToWTC) shouldBe true
+      IneligibilityType.ineligibilityTypeEq.eqv(EntitledToWTCButNilTC, EntitledToWTCButNilTC) shouldBe true
+      IneligibilityType.ineligibilityTypeEq.eqv(Unknown, Unknown) shouldBe true
+
+      IneligibilityType.ineligibilityTypeEq.eqv(NotEntitledToWTC, EntitledToWTCButNilTC) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(EntitledToWTCButNilTC, Unknown) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(Unknown, NotEntitledToWTC) shouldBe false
+
+    }
+
   }
 
 }

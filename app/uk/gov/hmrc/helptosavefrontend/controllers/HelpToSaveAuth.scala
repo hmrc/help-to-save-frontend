@@ -25,7 +25,7 @@ import org.joda.time.LocalDate
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Retrievals.authorisedEnrolments
-import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
+import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -86,6 +86,34 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
           handleFailure(redirectOnLoginURL)
         }
     }
+
+  // $COVERAGE-OFF$
+  def authorisedForHtsWithInfoHack(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
+    Action.async { implicit request ⇒
+      val timer = metrics.authTimer.time()
+
+      authorised(AuthWithCL200)
+        .retrieve(Retrievals.email and authorisedEnrolments) {
+          case email ~ authorisedEnrols ⇒
+            val time = timer.stop()
+
+            withNINO(authorisedEnrols.enrolments, time){ nino ⇒
+              val userDetails = Right(UserInfo(
+                "Shizlilly",
+                "Lillytwinkle",
+                nino,
+                java.time.LocalDate.ofEpochDay(0L),
+                email,
+                Address(List("29 Sparkle Lane", "Fairyland"), Some("AB12CD"), None)
+              ))
+
+              action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
+            }
+        }.recover {
+          handleFailure(redirectOnLoginURL)
+        }
+    }
+  // $COVERAGE-ON$
 
   def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] = {
     Action.async { implicit request ⇒

@@ -72,6 +72,28 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     )
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
+  // $COVERAGE-OFF$
+  def getCheckEligibilityHack: Action[AnyContent] = authorisedForHtsWithInfoHack { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled({
+      () ⇒
+        checkSession {
+          // there is no session yet
+          getEligibilityActionResult()
+        } { session ⇒
+          // there is a session
+          session.eligibilityCheckResult.fold(
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), // user is not eligible
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url) // user is eligible
+          )
+        }
+    }, { _ ⇒
+      // if there is an error checking the enrolment, do the eligibility checks
+      getEligibilityActionResult()
+    }
+    )
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  // $COVERAGE-ON
+
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkSession {
@@ -154,7 +176,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user", nino)
         }
 
-        SeeOther(routes.NSIController.goToNSI().url)
+        SeeOther(FrontendAppConfig.nsiManageAccountUrl)
       }
     )
   }

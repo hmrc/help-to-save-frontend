@@ -37,6 +37,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
+// $COVERAGE-OFF$
 class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
                                           configuration: Configuration,
                                           metrics:       Metrics,
@@ -88,6 +89,7 @@ class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
   }
 
 }
+// $COVERAGE-ON$
 
 object NSIConnectionHealthCheck {
 

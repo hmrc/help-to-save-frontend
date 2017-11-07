@@ -20,6 +20,7 @@ import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.{Configuration, ScenarioContext}
 import hts.utils.EitherOps._
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
 class CreateAccountSteps extends Steps with Page {
 
@@ -78,7 +79,7 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   Then("""^they see that the account is created$""") { () ⇒
-    getCurrentUrl should include(NSIManageAccountPage.url)
+    getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
   }
 
   Then("""^they will be on a page which says you do not have an account$""") { () ⇒
@@ -91,7 +92,7 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   Then("""^they will be on the account home page$"""){ () ⇒
-    getCurrentUrl should include(NSIManageAccountPage.url)
+    getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒

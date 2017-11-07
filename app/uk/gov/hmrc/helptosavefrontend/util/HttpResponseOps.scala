@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import play.api.libs.json.{JsError, Reads}
+import play.api.libs.json.{JsDefined, JsError, JsLookupResult, Reads}
 import uk.gov.hmrc.helptosavefrontend.util.JsErrorOps._
 import uk.gov.hmrc.http.HttpResponse
 
@@ -28,11 +28,11 @@ object HttpResponseOps {
 
 class HttpResponseOps(val response: HttpResponse) extends AnyVal {
 
-  def parseJson[A](implicit reads: Reads[A]): Either[String, A] =
-    Try(response.json) match {
-      case Success(jsValue) ⇒
+  def parseJSON[A](path: Option[String] = None)(implicit reads: Reads[A]): Either[String, A] =
+    Try(path.fold[JsLookupResult](JsDefined(response.json))(response.json \ _)) match {
+      case Success(jsLookupResult) ⇒
         // use Option here to filter out null values
-        Option(jsValue).fold[Either[String, A]](
+        jsLookupResult.toOption.flatMap(Option(_)).fold[Either[String, A]](
           Left("No JSON found in body of http response")
         )(_.validate[A].fold[Either[String, A]](
             errors ⇒

@@ -27,6 +27,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
@@ -279,7 +280,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
             val result = verifyEmail(emailVerificationParams.encode())
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(uk.gov.hmrc.helptosavefrontend.controllers.routes.NSIController.goToNSI().url)
+            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
           }
 
       }
