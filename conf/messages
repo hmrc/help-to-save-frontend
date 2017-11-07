@@ -166,14 +166,15 @@ hts.helpers.link-2=2. Eligibility
 hts.helpers.link-3=3. Apply
 hts.core.about-help-to-save.next=Next
 hts.core.about-help-to-save.eligibility=Eligibility
-hts.core.not-eligible.header-page=Help to Save
-hts.core.not-eligible.header=You''re not eligible for Help to Save
-hts.core.not-eligible.par-1=To be eligible for an account you, or your spouse or civil partner, need to be getting one of these benefits:
-hts.core.not-eligible.benefit.working.tax.credit=Working Tax Credit
-hts.core.not-eligible.benefit.universal.credit=Universal Credit, and your household earnings need to be at least £120 per week
-hts.core.not-eligible.par-2=You must also be a UK resident. Or a Crown servant or member of the British armed forces living overseas - or their spouse or civil partner.
-hts.core.not-eligible.par-3=Find out more about
-hts.core.not-eligible.link=Help to Save
+hts.core.not-eligible.h1=You''re not eligible for a Help to Save account
+hts.core.not-eligible.p-1=You can only open a Help to Save account if you''re receiving Working Tax Credit payments.
+hts.core.not-eligible.p-2=Find out more about eligibility for Help to Save.
+hts.core.not-eligible.h2-1=Waiting to hear back?
+hts.core.not-eligible.p-3=If you''ve applied for Working Tax Credit, you can only apply for an account again after:
+hts.core.not-eligible.li-1=your application for Working Tax Credit has been approved
+hts.core.not-eligible.li-2=you''re receiving Working Tax Credit payments
+hts.core.not-eligible.h2-2=Elsewhere on GOV.UK
+hts.core.not-eligible.p-4=<a href="#">Working Tax Credit</a>
 hts.helpers.sidebar.header=Elsewhere on GOV.UK
 hts.helpers.sidebar.government-gateway=Government Gateway
 hts.helpers.sidebar.universal-credit=Universal Credit
@@ -190,6 +191,8 @@ hts.register.you-are-eligible.h2-1=What happens next?
 hts.register.you-are-eligible.p-3=If you choose to create an account, we''ll set it up for you immediately. You can start using it as soon as you enter your UK bank account details.
 hts.register.you-are-eligible.p-4=To start creating your account, you''ll need to follow a few simple steps.
 hts.register.you-are-eligible.button-1=Start creating your account
+
+
 
 hts.register.check-and-confirm-your-details.title=Check and confirm your details
 hts.register.check-and-confirm-your-details.step=Step 1 of 4
