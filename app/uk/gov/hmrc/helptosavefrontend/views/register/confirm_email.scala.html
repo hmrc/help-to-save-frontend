@@ -23,7 +23,7 @@
 
 @(email: String, form: Form[ConfirmEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "Do you want to use the email address we hold for you? - Help to Save - GOV.UK", bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = messages("hts.select-email.page-title"), bodyClasses = None) {
     @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
         <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
             <div class="@{"form-group" + {if(hasNotSelected) " error" else "" }}">
