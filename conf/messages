@@ -174,7 +174,7 @@ hts.core.not-eligible.p-3=If you''ve applied for Working Tax Credit, you can onl
 hts.core.not-eligible.li-1=your application for Working Tax Credit has been approved
 hts.core.not-eligible.li-2=you''re receiving Working Tax Credit payments
 hts.core.not-eligible.h2-2=Elsewhere on GOV.UK
-hts.core.not-eligible.p-4=<a href="#">Working Tax Credit</a>
+hts.core.not-eligible.p-4=Working Tax Credit
 hts.helpers.sidebar.header=Elsewhere on GOV.UK
 hts.helpers.sidebar.government-gateway=Government Gateway
 hts.helpers.sidebar.universal-credit=Universal Credit
