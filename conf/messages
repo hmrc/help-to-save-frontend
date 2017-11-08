@@ -166,6 +166,7 @@ hts.helpers.link-2=2. Eligibility
 hts.helpers.link-3=3. Apply
 hts.core.about-help-to-save.next=Next
 hts.core.about-help-to-save.eligibility=Eligibility
+hts.core.not-eligible.page-title=You’re not eligible for a Help to Save account - Help to Save - GOV.UK
 hts.core.not-eligible.h1=You''re not eligible for a Help to Save account
 hts.core.not-eligible.p-1=You can only open a Help to Save account if you''re receiving Working Tax Credit payments.
 hts.core.not-eligible.p-2=Find out more about eligibility for Help to Save.
