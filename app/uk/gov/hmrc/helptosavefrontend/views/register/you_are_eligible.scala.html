@@ -25,19 +25,17 @@
     title = Messages("hts.register.you-are-eligible.title"),
     sidebarLinks = None,
     bodyClasses = None) {
-    <div class="govuk-box-highlight" role="alert">
-        <h1 class="bold-large">@Messages("hts.register.you-are-eligible.notification.h1")</h1>
-        <p class="alert__message">@Messages("hts.register.you-are-eligible.notification.p")</p>
-    </div>
-    <p>@Messages("hts.register.you-are-eligible.p-1")</p>
-    <p>@Messages("hts.register.you-are-eligible.p-2")</p>
 
-    <h2>These are your details:</h2>
+    <h1 class="heading-large">
+      <span class="pre-heading">@Messages("hts.register.you-are-eligible.notification.step")</span>
+      @Messages("hts.register.you-are-eligible.notification.h1")
+    </h1>
+
+    <p>@Messages("hts.register.you-are-eligible.p-1")</p>
+  
     @user_details(userInfo)
 
-    <h2 class="heading-medium">@Messages("hts.register.you-are-eligible.h2-1")</h2>
     <p>@Messages("hts.register.you-are-eligible.p-3")</p>
-    <p>@Messages("hts.register.you-are-eligible.p-4")</p>
 
     @defining(
         userInfo.email.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getConfirmEmailPage)
@@ -49,6 +47,6 @@
         }
     }
 
-    <a href=@routes.RegisterController.getDetailsAreIncorrect() class="button">My details are incorrect</a>
+    <a href=@routes.RegisterController.getDetailsAreIncorrect() >@Messages("hts.register.you-are-eligible.button-2")</a>
 
 }

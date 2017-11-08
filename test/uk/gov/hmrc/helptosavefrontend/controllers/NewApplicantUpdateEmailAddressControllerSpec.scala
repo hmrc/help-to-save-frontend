@@ -212,7 +212,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
         val params = EmailVerificationParams(validUserInfo.nino, testEmail)
         val result = doRequestWithQueryParam(params.encode())
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("not eligible for Help to Save")
+        contentAsString(result) should include("not eligible for a Help to Save account")
       }
 
       "return an Internal Server Error" when {
