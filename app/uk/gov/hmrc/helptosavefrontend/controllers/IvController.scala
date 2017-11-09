@@ -92,19 +92,19 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
             // The user's authority does not meet the criteria for starting an IV journey.
             // This result implies the service should not have sent this user to IV,
             // as this condition can get determined by the user's authority. See below for a list of conditions that lead to this result
-            Unauthorized(cant_confirm_identity(newIvUrl, allowContinue))
+            Unauthorized(precondition_failed())
 
           case Some(TechnicalIssue) ⇒
             metrics.ivTechnicalIssueCounter.inc()
             //A technical issue on the platform caused the journey to end.
             // This is usually a transient issue, so that the user should try again later
             logger.warn(s"TechnicalIssue response from identityVerificationFrontendService")
-            Unauthorized(user_aborted_or_incomplete(newIvUrl, allowContinue))
+            Unauthorized(technical_iv_issues(newIvUrl))
 
           case Some(Timeout) ⇒
             metrics.ivTimeoutCounter.inc()
             //The user took to long to proceed the journey and was timed-out
-            Unauthorized(cant_confirm_identity(newIvUrl, allowContinue))
+            Unauthorized(time_out(newIvUrl))
 
           case _ ⇒
             logger.warn(s"unexpected response from identityVerificationFrontendService")

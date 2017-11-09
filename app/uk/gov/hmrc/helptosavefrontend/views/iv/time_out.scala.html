@@ -15,22 +15,21 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-
 @(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.there_s_a_technical_issues.page-title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.time_out.page-title")) {
+
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h1>@Messages("hts.iv.there_s_a_technical_issues.title")</h1>
+                <h1>@Messages("hts.iv.time_out.title")</h1>
             </header>
+            <p>@Messages("hts.iv.time_out.p1")</p>
+            <p>@Messages("hts.iv.time_out.p2")</p>
 
-            <p class="margin-bottom">@Messages("hts.iv.there_s_a_technical_issues.p1")</p>
-            <p class="margin-botton">@Messages("hts.iv.there_s_a_technical_issues.p2")</p>
-
-          <section class="subsection">
-            <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.try_again_button")</a>
-          </section>
+            <section class="subsection">
+              <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.try_again_button")</a>
+            </section>
         </div>
     </div>
 }

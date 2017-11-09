@@ -18,15 +18,22 @@
 
 @(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.failed_matching.page-title")) {
 
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h1>@Messages("hts.iv.were_unable_to_confirm_your_identity")</h1>
+                <h1>@Messages("hts.iv.failed_matching.title")</h1>
             </header>
-            <p class="margin-bottom">@Html(Messages("hts.iv.failed_contact_HMRC", "https://www.gov.uk/contact-hmrc"))</p>
-            <a href="@retryUrl">@Messages("hts.iv.try_confirm_identity_again")</a>
+            <p>@Messages("hts.iv.failed_matching.p")</p>
+            <ul class="bullets">
+              <li>@Messages("hts.iv.failed_matching.li1")</li>
+              <li>@Messages("hts.iv.failed_matching.li2")</li>
+              <li>@Messages("hts.iv.failed_matching.li3")</li>
+            </ul>
+            <section class="subsection">
+              <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.try_again_button")</a>
+            </section>
         </div>
-    </div>
+
 }

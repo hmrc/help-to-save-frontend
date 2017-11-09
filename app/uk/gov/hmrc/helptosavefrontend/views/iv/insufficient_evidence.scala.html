@@ -18,14 +18,18 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.insufficient_evidence.page-title")) {
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h1>@Messages("hts.iv.were_unable_to_confirm_your_identity")</h1>
+                <h1>@Messages("hts.iv.insufficient_evidence.title")</h1>
             </header>
-
-            <p>@Html(Messages("hts.iv.you_cant_access_this_service_because_hmrc_doesnt_know_enough_", "https://www.gov.uk/contact-hmrc"))</p>
+            <p>@Messages("hts.iv.insufficient_evidence.p1")</p>
+          <p>@Messages("hts.iv.insufficient_evidence.telephone-title") <div>@Messages("hts.iv.insufficient_evidence.telephone-number")</p>
+            <section class="subsection">
+                <h2>@Messages("hts.iv.insufficient_evidence.h2")</h2>
+                <p>@Messages("hts.iv.insufficient_evidence.p2")</p>
+            </section>
         </div>
     </div>
 }

@@ -18,16 +18,18 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.locked_out.page-title")) {
 
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h2>@Messages("hts.iv.youve_tried_to_complete_your_identity_too_many_times")</h2>
+                <h2>@Messages("hts.iv.locked_out.title")</h2>
             </header>
-
-            <p class="margin-bottom">@Messages("hts.iv.try_again_in_24_hours")</p>
-            <p class="margin-bottom">@Html(Messages("hts.iv.failed_contact_HMRC", "https://www.gov.uk/contact-hmrc"))</p>
+            <p>@Messages("hts.iv.locked_out.p1")</p>
+            <p>@Messages("hts.iv.locked_out.p2")</p>
+            <section class="subsection">
+              <p><a href="#">@Messages("hts.exit_to_about_hts")</a></p>
+            </section>
         </div>
     </div>
 }
