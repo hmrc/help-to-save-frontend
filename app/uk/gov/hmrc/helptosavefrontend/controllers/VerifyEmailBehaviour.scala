@@ -49,10 +49,11 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
     }
 
   def handleEmailVerified(emailVerificationParams: String,
-                          ifValid:                 EmailVerificationParams ⇒ Future[Result])(implicit request: Request[AnyContent],
-                                                                                             htsContext: HtsContextWithNINOAndUserDetails,
-                                                                                             crypto:     Crypto,
-                                                                                             messages:   Messages): Future[Result] =
+                          ifValid:                 EmailVerificationParams ⇒ Future[Result],
+                          ifInvalid:               ⇒ Future[Result])(implicit request: Request[AnyContent],
+                                                                     htsContext: HtsContextWithNINOAndUserDetails,
+                                                                     crypto:     Crypto,
+                                                                     messages:   Messages): Future[Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒
@@ -60,7 +61,7 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
         logger.warn("SuspiciousActivity: malformed redirect from email verification service back to HtS, " +
           s"could not decode email verification parameters: ${e.getMessage}", e, nino)
         auditor.sendEvent(SuspiciousActivity(Some(nino), "malformed_redirect"), nino)
-        Ok(views.html.email.email_verify_error(BadContinueURL))
+        ifInvalid
 
       case Success(params) ⇒
         ifValid(params)

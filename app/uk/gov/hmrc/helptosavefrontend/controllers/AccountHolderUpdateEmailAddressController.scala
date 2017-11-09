@@ -75,7 +75,8 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
       emailVerificationParams,
-      params ⇒ checkIfAlreadyEnrolled (oldEmail ⇒ handleEmailVerified(params, oldEmail))
+      params ⇒ checkIfAlreadyEnrolled (oldEmail ⇒ handleEmailVerified(params, oldEmail)),
+      toFuture(SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url))
     )
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
 
@@ -97,14 +98,14 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     if (emailVerificationParams.nino =!= nino) {
       auditor.sendEvent(SuspiciousActivity(None, s"nino_mismatch, expected=$nino, received=${emailVerificationParams.nino}"), nino)
       logger.warn(s"SuspiciousActivity: email was verified but nino [${emailVerificationParams.nino}] in URL did not match user's nino", nino)
-      internalServerError()
+      SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
     } else {
       htsContext.userDetails match {
 
         case Left(missingUserInfos) ⇒
           logger.warn("Email was verified but missing some user info " +
             s"(${missingUserInfos.missingInfo.mkString(",")}", nino)
-          internalServerError()
+          SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
 
         case Right(userInfo) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
@@ -147,7 +148,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     enrolled.fold[Future[Result]]({
       error ⇒
         logger.warn(s"Could not check enrolment status: $error")
-        internalServerError()
+        SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
     }, {
       case (enrolmentStatus, maybeEmail) ⇒
         val nino = htsContext.nino
@@ -157,14 +158,14 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             // user is not enrolled in this case
             logger.warn("SuspiciousActivity: missing HtS enrolment record for user", nino)
             auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_enrolment"), nino)
-            internalServerError()
+            SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
 
           case (EnrolmentStatus.Enrolled(_), None) ⇒
             // this should never happen since we cannot have created an account
             // without a successful write to our email store
             logger.warn("SuspiciousActivity: user is enrolled but the HtS email record does not exist", nino)
             auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_email_record"), nino)
-            internalServerError()
+            SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
 
           case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
             ifEnrolled(email)

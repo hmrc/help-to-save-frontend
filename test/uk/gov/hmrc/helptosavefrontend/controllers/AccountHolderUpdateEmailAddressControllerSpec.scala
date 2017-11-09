@@ -102,6 +102,11 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
       .expects(userInfo, *, *)
       .returning(EitherT.fromEither[Future](result))
 
+  def checkIsErrorPage(result: Future[Result]): Unit = {
+    status(result) shouldBe SEE_OTHER
+    redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
+  }
+
   "The AccountHolderUpdateEmailAddressController" when {
 
     "handling requests to update email addresses" must {
@@ -294,8 +299,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           }
 
           val result = verifyEmail("random crap")
-          status(result) shouldBe OK
-          contentAsString(result) should include("There is an error with this verification link")
+          checkIsErrorPage(result)
         }
 
         "the NINO in the URL does not match the NINO from auth" in {
@@ -307,7 +311,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           }
 
           val result = verifyEmail(emailVerificationParams.copy(nino = "other nino").encode())
-          checkIsTechnicalErrorPage(result)
+          checkIsErrorPage(result)
         }
 
         "there is missing user info from auth" in {
@@ -318,7 +322,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
-          checkIsTechnicalErrorPage(result)
+          checkIsErrorPage(result)
         }
 
         "the call to NS&I to update the email is unsuccessful" in {
@@ -330,8 +334,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
+          checkIsErrorPage(result)
         }
 
       }
@@ -379,7 +382,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockEnrolmentCheck()(Left(""))
         }
 
-        checkIsTechnicalErrorPage(getResult())
+        checkIsErrorPage(getResult())
       }
 
       "there is an error getting the confirmed email" in {
@@ -389,7 +392,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockEmailGet()(Left(""))
         }
 
-        checkIsTechnicalErrorPage(getResult())
+        checkIsErrorPage(getResult())
       }
 
       "the user is not enrolled" in {
@@ -400,7 +403,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuditSuspiciousActivity()
         }
 
-        checkIsTechnicalErrorPage(getResult())
+        checkIsErrorPage(getResult())
       }
 
       "the user is enrolled but has no stored email" in {
@@ -411,7 +414,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuditSuspiciousActivity()
         }
 
-        checkIsTechnicalErrorPage(getResult())
+        checkIsErrorPage(getResult())
       }
 
     }
