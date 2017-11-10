@@ -42,7 +42,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
   def emailVerificationRequest(isNewApplicant: Boolean): EmailVerificationRequest =
     EmailVerificationRequest(
       email,
-      "awrs_email_verification",
+      "hts_verification_email",
       "PT2H",
       if (isNewApplicant) s"$newApplicantContinueURL?p=" else s"$accountHolderContinueURL?p=",
       Map("email" → email, "nino" → nino))

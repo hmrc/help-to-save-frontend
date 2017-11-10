@@ -46,7 +46,7 @@ trait EmailVerificationConnector {
 class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(implicit crypto: Crypto)
   extends EmailVerificationConnector with Logging {
 
-  val templateId: String = "awrs_email_verification"
+  val templateId: String = "hts_verification_email"
 
   def verifyEmail(nino:           String,
                   newEmail:       String,
