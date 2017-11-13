@@ -46,7 +46,7 @@ but the project will have a controlled go-live with a pilot population in Q1/201
 
 To request a Help to Save (‘HtS’) account, customers will access a HtS landing page apply.help-to-save.tax.service.gov.uk/about
 fronted by Akamai. Once authenticated via Government Gateway, the customer will access the HtS Service whereby the customer may
-check their HtS Eligibility check via DES API #2A which in turn collates responses from Head Of Duty’s NTC (for WTC), ITMP (for WTC)
+check their HtS Eligibility check via DES API #2A which in turn collates responses from HoD’s NTC (for WTC), ITMP (for WTC)
 and DWP (for UC). The response from DES will confirm whether the customer is eligible to a HtS Account and if so, the customer is
 able to continue the journey and create a Help To Save account from a button which in turn invokes an NS&I /createaccount endpoint,
 secured by mTLS, whereupon they are redirected to NS&I’s Help To Save web portal frontend.  At this time, in parallel, the HtS service
@@ -63,7 +63,7 @@ when they click the “Sign Out” link which redirects to an anonymous HMRC Exi
 
 ## Private Beta User Restriction
 
-During Private Beta, when a HtS Account is Created, per-day-count and total-count counters are incremented. After the customer’s Eligibility
+During Private Beta, when a HtS Account is created, per-day-count and total-count counters are incremented. After the customer’s Eligibility
 Check, the counters are checked to ensure that the cap’s haven’t been reached. If they have, they are shuttered, otherwise they may continue
 to create a HtS account.
 
