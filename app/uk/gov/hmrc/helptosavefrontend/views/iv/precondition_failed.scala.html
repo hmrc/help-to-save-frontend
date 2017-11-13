@@ -15,22 +15,21 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@(retryUrl: String, allowContinue: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.precondition_failed.page-title")) {
 
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h1>@Messages("hts.iv.cant_confirm_your_identity")</h1>
+                <h1>@Messages("hts.iv.precondition_failed.title")</h1>
             </header>
-
-            @if(allowContinue) {
-                <p class="margin-bottom">@Html(Messages("hts.iv.try_confirm_identity_again", retryUrl))</p>
-                <a href="@retryUrl" class="button" id="continue" role="button">@Messages("hts.iv.continue_button")</a>
-            } else {
-                <p class="margin-bottom">@Html(Messages("hts.iv.failed_contact_HMRC", "https://www.gov.uk/contact-hmrc"))</p>
-            }
+            <p>@Messages("hts.iv.precondition_failed.message")</p>
+            <section class="subsection">
+              <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
+            </section>
         </div>
     </div>
 }

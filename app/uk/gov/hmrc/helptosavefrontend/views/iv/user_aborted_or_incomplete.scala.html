@@ -19,22 +19,27 @@
 
 @(retryUrl: String, allowContinue: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.page-title")) {
 
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h1>@Messages("hts.iv.were_unable_to_confirm_your_identity")</h1>
+                <h1>@Messages("hts.iv.were_unable_to_confirm_your_identity.title")</h1>
             </header>
+            <p>@Messages("hts.iv.were_unable_to_confirm_your_identity.p1")</p>
+            <p>@Messages("hts.iv.were_unable_to_confirm_your_identity.p2")</p>
+            <p>@Messages("hts.iv.were_unable_to_confirm_your_identity.p3")</p>
+
+          <section class="subsection">
 
             @if(allowContinue) {
-                <p class="margin-bottom">@Html(Messages("hts.iv.try_confirm_identity_again", retryUrl))</p>
-                <a href="@retryUrl" class="button" id="continue" role="button">@Messages("hts.iv.continue_button")</a>
+                <a href="@retryUrl" class="button" id="continue" role="button">@Messages("hts.iv.try_again_button")</a>
             } else {
                 <p class="margin-bottom">@Messages("hts.iv.to_help_protect_data_you_can_access_HTS_once_confirmed_identity")</p>
                 <p class="margin-bottom">@Html(Messages("hts.iv.failed_contact_HMRC", "https://www.gov.uk/contact-hmrc"))</p>
                 <a href="@routes.IntroductionController.getAboutHelpToSave()">@Messages("hts.iv.try_confirm_identity_again")</a>
             }
+          </section>
         </div>
     </div>
 }
