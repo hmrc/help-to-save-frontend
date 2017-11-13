@@ -4,7 +4,11 @@
 
 ## Help to Save Frontend
 
-Frontend for application process for Help to Save. Runs on port 7000 when started locally by the service manager.
+Frontend for application process for Help to Save.
+
+## How to run
+
+Runs on port 7000 when started locally by the service manager.
 
 Start service manager with the following command to run the service with all required dependencies:
 
@@ -12,7 +16,7 @@ Start service manager with the following command to run the service with all req
 sm --start HTS_ALL -f
 ```
 
-## Testing 
+## How to test
 Selenium system tests are distinguished from unit tests by having `SeleniumSystemTest` in the relevant runner name. Note
 that you will need to download Selenium drivers from http://docs.seleniumhq.org/download/. The exact version of a driver
 to be downloaded will depend on the version of the corresponding browser - the versions of the driver and browser must be
@@ -72,6 +76,10 @@ zap.sh -daemon -config api.disableKey=true -port 11000
 from inside your zaproxy folder
 download and install ZAP from here:
 https://github.com/zaproxy/zaproxy/wiki/Downloads
+
+## How to deploy
+
+This microservice is deployed as per all MDTP microservices via Jenkins into a Docker slug running on a Cloud Provider.
 
 
 ## Main Public API
