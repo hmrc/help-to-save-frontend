@@ -67,6 +67,11 @@ During Private Beta, when a HtS Account is Created, per-day-count and total-coun
 Check, the counters are checked to ensure that the cap’s haven’t been reached. If they have, they are shuttered, otherwise they may continue
 to create a HtS account.
 
+Requirements
+------------
+
+This service is written in [Scala](http://www.scala-lang.org/) and [Play](http://playframework.com/), so needs at least a [JRE] to run.
+
 ## How to run
 
 Runs on port 7000 when started locally by the service manager.
