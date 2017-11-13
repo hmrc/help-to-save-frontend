@@ -98,7 +98,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
             val time = timer.stop()
 
             withNINO(authorisedEnrols.enrolments, time){ nino ⇒
-              val userDetails = Right(UserInfo(
+              val userDetails: Either[MissingUserInfos, UserInfo] = Right(UserInfo(
                 "Shizlilly",
                 "Lillytwinkle",
                 nino,

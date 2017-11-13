@@ -138,7 +138,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
       val result = doRequest
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmEmailPage().url)
+      redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
     }
   }
 
@@ -215,9 +215,9 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
     }
 
-    "handling getConfirmEmailPage" must {
+    "handling getSelectEmailPage" must {
 
-        def doRequest(): Future[PlayResult] = controller.getConfirmEmailPage(fakeRequest)
+        def doRequest(): Future[PlayResult] = controller.getSelectEmailPage(fakeRequest)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
@@ -250,13 +250,13 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       }
     }
 
-    "handling getConfirmEmailSubmit" must {
+    "handling getSElectEmailSubmit" must {
 
         def doRequest(newEmail: Option[String]): Future[PlayResult] = {
           newEmail.fold(
-            controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
-          ){ e ⇒
-              controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e))
+            controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
+          ) { e ⇒
+              controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e))
             }
 
         }
@@ -265,18 +265,32 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
       checkRedirectIfNoEmailInSession(doRequest(None))
 
-      "redirect to confirm email if the session data shows that they have been already found to be eligible " +
-        "and the form contains no new email" in {
+      "write the email to keystore and the email store if the user has not already enrolled and " +
+        "the session data shows that they have been already found to be eligible and the form contains no new email" in {
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(emailStr)))(Right(CacheMap("", Map.empty)))
+            mockEmailUpdate(emailStr)(Left(""))
           }
 
-          val result = doRequest(None)
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.confirmEmail(validNSIUserInfo.contactDetails.email).url)
+          await(doRequest(None))
         }
+
+      "redirect to the create an account page if the write to keystore and the email store was successful" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(emailStr)))(Right(CacheMap("", Map.empty)))
+          mockEmailUpdate(emailStr)(Right(()))
+        }
+
+        val result = doRequest(None)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountHelpToSavePage().url)
+      }
 
       "redirect to verify email if the session data shows that they have been already found to be eligible " +
         "and the form contains a valid new email" in {
@@ -316,7 +330,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           }
 
-          val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("new-email" → "email@test.com"))
+          val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("new-email" → "email@test.com"))
 
           status(result) shouldBe Status.OK
           contentAsString(result) should include("Which email")
@@ -329,22 +343,22 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           }
 
-          val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No"))
+          val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No"))
 
           status(result) shouldBe Status.OK
           contentAsString(result) should include("Which email")
         }
 
         "the 'email' key of the form is not 'Yes' or 'No'" in {
-          forAll{ s: String ⇒
-            whenever(s =!= "Yes" | s =!= "No"){
+          forAll { s: String ⇒
+            whenever(s =!= "Yes" | s =!= "No") {
               inSequence {
                 mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
                 mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                 mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
               }
 
-              val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → s))
+              val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → s))
 
               status(result) shouldBe Status.OK
               contentAsString(result) should include("Which email")
@@ -356,6 +370,32 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
       }
 
+      "return an error" when {
+        "the email cannot be written to keystore" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(emailStr)))(Left(""))
+          }
+
+          val result = doRequest(None)
+          checkIsTechnicalErrorPage(result)
+        }
+
+        "the email cannot be written to the email store" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(emailStr)))(Right(CacheMap("", Map.empty)))
+            mockEmailUpdate(emailStr)(Left(""))
+          }
+
+          val result = doRequest(None)
+          checkIsTechnicalErrorPage(result)
+        }
+      }
     }
 
     "handling getUserCapReachedPage" must {
@@ -381,72 +421,6 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       }
     }
 
-    "handling a confirmEmail" must {
-
-      val email = "email"
-
-        def doRequest(email: String): Future[PlayResult] =
-          controller.confirmEmail(email)(FakeRequest())
-
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest(email))
-
-      checkRedirectIfNoEmailInSession(doRequest(email))
-
-      "write the email to keystore and the email store if the user has not already enrolled and " +
-        "the session data shows that they have been already found to be eligible" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
-            mockEmailUpdate(email)(Left(""))
-          }
-          await(doRequest(email))
-        }
-
-      "redirect to the create an account page if the write to keystore and the email store was successful" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-          mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
-          mockEmailUpdate(email)(Right(()))
-        }
-
-        val result = doRequest(email)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountHelpToSavePage().url)
-      }
-
-      "return an error" when {
-
-        "the email cannot be written to keystore" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email)))(Left(""))
-          }
-
-          val result = doRequest(email)
-          checkIsTechnicalErrorPage(result)
-        }
-
-        "the email cannot be written to the email store" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
-            mockEmailUpdate(email)(Left(""))
-          }
-
-          val result = doRequest(email)
-          checkIsTechnicalErrorPage(result)
-        }
-      }
-    }
-
     "handling a getCreateAccountHelpToSave" must {
 
       val email = "email"
@@ -467,7 +441,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
       }
 
       "show the user the create account page if the session data contains a confirmed email" in {
@@ -538,7 +512,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
       }
 
       "indicate to the user that the creation was not successful " when {
