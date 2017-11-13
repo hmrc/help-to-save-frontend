@@ -89,6 +89,10 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
             logger.info(s"createAccount/insert returned 201 (Created) ${timeString(time)}", nino)
             SubmissionSuccess()
 
+          case Status.CONFLICT ⇒
+            logger.info(s"createAccount/insert returned 409 (Conflict) ${timeString(time)}", nino)
+            SubmissionSuccess()
+
           case other ⇒
             handleErrorStatus(other, response, userInfo.nino, time)
         }

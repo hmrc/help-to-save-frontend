@@ -105,6 +105,12 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
     }
 
+    "Return a SubmissionSuccess when the status is CONFLICT" in {
+      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.CONFLICT)))
+      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+      Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
+    }
+
     "Return a SubmissionFailure when the status is BAD_REQUEST" in {
       val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
       mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
