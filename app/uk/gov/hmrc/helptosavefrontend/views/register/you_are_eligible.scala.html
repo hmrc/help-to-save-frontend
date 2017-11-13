@@ -38,7 +38,7 @@
     <p>@Messages("hts.register.you-are-eligible.p-3")</p>
 
     @defining(
-        userInfo.email.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getSelectEmailPage)
+        userInfo.email.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getConfirmEmailPage)
     ){ call =>
         @form(call, 'class -> "group") {
             @submit('_buttonClass -> "") {
