@@ -2,16 +2,16 @@
 
 ## Help to Save Frontend
 
-Frontend for application process for Help to Save.
+Frontend application process for Help to Save.
 
 ## Product Repos
 
 The suite of repos connected with this Product are as follows:
 
-https://github.com/hmrc/help-to-save-frontend
-https://github.com/hmrc/help-to-save
-https://github.com/hmrc/help-to-save-frontend-stub
-..plus this repo is the JSON create account interface schema between HMRC and NS&I:
+https://github.com/hmrc/help-to-save-frontend <br />
+https://github.com/hmrc/help-to-save <br />
+https://github.com/hmrc/help-to-save-frontend-stub <br />
+..plus this repo is the JSON create account interface schema between HMRC and NS&I: <br />
 https://github.com/hmrc/help-to-save-apis/blob/master/1.0/create-account.request.schema.json
 
 ## Keywords
