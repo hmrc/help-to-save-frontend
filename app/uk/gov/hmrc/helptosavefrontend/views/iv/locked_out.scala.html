@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
@@ -28,7 +29,7 @@
             <p>@Messages("hts.iv.locked_out.p1")</p>
             <p>@Messages("hts.iv.locked_out.p2")</p>
             <section class="subsection">
-              <p><a href="#">@Messages("hts.exit_to_about_hts")</a></p>
+              <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
             </section>
         </div>
     </div>
