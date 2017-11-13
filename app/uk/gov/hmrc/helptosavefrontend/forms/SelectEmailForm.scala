@@ -23,9 +23,9 @@ import cats.syntax.eq._
 import cats.instances.string._
 import play.api.data.format.Formatter
 
-object ConfirmEmailForm {
+object SelectEmailForm {
 
-  val confirmEmailForm: Form[ConfirmEmail] = {
+  val selectEmailForm: Form[SelectEmail] = {
     val emailFormatter = new Formatter[Option[String]] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
         data.get("email") match {
@@ -45,9 +45,9 @@ object ConfirmEmailForm {
       mapping(
         "email" → text.verifying(l ⇒ l === "Yes" || l === "No"),
         "new-email" → of(emailFormatter)
-      )(ConfirmEmail.apply)(ConfirmEmail.unapply)
+      )(SelectEmail.apply)(SelectEmail.unapply)
     )
   }
 }
 
-case class ConfirmEmail(checked: String, newEmail: Option[String])
+case class SelectEmail(checked: String, newEmail: Option[String])

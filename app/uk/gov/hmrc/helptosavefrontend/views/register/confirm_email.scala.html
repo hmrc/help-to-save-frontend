@@ -17,15 +17,15 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.forms.ConfirmEmail
+@import uk.gov.hmrc.helptosavefrontend.forms.SelectEmail
 @import views.html.helper.CSRF
 
 
-@(email: String, form: Form[ConfirmEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String, form: Form[SelectEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = messages("hts.select-email.page-title"), bodyClasses = None) {
     @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
-        <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
+        <form method="post" action=@CSRF(routes.RegisterController.selectEmailSubmit)>
             <div class="@{"form-group" + {if(hasNotSelected) " error" else "" }}">
 
             <fieldset>
