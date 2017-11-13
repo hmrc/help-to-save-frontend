@@ -35,7 +35,7 @@
                 id = "email",
                 name = "email",
                 label = messages("hts.give-email-address.label"),
-                errorKey = ek.getOrElse("")
+                errorKey = ek.getOrElse("hts.select-email.enter-valid-emai")
             )
           <section class="subsection">
             @helpers.submit('_buttonClass -> "") { @messages("hts.global.continue-button") }
