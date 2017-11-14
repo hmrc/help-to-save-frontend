@@ -19,12 +19,18 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = messages("hts.introduction.title"),
+    title = messages("hts.we-couldnt-update-your-email.title"),
     sidebarLinks = None,
     bodyClasses = None) {
+    <header>
+      <h1>@messages("hts.we-couldnt-update-your-email.page-title")</h1>
+    </header>
 
-    <h1>We couldn't update your email - try again later</h1>
-    <p>Click here to go back to managing account</p>
-    <a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">Back to account</a>
+    <p>@messages("hts.we-couldnt-update-your-email.p1")</p>
+    <p>@messages("hts.we-couldnt-update-your-email.p2")</p>
+    <section class="subsection">
+      <a href=@{FrontendAppConfig.nsiManageAccountUrl}>@messages("hts.we-couldnt-update-your-email.back-to-account")</a>
+    </section>
+
 
 }

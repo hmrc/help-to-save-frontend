@@ -34,6 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, Se
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.BadContinueURL
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
@@ -91,7 +92,9 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
             Ok(views.html.register.email_updated(params.email))
           }
         })
-      })
+      },
+      toFuture(Ok(views.html.email.email_verify_error(BadContinueURL)))
+    )
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def getEmailUpdated(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
