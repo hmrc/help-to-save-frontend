@@ -27,6 +27,7 @@ trait AppConfig {
   val analyticsHost: String
   val reportAProblemPartialUrl: String
   val reportAProblemNonJSUrl: String
+  val betaFeedbackUrlNoAuth: String
 }
 
 object FrontendAppConfig extends AppConfig with ServicesConfig {
@@ -110,5 +111,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
   val contactBaseUrl: String = baseUrl("contact-frontend")
   override lazy val reportAProblemPartialUrl: String = s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override lazy val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+
+  override lazy val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
 
 }
