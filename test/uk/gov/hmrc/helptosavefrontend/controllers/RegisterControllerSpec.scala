@@ -173,7 +173,8 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("we don't have an email for you")
+        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account")
+        contentAsString(result) should include(routes.RegisterController.giveEmailSubmit().url)
       }
 
     }
@@ -198,7 +199,9 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doRequest("this is not an email")
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("we don't have an email for you")
+        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account")
+        contentAsString(result) should include(routes.RegisterController.giveEmailSubmit().url)
+
       }
 
       "redirect to verify email if the form does contains a valid email" in {

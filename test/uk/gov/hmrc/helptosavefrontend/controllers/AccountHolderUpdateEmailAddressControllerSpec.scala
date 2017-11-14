@@ -358,7 +358,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
         val result = controller.getEmailUpdateError(FakeRequest())
         status(result) shouldBe OK
-        contentAsString(result) should include("We couldn't update your email")
+        contentAsString(result) should include("We cannot change your email address at this time")
       }
     }
   }
