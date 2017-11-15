@@ -23,11 +23,13 @@ import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
+import uk.gov.hmrc.auth.core.Enrolments
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.checkEligibilityUrl
+import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{toJavaDate, urlEncode}
 
 import scala.concurrent.duration._
@@ -53,23 +55,33 @@ class HelpToSaveAuthSpec extends AuthSupport {
 
   "HelpToSaveAuth" should {
 
-    "return UserInfo after successful authentication" in {
-      val userInfo =
-        Json.toJson(UserInfo(
-          firstName,
-          lastName,
-          nino,
-          toJavaDate(dob),
-          Some(emailStr),
-          Address(List(line1, line2, line3), Some(postCode), Some(countryCode)
-          )
-        ))
+    val userInfo = UserInfo(
+      firstName,
+      lastName,
+      nino,
+      toJavaDate(dob),
+      Some(emailStr),
+      Address(List(line1, line2, line3), Some(postCode), Some(countryCode)
+      )
+    )
 
+    "return UserInfo after successful authentication" in {
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.OK
-      contentAsJson(result) shouldBe userInfo
+      contentAsJson(result) shouldBe Json.toJson(userInfo)
+    }
+
+    "filter out empty emails" in {
+      val retrieval =
+        new ~(name, Option("")) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+
+      mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval)
+
+      val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
+      status(result) shouldBe Status.OK
+      contentAsJson(result) shouldBe Json.toJson(userInfo.copy(email = None))
     }
 
     "handle when some user info is missing" in {

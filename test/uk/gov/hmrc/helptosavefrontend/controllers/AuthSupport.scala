@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object AuthSupport {
 
-  private implicit class ROps[A, B](val r: ~[A, B]) {
+  implicit class ROps[A, B](val r: ~[A, B]) {
     def and[C](c: C): ~[~[A, B], C] = new ~(r, c)
   }
 
