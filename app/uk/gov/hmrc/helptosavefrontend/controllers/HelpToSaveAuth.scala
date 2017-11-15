@@ -87,34 +87,6 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
         }
     }
 
-  // $COVERAGE-OFF$
-  def authorisedForHtsWithInfoHack(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
-    Action.async { implicit request ⇒
-      val timer = metrics.authTimer.time()
-
-      authorised(AuthWithCL200)
-        .retrieve(Retrievals.email and authorisedEnrolments) {
-          case email ~ authorisedEnrols ⇒
-            val time = timer.stop()
-
-            withNINO(authorisedEnrols.enrolments, time){ nino ⇒
-              val userDetails: Either[MissingUserInfos,UserInfo] = Right(UserInfo(
-                "Shizlilly",
-                "Lillytwinkle",
-                nino,
-                java.time.LocalDate.ofEpochDay(0L),
-                email,
-                Address(List("29 Sparkle Lane", "Fairyland"), Some("AB12CD"), None)
-              ))
-
-              action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
-            }
-        }.recover {
-          handleFailure(redirectOnLoginURL)
-        }
-    }
-  // $COVERAGE-ON$
-
   def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] = {
     Action.async { implicit request ⇒
       authorised(AuthProvider) {
