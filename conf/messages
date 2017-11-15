@@ -181,7 +181,6 @@ hts.helpers.sidebar.government-gateway=Government Gateway
 hts.helpers.sidebar.universal-credit=Universal Credit
 hts.helpers.sidebar.apply-for-universal-credit=Apply for Universal Credit
 hts.helpers.sidebar.working-tax-credit=Working Tax Credit
-hts.helpers.phaseBanner.feedback=This is a new service – your <a href="{0}">feedback</a> will help us to improve it.
 
 hts.register.you-are-eligible.notification.step=Step 1 of 4
 hts.register.you-are-eligible.title=You are eligible
