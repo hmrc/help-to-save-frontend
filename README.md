@@ -99,12 +99,15 @@ Only if you want to run the Selenium tests locally, execute the following comman
 sm --start HTS_DEP -f
 
 cd {front end path}
+
 sbt "run 7000"
 
 cd {back end path}
+
 sbt "run 7001"
 
 cd {stub path}
+
 sbt "run 7002"
 
 Then (to run against any environment) execute:
