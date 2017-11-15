@@ -30,6 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Play}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendGlobal
+import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
@@ -82,5 +83,8 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
 
     override def histogram(name: String): Histogram = new Histogram(new UniformReservoir())
   }
+
+  val mockEmailValidation: EmailValidation =
+    new EmailValidation(Configuration("email-validation.regex" → ".*@.*", "email-validation.max-length" → 100))
 
 }

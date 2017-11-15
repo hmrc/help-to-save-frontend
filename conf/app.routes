@@ -10,7 +10,7 @@ GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptos
 GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
 GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
 
-GET        /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getConfirmEmailPage
+GET        /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getSelectEmailPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
 
@@ -20,7 +20,7 @@ GET        /details-are-incorrect                           @uk.gov.hmrc.helptos
 
 GET        /register/give-email                             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getGiveEmailPage
 POST       /register/give-email-submit                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit
-POST       /register/confirm-email-submit                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmailSubmit
+POST       /register/select-email-submit                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.selectEmailSubmit
 GET        /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
 GET        /register/verify-email/:email                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail(email)
 GET        /register/email-verified                         @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerified(p: String)

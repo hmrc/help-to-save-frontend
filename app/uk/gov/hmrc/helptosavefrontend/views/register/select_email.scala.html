@@ -17,15 +17,15 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.forms.ConfirmEmail
+@import uk.gov.hmrc.helptosavefrontend.forms.SelectEmail
 @import views.html.helper.CSRF
 
 
-@(email: String, form: Form[ConfirmEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String, form: Form[SelectEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = messages("hts.select-email.page-title"), bodyClasses = None) {
     @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
-        <form method="post" action=@CSRF(routes.RegisterController.confirmEmailSubmit)>
+        <form method="post" action=@CSRF(routes.RegisterController.selectEmailSubmit)>
             <div class="@{"form-group" + {if(hasNotSelected) " error" else "" }}">
 
             <fieldset>
@@ -49,7 +49,7 @@
                 <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
                     <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
                     <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
-                    @{if(hasInvalidEmail) <span class="error-notification">{messages("hts.select-email.enter-valid-email")}</span> }
+                    @{if(hasInvalidEmail) <span class="error-notification">{messages("hts.email.enter-valid-email")}</span> }
                     <input class="form-control" name="new-email" type="text" id="new-email">
                 </div>
 

@@ -23,17 +23,17 @@ import cats.syntax.eq._
 import cats.instances.string._
 import play.api.data.format.Formatter
 
-object ConfirmEmailForm {
+object SelectEmailForm {
 
-  val confirmEmailForm: Form[ConfirmEmail] = {
+  def selectEmailForm(implicit emailValidation: EmailValidation): Form[SelectEmail] = {
     val emailFormatter = new Formatter[Option[String]] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
         data.get("email") match {
           // if "No" make sure that we have a new email
-          case Some("No") ⇒ email.withPrefix(key).bind(data).map(Some(_))
+          case Some("No") ⇒ emailValidation.emailMapping.withPrefix(key).bind(data).map(Some(_))
 
           // the value for "email" should be "Yes" or "No" - this will get picked up in the mapping in the form below.
-          // if the value is "Yes" ignore any new email that has been enetered
+          // if the value is "Yes" ignore any new email that has been entered
           case _          ⇒ Right(None)
         }
 
@@ -45,9 +45,9 @@ object ConfirmEmailForm {
       mapping(
         "email" → text.verifying(l ⇒ l === "Yes" || l === "No"),
         "new-email" → of(emailFormatter)
-      )(ConfirmEmail.apply)(ConfirmEmail.unapply)
+      )(SelectEmail.apply)(SelectEmail.unapply)
     )
   }
 }
 
-case class ConfirmEmail(checked: String, newEmail: Option[String])
+case class SelectEmail(checked: String, newEmail: Option[String])

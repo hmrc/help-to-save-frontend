@@ -20,8 +20,8 @@ import play.api.data._
 import play.api.data.Forms._
 
 object UpdateEmailForm {
-  val verifyEmailForm: Form[UpdateEmail] = Form(
-    mapping("new-email-address" -> email
+  def verifyEmailForm(implicit emailValidation: EmailValidation): Form[UpdateEmail] = Form(
+    mapping("new-email-address" -> emailValidation.emailMapping
     )(UpdateEmail.apply)(UpdateEmail.unapply)
   )
 }

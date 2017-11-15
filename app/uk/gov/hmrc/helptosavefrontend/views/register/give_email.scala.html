@@ -28,6 +28,9 @@
       <h1>@messages("hts.give-email.page-title")</h1>
     </header>
 
+    @{println(form.errors.length.toString + "\n\n\n\n")}
+    @{println(form.errors.mkString("\n") + "\n\n\n\n")}
+
     <p>@messages("hts.give-email-address.p")</p>
     @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.giveEmailSubmit()) {
         @defining(form.error("email").map(_.message)) { ek =>
@@ -35,7 +38,7 @@
                 id = "email",
                 name = "email",
                 label = messages("hts.give-email-address.label"),
-                errorKey = ek.getOrElse("hts.select-email.enter-valid-emai")
+                errorKey = ek.map(_ ⇒ "hts.email.enter-valid-email").getOrElse("")
             )
           <section class="subsection">
             @helpers.submit('_buttonClass -> "") { @messages("hts.global.continue-button") }
