@@ -49,13 +49,6 @@
 
 @headerNavLinks = {
         <li>
-            <a href="/get-help" id="get-help"
-               data-ga-event-category = "Get Help"
-               data-ga-event-action = "Get help"
-               data-ga-event-label= @request.uri
-               class="ga-track-event">
-                Get help
-            </a>&nbsp;
             @if(htsContext.isAuthorised) {
                 <a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out"
                    data-ga-event-category = "Sign out"
