@@ -98,7 +98,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
             val time = timer.stop()
 
             withNINO(authorisedEnrols.enrolments, time){ nino ⇒
-              val userDetails = Right(UserInfo(
+              val userDetails: Either[MissingUserInfos,UserInfo] = Right(UserInfo(
                 "Shizlilly",
                 "Lillytwinkle",
                 nino,
@@ -170,7 +170,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation)
         .map {
           case (givenName, surname, jodaDob) ⇒
-            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email, Address(itmpAddress))
+            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email.filter(_.nonEmpty), Address(itmpAddress))
         }
 
     validation
