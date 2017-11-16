@@ -20,8 +20,8 @@ import play.api.data._
 import play.api.data.Forms._
 
 object GiveEmailForm {
-  val giveEmailForm: Form[GiveEmail] = Form(
-    mapping("email" -> email
+  def giveEmailForm(implicit emailValidation: EmailValidation): Form[GiveEmail] = Form(
+    mapping("email" -> emailValidation.emailMapping
     )(GiveEmail.apply)(GiveEmail.unapply)
   )
 }

@@ -63,7 +63,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
     mockMetrics,
     mockAuditor,
     fakeApplication)(
-    ec, crypto) {
+    ec, crypto, mockEmailValidation) {
     override lazy val authConnector = mockAuthConnector
   }
 
@@ -138,7 +138,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
       val result = doRequest
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmEmailPage().url)
+      redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
     }
   }
 
@@ -218,9 +218,9 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
     }
 
-    "handling getConfirmEmailPage" must {
+    "handling getSelectEmailPage" must {
 
-        def doRequest(): Future[PlayResult] = controller.getConfirmEmailPage(fakeRequest)
+        def doRequest(): Future[PlayResult] = controller.getSelectEmailPage(fakeRequest)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
@@ -253,13 +253,13 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       }
     }
 
-    "handling getConfirmEmailSubmit" must {
+    "handling getselectEmailSubmit" must {
 
         def doRequest(newEmail: Option[String]): Future[PlayResult] = {
           newEmail.fold(
-            controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
+            controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
           ){ e ⇒
-              controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e))
+              controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e))
             }
 
         }
@@ -319,7 +319,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           }
 
-          val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("new-email" → "email@test.com"))
+          val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("new-email" → "email@test.com"))
 
           status(result) shouldBe Status.OK
           contentAsString(result) should include("Which email")
@@ -332,7 +332,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           }
 
-          val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No"))
+          val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No"))
 
           status(result) shouldBe Status.OK
           contentAsString(result) should include("Which email")
@@ -347,7 +347,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
                 mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
               }
 
-              val result = controller.confirmEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → s))
+              val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → s))
 
               status(result) shouldBe Status.OK
               contentAsString(result) should include("Which email")
@@ -470,7 +470,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
       }
 
       "show the user the create account page if the session data contains a confirmed email" in {
@@ -541,7 +541,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getConfirmEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
       }
 
       "indicate to the user that the creation was not successful " when {

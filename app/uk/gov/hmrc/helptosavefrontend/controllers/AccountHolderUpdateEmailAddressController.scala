@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.UpdateEmailError
-import uk.gov.hmrc.helptosavefrontend.forms.{UpdateEmail, UpdateEmailForm}
+import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
@@ -46,7 +46,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                                                            nSIConnector:                   NSIConnector,
                                                            metrics:                        Metrics,
                                                            val auditor:                    HTSAuditor
-)(implicit app: Application, crypto: Crypto, val messagesApi: MessagesApi, ec: ExecutionContext)
+)(implicit app: Application, crypto: Crypto, emailValidation: EmailValidation, val messagesApi: MessagesApi, ec: ExecutionContext)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with VerifyEmailBehaviour with I18nSupport {
 

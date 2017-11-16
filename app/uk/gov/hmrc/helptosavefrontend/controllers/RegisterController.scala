@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthCon
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
-import uk.gov.hmrc.helptosavefrontend.forms.{ConfirmEmailForm, GiveEmailForm}
+import uk.gov.hmrc.helptosavefrontend.forms.{SelectEmailForm, EmailValidation, GiveEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
@@ -53,7 +53,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                                     metrics:                     Metrics,
                                     auditor:                     HTSAuditor,
                                     app:                         Application
-)(implicit ec: ExecutionContext, crypto: Crypto)
+)(implicit ec: ExecutionContext, crypto: Crypto, emailValidation: EmailValidation)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
@@ -61,7 +61,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks{ _ ⇒
-          SeeOther(routes.RegisterController.getConfirmEmailPage().url)
+          SeeOther(routes.RegisterController.getSelectEmailPage().url)
         }{ _ ⇒
           checkIfAccountCreateAllowed(
             Ok(views.html.register.give_email(GiveEmailForm.giveEmailForm))
@@ -74,7 +74,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks { _ ⇒
-          SeeOther(routes.RegisterController.getConfirmEmailPage().url)
+          SeeOther(routes.RegisterController.getSelectEmailPage().url)
         }{ _ ⇒
           GiveEmailForm.giveEmailForm.bindFromRequest().fold[Result](
             withErrors ⇒ Ok(views.html.register.give_email(withErrors)),
@@ -84,24 +84,24 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       }
     }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def getConfirmEmailPage: Action[AnyContent] =
+  def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks{ eligibleWithEmail ⇒
           checkIfAccountCreateAllowed(
-            Ok(views.html.register.confirm_email(eligibleWithEmail.email, ConfirmEmailForm.confirmEmailForm)))
+            Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm)))
         } { _ ⇒
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
         }
       }
     }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def confirmEmailSubmit(): Action[AnyContent] =
+  def selectEmailSubmit(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks{ eligibleWithEmail ⇒
-          ConfirmEmailForm.confirmEmailForm.bindFromRequest().fold[Result](
-            withErrors ⇒ Ok(views.html.register.confirm_email(eligibleWithEmail.email, withErrors)),
+          SelectEmailForm.selectEmailForm.bindFromRequest().fold[Result](
+            withErrors ⇒ Ok(views.html.register.select_email(eligibleWithEmail.email, withErrors)),
             _.newEmail.fold(
               SeeOther(routes.RegisterController.confirmEmail(eligibleWithEmail.email).url))(
                 newEmail ⇒
@@ -141,7 +141,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         eligibleWithEmail.confirmedEmail.fold[Future[Result]](
-          SeeOther(routes.RegisterController.getConfirmEmailPage().url))(
+          SeeOther(routes.RegisterController.getSelectEmailPage().url))(
             _ ⇒ Ok(views.html.register.create_account_help_to_save()))
       }{ _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
@@ -162,7 +162,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         eligibleWithEmail.confirmedEmail.fold[Future[Result]](
-          SeeOther(routes.RegisterController.getConfirmEmailPage().url)
+          SeeOther(routes.RegisterController.getSelectEmailPage().url)
         ) { confirmedEmail ⇒
             val userInfo = NSIUserInfo(eligibleWithEmail.userInfo, confirmedEmail)
 
