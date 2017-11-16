@@ -260,6 +260,7 @@ hts.exit_to_about_hts=Exit to About Help to Save
 hts.access.denied.header=Access Denied
 hts.access.denied.message=You are not allowed to access this service
 hts.iv.try_again_button=Try again
+hts.iv.continue_button=Continue
 
 hts.email.enter-valid-email=Please enter a valid email address
 
