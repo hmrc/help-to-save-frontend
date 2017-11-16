@@ -23,6 +23,7 @@ import uk.gov.hmrc.auth.core.authorise._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.models
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserRetrievals
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
@@ -42,6 +43,8 @@ object AuthSupport {
 trait AuthSupport extends TestSupport {
 
   import AuthSupport._
+
+  type NameRetrievalType = ~[~[Name, ItmpName], Enrolments]
 
   type UserRetrievalType = Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Enrolments
 
@@ -75,13 +78,19 @@ trait AuthSupport extends TestSupport {
   )
   )
 
-  val mockedNINORetrieval = Enrolments(Set(enrolment))
+  val mockedNINORetrieval: Enrolments = Enrolments(Set(enrolment))
+
+  val mockedNINOAndNameRetrieval: ~[~[Name, ItmpName], Enrolments] = new ~(name, itmpName) and mockedNINORetrieval
+
+  val mockedNINOAndNameRetrievalMissingNino: ~[~[Name, ItmpName], Enrolments] = new ~(name, itmpName) and Enrolments(Set())
+
+  val mockedNINOAndNameRetrievalMissingName: ~[~[Name, ItmpName], Enrolments] = new ~(Name(None, None), ItmpName(None, None, None)) and mockedNINORetrieval
 
   val mockedRetrievals: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
-    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and mockedNINORetrieval
 
   val mockedRetrievalsMissingUserInfo: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
-    new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+    new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and itmpAddress and mockedNINORetrieval
 
   val mockedRetrievalsMissingNinoEnrolment: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
     new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set())
@@ -99,6 +108,11 @@ trait AuthSupport extends TestSupport {
   def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: Enrolments) =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, Retrievals.authorisedEnrolments, *, *)
+      .returning(Future.successful(result))
+
+  def mockAuthWithNINOAndName(predicate: Predicate)(result: NameRetrievalType) =
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[NameRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(predicate, Retrievals.name and Retrievals.itmpName and Retrievals.authorisedEnrolments, *, *)
       .returning(Future.successful(result))
 
   def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =

@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
-import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndName, HtsContextWithNINOAndUserDetails}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, MissingUserInfo, MissingUserInfos, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -56,6 +56,29 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
             withNINO(authorisedEnrols.enrolments, time){ nino ⇒
               action(request)(HtsContextWithNINO(authorised = true, nino))
+            }
+
+        }.recover {
+          handleFailure(redirectOnLoginURL)
+        }
+    }
+
+  def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndName])(redirectOnLoginURL: String): Action[AnyContent] =
+    Action.async { implicit request ⇒
+      val timer = metrics.authTimer.time()
+
+      authorised(AuthWithCL200)
+        .retrieve(Retrievals.name and Retrievals.itmpName and authorisedEnrolments) {
+          case maybeName ~ maybeItmpName ~ authorisedEnrols ⇒
+            val time = timer.stop()
+
+            withNINO(authorisedEnrols.enrolments, time){ nino ⇒
+              val name: Option[(String, String)] = for {
+                forename ← maybeName.name.orElse(maybeItmpName.givenName)
+                surname ← maybeName.lastName.orElse(maybeItmpName.familyName)
+              } yield forename → surname
+
+              action(request)(HtsContextWithNINOAndName(authorised = true, nino, name))
             }
 
         }.recover {

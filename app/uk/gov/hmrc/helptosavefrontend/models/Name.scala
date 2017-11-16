@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.models.email
+package uk.gov.hmrc.helptosavefrontend.models
 
-import play.api.libs.json._
-
-case class EmailVerificationRequest(email: String, templateId: String,
-                                    linkExpiryDuration: String, continueUrl: String,
-                                    templateParameters: Map[String, String])
-
-object EmailVerificationRequest {
-  implicit val formats: Format[EmailVerificationRequest] = Json.format[EmailVerificationRequest]
-
+case class Name(forename: String, surname: String) {
+  val fullName: String = s"$forename $surname"
 }

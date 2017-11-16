@@ -56,20 +56,25 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     )
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
 
-  def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled(_ ⇒
-      UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
-        formWithErrors ⇒ {
-          BadRequest(views.html.email.update_email_address("errors", formWithErrors))
-        },
-        (details: UpdateEmail) ⇒
-          sendEmailVerificationRequest(
-            details.email,
-            Ok(views.html.email.check_your_email(details.email)),
-            params ⇒ routes.AccountHolderUpdateEmailAddressController.emailVerified(params.encode()).url,
-            isNewApplicant = false)
+  def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINOAndName { implicit request ⇒ implicit htsContext ⇒
+    htsContext.name.fold[Future[Result]](
+      SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
+    ){ name ⇒
+        checkIfAlreadyEnrolled(_ ⇒
+          UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
+            formWithErrors ⇒ {
+              BadRequest(views.html.email.update_email_address("errors", formWithErrors))
+            },
+            (details: UpdateEmail) ⇒
+              sendEmailVerificationRequest(
+                details.email,
+                name,
+                Ok(views.html.email.check_your_email(details.email)),
+                params ⇒ routes.AccountHolderUpdateEmailAddressController.emailVerified(params.encode()).url,
+                isNewApplicant = false)
 
-      ))
+          ))
+      }
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.onSubmit().url)
 
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒

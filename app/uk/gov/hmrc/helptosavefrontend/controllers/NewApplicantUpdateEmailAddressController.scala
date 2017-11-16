@@ -63,6 +63,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           userInfo ⇒
             sendEmailVerificationRequest(
               email,
+              Name(userInfo.forename, userInfo.surname),
               Ok(views.html.register.check_your_email(email, userInfo.email)),
               params ⇒ routes.NewApplicantUpdateEmailAddressController.emailVerified(params.encode()).url,
               isNewApplicant = true)
