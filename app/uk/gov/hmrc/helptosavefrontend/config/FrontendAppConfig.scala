@@ -108,7 +108,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val contactFormServiceIdentifier: String = "HTS"
 
-  val contactBaseUrl: String = baseUrl("contact-frontend")
+  val contactBaseUrl: String = getUrlFor("contact-frontend")
   override lazy val reportAProblemPartialUrl: String = s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   override lazy val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
 
