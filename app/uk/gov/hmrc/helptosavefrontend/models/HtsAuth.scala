@@ -20,7 +20,7 @@ import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L200
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.retrieve.{Name ⇒ CoreName, _}
 import uk.gov.hmrc.auth.core.{AuthProviders, Enrolment}
 
 object HtsAuth {
@@ -31,7 +31,7 @@ object HtsAuth {
 
   val AuthWithCL200: Predicate = NinoWithCL200 and AuthProvider
 
-  val UserRetrievals: Retrieval[Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress] =
+  val UserRetrievals: Retrieval[CoreName ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress] =
     Retrievals.name and
       Retrievals.email and
       Retrievals.dateOfBirth and
