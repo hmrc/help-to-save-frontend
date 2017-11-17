@@ -22,6 +22,7 @@ import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{accountHolderContinueURL, newApplicantContinueURL, verifyEmailURL}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.models.Name
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.BackendError
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO}
@@ -33,6 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with GeneratorDrivenPropertyChecks {
 
   val nino: NINO = "AE123XXXX"
+  val name: Name = Name("first", "second")
   val email: Email = "email@gmail.com"
 
   val mockHttp: WSHttp = mock[WSHttp]
@@ -45,7 +47,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
       "hts_verification_email",
       "PT2H",
       if (isNewApplicant) s"$newApplicantContinueURL?p=" else s"$accountHolderContinueURL?p=",
-      Map("email" → email, "nino" → nino))
+      Map("name" → name.fullName))
 
   lazy val connector: EmailVerificationConnectorImpl =
     new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
@@ -82,25 +84,25 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
         "return 201 when given good json" in {
           mockEncrypt(nino + "#" + email)("")
           mockPost(verificationRequest)(Status.OK, None)
-          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Right(())
+          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Right(())
         }
 
         "return 400 when given bad json" in {
           mockEncrypt(nino + "#" + email)("")
           mockPost(verificationRequest)(Status.BAD_REQUEST, None)
-          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(VerifyEmailError.RequestNotValidError)
+          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.RequestNotValidError)
         }
 
         "return 409 when the email has already been verified" in {
           mockEncrypt(nino + "#" + email)("")
           mockPost(verificationRequest)(Status.CONFLICT, None)
-          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
+          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
         }
 
         "return a verification service unavailable error when the email verification service is down" in {
           mockEncrypt(nino + "#" + email)("")
           mockPost(verificationRequest)(Status.SERVICE_UNAVAILABLE, None)
-          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
+          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.VerificationServiceUnavailable)
         }
 
         "return a Left if the call comes back with an unexpected status" in {
@@ -110,7 +112,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
             whenever(!statuses.contains(status)) {
               mockEncrypt(nino + "#" + email)("")
               mockPost(verificationRequest)(status, None)
-              await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(BackendError)
+              await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(BackendError)
             }
           }
         }
@@ -118,7 +120,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
         "should return a back end error if the future failed" in {
           mockEncrypt(nino + "#" + email)("")
           mockPostFailure(verificationRequest)
-          await(connector.verifyEmail(nino, email, isNewApplicant)) shouldBe Left(BackendError)
+          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(BackendError)
         }
       }
   }

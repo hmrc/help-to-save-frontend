@@ -36,10 +36,10 @@ class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPro
         "email-validation.max-length" → testMaxLength
       ))
 
-      def test(expectedResult: Boolean)(s: String): Unit = {
-        val result = emailValidation.emailMapping.bind(Map("" → s))
-        result.isRight shouldBe expectedResult
-      }
+        def test(expectedResult: Boolean)(s: String): Unit = {
+          val result = emailValidation.emailMapping.bind(Map("" → s))
+          result.isRight shouldBe expectedResult
+        }
 
       val testSuccess: String ⇒ Unit = test(expectedResult = true)
       val testFailure: String ⇒ Unit = test(expectedResult = false)

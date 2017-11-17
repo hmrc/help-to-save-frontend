@@ -20,9 +20,9 @@ import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, BadContinueURL}
-import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, HtsContextWithNINOAndUserDetails, SuspiciousActivity}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture}
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, HtsContextWithNINOAndUserDetails, Name, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 
@@ -36,13 +36,14 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
   val auditor: HTSAuditor
 
   def sendEmailVerificationRequest(email:                String,
+                                   name:                 Name,
                                    ifSuccess:            ⇒ Result,
                                    ifAlreadyVerifiedURL: EmailVerificationParams ⇒ String,
                                    isNewApplicant:       Boolean)(implicit request: Request[AnyContent],
                                                                   htsContext: HtsContextWithNINO,
                                                                   crypto:     Crypto,
                                                                   messages:   Messages): Future[Result] =
-    emailVerificationConnector.verifyEmail(htsContext.nino, email, isNewApplicant).map {
+    emailVerificationConnector.verifyEmail(htsContext.nino, email, name, isNewApplicant).map {
       case Right(_)              ⇒ ifSuccess
       case Left(AlreadyVerified) ⇒ SeeOther(ifAlreadyVerifiedURL(EmailVerificationParams(htsContext.nino, email)))
       case Left(other)           ⇒ Ok(views.html.email.email_verify_error(other))
