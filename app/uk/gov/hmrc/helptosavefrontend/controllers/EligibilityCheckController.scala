@@ -106,6 +106,21 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
+  val youAreEligibleSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkSession {
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+    } {
+      _.eligibilityCheckResult.fold(
+        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+        { userInfo ⇒
+          val url = userInfo.email.fold(
+            routes.RegisterController.getGiveEmailPage()
+          )(_ ⇒ routes.RegisterController.getSelectEmailPage()).url
+          SeeOther(url)
+        })
+    }
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
   private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
                                            htsContext: HtsContextWithNINOAndUserDetails,
                                            request:    Request[AnyContent]): Future[PlayResult] = {
