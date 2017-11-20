@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport._
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
-import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, BackendError, RequestNotValidError, VerificationServiceUnavailable}
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
@@ -94,9 +94,9 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
     override val authConnector = mockAuthConnector
   }
 
-  def mockEmailVerificationConn(nino: String, email: String, name: Name)(result: Either[VerifyEmailError, Unit]) =
-    (mockEmailVerificationConnector.verifyEmail(_: String, _: String, _: Name, _: Boolean)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, email, name, false, *, *)
+  def mockEmailVerificationConn(nino: String, email: String, firstName: String)(result: Either[VerifyEmailError, Unit]) =
+    (mockEmailVerificationConnector.verifyEmail(_: String, _: String, _: String, _: Boolean)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, email, firstName, false, *, *)
       .returning(Future.successful(result))
 
   def mockUpdateEmailWithNSI(userInfo: NSIUserInfo)(result: Either[String, Unit]): Unit =
@@ -141,8 +141,6 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
       val email = "email@test.com"
 
-      val name = Name(firstName, lastName)
-
       lazy val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
       val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
@@ -161,7 +159,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
-          mockEmailVerificationConn(nino, email, name)(Right(()))
+          mockEmailVerificationConn(nino, email, firstName)(Right(()))
         }
         val result = await(controller.onSubmit()(fakePostRequest))
         status(result) shouldBe Status.OK
@@ -175,7 +173,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
             mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
             mockEnrolmentCheck()(Right(enrolled))
             mockEmailGet()(Right(Some("email")))
-            mockEmailVerificationConn(nino, email, name)(Left(AlreadyVerified))
+            mockEmailVerificationConn(nino, email, firstName)(Left(AlreadyVerified))
           }
           val result = await(controller.onSubmit()(fakePostRequest))(10.seconds)
           status(result) shouldBe Status.SEE_OTHER
@@ -200,46 +198,17 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
         }
 
-      "return an OK status and redirect the user to the email_verify_error page with request not valid message" in {
+      "show an error page if the email verification fails" in {
         val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
-          mockEmailVerificationConn(nino, email, name)(Left(RequestNotValidError))
+          mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
         }
         val result = controller.onSubmit()(fakePostRequest)
         status(result) shouldBe Status.OK
-        contentAsString(result).contains(messagesApi("hts.email-verification.error.title")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.error.request-not-valid.content")) shouldBe true
-      }
-
-      "return an OK status and redirect the user to the email_verify_error page with verification service unavailable message" in {
-        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
-        inSequence {
-          mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
-          mockEnrolmentCheck()(Right(enrolled))
-          mockEmailGet()(Right(Some("email")))
-          mockEmailVerificationConn(nino, email, name)(Left(VerificationServiceUnavailable))
-        }
-        val result = controller.onSubmit()(fakePostRequest)
-        status(result) shouldBe Status.OK
-        contentAsString(result).contains(messagesApi("hts.email-verification.error.title")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.error.verification-service-unavailable.content")) shouldBe true
-      }
-
-      "return an OK status and redirect the user to the email_verify_error page with backend error message" in {
-        val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
-        inSequence {
-          mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
-          mockEnrolmentCheck()(Right(enrolled))
-          mockEmailGet()(Right(Some("email")))
-          mockEmailVerificationConn(nino, email, name)(Left(BackendError))
-        }
-        val result = controller.onSubmit()(fakePostRequest)
-        status(result) shouldBe Status.OK
-        contentAsString(result).contains(messagesApi("hts.email-verification.error.title")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.error.backend-error.content")) shouldBe true
+        contentAsString(result).contains("Email verification error") shouldBe true
       }
 
       "redirect to the error page if the name retrieval fails" in {

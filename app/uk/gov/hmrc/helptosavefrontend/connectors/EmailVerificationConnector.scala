@@ -24,7 +24,6 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{accountHolderCon
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
-import uk.gov.hmrc.helptosavefrontend.models.Name
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -39,7 +38,7 @@ trait EmailVerificationConnector {
 
   def verifyEmail(nino:           String,
                   newEmail:       String,
-                  name:           Name,
+                  firstName:      String,
                   isNewApplicant: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]]
 
 }
@@ -52,7 +51,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
   def verifyEmail(nino:           String,
                   newEmail:       String,
-                  name:           Name,
+                  firstName:      String,
                   isNewApplicant: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]] = {
     val continueUrlWithParams = {
       val continueURL = if (isNewApplicant) newApplicantContinueURL else accountHolderContinueURL
@@ -64,7 +63,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
       templateId,
       Duration.ofMinutes(linkTTLMinutes).toString,
       continueUrlWithParams,
-      Map("name" → name.fullName))
+      Map("name" → firstName))
 
     val timerContext = metrics.emailVerificationTimer.time()
 
@@ -86,7 +85,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
         metrics.emailVerificationErrorCounter.inc()
 
         logger.warn(s"Error while calling email verification service: ${e.getMessage} (round-trip time: ${nanosToPrettyString(time)})", nino)
-        Left(BackendError)
+        Left(OtherError)
     }
   }
 
@@ -96,7 +95,7 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
     status match {
       case BAD_REQUEST ⇒
         logger.warn(s"Received status 400 (Bad Request) (round-trip time: ${nanosToPrettyString(time)})", nino)
-        Left(RequestNotValidError)
+        Left(OtherError)
 
       case CONFLICT ⇒
         logger.info("Email address already verified, received status 409 (Conflict) " +
@@ -105,12 +104,12 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
 
       case SERVICE_UNAVAILABLE ⇒
         logger.warn(s"Received status 503 (Service Unavailable) (round-trip time: ${nanosToPrettyString(time)})", nino)
-        Left(VerificationServiceUnavailable)
+        Left(OtherError)
 
       case other ⇒
         logger.warn(s"Received unexpected status $other from email verification" +
           s" body = ${response.body} (round-trip time: ${nanosToPrettyString(time)})", nino)
-        Left(BackendError)
+        Left(OtherError)
     }
   }
 

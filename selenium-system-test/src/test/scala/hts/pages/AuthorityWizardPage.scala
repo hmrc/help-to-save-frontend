@@ -71,10 +71,8 @@ object AuthorityWizardPage extends Page {
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
     find(name("redirectionUrl")).foreach(_.underlying.sendKeys(url))
 
-  def setNino(nino: String)(implicit driver: WebDriver): Unit = {
-    println("NINO entered in auth wizard: " + nino)
+  def setNino(nino: String)(implicit driver: WebDriver): Unit =
     find(name("nino")).foreach(_.underlying.sendKeys(nino))
-  }
 
   def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
     find(name("credentialStrength")).foreach(_.underlying.sendKeys(strength))

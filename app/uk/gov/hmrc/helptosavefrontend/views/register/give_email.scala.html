@@ -28,9 +28,6 @@
       <h1>@messages("hts.give-email.page-title")</h1>
     </header>
 
-    @{println(form.errors.length.toString + "\n\n\n\n")}
-    @{println(form.errors.mkString("\n") + "\n\n\n\n")}
-
     <p>@messages("hts.give-email-address.p")</p>
     @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.giveEmailSubmit()) {
         @defining(form.error("email").map(_.message)) { ek =>

@@ -24,6 +24,7 @@ import cats.syntax.option._
 import org.joda.time.LocalDate
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrievals.authorisedEnrolments
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
@@ -31,7 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
-import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndName, HtsContextWithNINOAndUserDetails}
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndFirstName, HtsContextWithNINOAndUserDetails}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, MissingUserInfo, MissingUserInfos, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -46,81 +47,43 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
 
   def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
-    Action.async { implicit request ⇒
-      val timer = metrics.authTimer.time()
-
-      authorised(AuthWithCL200)
-        .retrieve(authorisedEnrolments) {
-          case authorisedEnrols ⇒
-            val time = timer.stop()
-
-            withNINO(authorisedEnrols.enrolments, time){ nino ⇒
-              action(request)(HtsContextWithNINO(authorised = true, nino))
-            }
-
-        }.recover {
-          handleFailure(redirectOnLoginURL)
+    authorised(authorisedEnrolments){
+      case (authorisedEnrols, request, time) ⇒
+        withNINO(authorisedEnrols.enrolments, request, time){ nino ⇒
+          action(request)(HtsContextWithNINO(authorised = true, nino))
         }
-    }
+    }(redirectOnLoginURL)
 
-  def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndName])(redirectOnLoginURL: String): Action[AnyContent] =
-    Action.async { implicit request ⇒
-      val timer = metrics.authTimer.time()
-
-      authorised(AuthWithCL200)
-        .retrieve(Retrievals.name and Retrievals.itmpName and authorisedEnrolments) {
-          case maybeName ~ maybeItmpName ~ authorisedEnrols ⇒
-            val time = timer.stop()
-
-            withNINO(authorisedEnrols.enrolments, time){ nino ⇒
-              val name: Option[(String, String)] = for {
-                forename ← maybeName.name.orElse(maybeItmpName.givenName)
-                surname ← maybeName.lastName.orElse(maybeItmpName.familyName)
-              } yield forename → surname
-
-              action(request)(HtsContextWithNINOAndName(authorised = true, nino, name))
-            }
-
-        }.recover {
-          handleFailure(redirectOnLoginURL)
+  def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(redirectOnLoginURL: String): Action[AnyContent] =
+    authorised(Retrievals.name and Retrievals.itmpName and authorisedEnrolments){
+      case (maybeName ~ maybeItmpName ~ authorisedEnrols, request, time) ⇒
+        withNINO(authorisedEnrols.enrolments, request, time){ nino ⇒
+          action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, maybeName.name.orElse(maybeItmpName.givenName)))
         }
-    }
+    }(redirectOnLoginURL)
 
   def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
-    Action.async { implicit request ⇒
-      val timer = metrics.authTimer.time()
+    authorised(UserRetrievals and authorisedEnrolments){
+      case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ authorisedEnrols, request, time) ⇒
+        withNINO(authorisedEnrols.enrolments, request, time){ nino ⇒
+          val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
-      authorised(AuthWithCL200)
-        .retrieve(UserRetrievals and authorisedEnrolments) {
-          case name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ authorisedEnrols ⇒
-            val time = timer.stop()
+          userDetails.fold(
+            m ⇒ logger.warn(s"User details retrieval failed, missing details [${m.missingInfo.mkString(", ")}] ${timeString(time)}", nino),
+            _ ⇒ logger.info(s"Successfully retrieved NINO and user details ${timeString(time)}", nino)
+          )
 
-            withNINO(authorisedEnrols.enrolments, time){ nino ⇒
-              val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
-
-              userDetails.fold(
-                m ⇒ logger.warn(s"User details retrieval failed, missing details [${m.missingInfo.mkString(", ")}] ${timeString(time)}", nino),
-                _ ⇒ logger.info(s"Successfully retrieved NINO and user details ${timeString(time)}", nino)
-              )
-
-              action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
-            }
-        }.recover {
-          handleFailure(redirectOnLoginURL)
+          action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
         }
-    }
+    }(redirectOnLoginURL)
 
-  def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] = {
-    Action.async { implicit request ⇒
-      authorised(AuthProvider) {
+  def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] =
+    authorised(EmptyRetrieval, AuthProvider){
+      case (_, request, _) ⇒
         action(request)(HtsContext(authorised = true))
-      }.recover {
-        handleFailure(redirectOnLoginURL)
-      }
-    }
-  }
+    }(redirectOnLoginURL)
 
-  def unprotected(action: HtsAction[HtsContext]): Action[AnyContent] = {
+  def unprotected(action: HtsAction[HtsContext]): Action[AnyContent] =
     Action.async { implicit request ⇒
       authorised() {
         action(request)(HtsContext(authorised = true))
@@ -129,16 +92,30 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
           action(request)(HtsContext(authorised = false))
       }
     }
-  }
 
-  private def withNINO[A](enrolments: Set[Enrolment], nanos: Long)(withNINO: NINO ⇒ Future[Result])(implicit request: Request[_]): Future[Result] =
+  private def authorised[A](retrieval: Retrieval[A],
+                            predicate: Predicate    = AuthWithCL200
+  )(toResult: (A, Request[AnyContent], Long) ⇒ Future[Result])(redirectOnLoginURL: ⇒ String): Action[AnyContent] =
+    Action.async{ implicit request ⇒
+      val timer = metrics.authTimer.time()
+
+      authorised(predicate).retrieve(retrieval){ a ⇒
+        val time = timer.stop()
+        toResult(a, request, time)
+      }.recover{
+        val time = timer.stop()
+        handleFailure(redirectOnLoginURL, time)
+      }
+    }
+
+  private def withNINO[A](enrolments: Set[Enrolment], request: Request[_], nanos: Long)(withNINO: NINO ⇒ Future[Result]): Future[Result] =
     enrolments
       .find(_.key === "HMRC-NI")
       .flatMap(_.getIdentifier("NINO"))
       .map(_.value)
       .fold{
         logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
-        toFuture(internalServerError())
+        toFuture(internalServerError()(request))
       }(withNINO)
 
   private def getUserInfo(nino:        String,
@@ -173,7 +150,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       .toEither
   }
 
-  def handleFailure(redirectOnLoginURL: String)(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
+  def handleFailure(redirectOnLoginURL: String, time: Long)(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
       toGGLogin(redirectOnLoginURL)
 
@@ -181,7 +158,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       SeeOther(ivUrl(redirectOnLoginURL))
 
     case ex: AuthorisationException ⇒
-      logger.warn(s"could not authenticate user due to: $ex")
+      logger.warn(s"could not authenticate user due to: $ex ${timeString(time)}")
       internalServerError()
   }
 

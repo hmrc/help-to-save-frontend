@@ -19,9 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.models.email
 sealed trait VerifyEmailError
 
 object VerifyEmailError {
-  case object RequestNotValidError extends VerifyEmailError
-  case object VerificationServiceUnavailable extends VerifyEmailError
   case object AlreadyVerified extends VerifyEmailError
-  case object BackendError extends VerifyEmailError
-  case object BadContinueURL extends VerifyEmailError
+  case object OtherError extends VerifyEmailError
 }
