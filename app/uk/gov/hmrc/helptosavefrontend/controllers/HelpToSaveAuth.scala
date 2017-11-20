@@ -17,25 +17,22 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.ValidatedNel
-import cats.instances.string._
 import cats.syntax.cartesian._
-import cats.syntax.eq._
 import cats.syntax.option._
 import org.joda.time.LocalDate
 import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrievals.authorisedEnrolments
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserRetrievals}
-import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndFirstName, HtsContextWithNINOAndUserDetails}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserInfoRetrievals}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, MissingUserInfo, MissingUserInfos, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndFirstName, HtsContextWithNINOAndUserDetails}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
 
 import scala.concurrent.Future
 
@@ -47,25 +44,25 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
 
   def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(authorisedEnrolments){
-      case (authorisedEnrols, request, time) ⇒
-        withNINO(authorisedEnrols.enrolments, request, time){ nino ⇒
+    authorised(Retrievals.nino) {
+      case (mayBeNino, request, time) ⇒
+        withNINO(mayBeNino, request, time) { nino ⇒
           action(request)(HtsContextWithNINO(authorised = true, nino))
         }
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(Retrievals.name and Retrievals.itmpName and authorisedEnrolments){
-      case (maybeName ~ maybeItmpName ~ authorisedEnrols, request, time) ⇒
-        withNINO(authorisedEnrols.enrolments, request, time){ nino ⇒
+    authorised(Retrievals.name and Retrievals.itmpName and Retrievals.nino){
+      case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
+        withNINO(mayBeNino, request, time){ nino ⇒
           action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, maybeName.name.orElse(maybeItmpName.givenName)))
         }
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(UserRetrievals and authorisedEnrolments){
-      case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ authorisedEnrols, request, time) ⇒
-        withNINO(authorisedEnrols.enrolments, request, time){ nino ⇒
+    authorised(UserInfoRetrievals and Retrievals.nino){
+      case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
+        withNINO(mayBeNino, request, time){ nino ⇒
           val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
           userDetails.fold(
@@ -108,15 +105,11 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       }
     }
 
-  private def withNINO[A](enrolments: Set[Enrolment], request: Request[_], nanos: Long)(withNINO: NINO ⇒ Future[Result]): Future[Result] =
-    enrolments
-      .find(_.key === "HMRC-NI")
-      .flatMap(_.getIdentifier("NINO"))
-      .map(_.value)
-      .fold{
-        logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
-        toFuture(internalServerError()(request))
-      }(withNINO)
+  private def withNINO[A](mayBeNino: Option[String], request: Request[_], nanos: Long)(action: NINO ⇒ Future[Result]): Future[Result] =
+    mayBeNino.fold {
+      logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
+      toFuture(internalServerError()(request))
+    }(action)
 
   private def getUserInfo(nino:        String,
                           name:        Name,

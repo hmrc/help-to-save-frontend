@@ -24,7 +24,7 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserRetrievals
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserInfoRetrievals
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.toJavaDate
@@ -51,7 +51,7 @@ trait AuthSupport extends TestSupport {
   val mockAuthConnector: FrontendAuthConnector = mock[FrontendAuthConnector]
 
   val nino = "WM123456C"
-  val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated", ConfidenceLevel.L200)
+  val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated")
 
   val firstName = "Tyrion"
   val lastName = "Lannister"
@@ -78,11 +78,11 @@ trait AuthSupport extends TestSupport {
   )
   )
 
-  val mockedNINORetrieval: Enrolments = Enrolments(Set(enrolment))
+  val mockedNINORetrieval: Enrolment = enrolment
 
-  val mockedNINOAndNameRetrieval: ~[~[Name, ItmpName], Enrolments] = new ~(name, itmpName) and mockedNINORetrieval
+  val mockedNINOAndNameRetrieval: ~[~[Name, ItmpName], Enrolment] = new ~(name, itmpName) and mockedNINORetrieval
 
-  val mockedNINOAndNameRetrievalMissingNino: ~[~[Name, ItmpName], Enrolments] = new ~(name, itmpName) and Enrolments(Set())
+  val mockedNINOAndNameRetrievalMissingNino: ~[~[Name, ItmpName], Enrolment] = new ~(name, itmpName)
 
   val mockedNINOAndNameRetrievalMissingName: ~[~[Name, ItmpName], Enrolments] = new ~(Name(None, None), ItmpName(None, None, None)) and mockedNINORetrieval
 
@@ -117,7 +117,7 @@ trait AuthSupport extends TestSupport {
 
   def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[UserRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(predicate, UserRetrievals and Retrievals.authorisedEnrolments, *, *)
+      .expects(predicate, UserInfoRetrievals and Retrievals.authorisedEnrolments, *, *)
       .returning(Future.successful(result))
 
   def mockAuthWithNoRetrievals(predicate: Predicate): Unit =
