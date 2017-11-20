@@ -83,7 +83,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
     s"Basic: ${new String(base64Encode(s"$user:$password"), encoding)}"
   }
 
-  val nsiCreateAccountUrl: String = s"${baseUrl("nsi")}/nsihts/createaccount"
+  val nsiCreateAccountUrl: String = s"${baseUrl("nsi")}/nsi-services/account"
 
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
 
