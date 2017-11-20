@@ -18,15 +18,14 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.{retrieve, _}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
-import uk.gov.hmrc.helptosavefrontend.models
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserInfoRetrievals
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.util.toJavaDate
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -44,14 +43,13 @@ trait AuthSupport extends TestSupport {
 
   import AuthSupport._
 
-  type NameRetrievalType = ~[~[Name, ItmpName], Enrolments]
+  type NameRetrievalType = ~[~[Name, ItmpName], Option[String]]
 
-  type UserRetrievalType = Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Enrolments
+  type UserRetrievalType = Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Option[String]
 
   val mockAuthConnector: FrontendAuthConnector = mock[FrontendAuthConnector]
 
   val nino = "WM123456C"
-  val enrolment = Enrolment("HMRC-NI", Seq(EnrolmentIdentifier("NINO", nino)), "activated")
 
   val firstName = "Tyrion"
   val lastName = "Lannister"
@@ -77,23 +75,22 @@ trait AuthSupport extends TestSupport {
     line1, line2, Some(line3), None, None, postCode, Some(countryCode), emailStr
   )
   )
+  val mockedNINORetrieval: Option[String] = Some(nino)
 
-  val mockedNINORetrieval: Enrolment = enrolment
+  val mockedNINOAndNameRetrieval: ~[~[Name, ItmpName], Option[String]] = new ~(name, itmpName) and mockedNINORetrieval
 
-  val mockedNINOAndNameRetrieval: ~[~[Name, ItmpName], Enrolment] = new ~(name, itmpName) and mockedNINORetrieval
+  val mockedNINOAndNameRetrievalMissingNino: ~[~[Name, ItmpName], Option[String]] = new ~(name, itmpName) and None
 
-  val mockedNINOAndNameRetrievalMissingNino: ~[~[Name, ItmpName], Enrolment] = new ~(name, itmpName)
+  val mockedNINOAndNameRetrievalMissingName: ~[~[Name, ItmpName], Option[String]] = new ~(Name(None, None), ItmpName(None, None, None)) and mockedNINORetrieval
 
-  val mockedNINOAndNameRetrievalMissingName: ~[~[Name, ItmpName], Enrolments] = new ~(Name(None, None), ItmpName(None, None, None)) and mockedNINORetrieval
-
-  val mockedRetrievals: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
+  val mockedRetrievals: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Option[String]] =
     new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and mockedNINORetrieval
 
-  val mockedRetrievalsMissingUserInfo: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
+  val mockedRetrievalsMissingUserInfo: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Option[String]] =
     new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and itmpAddress and mockedNINORetrieval
 
-  val mockedRetrievalsMissingNinoEnrolment: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Enrolments] =
-    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set())
+  val mockedRetrievalsMissingNinoEnrolment: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Option[String]] =
+    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and None
 
   def mockAuthResultWithFail(ex: Throwable): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
@@ -105,19 +102,19 @@ trait AuthSupport extends TestSupport {
       .expects(predicate, *, *, *)
       .returning(Future.failed(ex))
 
-  def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: Enrolments) =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Enrolments])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(predicate, Retrievals.authorisedEnrolments, *, *)
+  def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: Option[String]) =
+    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Option[String]])(_: HeaderCarrier, _: ExecutionContext))
+      .expects(predicate, Retrievals.nino, *, *)
       .returning(Future.successful(result))
 
   def mockAuthWithNINOAndName(predicate: Predicate)(result: NameRetrievalType) =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[NameRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(predicate, Retrievals.name and Retrievals.itmpName and Retrievals.authorisedEnrolments, *, *)
+      .expects(predicate, Retrievals.name and Retrievals.itmpName and Retrievals.nino, *, *)
       .returning(Future.successful(result))
 
   def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[UserRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(predicate, UserInfoRetrievals and Retrievals.authorisedEnrolments, *, *)
+      .expects(predicate, UserInfoRetrievals and Retrievals.nino, *, *)
       .returning(Future.successful(result))
 
   def mockAuthWithNoRetrievals(predicate: Predicate): Unit =
