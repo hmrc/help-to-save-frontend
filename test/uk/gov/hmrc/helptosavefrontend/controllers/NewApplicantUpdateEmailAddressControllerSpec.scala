@@ -30,9 +30,9 @@ import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomIneligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, BackendError}
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, Name, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
@@ -72,9 +72,9 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
       override val authConnector = mockAuthConnector
     }
 
-  def mockEmailVerificationConn(nino: String, email: String, name: Name)(result: Either[VerifyEmailError, Unit]) = {
-    (mockEmailVerificationConnector.verifyEmail(_: String, _: String, _: Name, _: Boolean)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, email, name, true, *, *)
+  def mockEmailVerificationConn(nino: String, email: String, firstName: String)(result: Either[VerifyEmailError, Unit]) = {
+    (mockEmailVerificationConnector.verifyEmail(_: String, _: String, _: String, _: Boolean)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, email, firstName, true, *, *)
       .returning(Future.successful(result))
   }
 
@@ -88,8 +88,6 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     "verifyEmail" must {
 
       val email = "email@gmail.com"
-
-      val name = Name(firstName, lastName)
 
       "redirect to 'You're not Eligible' if the session data indicates they are ineligible" in {
         inSequence {
@@ -119,7 +117,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-          mockEmailVerificationConn(nino, newEmail, name)(Right(()))
+          mockEmailVerificationConn(nino, newEmail, firstName)(Right(()))
         }
         val result = await(controller.verifyEmail(newEmail)(FakeRequest()))
         status(result) shouldBe Status.OK
@@ -134,7 +132,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-            mockEmailVerificationConn(nino, email, name)(Left(AlreadyVerified))
+            mockEmailVerificationConn(nino, email, firstName)(Left(AlreadyVerified))
           }
           val result = await(controller.verifyEmail(email)(FakeRequest()))(10.seconds)
           status(result) shouldBe Status.SEE_OTHER
@@ -163,7 +161,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-          mockEmailVerificationConn(nino, email, name)(Left(BackendError))
+          mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
         }
 
         val result = await(controller.verifyEmail(email)(FakeRequest()))

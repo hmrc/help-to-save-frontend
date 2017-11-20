@@ -34,7 +34,6 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, Se
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
-import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.BadContinueURL
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
@@ -63,7 +62,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           userInfo ⇒
             sendEmailVerificationRequest(
               email,
-              Name(userInfo.forename, userInfo.surname),
+              userInfo.forename,
               Ok(views.html.register.check_your_email(email, userInfo.email)),
               params ⇒ routes.NewApplicantUpdateEmailAddressController.emailVerified(params.encode()).url,
               isNewApplicant = true)
@@ -94,7 +93,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           }
         })
       },
-      toFuture(Ok(views.html.email.email_verify_error(BadContinueURL)))
+      toFuture(Ok(views.html.email.email_verify_error()))
     )
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 

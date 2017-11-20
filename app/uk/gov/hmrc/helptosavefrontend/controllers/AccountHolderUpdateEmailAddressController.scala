@@ -57,7 +57,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINOAndName { implicit request ⇒ implicit htsContext ⇒
-    htsContext.name.fold[Future[Result]](
+    htsContext.firstName.fold[Future[Result]](
       SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
     ){ name ⇒
         checkIfAlreadyEnrolled(_ ⇒

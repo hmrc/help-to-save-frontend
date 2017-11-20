@@ -27,8 +27,8 @@ abstract class HtsContextWithNINO extends HtsContext {
   val nino: NINO
 }
 
-abstract class HtsContextWithNINOAndName extends HtsContextWithNINO {
-  val name: Option[Name]
+abstract class HtsContextWithNINOAndFirstName extends HtsContextWithNINO {
+  val firstName: Option[String]
 }
 
 abstract class HtsContextWithNINOAndUserDetails extends HtsContextWithNINO {
@@ -49,10 +49,10 @@ object HtsContextWithNINO {
     }
 }
 
-object HtsContextWithNINOAndName {
-  def apply(authorised: Boolean, NINO: NINO, maybeName: Option[(String, String)]): HtsContextWithNINOAndName =
-    new HtsContextWithNINOAndName {
-      override val name: Option[Name] = maybeName.map(Name.tupled)
+object HtsContextWithNINOAndFirstName {
+  def apply(authorised: Boolean, NINO: NINO, maybeName: Option[String]): HtsContextWithNINOAndFirstName =
+    new HtsContextWithNINOAndFirstName {
+      override val firstName: Option[String] = maybeName
       override val nino: NINO = NINO
       override val isAuthorised: Boolean = authorised
     }
