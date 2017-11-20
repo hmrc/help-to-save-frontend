@@ -18,20 +18,17 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.ConfidenceLevel.L200
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Name ⇒ CoreName, _}
-import uk.gov.hmrc.auth.core.{AuthProviders, Enrolment}
+import uk.gov.hmrc.auth.core.{AuthProviders, ConfidenceLevel}
 
 object HtsAuth {
 
-  val NinoWithCL200: Enrolment = Enrolment("HMRC-NI").withConfidenceLevel(L200)
-
   val AuthProvider: AuthProviders = AuthProviders(GovernmentGateway)
 
-  val AuthWithCL200: Predicate = NinoWithCL200 and AuthProvider
+  val AuthWithCL200: Predicate = AuthProvider and ConfidenceLevel.L200
 
-  val UserRetrievals: Retrieval[CoreName ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress] =
+  val UserInfoRetrievals: Retrieval[CoreName ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress] =
     Retrievals.name and
       Retrievals.email and
       Retrievals.dateOfBirth and

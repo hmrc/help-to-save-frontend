@@ -22,14 +22,13 @@ import cats.syntax.either._
 import play.api.libs.json.{JsValue, Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -65,7 +64,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
   def commonEnrolmentAndSessionBehaviour(getResult:               () ⇒ Future[Result], // scalastyle:ignore method.length
                                          mockSuccessfulAuth:      () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
-                                         mockNoNINOAuth:          () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Enrolments(Set.empty)),
+                                         mockNoNINOAuth:          () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None),
                                          testRedirectOnNoSession: Boolean             = true,
                                          testEnrolmentCheckError: Boolean             = true): Unit = {
 

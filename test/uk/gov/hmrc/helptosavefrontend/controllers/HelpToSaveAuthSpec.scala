@@ -23,7 +23,6 @@ import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
-import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.checkEligibilityUrl
@@ -74,8 +73,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
     }
 
     "filter out empty emails" in {
-      val retrieval =
-        new ~(name, Option("")) and Option(dob) and itmpName and itmpDob and itmpAddress and Enrolments(Set(enrolment))
+      val retrieval = new ~(name, Option("")) and Option(dob) and itmpName and itmpDob and itmpAddress and mockedNINORetrieval
 
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval)
 
