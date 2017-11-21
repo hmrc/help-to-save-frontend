@@ -28,7 +28,6 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.filters.csrf.CSRF.{Token, TokenProvider}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
@@ -45,7 +44,11 @@ import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with GeneratorDrivenPropertyChecks {
+class RegisterControllerSpec
+  extends AuthSupport
+  with CSRFSupport
+  with EnrolmentAndEligibilityCheckBehaviour
+  with GeneratorDrivenPropertyChecks {
 
   val jsonSchemaValidationService: JSONSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor: HTSAuditor = mock[HTSAuditor]
@@ -105,13 +108,6 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       .expects(Json.toJson(input))
       .returning(result.map(_ ⇒ Json.toJson(input)))
 
-  lazy val tokenProvider: TokenProvider =
-    fakeApplication.injector.instanceOf[TokenProvider]
-
-  val fakeRequest = FakeRequest().copyFakeRequest(tags = Map(
-    Token.NameRequestTag → "csrfToken",
-    Token.RequestTag → tokenProvider.generateToken))
-
   def checkRedirectIfNoEmailInSession(doRequest: ⇒ Future[PlayResult]): Unit = {
     "redirect to the give email page if the session data does not contain an email for the user" in {
       inSequence {
@@ -144,7 +140,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
     "handling getGiveEmailPage" must {
 
-        def doRequest(): Future[PlayResult] = controller.getGiveEmailPage(fakeRequest)
+        def doRequest(): Future[PlayResult] = controller.getGiveEmailPage(fakeRequestWithCSRFToken)
 
       checkRedirectIfEmailInSession(doRequest())
 
@@ -182,7 +178,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       val email = "email@test.com"
 
         def doRequest(email: String): Future[PlayResult] = controller.giveEmailSubmit()(
-          fakeRequest.withFormUrlEncodedBody("email" → email))
+          fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → email))
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest(email))
 
@@ -218,7 +214,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
     "handling getSelectEmailPage" must {
 
-        def doRequest(): Future[PlayResult] = controller.getSelectEmailPage(fakeRequest)
+        def doRequest(): Future[PlayResult] = controller.getSelectEmailPage(fakeRequestWithCSRFToken)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
@@ -255,9 +251,9 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
 
         def doRequest(newEmail: Option[String]): Future[PlayResult] = {
           newEmail.fold(
-            controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
+            controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "Yes"))
           ){ e ⇒
-              controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e))
+              controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "No", "new-email" → e))
             }
 
         }
@@ -317,7 +313,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           }
 
-          val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("new-email" → "email@test.com"))
+          val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("new-email" → "email@test.com"))
 
           status(result) shouldBe Status.OK
           contentAsString(result) should include("Which email")
@@ -330,7 +326,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
           }
 
-          val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → "No"))
+          val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "No"))
 
           status(result) shouldBe Status.OK
           contentAsString(result) should include("Which email")
@@ -345,7 +341,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
                 mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
               }
 
-              val result = controller.selectEmailSubmit()(fakeRequest.withFormUrlEncodedBody("email" → s))
+              val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → s))
 
               status(result) shouldBe Status.OK
               contentAsString(result) should include("Which email")
@@ -453,7 +449,7 @@ class RegisterControllerSpec extends AuthSupport with EnrolmentAndEligibilityChe
       val email = "email"
 
         def doRequest(): Future[PlayResult] =
-          controller.getCreateAccountHelpToSavePage()(FakeRequest())
+          controller.getCreateAccountHelpToSavePage()(fakeRequestWithCSRFToken)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 

@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IntroductionControllerSpec extends AuthSupport {
+class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
 
   val fakeRequest = FakeRequest("GET", "/")
   val helpToSave = new IntroductionController(fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector, mockMetrics)
@@ -86,7 +86,7 @@ class IntroductionControllerSpec extends AuthSupport {
     "the getApply return 200" in {
       mockAuthorise(false)
 
-      val result = helpToSave.getApply(fakeRequest)
+      val result = helpToSave.getApply(fakeRequestWithCSRFToken)
       status(result) shouldBe Status.OK
 
       contentType(result) shouldBe Some("text/html")

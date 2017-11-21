@@ -41,7 +41,10 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
-class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
+class NewApplicantUpdateEmailAddressControllerSpec
+  extends AuthSupport
+  with CSRFSupport
+  with EnrolmentAndEligibilityCheckBehaviour {
 
   lazy val injector: Injector = fakeApplication.injector
   lazy val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
@@ -174,7 +177,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     "emailVerified" should {
       val testEmail = "email@gmail.com"
 
-        def doRequestWithQueryParam(p: String): Future[Result] = controller.emailVerified(p)(FakeRequest())
+        def doRequestWithQueryParam(p: String): Future[Result] = controller.emailVerified(p)(fakeRequestWithCSRFToken)
 
       "show the check and confirm your details page showing the users details with the verified user email address " +
         "if the user has not already enrolled and " +
@@ -272,7 +275,7 @@ class NewApplicantUpdateEmailAddressControllerSpec extends AuthSupport with Enro
     "handling getEmailUpdated" must {
 
         def doRequest(): Future[Result] =
-          controller.getEmailUpdated()(FakeRequest())
+          controller.getEmailUpdated()(fakeRequestWithCSRFToken)
 
       "redirect to NS&I if they are already enrolled to HtS" in {
         inSequence {
