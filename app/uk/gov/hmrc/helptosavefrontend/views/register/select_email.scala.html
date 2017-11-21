@@ -25,43 +25,45 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = messages("hts.select-email.page-title"), bodyClasses = None) {
     @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
-        <form method="post" action=@CSRF(routes.RegisterController.selectEmailSubmit)>
-            <div class="@{"form-group" + {if(hasNotSelected) " error" else "" }}">
+    <form method="post" action=@routes.RegisterController.selectEmailSubmit>
+        @CSRF.formField(request)
 
-            <fieldset>
-                <legend>
-                    <h1 class="heading-large">
-                    @messages("hts.select-email.title")
-                    </h1>
-                </legend>
+    <div class="@{"form-group" + {if(hasNotSelected) " error" else "" }}">
 
-                @{if(hasNotSelected) <span class="error-notification">{messages("hts.select-email.select-an-option")}</span> }
+        <fieldset>
+            <legend>
+                <h1 class="heading-large">
+                @messages("hts.select-email.title")
+                </h1>
+            </legend>
 
-                <div class="multiple-choice">
-                    <input id="registered-email" type="radio" name="email" value="Yes">
-                    <label for="registered-email">@email</label>
-                </div>
+            @{if(hasNotSelected) <span class="error-notification">{messages("hts.select-email.select-an-option")}</span> }
 
-                <div class="multiple-choice" data-target="collect-new-email">
-                    <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail){ checked }>
-                    <label for="add-new-email">@messages("hts.select-email.select-new-address")</label>
-                </div>
-                <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
-                    <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
-                    <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
-                    @{if(hasInvalidEmail) <span class="error-notification">{messages("hts.email.enter-valid-email")}</span> }
-                    <input class="form-control" name="new-email" type="text" id="new-email">
-                </div>
-
-            </fieldset>
-
+            <div class="multiple-choice">
+                <input id="registered-email" type="radio" name="email" value="Yes">
+                <label for="registered-email">@email</label>
             </div>
-            <div class="form-field form-field--submit">
-                <button class="button " type="submit">
-                @messages("hts.global.continue-button")
-                </button>
+
+            <div class="multiple-choice" data-target="collect-new-email">
+                <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail){ checked }>
+                <label for="add-new-email">@messages("hts.select-email.select-new-address")</label>
             </div>
-        </form>
+            <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
+                <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
+                <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
+                @{if(hasInvalidEmail) <span class="error-notification">{messages("hts.email.enter-valid-email")}</span> }
+                <input class="form-control" name="new-email" type="text" id="new-email">
+            </div>
+
+        </fieldset>
+
+    </div>
+    <div class="form-field form-field--submit">
+        <button class="button " type="submit">
+        @messages("hts.global.continue-button")
+    </button>
+    </div>
+    </form>
     }
 
 

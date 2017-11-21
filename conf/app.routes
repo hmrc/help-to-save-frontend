@@ -40,3 +40,5 @@ GET        /account/email-updated                           @uk.gov.hmrc.helptos
 GET        /account/email-update-error                      @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdateError
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
+
+POST       /register/you-are-eligible-submit                @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.youAreEligibleSubmit

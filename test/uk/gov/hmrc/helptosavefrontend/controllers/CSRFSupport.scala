@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,12 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@(action: play.api.mvc.Call, args: (Symbol, String)*)(body: => Html)(implicit request: Request[_], messages: Messages)
-@import views.html.helper.CSRF
+package uk.gov.hmrc.helptosavefrontend.controllers
 
-<form action="@action.url" method="@action.method" @toHtmlArgs(args.toMap[Symbol,String])>
-    @CSRF.formField(request)
-    @body
-</form>
+import play.api.test.FakeRequest
+import play.filters.csrf.CSRF.{Token, TokenProvider}
+import uk.gov.hmrc.helptosavefrontend.TestSupport
+
+trait CSRFSupport { this: TestSupport ⇒
+
+  lazy val tokenProvider: TokenProvider =
+    fakeApplication.injector.instanceOf[TokenProvider]
+
+  lazy val fakeRequestWithCSRFToken = FakeRequest().copyFakeRequest(tags = Map(
+    Token.NameRequestTag → "csrfToken",
+    Token.RequestTag → tokenProvider.generateToken))
+
+}

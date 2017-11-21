@@ -41,6 +41,7 @@ import scala.concurrent.{Await, Future}
 
 class EligibilityCheckControllerSpec
   extends AuthSupport
+  with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with GeneratorDrivenPropertyChecks {
 
@@ -68,7 +69,7 @@ class EligibilityCheckControllerSpec
 
     "displaying the you are eligible page" must {
 
-        def getIsEligible(): Future[PlayResult] = controller.getIsEligible(FakeRequest())
+        def getIsEligible(): Future[PlayResult] = controller.getIsEligible(fakeRequestWithCSRFToken)
 
       behave like commonEnrolmentAndSessionBehaviour(getIsEligible)
 
@@ -403,5 +404,57 @@ class EligibilityCheckControllerSpec
         }
       }
     }
+
+    "handling you-are-eligible-submits" must {
+      import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
+
+        def doRequest(): Future[PlayResult] = controller.youAreEligibleSubmit(FakeRequest())
+
+      "redirect to the give email page if the user has no email" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getGiveEmailPage().url)
+      }
+
+      "redirect to the select email page if the user has an email" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = Some("email"))), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
+      }
+
+      "redirect to the check eligibility page if the user has no session" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+          mockSessionCacheConnectorGet(Right(None))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      }
+
+      "redirect to the not eligible page if the user is not eligible" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+      }
+
+    }
+
   }
 }

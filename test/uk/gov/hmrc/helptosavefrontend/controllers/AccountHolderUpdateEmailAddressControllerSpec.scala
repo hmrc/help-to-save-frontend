@@ -43,7 +43,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
+class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSRFSupport {
 
   implicit lazy val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
@@ -111,7 +111,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
     "handling requests to update email addresses" must {
 
         def getUpdateYourEmailAddress(): Future[Result] =
-          controller.getUpdateYourEmailAddress()(FakeRequest())
+          controller.getUpdateYourEmailAddress()(fakeRequestWithCSRFToken)
 
       behave like commonEnrolmentBehaviour(
         () ⇒ getUpdateYourEmailAddress(),
@@ -140,7 +140,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport {
 
       lazy val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
-      val fakePostRequest = FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
+      val fakePostRequest = fakeRequestWithCSRFToken.withFormUrlEncodedBody("new-email-address" → email)
 
         def submit(email: String): Future[Result] =
           controller.onSubmit()(FakeRequest().withFormUrlEncodedBody("new-email-address" → email))
