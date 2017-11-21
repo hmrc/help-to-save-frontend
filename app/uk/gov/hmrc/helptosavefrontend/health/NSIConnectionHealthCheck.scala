@@ -19,9 +19,10 @@ package uk.gov.hmrc.helptosavefrontend.health
 import java.time.LocalDate
 
 import akka.actor.{Actor, ActorRef, ActorSystem, PoisonPill, Props}
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
+import play.api.inject.ApplicationLifecycle
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector
 import uk.gov.hmrc.helptosavefrontend.health.NSIConnectionHealthCheck.NSIConnectionHealthCheckRunner
@@ -38,11 +39,13 @@ import scala.concurrent.duration._
 import scala.util.control.NonFatal
 
 // $COVERAGE-OFF$
+@Singleton
 class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
                                           configuration: Configuration,
                                           metrics:       Metrics,
                                           nSIConnector:  NSIConnector,
-                                          mongo:         ReactiveMongoComponent) extends Logging {
+                                          mongo:         ReactiveMongoComponent,
+                                          lifecycle:     ApplicationLifecycle) extends Logging {
 
   val name: String = "nsi-connection"
 
@@ -76,7 +79,8 @@ class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
       _.flatMap{ ref ⇒
         ref ! PoisonPill
         None
-      }),
+      },
+      lifecycle),
       s"health-check-$name-lock"
     )
 

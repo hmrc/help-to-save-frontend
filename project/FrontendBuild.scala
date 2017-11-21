@@ -24,10 +24,10 @@ object FrontendBuild extends Build with MicroService {
 
   def test(scope: String = "test") = Seq(
     "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
-    "org.scalatest" %% "scalatest" % "3.0.1" % scope,
+    "org.scalatest" %% "scalatest" % "3.0.4" % scope,
     "org.jsoup" % "jsoup" % "1.8.1" % scope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
-    "org.scalamock" %% "scalamock-scalatest-support" % "3.5.0" % scope,
+    "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
     "uk.gov.hmrc" %% "stub-data-generator" % "0.4.0" % scope,
     "com.typesafe.akka" %% "akka-testkit" % "2.3.11" % scope,
     "com.miguno.akka" % "akka-mock-scheduler_2.11" % "0.5.1" % scope,
