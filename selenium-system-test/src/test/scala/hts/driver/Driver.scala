@@ -31,12 +31,11 @@ object Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome")       ⇒ Right(createChromeDriver(false))
-      case Some("zap-chrome")   ⇒ Right(createZapChromeDriver())
-      case Some("headless")     ⇒ Right(createChromeDriver(true))
-      case Some("zap-headless") ⇒ Right(createZapHeadlessChromeDriver)
-      case Some(other)          ⇒ Left(s"Unrecognised browser: $other")
-      case None                 ⇒ Left("No browser set")
+      case Some("chrome")     ⇒ Right(createChromeDriver(false))
+      case Some("zap-chrome") ⇒ Right(createZapChromeDriver())
+      case Some("headless")   ⇒ Right(createChromeDriver(true))
+      case Some(other)        ⇒ Left(s"Unrecognised browser: $other")
+      case None               ⇒ Left("No browser set")
     }
 
     selectedDriver.foreach { driver ⇒
@@ -95,20 +94,6 @@ object Driver {
     val options = new ChromeOptions()
     options.addArguments("test-type")
     options.addArguments("--proxy-server=http://localhost:11000")
-    capabilities.setCapability(ChromeOptions.CAPABILITY, options)
-    val driver = new ChromeDriver(capabilities)
-    val caps = driver.getCapabilities
-    driver
-  }
-
-  private def createZapHeadlessChromeDriver(): WebDriver = {
-    setChromeDriver
-
-    val capabilities = DesiredCapabilities.chrome()
-    val options = new ChromeOptions()
-    options.addArguments("test-type")
-    options.addArguments("--proxy-server=http://localhost:11000")
-    options.addArguments("--headless")
     capabilities.setCapability(ChromeOptions.CAPABILITY, options)
     val driver = new ChromeDriver(capabilities)
     val caps = driver.getCapabilities

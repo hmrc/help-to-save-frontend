@@ -20,7 +20,7 @@ import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.EitherOps._
 import hts.utils.{Configuration, ScenarioContext}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig;
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
 class CreateAccountSteps extends Steps with Page {
 
