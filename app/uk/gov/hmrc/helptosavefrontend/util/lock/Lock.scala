@@ -19,15 +19,17 @@ package uk.gov.hmrc.helptosavefrontend.util.lock
 import akka.actor.{Actor, Cancellable, Props, Scheduler}
 import akka.pattern.pipe
 import org.joda.time
+import play.api.inject.ApplicationLifecycle
 import reactivemongo.api.DB
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.lock.{ExclusiveTimePeriodLock, LockMongoRepository, LockRepository}
 import uk.gov.hmrc.helptosavefrontend.util.lock.LockProvider.ExclusiveTimePeriodLockProvider
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 
+import scala.concurrent.Future
 import scala.concurrent.duration._
-import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
+import scala.util.control.NonFatal
 
 /**
  * This is an `Actor` which handles changing of state when a lock is acquired or a lock
@@ -36,16 +38,20 @@ import scala.util.{Failure, Success}
  * called on the `initialState`. The state is updated at this point.  When the lock duration defined
  * in the `LockProvider` has passed this `Actor` will try to acquire/renew a lock again. If successful
  * `onLockAcquired` is called on the current state. Otherwise `onLockReleased` is called on the
- * current state. This continues until the `Actor` dies. Before death, this `Actor` will try to release
- * the lock. If successful `onLockReleased` is called on the current state.
+ * current state. This continues until the `Actor` dies.
+ *
+ * The actor will register a release of the lock using the `registerStopHook` function. For Play applications
+ * the appropriate function is the `addStopHook` from the injectable `ApplicationLifecycle`. If this release
+ * is successful `onLockReleased` is called.
  *
  * N.B.: If the process of trying to acquire/renew a lock fails for any reason the state is not changed.
  */
-class Lock[State](lock:           LockProvider,
-                  scheduler:      Scheduler,
-                  initialState:   State,
-                  onLockAcquired: State ⇒ State,
-                  onLockReleased: State ⇒ State
+class Lock[State](lock:             LockProvider,
+                  scheduler:        Scheduler,
+                  initialState:     State,
+                  onLockAcquired:   State ⇒ State,
+                  onLockReleased:   State ⇒ State,
+                  registerStopHook: (() ⇒ Future[Unit]) ⇒ Unit
 ) extends Actor with Logging {
 
   import Lock.LockMessages._
@@ -55,6 +61,8 @@ class Lock[State](lock:           LockProvider,
   var state: State = initialState
 
   var schedulerTask: Option[Cancellable] = None
+
+  var lockAcquired: Boolean = false
 
   override def receive: Receive = {
     case AcquireLock ⇒
@@ -67,12 +75,14 @@ class Lock[State](lock:           LockProvider,
     case AcquireLockFailure(error) ⇒
       logger.warn(s"Could not acquire or renew lock: ${error.getMessage}. Leaving state as is")
 
-    case AcquireLockResult(lockAcquired) ⇒
-      if (lockAcquired) {
+    case AcquireLockResult(acquired) ⇒
+      if (acquired) {
         logger.info(s"Lock successfully acquired (lockID: ${lock.lockId}")
+        lockAcquired = true
         state = onLockAcquired(state)
       } else {
         logger.info(s"Unable to acquire lock (lockID: ${lock.lockId}")
+        lockAcquired = false
         state = onLockReleased(state)
       }
 
@@ -80,20 +90,20 @@ class Lock[State](lock:           LockProvider,
 
   override def preStart(): Unit = {
     super.preStart()
-    schedulerTask = Some(scheduler.schedule(Duration.Zero, lock.holdLockFor, self, AcquireLock))
-  }
 
-  override def postStop(): Unit = {
-    lock.releaseLock().onComplete{
-      case Success(_) ⇒
-        state = onLockReleased(state)
-
-      case Failure(e) ⇒
-        logger.warn(s"Could not release lock while shutting down: ${e.getMessage}")
-
+    // release the lock when the application shuts down
+    registerStopHook{ () ⇒
+      if (lockAcquired) {
+        lock.releaseLock().onComplete {
+          case Success(_) ⇒
+            logger.info("Successfully released lock")
+            state = onLockReleased(state)
+          case Failure(e) ⇒ logger.warn(s"Could not release lock: ${e.getMessage}")
+        }
+      }
     }
 
-    super.postStop()
+    schedulerTask = Some(scheduler.schedule(Duration.Zero, lock.holdLockFor, self, AcquireLock))
   }
 
 }
@@ -110,7 +120,8 @@ object Lock {
                    scheduler:      Scheduler,
                    initialState:   State,
                    onLockAcquired: State ⇒ State,
-                   onLockReleased: State ⇒ State): Props = {
+                   onLockReleased: State ⇒ State,
+                   lifecycle:      ApplicationLifecycle): Props = {
 
     val lock: ExclusiveTimePeriodLock = new ExclusiveTimePeriodLock {
       override val holdLockFor: time.Duration = org.joda.time.Duration.millis(lockDuration.toMillis)
@@ -120,7 +131,7 @@ object Lock {
       override val lockId: String = lockID
     }
 
-    Props(new Lock(ExclusiveTimePeriodLockProvider(lock), scheduler, initialState, onLockAcquired, onLockReleased))
+    Props(new Lock(ExclusiveTimePeriodLockProvider(lock), scheduler, initialState, onLockAcquired, onLockReleased, lifecycle.addStopHook))
   }
 
   private sealed trait LockMessages
