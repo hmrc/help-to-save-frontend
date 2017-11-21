@@ -47,4 +47,13 @@ class WhitelistFilter(configuration: Configuration, val mat: Materializer) exten
 
   val healthCheckCall: Call = Call("GET", uk.gov.hmrc.play.health.routes.AdminController.ping().url)
 
+  override def apply(f: (RequestHeader) ⇒ Future[Result])(rh: RequestHeader): Future[Result] = {
+    rh.headers.get(trueClient).foreach{ ip ⇒
+      if (!whitelist.contains(ip)) {
+        logger.warn(s"SuspiciousActivity: Received request from non-whitelisted ip $ip")
+      }
+    }
+    super.apply(f)(rh)
+  }
+
 }
