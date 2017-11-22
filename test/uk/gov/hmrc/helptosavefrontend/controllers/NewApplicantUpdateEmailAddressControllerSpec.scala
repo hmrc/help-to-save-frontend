@@ -18,6 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.net.URLDecoder
 
+import cats.data.EitherT
+import cats.instances.future._
 import play.api.http.Status
 import play.api.i18n.{Messages, MessagesApi}
 import play.api.inject.Injector
@@ -85,6 +87,11 @@ class NewApplicantUpdateEmailAddressControllerSpec
     (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO))
       .expects(*, *)
       .returning(Future.successful(AuditResult.Success))
+
+  def mockStoreConfirmedEmail(email: String)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier))
+      .expects(email, *)
+      .returning(EitherT.fromEither[Future](result))
 
   "The NewApplicantUpdateEmailAddressController" when {
 
@@ -189,6 +196,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
             mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo.updateEmail(testEmail)), Some(testEmail)))(Right(()))
+            mockStoreConfirmedEmail(testEmail)(Right(()))
           }
 
           val params = EmailVerificationParams(validUserInfo.nino, testEmail)
@@ -256,6 +264,15 @@ class NewApplicantUpdateEmailAddressControllerSpec
                validUserInfo.nino,
                testEmail
           )
+        }
+
+        "the confirmed email cannot be stored" in {
+          test(inSequence{
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo.updateEmail(testEmail)), Some(testEmail)))(Right(()))
+            mockStoreConfirmedEmail(testEmail)(Left(""))
+          }, validUserInfo.nino, testEmail)
         }
 
         "the user has missing info and they do not have a session" in {

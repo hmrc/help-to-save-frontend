@@ -143,7 +143,10 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         } else {
           val newInfo = info.updateEmail(params.email)
           val newSession = HTSSession(Right(newInfo), Some(params.email))
-          sessionCacheConnector.put(newSession).map(_ ⇒ newInfo)
+          for {
+            _ ← sessionCacheConnector.put(newSession)
+            _ ← helpToSaveService.storeConfirmedEmail(params.email)
+          } yield newInfo
         }
       }
 
