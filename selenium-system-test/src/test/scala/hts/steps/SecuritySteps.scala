@@ -93,4 +93,8 @@ class SecuritySteps extends Steps with Page {
     Helpers.isTextOnPage("You're not eligible for Help to Save") shouldBe true
   }
 
+  Given("""^HMRC doesn't currently hold an email address for me$"""){ () ⇒
+   AuthorityWizardPage.authenticateUserNoEmail(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+  }
+
 }

@@ -27,9 +27,14 @@ class EmailSteps extends Steps with Page {
     EligiblePage.startCreatingAccount()
   }
 
-  When("""^I choose to change my email address$"""){ () ⇒
-    ConfirmDetailsPage.changeEmail()
-    ChangeEmailPage.setAndVerifyNewEmail("newemail@mail.com")
+  When("""^I am shown a page to select which email address to use for hts$"""){ () ⇒
+    getCurrentUrl contains SelectEmailPage.url
+  }
+
+  When("""^I select the email obtained from GG and click Continue$"""){ () ⇒
+    getCurrentUrl contains SelectEmailPage.url
+    SelectEmailPage.selectGGEmail()
+    SelectEmailPage.clickContinue()
   }
 
   Then("""^I am asked to check my email account for a verification email$"""){ () ⇒
@@ -40,7 +45,7 @@ class EmailSteps extends Steps with Page {
     AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO())
     EligiblePage.startCreatingAccount()
     ConfirmDetailsPage.changeEmail()
-    ChangeEmailPage.setAndVerifyNewEmail("newemail@mail.com")
+    SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
   }
 
   Given("""^I want to receive a second verification email$"""){ () ⇒
@@ -65,7 +70,7 @@ class EmailSteps extends Steps with Page {
 
   When("""^I then choose to change the email address from B to C$"""){ () ⇒
     CheckYourEmailPage.changeEmail()
-    ChangeEmailPage.setAndVerifyNewEmail("secondnewemail@mail.com")
+    SelectEmailPage.setAndVerifyNewEmail("secondnewemail@mail.com")
   }
 
   When("""^I verify email address C$"""){ () ⇒
@@ -74,5 +79,9 @@ class EmailSteps extends Steps with Page {
 
   Then("""^I see that my saved email address is C$"""){ () ⇒
 
+  }
+
+  Then("""^I am shown a page to enter my email address$""") { () ⇒
+    getCurrentUrl contains GiveEmailPage.url
   }
 }

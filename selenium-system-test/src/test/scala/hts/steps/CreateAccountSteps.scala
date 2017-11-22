@@ -65,7 +65,7 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   When("""^they choose to create an account$""") { () ⇒
-    ConfirmDetailsPage.continue()
+//    ConfirmDetailsPage.continue()
     CreateAccountPage.createAccount()
   }
 

@@ -38,7 +38,7 @@
                 errorKey = ek.map(_ ⇒ "hts.email.enter-valid-email").getOrElse("")
             )
           <section class="subsection">
-            @helpers.submit('_buttonClass -> "") { @messages("hts.global.continue-button") }
+            @helpers.submit('_buttonClass -> "", 'id → "continue") { @messages("hts.global.continue-button") }
           </section>
         }
     }
