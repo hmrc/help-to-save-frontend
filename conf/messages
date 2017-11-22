@@ -272,7 +272,7 @@ hts.select-email.enter-new-address-label=Enter a new email address
 hts.select-email.select-an-option=Please select an option
 hts.give-email.title=Which email address do you want us to use for your Help to Save account? 
 hts.give-email.page-title=Which email address do you want us to use for your Help to Save account?
-hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account
+hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
 
 hts.email-verification.title=Update your email
