@@ -34,6 +34,8 @@ object EligiblePage extends Page {
 
   def startCreatingAccount()(implicit driver: WebDriver): Unit = click on "start-creating-account"
 
+  //def startCreatingYourAccount()(implicit driver: WebDriver): Unit = click on "start-creating-account"
+
   override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h1", pageTitle)
 
   def detailsNotCorrect()(implicit driver: WebDriver): Unit = click on linkText("These details are not correct")

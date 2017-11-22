@@ -99,5 +99,4 @@ class EmailSteps extends Steps with Page {
     getCurrentUrl contains CheckYourEmailPage.url
 
   }
-
 }

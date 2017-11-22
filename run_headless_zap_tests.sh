@@ -10,3 +10,4 @@ echo "EXIT_CODE = $EXIT_CODE"
 ./output-log-exceptions.sh
 
 exit $EXIT_CODE
+
