@@ -221,7 +221,6 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         } else if (userCapResponse.isDailyCapReached) {
           SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
         } else if (userCapResponse.forceDisabled) {
-          //TODO
           SeeOther(routes.RegisterController.getAccountCreateDisabledPage().url)
         } else {
           ifAllowed
