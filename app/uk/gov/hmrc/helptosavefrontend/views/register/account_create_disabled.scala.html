@@ -18,15 +18,19 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.user-cap-reached.header.page.title"), bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.account-create-disabled.header.page.title"), bodyClasses = None) {
 
 <div class="grid-layout grid-layout--stacked">
     <div class="grid-layout__column grid-layout__column--2-3">
         <header class="page-header text">
-            <h2>@Messages("hts.register.user-cap-reached.header")</h2>
+            <h2>@Messages("hts.register.account-create-disabled.header")</h2>
         </header>
 
-        <p class="margin-bottom">@Html(Messages("hts.register.user-cap-reached.contact.hmrc", "https://www.gov.uk/contact-hmrc"))</p>
+        <p>@Html(Messages("hts.register.account-create-disabled.p1"))</p>
+        <p>@Html(Messages("hts.register.account-create-disabled.p2"))</p>
+        <p>@Html(Messages("hts.register.account-create-disabled.p3"))</p>
+
+        <p>@Html(Messages("hts.register.total-cap-reached.exit.gov.uk"))</p>
     </div>
 </div>
 }

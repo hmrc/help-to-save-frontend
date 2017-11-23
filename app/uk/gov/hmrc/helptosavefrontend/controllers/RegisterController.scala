@@ -26,9 +26,7 @@ import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import play.filters.csrf.CSRFAddToken
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalTaxAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -151,9 +149,17 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     }
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def getUserCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.user_cap_reached())
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl) //TODO
+  def getDailyCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.daily_cap_reached())
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  def getTotalCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.total_cap_reached())
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  def getAccountCreateDisabledPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.account_create_disabled())
+  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def getDetailsAreIncorrect: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.details_are_incorrect())
@@ -209,11 +215,16 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       error ⇒ {
         logger.warn(s"Could not check if account create is allowed, due to: $error")
         ifAllowed
-      }, {
-        if (_) {
-          ifAllowed
+      }, { userCapResponse ⇒
+        if (userCapResponse.isTotalCapReached) {
+          SeeOther(routes.RegisterController.getTotalCapReachedPage().url)
+        } else if (userCapResponse.isDailyCapReached) {
+          SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
+        } else if (userCapResponse.forceDisabled) {
+          //TODO
+          SeeOther(routes.RegisterController.getAccountCreateDisabledPage().url)
         } else {
-          SeeOther(routes.RegisterController.getUserCapReachedPage().url)
+          ifAllowed
         }
       }
     )

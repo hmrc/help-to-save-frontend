@@ -26,7 +26,6 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result}
-import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,7 +47,7 @@ trait HelpToSaveService {
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean]
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[UserCapResponse]
 
   def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit]
 
@@ -83,7 +82,7 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
         Left(failure)
     })
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean] =
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[UserCapResponse] =
     helpToSaveConnector.isAccountCreationAllowed()
 
   def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit] =
