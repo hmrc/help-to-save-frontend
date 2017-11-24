@@ -116,5 +116,5 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
         logger.warn("response from identityVerificationFrontendService did not contain token or journeyId param")
         Future.successful(Unauthorized(access_denied()))
     }
-  }(redirectOnLoginURL = continueURL)
+  }(redirectOnLoginURL = routes.IvController.journeyResult(continueURL).url)
 }
