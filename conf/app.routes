@@ -30,7 +30,7 @@ POST       /register/create-an-account                      @uk.gov.hmrc.helptos
 
 GET        /register/daily-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /register/total-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
-GET        /register/account-create-disabled                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getAccountCreateDisabledPage
+GET        /register/service-unavailable                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceUnavailablePage
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String)
 

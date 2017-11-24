@@ -384,7 +384,7 @@ class RegisterControllerSpec
       "return the account create disabled page" in {
         mockAuthWithNoRetrievals(AuthProvider)
 
-        val result = controller.getAccountCreateDisabledPage(FakeRequest())
+        val result = controller.getServiceUnavailablePage(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include("We have disabled the Help to Save account creation at the moment")
       }

@@ -157,9 +157,9 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     Ok(views.html.register.total_cap_reached())
   }(redirectOnLoginURL = routes.RegisterController.getTotalCapReachedPage().url)
 
-  def getAccountCreateDisabledPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.account_create_disabled())
-  }(redirectOnLoginURL = routes.RegisterController.getAccountCreateDisabledPage().url)
+  def getServiceUnavailablePage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.service_unavailable())
+  }(redirectOnLoginURL = routes.RegisterController.getServiceUnavailablePage().url)
 
   def getDetailsAreIncorrect: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.details_are_incorrect())
@@ -221,7 +221,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         } else if (userCapResponse.isDailyCapReached) {
           SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
         } else if (userCapResponse.forceDisabled) {
-          SeeOther(routes.RegisterController.getAccountCreateDisabledPage().url)
+          SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
         } else {
           ifAllowed
         }
