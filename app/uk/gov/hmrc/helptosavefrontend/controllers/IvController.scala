@@ -26,10 +26,10 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConne
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, urlDecode}
 import uk.gov.hmrc.helptosavefrontend.views.html.access_denied
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
-import uk.gov.hmrc.helptosavefrontend.util.urlDecode
 
 import scala.concurrent.Future
 
@@ -41,12 +41,13 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
                               metrics:                   Metrics)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport with Logging {
 
-  def journeyResult(continueURL: String): Action[AnyContent] = authorisedForHts { // scalastyle:ignore cyclomatic.complexity method.length
+  def journeyResult(continueURL: String): Action[AnyContent] = authorisedForHtsWithNINO { // scalastyle:ignore cyclomatic.complexity method.length
   implicit request ⇒ implicit htsContext ⇒
     //Will be populated if we arrived here because of an IV success/failure
     val journeyId = request.getQueryString("token").orElse(request.getQueryString("journeyId"))
     val allowContinue = true
     val newIvUrl = ivUrl(continueURL)
+    val nino = htsContext.nino
 
     journeyId match {
       case Some(id) ⇒
@@ -98,7 +99,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
             metrics.ivTechnicalIssueCounter.inc()
             //A technical issue on the platform caused the journey to end.
             // This is usually a transient issue, so that the user should try again later
-            logger.warn(s"TechnicalIssue response from identityVerificationFrontendService")
+            logger.warn("TechnicalIssue response from identityVerificationFrontendService", nino)
             Unauthorized(technical_iv_issues(newIvUrl))
 
           case Some(Timeout) ⇒
@@ -107,7 +108,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
             Unauthorized(time_out(newIvUrl))
 
           case _ ⇒
-            logger.warn(s"unexpected response from identityVerificationFrontendService")
+            logger.warn("unexpected response from identityVerificationFrontendService", nino)
             InternalServerError(technical_iv_issues(newIvUrl))
         }
 
