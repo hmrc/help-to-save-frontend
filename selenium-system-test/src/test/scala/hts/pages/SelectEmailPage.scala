@@ -24,16 +24,17 @@ object SelectEmailPage extends Page {
   val url: String = s"${Configuration.host}/help-to-save/select-email"
 
   def setNewEmail(email: String)(implicit driver: WebDriver): Unit = {
-    val el = find(name("value"))
+    val el = find(name("new-email"))
     el.foreach(_.underlying.clear())
     el.foreach(_.underlying.sendKeys(email))
   }
 
-  def verifyYourEmail()(implicit driver: WebDriver): Unit = click on xpath(".//*[@type='submit']")
+  //def verifyYourEmail()(implicit driver: WebDriver): Unit = click on xpath(".//*[@type='submit']")
 
   def setAndVerifyNewEmail(email: String)(implicit driver: WebDriver): Unit = {
+    selectNewEmail()
     setNewEmail(email)
-    verifyYourEmail()
+    clickContinue()
   }
 
   def selectGGEmail()(implicit driver: WebDriver): Unit = click on "registered-email"

@@ -1,6 +1,6 @@
 Feature: Logging in
 
-  @HTS-23
+  @HTS-23 @done
   Scenario: An unauthenticated user wishes to apply for a Help to Save account
     Given A user is at the start of the registration process
     When they proceed through to the apply page

@@ -1,7 +1,7 @@
-@HTS-147 @ignore
+@HTS-147
 Feature: Returning account holder tries to apply again
 
-  @zap
+  @zap @done @but-will-need-updating
   Scenario: An unauthenticated user attempts to access their account through the sign in link
     Given a user has previously created an account
     And a user is on the apply page

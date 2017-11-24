@@ -21,10 +21,12 @@ import org.openqa.selenium.WebDriver
 
 object CreateAccountPage extends Page {
 
+  val url: String = s"${Configuration.host}/help-to-save/register/create-an-account"
+
   def navigate()(implicit driver: WebDriver): Unit = go to s"${Configuration.host}/help-to-save/register/create-an-account"
 
-  def createAccount()(implicit driver: WebDriver): Unit = click on "accept-and-create-account"
+  def createAccount()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='ga-track-event']")
 
-  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit = click on "exit-without-creating-account"
+  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='button button--secondary ga-track-event']")
 
 }

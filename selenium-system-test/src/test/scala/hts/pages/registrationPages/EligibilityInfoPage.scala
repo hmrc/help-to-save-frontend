@@ -19,8 +19,8 @@ package hts.pages.registrationPages
 import hts.pages.Page
 import hts.utils.Configuration
 
-object CheckEligibilityPage extends Page {
+object EligibilityInfoPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
+  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/eligibility"
 
 }

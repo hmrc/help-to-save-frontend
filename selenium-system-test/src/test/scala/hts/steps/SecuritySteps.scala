@@ -16,7 +16,7 @@
 
 package hts.steps
 
-import hts.pages.registrationPages.CheckEligibilityPage
+import hts.pages.registrationPages.EligibilityInfoPage
 import hts.pages._
 import hts.utils.{Configuration, Helpers, ScenarioContext}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
@@ -31,12 +31,12 @@ class SecuritySteps extends Steps with Page {
 
   Given(s"""^a user has a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
     AuthorityWizardPage.navigate()
-    AuthorityWizardPage.setRedirect(CheckEligibilityPage.url)
+    AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.setConfidenceLevel(level)
   }
 
   Given(s"""^I have logged in to Government Gateway with a confidence level of $confidenceLevelRegex$$""") { (level: Int) ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, level, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, level, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Then("""^I am forced into going through IV before being able to proceed with their HtS application$""") { () ⇒
@@ -48,7 +48,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   Given("""^a user has logged in$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   When("""^they have logged in and passed IV$"""){ () ⇒
@@ -57,7 +57,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   When("""^I try to view the user details page$""") { () ⇒
-    ConfirmDetailsPage.navigate()
+    EligiblePage.navigate()
   }
 
   When("""^I try to view the create-an-account page$""") { () ⇒
@@ -69,7 +69,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   Given("""^a user has logged in and passed IV$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Then("""^the GG sign in page is visible$"""){ () ⇒
@@ -86,7 +86,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   Given("""^I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateIneligibleNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.generateIneligibleNINO())
   }
 
   Then("""^I still see confirmation that I am NOT eligible$"""){ () ⇒
@@ -94,7 +94,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   Given("""^HMRC doesn't currently hold an email address for me$"""){ () ⇒
-   AuthorityWizardPage.authenticateUserNoEmail(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUserNoEmail(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
 }
