@@ -60,7 +60,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
             metrics.ivIncompleteCounter.inc()
             //The journey has not been completed yet.
             //This result can only occur when a service asks for the result too early (before receiving the redirect from IV)
-            InternalServerError(user_aborted_or_incomplete(newIvUrl, allowContinue))
+            internalServerError()
 
           case Some(FailedMatching) ⇒
             metrics.ivFailedMatchingCounter.inc()
@@ -109,7 +109,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
 
           case _ ⇒
             logger.warn("unexpected response from identityVerificationFrontendService", nino)
-            InternalServerError(technical_iv_issues(newIvUrl))
+            internalServerError()
         }
 
       case None ⇒

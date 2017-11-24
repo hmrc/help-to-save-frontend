@@ -153,25 +153,25 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
     status match {
       case Status.BAD_REQUEST ⇒
         logger.warn(s"Failed to create account as NSI, received status 400 (Bad Request) from NSI ${timeString(time)}", nino)
-        handleBadRequestResponse(response)
+        handleError(response)
 
       case Status.INTERNAL_SERVER_ERROR ⇒
         logger.warn(s"Failed to create account as NSI, received status 500 (Internal Server Error) from NSI ${timeString(time)}", nino)
-        handleBadRequestResponse(response)
+        handleError(response)
 
       case Status.SERVICE_UNAVAILABLE ⇒
         logger.warn(s"Failed to create account as NSI, received status 503 (Service Unavailable) from NSI ${timeString(time)}", nino)
-        handleBadRequestResponse(response)
+        handleError(response)
 
       case other ⇒
         logger.warn(s"Unexpected error during creating account, received status $other ${timeString(time)}", nino)
-        SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
+        handleError(response)
     }
   }
 
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
-  private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
+  private def handleError(response: HttpResponse): SubmissionFailure = {
     logger.warn(s"response body from NSI=${response.body}")
     response.parseJSON[SubmissionFailure](Some("error")) match {
       case Right(submissionFailure) ⇒ submissionFailure

@@ -24,16 +24,13 @@ import org.scalatest.prop.Tables.Table
 import play.api.http.Status._
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.AuthProviders
-import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval}
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{Await, Future}
 
 class IvControllerSpec extends AuthSupport {
 
@@ -48,11 +45,6 @@ class IvControllerSpec extends AuthSupport {
       .returning(Future.successful(IvSuccessResponse.fromString(ivServiceResponse)))
 
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
-
-  private def mockAuthConnectorResult() = {
-    (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(AuthProviders(GovernmentGateway), EmptyRetrieval, *, *).returning(Future.successful(()))
-  }
 
   lazy val ivController = new IvController(mockSessionCacheConnector,
                                            ivConnector,
@@ -87,7 +79,7 @@ class IvControllerSpec extends AuthSupport {
         )
 
       forAll(validCases) { (ivServiceResponse: String, htsStatus: Int) ⇒
-        mockAuthConnectorResult()
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockIvConnector(journeyId, ivServiceResponse)
 
         val responseFuture = doRequest()
@@ -100,7 +92,7 @@ class IvControllerSpec extends AuthSupport {
 
     "handles the case where no iv response for a given journeyId" in {
 
-      mockAuthConnectorResult()
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
 
       val responseFuture =
         ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(

@@ -573,7 +573,8 @@ class RegisterControllerSpec
           }
 
           val result = doCreateAccountRequest()
-          checkIsTechnicalErrorPage(result)
+          status(result) shouldBe SEE_OTHER
+          contentAsString(result) contains "User data failed validation"
         }
 
         "the help to save service returns with an error" in {

@@ -191,7 +191,6 @@ hts.register.you-are-eligible.button-1=Start creating your account
 hts.register.you-are-eligible.button-2=These details are not correct
 
 
-
 hts.register.check-and-confirm-your-details.title=Check and confirm your details
 hts.register.check-and-confirm-your-details.step=Step 1 of 4
 hts.register.check-and-confirm-your-details.name=Name
@@ -238,6 +237,12 @@ hts.register.create_account_help_to_save.bullet-1=you’'re only allowed one acc
 hts.register.create_account_help_to_save.bullet-2=you’'ll need to enter your bank details to access your account
 hts.register.create_account_help_to_save.accept-label=Accept and create account
 hts.register.create_account_help_to_save.cancel-label=Exit without creating account
+
+hts.register.userinfo.failed.validation.title=User data failed validation
+hts.register.userinfo.failed.validation.header=We are seeing issues with your details.
+hts.register.userinfo.failed.validation.p1=Your information we have in our systems is failed validation required for account creation.
+hts.register.userinfo.failed.validation.p2=Please call our customer services.
+hts.register.userinfo.failed.validation.contact.hmrc=If you have trouble getting in, please  <a href="{0}" target="_blank">Contact HMRC</a>
 
 hts.iv.identity_verification.title=Help to Save Identity verification
 hts.iv.locked_out.page-title=We were not able to verify your identity 
@@ -314,3 +319,8 @@ hts.we-couldnt-update-your-email.page-title=Something went wrong
 hts.we-couldnt-update-your-email.p1=We cannot change your email address at this time.
 hts.we-couldnt-update-your-email.p2=You''ll need to come back later and try again.
 hts.we-couldnt-update-your-email.back-to-account=Got to account home
+
+
+global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
+global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties
+global.error.InternalServerError500.message=Please try again later.
