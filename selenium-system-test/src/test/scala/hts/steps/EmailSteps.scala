@@ -97,6 +97,5 @@ class EmailSteps extends Steps with Page {
 
   Then("""^I see the page "You have 30 minutes to verify your email address"$""") { () ⇒
     getCurrentUrl contains CheckYourEmailPage.url
-
   }
 }

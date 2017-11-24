@@ -40,8 +40,13 @@
     @defining(
         oldEmail.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getSelectEmailPage)
     ){ call =>
+<<<<<<< HEAD
         <p class="content subsection--wide push--bottom">
             <a href=@call class="font-xsmall">@messages("hts.email-verification.check-your-email.change-email-address")</a>
+=======
+        <p class="content">
+            <a href=@call>@messages("hts.email-verification.check-your-email.change-email-address")</a>
+>>>>>>> HTS-598 All scenarios involing email have been fixed
         </p>
     }
 
