@@ -69,7 +69,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         )
       }
     }
-  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  } (redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmail(email).url)
 
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
@@ -95,7 +95,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
       },
       toFuture(Ok(views.html.email.email_verify_error()))
     )
-  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  } (redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
 
   def getEmailUpdated(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒

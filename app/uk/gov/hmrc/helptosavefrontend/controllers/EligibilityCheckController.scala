@@ -70,7 +70,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
       getEligibilityActionResult()
     }
     )
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -91,7 +91,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
         )
       }
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = routes.EligibilityCheckController.getIsNotEligible().url)
 
   val getIsEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -119,7 +119,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           SeeOther(url)
         })
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = routes.EligibilityCheckController.youAreEligibleSubmit().url)
 
   private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
                                            htsContext: HtsContextWithNINOAndUserDetails,

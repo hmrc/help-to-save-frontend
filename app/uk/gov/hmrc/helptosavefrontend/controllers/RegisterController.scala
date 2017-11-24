@@ -26,9 +26,7 @@ import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import play.filters.csrf.CSRFAddToken
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalTaxAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -70,7 +68,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           )
         }
       }
-    }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+    }(redirectOnLoginURL = routes.RegisterController.getGiveEmailPage().url)
 
   def giveEmailSubmit(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -84,7 +82,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           )
         }
       }
-    }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+    }(redirectOnLoginURL = routes.RegisterController.giveEmailSubmit().url)
 
   def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -96,7 +94,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
         }
       }
-    }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+    }(redirectOnLoginURL = routes.RegisterController.getSelectEmailPage().url)
 
   def selectEmailSubmit(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -114,7 +112,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
         }
       }
-    }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+    }(redirectOnLoginURL = routes.RegisterController.selectEmailSubmit().url)
 
   def confirmEmail(email: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
@@ -149,11 +147,19 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountHelpToSavePage().url)
 
-  def getUserCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.user_cap_reached())
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl) //TODO
+  def getDailyCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.daily_cap_reached())
+  }(redirectOnLoginURL = routes.RegisterController.getDailyCapReachedPage().url)
+
+  def getTotalCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.total_cap_reached())
+  }(redirectOnLoginURL = routes.RegisterController.getTotalCapReachedPage().url)
+
+  def getServiceUnavailablePage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.service_unavailable())
+  }(redirectOnLoginURL = routes.RegisterController.getServiceUnavailablePage().url)
 
   def getDetailsAreIncorrect: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.details_are_incorrect())
@@ -202,18 +208,22 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = routes.RegisterController.createAccountHelpToSave().url)
 
   private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Result)(implicit hc: HeaderCarrier) = {
     helpToSaveService.isAccountCreationAllowed().fold(
       error ⇒ {
         logger.warn(s"Could not check if account create is allowed, due to: $error")
         ifAllowed
-      }, {
-        if (_) {
-          ifAllowed
+      }, { userCapResponse ⇒
+        if (userCapResponse.isTotalCapReached) {
+          SeeOther(routes.RegisterController.getTotalCapReachedPage().url)
+        } else if (userCapResponse.isDailyCapReached) {
+          SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
+        } else if (userCapResponse.forceDisabled) {
+          SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
         } else {
-          SeeOther(routes.RegisterController.getUserCapReachedPage().url)
+          ifAllowed
         }
       }
     )

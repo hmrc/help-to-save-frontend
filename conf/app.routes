@@ -27,8 +27,10 @@ GET        /register/email-verified                         @uk.gov.hmrc.helptos
 GET        /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
 GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
-GET        /register/user-cap-reached                       @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getUserCapReachedPage
 
+GET        /register/daily-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
+GET        /register/total-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
+GET        /register/service-unavailable                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceUnavailablePage
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String)
 

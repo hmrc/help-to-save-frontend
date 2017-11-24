@@ -207,9 +207,29 @@ hts.register.missinguserinfo.header.page.title= Help-to-save: Missing UserInfo
 hts.register.missinguserinfo.redirect.personal.account= Please navigate to your <a href="{0}" target="_blank">Personal Account</a> and provide the missing information
 hts.register.missinguserinfo.contact.hmrc=If you have trouble getting in, please  <a href="{0}" target="_blank">Contact HMRC</a>
 
-hts.register.user-cap-reached.header.page.title=User Limit Reached
-hts.register.user-cap-reached.header=User limit reached for today. Please try again later
-hts.register.user-cap-reached.contact.hmrc=If you have trouble getting in, please  <a href="{0}" target="_blank">Contact HMRC</a>
+hts.register.daily-cap-reached.header.page.title=Help to Save - Daily User Limit Reached
+hts.register.daily-cap-reached.header=You''ll need to try again tomorrow
+hts.register.daily-cap-reached.p1=Thank you for apply for a Help to Save account.
+hts.register.daily-cap-reached.p2=We have a limit on the number of people who can open an account each day.
+hts.register.daily-cap-reached.p3=We''re sorry, we''ve reached our limit today.
+hts.register.daily-cap-reached.p4=You''ll need to try again tomorrow.
+hts.register.daily-cap-reached.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
+
+hts.register.total-cap-reached.header.page.title=Help to Save - Total User Limit Reached
+hts.register.total-cap-reached.header=You can''t open an account yet.
+hts.register.total-cap-reached.p1=Thank you for apply for a Help to Save account.
+hts.register.total-cap-reached.p2=We have a limit on the number of people who can open an account at the moment.
+hts.register.total-cap-reached.p3=We''re sorry, we''ve reached our limit.
+hts.register.total-cap-reached.p4=If You want to open an account, you''ll need to try again later in the year.
+hts.register.total-cap-reached.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
+
+
+hts.register.account-create-disabled.header.page.title=Help to Save - Account Create disabled
+hts.register.account-create-disabled.header=You can''t open an account at the moment.
+hts.register.account-create-disabled.p1=Thank you for apply for a Help to Save account.
+hts.register.account-create-disabled.p2=We have disabled the Help to Save account creation at the moment.
+hts.register.account-create-disabled.p3=If You want to open an account, you''ll need to try again later in the year.
+hts.register.account-create-disabled.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
 
 hts.register.create_account_help_to_save.title=Create a account
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
