@@ -17,6 +17,7 @@
 package hts.pages
 
 import hts.utils.Configuration
+import org.openqa.selenium.support.ui.Sleeper
 import org.openqa.selenium.{By, Keys, WebDriver}
 import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}

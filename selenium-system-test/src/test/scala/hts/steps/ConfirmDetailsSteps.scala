@@ -33,7 +33,6 @@ class ConfirmDetailsSteps extends Steps {
     AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
     AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.submit()
-    EligiblePage.startCreatingAccount()
   }
 
   Then("""^they see their details$"""){ () ⇒
@@ -44,15 +43,12 @@ class ConfirmDetailsSteps extends Steps {
     val info: TestUserInfo = ScenarioContext.userInfo().getOrElse(sys.error)
     val forename = info.forename.getOrElse(sys.error("Could not get forename"))
     val surname = info.surname.getOrElse(sys.error("Could not get surname"))
-    val email = info.email.getOrElse(sys.error("Could not get email"))
     val date = info.dateOfBirth.map(_.format(dateFormatter)).getOrElse(sys.error("Could not get date of birth"))
 
     val fullName = forename + " " + surname
 
     Helpers.isTextOnPage(fullName) shouldBe true
     Helpers.isTextOnPage(nino) shouldBe true
-
     Helpers.isTextOnPage(date) shouldBe true
-    Helpers.isTextOnPage(email) shouldBe true
   }
 }

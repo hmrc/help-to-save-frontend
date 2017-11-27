@@ -81,6 +81,7 @@ class CreateAccountSteps extends Steps with Page {
 
   Then("""^they see that the account is created$""") { () ⇒
     //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
+    Thread.sleep(10000)
     getCurrentUrl should include("nsandi")
   }
 
@@ -115,7 +116,8 @@ class CreateAccountSteps extends Steps with Page {
     AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.submit()
     EligiblePage.startCreatingAccount()
-    //need to put in select email page action?
+    SelectEmailPage.selectGGEmail()
+    SelectEmailPage.clickContinue()
     CreateAccountPage.createAccount()
   }
 }
