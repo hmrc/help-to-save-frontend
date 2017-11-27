@@ -87,7 +87,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
     mockNSIConnector,
     mockMetrics,
     mockAuditor
-  )(fakeApplication, crypto, mockEmailValidation, fakeApplication.injector.instanceOf[MessagesApi], ec) {
+  )(fakeApplication, crypto, mockEmailValidation, fakeApplication.injector.instanceOf[MessagesApi]) {
     override val authConnector = mockAuthConnector
   }
 

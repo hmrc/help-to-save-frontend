@@ -40,7 +40,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toF
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnector:      SessionCacheConnector,
@@ -49,7 +49,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                                                           val emailVerificationConnector: EmailVerificationConnector,
                                                           metrics:                        Metrics,
                                                           val auditor:                    HTSAuditor
-)(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, ec: ExecutionContext)
+)(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
 
   def verifyEmail(email: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

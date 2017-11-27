@@ -53,7 +53,7 @@ class EligibilityCheckControllerSpec
     mockSessionCacheConnector,
     mockAuditor,
     mockAuthConnector,
-    mockMetrics)(ec)
+    mockMetrics)
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
     (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier))
