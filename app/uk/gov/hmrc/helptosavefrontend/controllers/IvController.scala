@@ -41,7 +41,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
                               metrics:                   Metrics)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport with Logging {
 
-  def journeyResult(continueURL: String): Action[AnyContent] = authorisedForHtsWithNINO { // scalastyle:ignore cyclomatic.complexity method.length
+  def journeyResult(continueURL: String): Action[AnyContent] = authorisedForHtsWithNINOAndNoCL { //scalastyle:ignore cyclomatic.complexity method.length
   implicit request ⇒ implicit htsContext ⇒
     //Will be populated if we arrived here because of an IV success/failure
     val journeyId = request.getQueryString("token").orElse(request.getQueryString("journeyId"))

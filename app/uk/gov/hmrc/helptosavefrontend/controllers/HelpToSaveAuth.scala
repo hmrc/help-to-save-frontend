@@ -80,6 +80,14 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
         action(request)(HtsContext(authorised = true))
     }(redirectOnLoginURL)
 
+  def authorisedForHtsWithNINOAndNoCL(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
+    authorised(Retrievals.nino, AuthProvider) {
+      case (mayBeNino, request, time) ⇒
+        withNINO(mayBeNino, time) { nino ⇒
+          action(request)(HtsContextWithNINO(authorised = true, nino))
+        }(request)
+    }(redirectOnLoginURL)
+
   def unprotected(action: HtsAction[HtsContext]): Action[AnyContent] =
     Action.async { implicit request ⇒
       authorised() {
