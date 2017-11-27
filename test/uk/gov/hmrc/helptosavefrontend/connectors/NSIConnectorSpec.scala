@@ -28,6 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiAuthHeaderKey
 import uk.gov.hmrc.helptosavefrontend.config.WSHttpProxy
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.testutil.MockPagerDuty
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -35,20 +36,21 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.Random
 
-class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDrivenPropertyChecks {
+class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDrivenPropertyChecks with MockPagerDuty {
 
   lazy val mockHTTPProxy = mock[WSHttpProxy]
 
   def testNSAndIConnectorImpl = new NSIConnectorImpl(
     fakeApplication.configuration ++ Configuration("feature-toggles.log-account-creation-json.enabled" → Random.nextBoolean()),
-    mockMetrics) {
+    mockMetrics,
+    mockPagerDuty) {
     override val httpProxy = mockHTTPProxy
   }
 
   // put in fake authorization details - these should be removed by the call to create an account
   implicit val hc: HeaderCarrier = HeaderCarrier(authorization = Some(Authorization("auth")))
 
-  def mockPost[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit = {
+  def mockPost[I](body: I, url: String)(result: Either[String, HttpResponse]): Unit =
     (mockHTTPProxy.post(_: String, _: I, _: Map[String, String])(_: Writes[I], _: HeaderCarrier, _: ExecutionContext))
       .expects(url, body, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *, *)
       .returning(
@@ -56,9 +58,8 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
           e ⇒ Future.failed(new Exception(e)),
           r ⇒ Future.successful(r)
         ))
-  }
 
-  def mockPut[I](body: I, url: String, needsAuditing: Boolean = true)(result: Either[String, HttpResponse]): Unit = {
+  def mockPut[I](body: I, url: String, needsAuditing: Boolean = true)(result: Either[String, HttpResponse]): Unit =
     (mockHTTPProxy.put(_: String, _: I, _: Boolean, _: Map[String, String])(_: Writes[I], _: HeaderCarrier, _: ExecutionContext))
       .expects(url, body, needsAuditing, Map(nsiAuthHeaderKey → nsiBasicAuth), *, *, *)
       .returning(
@@ -66,7 +67,6 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
           e ⇒ Future.failed(new Exception(e)),
           r ⇒ Future.successful(r)
         ))
-  }
 
   "the updateEmail method" must {
     "return a Right when the status is OK" in {
@@ -80,7 +80,10 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       "the status is not OK" in {
         forAll{ status: Int ⇒
           whenever(status =!= Status.OK && status > 0){
-            mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(status)))
+            inSequence{
+              mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(status)))
+              mockPagerDutyAlert("Received unexpected http status in response to update email")
+            }
 
             val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
             Await.result(result.value, 3.seconds).isLeft shouldBe true
@@ -89,7 +92,10 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       }
 
       "the POST to NS&I fails" in {
-        mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Left("Oh no!"))
+        inSequence{
+          mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Left("Oh no!"))
+          mockPagerDutyAlert("Failed to make call to update email")
+        }
 
         val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
         Await.result(result.value, 3.seconds).isLeft shouldBe true
@@ -99,6 +105,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
   }
 
   "the createAccount Method" must {
+
     "Return a SubmissionSuccess when the status is Created" in {
       mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.CREATED)))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
@@ -111,46 +118,60 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
     }
 
-    "Return a SubmissionFailure when the status is BAD_REQUEST" in {
-      val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
-                                                                         Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
-      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds) shouldBe submissionFailure
-    }
-
-    "Return a SubmissionFailure when the status is INTERNAL_SERVER_ERROR" in {
-      val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.INTERNAL_SERVER_ERROR,
-                                                                         Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
-      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds) shouldBe submissionFailure
-    }
-
-    "Return a SubmissionFailure when the status is SERVICE_UNAVAILABLE" in {
-      val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.SERVICE_UNAVAILABLE,
-                                                                         Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
-      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds) shouldBe submissionFailure
-    }
-
-    "Return a SubmissionFailure in case there is an invalid json" in {
-      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
-                                                                         Some(JsObject(Seq("error" → Json.parse("""{"invalidJson":"foo"}""")))))))
-      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds) match {
-        case SubmissionSuccess()  ⇒ fail()
-        case _: SubmissionFailure ⇒ ()
+    "return a SubmissionFailure" when {
+      "the status is BAD_REQUEST" in {
+        val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
+        inSequence {
+          mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
+                                                                             Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
+          mockPagerDutyAlert("Received unexpected http status in response to create account")
+        }
+        val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+        Await.result(result, 3.seconds) shouldBe submissionFailure
       }
-    }
 
-    "Return a SubmissionFailure when the status is anything else" in {
-      mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_GATEWAY)))
-      val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds) match {
-        case SubmissionSuccess()  ⇒ fail()
-        case _: SubmissionFailure ⇒ ()
+      "the status is INTERNAL_SERVER_ERROR" in {
+        val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
+        inSequence {
+          mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.INTERNAL_SERVER_ERROR,
+                                                                             Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
+          mockPagerDutyAlert("Received unexpected http status in response to create account")
+        }
+        val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+        Await.result(result, 3.seconds) shouldBe submissionFailure
+      }
+
+      "the status is SERVICE_UNAVAILABLE" in {
+        val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
+        inSequence {
+          mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.SERVICE_UNAVAILABLE,
+                                                                             Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
+          mockPagerDutyAlert("Received unexpected http status in response to create account")
+        }
+        val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+        Await.result(result, 3.seconds) shouldBe submissionFailure
+      }
+
+      "the status is anything else" in {
+        inSequence{
+          mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_GATEWAY)))
+          mockPagerDutyAlert("Received unexpected http status in response to create account")
+
+        }
+        val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+        Await.result(result, 3.seconds) match {
+          case SubmissionSuccess()  ⇒ fail()
+          case _: SubmissionFailure ⇒ ()
+        }
+      }
+
+      "the call to createAccount fails" in {
+        inSequence {
+          mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Left(""))
+          mockPagerDutyAlert("Failed to make call to create account")
+        }
+        val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
+        Await.result(result, 3.seconds) shouldBe a[SubmissionFailure]
       }
     }
 

@@ -36,6 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
+import uk.gov.hmrc.helptosavefrontend.testutil.MockPagerDuty
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -48,7 +49,8 @@ class RegisterControllerSpec
   extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
-  with GeneratorDrivenPropertyChecks {
+  with GeneratorDrivenPropertyChecks
+  with MockPagerDuty {
 
   val jsonSchemaValidationService: JSONSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor: HTSAuditor = mock[HTSAuditor]
@@ -63,7 +65,8 @@ class RegisterControllerSpec
     jsonSchemaValidationService,
     mockMetrics,
     mockAuditor,
-    fakeApplication)(
+    fakeApplication,
+    mockPagerDuty)(
     ec, crypto, mockEmailValidation) {
     override lazy val authConnector = mockAuthConnector
   }
@@ -570,6 +573,7 @@ class RegisterControllerSpec
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail)))))
             mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Left(""))
+            mockPagerDutyAlert("JSON schema validation failed")
           }
 
           val result = doCreateAccountRequest()
