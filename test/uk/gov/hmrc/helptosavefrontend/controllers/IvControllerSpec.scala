@@ -25,7 +25,7 @@ import play.api.http.Status._
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -79,7 +79,7 @@ class IvControllerSpec extends AuthSupport {
         )
 
       forAll(validCases) { (ivServiceResponse: String, htsStatus: Int) ⇒
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
         mockIvConnector(journeyId, ivServiceResponse)
 
         val responseFuture = doRequest()
@@ -92,7 +92,7 @@ class IvControllerSpec extends AuthSupport {
 
     "handles the case where no iv response for a given journeyId" in {
 
-      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
 
       val responseFuture =
         ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(
