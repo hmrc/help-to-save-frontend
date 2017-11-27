@@ -1,6 +1,6 @@
 Feature: more ZAP tests to hit the rest of the URLS
 
-  @zap
+  @zap @done
 Scenario Outline: Hit URIs for ZAP testing
   Given a user has logged in and passed IV
   When I call URI <URI> with HTTP method <HTTP method>

@@ -82,6 +82,7 @@ class CreateAccountSteps extends Steps with Page {
   //TO-DO url will need updating
   Then("""^they see that the account is created$""") { () ⇒
     //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
+    Thread.sleep(10000)
     getCurrentUrl should include("nsandi")
   }
 
