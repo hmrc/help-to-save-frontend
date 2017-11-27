@@ -57,6 +57,9 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
+  import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.CreateAccountError
+  import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.CreateAccountError._
+
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
@@ -165,6 +168,10 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     Ok(views.html.register.details_are_incorrect())
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
+  def getInvalidUserDataPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.user_info_failed_validation())
+  }(redirectOnLoginURL = routes.RegisterController.getInvalidUserDataPage().url)
+
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
@@ -174,35 +181,37 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         ) { confirmedEmail ⇒
             val userInfo = NSIUserInfo(eligibleWithEmail.userInfo, confirmedEmail)
 
-            val result: EitherT[Future, String, Unit] = for {
-              _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(userInfo))
-              _ ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
+            val result: EitherT[Future, CreateAccountError, Unit] = for {
+              _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(userInfo).leftMap(JSONSchemaValidationError))
+              _ ← helpToSaveService.createAccount(userInfo).leftMap[CreateAccountError](f ⇒ BackendError(submissionFailureToString(f)))
             } yield ()
 
-            result.fold(
-              error ⇒ {
-                logger.warn(s"Error while trying to create account: $error", nino)
+            result.fold({
+              case JSONSchemaValidationError(e) ⇒
+                logger.warn(s"user info failed validation for creating account: $e", nino)
+                SeeOther(routes.RegisterController.getInvalidUserDataPage().url)
+
+              case BackendError(e) ⇒
+                logger.warn(s"Error while trying to create account: $e", nino)
                 internalServerError()
-              },
-              _ ⇒ {
-                logger.info("Successfully created account", nino)
+            }, { _ ⇒
+              logger.info("Successfully created account", nino)
 
-                // Account creation is successful, trigger background tasks but don't worry about the result
-                auditor.sendEvent(AccountCreated(userInfo), nino)
+              // Account creation is successful, trigger background tasks but don't worry about the result
+              auditor.sendEvent(AccountCreated(userInfo), nino)
 
-                helpToSaveService.updateUserCount().value.onFailure {
-                  case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
-                }
-
-                helpToSaveService.enrolUser().value.onComplete {
-                  case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
-                  case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
-                  case Success(Right(_)) ⇒ logger.info(s"Process started to enrol user", nino)
-                }
-
-                SeeOther(FrontendAppConfig.nsiManageAccountUrl)
+              helpToSaveService.updateUserCount().value.onFailure {
+                case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
               }
-            )
+
+              helpToSaveService.enrolUser().value.onComplete {
+                case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
+                case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
+                case Success(Right(_)) ⇒ logger.info(s"Process started to enrol user", nino)
+              }
+
+              SeeOther(FrontendAppConfig.nsiManageAccountUrl)
+            })
           }
       }{ _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
@@ -279,6 +288,16 @@ object RegisterController {
     case class EligibleWithEmail(userInfo: UserInfo, email: Email, confirmedEmail: Option[Email]) extends EligibleInfo
 
     case class EligibleWithNoEmail(userInfo: UserInfo) extends EligibleInfo
+  }
+
+  private sealed trait CreateAccountError
+
+  private object CreateAccountError {
+
+    case class JSONSchemaValidationError(message: String) extends CreateAccountError
+
+    case class BackendError(message: String) extends CreateAccountError
+
   }
 
 }
