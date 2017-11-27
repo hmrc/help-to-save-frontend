@@ -41,7 +41,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.config.AppName
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 class EligibilityCheckController @Inject() (val messagesApi:           MessagesApi,
@@ -49,7 +49,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
                                             val sessionCacheConnector: SessionCacheConnector,
                                             auditor:                   HTSAuditor,
                                             frontendAuthConnector:     FrontendAuthConnector,
-                                            metrics:                   Metrics)(implicit ec: ExecutionContext)
+                                            metrics:                   Metrics)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒

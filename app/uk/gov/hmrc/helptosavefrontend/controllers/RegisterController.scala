@@ -54,7 +54,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                                     auditor:                     HTSAuditor,
                                     app:                         Application,
                                     pagerDutyAlerting:           PagerDutyAlerting
-)(implicit ec: ExecutionContext, crypto: Crypto, emailValidation: EmailValidation)
+)(implicit crypto: Crypto, emailValidation: EmailValidation)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 

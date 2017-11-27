@@ -72,7 +72,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
       mockEmailVerificationConnector,
       mockMetrics,
       mockAuditor
-    )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto, ec) {
+    )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto) {
 
       override val authConnector = mockAuthConnector
     }
