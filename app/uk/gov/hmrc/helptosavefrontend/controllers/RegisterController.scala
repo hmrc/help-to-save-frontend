@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, PagerDutyAlerting, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -52,7 +52,8 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                                     jsonSchemaValidationService: JSONSchemaValidationService,
                                     metrics:                     Metrics,
                                     auditor:                     HTSAuditor,
-                                    app:                         Application
+                                    app:                         Application,
+                                    pagerDutyAlerting:           PagerDutyAlerting
 )(implicit ec: ExecutionContext, crypto: Crypto, emailValidation: EmailValidation)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
@@ -189,6 +190,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
             result.fold({
               case JSONSchemaValidationError(e) ⇒
                 logger.warn(s"user info failed validation for creating account: $e", nino)
+                pagerDutyAlerting.alert("JSON schema validation failed")
                 SeeOther(routes.RegisterController.getInvalidUserDataPage().url)
 
               case BackendError(e) ⇒

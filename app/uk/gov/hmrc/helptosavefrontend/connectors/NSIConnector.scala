@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.nsiUserInfoFor
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, Result}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, PagerDutyAlerting, Result}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.AppName
 
@@ -62,7 +62,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends NSIConnector with Logging with AppName {
+class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDutyAlerting: PagerDutyAlerting) extends NSIConnector with Logging with AppName {
 
   val httpProxy: WSHttpProxy = new WSHttpProxy
 
@@ -94,11 +94,13 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
             SubmissionSuccess()
 
           case other ⇒
+            pagerDutyAlerting.alert("Received unexpected http status in response to create account")
             handleErrorStatus(other, response, userInfo.nino, time)
         }
       }.recover {
         case e ⇒
           val time = timeContext.stop()
+          pagerDutyAlerting.alert("Failed to make call to create account")
           metrics.nsiAccountCreationErrorCounter.inc()
 
           logger.warn(s"Encountered error while trying to create account ${timeString(time)}", e, nino)
@@ -122,6 +124,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
           case other ⇒
             metrics.nsiUpdateEmailErrorCounter.inc()
+            pagerDutyAlerting.alert("Received unexpected http status in response to update email")
             Left(s"Received unexpected status $other from NS&I while trying to update email ${timeString(time)}. " +
               s"Body was ${response.body}")
 
@@ -129,6 +132,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
       }.recover {
         case e ⇒
           val time = timeContext.stop()
+          pagerDutyAlerting.alert("Failed to make call to update email")
           metrics.nsiUpdateEmailErrorCounter.inc()
 
           Left(s"Encountered error while trying to create account: ${e.getMessage} ${timeString(time)}")
