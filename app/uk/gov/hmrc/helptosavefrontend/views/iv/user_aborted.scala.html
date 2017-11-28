@@ -16,16 +16,22 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.access.denied.header")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.page-title")) {
 
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h2>@Messages("hts.access.denied.message")</h2>
+                <h1>@Messages("hts.iv.were_unable_to_confirm_your_identity.title")</h1>
             </header>
+            <p>@Messages("hts.iv.were_unable_to_confirm_your_identity.p1")</p>
+            <p>@Messages("hts.iv.were_unable_to_confirm_your_identity.p2")</p>
+            <p>@Messages("hts.iv.were_unable_to_confirm_your_identity.p3")</p>
+
+          <section class="subsection">
+              <a href="@retryUrl" class="button" id="continue" role="button">@Messages("hts.iv.try_again_button")</a>
+          </section>
         </div>
     </div>
-
 }
