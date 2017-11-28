@@ -16,16 +16,21 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.access.denied.header")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.failed_iv.page-title")) {
 
     <div class="grid-layout grid-layout--stacked">
         <div class="grid-layout__column grid-layout__column--2-3">
             <header class="page-header text">
-                <h2>@Messages("hts.access.denied.message")</h2>
+                <h1>@Messages("hts.iv.failed_iv.title")</h1>
             </header>
+            <p>@Messages("hts.iv.failed_iv.p1")</p>
+            <p>@Messages("hts.iv.failed_iv.p2")</p>
+            <p>@Messages("hts.iv.failed_iv.p3")</p>
+            <section class="subsection">
+                <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.failed_iv.try-again-button")</a>
+            </section>
         </div>
-    </div>
 
 }

@@ -19,19 +19,17 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.{Inject, Singleton}
 
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
+import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, urlDecode}
-import uk.gov.hmrc.helptosavefrontend.views.html.access_denied
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
-
-import scala.concurrent.Future
 
 @Singleton
 class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
@@ -44,9 +42,8 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
   def journeyResult(continueURL: String): Action[AnyContent] = authorisedForHtsWithNINOAndNoCL { //scalastyle:ignore cyclomatic.complexity method.length
   implicit request ⇒ implicit htsContext ⇒
     //Will be populated if we arrived here because of an IV success/failure
-    val journeyId = request.getQueryString("token").orElse(request.getQueryString("journeyId"))
-    val allowContinue = true
-    val newIvUrl = ivUrl(continueURL)
+    val journeyId = request.getQueryString("journeyId")
+    val newIVUrl = ivUrl(continueURL)
     val nino = htsContext.nino
 
     journeyId match {
@@ -54,7 +51,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
         ivConnector.getJourneyStatus(JourneyId(id)).map {
           case Some(Success) ⇒
             metrics.ivSuccessCounter.inc()
-            Ok(iv_success(urlDecode(continueURL)))
+            SeeOther(routes.IvController.getIVSuccessful(continueURL).url)
 
           case Some(Incomplete) ⇒
             metrics.ivIncompleteCounter.inc()
@@ -65,47 +62,47 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
           case Some(FailedMatching) ⇒
             metrics.ivFailedMatchingCounter.inc()
             //The user entered details on the Designatory Details page that could not be matched to an appropriate record in CID
-            Unauthorized(failed_matching(newIvUrl))
+            SeeOther(routes.IvController.getFailedMatching(newIVUrl).url)
 
           case Some(FailedIV) ⇒
             metrics.ivFailedIVCounter.inc()
             //The user couldn't answer enough questions correctly to pass verification
-            Unauthorized(failed_matching(newIvUrl))
+            SeeOther(routes.IvController.getFailedIV(newIVUrl).url)
 
           case Some(InsufficientEvidence) ⇒
             metrics.ivInsufficientEvidenceCounter.inc()
             //The user was matched, but we do not have enough information about them to be able to produce the necessary set of questions
             // to ask them to meet the required Confidence Level
-            Unauthorized(insufficient_evidence())
+            SeeOther(routes.IvController.getInsufficientEvidence().url)
 
           case Some(UserAborted) ⇒
             metrics.ivUserAbortedCounter.inc()
             //The user specifically chose to end the journey
-            Unauthorized(user_aborted_or_incomplete(newIvUrl, allowContinue))
+            SeeOther(routes.IvController.getUserAborted(newIVUrl).url)
 
           case Some(LockedOut) ⇒
             metrics.ivLockedOutCounter.inc()
             //The user failed to answer questions correctly and exceeded the lockout threshold
-            Unauthorized(locked_out())
+            SeeOther(routes.IvController.getLockedOut().url)
 
           case Some(PrecondFailed) ⇒
             metrics.ivPreconditionFailedCounter.inc()
             // The user's authority does not meet the criteria for starting an IV journey.
             // This result implies the service should not have sent this user to IV,
             // as this condition can get determined by the user's authority. See below for a list of conditions that lead to this result
-            Unauthorized(precondition_failed())
+            SeeOther(routes.IvController.getPreconditionFailed().url)
 
           case Some(TechnicalIssue) ⇒
             metrics.ivTechnicalIssueCounter.inc()
             //A technical issue on the platform caused the journey to end.
             // This is usually a transient issue, so that the user should try again later
             logger.warn("TechnicalIssue response from identityVerificationFrontendService", nino)
-            Unauthorized(technical_iv_issues(newIvUrl))
+            SeeOther(routes.IvController.getTechnicalIssue(newIVUrl).url)
 
           case Some(Timeout) ⇒
             metrics.ivTimeoutCounter.inc()
             //The user took to long to proceed the journey and was timed-out
-            Unauthorized(time_out(newIvUrl))
+            SeeOther(routes.IvController.getTimedOut(newIVUrl).url)
 
           case _ ⇒
             logger.warn("unexpected response from identityVerificationFrontendService", nino)
@@ -115,7 +112,53 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
       case None ⇒
         // No journeyId signifies subsequent 2FA failure
         logger.warn("response from identityVerificationFrontendService did not contain token or journeyId param")
-        Future.successful(Unauthorized(access_denied()))
+        SeeOther(routes.IvController.getTechnicalIssue(newIVUrl).url)
     }
   }(redirectOnLoginURL = routes.IvController.journeyResult(continueURL).url)
+
+  def getIVSuccessful(continueURL: String): Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Ok(iv_success(urlDecode(continueURL)))
+    }(routes.AccessAccountController.accessAccount().url)
+
+  def getFailedMatching(ivURL: String): Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Unauthorized(failed_matching(urlDecode(ivURL)))
+    }(routes.AccessAccountController.accessAccount().url)
+
+  def getFailedIV(ivURL: String): Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Unauthorized(failed_iv(urlDecode(ivURL)))
+    }(routes.AccessAccountController.accessAccount().url)
+
+  def getInsufficientEvidence: Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Unauthorized(insufficient_evidence())
+    }(routes.AccessAccountController.accessAccount().url)
+
+  def getLockedOut: Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Unauthorized(locked_out())
+    }(routes.AccessAccountController.accessAccount().url)
+
+  def getUserAborted(ivURL: String): Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Unauthorized(user_aborted_or_incomplete(urlDecode(ivURL), allowContinue = true))
+    }(routes.AccessAccountController.accessAccount().url)
+
+  def getTimedOut(ivURL: String): Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Unauthorized(time_out(urlDecode(ivURL)))
+    }(routes.AccessAccountController.accessAccount().url)
+
+  def getTechnicalIssue(ivURL: String): Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Unauthorized(technical_iv_issues(urlDecode(ivURL)))
+    }(routes.AccessAccountController.accessAccount().url)
+
+  def getPreconditionFailed: Action[AnyContent] =
+    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+      Unauthorized(precondition_failed())
+    }(routes.AccessAccountController.accessAccount().url)
+
 }
