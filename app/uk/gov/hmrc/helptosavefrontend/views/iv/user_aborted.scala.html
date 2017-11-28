@@ -14,10 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-@(retryUrl: String, allowContinue: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.page-title")) {
 
@@ -31,14 +30,7 @@
             <p>@Messages("hts.iv.were_unable_to_confirm_your_identity.p3")</p>
 
           <section class="subsection">
-
-            @if(allowContinue) {
-                <a href="@retryUrl" class="button" id="continue" role="button">@Messages("hts.iv.try_again_button")</a>
-            } else {
-                <p class="margin-bottom">@Messages("hts.iv.to_help_protect_data_you_can_access_HTS_once_confirmed_identity")</p>
-                <p class="margin-bottom">@Html(Messages("hts.iv.failed_contact_HMRC", "https://www.gov.uk/contact-hmrc"))</p>
-                <a href="@routes.IntroductionController.getAboutHelpToSave()">@Messages("hts.iv.try_confirm_identity_again")</a>
-            }
+              <a href="@retryUrl" class="button" id="continue" role="button">@Messages("hts.iv.try_again_button")</a>
           </section>
         </div>
     </div>

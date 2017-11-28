@@ -119,46 +119,46 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
   def getIVSuccessful(continueURL: String): Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
       Ok(iv_success(urlDecode(continueURL)))
-    }(routes.AccessAccountController.accessAccount().url)
+    }(routes.IvController.getIVSuccessful(continueURL).url)
 
   def getFailedMatching(ivURL: String): Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
       Unauthorized(failed_matching(urlDecode(ivURL)))
-    }(routes.AccessAccountController.accessAccount().url)
+    }(routes.IvController.getFailedMatching(ivURL).url)
 
   def getFailedIV(ivURL: String): Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
       Unauthorized(failed_iv(urlDecode(ivURL)))
-    }(routes.AccessAccountController.accessAccount().url)
+    }(routes.IvController.getFailedIV(ivURL).url)
 
   def getInsufficientEvidence: Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
       Unauthorized(insufficient_evidence())
-    }(routes.AccessAccountController.accessAccount().url)
+    }(routes.IvController.getInsufficientEvidence().url)
 
   def getLockedOut: Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
       Unauthorized(locked_out())
-    }(routes.AccessAccountController.accessAccount().url)
+    }(routes.IvController.getLockedOut().url)
 
   def getUserAborted(ivURL: String): Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
-      Unauthorized(user_aborted_or_incomplete(urlDecode(ivURL), allowContinue = true))
-    }(routes.AccessAccountController.accessAccount().url)
+      Unauthorized(user_aborted(urlDecode(ivURL)))
+    }(routes.IvController.getUserAborted(ivURL).url)
 
   def getTimedOut(ivURL: String): Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
       Unauthorized(time_out(urlDecode(ivURL)))
-    }(routes.AccessAccountController.accessAccount().url)
+    }(routes.IvController.getTimedOut(ivURL).url)
 
   def getTechnicalIssue(ivURL: String): Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
       Unauthorized(technical_iv_issues(urlDecode(ivURL)))
-    }(routes.AccessAccountController.accessAccount().url)
+    }(routes.IvController.getTechnicalIssue(ivURL).url)
 
   def getPreconditionFailed: Action[AnyContent] =
     authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
       Unauthorized(precondition_failed())
-    }(routes.AccessAccountController.accessAccount().url)
+    }(routes.IvController.getPreconditionFailed().url)
 
 }
