@@ -45,11 +45,7 @@ class EligibilitySteps extends Steps with Page {
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒
 
-    getCurrentUrl
-
-    element =
-
-    should include(NotEligiblePage.expectedUrl)
+    getCurrentUrl should include(NotEligiblePage.expectedUrl)
 
   }
 }
