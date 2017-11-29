@@ -1,4 +1,4 @@
-@HTS-90 @done
+@HTS-90
 Feature: Applicant goes through eligibility check
 
  @zap

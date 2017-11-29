@@ -1,4 +1,3 @@
-@done
 Feature: User CANNOT proceed without going through security
 
   @HTS-23
