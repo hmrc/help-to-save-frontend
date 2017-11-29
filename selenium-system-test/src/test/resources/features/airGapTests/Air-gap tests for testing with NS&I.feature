@@ -1,4 +1,4 @@
-@AirGap @to-do
+@AirGap @done
 Feature: Air-gap tests for testing with NS&I
 
   Scenario: Air-gap 1 - All fields are populated
@@ -15,7 +15,7 @@ Feature: Air-gap tests for testing with NS&I
       | address line 4 | line 4          |
       | address line 5 | line 5          |
       | postcode       | BN43 5QP        |
-      | country code   | 01              |
+      | country code   | GB              |
 
     When they choose to go ahead with creating an account
     Then they see that the account is created
@@ -50,7 +50,7 @@ Feature: Air-gap tests for testing with NS&I
       | address line 4 | cyKuQ2t7K6xV8vHJn6yAgchbQtWsiaYePxw                                                                                                                                                                                                                                                                          |
       | address line 5 | 70pVtjltRwwncMAp6810vimEzkToheldHhO                                                                                                                                                                                                                                                                          |
       | postcode       | BN435QPABC                                                                                                                                                                                                                                                                                                   |
-      | country code   | 01                                                                                                                                                                                                                                                                                                           |
+      | country code   | GB                                                                                                                                                                                                                                                                                                           |
 
     When they choose to go ahead with creating an account
     Then they see that the account is created
@@ -70,7 +70,7 @@ Feature: Air-gap tests for testing with NS&I
       | address line 4 | d          |
       | address line 5 | e          |
       | postcode       | B          |
-      | country code   | 01         |
+      | country code   | GB         |
 
     When they choose to go ahead with creating an account
     Then they see that the account is created
@@ -90,7 +90,7 @@ Feature: Air-gap tests for testing with NS&I
       | address line 4 | Barton-under-Needwood    |
       | address line 5 | Derbyshire               |
       | postcode       | W1J7NT                   |
-      | country code   | 04                       |
+      | country code   | GB                       |
 
     When they choose to go ahead with creating an account
     Then they see that the account is created
@@ -110,7 +110,7 @@ Feature: Air-gap tests for testing with NS&I
       | address line 4 | Hørdy-Gürdy4             |
       | address line 5 | Hørdy-Gürdy5             |
       | postcode       | 19023                    |
-      | country code   | 02                       |
+      | country code   | SE                       |
 
     When they choose to go ahead with creating an account
     Then they see that the account is created

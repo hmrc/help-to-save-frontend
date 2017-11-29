@@ -24,5 +24,5 @@ object AccessAccountPage extends Page {
 
   val url: String = s"${Configuration.host}/help-to-save/access-account"
 
-  def navigate()(implicit driver: WebDriver): Unit = go to s"${Configuration.host}/help-to-save/access-account"
+  def navigate()(implicit driver: WebDriver): Unit = go to url
 }

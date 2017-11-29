@@ -90,7 +90,8 @@ class SecuritySteps extends Steps with Page {
   }
 
   Then("""^I still see confirmation that I am NOT eligible$"""){ () ⇒
-    Helpers.isTextOnPage("You're not eligible for Help to Save") shouldBe true
+    //Helpers.isTextOnPage("You're not eligible for a Help to Save account") shouldBe true
+    getCurrentUrl should include(NotEligiblePage.expectedUrl)
   }
 
   Given("""^HMRC doesn't currently hold an email address for me$"""){ () ⇒

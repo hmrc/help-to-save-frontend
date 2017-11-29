@@ -54,6 +54,11 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
     _driver = None
   }
 
+  implicit val webDriverWait: WebDriverWait = Driver.newWebDriver() match {
+    case Right(x) ⇒ new WebDriverWait(x, 60)
+    case Left(x)  ⇒ sys.error("There is no driver")
+  }
+
 }
 
 private[steps] object Steps {

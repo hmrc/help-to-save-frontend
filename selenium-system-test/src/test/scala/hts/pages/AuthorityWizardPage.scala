@@ -45,7 +45,7 @@ object AuthorityWizardPage extends Page {
     setAddressLine4("AddressLine4")
     setAddressLine5("AddressLine5")
     setPostCode("S24AH")
-    setCountryCode("01")
+    setCountryCode("GB")
     submit()
   }
 
@@ -68,7 +68,7 @@ object AuthorityWizardPage extends Page {
     setAddressLine4("AddressLine4")
     setAddressLine5("AddressLine5")
     setPostCode("S24AH")
-    setCountryCode("01")
+    setCountryCode("GB")
     setBlankEmail
     submit()
   }

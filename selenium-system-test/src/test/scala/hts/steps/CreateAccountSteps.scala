@@ -16,11 +16,17 @@
 
 package hts.steps
 
+import java.util.concurrent.TimeUnit
+
 import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.{Configuration, ScenarioContext}
 import hts.utils.EitherOps._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import org.openqa.selenium.{By, WebElement}
+import org.openqa.selenium.support.ui.ExpectedConditions
+import org.openqa.selenium.support.ui.WebDriverWait
+import uk.gov.hmrc.helptosavefrontend.views;
 
 class CreateAccountSteps extends Steps with Page {
 
@@ -66,6 +72,7 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   When("""^they click on accept and create an account$""") { () ⇒
+    Thread.sleep(4000)
     CreateAccountPage.createAccount()
   }
 
@@ -79,9 +86,9 @@ class CreateAccountSteps extends Steps with Page {
     AccessAccountPage.navigate()
   }
 
+  //TO-DO url will need updating
   Then("""^they see that the account is created$""") { () ⇒
     //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
-    Thread.sleep(10000)
     getCurrentUrl should include("nsandi")
   }
 
@@ -94,9 +101,10 @@ class CreateAccountSteps extends Steps with Page {
     EligiblePage.pageInfoContains()
   }
 
+  //TO-DO url will need updating
   Then("""^they will be on the account home page$"""){ () ⇒
     //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
-    getCurrentUrl should include("access-account")
+    getCurrentUrl should include("nsandi")
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
@@ -119,5 +127,10 @@ class CreateAccountSteps extends Steps with Page {
     SelectEmailPage.selectGGEmail()
     SelectEmailPage.clickContinue()
     CreateAccountPage.createAccount()
+
+    //webDriverWait.Until(driver1 => ((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState").Equals("complete"))
+    //    val html: WebElement = views.html.register.create_account_help_to_save()
+    //    val webElement: WebElement = <h1>You're about to create a Help to Save account</h1>
+    //    webDriverWait.until(ExpectedConditions.stalenessOf())
   }
 }

@@ -97,7 +97,7 @@ private[utils] trait NINOGenerator {
   }
 
   def generateIneligibleNINO(): String = {
-    val ineligibleNino = "NA" + generateNINO().drop(2)
+    val ineligibleNino = "NE" + generateNINO().drop(2)
     current = ineligibleNino
     ineligibleNino
   }
