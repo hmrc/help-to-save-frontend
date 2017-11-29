@@ -20,20 +20,27 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.create_account_help_to_save.title"), bodyClasses = None) {
-    <header class="page-header text">
-        <h1>@Messages("hts.register.create_account_help_to_save.header-page")</h1>
-    </header>
+    <h1 class="heading-large">
+        <span class="pre-heading">@Messages("hts.register.create_account_help_to_save.step")</span>
+        @Messages("hts.register.create_account_help_to_save.header-page")
+    </h1>
     <p>
     @Messages("hts.register.create_account_help_to_save.par-1") <p>
-<ul class="bullets">
-    <li>
-    @Messages("hts.register.create_account_help_to_save.bullet-1")
-    </li>
-    <li>
-    @Messages("hts.register.create_account_help_to_save.bullet-2")
-    </li>
-</ul> <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--1-2">
+    <ul class="list list-bullet">
+        <li>
+        @Messages("hts.register.create_account_help_to_save.bullet-1")
+        </li>
+        <li>
+        @Messages("hts.register.create_account_help_to_save.bullet-2")
+        </li>
+        <li>
+            @Messages("hts.register.create_account_help_to_save.bullet-3")
+        </li>
+        <li>
+            @Messages("hts.register.create_account_help_to_save.bullet-4")
+        </li>
+    </ul>
+    <div class="form-field form-field--submit">
         @form(routes.RegisterController.createAccountHelpToSave)(
             Html(s"""<button id="accept-and-create-account"
                              data-ga-event-category = "buttons"
@@ -41,13 +48,10 @@
                              data-ga-event-label= "Create account page"
                              class="ga-track-event">${Messages("hts.register.create_account_help_to_save.accept-label")}</button>"""))
         </div>
-        <div class="grid-layout__column grid-layout__column--1-2">
-            <a href=@routes.IntroductionController.getAboutHelpToSave().url id="exit-without-creating-account"
+        <a href=@routes.IntroductionController.getAboutHelpToSave().url id="exit-without-creating-account"
                data-ga-event-category = "buttons"
                data-ga-event-action = "Cancel"
                data-ga-event-label= "Create account page"
-               class="button button--secondary ga-track-event">@Messages("hts.register.create_account_help_to_save.cancel-label")</a>
-        </div>
+               class="font-xsmall">@Messages("hts.register.create_account_help_to_save.cancel-label")</a>
 
-    </div>
 }

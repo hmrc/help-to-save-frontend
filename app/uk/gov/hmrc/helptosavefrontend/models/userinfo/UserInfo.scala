@@ -36,7 +36,7 @@ object UserInfo {
 
   implicit val userDetailsFormat: Format[UserInfo] = Json.format[UserInfo]
 
-  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("d MMMM YYYY")))
 
   implicit class UserInfoOps(val u: UserInfo) extends AnyVal {
 
