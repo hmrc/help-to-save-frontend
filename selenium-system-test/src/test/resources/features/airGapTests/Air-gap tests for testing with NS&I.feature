@@ -1,4 +1,4 @@
-@AirGap @done
+@AirGap
 Feature: Air-gap tests for testing with NS&I
 
   Scenario: Air-gap 1 - All fields are populated

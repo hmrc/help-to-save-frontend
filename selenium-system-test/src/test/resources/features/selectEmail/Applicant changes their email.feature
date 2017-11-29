@@ -1,4 +1,4 @@
-@current @done
+@current
 Feature: Applicant changes their email
 
   @new

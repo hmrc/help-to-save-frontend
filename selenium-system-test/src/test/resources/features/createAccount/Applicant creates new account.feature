@@ -1,4 +1,4 @@
-@HTS-37 @done
+@HTS-37
 Feature: Applicant creates new account
 
   Scenario: An unauthenticated user creates new account
