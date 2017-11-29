@@ -95,8 +95,4 @@ class SecuritySteps extends Steps with Page {
     AuthorityWizardPage.authenticateUserNoEmail(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
-  Given("""^HMRC doesn't currently hold an email address for me$"""){ () ⇒
-    AuthorityWizardPage.authenticateUserNoEmail(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
-  }
-
 }

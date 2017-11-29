@@ -49,11 +49,6 @@ object AuthorityWizardPage extends Page {
     submit()
   }
 
-  def authenticateUserNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    AuthorityWizardPage.navigate()
-    fillInAuthDetailsNoEmail(redirectUrl, confidence, credentialStrength, nino)
-  }
-
   private def fillInAuthDetailsNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     setRedirect(redirectUrl)
     setConfidenceLevel(confidence)
@@ -76,25 +71,6 @@ object AuthorityWizardPage extends Page {
   def authenticateUserNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     AuthorityWizardPage.navigate()
     fillInAuthDetailsNoEmail(redirectUrl, confidence, credentialStrength, nino)
-  }
-
-  private def fillInAuthDetailsNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    setRedirect(redirectUrl)
-    setConfidenceLevel(confidence)
-    setCredentialStrength(credentialStrength)
-    setNino(nino)
-    setGivenName("GivenName")
-    setFamilyName("FamilyName")
-    setDateOfBirth("1980-12-20")
-    setAddressLine1("AddressLine1")
-    setAddressLine2("AddressLine2")
-    setAddressLine3("AddressLine3")
-    setAddressLine4("AddressLine4")
-    setAddressLine5("AddressLine5")
-    setPostCode("S24AH")
-    setCountryCode("01")
-    setBlankEmail
-    submit()
   }
 
   def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: TestUserInfo)(implicit driver: WebDriver): Unit = {

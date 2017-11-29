@@ -20,7 +20,6 @@ import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.EitherOps._
 import hts.utils.{Configuration, ScenarioContext}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig;
 
 class CreateAccountSteps extends Steps with Page {
 
@@ -66,6 +65,7 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   When("""^they click on accept and create an account$""") { () ⇒
+    Thread.sleep(4000)
     CreateAccountPage.createAccount()
   }
 
@@ -82,7 +82,6 @@ class CreateAccountSteps extends Steps with Page {
   //TO-DO url will need updating
   Then("""^they see that the account is created$""") { () ⇒
     //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
-    Thread.sleep(10000)
     getCurrentUrl should include("nsandi")
   }
 
