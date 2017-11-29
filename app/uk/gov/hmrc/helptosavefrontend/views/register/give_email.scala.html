@@ -17,32 +17,32 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.GiveEmail
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 
 @(form: Form[GiveEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = messages("hts.give-email.title"),
-    sidebarLinks = None,
-    bodyClasses = None) {
-    <header>
-      <h1>@messages("hts.give-email.page-title")</h1>
-    </header>
+    @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+        title = messages("hts.give-email.title"),
+        sidebarLinks = None,
+        bodyClasses = None) {
+        <header>
+            <h1>@messages("hts.give-email.page-title")</h1>
+        </header>
 
-    <p>@messages("hts.give-email-address.p")</p>
-    @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.giveEmailSubmit()) {
-        @defining(form.error("email").map(_.message)) { ek =>
+        <p>@messages("hts.give-email-address.p")</p>
+        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.RegisterController.giveEmailSubmit()) {
             @helpers.input_text(
                 id = "email",
                 name = "email",
                 label = messages("hts.give-email-address.label"),
-                errorKey = ek.map(_ ⇒ "hts.email.enter-valid-email").getOrElse("")
+                errorKey = form.error("email").fold("")(_ ⇒ email_form_validation_error_message(form, "email").toString)
             )
-          <section class="subsection">
+            <section class="subsection">
             @helpers.submit('_buttonClass -> "") { @messages("hts.global.continue-button") }
-          </section>
+            </section>
+
         }
+
+
+
     }
-
-
-
-}

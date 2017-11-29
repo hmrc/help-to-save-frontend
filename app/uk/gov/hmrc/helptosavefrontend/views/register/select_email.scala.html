@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.forms.SelectEmail
 @import views.html.helper.CSRF
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 
 
 @(email: String, form: Form[SelectEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
@@ -51,7 +52,7 @@
             <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
                 <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
                 <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
-                @{if(hasInvalidEmail) <span class="error-notification">{messages("hts.email.enter-valid-email")}</span> }
+                @if(hasInvalidEmail) { <span class="error-notification">@email_form_validation_error_message(form, "new-email")</span> }
                 <input class="form-control" name="new-email" type="text" id="new-email">
             </div>
 

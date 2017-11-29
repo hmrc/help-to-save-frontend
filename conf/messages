@@ -291,7 +291,11 @@ hts.exit_to_about_hts=Exit to About Help to Save
 hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
 
-hts.email.enter-valid-email=Please enter a valid email address
+hts.email.error=Enter a valid email address
+hts.email.error.too-long=Enter a valid email address, this email address is too long
+hts.email.error.blank=Enter a valid email address
+hts.email.error.no-at-symbol=Enter a valid email address, like yourname@example.com
+
 
 hts.select-email.page-title=Do you want to use the email address we hold for you? 
 hts.select-email.title=Which email address do you want us to use for your Help to Save account?
