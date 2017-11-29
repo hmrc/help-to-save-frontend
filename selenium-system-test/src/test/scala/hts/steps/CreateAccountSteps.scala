@@ -72,7 +72,6 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   When("""^they click on accept and create an account$""") { () ⇒
-    Thread.sleep(4000)
     CreateAccountPage.createAccount()
   }
 
