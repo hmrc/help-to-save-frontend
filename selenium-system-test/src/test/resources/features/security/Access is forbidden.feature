@@ -23,7 +23,7 @@ Feature: User CANNOT proceed without going through security
     Given I have logged in to Government Gateway with a confidence level of 100
     When I try to view the create-an-account page
     Then I am forced into going through IV before being able to proceed with their HtS application
-  @doing
+
   Scenario: Ineligible user cannot view the create-an-account page
     Given I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save
     When I try to view the create-an-account page

@@ -21,10 +21,8 @@ import java.util.concurrent.TimeUnit
 import cats.syntax.either._
 import cucumber.api.scala.{EN, ScalaDsl}
 import hts.driver.Driver
-import hts.pages.Page
 import hts.utils.ScenarioContext
-import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
-import org.openqa.selenium.{By, WebDriver}
+import org.openqa.selenium.WebDriver
 import org.scalatest.Matchers
 
 private[steps] trait Steps extends ScalaDsl with EN with Matchers {
@@ -52,11 +50,6 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
   After { _ ⇒
     _driver.foreach(_.quit())
     _driver = None
-  }
-
-  implicit val webDriverWait: WebDriverWait = Driver.newWebDriver() match {
-    case Right(x) ⇒ new WebDriverWait(x, 60)
-    case Left(x)  ⇒ sys.error("There is no driver")
   }
 
 }

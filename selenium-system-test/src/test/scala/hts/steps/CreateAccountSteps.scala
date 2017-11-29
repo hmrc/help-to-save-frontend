@@ -16,17 +16,10 @@
 
 package hts.steps
 
-import java.util.concurrent.TimeUnit
-
 import hts.pages._
 import hts.pages.registrationPages._
-import hts.utils.{Configuration, ScenarioContext}
 import hts.utils.EitherOps._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import org.openqa.selenium.{By, WebElement}
-import org.openqa.selenium.support.ui.ExpectedConditions
-import org.openqa.selenium.support.ui.WebDriverWait
-import uk.gov.hmrc.helptosavefrontend.views;
+import hts.utils.{Configuration, ScenarioContext};
 
 class CreateAccountSteps extends Steps with Page {
 
@@ -126,10 +119,5 @@ class CreateAccountSteps extends Steps with Page {
     SelectEmailPage.selectGGEmail()
     SelectEmailPage.clickContinue()
     CreateAccountPage.createAccount()
-
-    //webDriverWait.Until(driver1 => ((IJavaScriptExecutor)driver).ExecuteScript("return document.readyState").Equals("complete"))
-    //    val html: WebElement = views.html.register.create_account_help_to_save()
-    //    val webElement: WebElement = <h1>You're about to create a Help to Save account</h1>
-    //    webDriverWait.until(ExpectedConditions.stalenessOf())
   }
 }

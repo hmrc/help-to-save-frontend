@@ -16,10 +16,8 @@
 
 package hts.steps
 
-import hts.pages.registrationPages.EligibilityInfoPage
 import hts.pages._
 import hts.utils.{Configuration, Helpers, ScenarioContext}
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 
 class SecuritySteps extends Steps with Page {
 
@@ -90,8 +88,7 @@ class SecuritySteps extends Steps with Page {
   }
 
   Then("""^I still see confirmation that I am NOT eligible$"""){ () ⇒
-    //Helpers.isTextOnPage("You're not eligible for a Help to Save account") shouldBe true
-    getCurrentUrl should include(NotEligiblePage.expectedUrl)
+    Helpers.isTextOnPage("You're not eligible for a Help to Save account") shouldBe true
   }
 
   Given("""^HMRC doesn't currently hold an email address for me$"""){ () ⇒

@@ -16,11 +16,8 @@
 
 package hts.steps
 
-import hts.pages
-import hts.pages.registrationPages.EligibilityInfoPage
 import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage, Page}
-import hts.utils.{Configuration, ScenarioContext}
-import org.openqa.selenium.By
+import hts.utils.ScenarioContext
 
 class EligibilitySteps extends Steps with Page {
 
@@ -45,12 +42,6 @@ class EligibilitySteps extends Steps with Page {
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒
-
-    getCurrentUrl
-
-    webDriverWait.until(EC.text_to_be_present_in_element_value("You're not eligible for a Help to Save account"))
-
-    should include(NotEligiblePage.expectedUrl)
-
+    getCurrentUrl should include (NotEligiblePage.expectedUrl)
   }
 }

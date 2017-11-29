@@ -7,7 +7,7 @@ Feature: Applicant goes through eligibility check
     When they apply for Help to Save
     Then they see that they are eligible for Help to Save
 
-@zap @to-do
+@zap
   Scenario: User is NOT in receipt of working tax credit and so is NOT eligible
     Given an user is NOT in receipt of working tax credit
     When they apply for Help to Save
