@@ -61,10 +61,6 @@ object Driver {
 
   private val driverDirectory: String = Option(systemProperties.getProperty("drivers")).getOrElse("/usr/local/bin")
 
-//  val webDriver = newWebDriver() match {
-//    case Left(x) ⇒
-//  }
-
   private def setChromeDriver() = {
     if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
       if (isMac) {
