@@ -25,7 +25,7 @@
     bodyClasses = None) {
 
     <h1 class="heading-large">@messages("hts.email-verification.check-your-email.title")</h1>
-    <p>@messages("hts.email-verification.check-your-email.we-have-sent-mail") @email</p>
+    <p class="lede">@messages("hts.email-verification.check-your-email.we-have-sent-mail") @email</p>
     <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.what-next")</h2>
     <p class="content">@messages("hts.email-verification.check-your-email.content1")</p>
     <p class="content">@messages("hts.email-verification.check-your-email.content2")</p>
@@ -40,8 +40,8 @@
     @defining(
         oldEmail.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getSelectEmailPage)
     ){ call =>
-        <p class="content">
-            <a href=@call>@messages("hts.email-verification.check-your-email.change-email-address")</a>
+        <p class="content subsection--wide push--bottom">
+            <a href=@call class="font-xsmall">@messages("hts.email-verification.check-your-email.change-email-address")</a>
         </p>
     }
 

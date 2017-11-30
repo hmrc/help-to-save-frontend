@@ -21,14 +21,17 @@
 
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "email-updated", bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.email-updated.page-title"), bodyClasses = None) {
 
- <h1>Your email has been updated</h1>
- <p> We will use the email: @email</p>
+ <div class="transaction-banner--complete">
+  <h1 class="transaction-banner__heading">@messages("hts.email-updated.title")</h1>
+  <p>@email</p>
+ </div>
 
- <p>Click here to continue creating an account</p>
+ <p>@messages("hts.email-updated.p1")</p>
+ <p>@messages("hts.email-updated.p2")</p>
  @form(routes.RegisterController.getCreateAccountHelpToSavePage)(
-  Html("""<button id="continue-to-create-account">Continue</button>"""))
+  Html("""<button id="continue-to-create-account">""" + messages("hts.email-updated.continue_button") + """</button>"""))
 
 
 
