@@ -223,12 +223,12 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         logger.warn(s"Could not check if account create is allowed, due to: $error")
         ifAllowed
       }, { userCapResponse ⇒
-        if (userCapResponse.isTotalCapReached) {
-          SeeOther(routes.RegisterController.getTotalCapReachedPage().url)
-        } else if (userCapResponse.isDailyCapReached) {
-          SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
-        } else if (userCapResponse.forceDisabled) {
+        if (userCapResponse.isTotalCapDisabled && userCapResponse.isDailyCapDisabled) {
           SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+        } else if (userCapResponse.isTotalCapDisabled || userCapResponse.isTotalCapReached) {
+          SeeOther(routes.RegisterController.getTotalCapReachedPage().url)
+        } else if (userCapResponse.isDailyCapDisabled || userCapResponse.isDailyCapReached) {
+          SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
         } else {
           ifAllowed
         }
