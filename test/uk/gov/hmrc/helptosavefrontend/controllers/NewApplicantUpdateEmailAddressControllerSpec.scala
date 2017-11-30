@@ -202,7 +202,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
           val params = EmailVerificationParams(validUserInfo.nino, testEmail)
           val result = doRequestWithQueryParam(params.encode())
           status(result) shouldBe Status.OK
-          contentAsString(result) should include("Your email has been updated")
+          contentAsString(result) should include("Email address verified")
         }
 
       "return an OK status when the link has been corrupted or is incorrect" in {
@@ -338,10 +338,22 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
         val result = doRequest()
         status(result) shouldBe OK
-        contentAsString(result) should include("email has been updated")
+        contentAsString(result) should include("Email address verified")
 
       }
 
     }
+
+    "handling emailUpdatedSubmit" must {
+
+      "redirect to the create account page" in {
+        val result = controller.emailUpdatedSubmit()(FakeRequest())
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountHelpToSavePage().url)
+
+      }
+
+    }
+
   }
 }

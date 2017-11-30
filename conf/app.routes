@@ -9,6 +9,8 @@ GET        /apply-for-help-to-save/eligibility              @uk.gov.hmrc.helptos
 GET        /apply-for-help-to-save/how-the-account-works    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowTheAccountWorks
 GET        /apply-for-help-to-save/how-we-calculate-bonuses @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
 GET        /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
+POST       /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.applySubmit
+
 
 GET        /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getSelectEmailPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
@@ -25,6 +27,7 @@ GET        /register/confirm-email/:email                   @uk.gov.hmrc.helptos
 GET        /register/verify-email/:email                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail(email)
 GET        /register/email-verified                         @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerified(p: String)
 GET        /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
+POST       /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
 GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 

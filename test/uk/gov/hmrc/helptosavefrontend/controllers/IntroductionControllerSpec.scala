@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
+class IntroductionCtestontrollerSpec extends AuthSupport with CSRFSupport {
 
   val fakeRequest = FakeRequest("GET", "/")
   val helpToSave = new IntroductionController(fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector, mockMetrics)
@@ -93,5 +93,12 @@ class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
       charset(result) shouldBe Some("utf-8")
       contentAsString(result) should not include "Sign out"
     }
+
+    "applySubmit return 303" in {
+      val result = helpToSave.applySubmit(fakeRequest)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+    }
+
   }
 }
