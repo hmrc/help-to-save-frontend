@@ -577,8 +577,7 @@ class RegisterControllerSpec
           }
 
           val result = doCreateAccountRequest()
-          status(result) shouldBe SEE_OTHER
-          contentAsString(result) contains "User data failed validation"
+          status(result) shouldBe INTERNAL_SERVER_ERROR
         }
 
         "the help to save service returns with an error" in {
