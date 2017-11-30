@@ -24,6 +24,7 @@ import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
 
 import scala.collection.JavaConverters._
+import scala.util.Random
 
 object ScenarioContext extends NINOGenerator {
 
@@ -96,8 +97,15 @@ private[utils] trait NINOGenerator {
     current
   }
 
+  //Private Beta
+  def generateIneligiblePrefix(): String = {
+    val prefixes = Set("NE02", "NE03")
+    val rnd = new Random
+    prefixes.toVector(rnd.nextInt(prefixes.size))
+  }
+
   def generateIneligibleNINO(): String = {
-    val ineligibleNino = "NE03" + generateNINO().drop(4)
+    val ineligibleNino = generateIneligiblePrefix() + generateNINO().drop(4)
     current = ineligibleNino
     ineligibleNino
   }
