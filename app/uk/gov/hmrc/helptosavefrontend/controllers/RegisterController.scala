@@ -169,10 +169,6 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     Ok(views.html.register.details_are_incorrect())
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
-  def getInvalidUserDataPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.user_info_failed_validation())
-  }(redirectOnLoginURL = routes.RegisterController.getInvalidUserDataPage().url)
-
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
@@ -191,7 +187,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
               case JSONSchemaValidationError(e) ⇒
                 logger.warn(s"user info failed validation for creating account: $e", nino)
                 pagerDutyAlerting.alert("JSON schema validation failed")
-                SeeOther(routes.RegisterController.getInvalidUserDataPage().url)
+                internalServerError()
 
               case BackendError(e) ⇒
                 logger.warn(s"Error while trying to create account: $e", nino)
