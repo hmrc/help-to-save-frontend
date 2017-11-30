@@ -14,16 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.forms
+package uk.gov.hmrc.helptosavefrontend.util
 
-import play.api.data._
-import play.api.data.Forms._
+import com.google.inject.ImplementedBy
 
-object GiveEmailForm {
-  def giveEmailForm(implicit emailValidation: EmailValidation): Form[GiveEmail] = Form(
-    mapping("email" -> of(emailValidation.emailFormatter)
-    )(GiveEmail.apply)(GiveEmail.unapply)
-  )
+@ImplementedBy(classOf[LoggingPagerDutyAlerting])
+trait PagerDutyAlerting {
+
+  def alert(message: String): Unit
+
 }
 
-case class GiveEmail(email: String)
+/** Pager duty alerts that are triggered via specific log messages */
+class LoggingPagerDutyAlerting extends PagerDutyAlerting with Logging {
+
+  private val alertPrefix: String = "[PagerDutyAlert]"
+
+  def alert(message: String): Unit = logger.warn(s"$alertPrefix: $message")
+
+}

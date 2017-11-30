@@ -27,11 +27,21 @@ GET        /register/email-verified                         @uk.gov.hmrc.helptos
 GET        /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
 GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
-GET        /register/user-cap-reached                       @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getUserCapReachedPage
 
+GET        /register/daily-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
+GET        /register/total-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
+GET        /register/service-unavailable                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceUnavailablePage
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String)
-
+GET        /identity-verified                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getIVSuccessful(continueURL: String)
+GET        /failed-iv-matching                              @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getFailedMatching(ivURL: String)
+GET        /failed-iv                                       @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getFailedIV(ivURL: String)
+GET        /failed-iv-insufficient-evidence                 @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getInsufficientEvidence
+GET        /failed-iv-locked-out                            @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getLockedOut
+GET        /failed-iv-user-rejected                         @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getUserAborted(ivURL: String)
+GET        /failed-iv-time-out                              @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getTimedOut(ivURL: String)
+GET        /failed-iv-technical-issue                       @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getTechnicalIssue(ivURL: String)
+GET        /failed-iv-precondition-failed                   @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getPreconditionFailed
 
 GET        /account/update-your-email-address               @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
 POST       /account/verify-email                            @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.onSubmit

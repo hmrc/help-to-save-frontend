@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,18 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.helptosavefrontend.forms
+@import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
 
-import play.api.data._
-import play.api.data.Forms._
+@(form: Form[_], key: String)(implicit messages: play.api.i18n.Messages)
+@{
+    val messagesKey = if(form.emailIsBlank(key)) {
+        "hts.email.error.blank"
+    } else if(form.emailTotalLengthTooLong(key) || form.emailLocalLengthTooLong(key) || form.emailDomainLengthTooLong(key)) {
+        "hts.email.error.too-long"
+    } else if(form.emailHasNoAtSymbol(key)) {
+        "hts.email.error.no-at-symbol"
+    } else {
+        "hts.email.error"
+    }
 
-object GiveEmailForm {
-  def giveEmailForm(implicit emailValidation: EmailValidation): Form[GiveEmail] = Form(
-    mapping("email" -> of(emailValidation.emailFormatter)
-    )(GiveEmail.apply)(GiveEmail.unapply)
-  )
+    messages(messagesKey)
 }
-
-case class GiveEmail(email: String)

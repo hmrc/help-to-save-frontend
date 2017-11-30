@@ -46,23 +46,23 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
   def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
     authorised(Retrievals.nino) {
       case (mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, request, time) { nino ⇒
+        withNINO(mayBeNino, time) { nino ⇒
           action(request)(HtsContextWithNINO(authorised = true, nino))
-        }
+        }(request)
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(redirectOnLoginURL: String): Action[AnyContent] =
     authorised(Retrievals.name and Retrievals.itmpName and Retrievals.nino){
       case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, request, time){ nino ⇒
+        withNINO(mayBeNino, time){ nino ⇒
           action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, maybeName.name.orElse(maybeItmpName.givenName)))
-        }
+        }(request)
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
     authorised(UserInfoRetrievals and Retrievals.nino){
       case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, request, time){ nino ⇒
+        withNINO(mayBeNino, time){ nino ⇒
           val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
           userDetails.fold(
@@ -71,13 +71,21 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
           )
 
           action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
-        }
+        }(request)
     }(redirectOnLoginURL)
 
   def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] =
     authorised(EmptyRetrieval, AuthProvider){
       case (_, request, _) ⇒
         action(request)(HtsContext(authorised = true))
+    }(redirectOnLoginURL)
+
+  def authorisedForHtsWithNINOAndNoCL(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
+    authorised(Retrievals.nino, AuthProvider) {
+      case (mayBeNino, request, time) ⇒
+        withNINO(mayBeNino, time) { nino ⇒
+          action(request)(HtsContextWithNINO(authorised = true, nino))
+        }(request)
     }(redirectOnLoginURL)
 
   def unprotected(action: HtsAction[HtsContext]): Action[AnyContent] =
@@ -105,10 +113,10 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       }
     }
 
-  private def withNINO[A](mayBeNino: Option[String], request: Request[_], nanos: Long)(action: NINO ⇒ Future[Result]): Future[Result] =
+  private def withNINO[A](mayBeNino: Option[String], nanos: Long)(action: NINO ⇒ Future[Result])(implicit request: Request[_]): Future[Result] =
     mayBeNino.fold {
       logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
-      toFuture(internalServerError()(request))
+      toFuture(internalServerError())
     }(action)
 
   private def getUserInfo(nino:        String,

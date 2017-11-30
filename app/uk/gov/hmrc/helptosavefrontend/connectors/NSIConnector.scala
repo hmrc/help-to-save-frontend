@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.nsiUserInfoFor
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, Result}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, PagerDutyAlerting, Result}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.AppName
 
@@ -62,7 +62,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends NSIConnector with Logging with AppName {
+class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDutyAlerting: PagerDutyAlerting) extends NSIConnector with Logging with AppName {
 
   val httpProxy: WSHttpProxy = new WSHttpProxy
 
@@ -94,11 +94,13 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
             SubmissionSuccess()
 
           case other ⇒
+            pagerDutyAlerting.alert("Received unexpected http status in response to create account")
             handleErrorStatus(other, response, userInfo.nino, time)
         }
       }.recover {
         case e ⇒
           val time = timeContext.stop()
+          pagerDutyAlerting.alert("Failed to make call to create account")
           metrics.nsiAccountCreationErrorCounter.inc()
 
           logger.warn(s"Encountered error while trying to create account ${timeString(time)}", e, nino)
@@ -122,6 +124,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
 
           case other ⇒
             metrics.nsiUpdateEmailErrorCounter.inc()
+            pagerDutyAlerting.alert("Received unexpected http status in response to update email")
             Left(s"Received unexpected status $other from NS&I while trying to update email ${timeString(time)}. " +
               s"Body was ${response.body}")
 
@@ -129,6 +132,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
       }.recover {
         case e ⇒
           val time = timeContext.stop()
+          pagerDutyAlerting.alert("Failed to make call to update email")
           metrics.nsiUpdateEmailErrorCounter.inc()
 
           Left(s"Encountered error while trying to create account: ${e.getMessage} ${timeString(time)}")
@@ -153,25 +157,25 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics) extends
     status match {
       case Status.BAD_REQUEST ⇒
         logger.warn(s"Failed to create account as NSI, received status 400 (Bad Request) from NSI ${timeString(time)}", nino)
-        handleBadRequestResponse(response)
+        handleError(response)
 
       case Status.INTERNAL_SERVER_ERROR ⇒
         logger.warn(s"Failed to create account as NSI, received status 500 (Internal Server Error) from NSI ${timeString(time)}", nino)
-        handleBadRequestResponse(response)
+        handleError(response)
 
       case Status.SERVICE_UNAVAILABLE ⇒
         logger.warn(s"Failed to create account as NSI, received status 503 (Service Unavailable) from NSI ${timeString(time)}", nino)
-        handleBadRequestResponse(response)
+        handleError(response)
 
       case other ⇒
         logger.warn(s"Unexpected error during creating account, received status $other ${timeString(time)}", nino)
-        SubmissionFailure(None, s"Something unexpected happened; response body: ${response.body}", other.toString)
+        handleError(response)
     }
   }
 
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
-  private def handleBadRequestResponse(response: HttpResponse): SubmissionFailure = {
+  private def handleError(response: HttpResponse): SubmissionFailure = {
     logger.warn(s"response body from NSI=${response.body}")
     response.parseJSON[SubmissionFailure](Some("error")) match {
       case Right(submissionFailure) ⇒ submissionFailure

@@ -161,20 +161,12 @@ class HelpToSaveServiceSpec extends TestSupport {
     }
 
     "checking if isAccountCreationAllowed" must {
-      "return true" in {
+      "return user cap response" in {
         (htsConnector.isAccountCreationAllowed()(_: HeaderCarrier)).expects(*)
-          .returning(EitherT.pure(true))
+          .returning(EitherT.pure(UserCapResponse()))
 
         val result = htsService.isAccountCreationAllowed()
-        result.value.futureValue should be(Right(true))
-      }
-
-      "return false" in {
-        (htsConnector.isAccountCreationAllowed()(_: HeaderCarrier)).expects(*)
-          .returning(EitherT.pure(false))
-
-        val result = htsService.isAccountCreationAllowed()
-        result.value.futureValue should be(Right(false))
+        result.value.futureValue should be(Right(UserCapResponse()))
       }
     }
 

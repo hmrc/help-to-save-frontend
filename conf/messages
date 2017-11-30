@@ -191,7 +191,6 @@ hts.register.you-are-eligible.button-1=Start creating your account
 hts.register.you-are-eligible.button-2=These details are not correct
 
 
-
 hts.register.check-and-confirm-your-details.title=Check and confirm your details
 hts.register.check-and-confirm-your-details.step=Step 1 of 4
 hts.register.check-and-confirm-your-details.name=Name
@@ -207,9 +206,29 @@ hts.register.missinguserinfo.header.page.title= Help-to-save: Missing UserInfo
 hts.register.missinguserinfo.redirect.personal.account= Please navigate to your <a href="{0}" target="_blank">Personal Account</a> and provide the missing information
 hts.register.missinguserinfo.contact.hmrc=If you have trouble getting in, please  <a href="{0}" target="_blank">Contact HMRC</a>
 
-hts.register.user-cap-reached.header.page.title=User Limit Reached
-hts.register.user-cap-reached.header=User limit reached for today. Please try again later
-hts.register.user-cap-reached.contact.hmrc=If you have trouble getting in, please  <a href="{0}" target="_blank">Contact HMRC</a>
+hts.register.daily-cap-reached.header.page.title=Help to Save - Daily User Limit Reached
+hts.register.daily-cap-reached.header=You''ll need to try again tomorrow
+hts.register.daily-cap-reached.p1=Thank you for apply for a Help to Save account.
+hts.register.daily-cap-reached.p2=We have a limit on the number of people who can open an account each day.
+hts.register.daily-cap-reached.p3=We''re sorry, we''ve reached our limit today.
+hts.register.daily-cap-reached.p4=You''ll need to try again tomorrow.
+hts.register.daily-cap-reached.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
+
+hts.register.total-cap-reached.header.page.title=Help to Save - Total User Limit Reached
+hts.register.total-cap-reached.header=You can''t open an account yet.
+hts.register.total-cap-reached.p1=Thank you for apply for a Help to Save account.
+hts.register.total-cap-reached.p2=We have a limit on the number of people who can open an account at the moment.
+hts.register.total-cap-reached.p3=We''re sorry, we''ve reached our limit.
+hts.register.total-cap-reached.p4=If You want to open an account, you''ll need to try again later in the year.
+hts.register.total-cap-reached.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
+
+
+hts.register.account-create-disabled.header.page.title=Help to Save - Account Create disabled
+hts.register.account-create-disabled.header=You can''t open an account at the moment.
+hts.register.account-create-disabled.p1=Thank you for apply for a Help to Save account.
+hts.register.account-create-disabled.p2=We have disabled the Help to Save account creation at the moment.
+hts.register.account-create-disabled.p3=If You want to open an account, you''ll need to try again later in the year.
+hts.register.account-create-disabled.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
 
 hts.register.create_account_help_to_save.title=Create a account
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
@@ -230,6 +249,12 @@ hts.iv.were_unable_to_confirm_your_identity.title=We were not able to verify you
 hts.iv.were_unable_to_confirm_your_identity.p1=You have not provided enough information.
 hts.iv.were_unable_to_confirm_your_identity.p2=To apply for a Help to Save account you''ll need to answer security questions based on the information we hold about you.
 hts.iv.were_unable_to_confirm_your_identity.p3=This is to prevent anyone other than you accessing your personal details.
+hts.iv.failed_iv.page-title=We were not able to verify your identity
+hts.iv.failed_iv.title=You''re not able to use this service
+hts.iv.failed_iv.p1=You did not answer all the questions correctly.
+hts.iv.failed_iv.p2=Your answers to the questions need to math the answers we already have for you.
+hts.iv.failed_iv.p3=You''l need to try again.
+hts.iv.failed_iv.try-again-button=Exit to About Help to Save
 hts.iv.failed_matching.page-title=We were not able to verify your identity 
 hts.iv.failed_matching.title=We were not able to verify your identity
 hts.iv.failed_matching.p=You''ll need to try again and check you entered your details correctly. This includes your:
@@ -257,12 +282,14 @@ hts.iv.precondition_failed.page-title=You''re not able to use this service
 hts.iv.precondition_failed.title=You''re not able to use this service
 hts.iv.precondition_failed.message=We've checked the details in your Government Gateway account and you don''t meet the criteria to use this service.
 hts.exit_to_about_hts=Exit to About Help to Save
-hts.access.denied.header=Access Denied
-hts.access.denied.message=You are not allowed to access this service
 hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
 
-hts.email.enter-valid-email=Please enter a valid email address
+hts.email.error=Enter a valid email address
+hts.email.error.too-long=Enter a valid email address, this email address is too long
+hts.email.error.blank=Enter a valid email address
+hts.email.error.no-at-symbol=Enter a valid email address, like yourname@example.com
+
 
 hts.select-email.page-title=Do you want to use the email address we hold for you? 
 hts.select-email.title=Which email address do you want us to use for your Help to Save account?
@@ -272,7 +299,7 @@ hts.select-email.enter-new-address-label=Enter a new email address
 hts.select-email.select-an-option=Please select an option
 hts.give-email.title=Which email address do you want us to use for your Help to Save account? 
 hts.give-email.page-title=Which email address do you want us to use for your Help to Save account?
-hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account
+hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
 
 hts.email-verification.title=Update your email
@@ -294,3 +321,8 @@ hts.we-couldnt-update-your-email.page-title=Something went wrong
 hts.we-couldnt-update-your-email.p1=We cannot change your email address at this time.
 hts.we-couldnt-update-your-email.p2=You''ll need to come back later and try again.
 hts.we-couldnt-update-your-email.back-to-account=Got to account home
+
+
+global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
+global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties
+global.error.InternalServerError500.message=Please try again later.

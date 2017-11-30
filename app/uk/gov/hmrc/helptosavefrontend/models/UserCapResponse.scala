@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.forms
+package uk.gov.hmrc.helptosavefrontend.models
 
-import play.api.data._
-import play.api.data.Forms._
+import play.api.libs.json.{Format, Json}
 
-object GiveEmailForm {
-  def giveEmailForm(implicit emailValidation: EmailValidation): Form[GiveEmail] = Form(
-    mapping("email" -> of(emailValidation.emailFormatter)
-    )(GiveEmail.apply)(GiveEmail.unapply)
-  )
+case class UserCapResponse(isDailyCapReached: Boolean = false, isTotalCapReached: Boolean = false, forceDisabled: Boolean = false)
+
+object UserCapResponse {
+  implicit val format: Format[UserCapResponse] = Json.format[UserCapResponse]
 }
-
-case class GiveEmail(email: String)

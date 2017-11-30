@@ -36,6 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
+import uk.gov.hmrc.helptosavefrontend.testutil.MockPagerDuty
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -48,7 +49,8 @@ class RegisterControllerSpec
   extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
-  with GeneratorDrivenPropertyChecks {
+  with GeneratorDrivenPropertyChecks
+  with MockPagerDuty {
 
   val jsonSchemaValidationService: JSONSchemaValidationService = mock[JSONSchemaValidationService]
   val mockAuditor: HTSAuditor = mock[HTSAuditor]
@@ -63,8 +65,9 @@ class RegisterControllerSpec
     jsonSchemaValidationService,
     mockMetrics,
     mockAuditor,
-    fakeApplication)(
-    ec, crypto, mockEmailValidation) {
+    fakeApplication,
+    mockPagerDuty)(
+    crypto, mockEmailValidation) {
     override lazy val authConnector = mockAuthConnector
   }
 
@@ -83,7 +86,7 @@ class RegisterControllerSpec
       .expects(email, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockAccountCreationAllowed(result: Either[String, Boolean]): Unit =
+  def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
     (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT.fromEither[Future](result))
@@ -144,17 +147,17 @@ class RegisterControllerSpec
 
       checkRedirectIfEmailInSession(doRequest())
 
-      "indicate to the user that user-cap has already reached and account creation not possible" in {
+      "indicate to the user that daily-cap has already reached and account creation not possible" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
-          mockAccountCreationAllowed(Right(false))
+          mockAccountCreationAllowed(Right(UserCapResponse(isDailyCapReached = true)))
         }
 
         val result = doRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getUserCapReachedPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
       }
 
       "return the give email page" in {
@@ -162,7 +165,7 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
-          mockAccountCreationAllowed(Right(true))
+          mockAccountCreationAllowed(Right(UserCapResponse()))
         }
 
         val result = doRequest()
@@ -225,12 +228,12 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-          mockAccountCreationAllowed(Right(false))
+          mockAccountCreationAllowed(Right(UserCapResponse(isTotalCapReached = true)))
         }
 
         val result = doRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getUserCapReachedPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage().url)
       }
 
       "return the confirm email page" in {
@@ -238,7 +241,7 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-          mockAccountCreationAllowed(Right(true))
+          mockAccountCreationAllowed(Right(UserCapResponse()))
         }
 
         val result = doRequest()
@@ -355,14 +358,38 @@ class RegisterControllerSpec
 
     }
 
-    "handling getUserCapReachedPage" must {
+    "handling getDailyCapReachedPage" must {
 
-      "return the user cap reached page" in {
+      "return the daily cap reached page" in {
         mockAuthWithNoRetrievals(AuthProvider)
 
-        val result = controller.getUserCapReachedPage(FakeRequest())
+        val result = controller.getDailyCapReachedPage(FakeRequest())
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("User Limit Reached")
+        contentAsString(result) should include("We have a limit on the number of people who can open an account each day")
+      }
+
+    }
+
+    "handling getTotalCapReachedPage" must {
+
+      "return the total cap reached page" in {
+        mockAuthWithNoRetrievals(AuthProvider)
+
+        val result = controller.getTotalCapReachedPage(FakeRequest())
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("We have a limit on the number of people who can open an account at the moment")
+      }
+
+    }
+
+    "handling getAccountCreateDisabledPage" must {
+
+      "return the account create disabled page" in {
+        mockAuthWithNoRetrievals(AuthProvider)
+
+        val result = controller.getServiceUnavailablePage(FakeRequest())
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("We have disabled the Help to Save account creation at the moment")
       }
 
     }
@@ -546,10 +573,11 @@ class RegisterControllerSpec
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail)))))
             mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Left(""))
+            mockPagerDutyAlert("JSON schema validation failed")
           }
 
           val result = doCreateAccountRequest()
-          checkIsTechnicalErrorPage(result)
+          status(result) shouldBe INTERNAL_SERVER_ERROR
         }
 
         "the help to save service returns with an error" in {

@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.forms
+package uk.gov.hmrc.helptosavefrontend.testutil
 
-import play.api.data._
-import play.api.data.Forms._
+import org.scalamock.scalatest.MockFactory
+import uk.gov.hmrc.helptosavefrontend.util.PagerDutyAlerting
 
-object GiveEmailForm {
-  def giveEmailForm(implicit emailValidation: EmailValidation): Form[GiveEmail] = Form(
-    mapping("email" -> of(emailValidation.emailFormatter)
-    )(GiveEmail.apply)(GiveEmail.unapply)
-  )
+trait MockPagerDuty { this: MockFactory ⇒
+
+  val mockPagerDuty: PagerDutyAlerting = mock[PagerDutyAlerting]
+
+  def mockPagerDutyAlert(expectedMessage: String): Unit =
+    (mockPagerDuty.alert(_: String))
+      .expects(expectedMessage)
+      .returning(())
+
 }
-
-case class GiveEmail(email: String)

@@ -40,7 +40,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toF
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnector:      SessionCacheConnector,
@@ -49,7 +49,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                                                           val emailVerificationConnector: EmailVerificationConnector,
                                                           metrics:                        Metrics,
                                                           val auditor:                    HTSAuditor
-)(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, ec: ExecutionContext)
+)(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
 
   def verifyEmail(email: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -69,7 +69,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         )
       }
     }
-  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  } (redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmail(email).url)
 
   def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
@@ -95,7 +95,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
       },
       toFuture(Ok(views.html.email.email_verify_error()))
     )
-  } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  } (redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
 
   def getEmailUpdated(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -143,7 +143,10 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         } else {
           val newInfo = info.updateEmail(params.email)
           val newSession = HTSSession(Right(newInfo), Some(params.email))
-          sessionCacheConnector.put(newSession).map(_ ⇒ newInfo)
+          for {
+            _ ← sessionCacheConnector.put(newSession)
+            _ ← helpToSaveService.storeConfirmedEmail(params.email)
+          } yield newInfo
         }
       }
 

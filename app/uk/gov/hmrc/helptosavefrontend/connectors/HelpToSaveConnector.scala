@@ -49,7 +49,7 @@ trait HelpToSaveConnector {
 
   def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]]
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean]
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[UserCapResponse]
 
   def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit]
 
@@ -83,8 +83,8 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]] =
     handleGet(getEmailURL, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[Boolean] = {
-    handleGet(accountCreateAllowedURL, _.parseJSON[Boolean](), "account creation allowed", identity)
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[UserCapResponse] = {
+    handleGet(accountCreateAllowedURL, _.parseJSON[UserCapResponse](), "account creation allowed", identity)
   }
 
   def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit] = {

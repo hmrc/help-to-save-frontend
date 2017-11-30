@@ -26,9 +26,7 @@ import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import play.filters.csrf.CSRFAddToken
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalTaxAccountUrl
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -39,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, PagerDutyAlerting, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -54,10 +52,14 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                                     jsonSchemaValidationService: JSONSchemaValidationService,
                                     metrics:                     Metrics,
                                     auditor:                     HTSAuditor,
-                                    app:                         Application
-)(implicit ec: ExecutionContext, crypto: Crypto, emailValidation: EmailValidation)
+                                    app:                         Application,
+                                    pagerDutyAlerting:           PagerDutyAlerting
+)(implicit crypto: Crypto, emailValidation: EmailValidation)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+
+  import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.CreateAccountError
+  import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.CreateAccountError._
 
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -70,7 +72,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           )
         }
       }
-    }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+    }(redirectOnLoginURL = routes.RegisterController.getGiveEmailPage().url)
 
   def giveEmailSubmit(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -84,7 +86,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           )
         }
       }
-    }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+    }(redirectOnLoginURL = routes.RegisterController.giveEmailSubmit().url)
 
   def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -96,7 +98,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
         }
       }
-    }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+    }(redirectOnLoginURL = routes.RegisterController.getSelectEmailPage().url)
 
   def selectEmailSubmit(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -114,7 +116,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
         }
       }
-    }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+    }(redirectOnLoginURL = routes.RegisterController.selectEmailSubmit().url)
 
   def confirmEmail(email: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
@@ -149,11 +151,19 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountHelpToSavePage().url)
 
-  def getUserCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.user_cap_reached())
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl) //TODO
+  def getDailyCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.daily_cap_reached())
+  }(redirectOnLoginURL = routes.RegisterController.getDailyCapReachedPage().url)
+
+  def getTotalCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.total_cap_reached())
+  }(redirectOnLoginURL = routes.RegisterController.getTotalCapReachedPage().url)
+
+  def getServiceUnavailablePage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.register.service_unavailable())
+  }(redirectOnLoginURL = routes.RegisterController.getServiceUnavailablePage().url)
 
   def getDetailsAreIncorrect: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.details_are_incorrect())
@@ -168,52 +178,59 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         ) { confirmedEmail ⇒
             val userInfo = NSIUserInfo(eligibleWithEmail.userInfo, confirmedEmail)
 
-            val result: EitherT[Future, String, Unit] = for {
-              _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(userInfo))
-              _ ← helpToSaveService.createAccount(userInfo).leftMap(submissionFailureToString)
+            val result: EitherT[Future, CreateAccountError, Unit] = for {
+              _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(userInfo).leftMap(JSONSchemaValidationError))
+              _ ← helpToSaveService.createAccount(userInfo).leftMap[CreateAccountError](f ⇒ BackendError(submissionFailureToString(f)))
             } yield ()
 
-            result.fold(
-              error ⇒ {
-                logger.warn(s"Error while trying to create account: $error", nino)
+            result.fold({
+              case JSONSchemaValidationError(e) ⇒
+                logger.warn(s"user info failed validation for creating account: $e", nino)
+                pagerDutyAlerting.alert("JSON schema validation failed")
                 internalServerError()
-              },
-              _ ⇒ {
-                logger.info("Successfully created account", nino)
 
-                // Account creation is successful, trigger background tasks but don't worry about the result
-                auditor.sendEvent(AccountCreated(userInfo), nino)
+              case BackendError(e) ⇒
+                logger.warn(s"Error while trying to create account: $e", nino)
+                internalServerError()
+            }, { _ ⇒
+              logger.info("Successfully created account", nino)
 
-                helpToSaveService.updateUserCount().value.onFailure {
-                  case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
-                }
+              // Account creation is successful, trigger background tasks but don't worry about the result
+              auditor.sendEvent(AccountCreated(userInfo), nino)
 
-                helpToSaveService.enrolUser().value.onComplete {
-                  case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
-                  case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
-                  case Success(Right(_)) ⇒ logger.info(s"Process started to enrol user", nino)
-                }
-
-                SeeOther(FrontendAppConfig.nsiManageAccountUrl)
+              helpToSaveService.updateUserCount().value.onFailure {
+                case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
               }
-            )
+
+              helpToSaveService.enrolUser().value.onComplete {
+                case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
+                case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
+                case Success(Right(_)) ⇒ logger.info(s"Process started to enrol user", nino)
+              }
+
+              SeeOther(FrontendAppConfig.nsiManageAccountUrl)
+            })
           }
       }{ _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = routes.RegisterController.createAccountHelpToSave().url)
 
   private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Result)(implicit hc: HeaderCarrier) = {
     helpToSaveService.isAccountCreationAllowed().fold(
       error ⇒ {
         logger.warn(s"Could not check if account create is allowed, due to: $error")
         ifAllowed
-      }, {
-        if (_) {
-          ifAllowed
+      }, { userCapResponse ⇒
+        if (userCapResponse.isTotalCapReached) {
+          SeeOther(routes.RegisterController.getTotalCapReachedPage().url)
+        } else if (userCapResponse.isDailyCapReached) {
+          SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
+        } else if (userCapResponse.forceDisabled) {
+          SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
         } else {
-          SeeOther(routes.RegisterController.getUserCapReachedPage().url)
+          ifAllowed
         }
       }
     )
@@ -269,6 +286,16 @@ object RegisterController {
     case class EligibleWithEmail(userInfo: UserInfo, email: Email, confirmedEmail: Option[Email]) extends EligibleInfo
 
     case class EligibleWithNoEmail(userInfo: UserInfo) extends EligibleInfo
+  }
+
+  private sealed trait CreateAccountError
+
+  private object CreateAccountError {
+
+    case class JSONSchemaValidationError(message: String) extends CreateAccountError
+
+    case class BackendError(message: String) extends CreateAccountError
+
   }
 
 }

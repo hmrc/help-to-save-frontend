@@ -300,15 +300,12 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         mockHttpGet(accountCreateAllowedURL),
         () ⇒ connector.isAccountCreationAllowed(),
         Json.toJson(true),
-        false
+        true
       )
 
-      "return a Right if the call comes with with HHTP 200 and valid boolean in the body" in {
-        mockHttpGet(accountCreateAllowedURL)(Some(HttpResponse(200, Some(Json.toJson(true)))))
-        await(connector.isAccountCreationAllowed().value) shouldBe Right(true)
-
-        mockHttpGet(accountCreateAllowedURL)(Some(HttpResponse(200, Some(Json.toJson(false)))))
-        await(connector.isAccountCreationAllowed().value) shouldBe Right(false)
+      "return a Right if the call comes with HTTP 200 and valid response in the body" in {
+        mockHttpGet(accountCreateAllowedURL)(Some(HttpResponse(200, Some(Json.toJson(UserCapResponse())))))
+        await(connector.isAccountCreationAllowed().value) shouldBe Right(UserCapResponse())
       }
     }
 

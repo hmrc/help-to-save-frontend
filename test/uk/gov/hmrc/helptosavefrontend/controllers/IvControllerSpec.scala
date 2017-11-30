@@ -21,19 +21,18 @@ import java.util.UUID.randomUUID
 
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.prop.Tables.Table
-import play.api.http.Status._
 import play.api.i18n.MessagesApi
+import play.api.mvc.Result
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
-import uk.gov.hmrc.auth.core.AuthProviders
-import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval}
+import play.api.test.Helpers._
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
+import uk.gov.hmrc.helptosavefrontend.util.urlEncode
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.Future
 
 class IvControllerSpec extends AuthSupport {
 
@@ -49,11 +48,6 @@ class IvControllerSpec extends AuthSupport {
 
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
-  private def mockAuthConnectorResult() = {
-    (mockAuthConnector.authorise[Unit](_: Predicate, _: Retrieval[Unit])(_: HeaderCarrier, _: ExecutionContext))
-      .expects(AuthProviders(GovernmentGateway), EmptyRetrieval, *, *).returning(Future.successful(()))
-  }
-
   lazy val ivController = new IvController(mockSessionCacheConnector,
                                            ivConnector,
                                            fakeApplication.injector.instanceOf[MessagesApi],
@@ -62,7 +56,7 @@ class IvControllerSpec extends AuthSupport {
 
   private val fakeRequest = FakeRequest("GET", s"/iv/journey-result?journeyId=${journeyId.Id}")
 
-  val continueURL = "continue-here!!"
+  val continueURL = "continue-here"
 
   private def doRequest() = ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(fakeRequest)
 
@@ -71,44 +65,138 @@ class IvControllerSpec extends AuthSupport {
     "handle different responses from identity-verification-frontend" in {
 
       val validCases =
-        Table(
+        Table[String, Option[String]](
           ("IV Journey Result", "hts response to the user"),
-          ("Success", OK),
-          ("Incomplete", INTERNAL_SERVER_ERROR),
-          ("FailedIV", UNAUTHORIZED),
-          ("FailedMatching", UNAUTHORIZED),
-          ("InsufficientEvidence", UNAUTHORIZED),
-          ("UserAborted", UNAUTHORIZED),
-          ("LockedOut", UNAUTHORIZED),
-          ("PreconditionFailed", UNAUTHORIZED),
-          ("TechnicalIssue", UNAUTHORIZED),
-          ("Timeout", UNAUTHORIZED),
-          ("blah-blah", INTERNAL_SERVER_ERROR)
+          ("Success", Some(routes.IvController.getIVSuccessful(urlEncode(continueURL)).url)),
+          ("Incomplete", None),
+          ("FailedIV", Some(routes.IvController.getFailedIV(ivUrl(continueURL)).url)),
+          ("FailedMatching", Some(routes.IvController.getFailedMatching(ivUrl(continueURL)).url)),
+          ("InsufficientEvidence", Some(routes.IvController.getInsufficientEvidence().url)),
+          ("UserAborted", Some(routes.IvController.getUserAborted(ivUrl(continueURL)).url)),
+          ("LockedOut", Some(routes.IvController.getLockedOut().url)),
+          ("PreconditionFailed", Some(routes.IvController.getPreconditionFailed().url)),
+          ("TechnicalIssue", Some(routes.IvController.getTechnicalIssue(ivUrl(continueURL)).url)),
+          ("Timeout", Some(routes.IvController.getTimedOut(ivUrl(continueURL)).url)),
+          ("blah-blah", None)
         )
 
-      forAll(validCases) { (ivServiceResponse: String, htsStatus: Int) ⇒
-        mockAuthConnectorResult()
+      forAll(validCases) { (ivServiceResponse: String, redirectURL: Option[String]) ⇒
+        mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
         mockIvConnector(journeyId, ivServiceResponse)
 
-        val responseFuture = doRequest()
+        val result = doRequest()
 
-        val result = Await.result(responseFuture, 3.seconds)
-
-        status(result) should be(htsStatus)
+        redirectURL.fold {
+          checkIsTechnicalErrorPage(result)
+        } { redirectURL ⇒
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(redirectURL)
+        }
       }
     }
 
     "handles the case where no iv response for a given journeyId" in {
 
-      mockAuthConnectorResult()
+      mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
 
-      val responseFuture =
+      val result =
         ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(
           FakeRequest("GET", "/iv/journey-result"))
 
-      val result = Await.result(responseFuture, 3.seconds)
-
-      status(result) should be(UNAUTHORIZED)
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.IvController.getTechnicalIssue(ivUrl(continueURL)).url)
     }
+  }
+
+  "The IvController" must {
+
+      def test(name:      String,
+               getResult: ⇒ Future[Result])(checks: Future[Result] ⇒ Unit): Unit = {
+        s"show the correct $name page" in {
+          mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+          checks(getResult)
+        }
+      }
+
+    val url = "my-url"
+
+    test(
+      "IV successful",
+      ivController.getIVSuccessful(url)(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe OK
+        contentAsString(result) should include(url)
+        contentAsString(result) should include("now confirmed your identity")
+      }
+
+    test(
+      "failed matching",
+      ivController.getFailedMatching(url)(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe UNAUTHORIZED
+        contentAsString(result) should include(url)
+        contentAsString(result) should include("need to try again and check you entered your details correctly")
+      }
+
+    test(
+      "failed iv",
+      ivController.getFailedIV(url)(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe UNAUTHORIZED
+        contentAsString(result) should include(url)
+        contentAsString(result) should include("You did not answer all the questions correctly")
+      }
+
+    test(
+      "insufficient evidence",
+      ivController.getInsufficientEvidence()(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe UNAUTHORIZED
+        contentAsString(result) should include("be able to apply for a Help to Save account by phone, after")
+      }
+
+    test(
+      "locked out",
+      ivController.getLockedOut()(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe UNAUTHORIZED
+        contentAsString(result) should include("You have tried to verify your identity too many times")
+      }
+
+    test(
+      "user aborted",
+      ivController.getUserAborted(url)(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe UNAUTHORIZED
+        contentAsString(result) should include(url)
+        contentAsString(result) should include("You have not provided enough information")
+      }
+
+    test(
+      "timed out",
+      ivController.getTimedOut(url)(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe UNAUTHORIZED
+        contentAsString(result) should include(url)
+        contentAsString(result) should include("Your session has ended")
+      }
+
+    test(
+      "technical issue",
+      ivController.getTechnicalIssue(url)(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe UNAUTHORIZED
+        contentAsString(result) should include(url)
+        contentAsString(result) should include("Something went wrong")
+      }
+
+    test(
+      "precondition failed",
+      ivController.getPreconditionFailed()(FakeRequest())
+    ){ result ⇒
+        status(result) shouldBe UNAUTHORIZED
+        contentAsString(result) should include("not able to use this service")
+      }
+
   }
 }
