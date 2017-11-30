@@ -21,7 +21,7 @@
 
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "Email address verified", bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.email-updated.page-title"), bodyClasses = None) {
 
  <div class="transaction-banner--complete">
   <h1 class="transaction-banner__heading">@messages("hts.email-updated.title")</h1>

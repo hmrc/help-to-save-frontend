@@ -235,9 +235,9 @@ hts.register.create_account_help_to_save.step=Step 2 of 4
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.par-1=Before opening an account, you’'ll need to confirm you accept these conditions:
 hts.register.create_account_help_to_save.bullet-1=you must inform us whenever you leave the UK for 8 weeks or more at a time
-hts.register.create_account_help_to_save.bullet-2=you’'re only allowed one account in your lifetime
+hts.register.create_account_help_to_save.bullet-2=you''re only allowed one account in your lifetime
 hts.register.create_account_help_to_save.bullet-3=your account lasts for 4 years and this time starts as soon as you create it
-hts.register.create_account_help_to_save.bullet-4=you’'ll need to enter your UK bank account details to start using your Help to Save account, saving money and earning a bonus
+hts.register.create_account_help_to_save.bullet-4=you''ll need to enter your UK bank account details to start using your Help to Save account, saving money and earning a bonus
 hts.register.create_account_help_to_save.accept-label=Accept and create account
 hts.register.create_account_help_to_save.cancel-label=Cancel
 
@@ -325,6 +325,7 @@ hts.we-couldnt-update-your-email.p1=We cannot change your email address at this 
 hts.we-couldnt-update-your-email.p2=You''ll need to come back later and try again.
 hts.we-couldnt-update-your-email.back-to-account=Got to account home
 
+hts.email-updated.page-title=Email address verified
 hts.email-updated.title=Email address verified
 hts.email-updated.p1=If you create a Help to Save account we''ll use this email address to contact you about it.
 hts.email-updated.p2=Your email address has not been updated in other government services.
