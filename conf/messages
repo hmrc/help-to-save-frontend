@@ -238,7 +238,7 @@ hts.register.create_account_help_to_save.bullet-2=you’'ll need to enter your b
 hts.register.create_account_help_to_save.accept-label=Accept and create account
 hts.register.create_account_help_to_save.cancel-label=Exit without creating account
 
-hts.iv.identity_verification.title=Help to Save Identity verification
+hts.iv.identity_verification.title=We''ve verified your identity
 hts.iv.locked_out.page-title=We were not able to verify your identity 
 hts.iv.locked_out.title=We were not able to verify your identity
 hts.iv.locked_out.p1=You have tried to verify your identity too many times.
