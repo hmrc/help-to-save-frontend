@@ -45,7 +45,31 @@ object AuthorityWizardPage extends Page {
     setAddressLine4("AddressLine4")
     setAddressLine5("AddressLine5")
     setPostCode("S24AH")
-    setCountryCode("01")
+    setCountryCode("GB")
+    submit()
+  }
+
+  def authenticateUserNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
+    AuthorityWizardPage.navigate()
+    fillInAuthDetailsNoEmail(redirectUrl, confidence, credentialStrength, nino)
+  }
+
+  private def fillInAuthDetailsNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
+    setRedirect(redirectUrl)
+    setConfidenceLevel(confidence)
+    setCredentialStrength(credentialStrength)
+    setNino(nino)
+    setGivenName("GivenName")
+    setFamilyName("FamilyName")
+    setDateOfBirth("1980-12-20")
+    setAddressLine1("AddressLine1")
+    setAddressLine2("AddressLine2")
+    setAddressLine3("AddressLine3")
+    setAddressLine4("AddressLine4")
+    setAddressLine5("AddressLine5")
+    setPostCode("S24AH")
+    setCountryCode("GB")
+    setBlankEmail
     submit()
   }
 
@@ -96,6 +120,9 @@ object AuthorityWizardPage extends Page {
 
   def setEmail(email: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.email")).foreach(_.underlying.sendKeys(email))
+
+  def setBlankEmail(implicit driver: WebDriver): Unit =
+    find(name("itmp.email")).foreach(_.underlying.sendKeys())
 
   def setAddressLine1(addressLine1: String)(implicit driver: WebDriver): Unit =
     find(name("itmp.address.line1")).foreach(_.underlying.sendKeys(addressLine1))

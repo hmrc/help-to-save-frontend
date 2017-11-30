@@ -1,4 +1,4 @@
-@HTS-371 @HTS-379 @ignore
+@HTS-371 @HTS-379
 Feature: Applicant confirms details
 
   Scenario: Applicant confirms details

@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.registrationPages
 
-import org.openqa.selenium.WebDriver
+import hts.pages.Page
 import hts.utils.Configuration
 
-object ConfirmDetailsPage extends Page {
+object EligibilityInfoPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/check-and-confirm-your-details"
-
-  def navigate()(implicit driver: WebDriver): Unit =
-    go to url
-
-  def continue()(implicit driver: WebDriver): Unit = click on "continue"
-
-  def changeEmail()(implicit driver: WebDriver): Unit = click on linkText("Change")
+  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/eligibility"
 
 }

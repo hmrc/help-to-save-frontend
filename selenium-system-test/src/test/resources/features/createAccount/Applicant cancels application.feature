@@ -1,4 +1,4 @@
-@HTS-431 @ignore
+@HTS-431
 Feature: Applicant cancels application
 
   @zap

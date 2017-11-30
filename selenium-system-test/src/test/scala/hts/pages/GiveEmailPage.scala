@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package hts.pages.registrationPages
+package hts.pages
 
-import hts.pages.Page
 import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
-object CheckEligibilityPage extends Page {
+object GiveEmailPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
+  val url: String = s"${Configuration.host}/help-to-save/register/give-email"
 
+  def continue()(implicit driver: WebDriver): Unit = click on "continue"
 }

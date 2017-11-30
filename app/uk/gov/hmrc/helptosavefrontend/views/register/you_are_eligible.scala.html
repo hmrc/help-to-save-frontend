@@ -40,7 +40,7 @@
 
     @form(routes.EligibilityCheckController.youAreEligibleSubmit(), 'class -> "group") {
         @CSRF.formField(request)
-        @submit('_buttonClass -> "") {
+        @submit('_buttonClass -> "", 'id → "start-creating-account") {
             @Messages("hts.register.you-are-eligible.button-1")
         }
     }
