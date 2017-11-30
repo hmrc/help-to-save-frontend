@@ -160,6 +160,19 @@ class RegisterControllerSpec
         redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
       }
 
+      "indicate to the user that total-cap has already reached and account creation not possible" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockAccountCreationAllowed(Right(UserCapResponse(isTotalCapReached = true)))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage().url)
+      }
+
       "return the give email page" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -172,6 +185,19 @@ class RegisterControllerSpec
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Which email address do you want us to use for your Help to Save account")
         contentAsString(result) should include(routes.RegisterController.giveEmailSubmit().url)
+      }
+
+      "indicate to the user that service is unavailable due to both caps are disabled" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockAccountCreationAllowed(Right(UserCapResponse(isDailyCapDisabled = true, isTotalCapDisabled = true)))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getServiceUnavailablePage().url)
       }
 
     }
@@ -382,14 +408,14 @@ class RegisterControllerSpec
 
     }
 
-    "handling getAccountCreateDisabledPage" must {
+    "handling service_unavailable page" must {
 
       "return the account create disabled page" in {
         mockAuthWithNoRetrievals(AuthProvider)
 
         val result = controller.getServiceUnavailablePage(FakeRequest())
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("We have disabled the Help to Save account creation at the moment")
+        contentAsString(result) should include("Service Unavailable")
       }
 
     }

@@ -223,12 +223,10 @@ hts.register.total-cap-reached.p4=If You want to open an account, you''ll need t
 hts.register.total-cap-reached.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
 
 
-hts.register.account-create-disabled.header.page.title=Help to Save - Account Create disabled
-hts.register.account-create-disabled.header=You can''t open an account at the moment.
-hts.register.account-create-disabled.p1=Thank you for apply for a Help to Save account.
-hts.register.account-create-disabled.p2=We have disabled the Help to Save account creation at the moment.
-hts.register.account-create-disabled.p3=If You want to open an account, you''ll need to try again later in the year.
-hts.register.account-create-disabled.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
+hts.register.service-unavailable.header.page.title=Help to Save - Service Unavailable
+hts.register.service-unavailable.header=Service Unavailable.
+hts.register.service-unavailable.p1=Please try again later.
+hts.register.service-unavailable.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
 
 hts.register.create_account_help_to_save.title=Create a account
 hts.register.create_account_help_to_save.step=Step 2 of 4
