@@ -81,8 +81,8 @@ class CreateAccountSteps extends Steps with Page {
 
   //TO-DO url will need updating
   Then("""^they see that the account is created$""") { () ⇒
-    getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
-    //getCurrentUrl should include("nsandi")
+    //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
+    getCurrentUrl should include("nsandi")
   }
 
   Then("""^they will be on a page which says you do not have an account$""") { () ⇒
