@@ -30,7 +30,7 @@ object SelectEmailForm {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
         data.get("email") match {
           // if "No" make sure that we have a new email
-          case Some("No") ⇒ emailValidation.emailMapping.withPrefix(key).bind(data).map(Some(_))
+          case Some("No") ⇒ emailValidation.emailFormatter.bind(key, data).map(Some(_))
 
           // the value for "email" should be "Yes" or "No" - this will get picked up in the mapping in the form below.
           // if the value is "Yes" ignore any new email that has been entered

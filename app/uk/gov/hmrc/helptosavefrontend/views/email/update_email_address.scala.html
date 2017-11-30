@@ -17,8 +17,9 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 
-@(emailAddress: String, form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.introduction.title"),
@@ -28,20 +29,15 @@
     <h1>@messages("hts.email-verification.title")</h1>
 
     @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderUpdateEmailAddressController.onSubmit()) {
-        @defining(form.error("new-email-address").map(_.message)) { ek =>
-            @helpers.input_text(
-                id = "new-email-address",
-                name = "new-email-address",
-                label = messages("hts.email-verification.input.label"),
-                errorKey = ek.map(_ ⇒ "hts.email.enter-valid-email").getOrElse(""),
-                value = ek.fold(emailAddress)(_ => "")
-            )
-            @helpers.submit('_buttonClass -> "") {
-                @messages("hts.email-verification.submit.text")
-            }
+        @helpers.input_text(
+            id = "new-email-address",
+            name = "new-email-address",
+            label = messages("hts.email-verification.input.label"),
+            errorKey = form.error("new-email-address").fold("")(_ ⇒ email_form_validation_error_message(form, "new-email-address").toString)
+        )
+        @helpers.submit('_buttonClass -> "") {
+            @messages("hts.email-verification.submit.text")
         }
     }
-
-
-
 }
+    

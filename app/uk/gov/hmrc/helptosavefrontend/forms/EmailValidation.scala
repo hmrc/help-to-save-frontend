@@ -16,22 +16,96 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import java.util.function.Predicate
+import cats.data.Validated.{Invalid, Valid}
+import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import cats.instances.string._
+import cats.syntax.cartesian._
+import cats.syntax.either._
+import cats.syntax.eq._
 
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.data.Mapping
-
-import scala.util.matching.Regex
+import play.api.data.Forms.text
+import play.api.data.{Form, FormError}
+import play.api.data.format.Formatter
+import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages
 
 @Singleton
 class EmailValidation @Inject() (configuration: Configuration) {
 
-  private val emailMaxLength: Int = configuration.underlying.getInt("email-validation.max-length")
+  private val emailMaxTotalLength: Int = configuration.underlying.getInt("email-validation.max-total-length")
 
-  private val emailRegex: Regex = configuration.underlying.getString("email-validation.regex").r
+  private val emailMaxLocalLength: Int = configuration.underlying.getInt("email-validation.max-local-length")
 
-  private val emailPredicate: Predicate[String] = emailRegex.pattern.asPredicate()
+  private val emailMaxDomainLength: Int = configuration.underlying.getInt("email-validation.max-domain-length")
 
-  val emailMapping: Mapping[String] = play.api.data.Forms.text(maxLength = emailMaxLength).verifying("error.email", emailPredicate.test(_))
+  val emailFormatter: Formatter[String] = new Formatter[String] {
+
+    private def invalid[A](message: String): ValidatedNel[String, A] = Invalid(NonEmptyList[String](message, Nil))
+
+    private def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
+      if (predicate(a)) Valid(a) else invalid(ifFalse)
+
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
+      val validation: Validated[NonEmptyList[String], String] =
+        data.get(key).fold(invalid[String](ErrorMessages.blankEmailAddress)) {
+          s ⇒
+            val trimmed = s.trim
+            val notBlankCheck = validatedFromBoolean(trimmed)(_.nonEmpty, ErrorMessages.blankEmailAddress)
+            val totalLengthCheck = validatedFromBoolean(trimmed)(_.length <= emailMaxTotalLength, ErrorMessages.totalTooLong)
+            val hasAtSymbolCheck = validatedFromBoolean(trimmed)(_.contains('@'), ErrorMessages.noAtSymbol)
+            val localLengthCheck = validatedFromBoolean(trimmed)(_.split("@").headOption.forall(_.length <= emailMaxLocalLength), ErrorMessages.localTooLong)
+            val domainLengthCheck = validatedFromBoolean(trimmed)(_.split("@").drop(1).mkString("").length <= emailMaxDomainLength, ErrorMessages.domainTooLong)
+
+            (notBlankCheck |@| totalLengthCheck |@| hasAtSymbolCheck |@| localLengthCheck |@| domainLengthCheck)
+              .map{ case _ ⇒ s }
+
+        }
+
+      validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
+    }
+
+    override def unbind(key: String, value: String): Map[String, String] =
+      text.withPrefix(key).unbind(value)
+  }
+
+}
+
+object EmailValidation {
+
+  private[forms] object ErrorMessages {
+
+    val totalTooLong: String = "total_too_long"
+
+    val localTooLong: String = "local_too_long"
+
+    val domainTooLong: String = "domain_too_long"
+
+    val noAtSymbol: String = "no_@_symbol"
+
+    val blankEmailAddress = "blank_email_address"
+  }
+
+  implicit class FormOps[A](val form: Form[A]) extends AnyVal {
+
+    private def hasErrorMessage(key: String, message: String): Boolean =
+      form.error(key).exists(_.message === message)
+
+    def emailTotalLengthTooLong(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.totalTooLong)
+
+    def emailLocalLengthTooLong(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.localTooLong)
+
+    def emailDomainLengthTooLong(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.domainTooLong)
+
+    def emailHasNoAtSymbol(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.noAtSymbol)
+
+    def emailIsBlank(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.blankEmailAddress)
+
+  }
+
 }
