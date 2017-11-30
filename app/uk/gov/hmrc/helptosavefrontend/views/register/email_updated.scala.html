@@ -30,7 +30,7 @@
 
  <p>@messages("hts.email-updated.p1")</p>
  <p>@messages("hts.email-updated.p2")</p>
- @form(routes.RegisterController.getCreateAccountHelpToSavePage)(
+ @form(routes.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit())(
   Html("""<button id="continue-to-create-account">""" + messages("hts.email-updated.continue_button") + """</button>"""))
 
 

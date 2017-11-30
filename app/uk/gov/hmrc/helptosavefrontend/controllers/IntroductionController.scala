@@ -25,6 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.play.frontend.controller.ActionWithMdc
 
 @Singleton
 class IntroductionController @Inject() (val messagesApi:       MessagesApi,
@@ -49,6 +50,10 @@ class IntroductionController @Inject() (val messagesApi:       MessagesApi,
 
   def getApply: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.introduction.apply())
+  }
+
+  def applySubmit: Action[AnyContent] = ActionWithMdc { _ ⇒
+    SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
   }
 
 }
