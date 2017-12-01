@@ -228,7 +228,7 @@ hts.register.service-unavailable.header=Service Unavailable.
 hts.register.service-unavailable.p1=Please try again later.
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
-hts.register.create_account_help_to_save.title=Create a account
+hts.register.create_account_help_to_save.title=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.step=Step 2 of 4
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.par-1=Before opening an account, you’'ll need to confirm you accept these conditions:
