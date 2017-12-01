@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json._
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.util.Email
@@ -30,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
  * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
  *                               if they haven't
  */
-case class HTSSession(eligibilityCheckResult: Either[Ineligible, UserInfo], confirmedEmail: Option[Email])
+case class HTSSession(eligibilityCheckResult: Either[EligibilityCheckResult, UserInfo], confirmedEmail: Option[Email])
 
 object HTSSession {
 
