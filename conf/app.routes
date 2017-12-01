@@ -29,7 +29,7 @@ GET        /register/email-verified                         @uk.gov.hmrc.helptos
 GET        /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
 POST       /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
 GET        /register/create-account                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
-POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
+POST       /register/create-account                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 
 GET        /register/daily-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /register/total-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
