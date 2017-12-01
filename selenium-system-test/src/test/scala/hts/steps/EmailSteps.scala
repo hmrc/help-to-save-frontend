@@ -17,19 +17,24 @@
 package hts.steps
 
 import hts.pages._
-import hts.pages.registrationPages.CheckEligibilityPage
+import hts.pages.registrationPages.EligibilityInfoPage
 import hts.utils.ScenarioContext
 
 class EmailSteps extends Steps with Page {
 
   Given("""^I am viewing my applicant details$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.currentNINO())
     EligiblePage.startCreatingAccount()
   }
 
-  When("""^I choose to change my email address$"""){ () ⇒
-    ConfirmDetailsPage.changeEmail()
-    ChangeEmailPage.setAndVerifyNewEmail("newemail@mail.com")
+  When("""^they are shown a page to select which email address to use for hts$"""){ () ⇒
+    getCurrentUrl contains SelectEmailPage.url
+  }
+
+  When("""^they select the email obtained from GG and click Continue$"""){ () ⇒
+    getCurrentUrl contains SelectEmailPage.url
+    SelectEmailPage.selectGGEmail()
+    SelectEmailPage.clickContinue()
   }
 
   Then("""^I am asked to check my email account for a verification email$"""){ () ⇒
@@ -37,10 +42,9 @@ class EmailSteps extends Steps with Page {
   }
 
   Given("""^I've chosen to change my email address from A to B during the application process$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.currentNINO())
     EligiblePage.startCreatingAccount()
-    ConfirmDetailsPage.changeEmail()
-    ChangeEmailPage.setAndVerifyNewEmail("newemail@mail.com")
+    SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
   }
 
   Given("""^I want to receive a second verification email$"""){ () ⇒
@@ -65,7 +69,7 @@ class EmailSteps extends Steps with Page {
 
   When("""^I then choose to change the email address from B to C$"""){ () ⇒
     CheckYourEmailPage.changeEmail()
-    ChangeEmailPage.setAndVerifyNewEmail("secondnewemail@mail.com")
+    SelectEmailPage.setAndVerifyNewEmail("secondnewemail@mail.com")
   }
 
   When("""^I verify email address C$"""){ () ⇒
@@ -75,4 +79,25 @@ class EmailSteps extends Steps with Page {
   Then("""^I see that my saved email address is C$"""){ () ⇒
 
   }
+
+  Then("""^I am shown a page to enter my email address$""") { () ⇒
+    getCurrentUrl contains GiveEmailPage.url
+  }
+
+  Then("""^they see the page "You're about to create a Help to Save account"$""") { () ⇒
+    getCurrentUrl contains CreateAccountPage.url
+  }
+
+  When("""^they select I want to enter a new email address and enter a new email$"""){ () ⇒
+    getCurrentUrl contains SelectEmailPage.url
+    SelectEmailPage.selectNewEmail()
+    SelectEmailPage.setNewEmail("newemail@gmail.com")
+    SelectEmailPage.clickContinue()
+  }
+
+  Then("""^I see the page "You have 30 minutes to verify your email address"$""") { () ⇒
+    getCurrentUrl contains CheckYourEmailPage.url
+
+  }
+
 }

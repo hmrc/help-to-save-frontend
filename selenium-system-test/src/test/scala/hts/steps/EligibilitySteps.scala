@@ -16,25 +16,24 @@
 
 package hts.steps
 
-import hts.pages.registrationPages.CheckEligibilityPage
-import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage}
-import hts.utils.{Configuration, ScenarioContext}
+import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage, Page}
+import hts.utils.ScenarioContext
 
-class EligibilitySteps extends Steps {
+class EligibilitySteps extends Steps with Page {
 
   Given("""^an user is in receipt of working tax credit$""") { () ⇒
     val _ = ScenarioContext.generateEligibleNINO()
   }
 
   When("""^they apply for Help to Save$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO)
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.currentNINO)
   }
 
   Then("""^they see that they are eligible for Help to Save$""") { () ⇒
-    EligiblePage.pageInfoIsCorrect
+    EligiblePage.pageInfoContains()
   }
 
-  When("""^they start to create an account$"""){ () ⇒
+  When("""^they click on start creating your account$"""){ () ⇒
     EligiblePage.startCreatingAccount()
   }
 
@@ -43,7 +42,6 @@ class EligibilitySteps extends Steps {
   }
 
   Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒
-    NotEligiblePage.pageInfoIsCorrect
-
+    getCurrentUrl should include (NotEligiblePage.expectedUrl)
   }
 }

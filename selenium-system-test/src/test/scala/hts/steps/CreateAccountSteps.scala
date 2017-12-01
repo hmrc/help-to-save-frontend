@@ -18,9 +18,9 @@ package hts.steps
 
 import hts.pages._
 import hts.pages.registrationPages._
-import hts.utils.{Configuration, ScenarioContext}
 import hts.utils.EitherOps._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import hts.utils.{Configuration, ScenarioContext}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig;
 
 class CreateAccountSteps extends Steps with Page {
 
@@ -42,16 +42,17 @@ class CreateAccountSteps extends Steps with Page {
 
   Given("""^a user has previously created an account$"""){ () ⇒
     AuthorityWizardPage.navigate()
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.startCreatingAccount()
-    ConfirmDetailsPage.continue()
+    SelectEmailPage.selectGGEmail()
+    SelectEmailPage.clickContinue()
     CreateAccountPage.createAccount()
     driver.manage().deleteAllCookies()
   }
 
   When("""^they proceed through to the apply page$""") { () ⇒
     AboutPage.nextPage()
-    CheckEligibilityPage.nextPage()
+    EligibilityInfoPage.nextPage()
     HowTheAccountWorksPage.nextPage()
     HowWeCalculateBonusesPage.nextPage()
   }
@@ -64,8 +65,7 @@ class CreateAccountSteps extends Steps with Page {
     ApplyPage.clickSignInLink()
   }
 
-  When("""^they choose to create an account$""") { () ⇒
-    ConfirmDetailsPage.continue()
+  When("""^they click on accept and create an account$""") { () ⇒
     CreateAccountPage.createAccount()
   }
 
@@ -75,11 +75,14 @@ class CreateAccountSteps extends Steps with Page {
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
     driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.currentNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.currentNINO())
+    AccessAccountPage.navigate()
   }
 
+  //TO-DO url will need updating
   Then("""^they see that the account is created$""") { () ⇒
-    getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
+    //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
+    getCurrentUrl should include("nsandi")
   }
 
   Then("""^they will be on a page which says you do not have an account$""") { () ⇒
@@ -88,22 +91,25 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   Then("""^they will be on the you're eligible page$""") { () ⇒
-    EligiblePage.pageInfoIsCorrect
+    EligiblePage.pageInfoContains()
   }
 
+  //TO-DO url will need updating
   Then("""^they will be on the account home page$"""){ () ⇒
-    getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
+    //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
+    getCurrentUrl should include("nsandi")
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(CheckEligibilityPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.startCreatingAccount()
-    ConfirmDetailsPage.continue()
+    SelectEmailPage.selectGGEmail()
+    SelectEmailPage.clickContinue()
     CreateAccountPage.exitWithoutCreatingAccount()
   }
 
   Then("""^they see the Help to Save landing page \(with information about Help to Save\)$"""){ () ⇒
-    AboutPage.pageInfoIsCorrect
+    getCurrentUrl contains AboutPage.url
   }
 
   When("""^they choose to go ahead with creating an account$"""){ () ⇒
@@ -111,7 +117,8 @@ class CreateAccountSteps extends Steps with Page {
     AuthorityWizardPage.setRedirect(EligiblePage.url)
     AuthorityWizardPage.submit()
     EligiblePage.startCreatingAccount()
-    ConfirmDetailsPage.continue()
+    SelectEmailPage.selectGGEmail()
+    SelectEmailPage.clickContinue()
     CreateAccountPage.createAccount()
   }
 }

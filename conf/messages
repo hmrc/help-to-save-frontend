@@ -212,7 +212,7 @@ hts.register.daily-cap-reached.p1=Thank you for apply for a Help to Save account
 hts.register.daily-cap-reached.p2=We have a limit on the number of people who can open an account each day.
 hts.register.daily-cap-reached.p3=We''re sorry, we''ve reached our limit today.
 hts.register.daily-cap-reached.p4=You''ll need to try again tomorrow.
-hts.register.daily-cap-reached.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
+hts.register.daily-cap-reached.exit.gov.uk=Exit to GOV.UK
 
 hts.register.total-cap-reached.header.page.title=Help to Save - Total User Limit Reached
 hts.register.total-cap-reached.header=You can''t open an account yet.
@@ -220,23 +220,24 @@ hts.register.total-cap-reached.p1=Thank you for apply for a Help to Save account
 hts.register.total-cap-reached.p2=We have a limit on the number of people who can open an account at the moment.
 hts.register.total-cap-reached.p3=We''re sorry, we''ve reached our limit.
 hts.register.total-cap-reached.p4=If You want to open an account, you''ll need to try again later in the year.
-hts.register.total-cap-reached.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
+hts.register.total-cap-reached.exit.gov.uk=Exit to GOV.UK
 
 
-hts.register.account-create-disabled.header.page.title=Help to Save - Account Create disabled
-hts.register.account-create-disabled.header=You can''t open an account at the moment.
-hts.register.account-create-disabled.p1=Thank you for apply for a Help to Save account.
-hts.register.account-create-disabled.p2=We have disabled the Help to Save account creation at the moment.
-hts.register.account-create-disabled.p3=If You want to open an account, you''ll need to try again later in the year.
-hts.register.account-create-disabled.exit.gov.uk=<a href="{0}" target="_blank">Exit to GOV.UK</a>
+hts.register.service-unavailable.header.page.title=Help to Save - Service Unavailable
+hts.register.service-unavailable.header=Service Unavailable.
+hts.register.service-unavailable.p1=Please try again later.
+hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
 hts.register.create_account_help_to_save.title=Create a account
+hts.register.create_account_help_to_save.step=Step 2 of 4
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.par-1=Before opening an account, you’'ll need to confirm you accept these conditions:
-hts.register.create_account_help_to_save.bullet-1=you’'re only allowed one account in your lifetime
-hts.register.create_account_help_to_save.bullet-2=you’'ll need to enter your bank details to access your account
+hts.register.create_account_help_to_save.bullet-1=you must inform us whenever you leave the UK for 8 weeks or more at a time
+hts.register.create_account_help_to_save.bullet-2=you''re only allowed one account in your lifetime
+hts.register.create_account_help_to_save.bullet-3=your account lasts for 4 years and this time starts as soon as you create it
+hts.register.create_account_help_to_save.bullet-4=you''ll need to enter your UK bank account details to start using your Help to Save account, saving money and earning a bonus
 hts.register.create_account_help_to_save.accept-label=Accept and create account
-hts.register.create_account_help_to_save.cancel-label=Exit without creating account
+hts.register.create_account_help_to_save.cancel-label=Cancel
 
 hts.iv.identity_verification.title=We''ve verified your identity
 hts.iv.locked_out.page-title=We were not able to verify your identity 
@@ -312,7 +313,7 @@ hts.email-verification.check-your-email.what-next=What happens next?
 hts.email-verification.check-your-email.content1=You''ll need to go to that email account and click the link in the message we sent you.
 hts.email-verification.check-your-email.content2=You have 30 minutes to do this.
 hts.email-verification.check-your-email.content3=We''ll only use this email address to contact you about your Help to Save account once you have done this.
-hts.email-verification.check-your-email.where-used-heading=Where your email is updated
+hts.email-verification.check-your-email.where-used-heading=Where your email address is updated
 hts.email-verification.check-your-email.where-used=We''ll only use this email address for your Help to Save account. The email addresses you use for other government services won''t change.
 hts.email-verification.check-your-email.resend-email=Resend email
 hts.email-verification.check-your-email.change-email-address=Change email address
@@ -322,7 +323,15 @@ hts.we-couldnt-update-your-email.p1=We cannot change your email address at this 
 hts.we-couldnt-update-your-email.p2=You''ll need to come back later and try again.
 hts.we-couldnt-update-your-email.back-to-account=Got to account home
 
+hts.email-updated.page-title=Email address verified
+hts.email-updated.title=Email address verified
+hts.email-updated.p1=If you create a Help to Save account we''ll use this email address to contact you about it.
+hts.email-updated.p2=Your email address has not been updated in other government services.
+hts.email-updated.continue_button=Continue
+
 
 global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
 global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties
 global.error.InternalServerError500.message=Please try again later.
+
+report.a.problem.link=Is there anything wrong with this page?

@@ -17,6 +17,7 @@
 package hts.pages
 
 import hts.utils.Configuration
+import org.openqa.selenium.support.ui.Sleeper
 import org.openqa.selenium.{By, Keys, WebDriver}
 import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
@@ -36,7 +37,7 @@ trait Page extends Matchers
   def back()(implicit driver: WebDriver): Unit = clickOn("ButtonBack")
 
   def nextPage()(implicit driver: WebDriver): Unit = {
-    driver.findElement(By.id("get-help")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
+    driver.findElement(By.id("next")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
     find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
   }
 
@@ -69,5 +70,11 @@ trait Page extends Matchers
     expectedUrl shouldBe currentUrl
     expectedPageTitle shouldBe pageTitle
     expectedPageHeader shouldBe pageHeading
+  }
+
+  def pageInfoContains()(implicit driver: WebDriver): Unit = {
+    expectedUrl shouldBe currentUrl
+    expectedPageTitle contains pageTitle
+    expectedPageHeader contains pageHeading
   }
 }

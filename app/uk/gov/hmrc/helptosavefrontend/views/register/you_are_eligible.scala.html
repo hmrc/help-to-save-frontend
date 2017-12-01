@@ -33,18 +33,18 @@
     </h1>
 
     <p>@Messages("hts.register.you-are-eligible.p-1")</p>
-  
+
     @user_details(userInfo)
 
-    <p>@Messages("hts.register.you-are-eligible.p-3")</p>
+    <p class="subsection--wide push--bottom">@Messages("hts.register.you-are-eligible.p-3")</p>
 
     @form(routes.EligibilityCheckController.youAreEligibleSubmit(), 'class -> "group") {
         @CSRF.formField(request)
-        @submit('_buttonClass -> "") {
+        @submit('_buttonClass -> "", 'id → "start-creating-account") {
             @Messages("hts.register.you-are-eligible.button-1")
         }
     }
 
-    <a href=@routes.RegisterController.getDetailsAreIncorrect() >@Messages("hts.register.you-are-eligible.button-2")</a>
+    <a href=@routes.RegisterController.getDetailsAreIncorrect() class="font-xsmall">@Messages("hts.register.you-are-eligible.button-2")</a>
 
 }

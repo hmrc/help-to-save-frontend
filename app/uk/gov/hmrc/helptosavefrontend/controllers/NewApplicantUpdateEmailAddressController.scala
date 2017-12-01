@@ -39,6 +39,7 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.frontend.controller.ActionWithMdc
 
 import scala.concurrent.Future
 
@@ -111,6 +112,10 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
       }
     }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+
+  def emailUpdatedSubmit: Action[AnyContent] = ActionWithMdc {
+    SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
+  }
 
   /** Return `None` if user is ineligible */
   private def getEligibleUserInfo(session: Option[HTSSession])(
