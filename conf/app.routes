@@ -46,7 +46,7 @@ GET        /failed-iv-time-out                              @uk.gov.hmrc.helptos
 GET        /failed-iv-technical-issue                       @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getTechnicalIssue(ivURL: String)
 GET        /failed-iv-precondition-failed                   @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getPreconditionFailed
 
-GET        /account/update-your-email-address               @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
+GET        /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
 POST       /account/verify-email                            @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.onSubmit
 GET        /account/email-verified                          @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.emailVerified(p: String)
 GET        /account/email-updated                           @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdated
