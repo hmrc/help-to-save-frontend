@@ -127,7 +127,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     htsContext.userDetails.fold[Future[PlayResult]](
       { missingUserInfo ⇒
         logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
-        Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo, personalTaxAccountUrl))
+        Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo))
       }, { userInfo ⇒
         performEligibilityChecks(userInfo).fold(
           { e ⇒

@@ -16,9 +16,9 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.MissingUserInfo
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 
-
-@(missingInfos: Set[MissingUserInfo], personalAccountUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(missingInfos: Set[MissingUserInfo])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.missinguserinfo.header.page.title"), bodyClasses = None) {
 
@@ -31,7 +31,7 @@
 
     <ul class="bullets">
     @for(info <- missingInfos) {
-        <li>@info</li>
+        <li>@{helpers.missing_user_info_to_message(info)}</li>
     }
     </ul>
 
