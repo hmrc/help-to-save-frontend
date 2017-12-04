@@ -55,7 +55,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
     authorised(Retrievals.name and Retrievals.itmpName and Retrievals.nino){
       case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time){ nino ⇒
-          action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, maybeName.name.orElse(maybeItmpName.givenName)))
+          action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, maybeItmpName.givenName.orElse(maybeName.name)))
         }(request)
     }(redirectOnLoginURL)
 
