@@ -34,7 +34,7 @@ object ScenarioContext extends NINOGenerator {
 
   def removeField(field: String, table: DataTable): Unit = dataTable = {
     val newTable = table.diff(table.diffableRows())
-    Some(table)
+    Some(newTable)
   }
 
   def userInfo(): Either[String, TestUserInfo] = dataTable.fold[Either[String, TestUserInfo]](
