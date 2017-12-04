@@ -20,10 +20,10 @@ import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, HtsContextWithNINOAndUserDetails, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
-import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 
 import scala.concurrent.Future
@@ -39,6 +39,7 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
                                    firstName:            String,
                                    ifSuccess:            ⇒ Result,
                                    ifAlreadyVerifiedURL: EmailVerificationParams ⇒ String,
+                                   ifFailure:            VerifyEmailError ⇒ Result,
                                    isNewApplicant:       Boolean)(implicit request: Request[AnyContent],
                                                                   htsContext: HtsContextWithNINO,
                                                                   crypto:     Crypto,
@@ -46,7 +47,7 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
     emailVerificationConnector.verifyEmail(htsContext.nino, email, firstName, isNewApplicant).map {
       case Right(_)              ⇒ ifSuccess
       case Left(AlreadyVerified) ⇒ SeeOther(ifAlreadyVerifiedURL(EmailVerificationParams(htsContext.nino, email)))
-      case Left(_)               ⇒ Ok(views.html.email.email_verify_error())
+      case Left(e)               ⇒ ifFailure(e)
     }
 
   def handleEmailVerified(emailVerificationParams: String,
