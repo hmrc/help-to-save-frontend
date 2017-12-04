@@ -329,6 +329,13 @@ hts.email-updated.p1=If you create a Help to Save account we''ll use this email 
 hts.email-updated.p2=Your email address has not been updated in other government services.
 hts.email-updated.continue_button=Continue
 
+hts.cannot-change-email.title=Something went wrong
+hts.cannot-change-email.p1=We cannot change your email address at this time. You have not created a Help to Save account.
+hts.cannot-change-email.header1=What do you want to do?
+hts.cannot-change-email.opt1a=Use this email address for your Help to Save account - {0}
+hts.cannot-change-email.opt1b=If you want to use this email address, you'll be able to change this from your account if you choose to create one.
+hts.cannot-change-email.opt2a=Come back later and apply again using a new email address
+hts.cannot-change-email.opt2b=You will be taken to About Help to Save
 
 global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
 global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties

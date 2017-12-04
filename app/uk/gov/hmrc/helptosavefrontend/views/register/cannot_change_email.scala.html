@@ -21,11 +21,48 @@
 
 @(backupEmail: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-<h1>:(</h1>
 
-<p>Click here to change continue your journey with the email: @backupEmail</p>
-<div class="form-field form-field--submit">
-@form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit) {
- @submit('_buttonClass -> "", 'id → "email-error-continue"){ Continue }
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+title = messages("hts.email-verification.check-your-email.page-title"),
+sidebarLinks = None,
+bodyClasses = None) {
+
+  <h1>@Messages("hts.cannot-change-email.title")</h1>
+
+    <p>@Messages("hts.cannot-change-email.p1")</p>
+
+    <form>
+        <div class="form-group">
+            <fieldset>
+
+                <legend>
+                    <h1 class="heading-medium">
+                        @Messages("hts.cannot-change-email.header1")
+                    </h1>
+                </legend>
+
+                <div class="multiple-choice">
+                    <input id="radio-inline-1" type="radio" name="radio-inline-group" value=true>
+                    <label for="radio-inline-1">
+                        @Html(Messages("hts.cannot-change-email.opt1a", backupEmail))
+                        <br />
+                        @Messages("hts.cannot-change-email.opt1b")
+                    </label>
+                </div>
+                <div class="multiple-choice">
+                    <input id="radio-inline-2" type="radio" name="radio-inline-group" value=false>
+                    <label for="radio-inline-2">
+                        @Messages("hts.cannot-change-email.opt2a")
+                        <br />
+                        <span class="font-xsmall">@Messages("hts.cannot-change-email.opt2b")</span></span>
+                    </label>
+                </div>
+
+            </fieldset>
+
+            @form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit) {
+                @submit('_buttonClass -> "", 'id → "email-error-continue"){ Continue }
+            }
+        </div>
+    </form>
 }
-</div>
