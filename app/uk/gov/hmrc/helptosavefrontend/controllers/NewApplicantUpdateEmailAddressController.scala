@@ -31,6 +31,7 @@ import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.forms.EmailVerificationErrorContinueForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
@@ -90,8 +91,17 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   def verifyEmailErrorSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkEnrolledAndSession(_.email.fold(
       SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
-    )(email ⇒ SeeOther(routes.RegisterController.confirmEmail(email).url))
-    )
+    )(email ⇒
+        EmailVerificationErrorContinueForm.continueForm.bindFromRequest().fold(
+          _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url),
+          { continue ⇒
+            if (continue.value) {
+              SeeOther(routes.RegisterController.confirmEmail(email).url)
+            } else {
+              SeeOther(routes.IntroductionController.getAboutHelpToSave().url)
+            }
+          }
+        )))
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
 
   def verifyEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

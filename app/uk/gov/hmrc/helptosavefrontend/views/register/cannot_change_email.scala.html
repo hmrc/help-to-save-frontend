@@ -17,27 +17,27 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form,submit}
-
+@import views.html.helper.CSRF
 
 @(backupEmail: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-title = messages("hts.email-verification.check-your-email.page-title"),
-sidebarLinks = None,
-bodyClasses = None) {
+    title = messages("hts.email-verification.check-your-email.page-title"),
+    sidebarLinks = None,
+    bodyClasses = None) {
 
-  <h1>@Messages("hts.cannot-change-email.title")</h1>
+    <h1>@Messages("hts.cannot-change-email.title")</h1>
 
     <p>@Messages("hts.cannot-change-email.p1")</p>
 
-    <form>
+    @form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit){
+        @CSRF.formField(request)
         <div class="form-group">
             <fieldset>
-
                 <legend>
                     <h1 class="heading-medium">
-                        @Messages("hts.cannot-change-email.header1")
+                    @Messages("hts.cannot-change-email.header1")
                     </h1>
                 </legend>
 
@@ -60,9 +60,8 @@ bodyClasses = None) {
 
             </fieldset>
 
-            @form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit) {
-                @submit('_buttonClass -> "", 'id → "email-error-continue"){ Continue }
-            }
+            @submit('_buttonClass -> "", 'id → "email-error-continue"){ Continue }
+
         </div>
-    </form>
+    }
 }
