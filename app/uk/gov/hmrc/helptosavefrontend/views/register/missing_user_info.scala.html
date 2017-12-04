@@ -22,20 +22,26 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.missinguserinfo.header.page.title"), bodyClasses = None) {
 
-    <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h2>@Messages("hts.register.missinguserinfo.header")</h2>
-            </header>
 
-            <ul class="bullets">
-            @for(info <- missingInfos) {
-                <li>@info</li>
-            }
-            </ul>
+    <header class="page-header text">
+        <h2>@Messages("hts.register.missinguserinfo.header")</h2>
+    </header>
 
-            <p>@Html(Messages("hts.register.missinguserinfo.redirect.personal.account", personalAccountUrl))</p>
-            <p class="margin-bottom">@Html(Messages("hts.register.missinguserinfo.contact.hmrc", "https://www.gov.uk/contact-hmrc"))</p>
-        </div>
-    </div>
+    <p>@Messages("hts.register.missinguserinfo.p1")</p>
+
+    <ul class="bullets">
+    @for(info <- missingInfos) {
+        <li>@info</li>
+    }
+    </ul>
+
+    <h2>@Messages("hts.register.missinguserinfo.title2")</h2>
+
+    <ol class="list list-number">
+        <li>@Messages("hts.register.missinguserinfo.next.step1")</li>
+        <li>@Messages("hts.register.missinguserinfo.next.step2")</li>
+        <li>@Messages("hts.register.missinguserinfo.next.step3")</li>
+    </ol>
+
+    <a class="button" href="https://www.tax.service.gov.uk/shortforms/form/PAYENICoC" role="button">Continue</a>
 }
