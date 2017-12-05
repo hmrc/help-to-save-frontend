@@ -41,7 +41,6 @@ object Driver {
 
     selectedDriver.foreach { driver ⇒
       val (_, _, _) = (sys.addShutdownHook(driver.quit()),
-        driver.manage().window().maximize(),
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
       )
     }
