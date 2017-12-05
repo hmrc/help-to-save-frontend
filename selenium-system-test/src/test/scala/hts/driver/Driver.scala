@@ -31,11 +31,11 @@ object Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome")       ⇒ Right(createChromeDriver(false))
-      case Some("zap-chrome")   ⇒ Right(createZapChromeDriver())
-      case Some("headless")     ⇒ Right(createChromeDriver(true))
-      case Some(other)          ⇒ Left(s"Unrecognised browser: $other")
-      case None                 ⇒ Left("No browser set")
+      case Some("chrome")     ⇒ Right(createChromeDriver(false))
+      case Some("zap-chrome") ⇒ Right(createZapChromeDriver())
+      case Some("headless")   ⇒ Right(createChromeDriver(true))
+      case Some(other)        ⇒ Left(s"Unrecognised browser: $other")
+      case None               ⇒ Left("No browser set")
     }
 
     selectedDriver.foreach { driver ⇒

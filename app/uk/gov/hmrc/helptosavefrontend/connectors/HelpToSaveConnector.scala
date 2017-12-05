@@ -125,7 +125,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
 
   // scalastyle:off magic.number
   private def toEligibilityCheckResult(response: Option[EligibilityCheckResponse]): Either[String, EligibilityCheckResult] = {
-    response.fold[Either[String, EligibilityCheckResult]](Right(EligibilityCheckResult.Ineligible(emptyECResponse))) {
+    response.fold[Either[String, EligibilityCheckResult]](Left("Conversion to EligibilityCheckResult failed")) {
       _.resultCode match {
         case 1     ⇒ Right(EligibilityCheckResult.Eligible(response.getOrElse(emptyECResponse)))
         case 2     ⇒ Right(EligibilityCheckResult.Ineligible(response.getOrElse(emptyECResponse)))
@@ -138,9 +138,9 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
 
 object HelpToSaveConnectorImpl {
 
-  private case class ECResponseHolder(response: Option[EligibilityCheckResponse])
+  private[connectors] case class ECResponseHolder(response: Option[EligibilityCheckResponse])
 
-  private object ECResponseHolder {
+  private[connectors] object ECResponseHolder {
     implicit val format: Format[ECResponseHolder] = Json.format[ECResponseHolder]
   }
 
