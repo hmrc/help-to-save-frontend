@@ -29,7 +29,7 @@
 
     <h1>@Messages("hts.cannot-change-email.title")</h1>
 
-    <p>@Messages("hts.cannot-change-email.p1")</p>
+    <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
 
     @form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit){
         @CSRF.formField(request)
@@ -37,34 +37,23 @@
             <fieldset>
                 <legend>
                     <h1 class="heading-medium">
-                    @Messages("hts.cannot-change-email.header1")
+                    @Messages("hts.cannot-change-email.header1", backupEmail)
                     </h1>
                 </legend>
 
                 <div class="multiple-choice">
                     <input id="radio-inline-1" type="radio" name="radio-inline-group" value=true>
                     <label for="radio-inline-1">
-                        @Html(Messages("hts.cannot-change-email.opt1a", backupEmail))
+                        @Html(Messages("hts.cannot-change-email.opt1", backupEmail))
                     </label>
-                </div>
-                <div class="panel panel-border-wide">
-                    <p>
-                        @Messages("hts.cannot-change-email.opt1b")
-                    </p>
                 </div>
 
                 <div class="multiple-choice">
                     <input id="radio-inline-2" type="radio" name="radio-inline-group" value=false>
                     <label for="radio-inline-2">
-                        @Messages("hts.cannot-change-email.opt2a")
+                        @Messages("hts.cannot-change-email.opt2")
                     </label>
                 </div>
-                <div class="panel panel-border-wide">
-                    <p class="font-xsmall">
-                        @Messages("hts.cannot-change-email.opt2b")
-                    </p>
-                </div>
-
             </fieldset>
 
             @submit('_buttonClass -> "", 'id → "email-error-continue"){ Continue }
