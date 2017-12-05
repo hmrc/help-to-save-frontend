@@ -84,7 +84,8 @@ class EligibilityCheckControllerSpec
         status(result) shouldBe OK
 
         val content = contentAsString(result)
-        content should include("You are eligible")
+        content should include("you-are-eligible-submit")
+        content should include("By continuing you are confirming that, to the best of your knowledge, these are your details and they are correct")
         content should include(validUserInfo.forename)
         content should include(validUserInfo.surname)
       }
@@ -340,14 +341,8 @@ class EligibilityCheckControllerSpec
           val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
 
           val result = Await.result(responseFuture, 5.seconds)
-          status(result) shouldBe Status.OK
-
-          contentType(result) shouldBe Some("text/html")
-          charset(result) shouldBe Some("utf-8")
-
-          val html = contentAsString(result)
-
-          html should include("Name")
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getMissingInfoPage().url)
         }
 
         "return an error" when {
@@ -405,8 +400,37 @@ class EligibilityCheckControllerSpec
       }
     }
 
+    "handling getMissingInfoPage" must {
+
+      "report missing user info back to the user if they really are missing user info" in {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+
+        val response: Future[PlayResult] = controller.getMissingInfoPage()(FakeRequest())
+
+        val result = Await.result(response, 5.seconds)
+        status(result) shouldBe Status.OK
+
+        contentType(result) shouldBe Some("text/html")
+        charset(result) shouldBe Some("utf-8")
+
+        val html = contentAsString(result)
+
+        html should include("Name")
+      }
+
+      "redirect to check eligbility if they aren't missing any info" in {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+
+        val response: Future[PlayResult] = controller.getMissingInfoPage()(FakeRequest())
+
+        val result = Await.result(response, 5.seconds)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      }
+
+    }
+
     "handling you-are-eligible-submits" must {
-      import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
 
         def doRequest(): Future[PlayResult] = controller.youAreEligibleSubmit(FakeRequest())
 

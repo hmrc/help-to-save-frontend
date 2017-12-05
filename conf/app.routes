@@ -19,6 +19,7 @@ GET        /check-eligibility                               @uk.gov.hmrc.helptos
 GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 GET        /details-are-incorrect                           @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDetailsAreIncorrect
+GET        /missing-details                                 @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getMissingInfoPage
 
 GET        /register/enter-email                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getGiveEmailPage
 POST       /register/give-email-submit                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit

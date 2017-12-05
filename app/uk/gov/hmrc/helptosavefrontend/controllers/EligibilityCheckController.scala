@@ -121,13 +121,20 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     }
   }(redirectOnLoginURL = routes.EligibilityCheckController.youAreEligibleSubmit().url)
 
+  val getMissingInfoPage: Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
+    htsContext.userDetails.fold(
+      missingInfo ⇒ Ok(views.html.register.missing_user_info(missingInfo.missingInfo)),
+      _ ⇒ SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+    )
+  }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
+
   private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
                                            htsContext: HtsContextWithNINOAndUserDetails,
                                            request:    Request[AnyContent]): Future[PlayResult] = {
     htsContext.userDetails.fold[Future[PlayResult]](
       { missingUserInfo ⇒
         logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
-        Ok(views.html.register.missing_user_info(missingUserInfo.missingInfo))
+        SeeOther(routes.EligibilityCheckController.getMissingInfoPage().url)
       }, { userInfo ⇒
         performEligibilityChecks(userInfo).fold(
           { e ⇒
