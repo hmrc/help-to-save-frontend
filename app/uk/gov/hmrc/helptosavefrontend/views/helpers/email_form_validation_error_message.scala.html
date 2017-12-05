@@ -20,8 +20,12 @@
 @{
     val messagesKey = if(form.emailIsBlank(key)) {
         "hts.email.error.blank"
-    } else if(form.emailTotalLengthTooLong(key) || form.emailLocalLengthTooLong(key) || form.emailDomainLengthTooLong(key)) {
-        "hts.email.error.too-long"
+    } else if(form.emailLocalLengthTooLong(key)) {
+        "hts.email.error.local-too-long"
+    } else if(form.emailDomainLengthTooLong(key)) {
+        "hts.email.error.domain-too-long"
+    } else if(form.emailTotalLengthTooLong(key)) {
+        "hts.email.error.total-too-long"
     } else if(form.emailHasNoAtSymbol(key)) {
         "hts.email.error.no-at-symbol"
     } else {

@@ -201,10 +201,16 @@ hts.register.check-and-confirm-your-details.change-button-label=Change
 hts.register.check-and-confirm-your-details.p-1=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
 hts.register.check-and-confirm-your-details.continue-button-label=Continue
 
-hts.register.missinguserinfo.header=We couldn''t retrieve the following details
+hts.register.missinguserinfo.header=We need your details
 hts.register.missinguserinfo.header.page.title=We''re missing some important details
-hts.register.missinguserinfo.redirect.personal.account= Please navigate to your <a href="{0}" target="_blank">Personal Account</a> and provide the missing information
-hts.register.missinguserinfo.contact.hmrc=If you have trouble getting in, please  <a href="{0}" target="_blank">Contact HMRC</a>
+hts.register.missinguserinfo.p1=We can''t create your account until we have your:
+hts.register.missinguserinfo.title2=What happens next?
+hts.register.missinguserinfo.next.step1=You''ll need to go to the form on the HM Revenue & Customs website and enter your details.
+hts.register.missinguserinfo.next.step2=You''ll need to wait until we''ve updated your details in our system.
+hts.register.missinguserinfo.next.step3=You can apply for a Help to Save account again.
+hts.register.missinguserinfo.name=name
+hts.register.missinguserinfo.dateOfBirth=date of birth
+hts.register.missinguserinfo.address=address
 
 hts.register.daily-cap-reached.header.page.title=Help to Save - Daily User Limit Reached
 hts.register.daily-cap-reached.header=You''ll need to try again tomorrow
@@ -287,7 +293,9 @@ hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
 
 hts.email.error=Enter a valid email address
-hts.email.error.too-long=Enter a valid email address, this email address is too long
+hts.email.error.local-too-long=The number of characters before the ''@'' must be 64 or less
+hts.email.error.domain-too-long=The number of characters after the ''@'' must be 252 or less
+hts.email.error.total-too-long=Your email address must be 254 characters or less
 hts.email.error.blank=Enter a valid email address
 hts.email.error.no-at-symbol=Enter a valid email address, like yourname@example.com
 
@@ -335,6 +343,15 @@ hts.cannot-change-email.p1=We can''t change your email now, you can try again af
 hts.cannot-change-email.header1=Do you want to create the account using {0}?
 hts.cannot-change-email.opt1=Yes, use {0}
 hts.cannot-change-email.opt2=No, return to About Help to Save
+
+hts.no-account.page-title=You don''t have an account
+hts.no-account.title=You don''t have an account
+hts.no-account.p1=You''ve signed into your Government Gateway account, but you don''t have a Help to Save account.
+hts.no-account.h2=Apply for an account
+hts.no-account.p2=If you want to apply for an account, you should continue and we''ll check if you''re eligible for one. If you are, you can then go on to create your Help to Save account.
+hts.no-account.continue_button=Continue
+hts.no-account.exit-message=Exit and apply another time
+
 
 global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
 global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties
