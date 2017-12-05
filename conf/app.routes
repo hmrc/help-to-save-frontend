@@ -24,7 +24,7 @@ GET        /register/give-email                             @uk.gov.hmrc.helptos
 POST       /register/give-email-submit                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit
 POST       /register/select-email-submit                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.selectEmailSubmit
 GET        /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
-GET        /register/verify-email/:email                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail(email)
+GET        /verify-email/:email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail(email)
 GET        /register/email-verified                         @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerified(p: String)
 GET        /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
 POST       /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
