@@ -329,6 +329,7 @@ hts.email-updated.p1=If you create a Help to Save account we''ll use this email 
 hts.email-updated.p2=Your email address has not been updated in other government services.
 hts.email-updated.continue_button=Continue
 
+hts.cannot-change-email.page-title=Something went wrong
 hts.cannot-change-email.title=Something went wrong
 hts.cannot-change-email.p1=We cannot change your email address at this time. You have not created a Help to Save account.
 hts.cannot-change-email.header1=What do you want to do?

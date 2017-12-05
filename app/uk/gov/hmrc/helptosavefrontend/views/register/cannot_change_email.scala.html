@@ -23,7 +23,7 @@
 
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = messages("hts.email-verification.check-your-email.page-title"),
+    title = messages("hts.cannot-change-email.page-title"),
     sidebarLinks = None,
     bodyClasses = None) {
 
@@ -45,17 +45,24 @@
                     <input id="radio-inline-1" type="radio" name="radio-inline-group" value=true>
                     <label for="radio-inline-1">
                         @Html(Messages("hts.cannot-change-email.opt1a", backupEmail))
-                        <br />
-                        @Messages("hts.cannot-change-email.opt1b")
                     </label>
                 </div>
+                <div class="panel panel-border-wide">
+                    <p>
+                        @Messages("hts.cannot-change-email.opt1b")
+                    </p>
+                </div>
+
                 <div class="multiple-choice">
                     <input id="radio-inline-2" type="radio" name="radio-inline-group" value=false>
                     <label for="radio-inline-2">
                         @Messages("hts.cannot-change-email.opt2a")
-                        <br />
-                        <span class="font-xsmall">@Messages("hts.cannot-change-email.opt2b")</span></span>
                     </label>
+                </div>
+                <div class="panel panel-border-wide">
+                    <p class="font-xsmall">
+                        @Messages("hts.cannot-change-email.opt2b")
+                    </p>
                 </div>
 
             </fieldset>
