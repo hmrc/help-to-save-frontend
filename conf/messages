@@ -201,7 +201,7 @@ hts.register.check-and-confirm-your-details.change-button-label=Change
 hts.register.check-and-confirm-your-details.p-1=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
 hts.register.check-and-confirm-your-details.continue-button-label=Continue
 
-hts.register.missinguserinfo.header=We need your details
+hts.register.missinguserinfo.header=We''re missing some important details
 hts.register.missinguserinfo.header.page.title=We''re missing some important details
 hts.register.missinguserinfo.p1=We can''t create your account until we have your:
 hts.register.missinguserinfo.title2=What happens next?
