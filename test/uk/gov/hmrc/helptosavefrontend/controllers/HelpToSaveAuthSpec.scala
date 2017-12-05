@@ -23,7 +23,7 @@ import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
-import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.checkEligibilityUrl
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
@@ -87,6 +87,24 @@ class HelpToSaveAuthSpec extends AuthSupport {
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
+
+    "handle when address info is missing" in {
+        def retrieval(address: ItmpAddress) =
+          new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and address and mockedNINORetrieval
+
+      List(
+        ItmpAddress(None, None, None, None, None, Some("postcode"), None, None),
+        ItmpAddress(Some("l1"), None, None, None, None, Some("postcode"), None, None),
+        ItmpAddress(Some("l1"), Some("l2"), None, None, None, Some(""), None, None),
+        ItmpAddress(Some("l1"), Some("l2"), None, None, None, None, None, None)
+      ).foreach{ address ⇒
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval(address))
+
+          val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
+          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+        }
+
     }
 
     "handle NoActiveSession exception and redirect user to GG login page" in {
