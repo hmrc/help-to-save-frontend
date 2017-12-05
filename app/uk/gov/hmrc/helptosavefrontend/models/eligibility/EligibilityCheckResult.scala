@@ -24,33 +24,23 @@ sealed trait EligibilityCheckResult {
 
 object EligibilityCheckResult {
 
-  implicit val format: Format[EligibilityCheckResult] = Json.format[EligibilityCheckResult]
-
   case class Eligible(value: EligibilityCheckResponse) extends EligibilityCheckResult
 
   case class Ineligible(value: EligibilityCheckResponse) extends EligibilityCheckResult
 
   case class AlreadyHasAccount(value: EligibilityCheckResponse) extends EligibilityCheckResult
 
-  case class InvalidNino(value: EligibilityCheckResponse) extends EligibilityCheckResult
-
   object Ineligible {
     implicit val format: Format[Ineligible] = Json.format[Ineligible]
-  }
-
-  object InvalidNino {
-    implicit val format: Format[InvalidNino] = Json.format[InvalidNino]
   }
 
   implicit class Ops(val result: EligibilityCheckResult) extends AnyVal {
     def fold[A](ifEligible:          EligibilityCheckResponse ⇒ A,
                 ifIneligible:        EligibilityCheckResponse ⇒ A,
-                ifAlreadyHasAccount: EligibilityCheckResponse ⇒ A,
-                ifInvalidNino:       EligibilityCheckResponse ⇒ A): A = result match {
+                ifAlreadyHasAccount: EligibilityCheckResponse ⇒ A): A = result match {
       case Eligible(reason)          ⇒ ifEligible(reason)
       case Ineligible(reason)        ⇒ ifIneligible(reason)
       case AlreadyHasAccount(reason) ⇒ ifAlreadyHasAccount(reason)
-      case InvalidNino(reason)       ⇒ ifInvalidNino(reason)
     }
   }
 

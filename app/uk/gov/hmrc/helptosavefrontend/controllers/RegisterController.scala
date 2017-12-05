@@ -276,10 +276,6 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, errorMessage: ${failure.errorMessage}, errorDetails: ${failure.errorDetail}"
 
-  def renderDeskproIframe: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.atos_deskpro())
-  }
-
 }
 
 object RegisterController {

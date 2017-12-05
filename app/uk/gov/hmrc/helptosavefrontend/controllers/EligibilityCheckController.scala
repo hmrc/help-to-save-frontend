@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.personalTaxAccoun
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Ineligible, InvalidNino}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResult, IneligibilityType}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
@@ -79,10 +79,10 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
       } {
         _.eligibilityCheckResult.fold(
           { ineligibleReason ⇒
-            val ineligibilityType = IneligibilityType(ineligibleReason)
+            val ineligibilityType = IneligibilityType.fromIneligible(ineligibleReason)
             if (ineligibilityType === IneligibilityType.Unknown) {
-              logger.warn(s"Could not parse ineligibility reason: reason code was ${ineligible.value.reasonCode} " +
-                s"and reason description was ${ineligible.value.reason}")
+              logger.warn(s"Could not parse ineligibility reason: reason code was ${ineligibleReason.value.reasonCode} " +
+                s"and reason description was ${ineligibleReason.value.reason}")
             }
 
             Ok(views.html.core.not_eligible(ineligibilityType))
@@ -146,11 +146,10 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     for {
       eligible ← helpToSaveService.checkEligibility()
       session = {
-        val result = eligible.fold[Option[Either[EligibilityCheckResult, UserInfo]]](
+        val result = eligible.fold[Option[Either[Ineligible, UserInfo]]](
           _ ⇒ Some(Right(userInfo)),
           ineligible ⇒ Some(Left(Ineligible(ineligible))),
-          _ ⇒ None,
-          invalidNino ⇒ Some(Left(InvalidNino(invalidNino))))
+          _ ⇒ None)
         result.map(r ⇒ HTSSession(r, None))
       }
       _ ← session.map(sessionCacheConnector.put).traverse[Result, CacheMap](identity)
@@ -161,7 +160,6 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     auditor.sendEvent(EligibilityResultEvent(nino, result), nino)
     result.fold(
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url),
-      _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
       _ ⇒ {
         // set the ITMP flag here but don't worry about the result
