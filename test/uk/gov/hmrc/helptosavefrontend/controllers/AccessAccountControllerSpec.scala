@@ -69,7 +69,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
       val result = doRequest()
       status(result) shouldBe 200
-      contentAsString(result) should include("Click here to check your eligibility for Help To Save")
+      contentAsString(result) should include("If you want to apply for an account, you should continue")
     }
 
     "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
