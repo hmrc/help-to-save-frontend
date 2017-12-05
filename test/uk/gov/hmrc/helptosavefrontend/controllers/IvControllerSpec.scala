@@ -126,7 +126,7 @@ class IvControllerSpec extends AuthSupport {
     ){ result ⇒
         status(result) shouldBe OK
         contentAsString(result) should include(url)
-        contentAsString(result) should include("now confirmed your identity")
+        contentAsString(result) should include("ve verified your identity")
       }
 
     test(
