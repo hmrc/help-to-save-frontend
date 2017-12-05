@@ -20,16 +20,15 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.identity_verification.title")) {
 
-    <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h1>@Messages("hts.iv.we_ve_confirmed_your_identity")</h1>
-            </header>
+    <header class="page-header text">
+        <h1>@Messages("hts.iv.we_ve_confirmed_your_identity")</h1>
+    </header>
 
-            <h3>@Messages("hts.iv.you_now_access_hts_account")</h3>
+    <p class="lede">@Messages("hts.iv.we_ve_confirmed_your_identity.p1")</p>
 
-            <a href="@continueUrl" class="button" id="continue" role="button">@Messages("hts.iv.continue_button")</a>
+    <h2>@Messages("hts.iv.you_now_access_hts_account")</h2>
 
-        </div>
-    </div>
+    <p>@Messages("hts.iv.we_ve_confirmed_your_identity.p2")</p>
+
+    <a href="@continueUrl" class="button" id="continue" role="button">@Messages("hts.iv.continue_button")</a>
 }
