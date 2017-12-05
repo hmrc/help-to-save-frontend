@@ -16,9 +16,7 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType.NotEntitledToWTC
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType.EntitledToWTCButNilTC
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType.Unknown
+@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType._
 @(ineligibilityType: IneligibilityType)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
@@ -52,6 +50,7 @@
       case NotEntitledToWTC      ⇒ "You need to be receiving Working Tax Credit"
       case EntitledToWTCButNilTC ⇒ "You're entitled to Working Tax Credit, but are not receiving any tax credit payments"
       case Unknown               ⇒ "Dunno"
+      case InvalidNino          => "Retrieved nino is invalid"
     }
   }
     <span>

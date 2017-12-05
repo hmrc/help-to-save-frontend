@@ -22,7 +22,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{GetEmailResponse, ECResponseHolder}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
@@ -61,7 +61,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
   def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
       eligibilityURL,
-      _.parseJSON[EligibilityCheckResponse]().flatMap(toEligibilityCheckResult),
+      _.parseJSON[ECResponseHolder]().flatMap(res ⇒ toEligibilityCheckResult(res.response)),
       "check eligibility",
       identity
     )
@@ -121,19 +121,28 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
 
   private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
 
-  // scalastyle:off magic.number
-  private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResult] = {
-    response.resultCode match {
-      case 1     ⇒ Right(EligibilityCheckResult.Eligible(response))
-      case 2     ⇒ Right(EligibilityCheckResult.Ineligible(response))
-      case 3     ⇒ Right(EligibilityCheckResult.AlreadyHasAccount(response))
-      case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
+  private val emptyECResponse = EligibilityCheckResponse("There was no Eligibility Check Response", 2, "", -1)
 
+  // scalastyle:off magic.number
+  private def toEligibilityCheckResult(response: Option[EligibilityCheckResponse]): Either[String, EligibilityCheckResult] = {
+    response.fold[Either[String, EligibilityCheckResult]](Left("Conversion to EligibilityCheckResult failed")) {
+      _.resultCode match {
+        case 1     ⇒ Right(EligibilityCheckResult.Eligible(response.getOrElse(emptyECResponse)))
+        case 2     ⇒ Right(EligibilityCheckResult.Ineligible(response.getOrElse(emptyECResponse)))
+        case 3     ⇒ Right(EligibilityCheckResult.AlreadyHasAccount(response.getOrElse(emptyECResponse)))
+        case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
+      }
     }
   }
 }
 
 object HelpToSaveConnectorImpl {
+
+  private[connectors] case class ECResponseHolder(response: Option[EligibilityCheckResponse])
+
+  private[connectors] object ECResponseHolder {
+    implicit val format: Format[ECResponseHolder] = Json.format[ECResponseHolder]
+  }
 
   private[connectors] object URLS {
     val eligibilityURL =
