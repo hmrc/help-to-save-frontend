@@ -79,10 +79,8 @@ class CreateAccountSteps extends Steps with Page {
     AccessAccountPage.navigate()
   }
 
-  //TO-DO url will need updating
   Then("""^they see that the account is created$""") { () ⇒
-    //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
-    getCurrentUrl should include("nsandi")
+    getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
   }
 
   Then("""^they will be on a page which says you do not have an account$""") { () ⇒
@@ -94,10 +92,8 @@ class CreateAccountSteps extends Steps with Page {
     EligiblePage.pageInfoContains()
   }
 
-  //TO-DO url will need updating
   Then("""^they will be on the account home page$"""){ () ⇒
-    //getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
-    getCurrentUrl should include("nsandi")
+    getCurrentUrl should include(FrontendAppConfig.nsiManageAccountUrl)
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
