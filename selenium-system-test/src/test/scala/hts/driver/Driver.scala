@@ -40,7 +40,7 @@ object Driver {
     }
 
     selectedDriver.foreach { driver ⇒
-      val (_, _, _) = (sys.addShutdownHook(driver.quit()),
+      val (_, _) = (sys.addShutdownHook(driver.quit()),
         driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS)
       )
     }
