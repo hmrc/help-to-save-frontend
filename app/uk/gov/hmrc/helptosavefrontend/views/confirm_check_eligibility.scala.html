@@ -20,21 +20,27 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "This is crap") {
-
-    <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h2>😞 You don't have an account 😢</h2>
-            </header>
-
-            <h1>Oh no! 😱😱😱</h1>
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.no-account.page-title")) {
 
 
-            <a href=@routes.EligibilityCheckController.getCheckEligibility()
-            id="continue"
-            class="button">Click here to check your eligibility for Help To Save</a>
-        </div>
-    </div>
+    <h1 class="heading-large">
+        @Messages("hts.no-account.title")
+    </h1>
+
+    <p>@Messages("hts.no-account.p1")</p>
+
+    <h2>@Messages("hts.no-account.h2")</h2>
+
+    <p>@Messages("hts.no-account.p2")</p>
+
+
+    <a href=@routes.EligibilityCheckController.getCheckEligibility()
+    id="continue"
+    class="button">@Messages("hts.no-account.continue_button")</a>
+
+    <p class="subsection--wide push--bottom">
+        <a href=@routes.IntroductionController.getAboutHelpToSave().url
+           id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a>
+    </p>
 
 }
