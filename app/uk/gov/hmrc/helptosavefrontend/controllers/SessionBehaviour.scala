@@ -20,9 +20,8 @@ import cats.instances.future._
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -34,7 +33,10 @@ trait SessionBehaviour {
 
   def checkSession(noSession: ⇒ Future[Result])(whenSession: HTSSession ⇒ Future[Result])(
       implicit
-      htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] = {
+      htsContext:  HtsContextWithNINO,
+      hc:          HeaderCarrier,
+      request:     Request[_],
+      transformer: NINOLogMessageTransformer): Future[Result] = {
     sessionCacheConnector.get.fold({
       e ⇒
         logger.warn(s"Could not read sessions data from keystore: $e", htsContext.nino)

@@ -67,7 +67,7 @@ class RegisterControllerSpec
     mockAuditor,
     fakeApplication,
     mockPagerDuty)(
-    crypto, mockEmailValidation) {
+    crypto, mockEmailValidation, transformer) {
     override lazy val authConnector = mockAuthConnector
   }
 

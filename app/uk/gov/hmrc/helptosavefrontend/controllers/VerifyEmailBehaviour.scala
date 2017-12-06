@@ -23,7 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, HtsContextWithNINOAndUserDetails, SuspiciousActivity}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINOLogMessageTransformer}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 
 import scala.concurrent.Future
@@ -53,9 +53,10 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
   def handleEmailVerified(emailVerificationParams: String,
                           ifValid:                 EmailVerificationParams ⇒ Future[Result],
                           ifInvalid:               ⇒ Future[Result])(implicit request: Request[AnyContent],
-                                                                     htsContext: HtsContextWithNINOAndUserDetails,
-                                                                     crypto:     Crypto,
-                                                                     messages:   Messages): Future[Result] =
+                                                                     htsContext:  HtsContextWithNINOAndUserDetails,
+                                                                     crypto:      Crypto,
+                                                                     messages:    Messages,
+                                                                     transformer: NINOLogMessageTransformer): Future[Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒

@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO, NINOLogMessageTransformer}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,7 +44,7 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(implicit crypto: Crypto)
+class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(implicit crypto: Crypto, transformer: NINOLogMessageTransformer)
   extends EmailVerificationConnector with Logging {
 
   val templateId: String = "hts_verification_email"
@@ -52,7 +52,9 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
   def verifyEmail(nino:           String,
                   newEmail:       String,
                   firstName:      String,
-                  isNewApplicant: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]] = {
+                  isNewApplicant: Boolean)(
+      implicit
+      hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]] = {
     val continueUrlWithParams = {
       val continueURL = if (isNewApplicant) newApplicantContinueURL else accountHolderContinueURL
       continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()

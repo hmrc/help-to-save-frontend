@@ -34,7 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -46,7 +46,12 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                                                            nSIConnector:                   NSIConnector,
                                                            metrics:                        Metrics,
                                                            val auditor:                    HTSAuditor
-)(implicit app: Application, crypto: Crypto, emailValidation: EmailValidation, val messagesApi: MessagesApi)
+)(implicit app: Application,
+  crypto:          Crypto,
+  emailValidation: EmailValidation,
+  val messagesApi: MessagesApi,
+  transformer:     NINOLogMessageTransformer
+)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with VerifyEmailBehaviour with I18nSupport {
   def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

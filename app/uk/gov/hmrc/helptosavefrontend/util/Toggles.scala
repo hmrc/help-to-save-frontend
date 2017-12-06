@@ -37,7 +37,7 @@ object Toggles {
 
     @inline private def time(): Long = System.nanoTime()
 
-    def thenOrElse[A](ifEnabled: ⇒ A, ifDisabled: ⇒ A): A = {
+    def thenOrElse[A](ifEnabled: ⇒ A, ifDisabled: ⇒ A)(implicit transformer: NINOLogMessageTransformer): A = {
       val start = time()
       val result = if (enabled) ifEnabled else ifDisabled
       val end = time()

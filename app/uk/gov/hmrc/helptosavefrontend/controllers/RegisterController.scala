@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, PagerDutyAlerting, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, PagerDutyAlerting, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -54,7 +54,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                                     auditor:                     HTSAuditor,
                                     app:                         Application,
                                     pagerDutyAlerting:           PagerDutyAlerting
-)(implicit crypto: Crypto, emailValidation: EmailValidation)
+)(implicit crypto: Crypto, emailValidation: EmailValidation, transformer: NINOLogMessageTransformer)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
 
