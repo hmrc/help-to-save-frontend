@@ -27,11 +27,14 @@ object IneligibilityType {
 
   case object EntitledToWTCButNilTC extends IneligibilityType
 
+  case object InvalidNino extends IneligibilityType
+
   case object Unknown extends IneligibilityType
 
   def fromIneligible(ineligible: Ineligible): IneligibilityType = ineligible.value.reasonCode match {
     case 2 | 4 ⇒ NotEntitledToWTC // scalastyle:ignore magic.number
     case 3 | 5 ⇒ EntitledToWTCButNilTC // scalastyle:ignore magic.number
+    case -1    ⇒ InvalidNino // scalastyle:ignore magic.number
     case _     ⇒ Unknown
   }
 
@@ -39,6 +42,7 @@ object IneligibilityType {
     override def eqv(x: IneligibilityType, y: IneligibilityType) = (x, y) match {
       case (NotEntitledToWTC, NotEntitledToWTC) ⇒ true
       case (EntitledToWTCButNilTC, EntitledToWTCButNilTC) ⇒ true
+      case (InvalidNino, InvalidNino) ⇒ true
       case (Unknown, Unknown) ⇒ true
       case _ ⇒ false
     }

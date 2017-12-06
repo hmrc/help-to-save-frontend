@@ -77,11 +77,11 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } {
         _.eligibilityCheckResult.fold(
-          { ineligible ⇒
-            val ineligibilityType = IneligibilityType.fromIneligible(ineligible)
+          { ineligibleReason ⇒
+            val ineligibilityType = IneligibilityType.fromIneligible(ineligibleReason)
             if (ineligibilityType === IneligibilityType.Unknown) {
-              logger.warn(s"Could not parse ineligibility reason: reason code was ${ineligible.value.reasonCode} " +
-                s"and reason description was ${ineligible.value.reason}")
+              logger.warn(s"Could not parse ineligibility reason: reason code was ${ineligibleReason.value.reasonCode} " +
+                s"and reason description was ${ineligibleReason.value.reason}")
             }
 
             Ok(views.html.core.not_eligible(ineligibilityType))

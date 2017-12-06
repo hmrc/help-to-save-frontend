@@ -26,7 +26,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{ECResponseHolder, GetEmailResponse}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
@@ -91,7 +91,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       behave like testCommon(
         mockHttpGet(eligibilityURL),
         () ⇒ connector.getEligibility(),
-        EligibilityCheckResponse("eligible!", 1, "???", 6)
+        ECResponseHolder(Some(EligibilityCheckResponse("eligible!", 1, "???", 6)))
       )
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result " +
@@ -99,7 +99,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           forAll(eligibleResponseGen){ response ⇒
             val reason = Eligible(response)
 
-            mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+            mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(response)))))))
 
             val result = connector.getEligibility()
             await(result.value) shouldBe Right(reason)
@@ -111,7 +111,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           forAll(ineligibleResponseGen){ response ⇒
             val reason = Ineligible(response)
 
-            mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+            mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(response)))))))
 
             val result = connector.getEligibility()
             await(result.value) shouldBe Right(reason)
@@ -124,22 +124,31 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
           val response = EligibilityCheckResponse("HtS account already exists", 3, reasonString, 1)
 
-          mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+          mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(response)))))))
 
           val result = connector.getEligibility()
           await(result.value) shouldBe Right(AlreadyHasAccount(response))
         }
+
+      "return an Ineligible when the given nino was not found to be in receipt of tax credit" in {
+        val response = EligibilityCheckResponse("No tax credit record found for user's NINO", 2, "", -1)
+
+        mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(None))))))
+
+        val result = connector.getEligibility()
+        await(result.value) shouldBe Right(Ineligible(response))
+      }
 
       "return an error" when {
         "the call comes back with a 200 and an unknown result code" in {
           forAll { (resultCode: Int) ⇒
             whenever(!(1 to 3).contains(resultCode)) {
               mockHttpGet(eligibilityURL)(
-                Some(HttpResponse(200, responseJson = Some(Json.toJson(
-                  EligibilityCheckResponse("", resultCode, "", 1))))))
+                Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(
+                  EligibilityCheckResponse("", resultCode, "", 1))))))))
 
-              val r = connector.getEligibility()
-              await(r.value).isLeft shouldBe true
+              val result = connector.getEligibility()
+              await(result.value).isLeft shouldBe true
             }
           }
         }

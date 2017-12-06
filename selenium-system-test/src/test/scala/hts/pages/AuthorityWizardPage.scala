@@ -49,11 +49,6 @@ object AuthorityWizardPage extends Page {
     submit()
   }
 
-  def authenticateUserNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    AuthorityWizardPage.navigate()
-    fillInAuthDetailsNoEmail(redirectUrl, confidence, credentialStrength, nino)
-  }
-
   private def fillInAuthDetailsNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     setRedirect(redirectUrl)
     setConfidenceLevel(confidence)
@@ -71,6 +66,11 @@ object AuthorityWizardPage extends Page {
     setCountryCode("GB")
     setBlankEmail
     submit()
+  }
+
+  def authenticateUserNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
+    AuthorityWizardPage.navigate()
+    fillInAuthDetailsNoEmail(redirectUrl, confidence, credentialStrength, nino)
   }
 
   def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: TestUserInfo)(implicit driver: WebDriver): Unit = {
