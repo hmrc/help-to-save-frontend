@@ -27,7 +27,7 @@ labelClass: Option[String] = None
 
 <div class="form-field @if(errorKey.nonEmpty){form-field--error}">
     <label class="form-label @if(labelClass.nonEmpty){@labelClass}" for="@id">
-        <span class="bold">@label</span>
+        @label
         @if(hint.nonEmpty){
             <span class="form-hint">@hint</span>
         }
