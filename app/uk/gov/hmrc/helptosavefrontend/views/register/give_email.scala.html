@@ -34,7 +34,7 @@
                 id = "email",
                 name = "email",
                 label = messages("hts.give-email-address.label"),
-                errorKey = form.error("email").fold("")(_ ⇒ email_form_validation_error_message(form, "email").toString)
+                errorMessage = form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))
             )
           <section class="subsection">
             @helpers.submit('_buttonClass -> "", 'id → "continue") { @messages("hts.global.continue-button") }
