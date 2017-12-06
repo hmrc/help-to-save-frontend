@@ -26,6 +26,7 @@ class MissingUserInfoSteps extends Steps with Page {
   Then("""^they see that their (.+) is missing$""") { (missingInfo: String) ⇒
     getCurrentUrl should include(MissingUserInfoPage.url)
 
+
   }
 
 }

@@ -29,10 +29,6 @@ class ConfirmDetailsSteps extends Steps {
     ScenarioContext.setDataTable(applicantDetails)
   }
 
-  When("""^an applicant has (.+) field missing$""") { () ⇒
-    ScenarioContext
-  }
-
   When("""^an applicant passes the eligibility check$"""){ () ⇒
     AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
     AuthorityWizardPage.setRedirect(EligiblePage.url)

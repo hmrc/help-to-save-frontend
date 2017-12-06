@@ -25,4 +25,17 @@ object MissingUserInfoPage extends Page {
 
   val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
 
+  val expectedTitle: String = "We couldn't retrieve the following details"
+
+  def missingDetails(details: List[String], pageContent: String): Boolean = {
+    def go(n: Int) {
+      if
+      if (pageContent contains (details.take(n))) {
+        go(n + 1)
+        true
+      } else false
+    }
+    go(1)
+  }
+
 }
