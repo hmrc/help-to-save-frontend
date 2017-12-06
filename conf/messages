@@ -212,20 +212,20 @@ hts.register.missinguserinfo.name=name
 hts.register.missinguserinfo.dateOfBirth=date of birth
 hts.register.missinguserinfo.address=address
 
-hts.register.daily-cap-reached.header.page.title=Help to Save - Daily User Limit Reached
+hts.register.daily-cap-reached.header.page.title=You''ll need to try again tomorrow
 hts.register.daily-cap-reached.header=You''ll need to try again tomorrow
-hts.register.daily-cap-reached.p1=Thank you for apply for a Help to Save account.
+hts.register.daily-cap-reached.p1=Thank you for applying for a Help to Save account.
 hts.register.daily-cap-reached.p2=We have a limit on the number of people who can open an account each day.
 hts.register.daily-cap-reached.p3=We''re sorry, we''ve reached our limit today.
 hts.register.daily-cap-reached.p4=You''ll need to try again tomorrow.
 hts.register.daily-cap-reached.exit.gov.uk=Exit to GOV.UK
 
-hts.register.total-cap-reached.header.page.title=Help to Save - Total User Limit Reached
+hts.register.total-cap-reached.header.page.title=You can''t open an account yet
 hts.register.total-cap-reached.header=You can''t open an account yet.
-hts.register.total-cap-reached.p1=Thank you for apply for a Help to Save account.
+hts.register.total-cap-reached.p1=Thank you for applying for a Help to Save account.
 hts.register.total-cap-reached.p2=We have a limit on the number of people who can open an account at the moment.
 hts.register.total-cap-reached.p3=We''re sorry, we''ve reached our limit.
-hts.register.total-cap-reached.p4=If You want to open an account, you''ll need to try again later in the year.
+hts.register.total-cap-reached.p4=If you want to open an account, you''ll need to try again later in the year.
 hts.register.total-cap-reached.exit.gov.uk=Exit to GOV.UK
 
 

@@ -20,18 +20,13 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.daily-cap-reached.header.page.title"), bodyClasses = None) {
 
-<div class="grid-layout grid-layout--stacked">
-    <div class="grid-layout__column grid-layout__column--2-3">
-        <header class="page-header text">
-            <h2>@Messages("hts.register.daily-cap-reached.header")</h2>
-        </header>
+    <h1 class="heading-xlarge">@Messages("hts.register.daily-cap-reached.header")</h1>
 
-        <p>@Html(Messages("hts.register.daily-cap-reached.p1"))</p>
-        <p>@Html(Messages("hts.register.daily-cap-reached.p2"))</p>
-        <p>@Html(Messages("hts.register.daily-cap-reached.p3"))</p>
-        <p>@Html(Messages("hts.register.daily-cap-reached.p4"))</p>
+    <p>@Html(Messages("hts.register.daily-cap-reached.p1"))</p>
+    <p>@Html(Messages("hts.register.daily-cap-reached.p2"))</p>
+    <p>@Html(Messages("hts.register.daily-cap-reached.p3"))</p>
+    <p>@Html(Messages("hts.register.daily-cap-reached.p4"))</p>
 
-        <p><a href="https://www.gov.uk/">Messages("hts.register.daily-cap-reached.exit.gov.uk")</a></p>
-    </div>
-</div>
+    <p><a href="https://www.gov.uk/">@Messages("hts.register.daily-cap-reached.exit.gov.uk")</a></p>
+
 }
