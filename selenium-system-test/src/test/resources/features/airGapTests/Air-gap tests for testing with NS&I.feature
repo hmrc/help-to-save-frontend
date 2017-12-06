@@ -116,8 +116,24 @@ Feature: Air-gap tests for testing with NS&I
     Then they see that the account is created
 
  @doing
-  Scenario: Air-gap - Missing data - forename field is unpopulated
+  Scenario: Air-gap - Missing data - field is unpopulated
     Given an applicant has the following details:
+      | field          | value           |
+      | first name     | missing         |
+      | last name      | data            |
+      | NINO           | <eligible>      |
+      | date of birth  | 12/12/1999      |
+      | email address  | sarah@smith.com |
+      | address line 1 | 1 the street    |
+      | address line 2 | the place       |
+      | address line 3 | the town        |
+      | address line 4 | line 4          |
+      | address line 5 | line 5          |
+      | postcode       | BN43 5QP        |
+      | country code   | GB              |
+
+    And they choose to go ahead with creating an account
+    When their <field> is missing
       | field          | value         |
       | last name      | Two           |
       | NINO           | <eligible>    |
@@ -127,5 +143,5 @@ Feature: Air-gap tests for testing with NS&I
       | address line 2 | the place     |
       | postcode       | BN43 5QP      |
 
-    When they choose to go ahead with creating an account
+
     Then they see that their <field> is missing
