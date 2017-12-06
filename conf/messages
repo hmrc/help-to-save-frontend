@@ -283,7 +283,7 @@ hts.iv.there_s_a_technical_issues.page-title=Something went wrong
 hts.iv.there_s_a_technical_issues.title=Something went wrong
 hts.iv.there_s_a_technical_issues.p1=We''re sorry, we''re having some technical problems.
 hts.iv.there_s_a_technical_issues.p2=You''l need to try again later.
-hts.iv.we_ve_confirmed_your_identity=We''ve now confirmed your identity
+hts.iv.we_ve_confirmed_your_identity=We''ve verified your identity
 hts.iv.you_now_access_hts_account=You can now access your help to save account.
 hts.iv.precondition_failed.page-title=You''re not able to use this service 
 hts.iv.precondition_failed.title=You''re not able to use this service
@@ -307,7 +307,7 @@ hts.select-email.enter-new-address-body-text=The email addresses you use for oth
 hts.select-email.enter-new-address-label=Enter a new email address
 hts.select-email.select-an-option=Please select an option
 hts.give-email.title=Which email address do you want to use for Help to Save?
-hts.give-email.page-title=Which email address do you want us to use for your Help to Save account?
+hts.give-email.page-title=Which email address do you want to use for Help to Save?
 hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
 
