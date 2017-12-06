@@ -93,8 +93,6 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val keyStoreDomain: String = getString("microservice.services.keystore.domain")
 
-  val personalTaxAccountUrl: String = s"${getUrlFor("pertax-frontend")}"
-
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
   val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"

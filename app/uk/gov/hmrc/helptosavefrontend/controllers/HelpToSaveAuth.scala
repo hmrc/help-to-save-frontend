@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import cats.data.ValidatedNel
+import cats.data.Validated.{Invalid, Valid}
+import cats.data.{NonEmptyList, ValidatedNel}
 import cats.syntax.cartesian._
 import cats.syntax.option._
 import org.joda.time.LocalDate
@@ -128,22 +129,32 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
                           itmpAddress: ItmpAddress): Either[MissingUserInfos, UserInfo] = {
 
     val givenNameValidation: ValidatedNel[MissingUserInfo, String] =
-      itmpName.givenName.orElse(name.name)
+      itmpName.givenName.orElse(name.name).filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.GivenName)
 
     val surnameValidation =
-      itmpName.familyName.orElse(name.lastName)
+      itmpName.familyName.orElse(name.lastName).filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.Surname)
 
     val dateOfBirthValidation =
       itmpDob.orElse(dob)
         .toValidNel(MissingUserInfo.DateOfBirth)
 
+    val addressValidation = {
+      val lineCount = List(itmpAddress.line1, itmpAddress.line2, itmpAddress.line3, itmpAddress.line4, itmpAddress.line5)
+        .map(_.map(_.trim).filter(_.nonEmpty)).collect{ case Some(_) ⇒ () }.length
+      if (lineCount < 2 || !itmpAddress.postCode.exists(_.trim.nonEmpty)) {
+        Invalid(NonEmptyList.of(MissingUserInfo.Contact))
+      } else {
+        Valid(itmpAddress)
+      }
+    }
+
     val validation: ValidatedNel[MissingUserInfo, UserInfo] =
-      (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation)
+      (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| addressValidation)
         .map {
-          case (givenName, surname, jodaDob) ⇒
-            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email.filter(_.nonEmpty), Address(itmpAddress))
+          case (givenName, surname, jodaDob, address) ⇒
+            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email.filter(_.nonEmpty), Address(address))
         }
 
     validation
