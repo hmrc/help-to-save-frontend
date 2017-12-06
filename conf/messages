@@ -183,7 +183,7 @@ hts.helpers.sidebar.apply-for-universal-credit=Apply for Universal Credit
 hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 
 hts.register.you-are-eligible.notification.step=Step 1 of 4
-hts.register.you-are-eligible.title=You are eligible
+hts.register.you-are-eligible.title=You''re eligible for a Help to Save account
 hts.register.you-are-eligible.notification.h1=You''re eligible for a Help to Save account
 hts.register.you-are-eligible.p-1=We''ve checked the details we hold for you and you''re eligible for an account.
 hts.register.you-are-eligible.p-3=By continuing you are confirming that, to the best of your knowledge, these are your details and they are correct.
@@ -201,7 +201,7 @@ hts.register.check-and-confirm-your-details.change-button-label=Change
 hts.register.check-and-confirm-your-details.p-1=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
 hts.register.check-and-confirm-your-details.continue-button-label=Continue
 
-hts.register.missinguserinfo.header=We need your details
+hts.register.missinguserinfo.header=We''re missing some important details
 hts.register.missinguserinfo.header.page.title=We''re missing some important details
 hts.register.missinguserinfo.p1=We can''t create your account until we have your:
 hts.register.missinguserinfo.title2=What happens next?
@@ -234,7 +234,7 @@ hts.register.service-unavailable.header=Service Unavailable.
 hts.register.service-unavailable.p1=Please try again later.
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
-hts.register.create_account_help_to_save.title=Create a account
+hts.register.create_account_help_to_save.title=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.step=Step 2 of 4
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.par-1=Before opening an account, you’'ll need to confirm you accept these conditions:
@@ -308,8 +308,8 @@ hts.select-email.select-new-address=I want to enter a new email address
 hts.select-email.enter-new-address-body-text=The email addresses you use for other government services will not change.
 hts.select-email.enter-new-address-label=Enter a new email address
 hts.select-email.select-an-option=Please select an option
-hts.give-email.title=Which email address do you want us to use for your Help to Save account? 
-hts.give-email.page-title=Which email address do you want us to use for your Help to Save account?
+hts.give-email.title=Which email address do you want to use for Help to Save?
+hts.give-email.page-title=Which email address do you want to use for Help to Save?
 hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
 
@@ -338,6 +338,16 @@ hts.email-updated.title=Email address verified
 hts.email-updated.p1=If you create a Help to Save account we''ll use this email address to contact you about it.
 hts.email-updated.p2=Your email address has not been updated in other government services.
 hts.email-updated.continue_button=Continue
+
+hts.cannot-change-email.page-title=Something went wrong
+hts.cannot-change-email.title=Something went wrong
+hts.cannot-change-email.p1=We can''t change your email now, you can try again after you create the account.
+hts.cannot-change-email.header1=Do you want to create the account using {0}?
+hts.cannot-change-email.opt1=Yes, use {0}
+hts.cannot-change-email.opt2=No, return to About Help to Save
+
+hts.cannot-change-email-try-later.page-title=Something went wrong
+hts.cannot-change-email-try-later.title=Something went wrong
 
 hts.no-account.page-title=You don''t have an account
 hts.no-account.title=You don''t have an account

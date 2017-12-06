@@ -14,22 +14,27 @@ POST       /apply-for-help-to-save/apply                    @uk.gov.hmrc.helptos
 
 GET        /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getSelectEmailPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
+GET        /no-account                                      @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getNoAccountPage
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
 
 GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 GET        /details-are-incorrect                           @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDetailsAreIncorrect
+GET        /missing-details                                 @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getMissingInfoPage
 
-GET        /register/give-email                             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getGiveEmailPage
+GET        /register/enter-email                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getGiveEmailPage
 POST       /register/give-email-submit                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit
 POST       /register/select-email-submit                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.selectEmailSubmit
 GET        /register/confirm-email/:email                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
 GET        /verify-email/:email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail(email)
 GET        /register/email-verified                         @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerified(p: String)
+GET        /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailError
+POST       /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit
+GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater
 GET        /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
 POST       /register/email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
-GET        /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
-POST       /register/create-an-account                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
+GET        /register/create-account                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
+POST       /register/create-account                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 
 GET        /register/daily-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /register/total-cap-reached                      @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage

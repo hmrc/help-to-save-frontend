@@ -70,6 +70,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                 name,
                 Ok(views.html.email.check_your_email(details.email)),
                 params ⇒ routes.AccountHolderUpdateEmailAddressController.emailVerified(params.encode()).url,
+                _ ⇒ Ok(views.html.email.email_verify_error()),
                 isNewApplicant = false)
 
           ))

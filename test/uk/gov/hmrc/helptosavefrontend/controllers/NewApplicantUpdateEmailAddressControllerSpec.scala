@@ -99,27 +99,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
       val email = "email@gmail.com"
 
-      "redirect to 'You're not Eligible' if the session data indicates they are ineligible" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
-        }
-        val result = await(controller.verifyEmail(email)(FakeRequest()))
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
-      }
-
-      "redirect to the eligibility check if there is no session data" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(None))
-        }
-        val result = await(controller.verifyEmail(email)(FakeRequest()))
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
-      }
+      behave like commonBehaviour(() ⇒ controller.verifyEmail(email)(FakeRequest()))
 
       "return the check your email page with a status of Ok" in {
         val newEmail = "e"
@@ -166,19 +146,153 @@ class NewApplicantUpdateEmailAddressControllerSpec
             }
         }
 
-      "show an email verification error page if the email verification is unsuccessful" in {
+      "redirect to the email verification error page if the email verification is unsuccessful " +
+        "and an email exists for the user" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
+          }
+
+          val result = controller.verifyEmail(email)(FakeRequest())
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
+        }
+
+      "redirect to the email verification error page if the email verification is unsuccessful and " +
+        "an email does not exist for the user" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+            mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
+          }
+
+          val result = controller.verifyEmail(email)(FakeRequest())
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
+        }
+
+    }
+
+    "emailVerifyError" should {
+
+        def doRequest(): Future[Result] = controller.verifyEmailError()(fakeRequestWithCSRFToken)
+
+      behave like commonBehaviour(doRequest)
+
+      "show the email verify error page if there is an email for the user" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-          mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
         }
 
-        val result = await(controller.verifyEmail(email)(FakeRequest()))
+        val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("verification error")
+        contentAsString(result) should include(":(")
       }
 
+      "redirect the email verify error try later page if there is no email for the user" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
+      }
+
+    }
+
+    "emailVerifyErrorSubmit" should {
+
+        def doRequest(continue: Boolean): Future[Result] =
+          controller.verifyEmailErrorSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("radio-inline-group" → continue.toString))
+
+      behave like commonBehaviour(() ⇒ doRequest(true))
+
+      "redirect to the email verify error page try later if there is no email for the user" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+        }
+
+        val result = doRequest(true)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
+      }
+
+      "redirect to the confirmEmail endpoint if there is an email for the user and the user selects to continue" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+        }
+
+        val result = doRequest(true)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.confirmEmail(emailStr).url)
+      }
+
+      "redirect to the info endpoint if there is an email for the user and the user selects not to continue" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+        }
+
+        val result = doRequest(false)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.IntroductionController.getAboutHelpToSave().url)
+      }
+
+      "redirect to the verify email error if there is an error in the form" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+        }
+
+        val result = controller.verifyEmailErrorSubmit()(fakeRequestWithCSRFToken)
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
+      }
+    }
+
+    "emailVerifyErrorTryLater" should {
+
+        def doRequest(): Future[Result] = controller.verifyEmailErrorTryLater()(FakeRequest())
+
+      behave like commonBehaviour(() ⇒ controller.verifyEmailErrorTryLater()(FakeRequest()))
+
+      "show the email verify error page try later if there is no email for the user" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("Something went wrong")
+      }
+
+      "redirect the email verify error try later page if there is an email for the user" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
+      }
     }
 
     "emailVerified" should {
@@ -294,40 +408,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         def doRequest(): Future[Result] =
           controller.getEmailUpdated()(fakeRequestWithCSRFToken)
 
-      "redirect to NS&I if they are already enrolled to HtS" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
-      }
-
-      "redirect to the eligibility checks is there is no session data" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(None))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
-      }
-
-      "redirect to the not eligible page if the session data indicates they are ineligible" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
-      }
+      behave like commonBehaviour(doRequest)
 
       "show the email updated page otherwise" in {
         inSequence {
@@ -355,5 +436,41 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
     }
 
+  }
+
+  def commonBehaviour(doRequest: () ⇒ Future[Result]): Unit = {
+
+    "redirect to NS&I if they are already enrolled to HtS" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+      }
+
+      val result = doRequest()
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+    }
+
+    "redirect to 'You're not Eligible' if the session data indicates they are ineligible" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
+      }
+      val result = doRequest()
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+    }
+
+    "redirect to the eligibility check if there is no session data" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(None))
+      }
+      val result = doRequest()
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+    }
   }
 }
