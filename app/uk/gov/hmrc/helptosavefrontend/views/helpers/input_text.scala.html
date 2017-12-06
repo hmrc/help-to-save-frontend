@@ -16,25 +16,24 @@
 
 @(id: String,
 label: String,
-errorKey: String,
 value: String = "",
 secondaryLabel: Option[String] = None,
 inputClass: Option[String] = None,
 hint: Option[String] = None,
 name: String = "value",
-labelClass: Option[String] = None
+labelClass: Option[String] = None,
+errorMessage: Option[Html] = None
 )(implicit messages: Messages)
 
-<div class="form-field @if(errorKey.nonEmpty){form-field--error}">
+<div class="form-field @if(errorMessage.isDefined){form-field--error}">
     <label class="form-label @if(labelClass.nonEmpty){@labelClass}" for="@id">
         @label
         @if(hint.nonEmpty){
             <span class="form-hint">@hint</span>
         }
-        @if(errorKey.nonEmpty){
-            <span class="error-notification" id="error-message-this-input">@messages(errorKey)</span>
-        }
+        @errorMessage.map(e ⇒ Html(s"""<span class="error-notification">$e</span>""")).getOrElse(Html(""))
     </label>
+
     <div class="form-control-wrapper" data-type="@secondaryLabel">
         <input
         class="form-control @inputClass"
@@ -42,7 +41,7 @@ labelClass: Option[String] = None
         id="@id"
         name="@name"
         value="@value"
-            @if(errorKey.nonEmpty){aria-describedby="error-message-this-input"}
+            @if(errorMessage.isDefined){aria-describedby="error-message-this-input"}
         />
     </div>
 </div>

@@ -33,7 +33,7 @@
             id = "new-email-address",
             name = "new-email-address",
             label = messages("hts.email-verification.input.label"),
-            errorKey = form.error("new-email-address").fold("")(_ ⇒ email_form_validation_error_message(form, "new-email-address").toString)
+            errorMessage = form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))
         )
         @helpers.submit('_buttonClass -> "") {
             @messages("hts.email-verification.submit.text")
