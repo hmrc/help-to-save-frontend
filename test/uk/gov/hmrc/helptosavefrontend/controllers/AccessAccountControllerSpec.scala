@@ -24,6 +24,8 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 
+import scala.concurrent.Future
+
 class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
 
   lazy val controller = new AccessAccountController(
@@ -33,55 +35,92 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     mockMetrics
   )
 
-  "The AccessAccountController" must {
+  "The AccessAccountController" when {
 
-      def doRequest(): Result = await(controller.accessAccount(FakeRequest()))
+    "handling accessAccount" must {
 
-    "redirect to NS&I if the user is enrolled" in {
-      inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-      }
+        def doRequest(): Result = await(controller.accessAccount(FakeRequest()))
 
-      val result = doRequest()
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
-    }
+      behave like commonBehaviour(doRequest)
 
-    "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
-      "it hasn't already been set" in {
+      "redirect to the 'no account' page if the user is not enrolled" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
-          mockWriteITMPFlag(Right(()))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
         val result = doRequest()
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
       }
 
-    "show the user the 'do you want to check eligibility' page if the user is not enrolled" in {
-      inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-      }
+      "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Left(""))
+        }
 
-      val result = doRequest()
-      status(result) shouldBe 200
-      contentAsString(result) should include("If you want to apply for an account, you should continue")
+        val result = doRequest()
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      }
     }
 
-    "proceed to do the eligibility checks if there is an error doing the enrolment check" in {
-      inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockEnrolmentCheck()(Left(""))
+    "handling getNoAccountPage" must {
+
+        def doRequest(): Result = await(controller.getNoAccountPage(FakeRequest()))
+
+      behave like commonBehaviour(doRequest)
+
+      "show the 'no account' page if the user is not enrolled" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe 200
+        contentAsString(result) should include("If you want to apply for an account, you should continue")
       }
 
-      val result = doRequest()
-      status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      "redirect to accessAccount if there is an error checking eligibility" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Left(""))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.AccessAccountController.accessAccount().url)
+      }
+
     }
+
+      def commonBehaviour(doRequest: () ⇒ Future[Result]): Unit = {
+        "redirect to NS&I if the user is enrolled" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          }
+
+          val result = doRequest()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+        }
+
+        "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
+          "it hasn't already been set" in {
+            inSequence {
+              mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+              mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
+              mockWriteITMPFlag(Right(()))
+            }
+
+            val result = doRequest()
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+          }
+      }
+
   }
-
 }

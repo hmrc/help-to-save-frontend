@@ -279,7 +279,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Try Later")
+        contentAsString(result) should include("Something went wrong")
       }
 
       "redirect the email verify error try later page if there is an email for the user" in {

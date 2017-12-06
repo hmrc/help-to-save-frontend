@@ -183,7 +183,7 @@ class RegisterControllerSpec
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account")
+        contentAsString(result) should include("Which email address do you want to use for Help to Save")
         contentAsString(result) should include(routes.RegisterController.giveEmailSubmit().url)
       }
 
@@ -222,7 +222,7 @@ class RegisterControllerSpec
 
         val result = doRequest("this is not an email")
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account")
+        contentAsString(result) should include("Which email address do you want to use for Help to Save")
         contentAsString(result) should include(routes.RegisterController.giveEmailSubmit().url)
 
       }

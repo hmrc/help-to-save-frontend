@@ -36,7 +36,7 @@ class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
   def accessAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
       // not enrolled
-      () ⇒ Ok(views.html.confirm_check_eligibility())
+      () ⇒ SeeOther(routes.AccessAccountController.getNoAccountPage().url)
     }, {
       e ⇒
         logger.warn(s"Could not check enrolment ($e) - proceeding to check eligibility", htsContext.nino)
@@ -44,5 +44,13 @@ class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
     }
     )
   }(redirectOnLoginURL = FrontendAppConfig.accessAccountUrl)
+
+  def getNoAccountPage: Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled({
+      () ⇒ Ok(views.html.confirm_check_eligibility())
+    }, { _ ⇒
+      SeeOther(routes.AccessAccountController.accessAccount().url)
+    })
+  }(redirectOnLoginURL = routes.AccessAccountController.getNoAccountPage().url)
 
 }
