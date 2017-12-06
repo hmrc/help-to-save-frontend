@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.nsiUserInfoFor
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, PagerDutyAlerting, Result}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, PagerDutyAlerting, Result}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.AppName
 
@@ -62,7 +62,9 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDutyAlerting: PagerDutyAlerting) extends NSIConnector with Logging with AppName {
+class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDutyAlerting: PagerDutyAlerting)(
+    implicit
+    transformer: NINOLogMessageTransformer) extends NSIConnector with Logging with AppName {
 
   val httpProxy: WSHttpProxy = new WSHttpProxy
 

@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.controller.ActionWithMdc
@@ -51,7 +51,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                                                           val emailVerificationConnector: EmailVerificationConnector,
                                                           metrics:                        Metrics,
                                                           val auditor:                    HTSAuditor
-)(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto)
+)(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, transformer: NINOLogMessageTransformer)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
 
   private def checkEnrolledAndSession(ifEligible: UserInfo ⇒ Future[Result])(implicit request: Request[AnyContent],

@@ -34,7 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, Result, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, Result, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -48,7 +48,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
                                             val sessionCacheConnector: SessionCacheConnector,
                                             auditor:                   HTSAuditor,
                                             frontendAuthConnector:     FrontendAuthConnector,
-                                            metrics:                   Metrics)
+                                            metrics:                   Metrics)(implicit transformer: NINOLogMessageTransformer)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
 
   def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒

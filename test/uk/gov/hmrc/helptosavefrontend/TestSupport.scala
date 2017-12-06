@@ -32,6 +32,7 @@ import play.api.{Application, Configuration, Play}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendGlobal
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.util.{NINO, NINOLogMessageTransformer, TestNINOLogMessageTransformer}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.test.UnitSpec
@@ -89,5 +90,7 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
       "email-validation.max-total-length" → Int.MaxValue,
       "email-validation.max-local-length" → Int.MaxValue,
       "email-validation.max-domain-length" → Int.MaxValue))
+
+  implicit val transformer: NINOLogMessageTransformer = TestNINOLogMessageTransformer.transformer
 
 }

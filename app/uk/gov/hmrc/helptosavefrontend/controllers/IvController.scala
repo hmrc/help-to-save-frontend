@@ -26,9 +26,8 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConne
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
-import uk.gov.hmrc.helptosavefrontend.util.toFuture
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture, urlDecode}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, urlDecode}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 
 @Singleton
@@ -36,7 +35,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
                               ivConnector:               IvConnector,
                               val messagesApi:           MessagesApi,
                               frontendAuthConnector:     FrontendAuthConnector,
-                              metrics:                   Metrics)
+                              metrics:                   Metrics)(implicit transformer: NINOLogMessageTransformer)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport with Logging {
 
   def journeyResult(continueURL: String): Action[AnyContent] = authorisedForHtsWithNINOAndNoCL { //scalastyle:ignore cyclomatic.complexity method.length

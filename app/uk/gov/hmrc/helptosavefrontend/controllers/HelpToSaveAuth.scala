@@ -33,11 +33,11 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL20
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, MissingUserInfo, MissingUserInfos, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndFirstName, HtsContextWithNINOAndUserDetails}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, toFuture, toJavaDate}
 
 import scala.concurrent.Future
 
-class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metrics)
+class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metrics)(implicit transformer: NINOLogMessageTransformer)
   extends HelpToSaveFrontendController with AuthorisedFunctions with Logging {
 
   override def authConnector: AuthConnector = frontendAuthConnector

@@ -22,7 +22,7 @@ import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -36,7 +36,7 @@ trait EnrolmentCheckBehaviour {
 
   def checkIfAlreadyEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
                              handleEnrolmentServiceError: String ⇒ Future[Result]
-  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier): Future[Result] = {
+  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Future[Result] = {
     val nino = htsContext.nino
 
     val enrolled: EitherT[Future, String, EnrolmentStatus] = helpToSaveService.getUserEnrolmentStatus()
@@ -66,9 +66,10 @@ trait EnrolmentCheckBehaviour {
 
   def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result])(
       implicit
-      htsContext: HtsContextWithNINO,
-      hc:         HeaderCarrier,
-      request:    Request[_]): Future[Result] =
+      htsContext:  HtsContextWithNINO,
+      hc:          HeaderCarrier,
+      request:     Request[_],
+      transformer: NINOLogMessageTransformer): Future[Result] =
     checkIfAlreadyEnrolled(ifNotEnrolled, _ ⇒ internalServerError())
 
 }

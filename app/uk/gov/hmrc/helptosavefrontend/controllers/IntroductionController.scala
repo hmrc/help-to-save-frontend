@@ -23,14 +23,15 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.util.toFuture
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.play.frontend.controller.ActionWithMdc
 
 @Singleton
 class IntroductionController @Inject() (val messagesApi:       MessagesApi,
                                         frontendAuthConnector: FrontendAuthConnector,
-                                        metrics:               Metrics) extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport {
+                                        metrics:               Metrics)(implicit transformer: NINOLogMessageTransformer)
+  extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport {
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.introduction.about_help_to_save())

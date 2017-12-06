@@ -35,7 +35,7 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, NINOLogMessageTransformer, TestNINOLogMessageTransformer}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -87,7 +87,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
     mockNSIConnector,
     mockMetrics,
     mockAuditor
-  )(fakeApplication, crypto, mockEmailValidation, fakeApplication.injector.instanceOf[MessagesApi]) {
+  )(fakeApplication, crypto, mockEmailValidation, fakeApplication.injector.instanceOf[MessagesApi], transformer) {
     override val authConnector = mockAuthConnector
   }
 
