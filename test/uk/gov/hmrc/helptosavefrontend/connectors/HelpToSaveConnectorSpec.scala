@@ -130,6 +130,15 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           await(result.value) shouldBe Right(AlreadyHasAccount(response))
         }
 
+      "return a None when the given nino was not found to be in receipt of tax credit" in {
+        val response = EligibilityCheckResponse("No tax credit record found for user's NINO", 2, "", -1)
+
+        mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(None))))))
+
+        val result = connector.getEligibility()
+        await(result.value) shouldBe Right(Ineligible(response))
+      }
+
       "return an error" when {
         "the call comes back with a 200 and an unknown result code" in {
           forAll { (resultCode: Int) ⇒
@@ -138,8 +147,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
                 Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(
                   EligibilityCheckResponse("", resultCode, "", 1))))))))
 
-              val r = connector.getEligibility()
-              await(r.value).isLeft shouldBe true
+              val result = connector.getEligibility()
+              await(result.value).isLeft shouldBe true
             }
           }
         }

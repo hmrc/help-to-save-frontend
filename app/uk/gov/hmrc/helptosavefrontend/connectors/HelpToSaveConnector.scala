@@ -121,7 +121,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
 
   private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
 
-  private val emptyECResponse = EligibilityCheckResponse("There was no Eligibility Check Response", 2, "", -1)
+  private val emptyECResponse = EligibilityCheckResponse("No tax credit record found for user's NINO", 2, "", -1)
 
   // scalastyle:off magic.number
   private def toEligibilityCheckResult(response: Option[EligibilityCheckResponse]): Either[String, EligibilityCheckResult] =
