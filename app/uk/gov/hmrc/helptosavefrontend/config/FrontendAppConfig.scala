@@ -69,9 +69,9 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val linkTTLMinutes: Int = getInt("microservice.services.email-verification.linkTTLMinutes")
 
-  val newApplicantContinueURL: String = s"$helpToSaveFrontendUrl/register/email-verified"
+  val newApplicantContinueURL: String = s"$helpToSaveFrontendUrl/email-verified"
 
-  val accountHolderContinueURL: String = s"$helpToSaveFrontendUrl/account/email-verified"
+  val accountHolderContinueURL: String = s"$helpToSaveFrontendUrl/account-home/email-verified"
 
   val nsiAuthHeaderKey: String = getString("microservice.services.nsi.client.httpheader.header-key")
 
