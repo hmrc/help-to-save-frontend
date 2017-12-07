@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
@@ -77,7 +79,7 @@ class EligibilityCheckControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(dateOfBirth = LocalDate.of(1980, 12, 31))), None))))
         }
 
         val result = getIsEligible()
@@ -88,6 +90,8 @@ class EligibilityCheckControllerSpec
         content should include("By continuing you are confirming that, to the best of your knowledge, these are your details and they are correct")
         content should include(validUserInfo.forename)
         content should include(validUserInfo.surname)
+        content should include("31 December 1980")
+
       }
 
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {
