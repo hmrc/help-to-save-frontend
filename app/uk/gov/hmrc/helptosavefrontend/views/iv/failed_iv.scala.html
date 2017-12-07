@@ -20,17 +20,12 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.failed_iv.page-title")) {
 
-    <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h1>@Messages("hts.iv.failed_iv.title")</h1>
-            </header>
-            <p>@Messages("hts.iv.failed_iv.p1")</p>
-            <p>@Messages("hts.iv.failed_iv.p2")</p>
-            <p>@Messages("hts.iv.failed_iv.p3")</p>
-            <section class="subsection">
-                <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.failed_iv.try-again-button")</a>
-            </section>
-        </div>
+    <h1 class="heading-xlarge">@Messages("hts.iv.failed_iv.title")</h1>
 
+    <p>@Messages("hts.iv.failed_iv.p1")</p>
+    <p>@Messages("hts.iv.failed_iv.p2")</p>
+    <p>@Messages("hts.iv.failed_iv.p3")</p>
+    <section class="subsection">
+        <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.failed_iv.try-again-button")</a>
+    </section>
 }
