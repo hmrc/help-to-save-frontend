@@ -348,6 +348,9 @@ hts.cannot-change-email.opt2=No, return to About Help to Save
 
 hts.cannot-change-email-try-later.page-title=Something went wrong
 hts.cannot-change-email-try-later.title=Something went wrong
+hts.cannot-change-email-try-later.p1=We can''t change your email
+hts.cannot-change-email-try-later.try_later_button=Try again
+hts.cannot-change-email-try-later.back_button=Go to About Help to Save
 
 hts.no-account.page-title=You don''t have an account
 hts.no-account.title=You don''t have an account
