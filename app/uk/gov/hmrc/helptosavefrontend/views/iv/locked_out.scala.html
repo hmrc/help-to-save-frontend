@@ -21,16 +21,11 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.locked_out.page-title")) {
 
-    <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h2>@Messages("hts.iv.locked_out.title")</h2>
-            </header>
-            <p>@Messages("hts.iv.locked_out.p1")</p>
-            <p>@Messages("hts.iv.locked_out.p2")</p>
-            <section class="subsection">
-              <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
-            </section>
-        </div>
-    </div>
+    <h1 class="heading-xlarge">@Messages("hts.iv.locked_out.title")</h1>
+    <p>@Messages("hts.iv.locked_out.p1")</p>
+    <p>@Messages("hts.iv.locked_out.p2")</p>
+    <section class="subsection">
+      <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
+    </section>
+
 }

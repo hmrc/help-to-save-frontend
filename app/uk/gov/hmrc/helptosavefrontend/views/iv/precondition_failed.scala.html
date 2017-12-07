@@ -21,15 +21,11 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.precondition_failed.page-title")) {
 
-    <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h1>@Messages("hts.iv.precondition_failed.title")</h1>
-            </header>
-            <p>@Messages("hts.iv.precondition_failed.message")</p>
-            <section class="subsection">
-              <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
-            </section>
-        </div>
-    </div>
+    <h1 class="heading-xlarge">@Messages("hts.iv.precondition_failed.title")</h1>
+
+    <p>@Messages("hts.iv.precondition_failed.message")</p>
+    <section class="subsection">
+      <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
+    </section>
+
 }
