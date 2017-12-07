@@ -32,11 +32,6 @@ object ScenarioContext extends NINOGenerator {
 
   def setDataTable(table: DataTable): Unit = dataTable = Some(table)
 
-  //  def removeField(field: String, table: DataTable): Unit = dataTable = {
-  //    val newTable = table.diff(table.diffableRows())
-  //    Some(newTable)
-  //  }
-
   def userInfo(): Either[String, TestUserInfo] = dataTable.fold[Either[String, TestUserInfo]](
     Left("No data table found")
   ){ table ⇒

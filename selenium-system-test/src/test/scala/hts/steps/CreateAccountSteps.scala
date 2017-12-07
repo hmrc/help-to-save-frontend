@@ -117,14 +117,4 @@ class CreateAccountSteps extends Steps with Page {
     SelectEmailPage.clickContinue()
     CreateAccountPage.createAccount()
   }
-
-  When("""^they choose to check eligibility with missing data$"""){ () ⇒
-    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
-    AuthorityWizardPage.setRedirect(EligiblePage.url)
-  }
-
-  When("""^their (.+) is missing$"""){ (field: String) ⇒
-    AuthorityWizardPage.setBlankField(field)
-    AuthorityWizardPage.submit()
-  }
 }

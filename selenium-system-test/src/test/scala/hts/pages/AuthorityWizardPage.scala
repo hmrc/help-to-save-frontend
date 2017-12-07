@@ -166,8 +166,4 @@ object AuthorityWizardPage extends Page {
 
     loop(address.lines.zip(setFunctions))
   }
-
-  def setBlankField(field: String)(implicit driver: WebDriver): Unit =
-    find(name(s"itmp.$field")).foreach(_.underlying.sendKeys())
-
 }
