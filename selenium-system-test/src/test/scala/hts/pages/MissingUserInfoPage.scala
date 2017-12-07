@@ -27,15 +27,18 @@ object MissingUserInfoPage extends Page {
 
   val expectedTitle: String = "We couldn't retrieve the following details"
 
-  def missingDetails(details: List[String], pageContent: String): Boolean = {
-    def go(n: Int) {
-      if
-      if (pageContent contains (details.take(n))) {
-        go(n + 1)
-        true
-      } else false
-    }
-    go(1)
-  }
+  //  def missingDetails(details: List[String], pageContent: String): Boolean = {
+  //    def go(n: Int) {
+  //      if (n <= details.length) {
+  //        if (pageContent contains (details.take(n))) {
+  //          go(n + 1)
+  //          true
+  //        } else false
+  //      } else {
+  //        return
+  //      }
+  //    }
+  //    go(1)
+  //  }
 
 }

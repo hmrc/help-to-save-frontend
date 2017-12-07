@@ -17,15 +17,13 @@
 package hts.steps
 
 import hts.pages.{MissingUserInfoPage, Page}
+import hts.utils.Helpers
 
-/**
- * Created by jackie on 01/12/17.
- */
 class MissingUserInfoSteps extends Steps with Page {
 
-  Then("""^they see that their (.+) is missing$""") { (missingInfo: String) ⇒
+  Then("""^they see that their (.+) is missing$""") { (field: String) ⇒
     getCurrentUrl should include(MissingUserInfoPage.url)
-
+    Helpers.isTextOnPage(field) shouldBe true
 
   }
 
