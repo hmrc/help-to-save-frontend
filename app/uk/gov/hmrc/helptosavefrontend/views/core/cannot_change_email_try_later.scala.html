@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(returningUser: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
 title = messages("hts.cannot-change-email-try-later.page-title"),
