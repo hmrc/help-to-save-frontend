@@ -17,14 +17,21 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.introduction.title"),
     sidebarLinks = None,
     bodyClasses = None) {
 
-    <h1>We've updated your email!!</h1>
-    <p>Click here to go back to managing account</p>
-    <a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">Back to account</a>
+  <div class="govuk-box-highlight">
+    <h1 class="heading-xlarge">
+      @messages("hts.email-verified.title")
+    </h1>
+    <p>@email</p>
+  </div>
+  <p>@messages("hts.email-verified.p1")</p>
+  <p>@messages("hts.email-verified.p2")</p>
+  <p><a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
+
 
 }
