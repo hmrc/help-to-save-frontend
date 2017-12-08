@@ -364,6 +364,28 @@ hts.no-account.continue_button=Continue
 hts.no-account.exit-message=Exit and apply another time
 
 
+hts.privacy.h1=Help to Save privacy statement
+hts.privacy.p1=This document sets out how we will use your information to deliver the Help to Save scheme.
+hts.privacy.p2=HM Revenue and Customs (HMRC) is a Data Controller under the Data Protection Act 1998. We will collect and use your personal information to check your eligibility for Help to Save and to make sure that you get any government bonus that your Help to Save account entitles you to.
+hts.privacy.p3=As part of our processing and compliance checks, we may:
+hts.privacy.ul1.li1=check your entitlement to benefits, Working Tax Credit, Child Tax Credit and Universal Credit
+hts.privacy.ul1.li2=confirm your employment status and income
+hts.privacy.ul1.li3=check whether you're entitled to a Help to Save account and any bonuses due
+hts.privacy.ul1.li4=check whether you have held a Help to Save account previously
+hts.privacy.p4=We will gather only the data that we need to establish your entitlement to open and maintain a Help to Save account.
+hts.privacy.p5=The data that we currently gather and use to achieve that with regard to Working Tax Credit and Universal Credit customers will be your name, National Insurance number, address, date of birth and email address.  We will gather this information from your Government Gateway account.
+hts.privacy.p6=We will establish your entitlement as a Working Tax Credit recipient through information already held on HMRC’s internal National Tax Credits system. We will establish your entitlement as a Universal Credit recipient based on information obtained from the Department for Work and Pensions (DWP).
+hts.privacy.p7=The only information that we will directly ask you for beyond this is where you need to provide a change of your email address.
+hts.privacy.p8=We’ll be sharing all of this information with NS&I who are helping to administer the Help to Save scheme.
+hts.privacy.p9=We will only share your information with third parties for purposes other than Help to Save if the law permits us to, and if then, for the:
+hts.privacy.ul2.li1=prevention or detection of crime
+hts.privacy.ul2.li2=protection of public funds
+hts.privacy.h2-1=HMRC staff handling your information
+hts.privacy.p10=HMRC's staff are trained in handling information and understand how important it is to protect personal and other sensitive information.
+hts.privacy.h2-2=Seeing what information we hold
+hts.privacy.p11=You can ask to see the personal information HMRC holds about you. To help locate the information you want and deal with your request more quickly, you should make your Data Protection Act request to the HMRC office that you've been dealing with. You should address your request to the 'Data Protection Officer'.  You can get more information on HMRC’s privacy policy (it will open in a new window) on the GOV.UK website.
+
+
 global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
 global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties
 global.error.InternalServerError500.message=Please try again later.

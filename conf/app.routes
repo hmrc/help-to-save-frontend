@@ -60,3 +60,4 @@ GET        /account/email-updated                           @uk.gov.hmrc.helptos
 GET        /account/email-update-error                      @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdateError
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
+GET        /privacy                                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.showPrivacyPage
