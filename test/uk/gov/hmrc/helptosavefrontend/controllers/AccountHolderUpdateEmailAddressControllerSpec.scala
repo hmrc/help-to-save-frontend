@@ -245,7 +245,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
           val result = verifyEmail(emailVerificationParams.encode())
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
+          redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated("email").url)
         }
 
       "redirect to NS&I" when {
