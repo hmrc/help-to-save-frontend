@@ -20,7 +20,6 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
-//import org.joda.time.LocalDate
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
@@ -413,7 +412,8 @@ class EligibilityCheckControllerSpec
       "show the user a page informing them which fields of their user info are missing" in {
         import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport._
 
-          def missingUserInfoRetrieval(name: Option[String], surname: Option[String], dob: Option[org.joda.time.LocalDate], address: ItmpAddress): ~[~[~[~[~[~[Name, Option[String]], Option[org.joda.time.LocalDate]], ItmpName], Option[org.joda.time.LocalDate]], ItmpAddress], Option[String]] =
+          def missingUserInfoRetrieval(name: Option[String], surname: Option[String], dob: Option[org.joda.time.LocalDate], address: ItmpAddress):
+          ~[~[~[~[~[~[Name, Option[String]], Option[org.joda.time.LocalDate]], ItmpName], Option[org.joda.time.LocalDate]], ItmpAddress], Option[String]] =
             new ~(Name(name, surname), email) and dob and ItmpName(name, None, surname) and dob and address and mockedNINORetrieval
 
         case class TestParameters(name: Option[String], surname: Option[String], dob: Option[org.joda.time.LocalDate], address: ItmpAddress)
