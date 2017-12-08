@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
@@ -25,4 +26,9 @@ bodyClasses = None) {
 
  <h1 class="heading-xlarge">@Messages("hts.cannot-change-email-try-later.title")</h1>
 
+ <p class="lede">@Messages("hts.cannot-change-email-try-later.p1")</p>
+
+ <a href=@routes.RegisterController.getGiveEmailPage class="button">@messages("hts.cannot-change-email-try-later.try_later_button")</a>
+ <p class="subsection--wide push--bottom"><a href=@routes.IntroductionController.getAboutHelpToSave().url id="exit-without-creating-account"
+   class="font-xsmall">@Messages("hts.cannot-change-email-try-later.back_button")</a></p>
 }

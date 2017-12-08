@@ -21,6 +21,7 @@ import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType._
 
+// scalastyle:off magic.number
 class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   "IneligibilityType" must {
@@ -34,7 +35,7 @@ class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenP
       IneligibilityType.fromIneligible(ineligible(5)) shouldBe EntitledToWTCButNilTC
 
       forAll{ reasonCode: Int ⇒
-        whenever(!Set(2, 3, 4, 5).contains(reasonCode)){
+        whenever(!Set(2, 3, 4, 5, -1).contains(reasonCode)){
           IneligibilityType.fromIneligible(ineligible(reasonCode)) shouldBe Unknown
         }
 
@@ -44,14 +45,28 @@ class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenP
     "have an Eq instance" in {
       IneligibilityType.ineligibilityTypeEq.eqv(NotEntitledToWTC, NotEntitledToWTC) shouldBe true
       IneligibilityType.ineligibilityTypeEq.eqv(EntitledToWTCButNilTC, EntitledToWTCButNilTC) shouldBe true
+      IneligibilityType.ineligibilityTypeEq.eqv(InvalidNino, InvalidNino) shouldBe true
       IneligibilityType.ineligibilityTypeEq.eqv(Unknown, Unknown) shouldBe true
 
       IneligibilityType.ineligibilityTypeEq.eqv(NotEntitledToWTC, EntitledToWTCButNilTC) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(NotEntitledToWTC, InvalidNino) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(NotEntitledToWTC, Unknown) shouldBe false
+
+      IneligibilityType.ineligibilityTypeEq.eqv(EntitledToWTCButNilTC, NotEntitledToWTC) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(EntitledToWTCButNilTC, InvalidNino) shouldBe false
       IneligibilityType.ineligibilityTypeEq.eqv(EntitledToWTCButNilTC, Unknown) shouldBe false
+
+      IneligibilityType.ineligibilityTypeEq.eqv(InvalidNino, NotEntitledToWTC) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(InvalidNino, EntitledToWTCButNilTC) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(InvalidNino, Unknown) shouldBe false
+
       IneligibilityType.ineligibilityTypeEq.eqv(Unknown, NotEntitledToWTC) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(Unknown, EntitledToWTCButNilTC) shouldBe false
+      IneligibilityType.ineligibilityTypeEq.eqv(Unknown, InvalidNino) shouldBe false
 
     }
 
   }
 
 }
+// scalastyle:on magic.number

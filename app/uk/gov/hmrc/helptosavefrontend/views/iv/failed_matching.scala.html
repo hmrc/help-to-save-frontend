@@ -20,20 +20,15 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.failed_matching.page-title")) {
 
-    <div class="grid-layout grid-layout--stacked">
-        <div class="grid-layout__column grid-layout__column--2-3">
-            <header class="page-header text">
-                <h1>@Messages("hts.iv.failed_matching.title")</h1>
-            </header>
-            <p>@Messages("hts.iv.failed_matching.p")</p>
-            <ul class="bullets">
-              <li>@Messages("hts.iv.failed_matching.li1")</li>
-              <li>@Messages("hts.iv.failed_matching.li2")</li>
-              <li>@Messages("hts.iv.failed_matching.li3")</li>
-            </ul>
-            <section class="subsection">
-              <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.try_again_button")</a>
-            </section>
-        </div>
+    <h1 class="heading-xlarge">@Messages("hts.iv.failed_matching.title")</h1>
+    <p>@Messages("hts.iv.failed_matching.p")</p>
+    <ul class="bullets">
+      <li>@Messages("hts.iv.failed_matching.li1")</li>
+      <li>@Messages("hts.iv.failed_matching.li2")</li>
+      <li>@Messages("hts.iv.failed_matching.li3")</li>
+    </ul>
+    <section class="subsection">
+      <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.try_again_button")</a>
+    </section>
 
 }
