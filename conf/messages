@@ -209,7 +209,8 @@ hts.register.missinguserinfo.title2=What happens next?
 hts.register.missinguserinfo.next.step1=You''ll need to go to the form on the HM Revenue & Customs website and enter your details.
 hts.register.missinguserinfo.next.step2=You''ll need to wait until we''ve updated your details in our system.
 hts.register.missinguserinfo.next.step3=You can apply for a Help to Save account again.
-hts.register.missinguserinfo.name=name
+hts.register.missinguserinfo.firstName=first name
+hts.register.missinguserinfo.lastName=last name
 hts.register.missinguserinfo.dateOfBirth=date of birth
 hts.register.missinguserinfo.address=address
 
