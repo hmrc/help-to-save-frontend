@@ -22,7 +22,7 @@ import cats.syntax.either._
 import cucumber.api.scala.{EN, ScalaDsl}
 import hts.driver.Driver
 import hts.utils.ScenarioContext
-import org.openqa.selenium.WebDriver
+import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebDriverException}
 import org.scalatest.Matchers
 
 private[steps] trait Steps extends ScalaDsl with EN with Matchers {
@@ -47,11 +47,24 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
     }
   }
 
-  After { _ ⇒
-    _driver.foreach(_.quit())
-    _driver = None
-  }
+  After {
+    scenario ⇒
+      if (scenario.isFailed) {
+        _driver.foreach{
+          case driver: TakesScreenshot ⇒
+            try {
+              val screenshot = driver.getScreenshotAs(OutputType.BYTES)
+              scenario.embed(screenshot, "image/png")
+            } catch {
+              case e: WebDriverException ⇒ System.err.println(s"Error creating screenshot: ${e.getMessage}")
+            }
+          case _ ⇒ println("Screenshot will not be taken")
+        }
+      }
 
+      _driver.foreach(_.quit())
+      _driver = None
+  }
 }
 
 private[steps] object Steps {

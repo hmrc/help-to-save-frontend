@@ -2,7 +2,7 @@
 Feature: Returning account holder tries to apply again
 
   @zap
-  Scenario: An unauthenticated user attempts to access their account through the sign in link
+  Scenario: An unauthenticated account holder attempts to access their account through the sign in link
     Given a user has previously created an account
     And a user is on the apply page
     When they click on the sign in link
