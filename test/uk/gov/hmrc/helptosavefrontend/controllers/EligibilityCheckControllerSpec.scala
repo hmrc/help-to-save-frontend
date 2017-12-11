@@ -412,39 +412,50 @@ class EligibilityCheckControllerSpec
       "show the user a page informing them which fields of their user info are missing" in {
         import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport._
 
-          def missingUserInfoRetrieval(name: Option[String], surname: Option[String], dob: Option[org.joda.time.LocalDate], address: ItmpAddress):
-          ~[~[~[~[~[~[Name, Option[String]], Option[org.joda.time.LocalDate]], ItmpName], Option[org.joda.time.LocalDate]], ItmpAddress], Option[String]] =
+          def missingUserInfoRetrieval(name:    Option[String],
+                                       surname: Option[String],
+                                       dob:     Option[org.joda.time.LocalDate],
+                                       address: ItmpAddress) =
             new ~(Name(name, surname), email) and dob and ItmpName(name, None, surname) and dob and address and mockedNINORetrieval
+
+          def isAddressInvalid(address: ItmpAddress): Boolean = !(address.line1.nonEmpty && address.line2.nonEmpty) || address.postCode.isEmpty
+          def isNameInvalid(name: Option[String]): Boolean = name.forall(_.isEmpty)
+          def isDobInvalid(dob: Option[org.joda.time.LocalDate]) = dob.isEmpty
 
         case class TestParameters(name: Option[String], surname: Option[String], dob: Option[org.joda.time.LocalDate], address: ItmpAddress)
 
-        val itmpAddressGen: Gen[ItmpAddress] = Gen.oneOf(
+        val itmpAddresses: List[ItmpAddress] = List(
           ItmpAddress(None, Some(line2), None, None, None, Some(postCode), Some(countryCode), Some(countryCode)),
           ItmpAddress(Some(line1), None, None, None, None, Some(postCode), Some(countryCode), Some(countryCode)),
           ItmpAddress(None, None, None, None, None, Some(postCode), Some(countryCode), Some(countryCode)),
-          ItmpAddress(Some(line1), Some(line2), None, None, None, None, Some(countryCode), Some(countryCode))
+          ItmpAddress(Some(line1), Some(line2), None, None, None, None, Some(countryCode), Some(countryCode)),
+          ItmpAddress(Some(line1), Some(line2), None, None, None, Some(postCode), Some(countryCode), Some(countryCode))
         )
 
-        val gen: Gen[TestParameters] = for {
-          name ← Gen.option(Gen.alphaStr)
-          surname ← Gen.option(Gen.alphaStr)
-          dob ← Gen.option(Gen.choose(0, 10).map(org.joda.time.LocalDate.now().minusDays))
-          itmpAddress ← itmpAddressGen
-        } yield TestParameters(name, surname, dob, itmpAddress)
+        val names: List[Option[String]] = List(Some("name"), None, Some(""))
 
-        forAll(gen){ params ⇒
-          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(missingUserInfoRetrieval(params.name, params.surname, params.dob, params.address))
+        val dobs: List[Option[org.joda.time.LocalDate]] = List(Some(org.joda.time.LocalDate.now()), None)
 
-            def isInvalid(address: ItmpAddress): Boolean = !(address.line1.nonEmpty && address.line2.nonEmpty) || address.postCode.isEmpty
+        val testParams: List[TestParameters] = for {
+          name ← names
+          surname ← names
+          dob ← dobs
+          address ← itmpAddresses
+        } yield TestParameters(name, surname, dob, address)
 
-          val result: Future[PlayResult] = controller.getMissingInfoPage(FakeRequest())
-          status(result) shouldBe Status.OK
+        testParams.foreach { params ⇒
+          if (isNameInvalid(params.name) || isNameInvalid(params.surname) || isDobInvalid(params.dob) || isAddressInvalid(params.address)) {
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(missingUserInfoRetrieval(params.name, params.surname, params.dob, params.address))
 
-          val html = contentAsString(result)
+            val result: Future[PlayResult] = controller.getMissingInfoPage(FakeRequest())
+            status(result) shouldBe Status.OK
 
-          html.contains("name</li>") shouldBe params.name.forall(_.isEmpty) || params.surname.forall(_.isEmpty)
-          html.contains("date of birth</li>") shouldBe params.dob.isEmpty
-          html.contains("address</li>") shouldBe isInvalid(params.address)
+            val html = contentAsString(result)
+
+            html.contains("name</li>") shouldBe isNameInvalid(params.name) || isNameInvalid(params.surname)
+            html.contains("date of birth</li>") shouldBe isDobInvalid(params.dob)
+            html.contains("address</li>") shouldBe isAddressInvalid(params.address)
+          }
         }
       }
 
