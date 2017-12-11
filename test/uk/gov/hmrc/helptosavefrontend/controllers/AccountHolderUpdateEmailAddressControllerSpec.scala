@@ -160,8 +160,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
         }
         val result = await(controller.onSubmit()(fakePostRequest))
         status(result) shouldBe Status.OK
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content")) shouldBe true
+        contentAsString(result) should include("You have 30 minutes to verify your email address")
       }
 
       "return an AlreadyVerified status and redirect the user to email verified page," +
@@ -245,7 +244,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
           val result = verifyEmail(emailVerificationParams.encode())
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
+          redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated(emailVerificationParams.email).url)
         }
 
       "redirect to NS&I" when {
@@ -323,9 +322,9 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
       "return the email updated page" in {
         mockAuthWithNoRetrievals(AuthProvider)
 
-        val result = controller.getEmailUpdated(FakeRequest())
+        val result = controller.getEmailUpdated("email")(FakeRequest())
         status(result) shouldBe OK
-        contentAsString(result) should include("We've updated your email")
+        contentAsString(result) should include("Email Address Verified")
       }
     }
 
