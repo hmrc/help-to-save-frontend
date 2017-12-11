@@ -206,12 +206,14 @@ hts.register.missinguserinfo.header=We''re missing some important details
 hts.register.missinguserinfo.header.page.title=We''re missing some important details
 hts.register.missinguserinfo.p1=We can''t create your account until we have your:
 hts.register.missinguserinfo.title2=What happens next?
-hts.register.missinguserinfo.next.step1=You''ll need to go to the form on the HM Revenue & Customs website and enter your details.
+hts.register.missinguserinfo.next.step1=You''ll need to <a href={0} target="_blank">fill in the form (it will open in a new window)</a> on the HM Revenue & Customs website.
 hts.register.missinguserinfo.next.step2=You''ll need to wait until we''ve updated your details in our system.
 hts.register.missinguserinfo.next.step3=You can apply for a Help to Save account again.
-hts.register.missinguserinfo.name=name
+hts.register.missinguserinfo.firstName=first name
+hts.register.missinguserinfo.lastName=last name
 hts.register.missinguserinfo.dateOfBirth=date of birth
 hts.register.missinguserinfo.address=address
+hts.register.missinguserinfo.exit_button=Exit to GOV.UK
 
 hts.register.daily-cap-reached.header.page.title=You''ll need to try again tomorrow
 hts.register.daily-cap-reached.header=You''ll need to try again tomorrow
