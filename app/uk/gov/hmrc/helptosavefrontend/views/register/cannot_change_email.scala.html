@@ -16,10 +16,11 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.{form,submit}
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import views.html.helper.CSRF
+@import uk.gov.hmrc.helptosavefrontend.forms.Continue
 
-@(backupEmail: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(backupEmail: String, form: Form[Continue])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
@@ -27,13 +28,14 @@
     sidebarLinks = None,
     bodyClasses = None) {
 
-    <h1 class="heading-xlarge">@Messages("hts.cannot-change-email.title")</h1>
+    @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
+        <h1 class="heading-xlarge">@Messages("hts.cannot-change-email.title")</h1>
 
-    <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
+        <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
 
-    @form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit){
+    @helpers.form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit){
         @CSRF.formField(request)
-        <div class="form-group">
+        <div class="@{"form-group"  + { if(hasErrors) " error" else "" }}">
             <fieldset>
                 <legend>
                     <h1 class="heading-medium">
@@ -41,23 +43,27 @@
                     </h1>
                 </legend>
 
+                @{if(hasErrors) <span class="error-notification">{Messages("hts.cannot-change-email.select-option")}</span> }
+
                 <div class="multiple-choice">
                     <input id="radio-inline-1" type="radio" name="radio-inline-group" value=true>
                     <label for="radio-inline-1">
-                        @Html(Messages("hts.cannot-change-email.opt1", backupEmail))
+                    @Html(Messages("hts.cannot-change-email.opt1", backupEmail))
                     </label>
                 </div>
 
                 <div class="multiple-choice">
                     <input id="radio-inline-2" type="radio" name="radio-inline-group" value=false>
                     <label for="radio-inline-2">
-                        @Messages("hts.cannot-change-email.opt2")
+                    @Messages("hts.cannot-change-email.opt2")
                     </label>
                 </div>
             </fieldset>
 
         </div>
 
-        @submit('_buttonClass -> "", 'id → "email-error-continue"){ Continue }
+        @helpers.submit('_buttonClass -> "", 'id → "email-error-continue"){ Continue }
     }
+    }
+
 }

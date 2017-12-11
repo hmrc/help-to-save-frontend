@@ -350,6 +350,7 @@ hts.cannot-change-email.p1=We can''t change your email now, you can try again af
 hts.cannot-change-email.header1=Do you want to create the account using {0}?
 hts.cannot-change-email.opt1=Yes, use {0}
 hts.cannot-change-email.opt2=No, return to About Help to Save
+hts.cannot-change-email.select-option=Select one option
 
 hts.cannot-change-email-try-later.page-title=Something went wrong
 hts.cannot-change-email-try-later.title=Something went wrong
