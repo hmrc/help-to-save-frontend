@@ -84,7 +84,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   def verifyEmailError: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkEnrolledAndSession(_.email.fold(
       SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
-    )(email ⇒ Ok(views.html.register.cannot_change_email(email)))
+    )(email ⇒ Ok(views.html.register.cannot_change_email(email, EmailVerificationErrorContinueForm.continueForm)))
     )
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
 
@@ -93,7 +93,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
       SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
     )(email ⇒
         EmailVerificationErrorContinueForm.continueForm.bindFromRequest().fold(
-          _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url),
+          form ⇒ Ok(views.html.register.cannot_change_email(email, form)),
           { continue ⇒
             if (continue.value) {
               SeeOther(routes.RegisterController.confirmEmail(email).url)

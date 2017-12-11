@@ -251,7 +251,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         redirectLocation(result) shouldBe Some(routes.IntroductionController.getAboutHelpToSave().url)
       }
 
-      "redirect to the verify email error if there is an error in the form" in {
+      "show the verify email error page again if there is an error in the form" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
@@ -259,8 +259,8 @@ class NewApplicantUpdateEmailAddressControllerSpec
         }
 
         val result = controller.verifyEmailErrorSubmit()(fakeRequestWithCSRFToken)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("form-group error")
       }
     }
 
