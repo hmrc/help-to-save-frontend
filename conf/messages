@@ -214,7 +214,6 @@ hts.register.missinguserinfo.lastName=last name
 hts.register.missinguserinfo.dateOfBirth=date of birth
 hts.register.missinguserinfo.address=address
 hts.register.missinguserinfo.exit_button=Exit to GOV.UK
-hts.register.missinguserinfo.exit_link=https://www.gov.uk/
 
 hts.register.daily-cap-reached.header.page.title=You''ll need to try again tomorrow
 hts.register.daily-cap-reached.header=You''ll need to try again tomorrow
