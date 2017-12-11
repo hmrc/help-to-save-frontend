@@ -22,7 +22,7 @@ import org.openqa.selenium.WebDriver
 
 object ApplyPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/apply"
+  val url: String = s"${Configuration.host}/help-to-save/apply"
 
   def navigate()(implicit driver: WebDriver): Unit = go to url
 

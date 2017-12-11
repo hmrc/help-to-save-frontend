@@ -21,7 +21,7 @@ import org.openqa.selenium.WebDriver
 
 object CheckYourEmailPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/register/verify-email"
+  val url: String = s"${Configuration.host}/help-to-save/verify-email"
 
   def resendVerificationEmail()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='button']")
 

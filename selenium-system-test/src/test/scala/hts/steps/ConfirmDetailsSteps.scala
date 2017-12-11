@@ -36,7 +36,7 @@ class ConfirmDetailsSteps extends Steps {
   }
 
   Then("""^they see their details$"""){ () ⇒
-    val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
 
     val nino = ScenarioContext.currentNINO
 
@@ -48,7 +48,8 @@ class ConfirmDetailsSteps extends Steps {
     val fullName = forename + " " + surname
 
     Helpers.isTextOnPage(fullName) shouldBe true
-    Helpers.isTextOnPage(nino) shouldBe true
+    val displayedNino = nino.grouped(2).mkString(" ")
+    Helpers.isTextOnPage(displayedNino) shouldBe true
     Helpers.isTextOnPage(date) shouldBe true
   }
 }
