@@ -187,11 +187,11 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
               case JSONSchemaValidationError(e) ⇒
                 logger.warn(s"user info failed validation for creating account: $e", nino)
                 pagerDutyAlerting.alert("JSON schema validation failed")
-                internalServerError()
+                Ok(views.html.register.create_account_error())
 
               case BackendError(e) ⇒
                 logger.warn(s"Error while trying to create account: $e", nino)
-                internalServerError()
+                Ok(views.html.register.create_account_error())
             }, { _ ⇒
               logger.info("Successfully created account", nino)
 
