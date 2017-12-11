@@ -32,6 +32,8 @@
         <h1 class="heading-xlarge">@Messages("hts.cannot-change-email.title")</h1>
 
         <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
+        <p>@Messages("hts.cannot-change-email.p2")</p>
+        <p>@Messages("hts.cannot-change-email.p3")</p>
 
     @helpers.form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit){
         @CSRF.formField(request)
@@ -39,7 +41,7 @@
             <fieldset>
                 <legend>
                     <h1 class="heading-medium">
-                    @Messages("hts.cannot-change-email.header1", backupEmail)
+                    @Messages("hts.cannot-change-email.header1")
                     </h1>
                 </legend>
 
@@ -62,7 +64,7 @@
 
         </div>
 
-        @helpers.submit('_buttonClass -> "", 'id → "email-error-continue"){ Continue }
+        @helpers.submit('_buttonClass -> "", 'id → "email-error-continue"){ @Messages("hts.cannot-change-email.continue-button") }
     }
     }
 
