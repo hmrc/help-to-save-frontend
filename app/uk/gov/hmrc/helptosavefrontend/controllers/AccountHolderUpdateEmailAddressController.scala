@@ -90,9 +90,9 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
     )
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
 
-  def getEmailUpdated: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
-    Ok(views.html.email.we_updated_your_email())
-  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
+  def getEmailUpdated(email: String): Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
+    Ok(views.html.email.we_updated_your_email(email))
+  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailUpdated(email).url)
 
   private def handleEmailVerified(emailVerificationParams: EmailVerificationParams, oldEmail: String)(
       implicit
@@ -131,7 +131,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
           }, { _ ⇒
             logger.info("Successfully updated email with NS&I", nino)
             auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
-            SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated().url)
+            SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailUpdated(emailVerificationParams.email).url)
           })
       }
     }

@@ -26,8 +26,8 @@
     sidebarLinks = None,
     bodyClasses = None) {
 
-    <h1>@messages("hts.email-verification.title")</h1>
-
+    <h1 class="heading-xlarge">@messages("hts.email-verification.title")</h1>
+    <p class="lede">@messages("hts.email-verification.intro")</p>
     @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderUpdateEmailAddressController.onSubmit()) {
         @helpers.input_text(
             id = "new-email-address",
@@ -35,9 +35,12 @@
             label = messages("hts.email-verification.input.label"),
             errorMessage = form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))
         )
+        <div class="panel panel-border-wide">
+          <p>@messages("hts.email-verification.note")</p>
+        </div>
+
         @helpers.submit('_buttonClass -> "") {
-            @messages("hts.email-verification.submit.text")
+            @messages("hts.global.continue-button")
         }
     }
 }
-    

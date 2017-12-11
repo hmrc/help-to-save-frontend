@@ -17,7 +17,6 @@
 package hts.steps
 
 import hts.pages._
-import hts.pages.registrationPages.EligibilityInfoPage
 import hts.utils.ScenarioContext
 
 class EmailSteps extends Steps with Page {

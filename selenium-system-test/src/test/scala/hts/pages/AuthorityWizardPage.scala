@@ -166,5 +166,4 @@ object AuthorityWizardPage extends Page {
 
     loop(address.lines.zip(setFunctions))
   }
-
 }

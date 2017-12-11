@@ -1,4 +1,5 @@
 hts.global.continue-button=Continue
+hts.global.back-to-account=Go to account home
 hts.global.title-suffix=- Help to Save - GOV.UK
 hts.introduction.title=Apply for Help to Save
 
@@ -169,7 +170,7 @@ hts.core.about-help-to-save.eligibility=Eligibility
 hts.core.not-eligible.page-title=You''re not eligible for a Help to Save account 
 hts.core.not-eligible.h1=You''re not eligible for a Help to Save account
 hts.core.not-eligible.p-1=You can only open a Help to Save account if you''re receiving Working Tax Credit payments.
-hts.core.not-eligible.p-2=Find out more about eligibility for Help to Save.
+hts.core.not-eligible.p-2=Find out more about <a href="{0}">eligibility for Help to Save</a>.
 hts.core.not-eligible.h2-1=Waiting to hear back?
 hts.core.not-eligible.p-3=If you''ve applied for Working Tax Credit, you can only apply for an account again after:
 hts.core.not-eligible.li-1=your application for Working Tax Credit has been approved
@@ -331,7 +332,9 @@ hts.we-couldnt-update-your-email.title=Something went wrong - Help to Save - GOV
 hts.we-couldnt-update-your-email.page-title=Something went wrong
 hts.we-couldnt-update-your-email.p1=We cannot change your email address at this time.
 hts.we-couldnt-update-your-email.p2=You''ll need to come back later and try again.
-hts.we-couldnt-update-your-email.back-to-account=Got to account home
+hts.email-verified.title=Email Address Verified
+hts.email-verified.p1=We''ll use this address to contact you about your Help to Save account.
+hts.email-verified.p2=Your email has not been updated in other government services.
 
 hts.email-updated.page-title=Email address verified
 hts.email-updated.title=Email address verified
