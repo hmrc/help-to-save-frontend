@@ -171,7 +171,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
           val result = controller.verifyEmail(email)(FakeRequest())
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
+          redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
         }
 
     }
@@ -203,7 +203,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
         val result = doRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
       }
 
     }
@@ -224,7 +224,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
         val result = doRequest(true)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
       }
 
       "redirect to the confirmEmail endpoint if there is an email for the user and the user selects to continue" in {
@@ -264,37 +264,6 @@ class NewApplicantUpdateEmailAddressControllerSpec
       }
     }
 
-    "emailVerifyErrorTryLater" should {
-
-        def doRequest(): Future[Result] = controller.verifyEmailErrorTryLater()(FakeRequest())
-
-      behave like commonBehaviour(() ⇒ controller.verifyEmailErrorTryLater()(FakeRequest()))
-
-      "show the email verify error page try later if there is no email for the user" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include("Something went wrong")
-      }
-
-      "redirect the email verify error try later page if there is an email for the user" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
-      }
-    }
-
     "emailVerified" should {
       val testEmail = "email@gmail.com"
 
@@ -325,8 +294,8 @@ class NewApplicantUpdateEmailAddressControllerSpec
           mockAudit()
         }
         val result = doRequestWithQueryParam("corrupt-link")
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include("Email verification error")
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
       }
 
       "return an OK status with a not eligible view when an ineligible user comes in via email verified" in {

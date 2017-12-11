@@ -355,6 +355,11 @@ hts.cannot-change-email-try-later.p1=We can''t change your email
 hts.cannot-change-email-try-later.try_later_button=Try again
 hts.cannot-change-email-try-later.back_button=Go to About Help to Save
 
+hts.cannot-change-email-try-later.returning.title=Something went wrong
+hts.cannot-change-email-try-later.returning.p1=We cannot change your email address at this time.
+hts.cannot-change-email-try-later.returning.p2=You''ll need to come back later and try again.
+hts.cannot-change-email-try-later.returning.button=Go to account home
+
 hts.no-account.page-title=You don''t have an account
 hts.no-account.title=You don''t have an account
 hts.no-account.p1=You''ve signed into your Government Gateway account, but you don''t have a Help to Save account.

@@ -103,7 +103,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
   def checkIsErrorPage(result: Future[Result]): Unit = {
     status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
+    redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
   }
 
   "The AccountHolderUpdateEmailAddressController" when {
@@ -203,8 +203,8 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
           mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
         }
         val result = controller.onSubmit()(fakePostRequest)
-        status(result) shouldBe Status.OK
-        contentAsString(result).contains("Email verification error") shouldBe true
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
       }
 
       "redirect to the error page if the name retrieval fails" in {
@@ -212,7 +212,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
         val result = controller.onSubmit()(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailUpdateError().url)
+        redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
       }
 
     }
@@ -328,16 +328,6 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
       }
     }
 
-    "handling getEmailUpdateError" must {
-
-      "return the email update error page" in {
-        mockAuthWithNoRetrievals(AuthProvider)
-
-        val result = controller.getEmailUpdateError(FakeRequest())
-        status(result) shouldBe OK
-        contentAsString(result) should include("We cannot change your email address at this time")
-      }
-    }
   }
 
   def commonEnrolmentBehaviour(getResult:          () ⇒ Future[Result],
