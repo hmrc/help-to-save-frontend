@@ -22,8 +22,8 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
-import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, HtsContextWithNINOAndUserDetails, SuspiciousActivity}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINOLogMessageTransformer}
+import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO, HtsContextWithNINOAndUserDetails, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 
 import scala.concurrent.Future
@@ -69,5 +69,10 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
       case Success(params) ⇒
         ifValid(params)
     }
+
+  def getEmailFromSession(session: Option[HTSSession])(getEmail: HTSSession ⇒ Option[Email], description: String): Either[String, Email] =
+    session.fold[Either[String, Email]](
+      Left("Could not find session")
+    )(getEmail(_).fold[Either[String, Email]](Left(s"Could not find $description in session"))(Right(_)))
 
 }
