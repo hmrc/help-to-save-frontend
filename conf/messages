@@ -385,7 +385,7 @@ hts.privacy.p10=HMRC''s staff are trained in handling information and understand
 hts.privacy.h2-2=Seeing what information we hold
 hts.privacy.p11=You can ask to see the personal information HMRC holds about you. To help locate the information you want and deal with your request more quickly, you should make your Data Protection Act request to the HMRC office that you''ve been dealing with. You should address your request to the ''Data Protection Officer''.  You can get more information on HMRC''s privacy policy (it will open in a new window) on the GOV.UK website.
 
-
+footer.links.privacy_policy.url=privacy
 global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
 global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties
 global.error.InternalServerError500.message=Please try again later.
