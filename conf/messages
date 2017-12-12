@@ -319,7 +319,7 @@ hts.give-email-address.label=Enter your email address
 hts.email-verification.title=Update your email
 hts.email-verification.input.label=New email address
 hts.email-verification.submit.text=Verify your email
-hts.email-verification.check-your-email.page-title=Verify your email address 
+hts.email-verification.check-your-email.page-title=Verify your email address
 hts.email-verification.check-your-email.title=You have 30 minutes to verify your email address
 hts.email-verification.check-your-email.we-have-sent-mail=We''ve sent you an email to:
 hts.email-verification.check-your-email.what-next=What happens next?
@@ -337,6 +337,14 @@ hts.we-couldnt-update-your-email.p2=You''ll need to come back later and try agai
 hts.email-verified.title=Email Address Verified
 hts.email-verified.p1=We''ll use this address to contact you about your Help to Save account.
 hts.email-verified.p2=Your email has not been updated in other government services.
+
+hts.email-verification.existing-user.check-your-email.title=You have 30 minutes to verify your email address
+hts.email-verification.existing-user.check-your-email.we-have-sent-mail=We''ve sent an email to you at:
+hts.email-verification.existing-user.check-your-email.what-next=What happens next?
+hts.email-verification.existing-user.check-your-email.content1=You''ll need to go to that email account and click the link in the message we sent you.
+hts.email-verification.existing-user.check-your-email.content2=You have 30 minutes to do this.
+hts.email-verification.existing-user.check-your-email.where-used-heading=Where your email address is updated
+hts.email-verification.existing-user.check-your-email.where-used=We''ll only use this email address for your Help to Save account. The email addresses you use for other government services won''t change.
 
 hts.email-updated.page-title=Email address verified
 hts.email-updated.title=Email address verified
