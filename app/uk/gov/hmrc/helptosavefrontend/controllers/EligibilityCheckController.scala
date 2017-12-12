@@ -156,7 +156,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           _ ⇒ Some(Right(userInfo)),
           ineligible ⇒ Some(Left(Ineligible(ineligible))),
           _ ⇒ None)
-        result.map(r ⇒ HTSSession(r, None))
+        result.map(r ⇒ HTSSession(r, None, None))
       }
       _ ← session.map(sessionCacheConnector.put).traverse[Result, CacheMap](identity)
     } yield eligible

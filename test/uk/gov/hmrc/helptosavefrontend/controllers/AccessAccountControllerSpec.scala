@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 
 import scala.concurrent.Future
 
-class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
+class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with SessionCacheBehaviour {
 
   lazy val controller = new AccessAccountController(
     fakeApplication.injector.instanceOf[MessagesApi],

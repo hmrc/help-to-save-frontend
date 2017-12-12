@@ -32,22 +32,9 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait EnrolmentAndEligibilityCheckBehaviour {
-  this: AuthSupport ⇒
-
-  val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
+trait EnrolmentAndEligibilityCheckBehaviour { this: AuthSupport with SessionCacheBehaviour ⇒
 
   val mockHelpToSaveService = mock[HelpToSaveService]
-
-  def mockSessionCacheConnectorPut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
-    (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier, _: ExecutionContext))
-      .expects(expectedSession, *, *, *)
-      .returning(EitherT.fromEither[Future](result.map(_ ⇒ CacheMap("1", Map.empty[String, JsValue]))))
-
-  def mockSessionCacheConnectorGet(result: Either[String, Option[HTSSession]]): Unit =
-    (mockSessionCacheConnector.get(_: Reads[HTSSession], _: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *)
-      .returning(EitherT.fromEither[Future](result))
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
     (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
