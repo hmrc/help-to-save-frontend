@@ -9,8 +9,8 @@ Scenario Outline: Hit URIs for ZAP testing
 Examples:
 | URI                                | HTTP method |
 | /access-account                    | GET         |
-| /register/confirm-email/:email     | POST        |
-| /register/create-an-account        | POST        |
+| /confirm-email/:email              | POST        |
+| /create-an-account                 | POST        |
 | /email/new-applicant-update        | POST        |
 | /email/account-holder-update       | POST        |
 | /email-verified                    | GET         |

@@ -17,9 +17,28 @@
 package hts.utils
 
 import hts.pages.Page
+import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.WebDriver
+
+import scala.util.control.NonFatal
 
 object Helpers extends Page {
 
-  def isTextOnPage(text: String)(implicit driver: WebDriver): Boolean = text.r.findAllIn(getPageContent).nonEmpty
+  def isTextOnPage(regex: String)(implicit driver: WebDriver): Boolean = {
+    val textPresent = regex.r.findAllIn(getPageContent).nonEmpty
+    if (!(textPresent)) {
+      println("Text not found: " + regex)
+    }
+    textPresent
+  }
+
+  def isActualUrlExpectedUrl(expectedUrl: String)(implicit driver: WebDriver): Boolean = {
+    try {
+      val wait = new WebDriverWait(driver, 20)
+      wait.until(ExpectedConditions.urlContains(expectedUrl))
+      true
+    } catch {
+      case NonFatal(_) ⇒ false
+    }
+  }
 }

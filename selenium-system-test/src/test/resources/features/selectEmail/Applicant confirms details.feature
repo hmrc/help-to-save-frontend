@@ -7,7 +7,7 @@ Feature: Applicant confirms details
       | first name     | FirstName     |
       | last name      | LastName      |
       | NINO           | <eligible>    |
-      | date of birth  | 20/12/1980    |
+      | date of birth  | 31/12/1980    |
       | email address  | user@test.com |
       | address line 1 | 1 the street  |
       | address line 2 | the place     |
