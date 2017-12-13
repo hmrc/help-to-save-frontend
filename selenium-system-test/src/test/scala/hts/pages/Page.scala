@@ -68,6 +68,13 @@ trait Page extends Matchers
   }
 
   def pageInfoIsCorrect()(implicit driver: WebDriver): Unit = {
+    // Keep the following lines for debugging
+    // println("Expected url: " + expectedUrl)
+    // println("Actual url: " + currentUrl)
+    // println("Expected page title: " + expectedPageTitle)
+    // println("Actual page title: " + pageTitle)
+    // println("Expected page heading: " + expectedPageHeader)
+    // println("Actual page heading: " + pageHeading)
     expectedUrl shouldBe currentUrl
     expectedPageTitle shouldBe pageTitle
     expectedPageHeader shouldBe pageHeading
