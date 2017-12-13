@@ -340,6 +340,7 @@ hts.email-verified.title=Email Address Verified
 hts.email-verified.p1=We''ll use this address to contact you about your Help to Save account.
 hts.email-verified.p2=Your email has not been updated in other government services.
 
+
 hts.email-verification.existing-user.page-title=Verify your email address
 hts.email-verification.existing-user.check-your-email.title=You have 30 minutes to verify your email address
 hts.email-verification.existing-user.check-your-email.we-have-sent-mail=We''ve sent an email to you at:
@@ -349,7 +350,7 @@ hts.email-verification.existing-user.check-your-email.content2=You have 30 minut
 hts.email-verification.existing-user.check-your-email.where-used-heading=Where your email address is updated
 hts.email-verification.existing-user.check-your-email.where-used=We''ll only use this email address for your Help to Save account. The email addresses you use for other government services won''t change.
 
-hts.email-updated.page-title=Email address verified
+hts.email-updated.page-title=Email address verified 
 hts.email-updated.title=Email address verified
 hts.email-updated.p1=If you create a Help to Save account we''ll use this email address to contact you about it.
 hts.email-updated.p2=Your email address has not been updated in other government services.
