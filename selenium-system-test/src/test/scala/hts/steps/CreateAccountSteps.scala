@@ -83,8 +83,7 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   Then("""^they will be on a page which says you do not have an account$""") { () ⇒
-    //    TODO: Uncomment when the placeholder page is replaced with the final page
-    //    YouDoNotHaveAnAccountPage.pageInfoIsCorrectCorrect
+    YouDoNotHaveAnAccountPage.pageInfoIsCorrect()
   }
 
   Then("""^they will be on the you're eligible page$""") { () ⇒
