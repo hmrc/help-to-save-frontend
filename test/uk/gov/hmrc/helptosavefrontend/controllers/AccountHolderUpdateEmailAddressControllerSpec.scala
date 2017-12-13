@@ -129,7 +129,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
           val result = getUpdateYourEmailAddress()
           status(result) shouldBe OK
-          contentAsString(result) should include("Update your email")
+          contentAsString(result) should include("Change your email address")
         }
     }
 
