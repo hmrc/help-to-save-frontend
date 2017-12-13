@@ -27,16 +27,15 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO, NINOLogMessageTransformer, TestNINOLogMessageTransformer}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -45,8 +44,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSRFSupport with SessionCacheBehaviour {
-
-  import uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.dummyEligibilityCheckResponse
 
   implicit lazy val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
@@ -160,7 +157,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
-          mockSessionCacheConnectorPut(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), None, Some(email)))(Right(()))
+          mockSessionCacheConnectorPut(HTSSession(None, None, Some(email)))(Right(()))
           mockEmailVerificationConn(nino, email, firstName)(Right(()))
         }
         val result = await(controller.onSubmit()(fakePostRequest))
@@ -174,7 +171,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
             mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
             mockEnrolmentCheck()(Right(enrolled))
             mockEmailGet()(Right(Some("email")))
-            mockSessionCacheConnectorPut(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), None, Some(email)))(Right(()))
+            mockSessionCacheConnectorPut(HTSSession(None, None, Some(email)))(Right(()))
             mockEmailVerificationConn(nino, email, firstName)(Left(AlreadyVerified))
           }
           val result = await(controller.onSubmit()(fakePostRequest))(10.seconds)
@@ -206,7 +203,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
-          mockSessionCacheConnectorPut(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), None, Some(email)))(Left(""))
+          mockSessionCacheConnectorPut(HTSSession(None, None, Some(email)))(Left(""))
         }
         val result = controller.onSubmit()(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
@@ -219,7 +216,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))
           mockEmailGet()(Right(Some("email")))
-          mockSessionCacheConnectorPut(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), None, Some(email)))(Right(()))
+          mockSessionCacheConnectorPut(HTSSession(None, None, Some(email)))(Right(()))
           mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
         }
         val result = controller.onSubmit()(fakePostRequest)
@@ -259,7 +256,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
             mockEmailGet()(Right(Some("email")))
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
-            mockSessionCacheConnectorPut(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), Some(verifiedEmail), None))(Right(()))
+            mockSessionCacheConnectorPut(HTSSession(None, Some(verifiedEmail), None))(Right(()))
             mockAuditEmailChanged()
           }
 
@@ -342,7 +339,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
             mockEmailGet()(Right(Some("email")))
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
-            mockSessionCacheConnectorPut(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), Some(verifiedEmail), None))(Left(""))
+            mockSessionCacheConnectorPut(HTSSession(None, Some(verifiedEmail), None))(Left(""))
             mockAuditEmailChanged()
           }
 
@@ -358,7 +355,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
       "return the email verified page" in {
         inSequence{
           mockAuthWithNoRetrievals(AuthProvider)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), Some("email"), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, Some("email"), None))))
         }
 
         val result = controller.getEmailVerified(FakeRequest())
@@ -381,7 +378,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
         "there is no confirmed email in the session" in {
           inSequence{
             mockAuthWithNoRetrievals(AuthProvider)
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), None, None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
           }
 
           val result = controller.getEmailVerified(FakeRequest())
@@ -406,7 +403,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
       "return the check your email  page" in {
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), None, Some("email")))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, Some("email")))))
         }
 
         val result = controller.getCheckYourEmail(fakeRequestWithCSRFToken)
@@ -429,7 +426,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
         "there is no pending email in the session" in {
           inSequence{
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), None, None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
           }
 
           val result = controller.getCheckYourEmail(FakeRequest())

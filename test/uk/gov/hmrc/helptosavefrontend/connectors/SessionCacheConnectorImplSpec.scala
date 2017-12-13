@@ -37,7 +37,8 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
 
     implicit val htsSessionGen: Gen[HTSSession] =
       for {
-        result ← Gen.oneOf[Either[Ineligible, UserInfo]](TestData.Eligibility.ineligibilityGen.map(Left(_)), TestData.UserData.userInfoGen.map(Right(_)))
+        result ← Gen.option(
+          Gen.oneOf[Either[Ineligible, UserInfo]](TestData.Eligibility.ineligibilityGen.map(Left(_)), TestData.UserData.userInfoGen.map(Right(_))))
         email ← Gen.option(Gen.alphaStr)
         pendingEmail ← Gen.option(Gen.alphaStr)
       } yield HTSSession(result, email, pendingEmail)
