@@ -33,10 +33,10 @@ GET        /email-verified                                  @uk.gov.hmrc.helptos
 GET        /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailError
 POST       /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit
 GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailVerificationErrorController.verifyEmailErrorTryLater
-GET        /email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
-POST       /email-updated                          @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
-GET        /create-account                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
-POST       /create-account                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
+GET        /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
+POST       /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
+GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
+POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 
 GET        /try-again-tomorrow                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /try-again-later-in-year                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
@@ -59,3 +59,5 @@ GET        /account-home/email-verified                     @uk.gov.hmrc.helptos
 GET        /account/email-updated                           @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdated(email: String)
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
+
+#GET        /error-no-account
