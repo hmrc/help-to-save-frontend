@@ -21,6 +21,7 @@ import cats.instances.future._
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -53,12 +54,13 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
       "show the we couldn't update your email page if the user is not enrolled yet" in {
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
         val result = controller.verifyEmailErrorTryLater(FakeRequest())
         status(result) shouldBe Status.OK
-        // TODO - do checks on the page content
+        contentAsString(result) should include("Something went wrong")
+        contentAsString(result) should include("Go to About Help to Save")
       }
 
       "show the we couldn't update your email page if the user is enrolled" in {
@@ -69,7 +71,8 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
 
         val result = controller.verifyEmailErrorTryLater(FakeRequest())
         status(result) shouldBe Status.OK
-        // TODO - do checks on the page content
+        contentAsString(result) should include("We cannot change your email address at this time")
+        contentAsString(result) should include("Go to account home")
       }
 
       "return an error if there is an error checking the users eligibility" in {
