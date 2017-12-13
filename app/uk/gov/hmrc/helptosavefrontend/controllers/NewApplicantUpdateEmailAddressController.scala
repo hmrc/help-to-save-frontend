@@ -58,10 +58,10 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   private def checkEnrolledAndSession(ifEligible: (UserInfo, Option[Email], Option[Email]) ⇒ Future[Result])(implicit request: Request[AnyContent],
                                                                                                              htsContext: HtsContextWithNINO): Future[Result] =
     checkIfAlreadyEnrolled { () ⇒
-      checkSession {
+      checkHasDoneEligibilityChecks {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } { session ⇒
-        session.eligibilityCheckResult.fold(
+        session.eligibilityResult.fold(
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
           info ⇒ ifEligible(info, session.pendingEmail, session.confirmedEmail)
         )
@@ -169,10 +169,10 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   /** Return `None` if user is ineligible */
   private def getEligibleUserInfo(session: Option[HTSSession])(
       implicit
-      htsContext: HtsContextWithNINOAndUserDetails): Either[String, Option[UserInfo]] = session match {
+      htsContext: HtsContextWithNINOAndUserDetails): Either[String, Option[UserInfo]] = session.flatMap(_.eligibilityCheckResult) match {
 
-    case Some(s) ⇒
-      s.eligibilityCheckResult.fold[Either[String, Option[UserInfo]]](
+    case Some(eligibilityCheckResult) ⇒
+      eligibilityCheckResult.fold[Either[String, Option[UserInfo]]](
         _ ⇒ Right(None), // IMPOSSIBLE - this means they are ineligible
         userInfo ⇒ Right(Some(userInfo))
       )
@@ -198,7 +198,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           EitherT.fromEither[Future](Left[String, UserInfo]("NINO in confirm details parameters did not match NINO from auth"))
         } else {
           val newInfo = info.updateEmail(params.email)
-          val newSession = HTSSession(Right(newInfo), Some(params.email), session.flatMap(_.pendingEmail))
+          val newSession = HTSSession(Some(Right(newInfo)), Some(params.email), session.flatMap(_.pendingEmail))
           for {
             _ ← sessionCacheConnector.put(newSession)
             _ ← helpToSaveService.storeConfirmedEmail(params.email)

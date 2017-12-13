@@ -49,11 +49,12 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: AuthSupport with SessionCach
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))
 
-  def commonEnrolmentAndSessionBehaviour(getResult:               () ⇒ Future[Result], // scalastyle:ignore method.length
-                                         mockSuccessfulAuth:      () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
-                                         mockNoNINOAuth:          () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None),
-                                         testRedirectOnNoSession: Boolean             = true,
-                                         testEnrolmentCheckError: Boolean             = true): Unit = {
+  def commonEnrolmentAndSessionBehaviour(getResult:                              () ⇒ Future[Result], // scalastyle:ignore method.length
+                                         mockSuccessfulAuth:                     () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
+                                         mockNoNINOAuth:                         () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None),
+                                         testRedirectOnNoSession:                Boolean             = true,
+                                         testEnrolmentCheckError:                Boolean             = true,
+                                         testRedirectOnNoEligibilityCheckResult: Boolean             = true): Unit = {
 
     "redirect to NS&I if the user is already enrolled" in {
       inSequence {
@@ -107,6 +108,20 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: AuthSupport with SessionCach
           mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(None))
+        }
+
+        val result = getResult()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      }
+    }
+
+    if (testRedirectOnNoEligibilityCheckResult) {
+      "redirect to the eligibility checks if there is no eligibility check result in the session data for the user" in {
+        inSequence {
+          mockSuccessfulAuth()
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
         }
 
         val result = getResult()
