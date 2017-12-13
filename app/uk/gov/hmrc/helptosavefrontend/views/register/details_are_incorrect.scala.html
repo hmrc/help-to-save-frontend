@@ -14,17 +14,35 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = "",
+    title = Messages("hts.incorrect-details.page-title"),
     sidebarLinks = None,
     bodyClasses = None) {
 
+    <h1 class="heading-xlarge">@Messages("hts.incorrect-details.title")</h1>
+    <p>@Messages("hts.incorrect-details.p1")</p>
 
-<h1>😡 There's nothing you can do about it! 😡</h1>
+    <ul class="list list-bullet">
+        <li>@Messages("hts.incorrect-details.listOne1")</li>
+        <li>@Messages("hts.incorrect-details.listOne2")</li>
+        <li>@Messages("hts.incorrect-details.listOne3")</li>
+        <li>@Messages("hts.incorrect-details.listOne4")</li>
+    </ul>
+
+    <h2>@Messages("hts.incorrect-details.h2")</h2>
+
+    <ol class="list list-number">
+        <li>@Html(Messages("hts.incorrect-details.listTwo1", "https://www.qa.tax.service.gov.uk/shortforms/form/PAYENICoC"))</li>
+        <li>@Messages("hts.incorrect-details.listTwo2")</li>
+        <li>@Messages("hts.incorrect-details.listTwo3")</li>
+    </ol>
+
+    <p class="subsection--wide push--bottom"><a href=@routes.EligibilityCheckController.getIsEligible() id="incorrect-details-goback">@Messages("hts.incorrect-details.exit-button")</a></p>
 
 }
 
