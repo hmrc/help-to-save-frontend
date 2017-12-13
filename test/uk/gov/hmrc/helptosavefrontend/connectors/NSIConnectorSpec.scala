@@ -82,6 +82,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
           whenever(status =!= Status.OK && status > 0){
             inSequence{
               mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(status)))
+              // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
               mockPagerDutyAlert("Received unexpected http status in response to update email")
             }
 
@@ -94,6 +95,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       "the POST to NS&I fails" in {
         inSequence{
           mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Left("Oh no!"))
+          // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
           mockPagerDutyAlert("Failed to make call to update email")
         }
 
@@ -124,6 +126,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
         inSequence {
           mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_REQUEST,
                                                                              Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
+          // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
           mockPagerDutyAlert("Received unexpected http status in response to create account")
         }
         val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
@@ -135,6 +138,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
         inSequence {
           mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.INTERNAL_SERVER_ERROR,
                                                                              Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
+          // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
           mockPagerDutyAlert("Received unexpected http status in response to create account")
         }
         val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
@@ -146,6 +150,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
         inSequence {
           mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.SERVICE_UNAVAILABLE,
                                                                              Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
+          // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
           mockPagerDutyAlert("Received unexpected http status in response to create account")
         }
         val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
@@ -155,6 +160,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       "the status is anything else" in {
         inSequence{
           mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.BAD_GATEWAY)))
+          // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
           mockPagerDutyAlert("Received unexpected http status in response to create account")
 
         }
@@ -168,6 +174,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
       "the call to createAccount fails" in {
         inSequence {
           mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Left(""))
+          // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
           mockPagerDutyAlert("Failed to make call to create account")
         }
         val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
