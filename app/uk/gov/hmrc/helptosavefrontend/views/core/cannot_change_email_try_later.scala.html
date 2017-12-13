@@ -1,0 +1,48 @@
+@*
+ * Copyright 2017 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.nsiManageAccountUrl
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+
+@(returningUser: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+title = messages("hts.cannot-change-email-try-later.page-title"),
+sidebarLinks = None,
+bodyClasses = None) {
+
+  @if(returningUser){
+
+    <h1 class="heading-xlarge">@Messages("hts.cannot-change-email-try-later.returning.title")</h1>
+    <p class="lede">@Messages("hts.cannot-change-email-try-later.returning.p1")</p>
+    <p>@Messages("hts.cannot-change-email-try-later.returning.p2")</p>
+    <a href=@nsiManageAccountUrl>@Messages("hts.cannot-change-email-try-later.returning.button")</a>
+
+  } else {
+
+    <h1 class="heading-xlarge">@Messages("hts.cannot-change-email-try-later.title")</h1>
+
+    <p class="lede">@Messages("hts.cannot-change-email-try-later.p1")</p>
+
+    <a href=@routes.RegisterController.getGiveEmailPage class="button">@messages("hts.cannot-change-email-try-later.try_later_button")</a>
+    <p class="subsection--wide push--bottom">
+      <a href=@routes.IntroductionController.getAboutHelpToSave().url id="exit-without-creating-account"
+       class="font-xsmall">@Messages("hts.cannot-change-email-try-later.back_button")</a>
+    </p>
+
+  }
+}

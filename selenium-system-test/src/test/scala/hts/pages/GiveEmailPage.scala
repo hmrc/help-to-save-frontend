@@ -21,7 +21,7 @@ import org.openqa.selenium.WebDriver
 
 object GiveEmailPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/register/give-email"
+  val url: String = s"${Configuration.host}/help-to-save/give-email"
 
   def continue()(implicit driver: WebDriver): Unit = click on "continue"
 }

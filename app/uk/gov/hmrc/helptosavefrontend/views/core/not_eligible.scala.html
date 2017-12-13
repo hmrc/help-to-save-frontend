@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType._
@@ -29,7 +30,7 @@
   <h1 class="heading-large" id="hts-not-eligible-title">@Messages("hts.core.not-eligible.h1")</h1>
 
   <p>@Messages("hts.core.not-eligible.p-1")</p>
-  <p>@Messages("hts.core.not-eligible.p-2")</p>
+  <p>@Html(Messages("hts.core.not-eligible.p-2", routes.IntroductionController.getEligibility().url))</p>
 
 
   <h2 class="heading-medium">@Messages("hts.core.not-eligible.h2-1")</h2>

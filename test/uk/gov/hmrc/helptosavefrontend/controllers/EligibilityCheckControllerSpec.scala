@@ -20,12 +20,14 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
@@ -37,6 +39,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckRespon
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.smartstub.AutoGen
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -45,6 +48,7 @@ class EligibilityCheckControllerSpec
   extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
+  with SessionCacheBehaviour
   with GeneratorDrivenPropertyChecks {
 
   val mockAuditor = mock[HTSAuditor]
@@ -79,7 +83,7 @@ class EligibilityCheckControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(dateOfBirth = LocalDate.of(1980, 12, 31))), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(dateOfBirth = LocalDate.of(1980, 12, 31))), None, None))))
         }
 
         val result = getIsEligible()
@@ -98,7 +102,7 @@ class EligibilityCheckControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None, None))))
         }
 
         val result = getIsEligible()
@@ -118,7 +122,7 @@ class EligibilityCheckControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None, None))))
         }
 
         val result = getIsNotEligible()
@@ -131,7 +135,7 @@ class EligibilityCheckControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
         }
 
         val result = getIsNotEligible()
@@ -211,7 +215,7 @@ class EligibilityCheckControllerSpec
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Left("Oh no!"))
             mockEligibilityResult()(Right(randomEligibility()))
-            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None))(Right(()))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None, None))(Right(()))
             mockSendAuditEvent()
           }
 
@@ -227,7 +231,7 @@ class EligibilityCheckControllerSpec
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Left("Oh no!"))
             mockEligibilityResult()(Right(ineligibilityReason))
-            mockSessionCacheConnectorPut(HTSSession(Left(ineligibilityReason), None))(Right(()))
+            mockSessionCacheConnectorPut(HTSSession(Left(ineligibilityReason), None, None))(Right(()))
             mockSendAuditEvent()
           }
 
@@ -258,7 +262,7 @@ class EligibilityCheckControllerSpec
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None, None))))
             }
 
             val result = doCheckEligibilityRequest()
@@ -272,7 +276,7 @@ class EligibilityCheckControllerSpec
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
             }
             val result = doCheckEligibilityRequest()
 
@@ -304,7 +308,7 @@ class EligibilityCheckControllerSpec
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult()(Right(Eligible(response)))
-              mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None))(Right(()))
+              mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None, None))(Right(()))
               mockSendAuditEvent()
             }
 
@@ -323,7 +327,7 @@ class EligibilityCheckControllerSpec
                 mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                 mockSessionCacheConnectorGet(Right(None))
                 mockEligibilityResult()(Right(ineligibility))
-                mockSessionCacheConnectorPut(HTSSession(Left(ineligibility), None))(Right(()))
+                mockSessionCacheConnectorPut(HTSSession(Left(ineligibility), None, None))(Right(()))
                 mockSendAuditEvent()
               }
 
@@ -397,7 +401,7 @@ class EligibilityCheckControllerSpec
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult()(Right(randomEligibility()))
-              mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None))(Left("Bang"))
+              mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None, None))(Left("Bang"))
             })
           }
         }
@@ -406,20 +410,54 @@ class EligibilityCheckControllerSpec
 
     "handling getMissingInfoPage" must {
 
-      "report missing user info back to the user if they really are missing user info" in {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+      "show the user a page informing them which fields of their user info are missing" in {
+        import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport._
 
-        val response: Future[PlayResult] = controller.getMissingInfoPage()(FakeRequest())
+          def missingUserInfoRetrieval(name:    Option[String],
+                                       surname: Option[String],
+                                       dob:     Option[org.joda.time.LocalDate],
+                                       address: ItmpAddress) =
+            new ~(Name(name, surname), email) and dob and ItmpName(name, None, surname) and dob and address and mockedNINORetrieval
 
-        val result = Await.result(response, 5.seconds)
-        status(result) shouldBe Status.OK
+          def isAddressInvalid(address: ItmpAddress): Boolean = !(address.line1.nonEmpty && address.line2.nonEmpty) || address.postCode.isEmpty
+          def isNameInvalid(name: Option[String]): Boolean = name.forall(_.isEmpty)
+          def isDobInvalid(dob: Option[org.joda.time.LocalDate]) = dob.isEmpty
 
-        contentType(result) shouldBe Some("text/html")
-        charset(result) shouldBe Some("utf-8")
+        case class TestParameters(name: Option[String], surname: Option[String], dob: Option[org.joda.time.LocalDate], address: ItmpAddress)
 
-        val html = contentAsString(result)
+        val itmpAddresses: List[ItmpAddress] = List(
+          ItmpAddress(None, Some(line2), None, None, None, Some(postCode), Some(countryCode), Some(countryCode)),
+          ItmpAddress(Some(line1), None, None, None, None, Some(postCode), Some(countryCode), Some(countryCode)),
+          ItmpAddress(None, None, None, None, None, Some(postCode), Some(countryCode), Some(countryCode)),
+          ItmpAddress(Some(line1), Some(line2), None, None, None, None, Some(countryCode), Some(countryCode)),
+          ItmpAddress(Some(line1), Some(line2), None, None, None, Some(postCode), Some(countryCode), Some(countryCode))
+        )
 
-        html should include("Name")
+        val names: List[Option[String]] = List(Some("name"), None, Some(""))
+
+        val dobs: List[Option[org.joda.time.LocalDate]] = List(Some(org.joda.time.LocalDate.now()), None)
+
+        val testParams: List[TestParameters] = for {
+          name ← names
+          surname ← names
+          dob ← dobs
+          address ← itmpAddresses
+        } yield TestParameters(name, surname, dob, address)
+
+        testParams.foreach { params ⇒
+          if (isNameInvalid(params.name) || isNameInvalid(params.surname) || isDobInvalid(params.dob) || isAddressInvalid(params.address)) {
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(missingUserInfoRetrieval(params.name, params.surname, params.dob, params.address))
+
+            val result: Future[PlayResult] = controller.getMissingInfoPage(FakeRequest())
+            status(result) shouldBe Status.OK
+
+            val html = contentAsString(result)
+
+            html.contains("name</li>") shouldBe isNameInvalid(params.name) || isNameInvalid(params.surname)
+            html.contains("date of birth</li>") shouldBe isDobInvalid(params.dob)
+            html.contains("address</li>") shouldBe isAddressInvalid(params.address)
+          }
+        }
       }
 
       "redirect to check eligbility if they aren't missing any info" in {
@@ -441,7 +479,7 @@ class EligibilityCheckControllerSpec
       "redirect to the give email page if the user has no email" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
         }
 
         val result = doRequest()
@@ -452,7 +490,7 @@ class EligibilityCheckControllerSpec
       "redirect to the select email page if the user has an email" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = Some("email"))), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = Some("email"))), None, None))))
         }
 
         val result = doRequest()
@@ -474,7 +512,7 @@ class EligibilityCheckControllerSpec
       "redirect to the not eligible page if the user is not eligible" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Left(randomIneligibility()), None, None))))
         }
 
         val result = doRequest()

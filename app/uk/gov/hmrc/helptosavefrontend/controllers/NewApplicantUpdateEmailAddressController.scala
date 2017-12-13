@@ -20,8 +20,8 @@ import javax.inject.Singleton
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.option._
 import cats.instances.string._
+import cats.syntax.either._
 import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.Inject
@@ -37,7 +37,8 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.frontend.controller.ActionWithMdc
@@ -54,64 +55,67 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
 )(implicit app: Application, val messagesApi: MessagesApi, crypto: Crypto, transformer: NINOLogMessageTransformer)
   extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
 
-  private def checkEnrolledAndSession(ifEligible: UserInfo ⇒ Future[Result])(implicit request: Request[AnyContent],
-                                                                             htsContext: HtsContextWithNINO): Future[Result] =
+  private def checkEnrolledAndSession(ifEligible: (UserInfo, Option[Email], Option[Email]) ⇒ Future[Result])(implicit request: Request[AnyContent],
+                                                                                                             htsContext: HtsContextWithNINO): Future[Result] =
     checkIfAlreadyEnrolled { () ⇒
       checkSession {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } { session ⇒
-        session.eligibilityCheckResult.fold[Future[Result]](
+        session.eligibilityCheckResult.fold(
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-          ifEligible
+          info ⇒ ifEligible(info, session.pendingEmail, session.confirmedEmail)
         )
       }
     }
 
-  def verifyEmail(email: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkEnrolledAndSession(userInfo ⇒
-      sendEmailVerificationRequest(
-        email,
-        userInfo.forename,
-        Ok(views.html.register.check_your_email(email, userInfo.email)),
-        params ⇒ routes.NewApplicantUpdateEmailAddressController.emailVerified(params.encode()).url,
-        _ ⇒ SeeOther(userInfo.email.fold(
-          routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)(
-            _ ⇒ routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)),
-        isNewApplicant = true)
-    )
-  } (redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmail(email).url)
+  def verifyEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkEnrolledAndSession {
+      case (userInfo, maybePendingEmail, _) ⇒
+        maybePendingEmail.fold[Future[Result]](
+          internalServerError()
+        ){ pendingEmail ⇒
+            sendEmailVerificationRequest(
+              pendingEmail,
+              userInfo.forename,
+              Ok(views.html.register.check_your_email(pendingEmail, userInfo.email)),
+              params ⇒ routes.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(params.encode()).url,
+              _ ⇒ SeeOther(userInfo.email.fold(
+                routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)(
+                  _ ⇒ routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)),
+              isNewApplicant = true)
+          }
+    }
+  } (redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
 
   def verifyEmailError: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkEnrolledAndSession(_.email.fold(
-      SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
-    )(email ⇒ Ok(views.html.register.cannot_change_email(email)))
-    )
+    checkEnrolledAndSession {
+      case (info, _, _) ⇒
+        info.email.fold(
+          SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+        )(email ⇒ Ok(views.html.register.cannot_change_email(email, EmailVerificationErrorContinueForm.continueForm)))
+    }
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
 
   def verifyEmailErrorSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkEnrolledAndSession(_.email.fold(
-      SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
-    )(email ⇒
-        EmailVerificationErrorContinueForm.continueForm.bindFromRequest().fold(
-          _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url),
-          { continue ⇒
-            if (continue.value) {
-              SeeOther(routes.RegisterController.confirmEmail(email).url)
-            } else {
-              SeeOther(routes.IntroductionController.getAboutHelpToSave().url)
-            }
-          }
-        )))
+    checkEnrolledAndSession{
+      case (info, _, _) ⇒
+        info.email.fold(
+          SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+        )(email ⇒
+            EmailVerificationErrorContinueForm.continueForm.bindFromRequest().fold(
+              form ⇒ Ok(views.html.register.cannot_change_email(email, form)),
+              { continue ⇒
+                if (continue.value) {
+                  SeeOther(routes.RegisterController.confirmEmail(email).url)
+                } else {
+                  SeeOther(routes.IntroductionController.getAboutHelpToSave().url)
+                }
+              }
+            ))
+    }
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
 
-  def verifyEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkEnrolledAndSession(_.email.fold(
-      Ok(views.html.register.cannot_change_email_try_later()))(
-        _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url))
-    )
-  }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater().url)
-
-  def emailVerified(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
       emailVerificationParams,
       { params ⇒
@@ -128,20 +132,34 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           maybeNSIUserInfo.fold{
             // this means they were ineligible
             Ok(views.html.core.not_eligible(IneligibilityType.Unknown))
-          }{ _ ⇒
-            Ok(views.html.register.email_updated(params.email))
-          }
+          }(_ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url))
         })
       },
-      toFuture(Ok(views.html.email.email_verify_error()))
+      toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
     )
-  } (redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.emailVerified(emailVerificationParams).url)
+  } (redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(emailVerificationParams).url)
+
+  def getEmailVerified: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkEnrolledAndSession {
+      case (info, _, confirmedEmail) ⇒
+        confirmedEmail.fold[Future[Result]]{
+          logger.warn("Could not find confirmed email", htsContext.nino)
+          val url = info.email.fold(
+            routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)(
+              _ ⇒ routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url
+            )
+          toFuture(SeeOther(url))
+        }(email ⇒ toFuture(Ok(views.html.register.email_updated(email))))
+    }
+  }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
 
   def getEmailUpdated(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkEnrolledAndSession(_.email.fold(
-      SeeOther(routes.RegisterController.getGiveEmailPage().url))(
-        email ⇒ Ok(views.html.register.email_updated(email)))
-    )
+    checkEnrolledAndSession {
+      case (info, _, _) ⇒
+        info.email.fold(
+          SeeOther(routes.RegisterController.getGiveEmailPage().url))(
+            email ⇒ Ok(views.html.register.email_updated(email)))
+    }
   } (redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   def emailUpdatedSubmit: Action[AnyContent] = ActionWithMdc {
@@ -172,13 +190,15 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
       implicit
       htsContext: HtsContextWithNINOAndUserDetails,
       hc:         HeaderCarrier): EitherT[Future, String, Option[UserInfo]] = {
+    import cats.instances.option._
+
     EitherT.fromEither[Future](getEligibleUserInfo(session)).flatMap { maybeInfo ⇒
       val updatedInfo: Option[EitherT[Future, String, UserInfo]] = maybeInfo.map{ info ⇒
         if (info.nino =!= params.nino) {
           EitherT.fromEither[Future](Left[String, UserInfo]("NINO in confirm details parameters did not match NINO from auth"))
         } else {
           val newInfo = info.updateEmail(params.email)
-          val newSession = HTSSession(Right(newInfo), Some(params.email))
+          val newSession = HTSSession(Right(newInfo), Some(params.email), session.flatMap(_.pendingEmail))
           for {
             _ ← sessionCacheConnector.put(newSession)
             _ ← helpToSaveService.storeConfirmedEmail(params.email)

@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,19 +12,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
-@import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
+package hts.pages
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-title = messages("hts.introduction.title"),
-sidebarLinks = None,
-bodyClasses = None) {
+import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
- <h1>Email verification error</h1>
-    <p>Email verification has gone wrong!</p>
+object NsiManageAccountPage extends Page {
 
+  val url: String = "https://www.nsandi.com/"
 }

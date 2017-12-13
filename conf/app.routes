@@ -28,11 +28,12 @@ POST       /select-email                                    @uk.gov.hmrc.helptos
 GET        /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getGiveEmailPage
 POST       /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit
 GET        /confirm-email/:email                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
-GET        /verify-email/:email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail(email)
-GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerified(p: String)
+GET        /verify-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail
+GET        /email-verified-callback                         @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(p: String)
+GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailVerified
 GET        /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailError
 POST       /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit
-GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailErrorTryLater
+GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailVerificationErrorController.verifyEmailErrorTryLater
 GET        /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
 POST       /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
 GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
@@ -55,8 +56,9 @@ GET        /failed-iv-precondition-failed                   @uk.gov.hmrc.helptos
 
 GET        /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
 POST       /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.onSubmit
-GET        /account-home/email-verified                     @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.emailVerified(p: String)
-GET        /account/email-updated                           @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdated(email: String)
-GET        /account/email-update-error                      @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailUpdateError
+GET        /account-home/verify-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getCheckYourEmail
+GET        /account-home/email-verified-callback            @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.emailVerifiedCallback(p: String)
+GET        /account-home/email-verified                     @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailVerified
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
+GET        /privacy                                         @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.showPrivacyPage
