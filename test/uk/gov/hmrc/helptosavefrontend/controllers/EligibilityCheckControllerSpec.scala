@@ -22,6 +22,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import play.api.Configuration
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Result ⇒ PlayResult}
@@ -29,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{AppConfig, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -59,7 +60,10 @@ class EligibilityCheckControllerSpec
     mockSessionCacheConnector,
     mockAuditor,
     mockAuthConnector,
-    mockMetrics)
+    mockMetrics,
+    Configuration("enable-early-cap-check" → false))
+
+  val mockAppConfig: AppConfig = mock[AppConfig]
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
     (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier))
@@ -70,6 +74,11 @@ class EligibilityCheckControllerSpec
     (mockAuditor.sendEvent(_: HTSEvent, _: NINO))
       .expects(*, nino)
       .returning(Future.successful(AuditResult.Success))
+
+  def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
+    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier))
+      .expects(*)
+      .returning(EitherT.fromEither[Future](result))
 
   "The EligibilityCheckController" when {
 
@@ -353,6 +362,44 @@ class EligibilityCheckControllerSpec
           redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getMissingInfoPage().url)
         }
 
+        "do the eligibility checks when the enable-early-cap-check config is set to true " +
+          "and the caps have not been reached" in {
+            val userCapResponse = new UserCapResponse(false, false, false, false)
+
+            val trueEarlyCapController = new EligibilityCheckController(
+              fakeApplication.injector.instanceOf[MessagesApi],
+              mockHelpToSaveService,
+              mockSessionCacheConnector,
+              mockAuditor,
+              mockAuthConnector,
+              mockMetrics,
+              Configuration("enable-early-cap-check" → true))
+
+            inSequence {
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+              mockAccountCreationAllowed(Right(userCapResponse))
+              //I'm missing a call to SessionCacheConnector.get
+            }
+
+            val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
+
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+
+          }
+
+        //        "show ... when the enable-early-cap-check config is set to true " +
+        //          "and ..." in {
+        //            val userCapResponse = new UserCapResponse(true, true, false, false)
+        //
+        //            test(inSequence {
+        //              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        //              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        //
+        //            })
+        //          }
+
         "return an error" when {
 
             def isError(result: Future[PlayResult]): Boolean =
@@ -404,6 +451,7 @@ class EligibilityCheckControllerSpec
               mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None, None))(Left("Bang"))
             })
           }
+
         }
       }
     }
