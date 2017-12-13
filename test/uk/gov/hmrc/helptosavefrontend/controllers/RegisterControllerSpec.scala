@@ -591,7 +591,7 @@ class RegisterControllerSpec
         redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
       }
 
-      "indicate to the user that the creation was not successful " when {
+      "redirect to the create account error page" when {
 
         "the JSON schema validation fails" in {
           inSequence {
@@ -603,7 +603,8 @@ class RegisterControllerSpec
           }
 
           val result = doCreateAccountRequest()
-          status(result) shouldBe INTERNAL_SERVER_ERROR
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
         }
 
         "the help to save service returns with an error" in {
@@ -616,9 +617,31 @@ class RegisterControllerSpec
           }
 
           val result = doCreateAccountRequest()
-          checkIsTechnicalErrorPage(result)
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
         }
       }
+
+      "handling getCreateAccountErrorPage" must {
+
+          def doRequest(): Future[PlayResult] = controller.getCreateAccountErrorPage(FakeRequest())
+
+        behave like commonEnrolmentAndSessionBehaviour(doRequest)
+
+        "show the error page" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail)))))
+          }
+
+          val result = doRequest()
+          contentAsString(result) should include("We couldn&#x27;t create a Help to Save account for you at this time")
+
+        }
+
+      }
+
     }
   }
 }
