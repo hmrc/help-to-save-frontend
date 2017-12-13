@@ -49,6 +49,7 @@ class RegisterControllerSpec
   extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
+  with SessionCacheBehaviour
   with GeneratorDrivenPropertyChecks
   with MockPagerDuty {
 
@@ -116,7 +117,7 @@ class RegisterControllerSpec
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
       }
 
       val result = doRequest
@@ -130,7 +131,7 @@ class RegisterControllerSpec
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
       }
 
       val result = doRequest
@@ -151,7 +152,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
           mockAccountCreationAllowed(Right(UserCapResponse(isDailyCapReached = true)))
         }
 
@@ -164,7 +165,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
           mockAccountCreationAllowed(Right(UserCapResponse(isTotalCapReached = true)))
         }
 
@@ -177,7 +178,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
           mockAccountCreationAllowed(Right(UserCapResponse()))
         }
 
@@ -191,7 +192,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
           mockAccountCreationAllowed(Right(UserCapResponse(isDailyCapDisabled = true, isTotalCapDisabled = true)))
         }
 
@@ -217,7 +218,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
         }
 
         val result = doRequest("this is not an email")
@@ -231,12 +232,12 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
         }
 
         val result = doRequest(email)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail(email).url)
+        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
       }
 
     }
@@ -253,7 +254,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
           mockAccountCreationAllowed(Right(UserCapResponse(isTotalCapReached = true)))
         }
 
@@ -266,7 +267,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
           mockAccountCreationAllowed(Right(UserCapResponse()))
         }
 
@@ -296,7 +297,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
           }
 
           val result = doRequest(None)
@@ -311,13 +312,30 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None, Some(newEmail)))(Right(()))
+
           }
 
           val result = doRequest(Some(newEmail))
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail(newEmail).url)
+          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
         }
+
+      "show an error page if writing the pending email to session cache fails" in {
+        val newEmail = "email@test.com"
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+          mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), None, Some(newEmail)))(Left(""))
+
+        }
+
+        val result = doRequest(Some(newEmail))
+        checkIsTechnicalErrorPage(result)
+      }
 
       "redirect to the confirm email page if the session data shows that they have been already found to be eligible and " when {
 
@@ -327,7 +345,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
           }
 
           val result = doRequest(Some(invalidEmail))
@@ -339,7 +357,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
           }
 
           val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("new-email" → "email@test.com"))
@@ -352,7 +370,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
           }
 
           val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "No"))
@@ -367,7 +385,7 @@ class RegisterControllerSpec
               inSequence {
                 mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
                 mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-                mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+                mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
               }
 
               val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → s))
@@ -447,8 +465,8 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email), None))(Right(CacheMap("", Map.empty)))
             mockEmailUpdate(email)(Left(""))
           }
           await(doRequest(email))
@@ -458,8 +476,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-          mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+          mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email), None))(Right(CacheMap("", Map.empty)))
           mockEmailUpdate(email)(Right(()))
         }
 
@@ -474,8 +492,8 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email)))(Left(""))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email), None))(Left(""))
           }
 
           val result = doRequest(email)
@@ -486,8 +504,8 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
-            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email)))(Right(CacheMap("", Map.empty)))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+            mockSessionCacheConnectorPut(HTSSession(Right(validUserInfo), Some(email), None))(Right(CacheMap("", Map.empty)))
             mockEmailUpdate(email)(Left(""))
           }
 
@@ -512,7 +530,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
         }
 
         val result = doRequest()
@@ -524,7 +542,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(email)))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(email), None))))
         }
 
         val result = doRequest()
@@ -548,7 +566,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail)))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail), None))))
             mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Right(()))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
             mockAudit()
@@ -561,12 +579,12 @@ class RegisterControllerSpec
           redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
         }
 
-      "indicate to the user that the creation was successful " +
-        "and even if the user couldn't be enrolled" in {
+      "indicate to the user that account creation was successful " +
+        "even if the user couldn't be enrolled into hts at this time" in {
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail)))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail), None))))
             mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Right(()))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
             mockAudit()
@@ -583,7 +601,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
         }
 
         val result = doCreateAccountRequest()
@@ -597,8 +615,9 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail)))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail), None))))
             mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Left(""))
+            // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
             mockPagerDutyAlert("JSON schema validation failed")
           }
 
@@ -611,7 +630,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail)))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail), None))))
             mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Right(()))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }

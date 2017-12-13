@@ -82,7 +82,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         }{ _ ⇒
           GiveEmailForm.giveEmailForm.bindFromRequest().fold[Result](
             withErrors ⇒ Ok(views.html.register.give_email(withErrors)),
-            form ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail(form.email).url)
+            form ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
           )
         }
       }
@@ -104,12 +104,17 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks{ eligibleWithEmail ⇒
-          SelectEmailForm.selectEmailForm.bindFromRequest().fold[Result](
+          SelectEmailForm.selectEmailForm.bindFromRequest().fold(
             withErrors ⇒ Ok(views.html.register.select_email(eligibleWithEmail.email, withErrors)),
-            _.newEmail.fold(
+            _.newEmail.fold[Future[Result]](
               SeeOther(routes.RegisterController.confirmEmail(eligibleWithEmail.email).url))(
-                newEmail ⇒
-                  SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail(newEmail).url)
+                newEmail ⇒ {
+                  val session = new HTSSession(Right(eligibleWithEmail.userInfo), None, Some(newEmail))
+                  sessionCacheConnector.put(session).fold(
+                    e ⇒ internalServerError(),
+                    _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
+                  )
+                }
               )
           )
         } { _ ⇒
@@ -123,7 +128,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         val result = for {
-          _ ← sessionCacheConnector.put(HTSSession(Right(eligibleWithEmail.userInfo), Some(email)))
+          _ ← sessionCacheConnector.put(HTSSession(Right(eligibleWithEmail.userInfo), Some(email), None))
           _ ← helpToSaveService.storeConfirmedEmail(email)
         } yield ()
 

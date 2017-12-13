@@ -32,7 +32,9 @@ object EligiblePage extends Page {
   val pageTitle: String = "You're eligible"
   val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
 
-  def startCreatingAccount()(implicit driver: WebDriver): Unit = click on "start-creating-account"
+  def startCreatingAccount()(implicit driver: WebDriver): Unit = {
+    clickButtonByIdOnceClickable("start-creating-account")
+  }
 
   override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h1", pageTitle)
 

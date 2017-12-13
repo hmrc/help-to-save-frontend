@@ -17,12 +17,13 @@
 package hts.pages
 
 import hts.utils.Configuration
-import org.openqa.selenium.support.ui.Sleeper
+import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, Keys, WebDriver}
 import org.scalatest.{Assertions, Matchers}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.selenium.WebBrowser
 import org.scalatest.time.{Millis, Seconds, Span}
+import org.openqa.selenium.WebElement
 
 trait Page extends Matchers
   with WebBrowser
@@ -76,5 +77,15 @@ trait Page extends Matchers
     expectedUrl shouldBe currentUrl
     expectedPageTitle contains pageTitle
     expectedPageHeader contains pageHeading
+  }
+
+  def clickButtonByIdOnceClickable(id: String)(implicit driver: WebDriver): Unit = {
+    val wait = new WebDriverWait(driver, 20)
+    wait.until(ExpectedConditions.or(
+      ExpectedConditions.elementToBeClickable(By.id(id)),
+      ExpectedConditions.presenceOfElementLocated(By.id(id)),
+      ExpectedConditions.visibilityOfElementLocated(By.id(id)))
+    )
+    click on id
   }
 }

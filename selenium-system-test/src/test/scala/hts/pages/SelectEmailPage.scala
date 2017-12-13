@@ -29,15 +29,13 @@ object SelectEmailPage extends Page {
     el.foreach(_.underlying.sendKeys(email))
   }
 
-  //def verifyYourEmail()(implicit driver: WebDriver): Unit = click on xpath(".//*[@type='submit']")
-
   def setAndVerifyNewEmail(email: String)(implicit driver: WebDriver): Unit = {
     selectNewEmail()
     setNewEmail(email)
     clickContinue()
   }
 
-  def selectGGEmail()(implicit driver: WebDriver): Unit = click on "registered-email"
+  def selectGGEmail()(implicit driver: WebDriver): Unit = clickButtonByIdOnceClickable("registered-email")
 
   def selectNewEmail()(implicit driver: WebDriver): Unit = click on "add-new-email"
 

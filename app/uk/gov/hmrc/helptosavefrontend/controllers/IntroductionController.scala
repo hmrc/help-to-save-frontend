@@ -57,4 +57,8 @@ class IntroductionController @Inject() (val messagesApi:       MessagesApi,
     SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
   }
 
+  def showPrivacyPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.core.privacy())
+  }
+
 }
