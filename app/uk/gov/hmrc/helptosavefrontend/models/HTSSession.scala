@@ -32,7 +32,9 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
  */
 case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, UserInfo]],
                       confirmedEmail:         Option[Email],
-                      pendingEmail:           Option[Email]
+                      pendingEmail:           Option[Email],
+                      ivURL:                  Option[String]                       = None,
+                      ivSuccessURL:           Option[String]                       = None
 )
 
 object HTSSession {

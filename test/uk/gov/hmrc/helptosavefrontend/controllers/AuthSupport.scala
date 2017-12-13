@@ -102,17 +102,17 @@ trait AuthSupport extends TestSupport {
       .expects(predicate, *, *, *)
       .returning(Future.failed(ex))
 
-  def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: Option[String]) =
+  def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: Option[String]): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[Option[String]])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, Retrievals.nino, *, *)
       .returning(Future.successful(result))
 
-  def mockAuthWithNINOAndName(predicate: Predicate)(result: NameRetrievalType) =
+  def mockAuthWithNINOAndName(predicate: Predicate)(result: NameRetrievalType): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[NameRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, Retrievals.name and Retrievals.itmpName and Retrievals.nino, *, *)
       .returning(Future.successful(result))
 
-  def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType) =
+  def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[UserRetrievalType])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, UserInfoRetrievals and Retrievals.nino, *, *)
       .returning(Future.successful(result))

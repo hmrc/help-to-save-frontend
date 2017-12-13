@@ -19,184 +19,319 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import java.net.URLEncoder
 import java.util.UUID.randomUUID
 
-import org.scalatest.prop.TableDrivenPropertyChecks._
-import org.scalatest.prop.Tables.Table
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivUrl
-import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
-import uk.gov.hmrc.helptosavefrontend.util.urlEncode
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class IvControllerSpec extends AuthSupport {
+class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
   val ivConnector: IvConnector = mock[IvConnector]
 
   val journeyId = JourneyId(randomUUID().toString)
-
-  val fakeNino = "WM123456C"
-
-  def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
-    (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
-      .returning(Future.successful(IvSuccessResponse.fromString(ivServiceResponse)))
-
-  val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
   lazy val ivController = new IvController(mockSessionCacheConnector,
                                            ivConnector,
                                            fakeApplication.injector.instanceOf[MessagesApi],
                                            mockAuthConnector,
                                            mockMetrics)
-
-  private val fakeRequest = FakeRequest("GET", s"/iv/journey-result?journeyId=${journeyId.Id}")
-
   val continueURL = "continue-here"
 
-  private def doRequest() = ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(fakeRequest)
+  lazy val mockPutContinueURLInSessionCache =
+    mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
 
-  "GET /iv/journey-result" should {
+  lazy val mockPutIVURLInSessionCache =
+    mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(ivUrl(continueURL)), None))(Right(()))
 
-    "handle different responses from identity-verification-frontend" in {
+  def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
+    (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
+      .returning(Future.successful(IvSuccessResponse.fromString(ivServiceResponse)))
 
-      val validCases =
-        Table[String, Option[String]](
-          ("IV Journey Result", "hts response to the user"),
-          ("Success", Some(routes.IvController.getIVSuccessful(urlEncode(continueURL)).url)),
-          ("Incomplete", None),
-          ("FailedIV", Some(routes.IvController.getFailedIV(ivUrl(continueURL)).url)),
-          ("FailedMatching", Some(routes.IvController.getFailedMatching(ivUrl(continueURL)).url)),
-          ("InsufficientEvidence", Some(routes.IvController.getInsufficientEvidence().url)),
-          ("UserAborted", Some(routes.IvController.getUserAborted(ivUrl(continueURL)).url)),
-          ("LockedOut", Some(routes.IvController.getLockedOut().url)),
-          ("PreconditionFailed", Some(routes.IvController.getPreconditionFailed().url)),
-          ("TechnicalIssue", Some(routes.IvController.getTechnicalIssue(ivUrl(continueURL)).url)),
-          ("Timeout", Some(routes.IvController.getTimedOut(ivUrl(continueURL)).url)),
-          ("blah-blah", None)
-        )
+  private def doRequest() =
+    ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"), Some(journeyId.Id))(FakeRequest())
 
-      forAll(validCases) { (ivServiceResponse: String, redirectURL: Option[String]) ⇒
-        mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
-        mockIvConnector(journeyId, ivServiceResponse)
+  "GET /iv/journey-result" when {
 
-        val result = doRequest()
+      def noSessionPutBehaviour(expectedRedirectURL: ⇒ String, ivServiceResponse: String): Unit = {
 
-        redirectURL.fold {
-          checkIsTechnicalErrorPage(result)
-        } { redirectURL ⇒
+        "redirect to the correct URL" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+            mockIvConnector(journeyId, ivServiceResponse)
+
+          }
+          val result = doRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(redirectURL)
+          redirectLocation(result) shouldBe Some(expectedRedirectURL)
         }
       }
+
+      def sessionPutIVURLBehaviour(expectedRedirectURL: ⇒ String, ivServiceResponse: String): Unit = {
+
+        "redirect to the correct URL if the write to session cache is successful" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+            mockIvConnector(journeyId, ivServiceResponse)
+            mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(ivUrl(continueURL)), None))(Right(()))
+
+          }
+          val result = doRequest()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(expectedRedirectURL)
+        }
+
+        "show an error page if the write to session cache is unsuccessful" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+            mockIvConnector(journeyId, ivServiceResponse)
+            mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(ivUrl(continueURL)), None))(Left(""))
+          }
+          val result = doRequest()
+          checkIsTechnicalErrorPage(result)
+        }
+
+      }
+
+    "handling success responses" must {
+
+      "redirect to the correct URL if the write to session cache is successful" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+          mockIvConnector(journeyId, "Success")
+          mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
+
+        }
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.IvController.getIVSuccessful().url)
+      }
+
+      "show an error page if the write to session cache is unsuccessful" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+          mockIvConnector(journeyId, "Success")
+          mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Left(""))
+        }
+        val result = doRequest()
+        checkIsTechnicalErrorPage(result)
+      }
+
+    }
+
+    "handling incomplete responses" must {
+      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue().url, "Incomplete")
+    }
+
+    "handling failed iv responses" must {
+      behave like sessionPutIVURLBehaviour(routes.IvController.getFailedIV().url, "FailedIV")
+    }
+
+    "handling failed matching responses" must {
+      behave like sessionPutIVURLBehaviour(routes.IvController.getFailedMatching().url, "FailedMatching")
+    }
+
+    "handling insufficient evidence responses" must {
+      behave like noSessionPutBehaviour(routes.IvController.getInsufficientEvidence().url, "InsufficientEvidence")
+    }
+
+    "handling user aborted responses" must {
+      behave like sessionPutIVURLBehaviour(routes.IvController.getUserAborted().url, "UserAborted")
+
+    }
+
+    "handling locked out responses" must {
+      behave like noSessionPutBehaviour(routes.IvController.getLockedOut().url, "LockedOut")
+
+    }
+
+    "handling precondition failed responses" must {
+      behave like noSessionPutBehaviour(routes.IvController.getPreconditionFailed().url, "PreconditionFailed")
+
+    }
+
+    "handling technical issue responses" must {
+      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue().url, "TechnicalIssue")
+
+    }
+
+    "handling timeout responses" must {
+      behave like sessionPutIVURLBehaviour(routes.IvController.getTimedOut().url, "Timeout")
+
+    }
+
+    "handling unknown responses" must {
+
+      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue().url, "???")
+
     }
 
     "handles the case where no iv response for a given journeyId" in {
-
-      mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
-
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+        mockPutIVURLInSessionCache
+      }
       val result =
-        ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"))(
-          FakeRequest("GET", "/iv/journey-result"))
+        ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"), None)(FakeRequest())
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.IvController.getTechnicalIssue(ivUrl(continueURL)).url)
+      redirectLocation(result) shouldBe Some(routes.IvController.getTechnicalIssue().url)
     }
   }
 
-  "The IvController" must {
+  "The IV controller" when {
 
-      def test(name:      String,
-               getResult: ⇒ Future[Result])(checks: Future[Result] ⇒ Unit): Unit = {
-        s"show the correct $name page" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
-          checks(getResult)
+      def testIndividualPage(name:                      String, // scalastyle:ignore method.length
+                             getResult:                 () ⇒ Future[Result],
+                             mockSessionCacheBehaviour: Option[() ⇒ Unit])(
+          successChecks: Future[Result] ⇒ Unit): Unit = {
+        s"handling $name" must {
+
+          s"show the correct $name page" in {
+            mockSessionCacheBehaviour.fold(
+              mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+            ) { behaviour ⇒
+                inSequence {
+                  mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+                  behaviour()
+                }
+              }
+
+            successChecks(getResult())
+          }
+
+          if (mockSessionCacheBehaviour.isDefined) {
+
+            "show an error page" when {
+
+              "session cache retrieval fails" in {
+                inSequence {
+                  mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+                  mockSessionCacheConnectorGet(Left(""))
+                }
+
+                checkIsTechnicalErrorPage(getResult())
+              }
+
+              "there is no session data" in {
+                inSequence {
+                  mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+                  mockSessionCacheConnectorGet(Right(None))
+                }
+
+                checkIsTechnicalErrorPage(getResult())
+              }
+
+              "the data required is not present in the session" in {
+                inSequence {
+                  mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+                  mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, None, None))))
+                }
+
+                checkIsTechnicalErrorPage(getResult())
+              }
+            }
+          }
         }
       }
 
     val url = "my-url"
 
-    test(
+    testIndividualPage(
       "IV successful",
-      ivController.getIVSuccessful(url)(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getIVSuccessful()(FakeRequest()),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, None, Some(url))))))
+    ) { result ⇒
         status(result) shouldBe OK
         contentAsString(result) should include(url)
         contentAsString(result) should include("ve verified your identity")
       }
 
-    test(
+    testIndividualPage(
       "failed matching",
-      ivController.getFailedMatching(url)(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getFailedMatching()(FakeRequest()),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
+    ) { result ⇒
         status(result) shouldBe UNAUTHORIZED
         contentAsString(result) should include(url)
         contentAsString(result) should include("need to try again and check you entered your details correctly")
       }
 
-    test(
+    testIndividualPage(
       "failed iv",
-      ivController.getFailedIV(url)(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getFailedIV()(FakeRequest()),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
+    ) { result ⇒
         status(result) shouldBe UNAUTHORIZED
         contentAsString(result) should include(url)
         contentAsString(result) should include("You did not answer all the questions correctly")
       }
 
-    test(
+    testIndividualPage(
       "insufficient evidence",
-      ivController.getInsufficientEvidence()(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getInsufficientEvidence()(FakeRequest()),
+      None
+    ) { result ⇒
         status(result) shouldBe UNAUTHORIZED
         contentAsString(result) should include("be able to apply for a Help to Save account by phone, after")
       }
 
-    test(
+    testIndividualPage(
       "locked out",
-      ivController.getLockedOut()(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getLockedOut()(FakeRequest()),
+      None
+    ) { result ⇒
         status(result) shouldBe UNAUTHORIZED
         contentAsString(result) should include("You have tried to verify your identity too many times")
       }
 
-    test(
+    testIndividualPage(
       "user aborted",
-      ivController.getUserAborted(url)(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getUserAborted()(FakeRequest()),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
+    ) { result ⇒
         status(result) shouldBe UNAUTHORIZED
         contentAsString(result) should include(url)
         contentAsString(result) should include("You have not provided enough information")
       }
 
-    test(
+    testIndividualPage(
       "timed out",
-      ivController.getTimedOut(url)(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getTimedOut()(FakeRequest()),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
+    ) { result ⇒
         status(result) shouldBe UNAUTHORIZED
         contentAsString(result) should include(url)
         contentAsString(result) should include("Your session has ended")
       }
 
-    test(
+    testIndividualPage(
       "technical issue",
-      ivController.getTechnicalIssue(url)(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getTechnicalIssue()(FakeRequest()),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
+    ) { result ⇒
         status(result) shouldBe UNAUTHORIZED
         contentAsString(result) should include(url)
         contentAsString(result) should include("Something went wrong")
       }
 
-    test(
+    testIndividualPage(
       "precondition failed",
-      ivController.getPreconditionFailed()(FakeRequest())
-    ){ result ⇒
+      () ⇒ ivController.getPreconditionFailed()(FakeRequest()),
+      None
+    ) { result ⇒
         status(result) shouldBe UNAUTHORIZED
         contentAsString(result) should include("not able to use this service")
       }
 
   }
+
 }
+
