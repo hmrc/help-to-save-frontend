@@ -63,6 +63,15 @@ class EligibilityCheckControllerSpec
     mockMetrics,
     Configuration("enable-early-cap-check" → false))
 
+  lazy val trueEarlyCapController = new EligibilityCheckController(
+    fakeApplication.injector.instanceOf[MessagesApi],
+    mockHelpToSaveService,
+    mockSessionCacheConnector,
+    mockAuditor,
+    mockAuthConnector,
+    mockMetrics,
+    Configuration("enable-early-cap-check" → true))
+
   val mockAppConfig: AppConfig = mock[AppConfig]
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
@@ -366,39 +375,64 @@ class EligibilityCheckControllerSpec
           "and the caps have not been reached" in {
             val userCapResponse = new UserCapResponse(false, false, false, false)
 
-            val trueEarlyCapController = new EligibilityCheckController(
-              fakeApplication.injector.instanceOf[MessagesApi],
-              mockHelpToSaveService,
-              mockSessionCacheConnector,
-              mockAuditor,
-              mockAuthConnector,
-              mockMetrics,
-              Configuration("enable-early-cap-check" → true))
-
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockAccountCreationAllowed(Right(userCapResponse))
-              //I'm missing a call to SessionCacheConnector.get
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+
             }
 
             val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
-
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
 
           }
 
-        //        "show ... when the enable-early-cap-check config is set to true " +
-        //          "and ..." in {
-        //            val userCapResponse = new UserCapResponse(true, true, false, false)
-        //
-        //            test(inSequence {
-        //              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        //              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        //
-        //            })
-        //          }
+        "show the getTotalCapReachedPage when the enable-early-cap-check config is set to true " +
+          "and the total cap has been reached" in {
+            val userCapResponse = new UserCapResponse(true, true, false, false)
+
+            inSequence {
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+              mockAccountCreationAllowed(Right(userCapResponse))
+            }
+
+            val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage().url)
+          }
+
+        "show the getDailyCapReachedPage when the enable-early-cap-check config is set to true " +
+          "and the total cap has been reached" in {
+            val userCapResponse = new UserCapResponse(true, false, false, false)
+
+            inSequence {
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+              mockAccountCreationAllowed(Right(userCapResponse))
+            }
+
+            val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
+          }
+
+        "show the getIsEligible page when the enable-early-cap-check config is set to false" +
+          "and neither cap has been reached" in {
+            val userCapResponse = new UserCapResponse(false, false, false, false)
+
+            inSequence {
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+            }
+
+            val result = controller.getCheckEligibility(FakeRequest())
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+          }
 
         "return an error" when {
 
