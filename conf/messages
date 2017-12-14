@@ -316,9 +316,9 @@ hts.give-email.page-title=Which email address do you want to use for Help to Sav
 hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
 
-
-hts.email-verification.page-title=Change your email address
-hts.email-verification.title=Update your email
+hts.email-verification.title=Change your email address
+hts.email-verification.intro=Once you''ve entered a new email address, we''ll send you an email so you can verify it.
+hts.email-verification.note=The email addresses you use for other government services will not change.
 hts.email-verification.input.label=New email address
 hts.email-verification.submit.text=Verify your email
 hts.email-verification.check-your-email.page-title=Verify your email address
@@ -386,7 +386,17 @@ hts.no-account.p2=If you want to apply for an account, you should continue and w
 hts.no-account.continue_button=Continue
 hts.no-account.exit-message=Exit and apply another time
 
-hts.privacy.page-title=Help to Save privacy statement
+hts.incorrect-details.title=We need your correct details
+hts.incorrect-details.p1=We can''t create your account until we have your:
+hts.incorrect-details.listOne1=first name
+hts.incorrect-details.listOne2=last name
+hts.incorrect-details.listOne3=date of birth
+hts.incorrect-details.listOne4=address
+hts.incorrect-details.h2=What happens next?
+hts.incorrect-details.listTwo1=You''ll need to <a href={0} target="_blank">fill in the form (it will open in a new window)</a> on the HM Revenue & Customs website.
+hts.incorrect-details.listTwo2=You''ll need to wait until we''ve updated your details in our system.
+hts.incorrect-details.listTwo3=You can then apply for a Help to Save account again.
+hts.incorrect-details.exit-button=Back
 hts.privacy.h1=Help to Save privacy statement
 hts.privacy.p1=This document sets out how we will use your information to deliver the Help to Save scheme.
 hts.privacy.p2=HM Revenue and Customs (HMRC) is a Data Controller under the Data Protection Act 1998. We will collect and use your personal information to check your eligibility for Help to Save and to make sure that you get any government bonus that your Help to Save account entitles you to.

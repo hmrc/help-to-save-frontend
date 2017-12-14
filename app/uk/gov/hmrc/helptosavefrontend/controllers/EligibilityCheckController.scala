@@ -59,10 +59,12 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           getEligibilityActionResult()
         } { session ⇒
           // there is a session
-          session.eligibilityCheckResult.fold(
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), // user is not eligible
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url) // user is eligible
-          )
+          session.eligibilityCheckResult.fold(getEligibilityActionResult()){
+            _.fold(
+              _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), // user is not eligible
+              _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url) // user is eligible
+            )
+          }
         }
     }, { _ ⇒
       // if there is an error checking the enrolment, do the eligibility checks
@@ -73,10 +75,10 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
 
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
-      checkSession {
+      checkHasDoneEligibilityChecks {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } {
-        _.eligibilityCheckResult.fold(
+        _.eligibilityResult.fold(
           { ineligibleReason ⇒
             val ineligibilityType = IneligibilityType.fromIneligible(ineligibleReason)
             if (ineligibilityType === IneligibilityType.Unknown) {
@@ -94,10 +96,10 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
 
   val getIsEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
-      checkSession {
+      checkHasDoneEligibilityChecks {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } {
-        _.eligibilityCheckResult.fold(
+        _.eligibilityResult.fold(
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
           userInfo ⇒ Ok(views.html.register.you_are_eligible(userInfo))
         )
@@ -106,10 +108,10 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
   }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
 
   val youAreEligibleSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkSession {
+    checkHasDoneEligibilityChecks {
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     } {
-      _.eligibilityCheckResult.fold(
+      _.eligibilityResult.fold(
         _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
         { userInfo ⇒
           val url = userInfo.email.fold(
@@ -156,7 +158,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           _ ⇒ Some(Right(userInfo)),
           ineligible ⇒ Some(Left(Ineligible(ineligible))),
           _ ⇒ None)
-        result.map(r ⇒ HTSSession(r, None, None))
+        result.map(r ⇒ HTSSession(Some(r), None, None))
       }
       _ ← session.map(sessionCacheConnector.put).traverse[Result, CacheMap](identity)
     } yield eligible

@@ -24,6 +24,7 @@ import hts.driver.Driver
 import hts.utils.ScenarioContext
 import org.openqa.selenium.{OutputType, TakesScreenshot, WebDriver, WebDriverException}
 import org.scalatest.Matchers
+import scala.annotation.tailrec
 
 private[steps] trait Steps extends ScalaDsl with EN with Matchers {
 
@@ -55,6 +56,14 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
             try {
               val screenshot = driver.getScreenshotAs(OutputType.BYTES)
               scenario.embed(screenshot, "image/png")
+
+              val failurePageUrl = driver.getCurrentUrl()
+              driver.navigate().back()
+
+              val _ = evaluateWhen(() ⇒ driver.getCurrentUrl() == failurePageUrl, 10){
+                val screenshotPreviousPage = driver.getScreenshotAs(OutputType.BYTES)
+                scenario.embed(screenshotPreviousPage, "image/png")
+              }
             } catch {
               case e: WebDriverException ⇒ System.err.println(s"Error creating screenshot: ${e.getMessage}")
             }
@@ -65,6 +74,21 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
       _driver.foreach(_.quit())
       _driver = None
   }
+
+  @tailrec
+  private def evaluateWhen[A](p: () ⇒ Boolean, maxIterations: Int)(whenTrue: ⇒ A): Option[A] = {
+    if (maxIterations < 0) {
+      if (p()) {
+        Some(whenTrue)
+      } else {
+        Thread.sleep(200L)
+        evaluateWhen(p, maxIterations - 1)(whenTrue)
+      }
+    } else {
+      None
+    }
+  }
+
 }
 
 private[steps] object Steps {
