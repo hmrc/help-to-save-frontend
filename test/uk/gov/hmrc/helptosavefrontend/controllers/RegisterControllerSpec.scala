@@ -59,7 +59,7 @@ class RegisterControllerSpec
   val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
   implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
-  val controller: RegisterController = new RegisterController(
+  def newController(earlyCapCheck: Boolean): RegisterController = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     mockSessionCacheConnector,
@@ -69,25 +69,13 @@ class RegisterControllerSpec
     mockAuditor,
     fakeApplication,
     mockPagerDuty,
-    Configuration("enable-early-cap-check" → false))(
+    Configuration("enable-early-cap-check" → earlyCapCheck))(
     crypto, mockEmailValidation, transformer) {
     override lazy val authConnector = mockAuthConnector
   }
 
-  val trueEarlyCapController: RegisterController = new RegisterController(
-    fakeApplication.injector.instanceOf[MessagesApi],
-    mockHelpToSaveService,
-    mockSessionCacheConnector,
-    frontendAuthConnector,
-    jsonSchemaValidationService,
-    mockMetrics,
-    mockAuditor,
-    fakeApplication,
-    mockPagerDuty,
-    Configuration("enable-early-cap-check" → true))(
-    crypto, mockEmailValidation, transformer) {
-    override lazy val authConnector = mockAuthConnector
-  }
+  val controller: RegisterController = newController(false)
+  val trueEarlyCapController: RegisterController = newController(true)
 
   def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess())): Unit =
     (mockHelpToSaveService.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))

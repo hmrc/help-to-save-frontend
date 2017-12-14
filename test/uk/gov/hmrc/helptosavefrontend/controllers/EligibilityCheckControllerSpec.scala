@@ -54,23 +54,17 @@ class EligibilityCheckControllerSpec
 
   val mockAuditor = mock[HTSAuditor]
 
-  lazy val controller = new EligibilityCheckController(
+  def newController(earlyCapCheck: Boolean): EligibilityCheckController = new EligibilityCheckController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     mockSessionCacheConnector,
     mockAuditor,
     mockAuthConnector,
     mockMetrics,
-    Configuration("enable-early-cap-check" → false))
+    Configuration("enable-early-cap-check" → earlyCapCheck))
 
-  lazy val trueEarlyCapController = new EligibilityCheckController(
-    fakeApplication.injector.instanceOf[MessagesApi],
-    mockHelpToSaveService,
-    mockSessionCacheConnector,
-    mockAuditor,
-    mockAuthConnector,
-    mockMetrics,
-    Configuration("enable-early-cap-check" → true))
+  val controller = newController(false)
+  val trueEarlyCapController = newController(true)
 
   val mockAppConfig: AppConfig = mock[AppConfig]
 
