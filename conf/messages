@@ -316,6 +316,7 @@ hts.give-email.page-title=Which email address do you want to use for Help to Sav
 hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
 
+hts.email-verification.page-title=Change your email address
 hts.email-verification.title=Change your email address
 hts.email-verification.intro=Once you''ve entered a new email address, we''ll send you an email so you can verify it.
 hts.email-verification.note=The email addresses you use for other government services will not change.
