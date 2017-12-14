@@ -16,7 +16,7 @@
 
 package hts.pages
 
-import hts.utils.Configuration
+import hts.utils.{Configuration, Helpers}
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, Keys, WebDriver}
 import org.scalatest.{Assertions, Matchers}
@@ -75,7 +75,7 @@ trait Page extends Matchers
     // println("Actual page title: " + pageTitle)
     // println("Expected page heading: " + expectedPageHeader)
     // println("Actual page heading: " + pageHeading)
-    expectedUrl shouldBe currentUrl
+    Helpers.isActualUrlExpectedUrl(expectedUrl) shouldBe true
     expectedPageTitle shouldBe pageTitle
     expectedPageHeader shouldBe pageHeading
   }
