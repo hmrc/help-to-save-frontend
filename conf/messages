@@ -398,6 +398,8 @@ hts.incorrect-details.listTwo1=You''ll need to <a href={0} target="_blank">fill 
 hts.incorrect-details.listTwo2=You''ll need to wait until we''ve updated your details in our system.
 hts.incorrect-details.listTwo3=You can then apply for a Help to Save account again.
 hts.incorrect-details.exit-button=Back
+
+hts.privacy.page-title=Help to Save privacy statement
 hts.privacy.h1=Help to Save privacy statement
 hts.privacy.p1=This document sets out how we will use your information to deliver the Help to Save scheme.
 hts.privacy.p2=HM Revenue and Customs (HMRC) is a Data Controller under the Data Protection Act 1998. We will collect and use your personal information to check your eligibility for Help to Save and to make sure that you get any government bonus that your Help to Save account entitles you to.
@@ -417,9 +419,9 @@ hts.privacy.ul2.li2=protection of public funds
 hts.privacy.h2-1=HMRC staff handling your information
 hts.privacy.p10=HMRC''s staff are trained in handling information and understand how important it is to protect personal and other sensitive information.
 hts.privacy.h2-2=Seeing what information we hold
-hts.privacy.p11.1=You can ask to see the personal information HMRC holds about you. To help locate the information you want and deal with your request more quickly, you should make your Data Protection Act request to the HMRC office that you''ve been dealing with. You should address your request to the ''Data Protection Officer''. 
-hts.privacy.p11.link-text=You can get more information on HMRC''s privacy policy
-hts.privacy.p11.2=on the GOV.UK website.
+hts.privacy.p11.1=You can ask to see the personal information HMRC holds about you. To help locate the information you want and deal with your request more quickly, you should make your Data Protection Act request to the HMRC office that you''ve been dealing with. You should address your request to the ''Data Protection Officer''. You can get more information on
+hts.privacy.p11.link-text=HMRC''s privacy policy
+hts.privacy.p11.2=(it will open in a new window) on the GOV.UK website.
 
 footer.links.privacy_policy.url=/help-to-save/privacy-statement
 global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
