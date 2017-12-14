@@ -57,7 +57,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
   val earlyCapCheckOn: Boolean = configuration.underlying.getBoolean("enable-early-cap-check")
 
   def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    def f =
+    def determineEligibility =
         checkSession {
           // there is no session yet
           getEligibilityActionResult()
@@ -72,8 +72,8 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     checkIfAlreadyEnrolled(
       () ⇒ if (earlyCapCheckOn) {
         logger.info(s"Checking pre-eligibility cap for nino: " + htsContext.nino)
-        checkIfAccountCreateAllowed(f)
-      } else f,
+        checkIfAccountCreateAllowed(determineEligibility)
+      } else determineEligibility,
       { _ ⇒
         // if there is an error checking the enrolment, do the eligibility checks
         if (earlyCapCheckOn) {

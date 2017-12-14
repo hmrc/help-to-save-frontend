@@ -145,7 +145,6 @@ class EligibilityCheckControllerSpec
 
         val result = getIsNotEligible()
         status(result) shouldBe OK
-
         contentAsString(result) should include("not eligible")
       }
 
@@ -284,7 +283,6 @@ class EligibilityCheckControllerSpec
             }
 
             val result = doCheckEligibilityRequest()
-
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
           }
@@ -297,7 +295,6 @@ class EligibilityCheckControllerSpec
               mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
             }
             val result = doCheckEligibilityRequest()
-
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
           }
@@ -332,7 +329,6 @@ class EligibilityCheckControllerSpec
 
             val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
             val result = Await.result(responseFuture, 5.seconds)
-
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
           }
@@ -351,7 +347,6 @@ class EligibilityCheckControllerSpec
 
               val result = doCheckEligibilityRequest()
               status(result) shouldBe Status.SEE_OTHER
-
               redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
             }
 
@@ -380,13 +375,11 @@ class EligibilityCheckControllerSpec
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockAccountCreationAllowed(Right(userCapResponse))
               mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
-
             }
 
             val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
-
           }
 
         "show the getTotalCapReachedPage when the enable-early-cap-check config is set to true " +
