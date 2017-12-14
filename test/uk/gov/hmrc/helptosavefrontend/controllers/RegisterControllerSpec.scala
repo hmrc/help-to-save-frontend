@@ -228,16 +228,29 @@ class RegisterControllerSpec
 
       }
 
-      "redirect to verify email if the form does contains a valid email" in {
+      "write the email to session cache redirect to verify email if the form does contains a valid email" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo.copy(email = None))), None, None))))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo.copy(email = None))), None, Some(email)))(Right(()))
         }
 
         val result = doRequest(email)
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
+      }
+
+      "show an error page if the form does contains a valid email but the write to session cache fails" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo.copy(email = None))), None, None))))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo.copy(email = None))), None, Some(email)))(Left(""))
+        }
+
+        val result = doRequest(email)
+        checkIsTechnicalErrorPage(result)
       }
 
     }
