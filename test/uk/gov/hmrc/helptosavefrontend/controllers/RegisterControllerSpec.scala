@@ -22,6 +22,7 @@ import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import play.api.Configuration
 import play.api.http.Status
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{JsValue, Json}
@@ -67,7 +68,8 @@ class RegisterControllerSpec
     mockMetrics,
     mockAuditor,
     fakeApplication,
-    mockPagerDuty)(
+    mockPagerDuty,
+    Configuration())(
     crypto, mockEmailValidation, transformer) {
     override lazy val authConnector = mockAuthConnector
   }
