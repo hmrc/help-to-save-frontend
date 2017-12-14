@@ -61,4 +61,4 @@ GET        /account-home/email-verified-callback            @uk.gov.hmrc.helptos
 GET        /account-home/email-verified                     @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailVerified
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
-GET        /privacy                                         @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.showPrivacyPage
+GET        /privacy-statement                                       @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.showPrivacyPage
