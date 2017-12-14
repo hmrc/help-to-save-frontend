@@ -192,11 +192,11 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
               case JSONSchemaValidationError(e) ⇒
                 logger.warn(s"user info failed validation for creating account: $e", nino)
                 pagerDutyAlerting.alert("JSON schema validation failed")
-                internalServerError()
+                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
 
               case BackendError(e) ⇒
                 logger.warn(s"Error while trying to create account: $e", nino)
-                internalServerError()
+                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             }, { _ ⇒
               logger.info("Successfully created account", nino)
 
@@ -221,6 +221,18 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.createAccountHelpToSave().url)
+
+  def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { () ⇒
+      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
+        eligibleWithEmail.confirmedEmail.fold[Future[Result]](
+          SeeOther(routes.RegisterController.getSelectEmailPage().url))(
+            _ ⇒ Ok(views.html.register.create_account_error()))
+      }{ _ ⇒
+        SeeOther(routes.RegisterController.getGiveEmailPage().url)
+      }
+    }
+  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountHelpToSavePage().url)
 
   private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Result)(implicit hc: HeaderCarrier) = {
     helpToSaveService.isAccountCreationAllowed().fold(

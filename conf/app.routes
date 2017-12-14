@@ -39,6 +39,8 @@ POST       /email-updated                                   @uk.gov.hmrc.helptos
 GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
 POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
 
+GET        /error-no-account                                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
+
 GET        /try-again-tomorrow                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /try-again-later-in-year                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
 GET        /service-unavailable                             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceUnavailablePage
@@ -61,4 +63,5 @@ GET        /account-home/email-verified-callback            @uk.gov.hmrc.helptos
 GET        /account-home/email-verified                     @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailVerified
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
-GET        /privacy-statement                                       @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.showPrivacyPage
+
+GET        /privacy-statement                               @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.showPrivacyPage
