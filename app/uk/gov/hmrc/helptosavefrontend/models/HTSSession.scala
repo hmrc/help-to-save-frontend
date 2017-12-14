@@ -30,7 +30,10 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
  * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
  *                               if they haven't
  */
-case class HTSSession(eligibilityCheckResult: Either[Ineligible, UserInfo], confirmedEmail: Option[Email], pendingEmail: Option[Email])
+case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, UserInfo]],
+                      confirmedEmail:         Option[Email],
+                      pendingEmail:           Option[Email]
+)
 
 object HTSSession {
 

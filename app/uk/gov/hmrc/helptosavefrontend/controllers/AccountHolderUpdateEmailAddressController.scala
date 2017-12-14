@@ -75,7 +75,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
               BadRequest(views.html.email.update_email_address(formWithErrors))
             },
             (details: UpdateEmail) ⇒
-              sessionCacheConnector.put(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), None, Some(details.email)))
+              sessionCacheConnector.put(HTSSession(None, None, Some(details.email)))
                 .semiflatMap(_ ⇒
                   sendEmailVerificationRequest(
                     details.email,
@@ -155,7 +155,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
             _ ← nSIConnector.updateEmail(NSIUserInfo(userInfo, emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
             _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap(UpdateEmailError.EmailMongoError)
-            _ ← sessionCacheConnector.put(HTSSession(Left(Ineligible(dummyEligibilityCheckResponse)), Some(emailVerificationParams.email), None))
+            _ ← sessionCacheConnector.put(HTSSession(None, Some(emailVerificationParams.email), None))
               .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
           } yield ()
 
@@ -242,8 +242,6 @@ object AccountHolderUpdateEmailAddressController {
     case class SessionCacheError(message: String) extends UpdateEmailError
 
   }
-
-  private[controllers] val dummyEligibilityCheckResponse: EligibilityCheckResponse = EligibilityCheckResponse("", -1, "", -1)
 
 }
 
