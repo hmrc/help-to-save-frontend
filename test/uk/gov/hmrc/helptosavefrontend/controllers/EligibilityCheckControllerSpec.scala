@@ -382,7 +382,7 @@ class EligibilityCheckControllerSpec
             redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
           }
 
-        "show the getTotalCapReachedPage when the enable-early-cap-check config is set to true " +
+        "show the TotalCapReached page when the enable-early-cap-check config is set to true " +
           "and the total cap has been reached" in {
             val userCapResponse = new UserCapResponse(true, true, false, false)
 
@@ -397,7 +397,7 @@ class EligibilityCheckControllerSpec
             redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage().url)
           }
 
-        "show the getDailyCapReachedPage when the enable-early-cap-check config is set to true " +
+        "show the DailyCapReached page when the enable-early-cap-check config is set to true " +
           "and the total cap has been reached" in {
             val userCapResponse = new UserCapResponse(true, false, false, false)
 
@@ -412,7 +412,22 @@ class EligibilityCheckControllerSpec
             redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
           }
 
-        "show the getIsEligible page when the enable-early-cap-check config is set to false" +
+        "show the DailyCapReached page when the enable-early-cap-check is set to true and " +
+          "the total cap has been reached and the user tries to hit the eligible URL" in {
+            val userCapResponse = new UserCapResponse(true, false, false, false)
+
+            inSequence {
+              mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+            }
+
+            val result = trueEarlyCapController.getIsEligible(fakeRequestWithCSRFToken)
+            status(result) shouldBe Status.SEE_OTHER
+            redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
+          }
+
+        "show the IsEligible page when the enable-early-cap-check config is set to false " +
           "and neither cap has been reached" in {
             val userCapResponse = new UserCapResponse(false, false, false, false)
 
