@@ -79,11 +79,19 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks { _ ⇒
           SeeOther(routes.RegisterController.getSelectEmailPage().url)
-        }{ _ ⇒
-          GiveEmailForm.giveEmailForm.bindFromRequest().fold[Result](
+        }{ eligible ⇒
+          GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
             withErrors ⇒ Ok(views.html.register.give_email(withErrors)),
-            form ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
-          )
+            form ⇒
+              sessionCacheConnector.put(HTSSession(Some(Right(eligible.userInfo)), None, Some(form.email), None, None))
+                .value.flatMap(
+                  _.fold(
+                    { e ⇒
+                      logger.warn(s"Could not update session cache: $e", eligible.userInfo.nino)
+                      internalServerError()
+                    }, _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
+                  )
+                ))
         }
       }
     }(redirectOnLoginURL = routes.RegisterController.giveEmailSubmit().url)

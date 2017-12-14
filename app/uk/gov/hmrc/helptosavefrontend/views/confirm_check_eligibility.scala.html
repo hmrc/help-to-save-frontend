@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
@@ -33,10 +33,9 @@
 
     <p>@Messages("hts.no-account.p2")</p>
 
-
-    <a href=@routes.EligibilityCheckController.getCheckEligibility()
-    id="continue"
-    class="button">@Messages("hts.no-account.continue_button")</a>
+    @helpers.form(routes.EligibilityCheckController.getCheckEligibility()){
+        <button id="continue" type="submit">@Messages("hts.no-account.continue_button")</button>
+    }
 
     <p class="subsection--wide push--bottom">
         <a href=@routes.IntroductionController.getAboutHelpToSave().url
