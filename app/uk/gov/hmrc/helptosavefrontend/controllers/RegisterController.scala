@@ -70,9 +70,12 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         checkIfDoneEligibilityChecks{ _ ⇒
           SeeOther(routes.RegisterController.getSelectEmailPage().url)
         }{ _ ⇒
-          checkIfAccountCreateAllowed(
+          if (earlyCapCheckOn) {
             Ok(views.html.register.give_email(GiveEmailForm.giveEmailForm))
-          )
+          } else {
+            checkIfAccountCreateAllowed(
+              Ok(views.html.register.give_email(GiveEmailForm.giveEmailForm)))
+          }
         }
       }
     }(redirectOnLoginURL = routes.RegisterController.getGiveEmailPage().url)
@@ -95,8 +98,12 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-          checkIfAccountCreateAllowed(
-            Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm)))
+          if (earlyCapCheckOn) {
+            Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm))
+          } else {
+            checkIfAccountCreateAllowed(
+              Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm)))
+          }
         } { _ ⇒
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
         }

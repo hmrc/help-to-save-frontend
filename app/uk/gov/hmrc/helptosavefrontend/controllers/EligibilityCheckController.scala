@@ -73,13 +73,13 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
       () ⇒ if (earlyCapCheckOn) {
         logger.info(s"Checking pre-eligibility cap for nino: " + htsContext.nino)
         checkIfAccountCreateAllowed(determineEligibility)
-      } else determineEligibility,
+      } else { determineEligibility },
       { _ ⇒
         // if there is an error checking the enrolment, do the eligibility checks
         if (earlyCapCheckOn) {
           logger.info(s"Checking pre-eligibility cap for nino: " + htsContext.nino)
           checkIfAccountCreateAllowed(getEligibilityActionResult())
-        } else getEligibilityActionResult
+        } else { getEligibilityActionResult }
       })
   }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
 

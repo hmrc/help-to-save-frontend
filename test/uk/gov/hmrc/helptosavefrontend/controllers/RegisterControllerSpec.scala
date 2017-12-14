@@ -69,7 +69,22 @@ class RegisterControllerSpec
     mockAuditor,
     fakeApplication,
     mockPagerDuty,
-    Configuration())(
+    Configuration("enable-early-cap-check" → false))(
+    crypto, mockEmailValidation, transformer) {
+    override lazy val authConnector = mockAuthConnector
+  }
+
+  val trueEarlyCapController: RegisterController = new RegisterController(
+    fakeApplication.injector.instanceOf[MessagesApi],
+    mockHelpToSaveService,
+    mockSessionCacheConnector,
+    frontendAuthConnector,
+    jsonSchemaValidationService,
+    mockMetrics,
+    mockAuditor,
+    fakeApplication,
+    mockPagerDuty,
+    Configuration("enable-early-cap-check" → true))(
     crypto, mockEmailValidation, transformer) {
     override lazy val authConnector = mockAuthConnector
   }
@@ -147,6 +162,7 @@ class RegisterControllerSpec
     "handling getGiveEmailPage" must {
 
         def doRequest(): Future[PlayResult] = controller.getGiveEmailPage(fakeRequestWithCSRFToken)
+        def doRequestEarlyCapCheck(): Future[PlayResult] = trueEarlyCapController.getGiveEmailPage(fakeRequestWithCSRFToken)
 
       checkRedirectIfEmailInSession(doRequest())
 
@@ -203,6 +219,17 @@ class RegisterControllerSpec
         redirectLocation(result) shouldBe Some(routes.RegisterController.getServiceUnavailablePage().url)
       }
 
+      "skip the cap check at a later point if enable-early-cap-check is set to true" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
+        }
+
+        val result = doRequestEarlyCapCheck()
+        status(result) shouldBe Status.OK
+      }
+
     }
 
     "handling giveEmailSubmit" must {
@@ -247,6 +274,7 @@ class RegisterControllerSpec
     "handling getSelectEmailPage" must {
 
         def doRequest(): Future[PlayResult] = controller.getSelectEmailPage(fakeRequestWithCSRFToken)
+        def doRequestEarlyCapCheck(): Future[PlayResult] = trueEarlyCapController.getSelectEmailPage(fakeRequestWithCSRFToken)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
@@ -277,6 +305,18 @@ class RegisterControllerSpec
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
       }
+
+      "skip the cap check at a later point if enable-early-cap-check is set to true" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = Some("test@user.com"))), None, None))))
+        }
+
+        val result = doRequestEarlyCapCheck()
+        status(result) shouldBe Status.OK
+      }
+
     }
 
     "handling getselectEmailSubmit" must {
