@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessa
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
