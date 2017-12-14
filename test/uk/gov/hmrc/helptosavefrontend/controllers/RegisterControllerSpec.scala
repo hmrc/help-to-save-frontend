@@ -651,7 +651,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), Some(confirmedEmail)))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), Some(confirmedEmail), None))))
           }
 
           val result = doRequest()
