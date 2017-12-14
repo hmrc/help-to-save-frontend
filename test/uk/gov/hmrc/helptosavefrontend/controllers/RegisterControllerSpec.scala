@@ -445,7 +445,7 @@ class RegisterControllerSpec
 
         val result = controller.getDetailsAreIncorrect(FakeRequest())
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("nothing you can do")
+        contentAsString(result) should include("We need your correct details")
       }
     }
 
