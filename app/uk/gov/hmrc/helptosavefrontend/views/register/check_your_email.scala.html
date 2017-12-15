@@ -34,14 +34,12 @@
     <p class="content">@messages("hts.email-verification.check-your-email.where-used")</p>
 
     @helpers.form(routes.NewApplicantUpdateEmailAddressController.verifyEmail){
-        <button id="resend-verification" type="submit">@messages("hts.email-verification.check-your-email.resend-email")</button>
+        <button id="resend-verification" class="subsection--wide" type="submit">@messages("hts.email-verification.check-your-email.resend-email")</button>
     }
 
     @defining(
         oldEmail.fold(routes.RegisterController.getGiveEmailPage)(_ => routes.RegisterController.getSelectEmailPage)
     ){ call =>
-        <p class="content subsection--wide push--bottom">
-            <a href=@call class="font-xsmall">@messages("hts.email-verification.check-your-email.change-email-address")</a>
-        </p>
+        <a href=@call class="font-xsmall">@messages("hts.email-verification.check-your-email.change-email-address")</a>
     }
 }
