@@ -22,6 +22,7 @@ import cats.instances.option._
 import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.Inject
+import play.api.Configuration
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result ⇒ PlayResult}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -48,12 +49,15 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
                                             val sessionCacheConnector: SessionCacheConnector,
                                             auditor:                   HTSAuditor,
                                             frontendAuthConnector:     FrontendAuthConnector,
-                                            metrics:                   Metrics)(implicit transformer: NINOLogMessageTransformer)
-  extends HelpToSaveAuth(frontendAuthConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging with AppName {
+                                            metrics:                   Metrics,
+                                            configuration:             Configuration)(implicit transformer: NINOLogMessageTransformer)
+  extends HelpToSaveAuth(frontendAuthConnector, metrics)
+  with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging with AppName {
+
+  val earlyCapCheckOn: Boolean = configuration.underlying.getBoolean("enable-early-cap-check")
 
   def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled({
-      () ⇒
+    def determineEligibility =
         checkSession {
           // there is no session yet
           getEligibilityActionResult()
@@ -66,11 +70,19 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
             )
           }
         }
-    }, { _ ⇒
-      // if there is an error checking the enrolment, do the eligibility checks
-      getEligibilityActionResult()
-    }
-    )
+
+    checkIfAlreadyEnrolled(
+      () ⇒ if (earlyCapCheckOn) {
+        logger.info("Checking pre-eligibility cap for nino", htsContext.nino)
+        checkIfAccountCreateAllowed(determineEligibility)
+      } else { determineEligibility },
+      { _ ⇒
+        // if there is an error checking the enrolment, do the eligibility checks
+        if (earlyCapCheckOn) {
+          logger.info("Checking pre-eligibility cap for nino", htsContext.nino)
+          checkIfAccountCreateAllowed(getEligibilityActionResult())
+        } else { getEligibilityActionResult }
+      })
   }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

@@ -22,7 +22,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.Inject
-import play.api.Application
+import play.api.{Application, Configuration}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessa
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -53,13 +53,16 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                                     metrics:                     Metrics,
                                     auditor:                     HTSAuditor,
                                     app:                         Application,
-                                    pagerDutyAlerting:           PagerDutyAlerting
+                                    pagerDutyAlerting:           PagerDutyAlerting,
+                                    configuration:               Configuration
 )(implicit crypto: Crypto, emailValidation: EmailValidation, transformer: NINOLogMessageTransformer)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
-  with EnrolmentCheckBehaviour with SessionBehaviour with I18nSupport with Logging {
+  with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging {
 
   import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.CreateAccountError
   import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.CreateAccountError._
+
+  val earlyCapCheckOn: Boolean = configuration.underlying.getBoolean("enable-early-cap-check")
 
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -67,9 +70,12 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
         checkIfDoneEligibilityChecks{ _ ⇒
           SeeOther(routes.RegisterController.getSelectEmailPage().url)
         }{ _ ⇒
-          checkIfAccountCreateAllowed(
+          if (earlyCapCheckOn) {
             Ok(views.html.register.give_email(GiveEmailForm.giveEmailForm))
-          )
+          } else {
+            checkIfAccountCreateAllowed(
+              Ok(views.html.register.give_email(GiveEmailForm.giveEmailForm)))
+          }
         }
       }
     }(redirectOnLoginURL = routes.RegisterController.getGiveEmailPage().url)
@@ -100,8 +106,12 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-          checkIfAccountCreateAllowed(
-            Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm)))
+          if (earlyCapCheckOn) {
+            Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm))
+          } else {
+            checkIfAccountCreateAllowed(
+              Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm)))
+          }
         } { _ ⇒
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
         }
@@ -241,25 +251,6 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountHelpToSavePage().url)
-
-  private def checkIfAccountCreateAllowed(ifAllowed: ⇒ Result)(implicit hc: HeaderCarrier) = {
-    helpToSaveService.isAccountCreationAllowed().fold(
-      error ⇒ {
-        logger.warn(s"Could not check if account create is allowed, due to: $error")
-        ifAllowed
-      }, { userCapResponse ⇒
-        if (userCapResponse.isTotalCapDisabled && userCapResponse.isDailyCapDisabled) {
-          SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
-        } else if (userCapResponse.isTotalCapDisabled || userCapResponse.isTotalCapReached) {
-          SeeOther(routes.RegisterController.getTotalCapReachedPage().url)
-        } else if (userCapResponse.isDailyCapDisabled || userCapResponse.isDailyCapReached) {
-          SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
-        } else {
-          ifAllowed
-        }
-      }
-    )
-  }
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
