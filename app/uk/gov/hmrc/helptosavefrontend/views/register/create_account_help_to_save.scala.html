@@ -24,22 +24,15 @@
         <span class="pre-heading">@Messages("hts.register.create_account_help_to_save.step")</span>
         @Messages("hts.register.create_account_help_to_save.header-page")
     </h1>
-    <p>
-    @Messages("hts.register.create_account_help_to_save.par-1") <p>
+    <p>@Messages("hts.register.create_account_help_to_save.par-1")<p>
+    <p>@Messages("hts.register.create_account_help_to_save.par-2")<p>
     <ul class="list list-bullet">
-        <li>
-        @Messages("hts.register.create_account_help_to_save.bullet-1")
-        </li>
-        <li>
-        @Messages("hts.register.create_account_help_to_save.bullet-2")
-        </li>
-        <li>
-            @Messages("hts.register.create_account_help_to_save.bullet-3")
-        </li>
-        <li>
-            @Messages("hts.register.create_account_help_to_save.bullet-4")
-        </li>
+        <li>@Messages("hts.register.create_account_help_to_save.bullet-1")</li>
+        <li>@Messages("hts.register.create_account_help_to_save.bullet-2")</li>
     </ul>
+    <div class="panel panel-border-wide">
+        <p>@Messages("hts.register.create_account_help_to_save.par-3")</p>
+    </div>
     <div class="form-field form-field--submit">
         @form(routes.RegisterController.createAccountHelpToSave)(
             Html(s"""<button id="accept-and-create-account"
