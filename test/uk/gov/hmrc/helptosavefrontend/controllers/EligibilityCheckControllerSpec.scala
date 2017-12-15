@@ -392,7 +392,7 @@ class EligibilityCheckControllerSpec
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockAccountCreationAllowed(Right(userCapResponse))
-              mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
             }
 
             val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
@@ -437,7 +437,7 @@ class EligibilityCheckControllerSpec
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo), None, None))))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
             }
 
             val result = controller.getCheckEligibility(FakeRequest())

@@ -211,7 +211,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = None)), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo.copy(email = None))), None, None))))
         }
 
         val result = doRequestEarlyCapCheck()
@@ -311,7 +311,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Right(validUserInfo.copy(email = Some("test@user.com"))), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo.copy(email = Some("test@user.com")))), None, None))))
         }
 
         val result = doRequestEarlyCapCheck()
