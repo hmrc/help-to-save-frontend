@@ -21,14 +21,11 @@ import org.openqa.selenium.WebDriver
 
 object YouDoNotHaveAnAccountPage extends Page {
 
-  override val expectedUrl: String = s"${Configuration.host}/help-to-save/access-account"
+  override val expectedUrl: String = s"${Configuration.host}/help-to-save/no-account"
 
-  override val expectedPageTitle: String = "TBD"
+  override val expectedPageTitle: String = "You don't have an account - Help to Save - GOV.UK"
 
-  override val expectedPageHeader: String = "TBD"
-
-  //TODO This page is still under construction
-  val pageTitle: String = "\uD83D\uDE1E You don't have an account \uD83D\uDE22"
+  override val expectedPageHeader: String = "You don't have an account"
 
   def clickCheckEligibility()(implicit driver: WebDriver): Unit = click on "continue"
 

@@ -19,10 +19,10 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.no-account.page-title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.privacy.page-title")) {
 
 
-  <h1 class="heading-xlarge">
+  <h1 class="heading-large">
     @messages("hts.privacy.h1")
 
   </h1>
@@ -56,6 +56,6 @@
   <p>@messages("hts.privacy.p10")</p>
 
   <h2>@messages("hts.privacy.h2-2")</h2>
-  <p>@messages("hts.privacy.p11")</p>
+  <p>@messages("hts.privacy.p11.1") <a href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" target="_blank">@messages("hts.privacy.p11.link-text")</a> @messages("hts.privacy.p11.2")</p>
 
 }

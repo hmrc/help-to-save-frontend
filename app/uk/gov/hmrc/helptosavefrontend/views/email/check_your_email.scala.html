@@ -25,7 +25,7 @@
     sidebarLinks = None,
     bodyClasses = None) {
 
-    <h1 class="heading-xlarge">@messages("hts.email-verification.existing-user.check-your-email.title")</h1>
+    <h1 class="heading-large">@messages("hts.email-verification.existing-user.check-your-email.title")</h1>
     <p class="lede">@messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail")<br />@email</p>
     <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.what-next")</h2>
     <p class="content">@messages("hts.email-verification.existing-user.check-your-email.content1")</p>
@@ -33,7 +33,7 @@
     <p class="content">@messages("hts.email-verification.check-your-email.content3")</p>
     <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.where-used-heading")</h2>
     <p class="content">@messages("hts.email-verification.existing-user.check-your-email.where-used")</p>
-    <p><a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
+    <p class="subsection--wide push--bottom"><a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
 
     @{
         helpers.form(routes.AccountHolderUpdateEmailAddressController.onSubmit())(
@@ -41,7 +41,7 @@
                 s"""
              |<input type="hidden" name="new-email-address" value="$email">
              |<p>
-             |${helpers.submit('_buttonClass -> "button button--link", 'id → "resend-verification")(Html(messages("hts.email-verification.check-your-email.resend-email")))}
+             |${helpers.submit('_buttonClass -> "button button--link soft--sides", 'id → "resend-verification")(Html(messages("hts.email-verification.check-your-email.resend-email")))}
              |</p>
              |""".stripMargin
             )

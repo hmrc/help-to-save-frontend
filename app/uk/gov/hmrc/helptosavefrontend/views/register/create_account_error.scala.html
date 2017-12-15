@@ -14,21 +14,16 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.insufficient_evidence.page-title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.account-creation-error.page-title"), bodyClasses = None) {
 
-    <h1 class="heading-large">@Messages("hts.iv.insufficient_evidence.title")</h1>
-    <p>@Messages("hts.iv.insufficient_evidence.p1")</p>
-    <p>
-        @Messages("hts.iv.insufficient_evidence.telephone-title")
-        <br />
-        <span class="bold">@Messages("hts.iv.insufficient_evidence.telephone-number")</span>
-    </p>
-    <section class="subsection">
-        <h2>@Messages("hts.iv.insufficient_evidence.h2")</h2>
-        <p>@Messages("hts.iv.insufficient_evidence.p2")</p>
-    </section>
+  <h1 class="heading-large">@Messages("hts.account-creation-error.title")</h1>
+  <p>@Messages("hts.account-creation-error.p1")</p>
+  <p>@Messages("hts.account-creation-error.p2")</p>
+  <a href="@routes.IntroductionController.getAboutHelpToSave().url">@Messages("hts.account-creation-error.exit-button")</a>
+
 }

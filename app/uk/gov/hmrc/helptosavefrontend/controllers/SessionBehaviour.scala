@@ -17,10 +17,13 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import uk.gov.hmrc.helptosavefrontend.controllers.SessionBehaviour.SessionWithEligibilityCheck
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -45,5 +48,24 @@ trait SessionBehaviour {
     ).flatMap(identity)
 
   }
+
+  def checkHasDoneEligibilityChecks(noSession: ⇒ Future[Result])(hasDoneChecks: SessionWithEligibilityCheck ⇒ Future[Result])(
+      implicit
+      htsContext:  HtsContextWithNINO,
+      hc:          HeaderCarrier,
+      request:     Request[AnyContent],
+      transformer: NINOLogMessageTransformer): Future[Result] =
+    checkSession(noSession){ session ⇒
+      session.eligibilityCheckResult.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(
+        result ⇒ hasDoneChecks(SessionWithEligibilityCheck(result, session.pendingEmail, session.confirmedEmail)))
+    }
+
+}
+
+object SessionBehaviour {
+
+  case class SessionWithEligibilityCheck(eligibilityResult: Either[Ineligible, UserInfo],
+                                         pendingEmail:      Option[Email],
+                                         confirmedEmail:    Option[Email])
 
 }

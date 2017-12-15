@@ -85,11 +85,19 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks { _ ⇒
           SeeOther(routes.RegisterController.getSelectEmailPage().url)
-        }{ _ ⇒
-          GiveEmailForm.giveEmailForm.bindFromRequest().fold[Result](
+        }{ eligible ⇒
+          GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
             withErrors ⇒ Ok(views.html.register.give_email(withErrors)),
-            form ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
-          )
+            form ⇒
+              sessionCacheConnector.put(HTSSession(Some(Right(eligible.userInfo)), None, Some(form.email), None, None))
+                .value.flatMap(
+                  _.fold(
+                    { e ⇒
+                      logger.warn(s"Could not update session cache: $e", eligible.userInfo.nino)
+                      internalServerError()
+                    }, _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
+                  )
+                ))
         }
       }
     }(redirectOnLoginURL = routes.RegisterController.giveEmailSubmit().url)
@@ -119,7 +127,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
             _.newEmail.fold[Future[Result]](
               SeeOther(routes.RegisterController.confirmEmail(eligibleWithEmail.email).url))(
                 newEmail ⇒ {
-                  val session = new HTSSession(Right(eligibleWithEmail.userInfo), None, Some(newEmail))
+                  val session = new HTSSession(Some(Right(eligibleWithEmail.userInfo)), None, Some(newEmail))
                   sessionCacheConnector.put(session).fold(
                     e ⇒ internalServerError(),
                     _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
@@ -138,7 +146,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         val result = for {
-          _ ← sessionCacheConnector.put(HTSSession(Right(eligibleWithEmail.userInfo), Some(email), None))
+          _ ← sessionCacheConnector.put(HTSSession(Some(Right(eligibleWithEmail.userInfo)), Some(email), None))
           _ ← helpToSaveService.storeConfirmedEmail(email)
         } yield ()
 
@@ -202,11 +210,11 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
               case JSONSchemaValidationError(e) ⇒
                 logger.warn(s"user info failed validation for creating account: $e", nino)
                 pagerDutyAlerting.alert("JSON schema validation failed")
-                internalServerError()
+                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
 
               case BackendError(e) ⇒
                 logger.warn(s"Error while trying to create account: $e", nino)
-                internalServerError()
+                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             }, { _ ⇒
               logger.info("Successfully created account", nino)
 
@@ -232,6 +240,18 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     }
   }(redirectOnLoginURL = routes.RegisterController.createAccountHelpToSave().url)
 
+  def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { () ⇒
+      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
+        eligibleWithEmail.confirmedEmail.fold[Future[Result]](
+          SeeOther(routes.RegisterController.getSelectEmailPage().url))(
+            _ ⇒ Ok(views.html.register.create_account_error()))
+      }{ _ ⇒
+        SeeOther(routes.RegisterController.getGiveEmailPage().url)
+      }
+    }
+  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountHelpToSavePage().url)
+
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
    * checks yet this session and they are redirected to the 'apply now' page. If the session data indicates
@@ -249,14 +269,16 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     } {
       session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
-          // user has gone through journey already this sessions and were found to be ineligible
-          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-          userInfo ⇒
-            // user has gone through journey already this sessions and were found to be eligible
-            userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo)))(email ⇒
-              ifEligibleWithEmail(EligibleWithEmail(userInfo, email, session.confirmedEmail))
-            )
-        )
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        )(_.fold(
+            // user has gone through journey already this sessions and were found to be ineligible
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+            userInfo ⇒
+              // user has gone through journey already this sessions and were found to be eligible
+              userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo)))(email ⇒
+                ifEligibleWithEmail(EligibleWithEmail(userInfo, email, session.confirmedEmail))
+              )
+          ))
     }
 
   private def validateCreateAccountJsonSchema(userInfo: NSIUserInfo): Either[String, Unit] = {
