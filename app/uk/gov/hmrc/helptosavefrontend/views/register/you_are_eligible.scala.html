@@ -38,7 +38,7 @@
 
     <p class="subsection--wide push--bottom">@Messages("hts.register.you-are-eligible.p-3")</p>
 
-    @form(routes.EligibilityCheckController.youAreEligibleSubmit(), 'class -> "group") {
+    @form(routes.EligibilityCheckController.youAreEligibleSubmit(), 'class -> "group subsection--wide") {
         @CSRF.formField(request)
         @submit('_buttonClass -> "", 'id → "start-creating-account") {
             @Messages("hts.register.you-are-eligible.button-1")

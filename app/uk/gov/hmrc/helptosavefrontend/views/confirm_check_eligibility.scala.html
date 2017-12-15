@@ -34,10 +34,10 @@
     <p>@Messages("hts.no-account.p2")</p>
 
     @helpers.form(routes.EligibilityCheckController.getCheckEligibility()){
-        <button id="continue" type="submit">@Messages("hts.no-account.continue_button")</button>
+        <button id="continue" class="subsection--wide" type="submit">@Messages("hts.no-account.continue_button")</button>
     }
 
-    <p class="subsection--wide push--bottom">
+    <p>
         <a href=@routes.IntroductionController.getAboutHelpToSave().url
            id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a>
     </p>
