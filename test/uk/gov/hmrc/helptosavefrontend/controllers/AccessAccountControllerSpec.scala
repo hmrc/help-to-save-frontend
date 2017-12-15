@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 
 import scala.concurrent.Future
 
-class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with SessionCacheBehaviour {
+class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with SessionCacheBehaviour with CSRFSupport {
 
   lazy val controller = new AccessAccountController(
     fakeApplication.injector.instanceOf[MessagesApi],
@@ -73,12 +73,15 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
       behave like commonBehaviour(doRequest)
 
       "show the 'no account' page if the user is not enrolled" in {
+
+          def doRequestWithCSRFToken(): Result = await(controller.getNoAccountPage(fakeRequestWithCSRFToken))
+
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = doRequest()
+        val result = doRequestWithCSRFToken()
         status(result) shouldBe 200
         contentAsString(result) should include("If you want to apply for an account, you should continue")
       }

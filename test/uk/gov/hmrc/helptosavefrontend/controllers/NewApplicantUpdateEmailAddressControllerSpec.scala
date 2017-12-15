@@ -110,7 +110,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, Some(newEmail)))))
           mockEmailVerificationConn(nino, newEmail, firstName)(Right(()))
         }
-        val result = await(controller.verifyEmail(FakeRequest()))
+        val result = await(controller.verifyEmail(fakeRequestWithCSRFToken))
         status(result) shouldBe Status.OK
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title")) shouldBe true
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content2")) shouldBe true
