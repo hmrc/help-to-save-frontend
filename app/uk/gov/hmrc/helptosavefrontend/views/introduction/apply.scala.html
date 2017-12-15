@@ -46,12 +46,18 @@
         <p>@Messages("hts.introduction.apply.par-4")</p>
         @form(routes.IntroductionController.applySubmit(), 'class -> "group") {
             @submit('_buttonClass -> "button--get-started"
-              //TODO: '_data-ga-event-category -> "links" 'data-ga-event-action = "Start Now" 'data-ga-event-label= "Apply page"
+              '_data-ga-event-category -> "links"
+              'data-ga-event-action = "Start Now"
+              'data-ga-event-label= "Apply page"
+              'onclick= "ga('send', 'event', 'buttons', 'Start now', 'Apply page')"
                     ) {
                 @Messages("hts.introduction.apply.button-1")
             }
         }
-        <a href="@routes.AccessAccountController.accessAccount" data-ga-event-category = "links" data-ga-event-action = "Eligibility" data-ga-event-label= "Apply page" class="ga-track-event">@Messages("hts.introduction.apply.sign-in-link")</a>
+        <a href="@routes.AccessAccountController.accessAccount" data-ga-event-category = "links"
+           data-ga-event-action = "Eligibility"
+           data-ga-event-label= "Apply page"
+           class="ga-track-event">@Messages("hts.introduction.apply.sign-in-link")</a>
     </section>
     <a class="page-nav__link page-nav__link--previous"
     title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
