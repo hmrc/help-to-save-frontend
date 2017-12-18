@@ -39,7 +39,7 @@
           <p>@messages("hts.email-verification.note")</p>
         </div>
 
-        @helpers.submit('_buttonClass -> "", onclick="ga('send', 'event', 'buttons', 'Confirmed update', 'Update email address page')") {
+        @helpers.submit('_buttonClass -> "", '_onclick -> "ga('send', 'event', 'buttons', 'Confirmed update', 'Update email address page');") {
             @messages("hts.global.continue-button")
         }
     }
