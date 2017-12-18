@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.util.lock.Lock
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, PagerDutyAlerting}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -40,12 +40,13 @@ import scala.util.control.NonFatal
 
 // $COVERAGE-OFF$
 @Singleton
-class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
-                                          configuration: Configuration,
-                                          metrics:       Metrics,
-                                          nSIConnector:  NSIConnector,
-                                          mongo:         ReactiveMongoComponent,
-                                          lifecycle:     ApplicationLifecycle) extends Logging {
+class NSIConnectionHealthCheck @Inject() (system:            ActorSystem,
+                                          configuration:     Configuration,
+                                          metrics:           Metrics,
+                                          nSIConnector:      NSIConnector,
+                                          mongo:             ReactiveMongoComponent,
+                                          lifecycle:         ApplicationLifecycle,
+                                          pagerDutyAlerting: PagerDutyAlerting) extends Logging {
 
   val name: String = "nsi-connection"
 
@@ -59,8 +60,7 @@ class NSIConnectionHealthCheck @Inject() (system:        ActorSystem,
       configuration.underlying,
       system.scheduler,
       metrics.metrics,
-      () ⇒ (),
-      () ⇒ (),
+      () ⇒ pagerDutyAlerting.alert("NSI health check has failed"),
       NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload1),
       NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload2)
     )

@@ -30,6 +30,7 @@ import com.kenshoo.play.metrics.Metrics
 import configs.syntax._
 import com.typesafe.config.Config
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
+import uk.gov.hmrc.helptosavefrontend.util.PagerDutyAlerting
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
@@ -52,18 +53,17 @@ import scala.util.control.NonFatal
  * @param name The name of the test
  * @param config The config variables will be looked for under the namespace `health-check.{name}` where `name` is
  *               the name of the test
- * @param scheduler      The scheduler used to schedule the health tests
- * @param metrics        The metrics to be updated
- * @param pagerDutyAlert A function which will alert pager duty
- * @param runnerProps    The props of the tests to be run
+ * @param scheduler         The scheduler used to schedule the health tests
+ * @param metrics           The metrics to be updated
+ * @param pagerDutyAlert    Triggers pager duty alerts
+ * @param runnerProps       The props of the tests to be run
  */
-class HealthCheck(name:             String,
-                  config:           Config,
-                  scheduler:        Scheduler,
-                  metrics:          Metrics,
-                  pagerDutyAlert:   () ⇒ Unit,
-                  pagerDutyResolve: () ⇒ Unit,
-                  runnerProps:      NonEmptyList[Props])
+class HealthCheck(name:           String,
+                  config:         Config,
+                  scheduler:      Scheduler,
+                  metrics:        Metrics,
+                  pagerDutyAlert: () ⇒ Unit,
+                  runnerProps:    NonEmptyList[Props])
   extends Actor with ActorLogging {
 
   import uk.gov.hmrc.helptosavefrontend.health.HealthCheck._
@@ -164,7 +164,6 @@ class HealthCheck(name:             String,
   def failed(downSince: LocalDateTime, fails: Int): Receive = performTest orElse {
     case HealthCheckResult.Success(message, nanos) ⇒
       log.warning(s"$loggingPrefix - had failed since ${prettyString(downSince)} but now OK ${timeString(nanos)}. Missed-beat counter is 0. $message")
-      pagerDutyResolve()
       becomeOK()
 
     case HealthCheckResult.Failure(message, nanos) ⇒
@@ -237,12 +236,11 @@ object HealthCheck {
       scheduler:        Scheduler,
       metrics:          Metrics,
       pagerDutyAlert:   () ⇒ Unit,
-      pagerDutyResolve: () ⇒ Unit,
       runnerProps:      Props,
       otherRunnerProps: Props*): Props =
     Props(
       new HealthCheck(
-        name, config, scheduler, metrics, pagerDutyAlert, pagerDutyResolve, NonEmptyList(runnerProps, otherRunnerProps.toList))
+        name, config, scheduler, metrics, pagerDutyAlert, NonEmptyList(runnerProps, otherRunnerProps.toList))
     )
 
   case object PerformHealthCheck
