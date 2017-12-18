@@ -18,17 +18,19 @@ package uk.gov.hmrc.helptosavefrontend.forms
 
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import cats.instances.char._
 import cats.instances.string._
 import cats.syntax.cartesian._
 import cats.syntax.either._
 import cats.syntax.eq._
-
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.text
 import play.api.data.{Form, FormError}
 import play.api.data.format.Formatter
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages
+
+import scala.annotation.tailrec
 
 @Singleton
 class EmailValidation @Inject() (configuration: Configuration) {
@@ -46,18 +48,34 @@ class EmailValidation @Inject() (configuration: Configuration) {
     private def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
       if (predicate(a)) Valid(a) else invalid(ifFalse)
 
+    private def charactersBeforeAndAfterChar(c: Char)(s: String): Option[(Int, Int)] = {
+        @tailrec
+        def loop(chars: List[Char], count: Int): Option[(Int, Int)] = chars match {
+          case Nil    ⇒ None
+          case h :: t ⇒ if (h === c) { Some(count → t.length) } else { loop(t, count + 1) }
+        }
+
+      loop(s.toList, 0)
+    }
+
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
       val validation: Validated[NonEmptyList[String], String] =
         data.get(key).fold(invalid[String](ErrorMessages.blankEmailAddress)) {
           s ⇒
             val trimmed = s.trim
+            val localAndDomainLength = charactersBeforeAndAfterChar('@')(trimmed)
             val notBlankCheck = validatedFromBoolean(trimmed)(_.nonEmpty, ErrorMessages.blankEmailAddress)
             val totalLengthCheck = validatedFromBoolean(trimmed)(_.length <= emailMaxTotalLength, ErrorMessages.totalTooLong)
             val hasAtSymbolCheck = validatedFromBoolean(trimmed)(_.contains('@'), ErrorMessages.noAtSymbol)
-            val localLengthCheck = validatedFromBoolean(trimmed)(_.split("@").headOption.forall(_.length <= emailMaxLocalLength), ErrorMessages.localTooLong)
-            val domainLengthCheck = validatedFromBoolean(trimmed)(_.split("@").drop(1).mkString("").length <= emailMaxDomainLength, ErrorMessages.domainTooLong)
 
-            (notBlankCheck |@| totalLengthCheck |@| hasAtSymbolCheck |@| localLengthCheck |@| domainLengthCheck)
+            val localLengthCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._1 <= emailMaxLocalLength), ErrorMessages.localTooLong)
+            val domainLengthCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._2 <= emailMaxDomainLength), ErrorMessages.domainTooLong)
+
+            val localBlankCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._1 > 0), ErrorMessages.localTooShort)
+            val domainBlankCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._2 > 0), ErrorMessages.domainTooShort)
+
+            (notBlankCheck |@| totalLengthCheck |@| hasAtSymbolCheck |@|
+              localLengthCheck |@| domainLengthCheck |@| localBlankCheck |@| domainBlankCheck)
               .map{ case _ ⇒ s }
 
         }
@@ -81,6 +99,10 @@ object EmailValidation {
 
     val domainTooLong: String = "domain_too_long"
 
+    val localTooShort: String = "local_too_short"
+
+    val domainTooShort: String = "domain_too_short"
+
     val noAtSymbol: String = "no_@_symbol"
 
     val blankEmailAddress = "blank_email_address"
@@ -97,8 +119,14 @@ object EmailValidation {
     def emailLocalLengthTooLong(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.localTooLong)
 
+    def emailLocalLengthTooShort(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.localTooShort)
+
     def emailDomainLengthTooLong(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.domainTooLong)
+
+    def emailDomainLengthTooShort(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.domainTooShort)
 
     def emailHasNoAtSymbol(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.noAtSymbol)

@@ -20,6 +20,10 @@
 @{
     val messagesKey = if(form.emailIsBlank(key)) {
         "hts.email.error.blank"
+    } else if(form.emailLocalLengthTooShort(key)) {
+        "hts.email.error.local-too-short"
+    } else if(form.emailDomainLengthTooShort(key)) {
+        "hts.email.error.domain-too-short"
     } else if(form.emailLocalLengthTooLong(key)) {
         "hts.email.error.local-too-long"
     } else if(form.emailDomainLengthTooLong(key)) {
