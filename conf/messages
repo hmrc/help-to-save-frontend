@@ -188,7 +188,7 @@ hts.register.you-are-eligible.notification.step=Step 1 of 4
 hts.register.you-are-eligible.title=You''re eligible for a Help to Save account
 hts.register.you-are-eligible.notification.h1=We''ve checked the details we hold for you
 hts.register.you-are-eligible.p-1=You''re eligible for a Help to Save account.
-hts.register.you-are-eligible.p-3=By continuing you are confirming that these are your details and they are correct.
+hts.register.you-are-eligible.p-3=By continuing you are confirming you are eligible for a Help to Save account, and that these are your details and they are correct.
 hts.register.you-are-eligible.button-1=Confirm and continue
 hts.register.you-are-eligible.button-2=These details are not correct
 
