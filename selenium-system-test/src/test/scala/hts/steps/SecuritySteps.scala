@@ -18,6 +18,8 @@ package hts.steps
 
 import hts.browser.Browser
 import hts.pages._
+import hts.pages.identityPages._
+import hts.pages.registrationPages.{AboutPage, ApplyPage}
 import hts.utils.{Configuration, ScenarioContext}
 
 class SecuritySteps extends Steps {
@@ -95,6 +97,25 @@ class SecuritySteps extends Steps {
     AuthorityWizardPage.authenticateUserNoEmail(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO()) // scalastyle:ignore magic.number
     Browser.checkCurrentPageIs(EligiblePage)
     EligiblePage.startCreatingAccount()
+  }
+
+  Given("""^an applicant who hasn't been through identity verification is on the Apply page$"""){ () ⇒
+    AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 50, "Strong", ScenarioContext.generateEligibleNINO())
+    ApplyPage.navigate()
+  }
+
+  When("""^they go through identity verification check successfully and continue$"""){ () ⇒
+    ApplyPage.clickStartNow()
+    IdentityVerificationStubPage.selectSuccessfulJourney()
+    IdentityVerificationStubPage.submitJourney()
+    Browser.checkCurrentPageIs(IdentityVerifiedPage)
+    IdentityVerifiedPage.continue()
+  }
+
+  Then("""^they will be redirected to the eligibility check and pass it$"""){ () ⇒
+    Browser.checkCurrentPageIs(EligiblePage)
+    AboutPage.navigate()
+    Thread.sleep(10000)
   }
 
 }
