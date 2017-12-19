@@ -37,7 +37,8 @@ class NSIConnectionHealthCheckRunnerSpec extends ActorTestSupport("NSIConnection
   def newRunner(payload: Payload): ActorRef = system.actorOf(Props(new NSIConnectionHealthCheckRunner(
     nsiConnector,
     mockMetrics,
-    payload
+    payload,
+    ninoLoggingEnabled = true
   )))
 
   def mockNSIConnectorTest(expectedPayload: Payload)(result: Option[Either[String, Unit]]): Unit =

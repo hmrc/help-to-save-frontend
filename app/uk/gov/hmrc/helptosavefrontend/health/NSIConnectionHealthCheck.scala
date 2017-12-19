@@ -54,6 +54,8 @@ class NSIConnectionHealthCheck @Inject() (system:            ActorSystem,
 
   val lockDuration: FiniteDuration = configuration.underlying.get[FiniteDuration](s"health.$name.lock-duration").value
 
+  val ninoLoggingEnabled: Boolean = configuration.underlying.getBoolean("nino-logging.enabled")
+
   def newHealthCheck(): ActorRef = system.actorOf(
     HealthCheck.props(
       name,
@@ -61,8 +63,8 @@ class NSIConnectionHealthCheck @Inject() (system:            ActorSystem,
       system.scheduler,
       metrics.metrics,
       () ⇒ pagerDutyAlerting.alert("NSI health check has failed"),
-      NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload1),
-      NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload2)
+      NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload1, ninoLoggingEnabled),
+      NSIConnectionHealthCheckRunner.props(nSIConnector, metrics, Payload.Payload2, ninoLoggingEnabled)
     )
   )
 
@@ -97,13 +99,17 @@ class NSIConnectionHealthCheck @Inject() (system:            ActorSystem,
 
 object NSIConnectionHealthCheck {
 
-  class NSIConnectionHealthCheckRunner(nsiConnector: NSIConnector, metrics: Metrics, payload: Payload) extends Actor with HealthCheckRunner with Logging {
+  class NSIConnectionHealthCheckRunner(nsiConnector: NSIConnector, metrics: Metrics, payload: Payload, ninoLoggingEnabled: Boolean)
+    extends Actor with HealthCheckRunner with Logging {
 
     import context.dispatcher
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val successMessage: String = s"For NINO [${payload.value.nino}]: createAccount/health check returned 200 OK"
+    val successMessage: String = {
+      val message = "createAccount/health check returned 200 OK"
+      if (ninoLoggingEnabled) { s"For NINO [${payload.value.nino}]: $message" } else { message }
+    }
 
     override def performTest(): Future[HealthCheckResult] = {
       val timer = metrics.healthCheckTimer.time()
@@ -124,8 +130,8 @@ object NSIConnectionHealthCheck {
 
   object NSIConnectionHealthCheckRunner {
 
-    def props(nsiConnector: NSIConnector, metrics: Metrics, payload: Payload): Props =
-      Props(new NSIConnectionHealthCheckRunner(nsiConnector, metrics, payload))
+    def props(nsiConnector: NSIConnector, metrics: Metrics, payload: Payload, ninoLoggingEnabled: Boolean): Props =
+      Props(new NSIConnectionHealthCheckRunner(nsiConnector, metrics, payload, ninoLoggingEnabled))
 
     sealed trait Payload {
       val value: NSIUserInfo
