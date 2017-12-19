@@ -92,7 +92,8 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDu
             SubmissionSuccess()
 
           case Status.CONFLICT ⇒
-            logger.info(s"createAccount/insert returned 409 (Conflict) ${timeString(time)}", nino)
+            logger.info(s"createAccount/insert returned 409 (Conflict). Account had already been created - " +
+              s"proceeding as normal ${timeString(time)}", nino)
             SubmissionSuccess()
 
           case other ⇒

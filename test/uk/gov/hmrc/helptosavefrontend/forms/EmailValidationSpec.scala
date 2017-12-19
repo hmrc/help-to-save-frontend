@@ -89,6 +89,26 @@ class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPro
       }
     }
 
+    "validate against no characters before the '@' symbol" in {
+      val emailValidation = newValidation()
+
+      forAll(Gen.identifier){ d ⇒
+        whenever(d.nonEmpty){
+          test(emailValidation)(s"@$d")(Left(Set(ErrorMessages.localTooShort)))
+        }
+      }
+    }
+
+    "validate against no characters after the '@' symbol" in {
+      val emailValidation = newValidation()
+
+      forAll(Gen.identifier){ l ⇒
+        whenever(l.nonEmpty){
+          test(emailValidation)(s"$l@")(Left(Set(ErrorMessages.domainTooShort)))
+        }
+      }
+    }
+
     "have an implicit class which provides methods" which {
 
       case class TestData(s: String)

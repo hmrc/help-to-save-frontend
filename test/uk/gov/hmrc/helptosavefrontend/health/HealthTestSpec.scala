@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.health
 
-import akka.actor.{Actor, ActorIdentity, ActorRef, Identify, Props}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.pattern.{ask, pipe}
 import akka.testkit.TestProbe
 import akka.util.Timeout
@@ -32,10 +32,10 @@ import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.ProxyActor.Created
 import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.ProxyActor
 import uk.gov.hmrc.helptosavefrontend.health.HealthTestSpec.TestNSIConnector.{GetTestResult, GetTestResultResponse}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.util.Result
+import uk.gov.hmrc.helptosavefrontend.util.{PagerDutyAlerting, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
 class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
@@ -77,6 +77,8 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
     override def toJson: String = sys.error("Not used")
   }
 
+  val mockPagerDutyAlerting: PagerDutyAlerting = mock[PagerDutyAlerting]
+
   def newHealthCheck(maximumConsecutiveFailures: Int            = maximumConsecutiveFailures,
                      minimumTimeBetweenTests:    FiniteDuration = minimumTimeBetweenTests): (ActorRef, VirtualTime) = {
     val time = new VirtualTime
@@ -97,7 +99,6 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
       time.scheduler,
       metrics,
       () ⇒ pagerDutyListener.ref ! PagerDutyAlert,
-      () ⇒ pagerDutyListener.ref ! PagerDutyResolved,
       Props(new ProxyActor(runnerListener.ref, runnerName1)),
       Props(new ProxyActor(runnerListener.ref, runnerName2))
     ))
@@ -301,11 +302,10 @@ class HealthTestSpec extends ActorTestSupport("HealthTestSpec") {
 
       "a test passes" must {
 
-        "record the number of failures as 0 and resolve pager duty" in {
+        "record the number of failures as 0" in {
           time.advance(timeBetweenTests)
           mockTest(runnerName1, Right(()))
           metricsListener.expectMsg(0)
-          pagerDutyListener.expectMsg(PagerDutyResolved)
         }
 
       }
