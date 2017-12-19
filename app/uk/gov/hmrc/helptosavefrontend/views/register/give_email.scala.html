@@ -37,7 +37,7 @@
                 errorMessage = form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))
             )
           <section class="subsection">
-            @helpers.submit('_buttonClass -> "", 'id → "continue") { @messages("hts.global.continue-button") }
+            @helpers.submit('_buttonClass -> "", 'id → "continue", '_onclick -> "ga('send', 'event', 'buttons', 'Confirmed given email', 'Applicant gives email address page');") { @messages("hts.global.continue-button") }
           </section>
         }
 
