@@ -106,7 +106,6 @@ class EligibilityCheckControllerSpec
         content should include(validUserInfo.forename)
         content should include(validUserInfo.surname)
         content should include("31 December 1980")
-
       }
 
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {
