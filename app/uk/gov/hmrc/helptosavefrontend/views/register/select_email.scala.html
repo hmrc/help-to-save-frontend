@@ -41,12 +41,12 @@
             @{if(hasNotSelected) <span class="error-notification">{messages("hts.select-email.select-an-option")}</span> }
 
             <div class="multiple-choice">
-                <input id="registered-email" type="radio" name="email" value="Yes" onclick="ga('send', 'event', 'radio', 'Applicant selected registered email', 'Applicant select email address page'););">
+                <input id="registered-email" type="radio" name="email" value="Yes">
                 <label for="registered-email">@email</label>
             </div>
 
             <div class="multiple-choice" data-target="collect-new-email">
-                <input id="add-new-email" type="radio" name="email" value="No" onclick="ga('send', 'event', 'radio', 'Applicant selected add new email', 'Applicant select email address page'););" @if(hasInvalidEmail){ checked }>
+                <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail){ checked }>
                 <label for="add-new-email">@messages("hts.select-email.select-new-address")</label>
             </div>
             <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
