@@ -19,7 +19,7 @@
 
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = messages("hts.introduction.title"),
+    title = messages("hts.email-verified.title"),
     sidebarLinks = None,
     bodyClasses = None) {
 
@@ -31,7 +31,7 @@
   </div>
   <p>@messages("hts.email-verified.p1")</p>
   <p>@messages("hts.email-verified.p2")</p>
-  <p><a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
+  <p class="subsection--wide"><a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
 
 
 }

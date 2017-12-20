@@ -63,8 +63,7 @@ class EligibilityCheckControllerSpec
     mockMetrics,
     Configuration("enable-early-cap-check" → earlyCapCheck))
 
-  val controller = newController(false)
-  val trueEarlyCapController = newController(true)
+  lazy val controller = newController(false)
 
   val mockAppConfig: AppConfig = mock[AppConfig]
 
@@ -103,11 +102,10 @@ class EligibilityCheckControllerSpec
 
         val content = contentAsString(result)
         content should include("You&#x27;re eligible for a Help to Save account")
-        content should include("By continuing you are confirming that these are your details and they are correct")
+        content should include("By continuing you are confirming you are eligible for a Help to Save account, and that these are your details and they are correct")
         content should include(validUserInfo.forename)
         content should include(validUserInfo.surname)
         content should include("31 December 1980")
-
       }
 
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {
@@ -386,6 +384,7 @@ class EligibilityCheckControllerSpec
 
         "do the eligibility checks when the enable-early-cap-check config is set to true " +
           "and the caps have not been reached" in {
+            val controller = newController(true)
             val userCapResponse = new UserCapResponse(false, false, false, false)
 
             inSequence {
@@ -395,13 +394,14 @@ class EligibilityCheckControllerSpec
               mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
             }
 
-            val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
+            val result = controller.getCheckEligibility(FakeRequest())
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
           }
 
         "show the TotalCapReached page when the enable-early-cap-check config is set to true " +
           "and the total cap has been reached" in {
+            val controller = newController(true)
             val userCapResponse = new UserCapResponse(true, true, false, false)
 
             inSequence {
@@ -410,13 +410,14 @@ class EligibilityCheckControllerSpec
               mockAccountCreationAllowed(Right(userCapResponse))
             }
 
-            val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
+            val result = controller.getCheckEligibility(FakeRequest())
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage().url)
           }
 
         "show the DailyCapReached page when the enable-early-cap-check config is set to true " +
           "and the total cap has been reached" in {
+            val controller = newController(true)
             val userCapResponse = new UserCapResponse(true, false, false, false)
 
             inSequence {
@@ -425,7 +426,7 @@ class EligibilityCheckControllerSpec
               mockAccountCreationAllowed(Right(userCapResponse))
             }
 
-            val result = trueEarlyCapController.getCheckEligibility(FakeRequest())
+            val result = controller.getCheckEligibility(FakeRequest())
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
           }

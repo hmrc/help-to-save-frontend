@@ -44,7 +44,7 @@
         <p>@Messages("hts.introduction.apply.par-2")</p>
         <p>@Messages("hts.introduction.apply.par-3")</p>
         <p>@Messages("hts.introduction.apply.par-4")</p>
-        @form(routes.IntroductionController.applySubmit(), 'class -> "group") {
+        @form(routes.IntroductionController.applySubmit(), 'class -> "group subsection--wide") {
             @submit('_buttonClass -> "button--get-started",
             '_onclick -> "ga('send', 'event', 'buttons', 'Start now', 'Apply page');"
         ) {

@@ -360,7 +360,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
         val result = controller.getEmailVerified(FakeRequest())
         status(result) shouldBe OK
-        contentAsString(result) should include("Email Address Verified")
+        contentAsString(result) should include("Email address verified")
       }
 
       "return an error" when {
