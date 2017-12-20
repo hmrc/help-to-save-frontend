@@ -16,15 +16,16 @@
 
 package hts.pages
 
+import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object SelectEmailPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/select-email"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/select-email"
 
   def setNewEmail(email: String)(implicit driver: WebDriver): Unit = {
-    val el = find(name("new-email"))
+    val el = Browser.find(Browser.name("new-email"))
     el.foreach(_.underlying.clear())
     el.foreach(_.underlying.sendKeys(email))
   }
@@ -35,10 +36,10 @@ object SelectEmailPage extends Page {
     clickContinue()
   }
 
-  def selectGGEmail()(implicit driver: WebDriver): Unit = clickButtonByIdOnceClickable("registered-email")
+  def selectGGEmail()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("registered-email")
 
-  def selectNewEmail()(implicit driver: WebDriver): Unit = click on "add-new-email"
+  def selectNewEmail()(implicit driver: WebDriver): Unit = Browser.click on "add-new-email"
 
-  def clickContinue()(implicit driver: WebDriver): Unit = click on xpath(".//*[@type='submit']")
+  def clickContinue()(implicit driver: WebDriver): Unit = Browser.click on Browser.xpath(".//*[@type='submit']")
 
 }

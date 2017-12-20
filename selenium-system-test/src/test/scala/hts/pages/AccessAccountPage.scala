@@ -22,7 +22,6 @@ import org.openqa.selenium.WebDriver
 //This page won't exist as a physical page but is here to expose a redirect URL
 object AccessAccountPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/access-account"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/access-account"
 
-  def navigate()(implicit driver: WebDriver): Unit = go to url
 }

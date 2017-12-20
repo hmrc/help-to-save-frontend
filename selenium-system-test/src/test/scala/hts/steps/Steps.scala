@@ -19,6 +19,7 @@ package hts.steps
 import java.util.concurrent.TimeUnit
 
 import cats.syntax.either._
+import cucumber.api.Scenario
 import cucumber.api.scala.{EN, ScalaDsl}
 import hts.driver.Driver
 import hts.utils.ScenarioContext
@@ -52,31 +53,35 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
     scenario ⇒
       if (scenario.isFailed) {
         _driver.foreach{
-          case driver: TakesScreenshot ⇒
-            try {
-              val screenshot = driver.getScreenshotAs(OutputType.BYTES)
-              scenario.embed(screenshot, "image/png")
-
-              val failurePageUrl = driver.getCurrentUrl()
-
-              // Try to take screen shot of previous page
-              driver.navigate().back()
-              val wait = new WebDriverWait(driver, 2);
-              wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(failurePageUrl)))
-              val screenshotPreviousPage = driver.getScreenshotAs(OutputType.BYTES)
-              scenario.embed(screenshotPreviousPage, "image/png")
-
-            } catch {
-              case e: TimeoutException   ⇒ println("Not possible to take screen shot of page before error.")
-              case e: WebDriverException ⇒ System.err.println(s"Error creating screenshot: ${e.getMessage}")
-            }
-          case _ ⇒ println("Screenshot will not be taken")
+          case driver: TakesScreenshot ⇒ takeScreenshot(scenario, driver)
+          case _                       ⇒ println("Screenshot will not be taken")
         }
       }
 
       _driver.foreach(_.quit())
       _driver = None
   }
+
+  private def takeScreenshot(scenario: Scenario, driver: WebDriver with TakesScreenshot): Unit = {
+    try {
+      val screenshot = driver.getScreenshotAs(OutputType.BYTES)
+      scenario.embed(screenshot, "image/png")
+
+      val failurePageUrl = driver.getCurrentUrl()
+
+      // Try to take screen shot of previous page
+      driver.navigate().back()
+      val wait = new WebDriverWait(driver, 2);
+      wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(failurePageUrl)))
+      val screenshotPreviousPage = driver.getScreenshotAs(OutputType.BYTES)
+      scenario.embed(screenshotPreviousPage, "image/png")
+
+    } catch {
+      case e: TimeoutException   ⇒ println("Not possible to take screen shot of page before error.")
+      case e: WebDriverException ⇒ System.err.println(s"Error creating screenshot: ${e.getMessage}")
+    }
+  }
+
 }
 
 private[steps] object Steps {

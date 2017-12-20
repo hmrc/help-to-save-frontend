@@ -16,18 +16,18 @@
 
 package hts.pages
 
+import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object YouDoNotHaveAnAccountPage extends Page {
 
-  override val expectedUrl: String = s"${Configuration.host}/help-to-save/no-account"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/no-account"
 
-  override val expectedPageTitle: String = "You don't have an account - Help to Save - GOV.UK"
+  override val expectedPageTitle: Option[String] = Some("You don't have an account")
 
-  override val expectedPageHeader: String = "You don't have an account"
+  override val expectedPageHeader: Option[String] = Some("You don't have an account")
 
-  def clickCheckEligibility()(implicit driver: WebDriver): Unit = click on "continue"
+  def clickCheckEligibility()(implicit driver: WebDriver): Unit = Browser.click on "continue"
 
-  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h2", pageTitle)
 }

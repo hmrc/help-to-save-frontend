@@ -16,12 +16,13 @@
 
 package hts.pages
 
+import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object GiveEmailPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/give-email"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
 
-  def continue()(implicit driver: WebDriver): Unit = click on "continue"
+  def continue()(implicit driver: WebDriver): Unit = Browser.click on "continue"
 }

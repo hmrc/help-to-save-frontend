@@ -21,6 +21,6 @@ import hts.utils.Configuration
 
 object HowTheAccountWorksPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/how-the-account-works"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/how-the-account-works"
 
 }

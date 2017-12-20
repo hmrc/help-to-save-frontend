@@ -16,19 +16,20 @@
 
 package hts.steps
 
+import hts.browser.Browser
 import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.EitherOps._
-import hts.utils.{Configuration, Helpers, ScenarioContext}
+import hts.utils.{Configuration, ScenarioContext}
 
-class CreateAccountSteps extends Steps with Page {
+class CreateAccountSteps extends Steps {
 
   Given("""^A user is at the start of the registration process$""") { () ⇒
     AboutPage.navigate()
   }
 
   Given("""^An authenticated user is at the start of the registration process$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(AboutPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(AboutPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Given("""^a user is on the apply page$""") { () ⇒
@@ -36,12 +37,12 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   Given("""^an authenticated user is on the apply page$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(ApplyPage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Given("""^a user has previously created an account$"""){ () ⇒
     AuthorityWizardPage.navigate()
-    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.startCreatingAccount()
     SelectEmailPage.selectGGEmail()
     SelectEmailPage.clickContinue()
@@ -50,10 +51,19 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   When("""^they proceed through to the apply page$""") { () ⇒
-    AboutPage.nextPage()
-    EligibilityInfoPage.nextPage()
-    HowTheAccountWorksPage.nextPage()
-    HowWeCalculateBonusesPage.nextPage()
+    Browser.checkCurrentPageIs(AboutPage)
+    Browser.nextPage()
+
+    Browser.checkCurrentPageIs(EligibilityInfoPage)
+    Browser.nextPage()
+
+    Browser.checkCurrentPageIs(HowTheAccountWorksPage)
+    Browser.nextPage()
+
+    Browser.checkCurrentPageIs(HowWeCalculateBonusesPage)
+    Browser.nextPage()
+
+    Browser.checkCurrentPageIs(ApplyPage)
   }
 
   When("""^they click on the Start now button$""") { () ⇒
@@ -74,28 +84,28 @@ class CreateAccountSteps extends Steps with Page {
 
   When("""^they have logged in again and passed IV$"""){ () ⇒
     driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
-    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.currentNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.currentNINO())
     AccessAccountPage.navigate()
   }
 
   Then("""^they see that the account is created$""") { () ⇒
-    Helpers.isActualUrlExpectedUrl(NsiManageAccountPage.url) shouldBe true
+    Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
 
   Then("""^they will be on a page which says you do not have an account$""") { () ⇒
-    YouDoNotHaveAnAccountPage.pageInfoIsCorrect()
+    Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
   }
 
   Then("""^they will be on the you're eligible page$""") { () ⇒
-    EligiblePage.pageInfoContains()
+    Browser.checkCurrentPageIs(EligiblePage)
   }
 
   Then("""^they will be on the account home page$"""){ () ⇒
-    getCurrentUrl should include(NsiManageAccountPage.url)
+    Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
 
   When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.url, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.startCreatingAccount()
     SelectEmailPage.selectGGEmail()
     SelectEmailPage.clickContinue()
@@ -103,12 +113,12 @@ class CreateAccountSteps extends Steps with Page {
   }
 
   Then("""^they see the Help to Save landing page \(with information about Help to Save\)$"""){ () ⇒
-    getCurrentUrl contains AboutPage.url
+    Browser.checkCurrentPageIs(AboutPage)
   }
 
   When("""^they choose to go ahead with creating an account$"""){ () ⇒
     AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
-    AuthorityWizardPage.setRedirect(EligiblePage.url)
+    AuthorityWizardPage.setRedirect(EligiblePage.expectedURL)
     AuthorityWizardPage.submit()
     EligiblePage.startCreatingAccount()
     SelectEmailPage.selectGGEmail()

@@ -21,6 +21,6 @@ import hts.utils.Configuration
 
 object EligibilityInfoPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/eligibility"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/eligibility"
 
 }
