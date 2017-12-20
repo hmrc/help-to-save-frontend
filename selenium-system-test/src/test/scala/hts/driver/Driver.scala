@@ -75,7 +75,7 @@ object Driver {
   }
 
   private def createChromeDriver(headless: Boolean): WebDriver = {
-    setChromeDriver
+    setChromeDriver()
 
     val capabilities = DesiredCapabilities.chrome()
     val options = new ChromeOptions()
@@ -88,7 +88,7 @@ object Driver {
   }
 
   private def createZapChromeDriver(): WebDriver = {
-    setChromeDriver
+    setChromeDriver()
 
     val capabilities = DesiredCapabilities.chrome()
     val options = new ChromeOptions()

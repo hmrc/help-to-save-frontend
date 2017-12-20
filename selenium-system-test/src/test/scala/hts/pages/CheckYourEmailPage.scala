@@ -16,14 +16,15 @@
 
 package hts.pages
 
+import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object CheckYourEmailPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/verify-email"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/verify-email"
 
-  def resendVerificationEmail()(implicit driver: WebDriver): Unit = clickButtonByIdOnceClickable("resend-verification")
+  def resendVerificationEmail()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("resend-verification")
 
-  def changeEmail()(implicit driver: WebDriver): Unit = click on linkText("Change email address")
+  def changeEmail()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Change email address")
 }

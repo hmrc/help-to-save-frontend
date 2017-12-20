@@ -21,6 +21,6 @@ import hts.utils.Configuration
 
 object HowWeCalculateBonusesPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/how-we-calculate-bonuses"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/how-we-calculate-bonuses"
 
 }

@@ -16,18 +16,17 @@
 
 package hts.pages.registrationPages
 
+import hts.browser.Browser
 import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object ApplyPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/apply"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/apply"
 
-  def navigate()(implicit driver: WebDriver): Unit = go to url
+  def clickStartNow()(implicit driver: WebDriver): Unit = Browser.click on Browser.xpath(".//*[@class='button button--get-started']")
 
-  def clickStartNow()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='button button--get-started']")
-
-  def clickSignInLink()(implicit driver: WebDriver): Unit = click on xpath(".//*[@class='service-info']/ul/li/a")
+  def clickSignInLink()(implicit driver: WebDriver): Unit = Browser.click on Browser.xpath(".//*[@class='service-info']/ul/li/a")
 
 }

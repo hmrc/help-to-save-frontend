@@ -18,6 +18,7 @@ package hts.pages
 
 import java.time.format.DateTimeFormatter
 
+import hts.browser.Browser
 import hts.utils.{Configuration, TestUserInfo}
 import org.openqa.selenium.WebDriver
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
@@ -25,6 +26,8 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
 import scala.annotation.tailrec
 
 object AuthorityWizardPage extends Page {
+
+  val expectedURL: String = s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     AuthorityWizardPage.navigate()
@@ -89,65 +92,56 @@ object AuthorityWizardPage extends Page {
     userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
   }
 
-  def navigate()(implicit driver: WebDriver): Unit =
-    go to s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
-
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
-    find(name("redirectionUrl")).foreach(_.underlying.sendKeys(url))
+    Browser.find(Browser.name("redirectionUrl")).foreach(_.underlying.sendKeys(url))
 
-  def setNino(nino: String)(implicit driver: WebDriver): Unit = {
-    find(name("nino")).foreach{ element ⇒
+  def setNino(nino: String)(implicit driver: WebDriver): Unit =
+    Browser.find(Browser.name("nino")).foreach{ element ⇒
       element.underlying.sendKeys(nino)
       println("NINO entered on auth wizard: " + nino)
     }
-  }
 
   def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
-    find(name("credentialStrength")).foreach(_.underlying.sendKeys(strength))
+    Browser.find(Browser.name("credentialStrength")).foreach(_.underlying.sendKeys(strength))
 
   def setConfidenceLevel(level: Int)(implicit driver: WebDriver): Unit =
-    find(name("confidenceLevel")).foreach(_.underlying.sendKeys(level.toString))
+    Browser.find(Browser.name("confidenceLevel")).foreach(_.underlying.sendKeys(level.toString))
 
-  def submit()(implicit driver: WebDriver): Unit = {
-    find(cssSelector("input.button")).foreach(_.underlying.submit())
-  }
+  def submit()(implicit driver: WebDriver): Unit =
+    Browser.find(Browser.cssSelector("input.button")).foreach(_.underlying.submit())
 
   def setGivenName(givenName: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.givenName")).foreach(_.underlying.sendKeys(givenName))
+    Browser.find(Browser.name("itmp.givenName")).foreach(_.underlying.sendKeys(givenName))
 
   def setFamilyName(familyName: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.familyName")).foreach(_.underlying.sendKeys(familyName))
+    Browser.find(Browser.name("itmp.familyName")).foreach(_.underlying.sendKeys(familyName))
 
-  def setDateOfBirth(dateOfBirth: String)(implicit driver: WebDriver): Unit = {
-    find(name("itmp.dateOfBirth")).foreach(_.underlying.sendKeys(dateOfBirth))
-  }
-
-  def setEmail(email: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.email")).foreach(_.underlying.sendKeys(email))
+  def setDateOfBirth(dateOfBirth: String)(implicit driver: WebDriver): Unit =
+    Browser.find(Browser.name("itmp.dateOfBirth")).foreach(_.underlying.sendKeys(dateOfBirth))
 
   def setBlankEmail(implicit driver: WebDriver): Unit =
-    find(name("itmp.email")).foreach(_.underlying.sendKeys())
+    Browser.find(Browser.name("email")).foreach(_.underlying.clear())
 
   def setAddressLine1(addressLine1: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.address.line1")).foreach(_.underlying.sendKeys(addressLine1))
+    Browser.find(Browser.name("itmp.address.line1")).foreach(_.underlying.sendKeys(addressLine1))
 
   def setAddressLine2(addressLine2: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.address.line2")).foreach(_.underlying.sendKeys(addressLine2))
+    Browser.find(Browser.name("itmp.address.line2")).foreach(_.underlying.sendKeys(addressLine2))
 
   def setAddressLine3(addressLine3: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.address.line3")).foreach(_.underlying.sendKeys(addressLine3))
+    Browser.find(Browser.name("itmp.address.line3")).foreach(_.underlying.sendKeys(addressLine3))
 
   def setAddressLine4(addressLine4: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.address.line4")).foreach(_.underlying.sendKeys(addressLine4))
+    Browser.find(Browser.name("itmp.address.line4")).foreach(_.underlying.sendKeys(addressLine4))
 
   def setAddressLine5(addressLine5: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.address.line5")).foreach(_.underlying.sendKeys(addressLine5))
+    Browser.find(Browser.name("itmp.address.line5")).foreach(_.underlying.sendKeys(addressLine5))
 
   def setPostCode(postcode: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.address.postCode")).foreach(_.underlying.sendKeys(postcode))
+    Browser.find(Browser.name("itmp.address.postCode")).foreach(_.underlying.sendKeys(postcode))
 
   def setCountryCode(countryCode: String)(implicit driver: WebDriver): Unit =
-    find(name("itmp.address.countryCode")).foreach(_.underlying.sendKeys(countryCode))
+    Browser.find(Browser.name("itmp.address.countryCode")).foreach(_.underlying.sendKeys(countryCode))
 
   private def setAddressLines(address: Address)(implicit driver: WebDriver): Unit = {
     val setFunctions: List[String ⇒ Unit] = List(

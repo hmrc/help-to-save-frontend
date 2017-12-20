@@ -19,8 +19,9 @@ package hts.steps
 import java.time.format.DateTimeFormatter
 
 import cucumber.api.DataTable
-import hts.pages.{AuthorityWizardPage, EligiblePage}
-import hts.utils.{Helpers, ScenarioContext, TestUserInfo}
+import hts.browser.Browser
+import hts.pages.{AuthorityWizardPage, EligiblePage, Page}
+import hts.utils.{ScenarioContext, TestUserInfo}
 import hts.utils.EitherOps._
 
 class ConfirmDetailsSteps extends Steps {
@@ -31,7 +32,7 @@ class ConfirmDetailsSteps extends Steps {
 
   When("""^an applicant passes the eligibility check$"""){ () ⇒
     AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
-    AuthorityWizardPage.setRedirect(EligiblePage.url)
+    AuthorityWizardPage.setRedirect(EligiblePage.expectedURL)
     AuthorityWizardPage.submit()
   }
 
@@ -46,10 +47,11 @@ class ConfirmDetailsSteps extends Steps {
     val date = info.dateOfBirth.map(_.format(dateFormatter)).getOrElse(sys.error("Could not get date of birth"))
 
     val fullName = forename + " " + surname
-
-    Helpers.isTextOnPage(fullName) shouldBe true
     val displayedNino = nino.grouped(2).mkString(" ")
-    Helpers.isTextOnPage(displayedNino) shouldBe true
-    Helpers.isTextOnPage(date) shouldBe true
+
+    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.isTextOnPage(fullName) shouldBe true
+    Browser.isTextOnPage(displayedNino) shouldBe true
+    Browser.isTextOnPage(date) shouldBe true
   }
 }

@@ -16,28 +16,21 @@
 
 package hts.pages
 
+import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object EligiblePage extends Page {
 
-  def navigate()(implicit driver: WebDriver): Unit = go to s"${Configuration.host}/help-to-save/eligible"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/eligible"
 
-  override val expectedUrl: String = s"${Configuration.host}/help-to-save/eligible"
+  override val expectedPageTitle: Option[String] = Some("You're eligible for a Help to Save account")
 
-  override val expectedPageTitle: String = "You are eligible"
+  override val expectedPageHeader: Option[String] = Some("Step 1 of 4\nWe've checked the details we hold for you")
 
-  override val expectedPageHeader: String = "You're eligible"
+  def startCreatingAccount()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("start-creating-account")
 
-  val pageTitle: String = "You're eligible"
-  val url: String = s"${Configuration.host}/help-to-save/check-eligibility"
-
-  def startCreatingAccount()(implicit driver: WebDriver): Unit = {
-    clickButtonByIdOnceClickable("start-creating-account")
-  }
-
-  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h1", pageTitle)
-
-  def detailsNotCorrect()(implicit driver: WebDriver): Unit = click on linkText("These details are not correct")
+  def detailsNotCorrect()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("These details are not correct")
 
 }

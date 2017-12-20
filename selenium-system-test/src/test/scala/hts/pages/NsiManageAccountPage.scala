@@ -16,10 +16,7 @@
 
 package hts.pages
 
-import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
-
 object NsiManageAccountPage extends Page {
 
-  val url: String = "https://www.nsandi.com/"
+  val expectedURL: String = "https://www.nsandi.com/"
 }

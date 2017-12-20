@@ -22,18 +22,8 @@ import org.openqa.selenium.WebDriver
 
 object AboutPage extends Page {
 
-  override val expectedUrl: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/about-help-to-save"
 
-  override val expectedPageTitle: String = "About Help to Save"
-
-  override val expectedPageHeader: String = "Apply for Help to Save"
-
-  val url: String = s"${Configuration.host}/help-to-save/apply-for-help-to-save/about-help-to-save"
-
-  def navigate()(implicit driver: WebDriver): Unit = {
-    go to url
-  }
-
-  override def isCurrentPage(implicit driver: WebDriver): Boolean = checkHeader("h2", "1. About Help to Save")
+  override val expectedPageTitle: Option[String] = Some("About Help to Save")
 
 }

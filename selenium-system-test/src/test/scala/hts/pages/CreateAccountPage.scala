@@ -16,17 +16,16 @@
 
 package hts.pages
 
+import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
 object CreateAccountPage extends Page {
 
-  val url: String = s"${Configuration.host}/help-to-save/create-account"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/create-account"
 
-  def navigate()(implicit driver: WebDriver): Unit = go to url
+  def createAccount()(implicit driver: WebDriver): Unit = Browser.click on "accept-and-create-account"
 
-  def createAccount()(implicit driver: WebDriver): Unit = click on "accept-and-create-account"
-
-  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit = click on linkText("Cancel")
+  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Cancel")
 
 }
