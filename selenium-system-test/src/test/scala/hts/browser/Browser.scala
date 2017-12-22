@@ -17,6 +17,7 @@
 package hts.browser
 
 import hts.pages.Page
+import hts.pages.identityPages.{FailedIVInsufficientEvidencePage, FailedIVTechnicalIssuePage, IdentityVerifiedPage}
 import hts.utils.Configuration
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, Keys, WebDriver}
@@ -39,13 +40,18 @@ trait Navigation { this: WebBrowser ⇒
     find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
   }
 
-  def clickButtonByIdOnceClickable(id: String)(implicit driver: WebDriver): Unit = {
-    val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
+  def clickButtonByIdOnceClickable(id: String)(implicit driver: WebDriver): Unit =
+    clickByIdentifier(id, By.id)
+
+  def clickButtonByClassOnceClickable(className: String)(implicit driver: WebDriver): Unit =
+    clickByIdentifier(className, By.className)
+
+  private def clickByIdentifier(id: String, by: String ⇒ By)(implicit driver: WebDriver): Unit = {
+    val wait = new WebDriverWait(driver, 20)
     wait.until(ExpectedConditions.or(
-      ExpectedConditions.elementToBeClickable(By.id(id)),
-      ExpectedConditions.presenceOfElementLocated(By.id(id)),
-      ExpectedConditions.visibilityOfElementLocated(By.id(id)))
-    )
+      ExpectedConditions.elementToBeClickable(by(id)),
+      ExpectedConditions.presenceOfElementLocated(by(id)),
+      ExpectedConditions.visibilityOfElementLocated(by(id))))
     click on id
   }
 
@@ -75,7 +81,7 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
   def checkCurrentPageIs(page: Page)(implicit driver: WebDriver): Unit = {
       def isActualUrlExpectedUrl(expectedUrl: String)(implicit driver: WebDriver): Boolean = {
         try {
-          val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
+          val wait = new WebDriverWait(driver, 20)
           wait.until(ExpectedConditions.urlContains(expectedUrl))
           true
         } catch {

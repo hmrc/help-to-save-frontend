@@ -21,14 +21,14 @@ import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object IdentityVerifiedPage extends Page {
+object FailedIVTimeOutPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/identity-verified"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-time-out"
 
-  override val expectedPageTitle: Option[String] = Some("We've verified your identity")
+  override val expectedPageHeader: Option[String] = Some("Your session has ended")
 
-  override val expectedPageHeader: Option[String] = Some("We've verified your identity")
+  override val expectedPageTitle: Option[String] = Some("Your session has ended")
 
-  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
+  def tryAgain()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
 
 }
