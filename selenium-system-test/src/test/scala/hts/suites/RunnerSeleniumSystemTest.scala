@@ -22,8 +22,8 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[Cucumber])
 @CucumberOptions(
-  features = Array("selenium-system-test/src/test/resources/features"),
-  glue     = Array("hts.steps"),
+  features = Array("src/test/resources/features"),
+  glue = Array("uk.gov.hmrc.integration.cucumber.stepdefs"),
   plugin   = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
   tags     = Array("~@ignore")
 )
