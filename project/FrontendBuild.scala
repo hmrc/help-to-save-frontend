@@ -19,7 +19,8 @@ object FrontendBuild extends Build with MicroService {
     "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9",
     "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
     "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
-    "uk.gov.hmrc" %% "mongo-lock" % "5.0.0"
+    "uk.gov.hmrc" %% "mongo-lock" % "5.0.0",
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.10" % "2.7.2"
   )
 
   def test(scope: String = "test") = Seq(

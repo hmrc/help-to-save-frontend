@@ -7,7 +7,7 @@ Feature: Applicant creates new account
     When they log in and proceed to create an account using their GG email
     Then they see that the account is created
 
-  @zap @HTS-23
+  @zap @HTS-23 @BrowserStack
   Scenario: An unauthenticated eligible user wishes to create an account but comes through the sign in link
     Given they try to sign in through the Apply page without being logged in GG
     And they are prompted to log into GG
