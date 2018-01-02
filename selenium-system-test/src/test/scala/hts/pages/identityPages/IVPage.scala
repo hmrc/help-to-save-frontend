@@ -31,7 +31,7 @@ object IVPage {
       case "Technical Issue"       ⇒ FailedIVTechnicalIssuePage
       case "User Aborted"          ⇒ FailedIVUserAbortedPage
       case "Timed Out"             ⇒ FailedIVTimeOutPage
-      case _                       ⇒ sys.error("Unknown IV reason: $reason; Please use the reason name exactly as stated on the IV Stub page")
+      case _                       ⇒ sys.error(s"Unknown IV reason: $reason; Please use the reason name exactly as stated on the IV Stub page")
     }
 
 }
