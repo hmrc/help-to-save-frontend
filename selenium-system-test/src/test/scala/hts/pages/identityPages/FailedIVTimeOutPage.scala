@@ -21,7 +21,7 @@ import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object FailedIVTimeOutPage extends Page {
+object FailedIVTimeOutPage extends IVPage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-time-out"
 
@@ -29,6 +29,5 @@ object FailedIVTimeOutPage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("Your session has ended")
 
-  def tryAgain()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
-
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
 }

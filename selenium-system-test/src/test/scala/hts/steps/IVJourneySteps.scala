@@ -34,7 +34,6 @@ class IVJourneySteps extends Steps {
     ApplyPage.clickStartNow()
 
     IdentityVerificationStubPage.selectSuccessfulJourney()
-    IdentityVerificationStubPage.submitJourney()
 
     Browser.checkCurrentPageIs(IdentityVerifiedPage)
     IdentityVerifiedPage.continue()
@@ -47,17 +46,17 @@ class IVJourneySteps extends Steps {
     Browser.checkCurrentPageIs(AboutPage)
   }
 
-  When("^they go through identity verification and fail because of (.+)") { (reason: String) ⇒
+  When("^they go through identity verification and fail because of (.+)") { reason: String ⇒
     Browser.checkCurrentPageIs(ApplyPage)
     ApplyPage.clickStartNow()
 
     IdentityVerificationStubPage.selectJourney(reason)
-    IdentityVerificationStubPage.submitJourney()
   }
 
-  Then("^they will see the (.+) page$") { (reason: String) ⇒
-    IdentityVerificationStubPage.checkIVResultPage(reason)
-    IdentityVerificationStubPage.executeIVResultPageAction(reason)
+  Then("^they will see the (.+) page$") { reason: String ⇒
+    val reasonPage = IVPage.fromString(reason)
+    Browser.checkCurrentPageIs(reasonPage)
+    reasonPage.executeIVResultPageAction()
   }
 
 }

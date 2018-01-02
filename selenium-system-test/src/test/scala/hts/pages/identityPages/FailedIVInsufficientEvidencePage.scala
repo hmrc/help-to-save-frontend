@@ -21,7 +21,7 @@ import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object FailedIVInsufficientEvidencePage extends Page {
+object FailedIVInsufficientEvidencePage extends IVPage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-insufficient-evidence"
 
@@ -29,6 +29,6 @@ object FailedIVInsufficientEvidencePage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("We were not able to verify your identity")
 
-  def checkTelephone()(implicit driver: WebDriver): Unit = Browser.contain("0300 322 7093")
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.contain("0300 322 7093")
 
 }
