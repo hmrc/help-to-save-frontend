@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,37 +26,26 @@ object IdentityVerificationStubPage extends Page {
 
   def selectSuccessfulJourney()(implicit driver: WebDriver): Unit = Browser.click.on("requiredResult-success")
 
+  private def selectRadioButton(reasonLabel: String)(implicit driver: WebDriver): Unit ={
+    Browser.radioButtonGroup("requiredResult").value = reasonLabel
+  }
+
   def selectJourney(reason: String)(implicit driver: WebDriver): Unit = {
     reason match {
-
-      /*
-      There is a number of ways to select the radio buttons:
-      Browser.click on "{radioButtonID}"
-      Browser.click on Browser.radioButton("{value}")
-      Browser.radioButtonGroup("{radioButtonSharedName}").value="{value}"
-      Browser.radioButtonGroup("{radioButtonSharedName}").selection=Some("{value}")
-      etc.
-       */
-
-//      case "Success"               ⇒ Browser.radioButtonGroup("requiredResult").value = "Success"
-      case "Failed IV"             ⇒ Browser.radioButtonGroup("requiredResult").value = "Incomplete"
-      case "Precondition Failed"   ⇒ Browser.radioButtonGroup("requiredResult").value = "PreconditionFailed"
-      case "Locked Out"            ⇒ Browser.radioButtonGroup("requiredResult").value = "LockedOut"
-      case "Insufficient Evidence" ⇒ Browser.radioButtonGroup("requiredResult").value = "InsufficientEvidence"
-      case "Failed Matching"       ⇒ Browser.radioButtonGroup("requiredResult").value = "FailedMatching"
-      case "Technical Issue"       ⇒ Browser.radioButtonGroup("requiredResult").value = "TechnicalIssue"
-      case "User Aborted"          ⇒ Browser.radioButtonGroup("requiredResult").value = "UserAborted"
-      case "Timed Out"             ⇒ Browser.radioButtonGroup("requiredResult").value = "Timeout"
-      case _                       ⇒ println("Invalid Journey - please input the exact name of the selected journey as is displayed on the Stub page")
-
+      case "Failed IV"             ⇒ selectRadioButton("Incomplete")
+      case "Precondition Failed"   ⇒ selectRadioButton("PreconditionFailed")
+      case "Locked Out"            ⇒ selectRadioButton("LockedOut")
+      case "Insufficient Evidence" ⇒ selectRadioButton("InsufficientEvidence")
+      case "Failed Matching"       ⇒ selectRadioButton("FailedMatching")
+      case "Technical Issue"       ⇒ selectRadioButton("TechnicalIssue")
+      case "User Aborted"          ⇒ selectRadioButton("UserAborted")
+      case "Timed Out"             ⇒ selectRadioButton("Timeout")
+      case _                       ⇒ sys.error("Invalid Journey - please input the exact name of the selected journey as is displayed on the Stub page")
     }
   }
 
-  def submitJourney()(implicit driver: WebDriver): Unit = Browser.submit()
-
   def checkIVResultPage(reason: String)(implicit driver: WebDriver): Unit = {
     reason match {
-//      case "Success" ⇒ Browser.checkCurrentPageIs(IdentityVerifiedPage)
       case "Failed IV" ⇒
         Browser.navigateTo("failed-iv")
         Browser.checkCurrentPageIs(FailedIVPage)
@@ -67,13 +56,12 @@ object IdentityVerificationStubPage extends Page {
       case "Technical Issue"       ⇒ Browser.checkCurrentPageIs(FailedIVTechnicalIssuePage)
       case "User Aborted"          ⇒ Browser.checkCurrentPageIs(FailedIVUserAbortedPage)
       case "Timed Out"             ⇒ Browser.checkCurrentPageIs(FailedIVTimeOutPage)
-      case _                       ⇒ println("Invalid Journey - please input the exact name of the selected journey as is displayed on the Stub page")
+      case _                       ⇒ sys.error("Invalid Journey - please input the exact name of the selected journey as is displayed on the Stub page")
     }
   }
 
   def executeIVResultPageAction(reason: String)(implicit driver: WebDriver): Unit = {
     reason match {
-//      case "Success"               ⇒ IdentityVerifiedPage.continue()
       case "Failed IV"             ⇒ FailedIVPage.tryAgain()
       case "Precondition Failed"   ⇒ FailedIVPreconditionFailedPage.clickExitLink()
       case "Locked Out"            ⇒ FailedIVLockedOutPage.clickExitLink()
@@ -82,8 +70,10 @@ object IdentityVerificationStubPage extends Page {
       case "Technical Issue"       ⇒ FailedIVTechnicalIssuePage.tryAgain()
       case "User Aborted"          ⇒ FailedIVUserAbortedPage.tryAgain()
       case "Timed Out"             ⇒ FailedIVTimeOutPage.tryAgain()
-      case _                       ⇒ println("Invalid Journey - please input the exact name of the selected journey as is displayed on the Stub page")
+      case _                       ⇒ sys.error("Invalid Journey - please input the exact name of the selected journey as is displayed on the Stub page")
     }
   }
+
+  def submitJourney()(implicit driver: WebDriver): Unit = Browser.submit()
 
 }
