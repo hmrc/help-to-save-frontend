@@ -20,7 +20,7 @@ import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object GiveEmailPage extends Page {
+object EnterEmailPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
 

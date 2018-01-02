@@ -25,6 +25,7 @@ Feature: Applicant creates new account
     When they click on accept and create an account
     Then they see that the account is created
 
+    @wip
   Scenario: An authenticated eligible user wishes to create an account but comes through the sign in link
     Given an authenticated user is on the apply page
     When they click on the sign in link
