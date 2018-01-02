@@ -22,27 +22,27 @@ import hts.utils.ScenarioContext
 
 class EligibilitySteps extends Steps {
 
-  Given("""^an user is in receipt of working tax credit$""") { () ⇒
+  Given("^an user is in receipt of working tax credit$") { () ⇒
     val _ = ScenarioContext.generateEligibleNINO()
   }
 
-  When("""^they apply for Help to Save$""") { () ⇒
+  When("^they apply for Help to Save$") { () ⇒
     AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.currentNINO())
   }
 
-  Then("""^they see that they are eligible for Help to Save$""") { () ⇒
+  Then("^they see that they are eligible for Help to Save$") { () ⇒
     Browser.checkCurrentPageIs(EligiblePage)
   }
 
-  When("""^they click on start creating your account$"""){ () ⇒
-    EligiblePage.startCreatingAccount()
+  When("^they confirm their details and continue to create an account$"){ () ⇒
+    EligiblePage.clickConfirmAndContinue()
   }
 
-  Given("""^an user is NOT in receipt of working tax credit$""") { () ⇒
+  Given("^an user is NOT in receipt of working tax credit$") { () ⇒
     val _ = ScenarioContext.generateIneligibleNINO()
   }
 
-  Then("""^they see that they are NOT eligible for Help to Save$""") { () ⇒
+  Then("^they see that they are NOT eligible for Help to Save$") { () ⇒
     Browser.checkCurrentPageIs(NotEligiblePage)
   }
 }

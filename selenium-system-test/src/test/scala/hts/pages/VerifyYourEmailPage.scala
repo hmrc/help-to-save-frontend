@@ -20,7 +20,7 @@ import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object CheckYourEmailPage extends Page {
+object VerifyYourEmailPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/verify-email"
 
