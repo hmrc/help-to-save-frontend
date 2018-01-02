@@ -21,7 +21,7 @@ import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object FailedIVTechnicalIssuePage extends Page {
+object FailedIVTechnicalIssuePage extends IVPage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-technical-issue"
 
@@ -29,6 +29,5 @@ object FailedIVTechnicalIssuePage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("Something went wrong")
 
-  def tryAgain()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
-
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
 }

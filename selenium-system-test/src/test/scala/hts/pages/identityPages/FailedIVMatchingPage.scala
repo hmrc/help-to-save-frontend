@@ -21,7 +21,7 @@ import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object FailedIVMatchingPage extends Page {
+object FailedIVMatchingPage extends IVPage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-matching"
 
@@ -29,6 +29,5 @@ object FailedIVMatchingPage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("We were not able to verify your identity")
 
-  def tryAgain()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
-
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
 }

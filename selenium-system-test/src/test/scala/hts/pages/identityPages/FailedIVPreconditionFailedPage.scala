@@ -21,7 +21,7 @@ import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object FailedIVPreconditionFailedPage extends Page {
+object FailedIVPreconditionFailedPage extends IVPage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-precondition-failed"
 
@@ -29,6 +29,5 @@ object FailedIVPreconditionFailedPage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("You're not able to use this service")
 
-  def clickExitLink()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Exit to About Help to Save")
-
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Exit to About Help to Save")
 }

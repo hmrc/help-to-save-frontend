@@ -13,12 +13,12 @@ Feature: Applicant goes through IV journey
     Then they will see the <reason> page
 
     Examples:
-      | reason              |
-      | Failed IV           |
-      | Precondition Failed |
-      | Locked Out          |
-#| Insufficient Evidence |
-#| Failed Matching       |
-#| Technical Issue       |
-#| User Aborted          |
-#| Timed Out             |
+      | reason                |
+      | Failed IV             |
+      | Precondition Failed   |
+      | Locked Out            |
+      | Insufficient Evidence |
+      | Failed Matching       |
+      | Technical Issue       |
+      | User Aborted          |
+      | Timed Out             |
