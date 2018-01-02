@@ -18,7 +18,6 @@ Feature: Air-gap tests for testing with NS&I
       | country code   | GB              |
 
     When they choose to go ahead with creating an account
-    Then they see that the account is created
 
   Scenario: Air-gap 2 - Only mandatory fields (in correct format) are populated
     Given an applicant has the following details:
@@ -33,7 +32,6 @@ Feature: Air-gap tests for testing with NS&I
       | postcode       | BN43 5QP      |
 
     When they choose to go ahead with creating an account
-    Then they see that the account is created
 
 
   Scenario: Air-gap 3 - All fields populated with values of maximum length
@@ -53,7 +51,6 @@ Feature: Air-gap tests for testing with NS&I
       | country code   | GB                                                                                                                                                                                                                                                                                                           |
 
     When they choose to go ahead with creating an account
-    Then they see that the account is created
 
 
   Scenario: Air-gap 4 - All fields are populated with values of minimum length
@@ -73,7 +70,6 @@ Feature: Air-gap tests for testing with NS&I
       | country code   | GB         |
 
     When they choose to go ahead with creating an account
-    Then they see that the account is created
 
 
   Scenario: Air-gap 7 - Wacky postal address
@@ -93,7 +89,6 @@ Feature: Air-gap tests for testing with NS&I
       | country code   | GB                       |
 
     When they choose to go ahead with creating an account
-    Then they see that the account is created
 
 
   Scenario: Air-gap 11 - Populate forename, surname, address lines (phone number) and email with accented characters
@@ -113,4 +108,3 @@ Feature: Air-gap tests for testing with NS&I
       | country code   | SE                       |
 
     When they choose to go ahead with creating an account
-    Then they see that the account is created

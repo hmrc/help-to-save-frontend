@@ -91,10 +91,10 @@ class SecuritySteps extends Steps {
     Browser.isTextOnPage("You're not eligible for a Help to Save account") shouldBe true
   }
 
-  Given("^HMRC doesn't currently hold an email address for me$"){ () ⇒
+  Given("^HMRC doesn't currently hold an email address for the user$"){ () ⇒
     AuthorityWizardPage.authenticateUserNoEmail(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
     Browser.checkCurrentPageIs(EligiblePage)
-    EligiblePage.startCreatingAccount()
+    EligiblePage.clickConfirmAndContinue()
   }
 
 }
