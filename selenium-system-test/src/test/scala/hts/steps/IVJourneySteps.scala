@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,12 @@ import hts.utils.ScenarioContext
 
 class IVJourneySteps extends Steps {
 
-  //  TO RUN, USE: ./run_selenium_system_test.sh local chrome /usr/local/bin/chromedriver wip
-
-  Given("^an applicant who hasn't been through identity verification is on the Apply page$"){
+  Given("^an applicant who hasn't been through identity verification is on the Apply page$") {
     AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 50, "Strong", ScenarioContext.generateEligibleNINO())
     ApplyPage.navigate()
   }
 
-  When("^they go through identity verification check successfully and continue$"){
+  When("^they go through identity verification check successfully and continue$") {
     Browser.checkCurrentPageIs(ApplyPage)
     ApplyPage.clickStartNow()
 
@@ -42,14 +40,14 @@ class IVJourneySteps extends Steps {
     IdentityVerifiedPage.continue()
   }
 
-  Then("^they will be redirected to the eligibility check and pass it$"){
+  Then("^they will be redirected to the eligibility check and pass it$") {
     Browser.checkCurrentPageIs(EligiblePage)
 
     AboutPage.navigate()
     Browser.checkCurrentPageIs(AboutPage)
   }
 
-  When("^they go through identity verification and fail because of (.+)"){ (reason: String) ⇒
+  When("^they go through identity verification and fail because of (.+)") { (reason: String) ⇒
     Browser.checkCurrentPageIs(ApplyPage)
     ApplyPage.clickStartNow()
 
@@ -57,7 +55,7 @@ class IVJourneySteps extends Steps {
     IdentityVerificationStubPage.submitJourney()
   }
 
-  Then("^they will see the (.+) page$"){ (reason: String) ⇒
+  Then("^they will see the (.+) page$") { (reason: String) ⇒
     IdentityVerificationStubPage.checkIVResultPage(reason)
     IdentityVerificationStubPage.executeIVResultPageAction(reason)
   }
