@@ -28,12 +28,6 @@ class SecuritySteps extends Steps {
 
   val credentialStrengthsRegex: String = oneOfRegex(Set("weak", "strong", "none"))
 
-  Given(s"^a user has a confidence level of $confidenceLevelRegex$$") { (level: Int) ⇒
-    AuthorityWizardPage.navigate()
-    AuthorityWizardPage.setRedirect(EligiblePage.expectedURL)
-    AuthorityWizardPage.setConfidenceLevel(level)
-  }
-
   Given(s"^I have logged in to Government Gateway with a confidence level of $confidenceLevelRegex$$") { (level: Int) ⇒
     AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, level, "Strong", ScenarioContext.generateEligibleNINO())
   }
@@ -42,20 +36,11 @@ class SecuritySteps extends Steps {
     Browser.getCurrentUrl should include regex "/iv/journey-result|iv%2Fjourney-result"
   }
 
-  Given("^I have NOT logged in to Government Gateway$") { () ⇒
-    // Do nothing
-  }
-
-  Given("^a user has logged in$") { () ⇒
+  Given("^the user has logged in and passed IV$") { () ⇒
     AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
-  When("^they have logged in and passed IV$"){ () ⇒
-    AuthorityWizardPage.navigate()
-    AuthorityWizardPage.authenticateUser(AccessAccountPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
-  }
-
-  When("^I try to view the user details page$") { () ⇒
+  When("^I try to view the user details page without having logged in GG$") { () ⇒
     EligiblePage.navigate()
   }
 
@@ -67,20 +52,18 @@ class SecuritySteps extends Steps {
     Browser.getCurrentUrl should include(s"${Configuration.ggHost}/gg/sign-in")
   }
 
-  Given("^a user has logged in and passed IV$") { () ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
-  }
-
   Then("^the GG sign in page is visible$"){ () ⇒
     Browser.getCurrentUrl should include("gg/sign-in?")
   }
 
-  When("^I call URI (.+) with HTTP method (.+)$"){ (uri: String, httpMethod: String) ⇒
-    Browser.navigateTo(s"${Configuration.host}/help-to-save/$uri")
+  When("^I call URI (.+)$"){ (uri: String) ⇒
+    Browser.navigateTo(uri)
   }
 
-  Then("^I see a response$"){ () ⇒
+  Then("^I see a valid response$"){ () ⇒
     Browser.getCurrentUrl should include ("")
+    Browser.pageTitle shouldNot include ("not found")
+    Browser.pageSource shouldNot include ("This page can’t be found")
   }
 
   Given("^I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save$"){ () ⇒
@@ -94,7 +77,6 @@ class SecuritySteps extends Steps {
   Given("^HMRC doesn't currently hold an email address for the user$"){ () ⇒
     AuthorityWizardPage.authenticateUserNoEmail(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
     Browser.checkCurrentPageIs(EligiblePage)
-    EligiblePage.clickConfirmAndContinue()
   }
 
 }

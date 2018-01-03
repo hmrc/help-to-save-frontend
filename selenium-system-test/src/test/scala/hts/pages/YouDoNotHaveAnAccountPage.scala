@@ -28,6 +28,6 @@ object YouDoNotHaveAnAccountPage extends Page {
 
   override val expectedPageHeader: Option[String] = Some("You don't have an account")
 
-  def clickCheckEligibility()(implicit driver: WebDriver): Unit = Browser.click on "continue"
+  def clickContinue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 
 }

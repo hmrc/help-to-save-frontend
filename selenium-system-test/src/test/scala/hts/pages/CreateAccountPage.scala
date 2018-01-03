@@ -24,8 +24,10 @@ object CreateAccountPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/create-account"
 
-  def createAccount()(implicit driver: WebDriver): Unit = Browser.click on "accept-and-create-account"
+  def createAccount()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("accept-and-create-account")
 
-  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Cancel")
+  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit =
+    Browser.clickLinkTextOnceClickable("Cancel")
 
 }

@@ -29,5 +29,5 @@ object FailedIVMatchingPage extends IVPage {
 
   override val expectedPageTitle: Option[String] = Some("We were not able to verify your identity")
 
-  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Try again")
 }

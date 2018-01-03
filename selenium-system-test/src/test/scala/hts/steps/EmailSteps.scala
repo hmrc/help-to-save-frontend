@@ -25,7 +25,6 @@ class EmailSteps extends Steps {
   And("^they select their GG email and proceed$"){ () ⇒
     Browser.checkCurrentPageIs(SelectEmailPage)
     SelectEmailPage.selectGGEmail()
-    SelectEmailPage.clickContinue()
   }
 
   When("^they start to create an account$"){ () ⇒
@@ -59,7 +58,7 @@ class EmailSteps extends Steps {
     Browser.checkCurrentPageIs(CreateAccountPage)
   }
 
-  When("^they select I want to enter a new email address and enter a new email$"){ () ⇒
+  When("^they enter a new email address$"){ () ⇒
     Browser.checkCurrentPageIs(SelectEmailPage)
     SelectEmailPage.setAndVerifyNewEmail("newemail@gmail.com")
   }
