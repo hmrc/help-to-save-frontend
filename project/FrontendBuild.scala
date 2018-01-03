@@ -6,7 +6,7 @@ object FrontendBuild extends Build with MicroService {
 
   val appName = "help-to-save-frontend"
 
-  override lazy val appDependencies: Seq[ModuleID] = compile ++ test()
+  override lazy val appDependencies: Seq[ModuleID] = compile ++ test() ++ test("it")
 
   val compile = Seq(
     ws,
