@@ -24,15 +24,15 @@ import hts.utils.ScenarioContext
 
 class IVJourneySteps extends Steps {
 
-  Given("^an applicant who hasn't been through identity verification is on the Apply page$") {
+  Given("^an applicant who hasn't been through IV applies$") {
     AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 50, "Strong", ScenarioContext.generateEligibleNINO())
     ApplyPage.navigate()
-  }
 
-  When("^they go through identity verification check successfully and continue$") {
     Browser.checkCurrentPageIs(ApplyPage)
     ApplyPage.clickStartNow()
+  }
 
+  When("^they go through IV check successfully and continue$") {
     IdentityVerificationStubPage.selectSuccessfulJourney()
 
     Browser.checkCurrentPageIs(IdentityVerifiedPage)
@@ -46,10 +46,8 @@ class IVJourneySteps extends Steps {
     Browser.checkCurrentPageIs(AboutPage)
   }
 
-  When("^they go through identity verification and fail because of (.+)") { reason: String ⇒
-    Browser.checkCurrentPageIs(ApplyPage)
-    ApplyPage.clickStartNow()
-
+  When("^they go through IV and fail because of (.+)") { reason: String ⇒
+    Browser.checkCurrentPageIs(IdentityVerificationStubPage)
     IdentityVerificationStubPage.selectJourney(reason)
   }
 

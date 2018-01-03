@@ -24,7 +24,10 @@ object IdentityVerificationStubPage extends Page {
 
   override val expectedURL: String = "http://localhost:9948/mdtp/uplift?origin=help-to-save-frontend&completionURL=http%3A%2F%2Flocalhost%3A7000%2Fhelp-to-save%2Fiv%2Fjourney-result%3FcontinueURL%3D%2Fhelp-to-save%2Fcheck-eligibility&failureURL=http%3A%2F%2Flocalhost%3A7000%2Fhelp-to-save%2Fiv%2Fjourney-result%3FcontinueURL%3D%2Fhelp-to-save%2Fcheck-eligibility&confidenceLevel=200"
 
-  def selectSuccessfulJourney()(implicit driver: WebDriver): Unit = Browser.click.on("requiredResult-success")
+  def selectSuccessfulJourney()(implicit driver: WebDriver): Unit = {
+    Browser.click.on("requiredResult-success")
+    Browser.submit()
+  }
 
   private def selectRadioButton(reasonLabel: String)(implicit driver: WebDriver): Unit = {
     Browser.radioButtonGroup("requiredResult").value = reasonLabel

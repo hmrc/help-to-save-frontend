@@ -24,5 +24,5 @@ object EnterEmailPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
 
-  def continue()(implicit driver: WebDriver): Unit = Browser.click on "continue"
+  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 }

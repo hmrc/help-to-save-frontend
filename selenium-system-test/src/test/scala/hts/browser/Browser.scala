@@ -16,6 +16,7 @@
 
 package hts.browser
 
+import com.gargoylesoftware.htmlunit.{HttpWebConnection, WebRequest}
 import hts.pages.Page
 import hts.pages.identityPages.{FailedIVInsufficientEvidencePage, FailedIVTechnicalIssuePage, IdentityVerifiedPage}
 import hts.utils.Configuration
@@ -41,18 +42,21 @@ trait Navigation { this: WebBrowser ⇒
   }
 
   def clickButtonByIdOnceClickable(id: String)(implicit driver: WebDriver): Unit =
-    clickByIdentifier(id, By.id)
+    clickByIdentifier(id, By.id)(click.on)
 
   def clickButtonByClassOnceClickable(className: String)(implicit driver: WebDriver): Unit =
-    clickByIdentifier(className, By.className)
+    clickByIdentifier(className, By.className)(click.on)
 
-  private def clickByIdentifier(id: String, by: String ⇒ By)(implicit driver: WebDriver): Unit = {
+  def clickLinkTextOnceClickable(text: String)(implicit driver: WebDriver): Unit =
+    clickByIdentifier(text, By.linkText)(s ⇒ click on linkText(s))
+
+  private def clickByIdentifier(id: String, by: String ⇒ By)(clickOn: String ⇒ Unit)(implicit driver: WebDriver): Unit = {
     val wait = new WebDriverWait(driver, 20)
     wait.until(ExpectedConditions.or(
       ExpectedConditions.elementToBeClickable(by(id)),
       ExpectedConditions.presenceOfElementLocated(by(id)),
       ExpectedConditions.visibilityOfElementLocated(by(id))))
-    click on id
+    clickOn(id)
   }
 
 }

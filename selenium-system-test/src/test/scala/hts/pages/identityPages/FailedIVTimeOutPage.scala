@@ -29,5 +29,5 @@ object FailedIVTimeOutPage extends IVPage {
 
   override val expectedPageTitle: Option[String] = Some("Your session has ended")
 
-  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Try again")
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Try again")
 }

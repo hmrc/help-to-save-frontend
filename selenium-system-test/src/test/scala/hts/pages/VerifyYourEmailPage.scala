@@ -26,5 +26,5 @@ object VerifyYourEmailPage extends Page {
 
   def resendVerificationEmail()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("resend-verification")
 
-  def changeEmail()(implicit driver: WebDriver): Unit = Browser.click on Browser.linkText("Change email address")
+  def changeEmail()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Change email address")
 }
