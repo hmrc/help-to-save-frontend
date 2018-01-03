@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.form
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.ga_submit_button
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.create_account_help_to_save.title"), bodyClasses = None) {
@@ -35,12 +36,10 @@
     </div>
     <div class="form-field form-field--submit">
         @form(routes.RegisterController.createAccountHelpToSave)(
-            Html(s"""<button id="accept-and-create-account"
-                             data-ga-event-category = "buttons"
-                             data-ga-event-action = "Accept and create account"
-                             data-ga-event-label= "Create account page"
-                             class="ga-track-event subsection--wide"
-                             type="submit">${Messages("hts.register.create_account_help_to_save.accept-label")}</button>"""))
+          ga_submit_button("accept-and-create-account",
+                          "Accept and create account",
+                          "Create account page",
+                           Messages("hts.register.create_account_help_to_save.accept-label")))
         </div>
         <a href=@routes.IntroductionController.getAboutHelpToSave().url id="exit-without-creating-account"
                data-ga-event-category = "buttons"
