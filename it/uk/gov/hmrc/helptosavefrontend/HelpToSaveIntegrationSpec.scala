@@ -10,11 +10,11 @@ import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 
 /**
-  * NB: The integration tests here requires the following to be running:
-  * - mongo to be running
-  * - an instance of the help-to-save backend app
-  * - an instance of the auth login stub running with all its associated dependencies
-  */
+ * NB: The integration tests here requires the following to be running:
+ * - mongo to be running
+ * - an instance of the help-to-save backend app
+ * - an instance of the auth login stub running with all its associated dependencies
+ */
 class HelpToSaveIntegrationSpec extends IntegrationTest with AuthorisationSupport with MongoSupport {
 
   lazy val enrolmentCollection: JSONCollection = collection("enrolments")

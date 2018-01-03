@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,22 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package hts.pages
+@(id: String, action: String, label: String, message: String)
 
-import hts.browser.Browser
-import org.openqa.selenium.WebDriver
-
-trait Page {
-
-  val expectedURL: String
-
-  val expectedPageTitle: Option[String] = None
-
-  val expectedPageHeader: Option[String] = None
-
-  def navigate()(implicit driver: WebDriver): Unit = Browser.go to expectedURL
-
-}
-
+<button id= "@id"
+        data-ga-event-category = "buttons"
+        data-ga-event-action = "@action"
+        data-ga-event-label= "@label"
+        class="ga-track-event subsection--wide"
+        type="submit">@message</button>
