@@ -45,10 +45,11 @@
         <p>@Messages("hts.introduction.apply.par-3")</p>
         <p>@Messages("hts.introduction.apply.par-4")</p>
         @form(routes.IntroductionController.applySubmit(), 'class -> "group subsection--wide") {
-          ga_submit_button("button--get-started",
-                           "Start now",
-                           "Apply page",
-                           Messages("hts.introduction.apply.button-1")
+          @ga_submit_button("apply-button",
+                            "Start now",
+                            "Apply page",
+                            Messages("hts.introduction.apply.button-1"),
+                            Some("button--get-started")
                            )
         }
         <a href="@routes.AccessAccountController.accessAccount" data-ga-event-category = "links"

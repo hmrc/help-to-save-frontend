@@ -35,11 +35,12 @@
         <p>@Messages("hts.register.create_account_help_to_save.par-3")</p>
     </div>
     <div class="form-field form-field--submit">
-        @form(routes.RegisterController.createAccountHelpToSave)(
-          ga_submit_button("accept-and-create-account",
+        @form(routes.RegisterController.createAccountHelpToSave){
+          @ga_submit_button("accept-and-create-account",
                           "Accept and create account",
                           "Create account page",
-                           Messages("hts.register.create_account_help_to_save.accept-label")))
+                           Messages("hts.register.create_account_help_to_save.accept-label"))
+        }
         </div>
         <a href=@routes.IntroductionController.getAboutHelpToSave().url id="exit-without-creating-account"
                data-ga-event-category = "buttons"
