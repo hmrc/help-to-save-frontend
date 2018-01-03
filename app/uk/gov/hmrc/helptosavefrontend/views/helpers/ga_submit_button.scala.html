@@ -14,11 +14,14 @@
  * limitations under the License.
  *@
 
-@(id: String, action: String, label: String, message: String)
+@(id: String, action: String, label: String, message: String, classModifier: Option[String] = None)
 
+<div class="form-field form-field--submit">
 <button id= "@id"
         data-ga-event-category = "buttons"
         data-ga-event-action = "@action"
         data-ga-event-label= "@label"
-        class="ga-track-event subsection--wide"
+        class="button @{classModifier.getOrElse("")} ga-track-event"
         type="submit">@message</button>
+
+</div>
