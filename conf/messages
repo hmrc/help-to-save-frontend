@@ -225,7 +225,7 @@ hts.register.daily-cap-reached.p4=You''ll need to try again tomorrow.
 hts.register.daily-cap-reached.exit.gov.uk=Exit to GOV.UK
 
 hts.register.total-cap-reached.header.page.title=You can''t open an account yet
-hts.register.total-cap-reached.header=You can''t open an account yet.
+hts.register.total-cap-reached.header=You can''t open an account yet
 hts.register.total-cap-reached.p1=Thank you for applying for a Help to Save account.
 hts.register.total-cap-reached.p2=We have a limit on the number of people who can open an account at the moment.
 hts.register.total-cap-reached.p3=We''re sorry, we''ve reached our limit.
