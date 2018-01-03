@@ -14,10 +14,5 @@ Feature: Applicant goes through Identity Verification (IV) journey
     Examples:
       | reason                |
       | Failed IV             |
-      | Precondition Failed   |
       | Locked Out            |
       | Insufficient Evidence |
-      | Failed Matching       |
-      | Technical Issue       |
-      | User Aborted          |
-      | Timed Out             |
