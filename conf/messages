@@ -171,7 +171,9 @@ hts.core.about-help-to-save.eligibility=Eligibility
 hts.core.not-eligible.page-title=You''re not eligible for a Help to Save account
 hts.core.not-eligible.h1=You''re not eligible for a Help to Save account
 hts.core.not-eligible.p-1=You can only open a Help to Save account if you''re receiving Working Tax Credit payments.
-hts.core.not-eligible.p-2=Find out more about <a href="{0}" onclick="ga('send', 'event', 'links', 'Help to Save', 'Not eligible page');">eligibility for Help to Save</a>.
+hts.core.not-eligible.p-2=Find out more about
+hts.core.not-eligible.link-1=eligibility for Help to Save
+hts.core.not-eligible.p-2-2=.
 hts.core.not-eligible.h2-1=Waiting to hear back?
 hts.core.not-eligible.p-3=If you''ve applied for Working Tax Credit, you can only apply for an account again after:
 hts.core.not-eligible.li-1=your application for Working Tax Credit has been approved
