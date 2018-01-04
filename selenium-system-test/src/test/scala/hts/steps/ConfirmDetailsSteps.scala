@@ -17,12 +17,11 @@
 package hts.steps
 
 import java.time.format.DateTimeFormatter
-
 import cucumber.api.DataTable
 import hts.browser.Browser
-import hts.pages.{AuthorityWizardPage, EligiblePage, Page}
-import hts.utils.{ScenarioContext, TestUserInfo}
+import hts.pages.{AuthorityWizardPage, EligiblePage}
 import hts.utils.EitherOps._
+import hts.utils.{ScenarioContext, TestUserInfo}
 
 class ConfirmDetailsSteps extends Steps {
 
@@ -31,7 +30,7 @@ class ConfirmDetailsSteps extends Steps {
   }
 
   When("^an applicant passes the eligibility check$"){
-    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
   }
 
   Then("^they see their details$"){ () ⇒

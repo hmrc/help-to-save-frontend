@@ -34,7 +34,8 @@ class CreateAccountSteps extends Steps {
     AboutPage.navigate()
   }
 
-  When("^they try to sign in through the Apply page$") { () ⇒
+  When("^they try to sign in through the Apply page without being logged in GG$") { () ⇒
+    driver.manage().deleteAllCookies()
     ApplyPage.navigate()
     ApplyPage.clickSignInLink()
   }
@@ -52,7 +53,6 @@ class CreateAccountSteps extends Steps {
   Given("^a user has previously created an account$") { () ⇒
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
     createAccountUsingGGEmail()
-    driver.manage().deleteAllCookies()
   }
 
   When("^they choose to go ahead with creating an account$|^they log in and proceed to create an account using their GG email$") { () ⇒

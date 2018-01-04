@@ -9,7 +9,7 @@ Feature: Applicant creates new account
 
   @zap @HTS-23
   Scenario: An unauthenticated eligible user wishes to create an account but comes through the sign in link
-    Given they try to sign in through the Apply page
+    Given they try to sign in through the Apply page without being logged in GG
     And they are prompted to log into GG
     When they log in
     And they are informed they don't have an account

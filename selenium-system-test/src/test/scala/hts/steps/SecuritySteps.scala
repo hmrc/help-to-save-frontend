@@ -49,7 +49,7 @@ class SecuritySteps extends Steps {
   }
 
   Then("^they are prompted to log into GG$") { () ⇒
-    Browser.getCurrentUrl should include(s"${Configuration.ggHost}/gg/sign-in")
+    Browser.checkCurrentPageIs(GGSignInPage)
   }
 
   When("^I call URI (.+)$"){ (uri: String) ⇒
