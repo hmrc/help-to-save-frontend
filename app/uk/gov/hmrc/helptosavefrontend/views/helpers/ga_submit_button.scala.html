@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+
 @(id: String, action: String, label: String, message: String, classModifier: Option[String] = None)
 
 <div class="form-field form-field--submit">
@@ -23,5 +24,4 @@
         data-ga-event-label= "@label"
         class="button @{classModifier.getOrElse("")} ga-track-event"
         type="submit">@message</button>
-
 </div>
