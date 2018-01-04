@@ -31,19 +31,16 @@ class ConfirmDetailsSteps extends Steps {
   }
 
   When("^an applicant passes the eligibility check$"){
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
   Then("^they see their details$"){ () ⇒
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-
     val nino = ScenarioContext.currentNINO
-
     val info: TestUserInfo = ScenarioContext.userInfo().getOrElse(sys.error)
     val forename = info.forename.getOrElse(sys.error("Could not get forename"))
     val surname = info.surname.getOrElse(sys.error("Could not get surname"))
     val date = info.dateOfBirth.map(_.format(dateFormatter)).getOrElse(sys.error("Could not get date of birth"))
-
     val fullName = forename + " " + surname
     val displayedNino = nino.grouped(2).mkString(" ")
 

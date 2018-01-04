@@ -1,6 +1,7 @@
 @HTS-371 @HTS-379
 Feature: Applicant confirms details
 
+  @check
   Scenario: Applicant confirms details
     Given an applicant has the following details:
       | field          | value         |

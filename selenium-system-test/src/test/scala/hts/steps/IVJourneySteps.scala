@@ -25,7 +25,7 @@ import hts.utils.ScenarioContext
 class IVJourneySteps extends Steps {
 
   Given("^an applicant who hasn't been through IV applies$") {
-    AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 50, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateIneligibleUser(ApplyPage.expectedURL, ScenarioContext.generateEligibleNINO())
     ApplyPage.navigate()
 
     Browser.checkCurrentPageIs(ApplyPage)

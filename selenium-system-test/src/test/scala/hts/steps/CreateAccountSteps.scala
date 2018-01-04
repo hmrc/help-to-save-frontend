@@ -24,7 +24,7 @@ import hts.utils.{Configuration, ScenarioContext}
 
 class CreateAccountSteps extends Steps {
 
-  private def createAccountUsingGGEmail(): Unit ={
+  private def createAccountUsingGGEmail(): Unit = {
     EligiblePage.clickConfirmAndContinue()
     SelectEmailPage.selectGGEmail()
     CreateAccountPage.createAccount()
@@ -40,7 +40,7 @@ class CreateAccountSteps extends Steps {
   }
 
   Given("^the authenticated user tries to sign in through the Apply page$|^they log in$") { () ⇒
-    AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUser(ApplyPage.expectedURL, ScenarioContext.generateEligibleNINO())
     ApplyPage.clickSignInLink()
   }
 
@@ -50,18 +50,18 @@ class CreateAccountSteps extends Steps {
   }
 
   Given("^a user has previously created an account$") { () ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
     createAccountUsingGGEmail()
     driver.manage().deleteAllCookies()
   }
 
   When("^they choose to go ahead with creating an account$|^they log in and proceed to create an account using their GG email$") { () ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
     createAccountUsingGGEmail()
   }
 
   When("^an applicant cancels their application just before creating an account$") { () ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
     EligiblePage.clickConfirmAndContinue()
     SelectEmailPage.selectGGEmail()
     CreateAccountPage.exitWithoutCreatingAccount()
@@ -100,7 +100,7 @@ class CreateAccountSteps extends Steps {
   }
 
   When("^they log in again$") { () ⇒
-    AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 200, "Strong", ScenarioContext.currentNINO())
+    AuthorityWizardPage.authenticateEligibleUser(ApplyPage.expectedURL, ScenarioContext.currentNINO())
     ApplyPage.clickSignInLink()
   }
 

@@ -19,9 +19,6 @@ package hts.pages
 import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
-
-import scala.annotation.tailrec
 
 object AuthorityWizardPage extends Page {
 
@@ -29,6 +26,16 @@ object AuthorityWizardPage extends Page {
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
+    Browser.submit()
+  }
+
+  def authenticateEligibleUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
+    fillInAuthDetails(redirectUrl, 200, "strong", nino)
+    Browser.submit()
+  }
+
+  def authenticateIneligibleUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
+    fillInAuthDetails(redirectUrl, 50, "none", nino)
     Browser.submit()
   }
 
@@ -44,9 +51,9 @@ object AuthorityWizardPage extends Page {
     setConfidenceLevel(confidence)
     setCredentialStrength(credentialStrength)
     setNino(nino)
-    setGivenName("GivenName")
-    setFamilyName("FamilyName")
-    setDateOfBirth("1980-12-20")
+    setGivenName("FirstName")
+    setFamilyName("LastName")
+    setDateOfBirth("1980-12-31")
     setAddressLine1("AddressLine1")
     setAddressLine2("AddressLine2")
     setAddressLine3("AddressLine3")
@@ -103,27 +110,5 @@ object AuthorityWizardPage extends Page {
 
   def setCountryCode(countryCode: String)(implicit driver: WebDriver): Unit =
     Browser.find(Browser.name("itmp.address.countryCode")).foreach(_.underlying.sendKeys(countryCode))
-
-  private def setAddressLines(address: Address)(implicit driver: WebDriver): Unit = {
-    val setFunctions: List[String ⇒ Unit] = List(
-      setAddressLine1 _,
-      setAddressLine2 _,
-      setAddressLine3 _,
-      setAddressLine4 _,
-      setAddressLine5 _
-    )
-
-      @tailrec
-      def loop(acc: List[(String, String ⇒ Unit)]): Unit = acc match {
-        case Nil ⇒
-          ()
-
-        case (line, f) :: tail ⇒
-          f(line)
-          loop(tail)
-      }
-
-    loop(address.lines.zip(setFunctions))
-  }
 
 }

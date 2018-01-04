@@ -28,8 +28,8 @@ class SecuritySteps extends Steps {
 
   val credentialStrengthsRegex: String = oneOfRegex(Set("weak", "strong", "none"))
 
-  Given(s"^I have logged in to Government Gateway with a confidence level of $confidenceLevelRegex$$") { (level: Int) ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, level, "Strong", ScenarioContext.generateEligibleNINO())
+  Given("^I have logged in to Government Gateway with a confidence level of 100$") {
+    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 100, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Then("^I am forced into going through IV before being able to proceed with their HtS application$") { () ⇒
@@ -37,7 +37,7 @@ class SecuritySteps extends Steps {
   }
 
   Given("^the user has logged in and passed IV$") { () ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
   When("^I try to view my details without having logged in GG$") { () ⇒
@@ -63,7 +63,7 @@ class SecuritySteps extends Steps {
   }
 
   Given("^I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save$"){
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateIneligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateIneligibleNINO())
   }
 
   Then("^I still see confirmation that I am NOT eligible$"){ () ⇒
