@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.identityPages
 
 import hts.browser.Browser
+import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object GiveEmailPage extends Page {
+object FailedIVMatchingPage extends IVPage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-matching"
 
-  def continue()(implicit driver: WebDriver): Unit = Browser.click on "continue"
+  override val expectedPageHeader: Option[String] = Some("We were not able to verify your identity")
+
+  override val expectedPageTitle: Option[String] = Some("We were not able to verify your identity")
+
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Try again")
 }

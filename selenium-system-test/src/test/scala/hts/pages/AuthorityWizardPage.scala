@@ -17,12 +17,10 @@
 package hts.pages
 
 import java.time.format.DateTimeFormatter
-
 import hts.browser.Browser
 import hts.utils.{Configuration, TestUserInfo}
 import org.openqa.selenium.WebDriver
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
-
 import scala.annotation.tailrec
 
 object AuthorityWizardPage extends Page {
@@ -30,73 +28,49 @@ object AuthorityWizardPage extends Page {
   val expectedURL: String = s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    AuthorityWizardPage.navigate()
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
+    Browser.submit()
   }
 
-  private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    setRedirect(redirectUrl)
-    setConfidenceLevel(confidence)
-    setCredentialStrength(credentialStrength)
-    setNino(nino)
-    setGivenName("GivenName")
-    setFamilyName("FamilyName")
-    setDateOfBirth("1980-12-20")
-    setAddressLine1("AddressLine1")
-    setAddressLine2("AddressLine2")
-    setAddressLine3("AddressLine3")
-    setAddressLine4("AddressLine4")
-    setAddressLine5("AddressLine5")
-    setPostCode("S24AH")
-    setCountryCode("GB")
-    submit()
+  def authenticateEligibleUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
+    fillInAuthDetails(redirectUrl, 200, "strong", nino)
+    Browser.submit()
   }
 
-  private def fillInAuthDetailsNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    setRedirect(redirectUrl)
-    setConfidenceLevel(confidence)
-    setCredentialStrength(credentialStrength)
-    setNino(nino)
-    setGivenName("GivenName")
-    setFamilyName("FamilyName")
-    setDateOfBirth("1980-12-20")
-    setAddressLine1("AddressLine1")
-    setAddressLine2("AddressLine2")
-    setAddressLine3("AddressLine3")
-    setAddressLine4("AddressLine4")
-    setAddressLine5("AddressLine5")
-    setPostCode("S24AH")
-    setCountryCode("GB")
-    setBlankEmail
-    submit()
+  def authenticateIneligibleUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
+    fillInAuthDetails(redirectUrl, 50, "none", nino)
+    Browser.submit()
   }
 
   def authenticateUserNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    AuthorityWizardPage.navigate()
-    fillInAuthDetailsNoEmail(redirectUrl, confidence, credentialStrength, nino)
+    fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
+    setBlankEmail
+    Browser.submit()
   }
 
-  def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: TestUserInfo)(implicit driver: WebDriver): Unit = {
-    navigate()
-    setConfidenceLevel(confidence)
+  private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
+    AuthorityWizardPage.navigate()
+    setRedirect(redirectUrl)
     setCredentialStrength(credentialStrength)
-
-    setAddressLines(userInfo.address)
-
-    userInfo.address.postcode.foreach(setPostCode)
-    userInfo.address.country.foreach(setCountryCode)
-
-    userInfo.forename.foreach(setGivenName)
-    userInfo.surname.foreach(setFamilyName)
-    userInfo.nino.foreach(setNino)
-    userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+    setConfidenceLevel(confidence)
+    setNino(nino)
+    setGivenName("FirstName")
+    setFamilyName("LastName")
+    setDateOfBirth("1980-12-31")
+    setAddressLine1("AddressLine1")
+    setAddressLine2("AddressLine2")
+    setAddressLine3("AddressLine3")
+    setAddressLine4("AddressLine4")
+    setAddressLine5("AddressLine5")
+    setPostCode("S24AH")
+    setCountryCode("GB-ENG")
   }
 
   def setRedirect(url: String)(implicit driver: WebDriver): Unit =
     Browser.find(Browser.name("redirectionUrl")).foreach(_.underlying.sendKeys(url))
 
   def setNino(nino: String)(implicit driver: WebDriver): Unit =
-    Browser.find(Browser.name("nino")).foreach{ element ⇒
+    Browser.find(Browser.name("nino")).foreach { element ⇒
       element.underlying.sendKeys(nino)
       println("NINO entered on auth wizard: " + nino)
     }
@@ -106,9 +80,6 @@ object AuthorityWizardPage extends Page {
 
   def setConfidenceLevel(level: Int)(implicit driver: WebDriver): Unit =
     Browser.find(Browser.name("confidenceLevel")).foreach(_.underlying.sendKeys(level.toString))
-
-  def submit()(implicit driver: WebDriver): Unit =
-    Browser.find(Browser.cssSelector("input.button")).foreach(_.underlying.submit())
 
   def setGivenName(givenName: String)(implicit driver: WebDriver): Unit =
     Browser.find(Browser.name("itmp.givenName")).foreach(_.underlying.sendKeys(givenName))
@@ -143,6 +114,21 @@ object AuthorityWizardPage extends Page {
   def setCountryCode(countryCode: String)(implicit driver: WebDriver): Unit =
     Browser.find(Browser.name("itmp.address.countryCode")).foreach(_.underlying.sendKeys(countryCode))
 
+  def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: TestUserInfo)(implicit driver: WebDriver): Unit = {
+    navigate()
+    setRedirect(EligiblePage.expectedURL)
+    setConfidenceLevel(confidence)
+    setCredentialStrength(credentialStrength)
+    setAddressLines(userInfo.address)
+    userInfo.address.postcode.foreach(setPostCode)
+    userInfo.address.country.foreach(setCountryCode)
+    userInfo.forename.foreach(setGivenName)
+    userInfo.surname.foreach(setFamilyName)
+    userInfo.nino.foreach(setNino)
+    userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
+    Browser.submit()
+  }
+
   private def setAddressLines(address: Address)(implicit driver: WebDriver): Unit = {
     val setFunctions: List[String ⇒ Unit] = List(
       setAddressLine1 _,
@@ -154,14 +140,11 @@ object AuthorityWizardPage extends Page {
 
       @tailrec
       def loop(acc: List[(String, String ⇒ Unit)]): Unit = acc match {
-        case Nil ⇒
-          ()
-
+        case Nil ⇒ ()
         case (line, f) :: tail ⇒
           f(line)
           loop(tail)
       }
-
     loop(address.lines.zip(setFunctions))
   }
 }

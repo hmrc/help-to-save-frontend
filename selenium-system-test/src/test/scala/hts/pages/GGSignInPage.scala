@@ -16,25 +16,10 @@
 
 package hts.pages
 
-import hts.browser.Browser
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
-object SelectEmailPage extends Page {
+object GGSignInPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/select-email"
-
-  def clickContinue()(implicit driver: WebDriver): Unit = Browser.submit
-
-  def selectGGEmail()(implicit driver: WebDriver): Unit = {
-    Browser.clickButtonByIdOnceClickable("registered-email")
-    clickContinue()
-  }
-
-  def setAndVerifyNewEmail(email: String)(implicit driver: WebDriver): Unit = {
-    Browser.clickButtonByIdOnceClickable("add-new-email")
-    Browser.textField("new-email").value = email
-    clickContinue()
-  }
+  val expectedURL: String = s"${Configuration.ggHost}/gg/sign-in"
 
 }

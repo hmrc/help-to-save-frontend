@@ -14,27 +14,21 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.identityPages
 
 import hts.browser.Browser
+import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object SelectEmailPage extends Page {
+object IdentityVerifiedPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/select-email"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/identity-verified"
 
-  def clickContinue()(implicit driver: WebDriver): Unit = Browser.submit
+  override val expectedPageTitle: Option[String] = Some("We've verified your identity")
 
-  def selectGGEmail()(implicit driver: WebDriver): Unit = {
-    Browser.clickButtonByIdOnceClickable("registered-email")
-    clickContinue()
-  }
+  override val expectedPageHeader: Option[String] = Some("We've verified your identity")
 
-  def setAndVerifyNewEmail(email: String)(implicit driver: WebDriver): Unit = {
-    Browser.clickButtonByIdOnceClickable("add-new-email")
-    Browser.textField("new-email").value = email
-    clickContinue()
-  }
+  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 
 }

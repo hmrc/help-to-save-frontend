@@ -14,27 +14,20 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.identityPages
 
 import hts.browser.Browser
+import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object SelectEmailPage extends Page {
+object FailedIVLockedOutPage extends IVPage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/select-email"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-locked-out"
 
-  def clickContinue()(implicit driver: WebDriver): Unit = Browser.submit
+  override val expectedPageHeader: Option[String] = Some("We were not able to verify your identity")
 
-  def selectGGEmail()(implicit driver: WebDriver): Unit = {
-    Browser.clickButtonByIdOnceClickable("registered-email")
-    clickContinue()
-  }
+  override val expectedPageTitle: Option[String] = Some("We were not able to verify your identity")
 
-  def setAndVerifyNewEmail(email: String)(implicit driver: WebDriver): Unit = {
-    Browser.clickButtonByIdOnceClickable("add-new-email")
-    Browser.textField("new-email").value = email
-    clickContinue()
-  }
-
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Exit to About Help to Save")
 }

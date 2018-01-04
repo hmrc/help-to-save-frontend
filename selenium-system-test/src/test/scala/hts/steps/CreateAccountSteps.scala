@@ -24,33 +24,55 @@ import hts.utils.{Configuration, ScenarioContext}
 
 class CreateAccountSteps extends Steps {
 
-  Given("""^A user is at the start of the registration process$""") { () ⇒
+  private def createAccountUsingGGEmail(): Unit = {
+    EligiblePage.clickConfirmAndContinue()
+    SelectEmailPage.selectGGEmail()
+    CreateAccountPage.createAccount()
+  }
+
+  Given("^an applicant is on the home page$") { () ⇒
     AboutPage.navigate()
   }
 
-  Given("""^An authenticated user is at the start of the registration process$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(AboutPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
-  }
-
-  Given("""^a user is on the apply page$""") { () ⇒
-    ApplyPage.navigate()
-  }
-
-  Given("""^an authenticated user is on the apply page$""") { () ⇒
-    AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
-  }
-
-  Given("""^a user has previously created an account$"""){ () ⇒
-    AuthorityWizardPage.navigate()
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
-    EligiblePage.startCreatingAccount()
-    SelectEmailPage.selectGGEmail()
-    SelectEmailPage.clickContinue()
-    CreateAccountPage.createAccount()
+  When("^they try to sign in through the Apply page without being logged in GG$") { () ⇒
     driver.manage().deleteAllCookies()
+    ApplyPage.navigate()
+    ApplyPage.clickSignInLink()
   }
 
-  When("""^they proceed through to the apply page$""") { () ⇒
+  Given("^the authenticated user tries to sign in through the Apply page$|^they log in$") { () ⇒
+    AuthorityWizardPage.authenticateEligibleUser(ApplyPage.expectedURL, ScenarioContext.generateEligibleNINO())
+    ApplyPage.clickSignInLink()
+  }
+
+  Given("^they try to start creating an account from the Apply page$") {
+    ApplyPage.navigate()
+    ApplyPage.clickStartNow()
+  }
+
+  Given("^a user has previously created an account$") { () ⇒
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
+    createAccountUsingGGEmail()
+  }
+
+  When("^they choose to go ahead with creating an account$|^they log in and proceed to create an account using their GG email$") { () ⇒
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
+    createAccountUsingGGEmail()
+  }
+
+  When("^an applicant cancels their application just before creating an account$") { () ⇒
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
+    EligiblePage.clickConfirmAndContinue()
+    SelectEmailPage.selectGGEmail()
+    CreateAccountPage.exitWithoutCreatingAccount()
+  }
+
+  When("^they proceed to create an account using their GG email$"){
+    EligiblePage.navigate()
+    createAccountUsingGGEmail()
+  }
+
+  When("^they proceed to the Apply page and click on the Start now button$") { () ⇒
     Browser.checkCurrentPageIs(AboutPage)
     Browser.nextPage()
 
@@ -64,65 +86,34 @@ class CreateAccountSteps extends Steps {
     Browser.nextPage()
 
     Browser.checkCurrentPageIs(ApplyPage)
-  }
-
-  When("""^they click on the Start now button$""") { () ⇒
     ApplyPage.clickStartNow()
   }
 
-  When("""^they click on the sign in link$""") { () ⇒
-    ApplyPage.clickSignInLink()
-  }
-
-  When("""^they click on accept and create an account$""") { () ⇒
+  When("^they click on accept and create an account$") { () ⇒
     CreateAccountPage.createAccount()
-  }
-
-  When("""^the user clicks on the check eligibility button$""") { () ⇒
-    YouDoNotHaveAnAccountPage.clickCheckEligibility()
-  }
-
-  When("""^they have logged in again and passed IV$"""){ () ⇒
-    driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.currentNINO())
-    AccessAccountPage.navigate()
-  }
-
-  Then("""^they see that the account is created$""") { () ⇒
     Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
 
-  Then("""^they will be on a page which says you do not have an account$""") { () ⇒
-    Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
-  }
-
-  Then("""^they will be on the you're eligible page$""") { () ⇒
+  When("^the user continues$") { () ⇒
+    YouDoNotHaveAnAccountPage.clickContinue()
     Browser.checkCurrentPageIs(EligiblePage)
   }
 
-  Then("""^they will be on the account home page$"""){ () ⇒
-    Browser.checkCurrentPageIs(NsiManageAccountPage)
+  When("^they log in again$") { () ⇒
+    AuthorityWizardPage.authenticateEligibleUser(ApplyPage.expectedURL, ScenarioContext.currentNINO())
+    ApplyPage.clickSignInLink()
   }
 
-  When("""^an applicant cancels their application just before giving the go-ahead to create an account$"""){ () ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
-    EligiblePage.startCreatingAccount()
-    SelectEmailPage.selectGGEmail()
-    SelectEmailPage.clickContinue()
-    CreateAccountPage.exitWithoutCreatingAccount()
+  Then("^they are informed they don't have an account$") { () ⇒
+    Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
   }
 
-  Then("""^they see the Help to Save landing page \(with information about Help to Save\)$"""){ () ⇒
+  Then("^they see the Help to Save About page$") { () ⇒
     Browser.checkCurrentPageIs(AboutPage)
   }
 
-  When("""^they choose to go ahead with creating an account$"""){ () ⇒
-    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
-    AuthorityWizardPage.setRedirect(EligiblePage.expectedURL)
-    AuthorityWizardPage.submit()
-    EligiblePage.startCreatingAccount()
-    SelectEmailPage.selectGGEmail()
-    SelectEmailPage.clickContinue()
-    CreateAccountPage.createAccount()
+  Then("^they see that the account is created$|^they will be on the account home page$") { () ⇒
+    Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
+
 }

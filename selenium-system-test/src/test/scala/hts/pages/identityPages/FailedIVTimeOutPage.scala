@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.identityPages
 
+import hts.browser.Browser
+import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-//This page won't exist as a physical page but is here to expose a redirect URL
-object AccessAccountPage extends Page {
+object FailedIVTimeOutPage extends IVPage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/access-account"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-time-out"
 
+  override val expectedPageHeader: Option[String] = Some("Your session has ended")
+
+  override val expectedPageTitle: Option[String] = Some("Your session has ended")
+
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Try again")
 }
