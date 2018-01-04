@@ -85,7 +85,7 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
   def checkCurrentPageIs(page: Page)(implicit driver: WebDriver): Unit = {
       def isActualUrlExpectedUrl(expectedUrl: String)(implicit driver: WebDriver): Boolean = {
         try {
-          val wait = new WebDriverWait(driver, 20)
+          val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
           wait.until(ExpectedConditions.urlContains(expectedUrl))
           true
         } catch {

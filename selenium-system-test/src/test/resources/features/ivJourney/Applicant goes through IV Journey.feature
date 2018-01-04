@@ -1,15 +1,16 @@
 @iv-journey @zap
 Feature: Applicant goes through Identity Verification (IV) journey
 
-  Scenario: An eligible applicant passes IV and eligibility check
+  Background:
     Given an applicant who hasn't been through IV applies
-    When they go through IV check successfully and continue
-    Then they will be redirected to the eligibility check and pass it
+
+  Scenario: An eligible applicant passes IV and eligibility check
+    When they successfully go through the IV journey
+    Then they see that they have passed the eligibility check
 
   Scenario Outline: An eligible applicant does not pass IV and has to try again
-    Given an applicant who hasn't been through IV applies
-    When they go through IV and fail because of <reason>
-    Then they will see the <reason> page
+    When they go through the IV journey and fail because of <reason>
+    Then they will see the <reason>
 
     Examples:
       | reason                |

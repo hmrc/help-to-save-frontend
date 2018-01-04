@@ -30,10 +30,8 @@ class ConfirmDetailsSteps extends Steps {
     ScenarioContext.setDataTable(applicantDetails)
   }
 
-  When("^an applicant passes the eligibility check$"){ () ⇒
-    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
-    AuthorityWizardPage.setRedirect(EligiblePage.expectedURL)
-    AuthorityWizardPage.submit()
+  When("^an applicant passes the eligibility check$"){
+    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
   Then("^they see their details$"){ () ⇒

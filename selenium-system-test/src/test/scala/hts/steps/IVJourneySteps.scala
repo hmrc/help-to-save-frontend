@@ -32,26 +32,26 @@ class IVJourneySteps extends Steps {
     ApplyPage.clickStartNow()
   }
 
-  When("^they go through IV check successfully and continue$") {
+  When("^they successfully go through the IV journey$") {
     IdentityVerificationStubPage.selectSuccessfulJourney()
 
     Browser.checkCurrentPageIs(IdentityVerifiedPage)
     IdentityVerifiedPage.continue()
   }
 
-  Then("^they will be redirected to the eligibility check and pass it$") {
+  Then("^they see that they have passed the eligibility check$") {
     Browser.checkCurrentPageIs(EligiblePage)
 
     AboutPage.navigate()
     Browser.checkCurrentPageIs(AboutPage)
   }
 
-  When("^they go through IV and fail because of (.+)") { reason: String ⇒
+  When("^they go through the IV journey and fail because of (.+)$") { reason: String ⇒
     Browser.checkCurrentPageIs(IdentityVerificationStubPage)
     IdentityVerificationStubPage.selectJourney(reason)
   }
 
-  Then("^they will see the (.+) page$") { reason: String ⇒
+  Then("^they will see the (.+)$") { reason: String ⇒
     val reasonPage = IVPage.fromString(reason)
     Browser.checkCurrentPageIs(reasonPage)
     reasonPage.executeIVResultPageAction()

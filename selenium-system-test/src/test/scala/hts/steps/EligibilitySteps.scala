@@ -22,7 +22,7 @@ import hts.utils.ScenarioContext
 
 class EligibilitySteps extends Steps {
 
-  Given("^an user is in receipt of working tax credit$") { () ⇒
+  Given("^a user is in receipt of working tax credit$") { () ⇒
     val _ = ScenarioContext.generateEligibleNINO()
   }
 
@@ -38,7 +38,7 @@ class EligibilitySteps extends Steps {
     EligiblePage.clickConfirmAndContinue()
   }
 
-  Given("^an user is NOT in receipt of working tax credit$") { () ⇒
+  Given("^a user is NOT in receipt of working tax credit$") { () ⇒
     val _ = ScenarioContext.generateIneligibleNINO()
   }
 

@@ -40,7 +40,7 @@ class SecuritySteps extends Steps {
     AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
-  When("^I try to view the user details page without having logged in GG$") { () ⇒
+  When("^I try to view my details without having logged in GG$") { () ⇒
     EligiblePage.navigate()
   }
 
@@ -48,12 +48,8 @@ class SecuritySteps extends Steps {
     CreateAccountPage.navigate()
   }
 
-  Then("^I am prompted to log in to Government Gateway$") { () ⇒
+  Then("^they are prompted to log into GG$") { () ⇒
     Browser.getCurrentUrl should include(s"${Configuration.ggHost}/gg/sign-in")
-  }
-
-  Then("^the GG sign in page is visible$"){ () ⇒
-    Browser.getCurrentUrl should include("gg/sign-in?")
   }
 
   When("^I call URI (.+)$"){ (uri: String) ⇒
@@ -66,7 +62,7 @@ class SecuritySteps extends Steps {
     Browser.pageSource shouldNot include ("This page can’t be found")
   }
 
-  Given("^I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save$"){ () ⇒
+  Given("^I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save$"){
     AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateIneligibleNINO())
   }
 

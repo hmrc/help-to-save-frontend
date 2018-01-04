@@ -24,26 +24,52 @@ import hts.utils.{Configuration, ScenarioContext}
 
 class CreateAccountSteps extends Steps {
 
+  private def createAccountUsingGGEmail(): Unit ={
+    EligiblePage.clickConfirmAndContinue()
+    SelectEmailPage.selectGGEmail()
+    CreateAccountPage.createAccount()
+  }
+
   Given("^an applicant is on the home page$") { () ⇒
     AboutPage.navigate()
   }
 
-  When("^the user tries to sign in through the Apply page$") { () ⇒
+  When("^they try to sign in through the Apply page$") { () ⇒
     ApplyPage.navigate()
     ApplyPage.clickSignInLink()
   }
 
-  Given("^an authenticated user tries to sign in through the Apply page$") { () ⇒
+  Given("^the authenticated user tries to sign in through the Apply page$|^they log in$") { () ⇒
     AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
     ApplyPage.clickSignInLink()
   }
 
+  Given("^they try to start creating an account from the Apply page$") {
+    ApplyPage.navigate()
+    ApplyPage.clickStartNow()
+  }
+
   Given("^a user has previously created an account$") { () ⇒
+    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    createAccountUsingGGEmail()
+    driver.manage().deleteAllCookies()
+  }
+
+  When("^they choose to go ahead with creating an account$|^they log in and proceed to create an account using their GG email$") { () ⇒
+    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
+    createAccountUsingGGEmail()
+  }
+
+  When("^an applicant cancels their application just before creating an account$") { () ⇒
     AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
     EligiblePage.clickConfirmAndContinue()
     SelectEmailPage.selectGGEmail()
-    CreateAccountPage.createAccount()
-    driver.manage().deleteAllCookies()
+    CreateAccountPage.exitWithoutCreatingAccount()
+  }
+
+  When("^they proceed to create an account using their GG email$"){
+    EligiblePage.navigate()
+    createAccountUsingGGEmail()
   }
 
   When("^they proceed to the Apply page and click on the Start now button$") { () ⇒
@@ -65,7 +91,6 @@ class CreateAccountSteps extends Steps {
 
   When("^they click on accept and create an account$") { () ⇒
     CreateAccountPage.createAccount()
-
     Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
 
@@ -74,29 +99,12 @@ class CreateAccountSteps extends Steps {
     Browser.checkCurrentPageIs(EligiblePage)
   }
 
-  When("^they have logged in again and passed IV$") { () ⇒
-    driver.navigate().to(s"${Configuration.authHost}/auth-login-stub/gg-sign-in")
+  When("^they log in again$") { () ⇒
     AuthorityWizardPage.authenticateUser(ApplyPage.expectedURL, 200, "Strong", ScenarioContext.currentNINO())
     ApplyPage.clickSignInLink()
   }
 
-  When("^an applicant cancels their application just before creating an account$") { () ⇒
-    AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
-    EligiblePage.clickConfirmAndContinue()
-    SelectEmailPage.selectGGEmail()
-    CreateAccountPage.exitWithoutCreatingAccount()
-  }
-
-  When("^they choose to go ahead with creating an account$") { () ⇒
-    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
-    AuthorityWizardPage.setRedirect(EligiblePage.expectedURL)
-    AuthorityWizardPage.submit()
-    EligiblePage.clickConfirmAndContinue()
-    SelectEmailPage.selectGGEmail()
-    CreateAccountPage.createAccount()
-  }
-
-  Then("^they see a page stating they don't have an account$") { () ⇒
+  Then("^they are informed they don't have an account$") { () ⇒
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
   }
 
@@ -104,7 +112,8 @@ class CreateAccountSteps extends Steps {
     Browser.checkCurrentPageIs(AboutPage)
   }
 
-  Then("^they will be on the account home page$") { () ⇒
+  Then("^they see that the account is created$|^they will be on the account home page$") { () ⇒
     Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
+
 }
