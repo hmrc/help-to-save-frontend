@@ -1,28 +1,39 @@
-Feature: User CANNOT proceed without going through security
+@security
+Feature: Applicant CANNOT proceed without going through security
 
   @HTS-23
-  Scenario: User CANNOT view the user details page without logging in to Government Gateway
-    When I try to view my details without having logged in GG
+  Scenario: Applicant CANNOT view the user details page without logging in to Government Gateway
+    When they try to view their details without having logged in GG
     Then they are prompted to log into GG
 
   @HTS-23
-  Scenario: User CANNOT view the create-an-account page without logging in to Government Gateway
-    When I try to view the create-an-account page
+  Scenario: Applicant CANNOT view the create-an-account page without logging in to Government Gateway
+    When they try to view the create-an-account page
     Then they are prompted to log into GG
 
-  @HTS-25
-  Scenario: User CANNOT view user details if they have NOT passed IV
-    Given I have logged in to Government Gateway with a confidence level of 100
-    When I try to view my details without having logged in GG
-    Then I am forced into going through IV before being able to proceed with their HtS application
+  Scenario: Ineligible applicant cannot view the create-an-account page
+    Given they have gone through GG/2SV/identity check but they are NOT eligible for Help to Save
+    When they try to view the create-an-account page
+    Then they still see confirmation that they are NOT eligible
 
   @HTS-25
-  Scenario: User CANNOT proceed with application if they have NOT passed IV
-    Given I have logged in to Government Gateway with a confidence level of 100
-    When I try to view the create-an-account page
-    Then I am forced into going through IV before being able to proceed with their HtS application
+  Scenario Outline: Applicant CANNOT proceed with application if they have NOT passed IV
+    Given they have logged into Government Gateway with a confidence level of <level>
+    When they try to view the create-an-account page
+    Then they are forced into going through IV before being able to proceed with their HtS application
 
-  Scenario: Ineligible user cannot view the create-an-account page
-    Given I have gone through GG/2SV/identity check but I am NOT eligible for Help to Save
-    When I try to view the create-an-account page
-    Then I still see confirmation that I am NOT eligible
+  Examples:
+      | level |
+      | 50    |
+      | 100   |
+
+  @HTS-25
+  Scenario Outline: Applicant CANNOT view user details if they have NOT passed IV
+    Given they have logged into Government Gateway with a confidence level of <level>
+    When they try to view their details without having logged in GG
+    Then they are forced into going through IV before being able to proceed with their HtS application
+
+    Examples:
+      | level |
+      | 50    |
+      | 100   |
