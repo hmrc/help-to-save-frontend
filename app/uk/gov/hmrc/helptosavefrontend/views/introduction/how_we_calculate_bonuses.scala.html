@@ -16,13 +16,13 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.views.html.introduction.navigation
+@import uk.gov.hmrc.helptosavefrontend.views.html.introduction.{navigation, sidebar}
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.introduction.how-we-calculate-bonuses.title"),
-    sidebarLinks = None,
+    sidebarLinks = Some(sidebar()),
     bodyClasses = None) {
     @navigation(request.uri, "How we calculate bonuses page")
 
