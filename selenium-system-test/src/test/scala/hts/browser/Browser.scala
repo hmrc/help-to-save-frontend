@@ -94,4 +94,8 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
   }
 
+  def isElementByIdVisible(id: String)(implicit driver: WebDriver): Boolean = {
+    driver.findElement(By.id(id)).isDisplayed
+  }
+
 }

@@ -21,6 +21,8 @@ import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.ScenarioContext
 
+import scala.collection.JavaConverters._
+
 class VerifyLinksSteps extends Steps {
 
   Given("""^that users are authenticated$""") { () ⇒
@@ -66,29 +68,41 @@ class VerifyLinksSteps extends Steps {
 
     //go back to original select email page and continue
     SelectEmailPage.selectGGEmail()
-    //SelectEmailPage.clickContinue()
     checkForLinksThatExistOnEveryPage(CreateAccountPage)
-
-    CreateAccountPage.createAccount()
 
   }
 
   private def checkForLinksThatExistOnEveryPage(currentPage: Page): Unit = {
 
-    //feedback link
-    Browser.isTextOnPage("BETA") shouldBe true
-    Browser.clickButtonByIdOnceClickable("feedback-link")
+    verifyFeedbackLink()
     driver.navigate().back()
+    verifyGetHelpLink()
+    verifyPrivacyPolicyLink()
 
-    //Get Help with this page
-    Browser.isTextOnPage("Is there anything wrong with this page") shouldBe true
-    Browser.clickButtonByIdOnceClickable("get-help-action")
-
-    //Privacy policy
-    Browser.isTextOnPage("Privacy policy") shouldBe true
-    Browser.click on Browser.linkText("Privacy policy")
     currentPage.navigate()
     Browser.checkCurrentPageIs(currentPage)
+  }
+
+  private def verifyFeedbackLink(): Unit = {
+    Browser.isTextOnPage("BETA") shouldBe true
+    Browser.clickButtonByIdOnceClickable("feedback-link")
+    Browser.checkCurrentPageIs(FeedbackPage)
+  }
+
+  private def verifyGetHelpLink(): Unit = {
+    Browser.isTextOnPage("Is there anything wrong with this page") shouldBe true
+    Browser.clickButtonByIdOnceClickable("get-help-action")
+    Browser.isElementByIdVisible("report-error-partial-form") shouldBe true
+
+  }
+
+  private def verifyPrivacyPolicyLink(): Unit = {
+    Browser.isTextOnPage("Privacy policy") shouldBe true
+    Browser.clickLinkTextOnceClickable("Privacy policy")
+    val tabs = driver.getWindowHandles.asScala.toList
+    driver.switchTo.window(tabs(1)) //switch to privacy policy tab
+    Browser.checkCurrentPageIs(PrivacyPolicyPage)
+    driver.switchTo.window(tabs.headOption.getOrElse("missing url here")) //switch back to original page
   }
 
 }
