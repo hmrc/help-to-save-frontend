@@ -35,8 +35,8 @@ class CreateAccountSteps extends Steps {
   }
 
   When("^they try to sign in through the Apply page without being logged in GG$") { () ⇒
-    driver.manage().deleteAllCookies()
     ApplyPage.navigate()
+    driver.manage().deleteAllCookies()
     ApplyPage.clickSignInLink()
   }
 
