@@ -1,3 +1,4 @@
+@ignore
 Feature: Returning account holder tries to apply again
 
   @HTS-147 @zap
