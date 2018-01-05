@@ -29,23 +29,23 @@ object AuthorityWizardPage extends Page {
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
-    Browser.submit()
+    clickSubmit()
   }
 
   def authenticateEligibleUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
     fillInAuthDetails(redirectUrl, 200, "strong", nino)
-    Browser.submit()
+    clickSubmit()
   }
 
   def authenticateIneligibleUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
     fillInAuthDetails(redirectUrl, 50, "none", nino)
-    Browser.submit()
+    clickSubmit()
   }
 
   def authenticateUserNoEmail(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)
     setBlankEmail
-    Browser.submit()
+    clickSubmit()
   }
 
   private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
@@ -114,6 +114,9 @@ object AuthorityWizardPage extends Page {
   def setCountryCode(countryCode: String)(implicit driver: WebDriver): Unit =
     Browser.find(Browser.name("itmp.address.countryCode")).foreach(_.underlying.sendKeys(countryCode))
 
+  def clickSubmit()(implicit driver: WebDriver): Unit =
+    Browser.find(Browser.className("button")).foreach(_.underlying.click())
+
   def enterUserDetails(confidence: Int, credentialStrength: String, userInfo: TestUserInfo)(implicit driver: WebDriver): Unit = {
     navigate()
     setRedirect(EligiblePage.expectedURL)
@@ -126,7 +129,7 @@ object AuthorityWizardPage extends Page {
     userInfo.surname.foreach(setFamilyName)
     userInfo.nino.foreach(setNino)
     userInfo.dateOfBirth.foreach(d ⇒ setDateOfBirth(d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))))
-    Browser.submit()
+    clickSubmit()
   }
 
   private def setAddressLines(address: Address)(implicit driver: WebDriver): Unit = {
@@ -147,4 +150,5 @@ object AuthorityWizardPage extends Page {
       }
     loop(address.lines.zip(setFunctions))
   }
+
 }
