@@ -100,9 +100,15 @@ class VerifyLinksSteps extends Steps {
     Browser.isTextOnPage("Privacy policy") shouldBe true
     Browser.clickLinkTextOnceClickable("Privacy policy")
     val tabs = driver.getWindowHandles.asScala.toList
-    driver.switchTo.window(tabs(1)) //switch to privacy policy tab
-    Browser.checkCurrentPageIs(PrivacyPolicyPage)
-    driver.switchTo.window(tabs.headOption.getOrElse("missing url here")) //switch back to original page
+    tabs match {
+      case tab1 :: tab2 :: Nil ⇒
+        driver.switchTo.window(tab2) //switch to privacy policy tab
+        Browser.checkCurrentPageIs(PrivacyPolicyPage)
+        driver.close()
+        driver.switchTo.window(tab1) //switch back to original page
+      case ts ⇒ fail(s"Unexpected number of tabs: ${ts.length}")
+    }
+
   }
 
 }
