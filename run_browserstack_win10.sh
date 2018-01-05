@@ -6,4 +6,4 @@ sh ./run_browser_dependencies.sh
 
 export ARGS="-Denvironment=local -Dbrowser=browserstack"
 
-sbt $ARGS -DtestDevice=BS_Win10_Chrome_55 clean 'test-only hts.suites.RunnerBrowserStackTests'
+sbt $ARGS -DtestDevice=BS_Win10_Chrome_55 clean 'test-only hts.suites.RunnerSeleniumSystemTest'

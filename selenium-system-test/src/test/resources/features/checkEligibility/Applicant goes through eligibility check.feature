@@ -1,4 +1,4 @@
-@HTS-90 @zap
+@HTS-90 @BrowserStack
 Feature: Applicant goes through eligibility check
 
   Scenario: User is in receipt of working tax credit and so is eligible

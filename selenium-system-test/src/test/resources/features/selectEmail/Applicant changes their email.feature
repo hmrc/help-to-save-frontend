@@ -6,7 +6,7 @@ Feature: Applicant changes their email
     And they select their GG email and proceed
     Then they see the final Create Account page
 
-  @zap
+  @zap @BrowserStack
   Scenario: An eligible applicant chooses to give a new email address for hts
     Given the user has logged in and passed IV
     When they start to create an account

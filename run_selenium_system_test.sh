@@ -9,7 +9,7 @@ tags    - Space separated list of tags. Only run tests with the given
           tags. Not specifying any tags will run all tests.
           Tags with an '@' symbol."
 
-if [ "$1" != 'dev' ] && [ "$1" != 'qa' ] && [ "$1" != 'local' ] || ([ "$2" != 'chrome' ] && [ "$2" != 'firefox' ] && [ "$2" != 'zap-chrome' ] && [ "$2" != 'headless' ])
+if [ "$1" != 'dev' ] && [ "$1" != 'qa' ] && [ "$1" != 'local' ] || ([ "$2" != 'chrome' ] && [ "$2" != 'firefox' ] && [ "$2" != 'zap-chrome' ] && [ "$2" != 'headless' ] && [ "$2" != 'browserstack' ])
 then
   echo -e "Expected usage:\n${USAGE}"
   exit 1

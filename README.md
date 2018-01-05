@@ -120,6 +120,7 @@ containing the Selenium driver files. This command will not run the unit tests. 
 Selenium scenarios, tag the relevant scenarios and then run the command
  ```
  ./run_selenium_system_test.sh ${ENV} ${BROWSER} ${DRIVERS} ${TAGS}
+ ./run_browserstack.sh ${ENV} ${BROWSER} ${DRIVERS} ${TAGS}
  ```
 where `${TAGS}` is a space separated list containing the relevant tags. Examples:
 
