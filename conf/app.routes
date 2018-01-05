@@ -28,6 +28,11 @@ POST       /select-email                                    @uk.gov.hmrc.helptos
 GET        /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getGiveEmailPage
 POST       /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit
 GET        /confirm-email/:email                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
+
+GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
+POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
+GET        /error-no-account                                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
+
 GET        /verify-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail
 GET        /email-verified-callback                         @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(p: String)
 GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailVerified
@@ -36,10 +41,6 @@ POST       /cannot-change-email                             @uk.gov.hmrc.helptos
 GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailVerificationErrorController.verifyEmailErrorTryLater
 GET        /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
 POST       /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
-GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
-POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
-
-GET        /error-no-account                                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
 
 GET        /try-again-tomorrow                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /try-again-later-in-year                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
