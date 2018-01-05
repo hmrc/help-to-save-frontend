@@ -16,9 +16,7 @@
 
 package hts.browser
 
-import com.gargoylesoftware.htmlunit.{HttpWebConnection, WebRequest}
 import hts.pages.Page
-import hts.pages.identityPages.{FailedIVInsufficientEvidencePage, FailedIVTechnicalIssuePage, IdentityVerifiedPage}
 import hts.utils.Configuration
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, Keys, WebDriver}
@@ -33,8 +31,6 @@ trait Navigation { this: WebBrowser ⇒
 
   def navigateTo(uri: String)(implicit driver: WebDriver): Unit =
     go to s"${Configuration.host}/help-to-save/$uri"
-
-  def back()(implicit driver: WebDriver): Unit = clickOn("ButtonBack")
 
   def nextPage()(implicit driver: WebDriver): Unit = {
     driver.findElement(By.id("next")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
@@ -96,6 +92,10 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
     isActualUrlExpectedUrl(page.expectedURL) shouldBe true
     page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+  }
+
+  def isElementByIdVisible(id: String)(implicit driver: WebDriver): Boolean = {
+    driver.findElement(By.id(id)).isDisplayed
   }
 
 }
