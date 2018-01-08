@@ -23,6 +23,7 @@ import cats.data.EitherT
 import org.joda.time.LocalDate
 
 import scala.concurrent.Future
+import scala.util.matching.Regex
 
 package object util {
 
@@ -47,4 +48,14 @@ package object util {
   def urlEncode(url: String): String = URLEncoder.encode(url, "UTF-8")
 
   def urlDecode(url: String): String = URLDecoder.decode(url, "UTF-8")
+
+  val ninoRegex: Regex = """[A-Za-z]{2}[0-9]{6}[A-Za-z]{1}""".r
+
+  def maskNino(original: String): String = {
+    Option(original) match {
+      case Some(text) ⇒ ninoRegex.replaceAllIn(text, "<NINO>")
+      case None       ⇒ original
+    }
+  }
+
 }
