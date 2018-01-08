@@ -18,6 +18,7 @@ package hts.steps
 
 import hts.browser.Browser
 import hts.pages._
+import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
 import hts.utils.ScenarioContext
 
@@ -25,15 +26,15 @@ import scala.collection.JavaConverters._
 
 class VerifyLinksSteps extends Steps {
 
-  Given("""^that users are authenticated$""") { () ⇒
+  Given("^that users are authenticated$") {
     AuthorityWizardPage.authenticateUser(AboutPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
   }
 
-  When("""^they are at the start of the hts pages""") { () ⇒
+  When("^they are at the start of the hts pages") {
     Browser.checkCurrentPageIs(AboutPage)
   }
 
-  Then("""^they see all feedback, get-help and privacy links are working as they go through the journey$""") { () ⇒
+  Then("^they see all feedback, get-help and privacy links are working as they go through the journey$") {
     Browser.checkCurrentPageIs(AboutPage)
     checkForLinksThatExistOnEveryPage(AboutPage)
     Browser.nextPage()
@@ -52,7 +53,6 @@ class VerifyLinksSteps extends Steps {
 
     Browser.checkCurrentPageIs(ApplyPage)
     checkForLinksThatExistOnEveryPage(ApplyPage)
-
     ApplyPage.clickStartNow()
 
     Browser.checkCurrentPageIs(EligiblePage)
@@ -64,16 +64,32 @@ class VerifyLinksSteps extends Steps {
     //try to change the email and verify links
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
     Browser.checkCurrentPageIs(VerifyYourEmailPage)
-    checkForLinksThatExistOnEveryPage(SelectEmailPage)
+    checkForLinksThatExistOnEveryPage(VerifyYourEmailPage)
 
     //go back to original select email page and continue
+    Browser.goBack()
     SelectEmailPage.selectGGEmail()
     checkForLinksThatExistOnEveryPage(CreateAccountPage)
+    CreateAccountPage.createAccount()
 
+    Browser.checkCurrentPageIs(NsiManageAccountPage)
+
+    ChangeEmailPage.navigate()
+    Browser.checkCurrentPageIs(ChangeEmailPage)
+    checkForLinksThatExistOnEveryPage(ChangeEmailPage)
+    ChangeEmailPage.setNewEmailAddress("anotheremail@mail.com")
+
+    Browser.checkCurrentPageIs(VerifyEmailPage)
+    checkForLinksThatExistOnEveryPage(VerifyEmailPage)
+    VerifyEmailPage.resendEmail
+
+    Browser.checkCurrentPageIs(VerifyEmailPage)
+    VerifyEmailPage.goToAccountHome
+
+    Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
 
   private def checkForLinksThatExistOnEveryPage(currentPage: Page): Unit = {
-
     verifyFeedbackLink()
     driver.navigate().back()
     verifyGetHelpLink()
@@ -93,7 +109,6 @@ class VerifyLinksSteps extends Steps {
     Browser.isTextOnPage("Is there anything wrong with this page") shouldBe true
     Browser.clickButtonByIdOnceClickable("get-help-action")
     Browser.isElementByIdVisible("report-error-partial-form") shouldBe true
-
   }
 
   private def verifyPrivacyPolicyLink(): Unit = {
@@ -108,7 +123,6 @@ class VerifyLinksSteps extends Steps {
         driver.switchTo.window(tab1) //switch back to original page
       case ts ⇒ fail(s"Unexpected number of tabs: ${ts.length}")
     }
-
   }
 
 }

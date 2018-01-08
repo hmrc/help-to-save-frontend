@@ -1,4 +1,4 @@
-Feature: Logging in
+Feature: Verifying header and footer links on every page
 
   @HTS-668
   Scenario: when users navigates through the HTS pages they see feedback, get-help and privacy links are working
