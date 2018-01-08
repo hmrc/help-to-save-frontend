@@ -22,3 +22,8 @@ Feature: Applicant creates new account
     And they are informed they don't have an account
     When they proceed to create an account using their GG email
     Then they see that the account is created
+
+  Scenario: An authenticated eligible user wishes to create account but sees their details are incorrect
+    Given they apply for Help to Save
+    When they see their details are incorrect and report it
+    Then they see the relevant page

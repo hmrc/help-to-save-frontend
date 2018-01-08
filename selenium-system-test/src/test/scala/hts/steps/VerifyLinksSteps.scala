@@ -22,8 +22,6 @@ import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
 import hts.utils.ScenarioContext
 
-import scala.collection.JavaConverters._
-
 class VerifyLinksSteps extends Steps {
 
   Given("^that users are authenticated$") {
@@ -49,6 +47,7 @@ class VerifyLinksSteps extends Steps {
 
     Browser.checkCurrentPageIs(HowWeCalculateBonusesPage)
     checkForLinksThatExistOnEveryPage(HowWeCalculateBonusesPage)
+    verifyGovUKLink()
     Browser.nextPage()
 
     Browser.checkCurrentPageIs(ApplyPage)
@@ -90,39 +89,23 @@ class VerifyLinksSteps extends Steps {
   }
 
   private def checkForLinksThatExistOnEveryPage(currentPage: Page): Unit = {
-    verifyFeedbackLink()
-    driver.navigate().back()
-    verifyGetHelpLink()
-    verifyPrivacyPolicyLink()
+    Browser.clickButtonByIdOnceClickable("feedback-link")
+    Browser.checkCurrentPageIs(FeedbackPage)
+
+    Browser.goBack()
+    Browser.clickButtonByIdOnceClickable("get-help-action")
+    Browser.isElementByIdVisible("report-error-partial-form") shouldBe true
+
+    Browser.openAndCheckPageInNewWindowUsingLinkText("Privacy policy", PrivacyPolicyPage)
 
     currentPage.navigate()
     Browser.checkCurrentPageIs(currentPage)
   }
 
-  private def verifyFeedbackLink(): Unit = {
-    Browser.isTextOnPage("BETA") shouldBe true
-    Browser.clickButtonByIdOnceClickable("feedback-link")
-    Browser.checkCurrentPageIs(FeedbackPage)
-  }
-
-  private def verifyGetHelpLink(): Unit = {
-    Browser.isTextOnPage("Is there anything wrong with this page") shouldBe true
-    Browser.clickButtonByIdOnceClickable("get-help-action")
-    Browser.isElementByIdVisible("report-error-partial-form") shouldBe true
-  }
-
-  private def verifyPrivacyPolicyLink(): Unit = {
-    Browser.isTextOnPage("Privacy policy") shouldBe true
-    Browser.clickLinkTextOnceClickable("Privacy policy")
-    val tabs = driver.getWindowHandles.asScala.toList
-    tabs match {
-      case tab1 :: tab2 :: Nil ⇒
-        driver.switchTo.window(tab2) //switch to privacy policy tab
-        Browser.checkCurrentPageIs(PrivacyPolicyPage)
-        driver.close()
-        driver.switchTo.window(tab1) //switch back to original page
-      case ts ⇒ fail(s"Unexpected number of tabs: ${ts.length}")
-    }
+  private def verifyGovUKLink(): Unit = {
+    Browser.clickButtonByIdOnceClickable("logo")
+    Browser.checkCurrentPageIs(GovUKPage)
+    Browser.goBack()
   }
 
 }
