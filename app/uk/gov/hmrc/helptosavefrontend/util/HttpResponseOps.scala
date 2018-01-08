@@ -37,12 +37,12 @@ class HttpResponseOps(val response: HttpResponse) extends AnyVal {
         )(_.validate[A].fold[Either[String, A]](
             errors ⇒
               // there was JSON in the response but we couldn't read it
-              Left(s"Could not parse http response JSON: ${JsError(errors).prettyPrint()}. Response body was ${response.body}"),
+              Left(s"Could not parse http response JSON: ${JsError(errors).prettyPrint()}. Response body was ${maskNino(response.body)}}"),
             Right(_)
           ))
       case Failure(error) ⇒
         // response.json failed in this case - there was no JSON in the response
-        Left(s"Could not read http response as JSON: ${error.getMessage}. Response body was ${response.body}")
+        Left(s"Could not read http response as JSON: ${error.getMessage}. Response body was ${maskNino(response.body)}")
     }
 
 }

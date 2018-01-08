@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.nsiUserInfoFor
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, PagerDutyAlerting, Result}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, PagerDutyAlerting, Result, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.config.AppName
 
@@ -129,7 +129,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDu
             metrics.nsiUpdateEmailErrorCounter.inc()
             pagerDutyAlerting.alert("Received unexpected http status in response to update email")
             Left(s"Received unexpected status $other from NS&I while trying to update email ${timeString(time)}. " +
-              s"Body was ${response.body}")
+              s"Body was ${maskNino(response.body)}")
 
         }
       }.recover {
@@ -147,7 +147,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDu
       .map[Either[String, Unit]] { response ⇒
         response.status match {
           case Status.OK ⇒ Right(())
-          case other     ⇒ Left(s"Received unexpected status $other from NS&I while trying to do health-check. Body was ${response.body}")
+          case other     ⇒ Left(s"Received unexpected status $other from NS&I while trying to do health-check. Body was ${maskNino(response.body)}")
         }
       }.recover {
         case e ⇒ Left(s"Encountered error while trying to create account: ${e.getMessage}")
@@ -179,7 +179,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDu
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
   private def handleError(response: HttpResponse): SubmissionFailure = {
-    logger.warn(s"response body from NSI=${response.body}")
+    logger.warn(s"response body from NSI=${maskNino(response.body)}")
     response.parseJSON[SubmissionFailure](Some("error")) match {
       case Right(submissionFailure) ⇒ submissionFailure
       case Left(error)              ⇒ SubmissionFailure(None, "", error)
