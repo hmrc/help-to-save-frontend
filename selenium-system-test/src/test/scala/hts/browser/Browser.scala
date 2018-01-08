@@ -22,6 +22,7 @@ import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.openqa.selenium.{By, Keys, WebDriver}
 import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
+import scala.collection.JavaConverters._
 
 import scala.util.control.NonFatal
 
@@ -92,6 +93,19 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
     isActualUrlExpectedUrl(page.expectedURL) shouldBe true
     page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+  }
+
+  def openAndCheckPageInNewWindowUsingLinkText(linkText: String, page: Page)(implicit driver: WebDriver): Unit = {
+    Browser.clickLinkTextOnceClickable(linkText)
+    val tabs = driver.getWindowHandles.asScala.toList
+    tabs match {
+      case tab1 :: tab2 :: Nil ⇒
+        driver.switchTo.window(tab2) //switch to privacy policy tab
+        Browser.checkCurrentPageIs(page)
+        driver.close()
+        driver.switchTo.window(tab1) //switch back to original page
+      case ts ⇒ fail(s"Unexpected number of tabs: ${ts.length}")
+    }
   }
 
   def isElementByIdVisible(id: String)(implicit driver: WebDriver): Boolean = {
