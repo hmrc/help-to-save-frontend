@@ -64,7 +64,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
         "redirect to the correct URL" in {
           inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+            mockAuthWithNoRetrievals(AuthProvider)
             mockIvConnector(journeyId, ivServiceResponse)
 
           }
@@ -78,7 +78,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
         "redirect to the correct URL if the write to session cache is successful" in {
           inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+            mockAuthWithNoRetrievals(AuthProvider)
             mockIvConnector(journeyId, ivServiceResponse)
             mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(ivUrl(continueURL)), None))(Right(()))
 
@@ -90,7 +90,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
         "show an error page if the write to session cache is unsuccessful" in {
           inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+            mockAuthWithNoRetrievals(AuthProvider)
             mockIvConnector(journeyId, ivServiceResponse)
             mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(ivUrl(continueURL)), None))(Left(""))
           }
@@ -104,7 +104,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
       "redirect to the correct URL if the write to session cache is successful" in {
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+          mockAuthWithNoRetrievals(AuthProvider)
           mockIvConnector(journeyId, "Success")
           mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
 
@@ -116,7 +116,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
       "show an error page if the write to session cache is unsuccessful" in {
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+          mockAuthWithNoRetrievals(AuthProvider)
           mockIvConnector(journeyId, "Success")
           mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Left(""))
         }
@@ -175,7 +175,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
     "handles the case where no iv response for a given journeyId" in {
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+        mockAuthWithNoRetrievals(AuthProvider)
         mockPutIVURLInSessionCache
       }
       val result =
@@ -196,10 +196,10 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
           s"show the correct $name page" in {
             mockSessionCacheBehaviour.fold(
-              mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+              mockAuthWithNoRetrievals(AuthProvider)
             ) { behaviour ⇒
                 inSequence {
-                  mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+                  mockAuthWithNoRetrievals(AuthProvider)
                   behaviour()
                 }
               }
@@ -213,7 +213,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
               "session cache retrieval fails" in {
                 inSequence {
-                  mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+                  mockAuthWithNoRetrievals(AuthProvider)
                   mockSessionCacheConnectorGet(Left(""))
                 }
 
@@ -222,7 +222,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
               "there is no session data" in {
                 inSequence {
-                  mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+                  mockAuthWithNoRetrievals(AuthProvider)
                   mockSessionCacheConnectorGet(Right(None))
                 }
 
@@ -231,7 +231,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
               "the data required is not present in the session" in {
                 inSequence {
-                  mockAuthWithNINORetrievalWithSuccess(AuthProvider)(mockedNINORetrieval)
+                  mockAuthWithNoRetrievals(AuthProvider)
                   mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, None, None))))
                 }
 
