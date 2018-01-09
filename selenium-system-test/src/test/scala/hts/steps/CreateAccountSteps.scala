@@ -73,7 +73,7 @@ class CreateAccountSteps extends Steps {
   }
 
   Then("^they see the relevant page$") {
-    Browser.openAndCheckPageInNewWindowUsingLinkText("fill in the form (it will open in a new window)", HMRCChangeOfDetailsPage)
+    Browser.openAndCheckPageInNewWindowUsingLinkText("give us your correct details", HMRCChangeOfDetailsPage)
   }
 
   When("^an applicant cancels their application just before creating an account$") {
