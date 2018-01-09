@@ -23,4 +23,7 @@ object PrivacyPolicyPage extends Page {
   val expectedURL: String = s"${Configuration.host}/help-to-save/privacy-statement"
 
   override val expectedPageTitle: Option[String] = Some("Help to Save privacy statement")
+
+  override val expectedPageHeader: Option[String] = Some("Help to Save privacy statement")
+
 }
