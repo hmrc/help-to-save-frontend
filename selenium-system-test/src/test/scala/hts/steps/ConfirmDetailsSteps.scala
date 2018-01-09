@@ -25,15 +25,15 @@ import hts.utils.{ScenarioContext, TestUserInfo}
 
 class ConfirmDetailsSteps extends Steps {
 
-  Given("^an applicant has the following details:$"){ (applicantDetails: DataTable) ⇒
+  Given("^an applicant has the following details:$") { (applicantDetails: DataTable) ⇒
     ScenarioContext.setDataTable(applicantDetails)
   }
 
-  When("^an applicant passes the eligibility check$"){
+  When("^an applicant passes the eligibility check$") {
     AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
   }
 
-  Then("^they see their details$"){ () ⇒
+  Then("^they see their details$") { () ⇒
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
     val nino = ScenarioContext.currentNINO
     val info: TestUserInfo = ScenarioContext.userInfo().getOrElse(sys.error)
