@@ -24,5 +24,9 @@ object EnterEmailPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
 
+  override val expectedPageHeader: Option[String] = Some("Which email address do you want to use for Help to Save?")
+
+  override val expectedPageTitle: Option[String] = Some("Which email address do you want to use for Help to Save?")
+
   def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 }
