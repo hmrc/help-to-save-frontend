@@ -172,30 +172,41 @@ This microservice is deployed as per all MDTP microservices via Jenkins into a D
 |`/help-to-save/create-account`                                 |        POST       | Submits an eligible user`s details to create an account|
 |`/help-to-save/try-again-tomorrow`                             |        GET        | Displays a page when user cap has been reached (Private Beta Only)|
 |`/help-to-save/try-again-later-in-year`                        |        GET        | Displays a page when total user cap has been reached (Private Beta Only)|
-|`/help-to-save/register/give-email`                            |        GET        | Directs the user to a page where they can supply a new email address|
-|`/help-to-save/register/give-email-submit`                     |        POST       | Submits an eligible user`s new email address to the verification service|
 |`/help-to-save/select-email`                                   |        GET        | Page where user selects existing or new email address to use for help-to-save|
 |`/help-to-save/select-email`                                   |        POST       | Submits an eligible user's selected email address to use for help-to-save|
-|`/help-to-save/register/select-email-submit`                   |        POST       | If given, submits a new email to the email verification service. Otherwise continues the create account journey|
 |`/help-to-save/incorrect-details`                              |        GET        | Page showing user what to do if the details shown are incorrect|
+|`/help-to-save/service-unavailable`                            |        GET        | Displays a page to the user when the service is unavailable|
 
 ## IV API
 
 | Path                                                          | Supported Methods | Description  |
 | --------------------------------------------------------------| ------------------| ------------ |
 |`/help-to-save/iv/journey-result`                              |        GET        | The continue URL we pass to Auth to return users after IV|
+|`/help-to-save/identity-verified`                              |        GET        | Page showing user their identity has been successfully verified|
+|`/help-to-save/failed-iv-matching`                             |        GET        | Page showing user we were unable to verify their identity|
+|`/help-to-save/failed-iv`                                      |        GET        | Page showing user they didn't answer all iv questions correctly|
+|`/help-to-save/failed-iv-insufficient-evidence`                |        GET        | Page showing user they need to call us to supply more information|
+|`/help-to-save/failed-iv-locked-out`                           |        GET        | Page showing user they have tried to verify their identity too many times so they are now locked out|
+|`/help-to-save/failed-iv-user-rejected`                        |        GET        | Page showing user we were unable to confirm their identity|
+|`/help-to-save/failed-iv-time-out`                             |        GET        | Page showing user their session has ended|
+|`/help-to-save/failed-iv-technical-issue`                      |        GET        | Page showing user we have some technical issue|
+|`/help-to-save/failed-iv-precondition-failed`                  |        GET        | Page showing user they are not able to use this service|
 
 ## New Applicant Email Address Update API
 
 | Path                                                          | Supported Methods | Description  |
 | --------------------------------------------------------------| ------------------| ------------ |
 |`/help-to-save/email-verified-callback`                        |        GET        | Users are redirected here after they have verified their email|
-|`/help-to-save/email-verified`                                 |
+|`/help-to-save/email-verified`                                 |        GET        | Page showing the user their email address has been successfully verified|
 |`/help-to-save/email-updated`                                  |        GET        | Page showing user their email address was successfully updated for help-to-save|
+|`/help-to-save/email-updated`                                  |        POST       | User is directed to the final step of the create account journey|
 |`/help-to-save/enter-email`                                    |        GET        | Page for user to enter their email address|
 |`/help-to-save/enter-email`                                    |        POST       | Submits user's given email address to use for help-to-save|
 |`/help-to-save/confirm-email/:email`                           |        GET        | Stores user's confirmed email|
 |`/help-to-save/verify-email`                                   |        GET        | Submits the users new email address to the email verification service|
+|`/help-to-save/cannot-change-email`                            |        GET        | Page showing the user options whether they want to continue when we cannot currently change their email address|
+|`/help-to-save/cannot-change-email`                            |        POST       | Redirects user depending on if they choose to continue or not|
+|`/help-to-save/cannot-change-email-try-later`                  |        GET        | Page showing user that they need to try again later to change their email address|
 
 ## Eligibility Check API
 
@@ -218,11 +229,11 @@ This microservice is deployed as per all MDTP microservices via Jenkins into a D
 
 | Path                                                          | Supported Methods | Description  |
 | --------------------------------------------------------------| ------------------| ------------ |
-|`/help-to-save/account/update-your-email-address`              |        GET        | Directs an account holder to a page for them to enter a new email address|
-|`/help-to-save/account/verify-email`                           |        POST       | Submits the account holders new email address to the email verification service|
-|`/help-to-save/account/email-verified`                         |        GET        | Account holders are redirected here after they have verified their email|
-|`/help-to-save/account/email-updated`                          |        GET        | Page showing account holder their email address was successfully updated for help-to-save|
-|`/help-to-save/account/email-update-error`                     |        GET        | Page showing account holder their email update request has been unsuccessful|
+|`/help-to-save/account-home/change-email`                      |        GET        | Directs an account holder to a page for them to enter a new email address|
+|`/help-to-save/account-home/change-email`                      |        POST       | Submits the account holders new email address to the email verification service|
+|`/help-to-save/account-home/verify-email`                      |        GET        | Page showing user that they need to verify their email address via an email sent to them|
+|`/help-to-save/account-home/email-verified-callback`           |        GET        | This url is given to the email verification service for them to direct back to our service|
+|`/help-to-save/account-home/email-verified`                    |        GET        | Account holders are redirected here after they have verified their email|
 
 ## IP Whitelisting API
 
@@ -230,6 +241,11 @@ This microservice is deployed as per all MDTP microservices via Jenkins into a D
 | --------------------------------------------------------------| ------------------| ------------ |
 |`/help-to-save/forbidden`                                      |        GET        | Page shown if the user is not whitelisted if IP-whitelisting is enabled|
 
+## Privacy Statement
+
+| Path                                                          | Supported Methods | Description  |
+| --------------------------------------------------------------| ------------------| ------------ |
+|`/help-to-save/privacy-statement`                              |        GET        | Displays a page to the user showing the privacy statement|
 
 License
 ---
