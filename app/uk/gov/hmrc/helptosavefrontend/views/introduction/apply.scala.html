@@ -57,9 +57,17 @@
            data-ga-event-label= "Apply page"
            class="ga-track-event">@Messages("hts.introduction.apply.sign-in-link")</a>
     </section>
-    <a class="page-nav__link page-nav__link--previous"
-    title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
-        <span class="page-nav__label">Previous</span>
-        <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
-    </a>
+
+    <nav class="page-navigation--previous-next" role="navigation"
+         aria-label="Page navigation">
+        <ul>
+            <li class="page-nav__item page-nav__item--previous">
+                <a class="page-nav__link page-nav__link--previous"
+                   title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
+                    <span class="page-nav__label">Previous</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 }

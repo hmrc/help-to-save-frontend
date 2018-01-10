@@ -56,20 +56,25 @@
             <li>@Messages("hts.introduction.eligibility.list-3-4")</li>
         </ul>
     </section>
-    <div class="grid-layout grid-layout--no-gutter">
-        <div class="grid-layout__column grid-layout__column--1-2">
-            <a class="page-nav__link page-nav__link--previous"
-            title="Navigate to @Messages("hts.introduction.about-help-to-save.title")" rel="prev" href="@routes.IntroductionController.getAboutHelpToSave()">
-                <span class="page-nav__label">Previous</span>
-                <span class="page-nav__title">@Messages("hts.introduction.about-help-to-save.title")</span>
-            </a>
-        </div>
-        <div class="grid-layout__column grid-layout__column--1-2">
-            <a class="page-nav__link page-nav__link--next"
-            title="Navigate to @Messages("hts.introduction.how-the-account-works.title")" rel="next" href=@routes.IntroductionController.getHowTheAccountWorks() id="next">
-                <span class="page-nav__label">Next</span>
-                <span class="page-nav__title">@Messages("hts.introduction.how-the-account-works.title")</span>
-            </a>
-        </div>
-    </div>
+
+
+    <nav class="page-navigation--previous-next" role="navigation"
+         aria-label="Page navigation">
+        <ul>
+            <li class="page-nav__item page-nav__item--previous">
+                <a class="page-nav__link page-nav__link--previous"
+                   title="Navigate to @Messages("hts.introduction.about-help-to-save.title")" rel="prev" href="@routes.IntroductionController.getAboutHelpToSave()">
+                    <span class="page-nav__label">Previous</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.about-help-to-save.title")</span>
+                </a>
+            </li>
+            <li class="page-nav__item page-nav__item--next">
+                <a class="page-nav__link page-nav__link--next"
+                   title="Navigate to @Messages("hts.introduction.how-the-account-works.title")" rel="next" href=@routes.IntroductionController.getHowTheAccountWorks() id="next">
+                    <span class="page-nav__label">Next</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.how-the-account-works.title")</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 }
