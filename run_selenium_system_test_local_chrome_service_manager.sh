@@ -2,6 +2,10 @@
 
 echo "Starting Service Manager with HTS_ALL"
 ./start-service-manager.sh
+if [ $? = 1 ]
+then
+    exit
+fi
 
 echo "./run_selenium_system_test.sh local chrome /usr/local/bin/chromedriver"
 ./run_selenium_system_test.sh local chrome /usr/local/bin/chromedriver
