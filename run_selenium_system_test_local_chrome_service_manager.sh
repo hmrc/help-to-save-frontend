@@ -3,7 +3,7 @@
 exit_if_status_1() {
   if [ $? = 1 ]
   then
-     exit
+     exit 1
   fi
 }
 
