@@ -18,12 +18,10 @@ fi
 
 
 echo "Starting HTS dependencies from snapshots"
-sm --start HTS_ALL -f --wait 1200 --noprogress
-if [ $? != 0 ]
-then
-    echo "HTS dependencies failed to start"
-    sm --stop HTS_ALL
+#sm --start HTS_ALL -f --wait 1200 --noprogress
+#if [ $? != 0 ]
+#then
+#    echo "HTS dependencies failed to start"
+#    sm --stop HTS_ALL
     exit 1
-fi
-
-./services-health-check.sh
+#fi
