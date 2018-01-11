@@ -125,11 +125,11 @@ Selenium scenarios, tag the relevant scenarios and then run the command
 where `${TAGS}` is a space separated list containing the relevant tags. Examples:
 
 ```
-./run_selenium_system_test.sh dev chrome /usr/local/bin/chromedriver           # (1) runs all selenium tests on the dev environment using chrome
-./run_selenium_system_test.sh qa chrome /usr/local/bin/chromedriver wip     # (2) runs selenium scenarios tagged with the `@wip` tag on the
+./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver           # (1) runs all selenium tests on the dev environment using chrome
+./run_selenium_system_test.sh -e=qa -b=chrome -d=/usr/local/bin/chromedriver wip     # (2) runs selenium scenarios tagged with the `@wip` tag on the
                                                                                 #     QA environment using chrome
-./run_selenium_system_test.sh dev chrome /usr/local/bin/chromedriver @wip   # (3) the same as (2)
-./run_selenium_system_test.sh local chrome /usr/local/bin/chromedriver wip sit # (4) runs selenium scenarios tagged with either the `@wip` or `@sit`
+./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver @wip   # (3) the same as (2)
+./run_selenium_system_test.sh -e=local -b=chrome -d=/usr/local/bin/chromedriver wip sit # (4) runs selenium scenarios tagged with either the `@wip` or `@sit`
                                                                                 #     tags locally using chrome
 ```
 
