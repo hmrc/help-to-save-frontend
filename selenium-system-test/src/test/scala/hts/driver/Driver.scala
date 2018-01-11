@@ -26,7 +26,9 @@ import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 
-object Driver {
+object Driver extends Driver
+
+class Driver {
 
   var sessionID = ""
 
@@ -68,15 +70,15 @@ object Driver {
   private val driverDirectory: String = Option(systemProperties.getProperty("drivers")).getOrElse("/usr/local/bin")
 
   private def setChromeDriver() = {
-    if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
+    if (Option(systemProperties.getProperty("webdriver.driver")).isEmpty) {
       if (isMac) {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
+        systemProperties.setProperty("webdriver.driver", driverDirectory + "/chromedriver_mac")
       } else if (isLinux && linuxArch === "amd32") {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")
+        systemProperties.setProperty("webdriver.driver", driverDirectory + "/chromedriver_linux32")
       } else if (isLinux) {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver")
+        systemProperties.setProperty("webdriver.driver", driverDirectory + "/chromedriver")
       } else {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
+        systemProperties.setProperty("webdriver.driver", driverDirectory + "/chromedriver.exe")
       }
     }
   }
@@ -115,7 +117,12 @@ object Driver {
     desiredCaps.setCapability("project", "HTS")
     desiredCaps.setCapability("build", "Local")
 
-    List("browserstack.os", "browserstack.os_version", "browserstack.browser", "browserstack.device", "browserstack.browser_version", "browserstack.real_mobile")
+    List("browserstack.os",
+      "browserstack.os_version",
+      "browserstack.browser",
+      "browserstack.device",
+      "browserstack.browser_version",
+      "browserstack.real_mobile")
       .map(k ⇒ (k, sys.props.get(k)))
       .collect({ case (k, Some(v)) ⇒ (k, v) })
       .foreach(x ⇒ desiredCaps.setCapability(x._1.replace("browserstack.", ""), x._2.replace("_", " ")))
