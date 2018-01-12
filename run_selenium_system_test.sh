@@ -59,7 +59,7 @@ while [ "$1" != "" ]; do
        java_opts+=("-Denvironment=$VALUE")
        ;;
    --browser | -b)
-   if [ "$VALUE" != 'chrome' ] && [ "$VALUE" != 'firefox' ] && [ "$VALUE" != 'zap-chrome' ] && [ "$VALUE" != 'headless' ] && [ "$VALUE" != 'browserstack' ]
+   if [ "$VALUE" != 'chrome' ] && [ "$VALUE" != 'firefox' ] && [ "$VALUE" != 'zap-chrome' ] && [ "$VALUE" != 'headless' ] && [ "$VALUE" != 'browserstack' ] && [ "$VALUE" != 'browserstacktest' ]
    then
         usage
         exit 1

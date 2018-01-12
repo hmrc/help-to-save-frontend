@@ -39,12 +39,13 @@ class Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome")       ⇒ Right(createChromeDriver(false))
-      case Some("zap-chrome")   ⇒ Right(createZapChromeDriver())
-      case Some("headless")     ⇒ Right(createChromeDriver(true))
-      case Some("browserstack") ⇒ Right(createBrowserStackDriver)
-      case Some(other)          ⇒ Left(s"Unrecognised browser: $other")
-      case None                 ⇒ Left("No browser set")
+      case Some("chrome")           ⇒ Right(createChromeDriver(false))
+      case Some("zap-chrome")       ⇒ Right(createZapChromeDriver())
+      case Some("headless")         ⇒ Right(createChromeDriver(true))
+      case Some("browserstack")     ⇒ Right(createBrowserStackDriver)
+      case Some("browserstacktest") ⇒ Right(createBrowserStackTestDriver)
+      case Some(other)              ⇒ Left(s"Unrecognised browser: $other")
+      case None                     ⇒ Left("No browser set")
     }
 
     selectedDriver.foreach { driver ⇒
@@ -113,6 +114,34 @@ class Driver {
     val desiredCaps = new DesiredCapabilities()
     desiredCaps.setCapability("browserstack.debug", "true")
     desiredCaps.setCapability("browserstack.local", "true")
+    desiredCaps.setCapability("browserstack.localIdentifier", "Testing")
+    desiredCaps.setCapability("acceptSslCerts", "true")
+    desiredCaps.setCapability("project", "HTS")
+    desiredCaps.setCapability("build", "Local")
+
+    List("browserstack.os",
+      "browserstack.os_version",
+      "browserstack.browser",
+      "browserstack.device",
+      "browserstack.browser_version",
+      "browserstack.real_mobile")
+      .map(k ⇒ (k, sys.props.get(k)))
+      .collect({ case (k, Some(v)) ⇒ (k, v) })
+      .foreach(x ⇒ desiredCaps.setCapability(x._1.replace("browserstack.", ""), x._2.replace("_", " ")))
+
+    val username = sys.props.getOrElse("browserstack.username", "notspecified")
+    val automateKey = sys.props.getOrElse("browserstack.key", "notspecified")
+    val url = s"http://$username:$automateKey@hub.browserstack.com/wd/hub"
+
+    val remoteDriver = new RemoteWebDriver(new URL(url), desiredCaps)
+    remoteDriver
+  }
+
+  def createBrowserStackTestDriver: WebDriver = {
+    val desiredCaps = new DesiredCapabilities()
+    desiredCaps.setCapability("browserstack.debug", "true")
+    desiredCaps.setCapability("browserstack.local", "true")
+    desiredCaps.setCapability("browserstack.localIdentifier", "Testing123")
     desiredCaps.setCapability("acceptSslCerts", "true")
     desiredCaps.setCapability("project", "HTS")
     desiredCaps.setCapability("build", "Local")
