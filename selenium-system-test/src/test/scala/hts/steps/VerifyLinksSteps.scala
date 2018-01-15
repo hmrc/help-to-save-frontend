@@ -25,10 +25,17 @@ import hts.utils.ScenarioContext
 class VerifyLinksSteps extends Steps {
 
   Then("^they go through the happy path they can see and access all header and footer links$") {
-    Browser.checkCurrentPageIs(AboutPage)
-    checkForLinksThatExistOnEveryPage(AboutPage)
-    Browser.nextPage()
+    //    AboutPage.navigate()
+    //    Browser.checkCurrentPageIs(AboutPage)
+    //    checkForLinksThatExistOnEveryPage(AboutPage)
+    //    Browser.nextPage()
 
+    EligibilityInfoPage.navigate()
+    Browser.checkPageIsLoaded()
+    Browser.scrollDown()
+    Thread.sleep(2000)
+    Browser.scrollDown()
+    Thread.sleep(2000)
     Browser.checkCurrentPageIs(EligibilityInfoPage)
     checkForLinksThatExistOnEveryPage(EligibilityInfoPage)
     Browser.nextPage()

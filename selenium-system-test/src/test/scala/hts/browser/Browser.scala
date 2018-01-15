@@ -53,6 +53,12 @@ trait Navigation { this: WebBrowser ⇒
   def clickLinkTextOnceClickable(text: String)(implicit driver: WebDriver): Unit =
     clickByIdentifier(text, By.linkText)(s ⇒ click on linkText(s))
 
+  def scrollDown()(implicit driver: WebDriver): AnyRef = driver match {
+    case executor: JavascriptExecutor ⇒
+      executor.executeScript("scrollBy(0,250)")
+    case _ ⇒ fail("Failed to scroll down")
+  }
+
   private def clickByIdentifier(id: String, by: String ⇒ By)(clickOn: String ⇒ Unit)(implicit driver: WebDriver): Unit = {
     val wait = new WebDriverWait(driver, 20)
     wait.until(ExpectedConditions.or(
@@ -103,16 +109,7 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
 
   def checkPageIsLoaded()(implicit driver: WebDriver): Unit = {
     val wait: WebDriverWait = new WebDriverWait(driver, 20)
-
-    wait.until {
-      new base.Function[WebDriver, Boolean] {
-        override def apply(input: WebDriver): Boolean = input match {
-          case executor: JavascriptExecutor ⇒ executor.executeScript("return document.readyState").equals("complete")
-          case _                            ⇒ fail("Driver is not relevant for this scenario")
-        }
-      }
-    }
-
+    wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete';"))
   }
 
   def openAndCheckPageInNewWindowUsingLinkText(linkText: String, page: Page)(implicit driver: WebDriver): Unit = {
