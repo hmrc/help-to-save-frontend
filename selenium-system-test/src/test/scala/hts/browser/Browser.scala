@@ -16,20 +16,13 @@
 
 package hts.browser
 
-import com.google.common.base
-import com.sun.jna.platform.FileUtils
-import com.sun.xml.internal.stream.Entity.ScannedEntity
-import cucumber.api.Scenario
 import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.support.ui._
 import org.openqa.selenium._
+import org.openqa.selenium.support.ui._
 import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
-import org.apache.commons.io
-
 import scala.collection.JavaConverters._
-import scala.reflect.io.File
 import scala.util.control.NonFatal
 
 object Browser extends WebBrowser with Navigation with Retrievals with Assertions with Matchers
