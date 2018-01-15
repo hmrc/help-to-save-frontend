@@ -18,12 +18,11 @@ package hts.browser
 
 import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
-import org.openqa.selenium.{By, Keys, WebDriver}
+import org.openqa.selenium._
+import org.openqa.selenium.support.ui._
 import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
 import scala.collection.JavaConverters._
-
 import scala.util.control.NonFatal
 
 object Browser extends WebBrowser with Navigation with Retrievals with Assertions with Matchers
@@ -93,6 +92,17 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
     isActualUrlExpectedUrl(page.expectedURL) shouldBe true
     page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+  }
+
+  def scrollDown()(implicit driver: WebDriver): AnyRef = driver match {
+    case executor: JavascriptExecutor ⇒
+      executor.executeScript("scrollBy(0,250)")
+    case _ ⇒ fail("Failed to scroll down")
+  }
+
+  def checkPageIsLoaded()(implicit driver: WebDriver): Unit = {
+    val wait: WebDriverWait = new WebDriverWait(driver, 20)
+    wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete';"))
   }
 
   def openAndCheckPageInNewWindowUsingLinkText(linkText: String, page: Page)(implicit driver: WebDriver): Unit = {

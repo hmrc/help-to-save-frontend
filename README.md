@@ -120,15 +120,16 @@ containing the Selenium driver files. This command will not run the unit tests. 
 Selenium scenarios, tag the relevant scenarios and then run the command
  ```
  ./run_selenium_system_test.sh ${ENV} ${BROWSER} ${DRIVERS} ${TAGS}
+ ./run_browserstack.sh ${ENV} ${BROWSER} ${DRIVERS} ${TAGS}
  ```
 where `${TAGS}` is a space separated list containing the relevant tags. Examples:
 
 ```
-./run_selenium_system_test.sh dev chrome /usr/local/bin/chromedriver           # (1) runs all selenium tests on the dev environment using chrome
-./run_selenium_system_test.sh qa chrome /usr/local/bin/chromedriver wip     # (2) runs selenium scenarios tagged with the `@wip` tag on the
+./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver           # (1) runs all selenium tests on the dev environment using chrome
+./run_selenium_system_test.sh -e=qa -b=chrome -d=/usr/local/bin/chromedriver wip     # (2) runs selenium scenarios tagged with the `@wip` tag on the
                                                                                 #     QA environment using chrome
-./run_selenium_system_test.sh dev chrome /usr/local/bin/chromedriver @wip   # (3) the same as (2)
-./run_selenium_system_test.sh local chrome /usr/local/bin/chromedriver wip sit # (4) runs selenium scenarios tagged with either the `@wip` or `@sit`
+./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver @wip   # (3) the same as (2)
+./run_selenium_system_test.sh -e=local -b=chrome -d=/usr/local/bin/chromedriver wip sit # (4) runs selenium scenarios tagged with either the `@wip` or `@sit`
                                                                                 #     tags locally using chrome
 ```
 
@@ -136,6 +137,15 @@ If you wish to run the Selenium tests from Intellij, you`ll need to:
 1. Install the Cucumber for Java plugin.
 2. In "Edit configurations" > "Cucumber java" > "VM options" enter, for example: -Dbrowser=chrome -Denvironment=dev -Ddrivers=/usr/local/bin
 3. In "Edit configurations" > "Cucumber java" > "Glue" enter: hts.steps
+
+## BrowserStack (accessibility testing)
+
+To run parallel tests using BrowserStack, you need to first run the BrowserStackLocal file in this project using:
+./BrowserStackLocal --key {KEY} --local-identifier {1/2/3/4} (the script is configured to accept either no local identifier or just 1/2/3/4)
+
+Once you have the desired number of BrowserStack instances running locally,
+configure the following script to use the desired OS/Browser combination and run:
+./run_selenium_system_test.sh -e=local -b=browserstack -d=BrowserStackLocal -j="-Dbrowserstack.os=android,-Dbrowserstack.os_version="7.0",-Dbrowserstack.device=Samsung_Galaxy_S8,-Dbrowserstack.real_mobile=true,-Dbrowserstack.username={USERNAME},-Dbrowserstack.key={KEY}" -t=@BrowserStack
 
 ## ZAP (pen testing)
 
@@ -157,7 +167,7 @@ This microservice is deployed as per all MDTP microservices via Jenkins into a D
 | --------------------------------------------------------------| ------------------| ------------ |
 |`/help-to-save/`                                               |        GET        | Redirects the user to the about-help-to-save page|
 |`/help-to-save/apply-for-help-to-save/about-help-to-save`      |        GET        | Displays the about-help-to-page|
-|'/help-to-save/about-help-to-save`                             |        GET        | Displays the about-help-to-page|
+|`/help-to-save/about-help-to-save`                             |        GET        | Displays the about-help-to-page|
 |`/help-to-save/eligibility`                                    |        GET        | Displays information about Eligibility for help-to-save|
 |`/help-to-save/how-the-account-works`                          |        GET        | Displays information about how help-to-save works|
 |`/help-to-save/how-we-calculate-bonuses`                       |        GET        | Displays information about bonuses|
