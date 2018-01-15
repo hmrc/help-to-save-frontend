@@ -53,12 +53,6 @@ trait Navigation { this: WebBrowser ⇒
   def clickLinkTextOnceClickable(text: String)(implicit driver: WebDriver): Unit =
     clickByIdentifier(text, By.linkText)(s ⇒ click on linkText(s))
 
-  def scrollDown()(implicit driver: WebDriver): AnyRef = driver match {
-    case executor: JavascriptExecutor ⇒
-      executor.executeScript("scrollBy(0,250)")
-    case _ ⇒ fail("Failed to scroll down")
-  }
-
   private def clickByIdentifier(id: String, by: String ⇒ By)(clickOn: String ⇒ Unit)(implicit driver: WebDriver): Unit = {
     val wait = new WebDriverWait(driver, 20)
     wait.until(ExpectedConditions.or(
@@ -105,6 +99,12 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
     isActualUrlExpectedUrl(page.expectedURL) shouldBe true
     page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+  }
+
+  def scrollDown()(implicit driver: WebDriver): AnyRef = driver match {
+    case executor: JavascriptExecutor ⇒
+      executor.executeScript("scrollBy(0,250)")
+    case _ ⇒ fail("Failed to scroll down")
   }
 
   def checkPageIsLoaded()(implicit driver: WebDriver): Unit = {
