@@ -49,7 +49,7 @@ object AuthorityWizardPage extends Page {
   }
 
   private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    AuthorityWizardPage.navigate()
+    navigate()
     setRedirect(redirectUrl)
     setCredentialStrength(credentialStrength)
     setConfidenceLevel(confidence)

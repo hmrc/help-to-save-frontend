@@ -16,14 +16,20 @@
 
 package hts.browser
 
+import com.google.common.base
+import com.sun.jna.platform.FileUtils
+import com.sun.xml.internal.stream.Entity.ScannedEntity
+import cucumber.api.Scenario
 import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
-import org.openqa.selenium.{By, Keys, WebDriver}
+import org.openqa.selenium.support.ui._
+import org.openqa.selenium._
 import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
-import scala.collection.JavaConverters._
+import org.apache.commons.io
 
+import scala.collection.JavaConverters._
+import scala.reflect.io.File
 import scala.util.control.NonFatal
 
 object Browser extends WebBrowser with Navigation with Retrievals with Assertions with Matchers
@@ -93,6 +99,20 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
     isActualUrlExpectedUrl(page.expectedURL) shouldBe true
     page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+  }
+
+  def checkPageIsLoaded()(implicit driver: WebDriver): Unit = {
+    val wait: WebDriverWait = new WebDriverWait(driver, 20)
+
+    wait.until {
+      new base.Function[WebDriver, Boolean] {
+        override def apply(input: WebDriver): Boolean = input match {
+          case executor: JavascriptExecutor ⇒ executor.executeScript("return document.readyState").equals("complete")
+          case _                            ⇒ fail("Driver is not relevant for this scenario")
+        }
+      }
+    }
+
   }
 
   def openAndCheckPageInNewWindowUsingLinkText(linkText: String, page: Page)(implicit driver: WebDriver): Unit = {

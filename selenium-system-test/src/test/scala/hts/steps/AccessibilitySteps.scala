@@ -22,56 +22,44 @@ import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
 import hts.utils.ScenarioContext
 
-class VerifyLinksSteps extends Steps {
+class AccessibilitySteps extends Steps {
 
-  Then("^they go through the happy path they can see and access all header and footer links$") {
+  Then("^they go through the happy path$") {
+    AboutPage.navigate()
     Browser.checkCurrentPageIs(AboutPage)
-    checkForLinksThatExistOnEveryPage(AboutPage)
+    checkPrivacyPolicyPage(AboutPage)
     Browser.nextPage()
 
     Browser.checkCurrentPageIs(EligibilityInfoPage)
-    checkForLinksThatExistOnEveryPage(EligibilityInfoPage)
     Browser.nextPage()
 
     Browser.checkCurrentPageIs(HowTheAccountWorksPage)
-    checkForLinksThatExistOnEveryPage(HowTheAccountWorksPage)
     Browser.nextPage()
 
     Browser.checkCurrentPageIs(HowWeCalculateBonusesPage)
-    checkForLinksThatExistOnEveryPage(HowWeCalculateBonusesPage)
     verifyGovUKLink()
     Browser.nextPage()
 
     Browser.checkCurrentPageIs(ApplyPage)
-    checkForLinksThatExistOnEveryPage(ApplyPage)
     ApplyPage.clickStartNow()
 
     Browser.checkCurrentPageIs(EligiblePage)
-    checkForLinksThatExistOnEveryPage(EligiblePage)
-
     EligiblePage.clickConfirmAndContinue()
-    checkForLinksThatExistOnEveryPage(SelectEmailPage)
 
-    //try to change the email and verify links
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
     Browser.checkCurrentPageIs(VerifyYourEmailPage)
-    checkForLinksThatExistOnEveryPage(VerifyYourEmailPage)
 
-    //go back to original select email page and continue
     Browser.goBack()
     SelectEmailPage.selectGGEmail()
-    checkForLinksThatExistOnEveryPage(CreateAccountPage)
     CreateAccountPage.createAccount()
 
     Browser.checkCurrentPageIs(NsiManageAccountPage)
 
     ChangeEmailPage.navigate()
     Browser.checkCurrentPageIs(ChangeEmailPage)
-    checkForLinksThatExistOnEveryPage(ChangeEmailPage)
     ChangeEmailPage.setNewEmailAddress("anotheremail@mail.com")
 
     Browser.checkCurrentPageIs(VerifyEmailPage)
-    checkForLinksThatExistOnEveryPage(VerifyEmailPage)
     VerifyEmailPage.resendEmail
 
     Browser.checkCurrentPageIs(VerifyEmailPage)
@@ -80,14 +68,7 @@ class VerifyLinksSteps extends Steps {
     Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
 
-  private def checkForLinksThatExistOnEveryPage(currentPage: Page): Unit = {
-    Browser.clickButtonByIdOnceClickable("feedback-link")
-    Browser.checkCurrentPageIs(FeedbackPage)
-
-    Browser.goBack()
-    Browser.clickButtonByIdOnceClickable("get-help-action")
-    Browser.isElementByIdVisible("report-error-partial-form") shouldBe true
-
+  private def checkPrivacyPolicyPage(currentPage: Page): Unit = {
     Browser.openAndCheckPageInNewWindowUsingLinkText("Privacy policy", PrivacyPolicyPage)
 
     currentPage.navigate()
