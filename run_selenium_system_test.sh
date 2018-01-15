@@ -51,7 +51,7 @@ while [ "$1" != "" ]; do
  VALUE=$(echo $1 | awk -F= '{for (i=2; i<NF; i++) printf $i "="; print $NF}')
  case $PARAM in
    --environment | -e)
-   if [ "$VALUE" != 'dev' ] && [ "$VALUE" != 'qa' ] && [ "$VALUE" != 'local' ]
+   if [ "$VALUE" != 'dev' ] && [ "$VALUE" != 'qa' ] && [ "$VALUE" != 'local' ]&& [ "$VALUE" != 'esit' ]
    then
      usage
      exit 1
