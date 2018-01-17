@@ -139,12 +139,18 @@ If you wish to run the Selenium tests from Intellij, you`ll need to:
 
 ## BrowserStack (accessibility testing)
 
-To run parallel tests using BrowserStack, you need to first run the BrowserStackLocal file in this project using:
+To run parallel tests using BrowserStack, you need to:
+0. If necessary, start mongod using "sudo service mongod start"
+1. Start service manager using HTS_ALL
+2. Run the BrowserStackLocal file in this project up to four times using:
 ./BrowserStackLocal --key {KEY} --local-identifier {1/2/3/4} (the script is configured to accept either no local identifier or just 1/2/3/4)
-
-Once you have the desired number of BrowserStack instances running locally,
-configure the following script to use the desired OS/Browser combination and run:
-./run_selenium_system_test.sh -e=local -b=browserstack -d=BrowserStackLocal -j="-Dbrowserstack.os=android,-Dbrowserstack.os_version="7.0",-Dbrowserstack.device=Samsung_Galaxy_S8,-Dbrowserstack.real_mobile=true,-Dbrowserstack.username={USERNAME},-Dbrowserstack.key={KEY}" -t=@BrowserStack
+3. Once you have the desired number of BrowserStack instances running locally,
+configure the following script to use the desired OS/Browser combination by
+replacing the placeholders with the values listed at https://www.browserstack.com/automate/capabilities or
+you can visit the spreadsheet at https://docs.google.com/spreadsheets/d/1xa9h-A7goX3yOd954Oo2sdE2KNUsAWpWa6VFCXHKt-g/edit#gid=0 for example commands:
+./run_selenium_system_test.sh -e=local -b=browserstack{1/2/3/4} -d=BrowserStackLocal -j="-Dbrowserstack.os={OS},-Dbrowserstack.os_version="{OS_Version}",-Dbrowserstack.device={device},-Dbrowserstack.real_mobile=true,-Dbrowserstack.username={USERNAME},-Dbrowserstack.key={KEY}" -t=@BrowserStack
+./run_selenium_system_test.sh -e=local -b=browserstack{1/2/3/4} -d=BrowserStackLocal -j="-Dbrowserstack.os={OS},-Dbrowserstack.os_version="{OS_Version}",-Dbrowserstack.browser={browser},-Dbrowserstack.browser_version={browser_version},-Dbrowserstack.username={USERNAME},-Dbrowserstack.key={KEY}" -t=@BrowserStack
+4. Visit https://www.browserstack.com/automate to look at the results. Make sure you choose "Local" Build and "HTS" Project
 
 ## ZAP (pen testing)
 

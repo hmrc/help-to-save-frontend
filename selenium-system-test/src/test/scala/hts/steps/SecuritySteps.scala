@@ -16,11 +16,9 @@
 
 package hts.steps
 
-import cucumber.api.{DataTable, Scenario}
 import hts.browser.Browser
 import hts.pages._
-import hts.utils.{Configuration, ScenarioContext}
-import org.openqa.selenium.{OutputType, WebDriver}
+import hts.utils.ScenarioContext
 
 import scala.collection.JavaConverters._
 

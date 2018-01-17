@@ -21,11 +21,17 @@ import hts.pages._
 import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
 import hts.utils.ScenarioContext
+import hts.utils.EitherOps._
+import org.openqa.selenium.By
 
-class AccessibilitySteps extends Steps {
+class CrossBrowserCompatibilitySteps extends Steps {
+
+  When("^the user logs in and passes IV on a PC, phone or tablet$") {
+    AuthorityWizardPage.authenticateEligibleUserOnAnyDevice(AboutPage.expectedURL, ScenarioContext.generateEligibleNINO())
+  }
 
   Then("^they go through the happy path$") {
-    AboutPage.navigate()
+    Browser.checkPageIsLoaded()
     Browser.checkCurrentPageIs(AboutPage)
     checkPrivacyPolicyPage(AboutPage)
     Browser.nextPage()
@@ -44,6 +50,14 @@ class AccessibilitySteps extends Steps {
     ApplyPage.clickStartNow()
 
     Browser.checkCurrentPageIs(EligiblePage)
+    Browser.goBack()
+    ApplyPage.clickSignInLink()
+
+    Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
+    YouDoNotHaveAnAccountPage.clickContinue()
+
+    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.scrollToElement("start-creating-account", By.id)
     EligiblePage.clickConfirmAndContinue()
 
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
