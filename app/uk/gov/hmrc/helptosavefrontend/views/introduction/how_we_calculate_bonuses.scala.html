@@ -23,7 +23,8 @@
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.introduction.how-we-calculate-bonuses.title"),
     sidebarLinks = None,
-    bodyClasses = None) {
+    bodyClasses = None,
+    extraMeta = Some(Html("""<meta name="robots" content="noindex, nofollow" />"""))) {
     @navigation(request.uri, "How we calculate bonuses page")
 
     <section class="section">
