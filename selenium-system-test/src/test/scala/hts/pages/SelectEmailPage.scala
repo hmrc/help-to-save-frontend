@@ -28,7 +28,8 @@ object SelectEmailPage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("Do you want to use the email address we hold for you?")
 
-  def clickContinue()(implicit driver: WebDriver): Unit = Browser.submit
+  def clickContinue()(implicit driver: WebDriver): Unit =
+    Browser.find(Browser.className("button")).foreach(_.underlying.click())
 
   def selectGGEmail()(implicit driver: WebDriver): Unit = {
     Browser.clickButtonByIdOnceClickable("registered-email")

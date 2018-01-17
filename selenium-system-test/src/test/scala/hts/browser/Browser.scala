@@ -27,7 +27,8 @@ import scala.util.control.NonFatal
 
 object Browser extends WebBrowser with Navigation with Retrievals with Assertions with Matchers
 
-trait Navigation { this: WebBrowser ⇒
+trait Navigation {
+  this: WebBrowser ⇒
 
   def navigateTo(uri: String)(implicit driver: WebDriver): Unit =
     go to s"${Configuration.host}/help-to-save/$uri"
@@ -45,6 +46,20 @@ trait Navigation { this: WebBrowser ⇒
 
   def clickLinkTextOnceClickable(text: String)(implicit driver: WebDriver): Unit =
     clickByIdentifier(text, By.linkText)(s ⇒ click on linkText(s))
+
+  def scrollToElement(id: String, By: String ⇒ By)(implicit driver: WebDriver): Unit = {
+    val elementLocation = driver.findElement(By(id)).getLocation
+    driver match {
+      case executor: JavascriptExecutor ⇒
+        var diff = elementLocation.getY - executor.executeScript("return window.pageYOffset;").toString.toInt
+        if (diff < 0) {
+          diff = diff - 200 // done to avoid any bars or popups blocking elements on mobile devices
+        } else {
+          diff = diff + 200 // done to avoid any bars or popups blocking elements on mobile devices
+        }
+        executor.executeScript("scrollBy(0," + diff.toString + ")")
+    }
+  }
 
   private def clickByIdentifier(id: String, by: String ⇒ By)(clickOn: String ⇒ Unit)(implicit driver: WebDriver): Unit = {
     val wait = new WebDriverWait(driver, 20)
