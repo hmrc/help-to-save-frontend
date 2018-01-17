@@ -77,6 +77,7 @@ class CrossBrowserCompatibilitySteps extends Steps {
     VerifyEmailPage.resendEmail
 
     Browser.checkCurrentPageIs(VerifyEmailPage)
+    Browser.navigateTo("account-home/email-verified")
     VerifyEmailPage.goToAccountHome
 
     Browser.checkCurrentPageIs(NsiManageAccountPage)
