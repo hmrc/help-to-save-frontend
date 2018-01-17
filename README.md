@@ -137,9 +137,11 @@ If you wish to run the Selenium tests from Intellij, you`ll need to:
 2. In "Edit configurations" > "Cucumber java" > "VM options" enter, for example: -Dbrowser=chrome -Denvironment=dev -Ddrivers=/usr/local/bin
 3. In "Edit configurations" > "Cucumber java" > "Glue" enter: hts.steps
 
-## BrowserStack (accessibility testing)
+## BrowserStack (cross-browser/-platform compatibility testing)
 
-To run parallel tests using BrowserStack, you need to:
+NOTE: BrowserStack has compatbility issues with Safari accessing localhost, so please run tests against Safari MANUALLY at https://www.browserstack.com/start. All iOS devices run Safari by default.
+
+To run parallel tests using BrowserStack in AUTOMATED mode, you need to:
 0. If necessary, start mongod using "sudo service mongod start"
 1. Start service manager using HTS_ALL
 2. Run the BrowserStackLocal file in this project up to four times using:
