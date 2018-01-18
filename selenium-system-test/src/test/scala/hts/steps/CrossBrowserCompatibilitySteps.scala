@@ -31,8 +31,14 @@ class CrossBrowserCompatibilitySteps extends Steps {
   }
 
   Then("^they go through the happy path$") {
-    Browser.checkPageIsLoaded()
     Browser.checkCurrentPageIs(AboutPage)
+    Browser.clickButtonByIdOnceClickable("feedback-link")
+    Browser.checkCurrentPageIs(FeedbackPage)
+
+    Browser.goBack()
+    Browser.clickButtonByIdOnceClickable("get-help-action")
+    Browser.isElementByIdVisible("report-error-partial-form") shouldBe true
+
     checkPrivacyPolicyPage(AboutPage)
     Browser.nextPage()
 
@@ -55,6 +61,12 @@ class CrossBrowserCompatibilitySteps extends Steps {
 
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
     YouDoNotHaveAnAccountPage.clickContinue()
+
+    Browser.checkCurrentPageIs(EligiblePage)
+    EligiblePage.detailsNotCorrect()
+
+    Browser.checkCurrentPageIs(IncorrectDetailsPage)
+    IncorrectDetailsPage.clickBack
 
     Browser.checkCurrentPageIs(EligiblePage)
     Browser.scrollToElement("start-creating-account", By.id)
