@@ -385,9 +385,9 @@ hts.cannot-change-email-try-later.returning.p2=You''ll need to come back later a
 hts.cannot-change-email-try-later.returning.button=Go to account home
 
 hts.no-account.page-title=You don''t have an account
-hts.no-account.title=You don''t have an account
+hts.no-account.title=You don''t have a Help to Save account
 hts.no-account.p1=You''ve signed into your Government Gateway account, but you don''t have a Help to Save account.
-hts.no-account.h2=Apply for an account
+hts.no-account.h2=Apply for a Help to Save account
 hts.no-account.p2=If you want to apply for an account, you should continue and we''ll check if you''re eligible for one. If you are, you can then go on to create your Help to Save account.
 hts.no-account.continue_button=Continue
 hts.no-account.exit-message=Exit and apply another time
