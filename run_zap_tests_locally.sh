@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Running zap browser tests"
-./run_selenium_system_test.sh local zap-chrome @zap
+./run_selenium_system_test.sh -e=local -b=zap-chrome @zap
 
 sleep 5
 

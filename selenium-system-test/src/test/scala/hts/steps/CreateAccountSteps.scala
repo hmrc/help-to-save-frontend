@@ -55,8 +55,13 @@ class CreateAccountSteps extends Steps {
     createAccountUsingGGEmail()
   }
 
-  When("^they choose to go ahead with creating an account$|^they log in and proceed to create an account using their GG email$") {
+  When("^they log in and proceed to create an account using their GG email$") {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
+    createAccountUsingGGEmail()
+  }
+
+  When("^they choose to go ahead with creating an account$") {
+    AuthorityWizardPage.enterUserDetails(200, "strong", ScenarioContext.userInfo().getOrElse(sys.error))
     createAccountUsingGGEmail()
   }
 

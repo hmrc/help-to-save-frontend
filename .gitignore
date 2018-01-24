@@ -35,3 +35,6 @@ tmp
 bin
 ZapReport.html
 **/*.sc
+*.txt
+*.jfr
+*.hprof
