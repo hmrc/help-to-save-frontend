@@ -18,17 +18,17 @@ package hts.browser
 
 import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
-import org.openqa.selenium.{By, Keys, WebDriver}
+import org.openqa.selenium._
+import org.openqa.selenium.support.ui._
 import org.scalatest.Matchers
 import org.scalatest.selenium.WebBrowser
 import scala.collection.JavaConverters._
-
 import scala.util.control.NonFatal
 
 object Browser extends WebBrowser with Navigation with Retrievals with Assertions with Matchers
 
-trait Navigation { this: WebBrowser ⇒
+trait Navigation {
+  this: WebBrowser ⇒
 
   def navigateTo(uri: String)(implicit driver: WebDriver): Unit =
     go to s"${Configuration.host}/help-to-save/$uri"
@@ -46,6 +46,20 @@ trait Navigation { this: WebBrowser ⇒
 
   def clickLinkTextOnceClickable(text: String)(implicit driver: WebDriver): Unit =
     clickByIdentifier(text, By.linkText)(s ⇒ click on linkText(s))
+
+  def scrollToElement(id: String, By: String ⇒ By)(implicit driver: WebDriver): Unit = {
+    val elementLocation = driver.findElement(By(id)).getLocation
+    driver match {
+      case executor: JavascriptExecutor ⇒
+        var diff = elementLocation.getY - executor.executeScript("return window.pageYOffset;").toString.toInt
+        if (diff < 0) {
+          diff = diff - 200 // done to avoid any bars or popups blocking elements on mobile devices
+        } else {
+          diff = diff + 200 // done to avoid any bars or popups blocking elements on mobile devices
+        }
+        executor.executeScript("scrollBy(0," + diff.toString + ")")
+    }
+  }
 
   private def clickByIdentifier(id: String, by: String ⇒ By)(clickOn: String ⇒ Unit)(implicit driver: WebDriver): Unit = {
     val wait = new WebDriverWait(driver, 20)
@@ -93,6 +107,17 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
     isActualUrlExpectedUrl(page.expectedURL) shouldBe true
     page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+  }
+
+  def scrollDown()(implicit driver: WebDriver): AnyRef = driver match {
+    case executor: JavascriptExecutor ⇒
+      executor.executeScript("scrollBy(0,250)")
+    case _ ⇒ fail("Failed to scroll down")
+  }
+
+  def checkPageIsLoaded()(implicit driver: WebDriver): Unit = {
+    val wait: WebDriverWait = new WebDriverWait(driver, 20)
+    wait.until(ExpectedConditions.jsReturnsValue("return document.readyState === 'complete';"))
   }
 
   def openAndCheckPageInNewWindowUsingLinkText(linkText: String, page: Page)(implicit driver: WebDriver): Unit = {

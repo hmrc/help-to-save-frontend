@@ -27,7 +27,7 @@ class EligibilitySteps extends Steps {
   }
 
   When("^they apply for Help to Save$") {
-    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.currentNINO())
+    AuthorityWizardPage.authenticateEligibleUserOnAnyDevice(EligiblePage.expectedURL, ScenarioContext.currentNINO())
   }
 
   Then("^they see that they are eligible for Help to Save$") {

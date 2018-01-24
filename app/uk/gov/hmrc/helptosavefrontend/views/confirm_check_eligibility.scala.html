@@ -34,7 +34,9 @@
     <p>@Messages("hts.no-account.p2")</p>
 
     @helpers.form(routes.EligibilityCheckController.getCheckEligibility()){
-        <button id="continue" class="subsection--wide" type="submit">@Messages("hts.no-account.continue_button")</button>
+        <div class="form-group subsection--wide">
+            <button id="continue" class="button subsection--wide" type="submit">@Messages("hts.no-account.continue_button")</button>
+        </div>
     }
 
     <p>

@@ -25,13 +25,13 @@ labelClass: Option[String] = None,
 errorMessage: Option[Html] = None
 )(implicit messages: Messages)
 
-<div class="form-field @if(errorMessage.isDefined){form-field--error}">
+<div class="form-group @if(errorMessage.isDefined){form-group-error}">
     <label class="form-label @if(labelClass.nonEmpty){@labelClass}" for="@id">
         @label
         @if(hint.nonEmpty){
             <span class="form-hint">@hint</span>
         }
-        @errorMessage.map(e ⇒ Html(s"""<span class="error-notification">$e</span>""")).getOrElse(Html(""))
+        @errorMessage.map(e ⇒ Html(s"""<span class="error-message">$e</span>""")).getOrElse(Html(""))
     </label>
 
     <div class="form-control-wrapper" data-type="@secondaryLabel">
