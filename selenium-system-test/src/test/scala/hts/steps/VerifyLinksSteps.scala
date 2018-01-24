@@ -24,15 +24,8 @@ import hts.utils.ScenarioContext
 
 class VerifyLinksSteps extends Steps {
 
-  Given("^that users are authenticated$") {
-    AuthorityWizardPage.authenticateUser(AboutPage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
-  }
-
-  When("^they are at the start of the hts pages") {
-    Browser.checkCurrentPageIs(AboutPage)
-  }
-
-  Then("^they see all feedback, get-help and privacy links are working as they go through the journey$") {
+  Then("^they go through the happy path they can see and access all header and footer links$") {
+    AboutPage.navigate()
     Browser.checkCurrentPageIs(AboutPage)
     checkForLinksThatExistOnEveryPage(AboutPage)
     Browser.nextPage()

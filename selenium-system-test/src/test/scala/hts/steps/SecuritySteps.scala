@@ -18,7 +18,9 @@ package hts.steps
 
 import hts.browser.Browser
 import hts.pages._
-import hts.utils.{Configuration, ScenarioContext}
+import hts.utils.ScenarioContext
+
+import scala.collection.JavaConverters._
 
 class SecuritySteps extends Steps {
 
@@ -52,14 +54,13 @@ class SecuritySteps extends Steps {
     Browser.checkCurrentPageIs(GGSignInPage)
   }
 
-  When("^I call URI (.+)$") { (uri: String) ⇒
-    Browser.navigateTo(uri)
-  }
-
-  Then("^I see a valid response$") { () ⇒
-    Browser.getCurrentUrl should include("")
-    Browser.pageTitle shouldNot include("not found")
-    Browser.pageSource shouldNot include("This page can’t be found")
+  Given("^if they visit the URIs below they see a valid response$") { (URIs: java.util.List[String]) ⇒
+    URIs.asScala.foreach { uri ⇒
+      Browser.navigateTo(uri)
+      Browser.checkPageIsLoaded()
+      Browser.pageTitle shouldNot include("not found")
+      Browser.pageSource shouldNot include("This page can’t be found")
+    }
   }
 
   Given("^they have gone through GG/2SV/identity check but they are NOT eligible for Help to Save$") {

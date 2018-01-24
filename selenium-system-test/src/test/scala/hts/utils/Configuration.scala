@@ -24,6 +24,7 @@ object Environment {
   case object Dev extends Environment
   case object Qa extends Environment
   case object Staging extends Environment
+  case object Esit extends Environment
 }
 
 object Configuration {
@@ -35,6 +36,7 @@ object Configuration {
       case "qa"      ⇒ Environment.Qa
       case "dev"     ⇒ Environment.Dev
       case "staging" ⇒ Environment.Staging
+      case "esit"    ⇒ Environment.Esit
       case _         ⇒ sys.error(s"Environment '$environmentProperty' not known")
     }
   }
@@ -45,6 +47,7 @@ object Configuration {
       case Environment.Dev     ⇒ ("https://www-dev.tax.service.gov.uk", "https://www-dev.tax.service.gov.uk", "https://www-dev.tax.service.gov.uk", "https://www-dev.tax.service.gov.uk")
       case Environment.Qa      ⇒ ("https://www.qa.tax.service.gov.uk", "https://www.qa.tax.service.gov.uk", "https://www.qa.tax.service.gov.uk", "https://www.qa.tax.service.gov.uk")
       case Environment.Staging ⇒ ("https://www-staging.tax.service.gov.uk", "https://www-staging.tax.service.gov.uk", "https://www-staging.tax.service.gov.uk", "https://www-staging.tax.service.gov.uk")
+      case Environment.Esit    ⇒ ("https://test-www.tax.service.gov.uk", "https://test-www.tax.service.gov.uk", "https://test-www.tax.service.gov.uk", "https://test-www.tax.service.gov.uk")
       case _                   ⇒ sys.error(s"Environment '$environment' not known")
     }
   }
