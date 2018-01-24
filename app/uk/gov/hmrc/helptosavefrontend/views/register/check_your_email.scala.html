@@ -34,7 +34,9 @@
     <p class="content">@messages("hts.email-verification.check-your-email.where-used")</p>
 
     @helpers.form(routes.NewApplicantUpdateEmailAddressController.verifyEmail){
-        <button id="resend-verification" class="subsection--wide" type="submit">@messages("hts.email-verification.check-your-email.resend-email")</button>
+        <div class="form-group subsection--wide">
+            <button id="resend-verification" class="button subsection--wide" type="submit">@messages("hts.email-verification.check-your-email.resend-email")</button>
+        </div>
     }
 
     @defining(

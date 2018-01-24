@@ -17,10 +17,12 @@
 package hts.pages
 
 import java.time.format.DateTimeFormatter
+
 import hts.browser.Browser
 import hts.utils.{Configuration, TestUserInfo}
-import org.openqa.selenium.WebDriver
+import org.openqa.selenium.{By, WebDriver}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
+
 import scala.annotation.tailrec
 
 object AuthorityWizardPage extends Page {
@@ -37,6 +39,12 @@ object AuthorityWizardPage extends Page {
     clickSubmit()
   }
 
+  def authenticateEligibleUserOnAnyDevice(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
+    fillInAuthDetails(redirectUrl, 200, "strong", nino)
+    Browser.scrollToElement("button", By.className)
+    clickSubmit()
+  }
+
   def authenticateIneligibleUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
     fillInAuthDetails(redirectUrl, 50, "none", nino)
     clickSubmit()
@@ -49,7 +57,7 @@ object AuthorityWizardPage extends Page {
   }
 
   private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
-    AuthorityWizardPage.navigate()
+    navigate()
     setRedirect(redirectUrl)
     setCredentialStrength(credentialStrength)
     setConfidenceLevel(confidence)
