@@ -19,13 +19,16 @@ package uk.gov.hmrc.helptosavefrontend.health
 import akka.actor.{ActorIdentity, ActorRef, ActorSystem, Identify}
 import akka.pattern.ask
 import akka.testkit.{ImplicitSender, TestKit}
+import com.typesafe.config.{Config, ConfigFactory, ConfigValueFactory}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class ActorTestSupport(name: String) extends TestKit(ActorSystem(name))
-  with ImplicitSender with TestSupport {
+class ActorTestSupport(name: String) extends TestKit(ActorSystem(
+  name,
+  ConfigFactory.defaultApplication().resolve().withValue("akka.test.single-expect-default", ConfigValueFactory.fromAnyRef("10 seconds"))
+)) with ImplicitSender with TestSupport {
 
   override def afterAll(): Unit = {
     super.afterAll()
