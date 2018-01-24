@@ -16,26 +16,39 @@
 
 package hts.driver
 
+import java.net.URL
 import java.util.concurrent.TimeUnit
 
 import cats.instances.string._
-import cats.syntax.eq._
 import cats.syntax.either._
+import cats.syntax.eq._
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
-import org.openqa.selenium.remote.DesiredCapabilities
+import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 
-object Driver {
+object Driver extends Driver
+
+class Driver {
+
+  var sessionID = ""
+
+  // set flag to true to see full information about browserstack webdrivers on initialisation
+  private val DRIVER_INFO_FLAG = false
 
   private val systemProperties = System.getProperties
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome")     ⇒ Right(createChromeDriver(false))
-      case Some("zap-chrome") ⇒ Right(createZapChromeDriver())
-      case Some("headless")   ⇒ Right(createChromeDriver(true))
-      case Some(other)        ⇒ Left(s"Unrecognised browser: $other")
-      case None               ⇒ Left("No browser set")
+      case Some("chrome")        ⇒ Right(createChromeDriver(false))
+      case Some("zap-chrome")    ⇒ Right(createZapChromeDriver())
+      case Some("headless")      ⇒ Right(createChromeDriver(true))
+      case Some("browserstack")  ⇒ Right(createBrowserStackDriver)
+      case Some("browserstack1") ⇒ Right(createBrowserStackDriverOne)
+      case Some("browserstack2") ⇒ Right(createBrowserStackDriverTwo)
+      case Some("browserstack3") ⇒ Right(createBrowserStackDriverThree)
+      case Some("browserstack4") ⇒ Right(createBrowserStackDriverFour)
+      case Some(other)           ⇒ Left(s"Unrecognised browser: $other")
+      case None                  ⇒ Left("No browser set")
     }
 
     selectedDriver.foreach { driver ⇒
@@ -61,15 +74,15 @@ object Driver {
   private val driverDirectory: String = Option(systemProperties.getProperty("drivers")).getOrElse("/usr/local/bin")
 
   private def setChromeDriver() = {
-    if (Option(systemProperties.getProperty("webdriver.chrome.driver")).isEmpty) {
+    if (Option(systemProperties.getProperty("webdriver.driver")).isEmpty) {
       if (isMac) {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_mac")
+        systemProperties.setProperty("webdriver.driver", driverDirectory + "/chromedriver_mac")
       } else if (isLinux && linuxArch === "amd32") {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver_linux32")
+        systemProperties.setProperty("webdriver.driver", driverDirectory + "/chromedriver_linux32")
       } else if (isLinux) {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver")
+        systemProperties.setProperty("webdriver.driver", driverDirectory + "/chromedriver")
       } else {
-        systemProperties.setProperty("webdriver.chrome.driver", driverDirectory + "/chromedriver.exe")
+        systemProperties.setProperty("webdriver.driver", driverDirectory + "/chromedriver.exe")
       }
     }
   }
@@ -99,4 +112,44 @@ object Driver {
     val caps = driver.getCapabilities
     driver
   }
+
+  def createBrowserStackDriver: WebDriver = useBrowserStackDriverConstructor("test", default = true)
+
+  def createBrowserStackDriverOne: WebDriver = useBrowserStackDriverConstructor("1", default = false)
+
+  def createBrowserStackDriverTwo: WebDriver = useBrowserStackDriverConstructor("2", default = false)
+
+  def createBrowserStackDriverThree: WebDriver = useBrowserStackDriverConstructor("3", default = false)
+
+  def createBrowserStackDriverFour: WebDriver = useBrowserStackDriverConstructor("4", default = false)
+
+  private def useBrowserStackDriverConstructor(identifier: String, default: Boolean): WebDriver = {
+    val desiredCaps = new DesiredCapabilities()
+    desiredCaps.setCapability("browserstack.debug", "true")
+    desiredCaps.setCapability("browserstack.local", "true")
+    if (!default) {
+      desiredCaps.setCapability("browserstack.localIdentifier", identifier)
+    }
+    desiredCaps.setCapability("acceptSslCerts", "true")
+    desiredCaps.setCapability("project", "HTS")
+    desiredCaps.setCapability("build", "Local")
+
+    List("browserstack.os",
+      "browserstack.os_version",
+      "browserstack.browser",
+      "browserstack.device",
+      "browserstack.browser_version",
+      "browserstack.real_mobile")
+      .map(k ⇒ (k, sys.props.get(k)))
+      .collect({ case (k, Some(v)) ⇒ (k, v) })
+      .foreach(x ⇒ desiredCaps.setCapability(x._1.replace("browserstack.", ""), x._2.replace("_", " ")))
+
+    val username = sys.props.getOrElse("browserstack.username", "notspecified")
+    val automateKey = sys.props.getOrElse("browserstack.key", "notspecified")
+    val url = s"http://$username:$automateKey@hub.browserstack.com/wd/hub"
+
+    val remoteDriver = new RemoteWebDriver(new URL(url), desiredCaps)
+    remoteDriver
+  }
+
 }

@@ -1,4 +1,4 @@
-@HTS-90 @zap
+@HTS-90
 Feature: Applicant goes through eligibility check
 
   Scenario: User is in receipt of working tax credit and so is eligible
@@ -6,6 +6,7 @@ Feature: Applicant goes through eligibility check
     When they apply for Help to Save
     Then they see that they are eligible for Help to Save
 
+  @BrowserStack
   Scenario: User is NOT in receipt of working tax credit and so is NOT eligible
     Given a user is NOT in receipt of working tax credit
     When they apply for Help to Save
