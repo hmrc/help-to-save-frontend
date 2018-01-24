@@ -18,12 +18,12 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType._
-@import uk.gov.hmrc.helptosavefrontend.views.html.core.sidebar
+@import uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligible_sidebar
 @(ineligibilityType: IneligibilityType)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.not-eligible.page-title"),
-    sidebarLinks = Some(sidebar()),
+    sidebarLinks = Some(not_eligible_sidebar()),
     bodyClasses = None) {
 
 
