@@ -22,48 +22,48 @@ import hts.utils.ScenarioContext
 
 class EmailSteps extends Steps {
 
-  And("^they select their GG email and proceed$"){ () ⇒
+  And("^they select their GG email and proceed$") {
     Browser.checkCurrentPageIs(SelectEmailPage)
     SelectEmailPage.selectGGEmail()
   }
 
-  When("^they start to create an account$"){ () ⇒
+  When("^they start to create an account$") {
     EligiblePage.clickConfirmAndContinue()
   }
 
-  Then("^they are asked to check their email for a verification email$"){ () ⇒
+  Then("^they are asked to check their email for a verification email$") {
     Browser.checkCurrentPageIs(VerifyYourEmailPage)
   }
 
-  Given("^they've chosen to enter a new email address during the application process$"){ () ⇒
+  Given("^they've chosen to enter a new email address during the application process$") {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.currentNINO())
     EligiblePage.clickConfirmAndContinue()
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
   }
 
-  When("^they request a re-send of the verification email$"){ () ⇒
+  When("^they request a re-send of the verification email$") {
     VerifyYourEmailPage.resendVerificationEmail()
   }
 
-  When("^they want to change their email again$"){ () ⇒
+  When("^they want to change their email again$") {
     VerifyYourEmailPage.changeEmail()
     SelectEmailPage.setAndVerifyNewEmail("secondnewemail@mail.com")
   }
 
-  Then("^they are asked to enter an email address$") { () ⇒
+  Then("^they are asked to enter an email address$") {
     Browser.checkCurrentPageIs(EnterEmailPage)
   }
 
-  Then("^they see the final Create Account page$") { () ⇒
+  Then("^they see the final Create Account page$") {
     Browser.checkCurrentPageIs(CreateAccountPage)
   }
 
-  When("^they enter a new email address$"){ () ⇒
+  When("^they enter a new email address$") {
     Browser.checkCurrentPageIs(SelectEmailPage)
     SelectEmailPage.setAndVerifyNewEmail("newemail@gmail.com")
   }
 
-  Then("^they see the email verification page$") { () ⇒
+  Then("^they see the email verification page$") {
     Browser.checkCurrentPageIs(VerifyYourEmailPage)
   }
 

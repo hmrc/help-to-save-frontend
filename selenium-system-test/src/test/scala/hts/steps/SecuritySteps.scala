@@ -18,7 +18,9 @@ package hts.steps
 
 import hts.browser.Browser
 import hts.pages._
-import hts.utils.{Configuration, ScenarioContext}
+import hts.utils.ScenarioContext
+
+import scala.collection.JavaConverters._
 
 class SecuritySteps extends Steps {
 
@@ -36,41 +38,40 @@ class SecuritySteps extends Steps {
     Browser.getCurrentUrl should include regex "/iv/journey-result|iv%2Fjourney-result"
   }
 
-  Given("^the user has logged in and passed IV$") { () ⇒
+  Given("^the user has logged in and passed IV$") {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
-  When("^they try to view their details without having logged in GG$") { () ⇒
+  When("^they try to view their details without having logged in GG$") {
     EligiblePage.navigate()
   }
 
-  When("^they try to view the create-an-account page$") { () ⇒
+  When("^they try to view the create-an-account page$") {
     CreateAccountPage.navigate()
   }
 
-  Then("^they are prompted to log into GG$") { () ⇒
+  Then("^they are prompted to log into GG$") {
     Browser.checkCurrentPageIs(GGSignInPage)
   }
 
-  When("^I call URI (.+)$"){ (uri: String) ⇒
-    Browser.navigateTo(uri)
+  Given("^if they visit the URIs below they see a valid response$") { (URIs: java.util.List[String]) ⇒
+    URIs.asScala.foreach { uri ⇒
+      Browser.navigateTo(uri)
+      Browser.checkPageIsLoaded()
+      Browser.pageTitle shouldNot include("not found")
+      Browser.pageSource shouldNot include("This page can’t be found")
+    }
   }
 
-  Then("^I see a valid response$"){ () ⇒
-    Browser.getCurrentUrl should include ("")
-    Browser.pageTitle shouldNot include ("not found")
-    Browser.pageSource shouldNot include ("This page can’t be found")
-  }
-
-  Given("^they have gone through GG/2SV/identity check but they are NOT eligible for Help to Save$"){
+  Given("^they have gone through GG/2SV/identity check but they are NOT eligible for Help to Save$") {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateIneligibleNINO())
   }
 
-  Then("^they still see confirmation that they are NOT eligible$"){ () ⇒
+  Then("^they still see confirmation that they are NOT eligible$") { () ⇒
     Browser.isTextOnPage("You're not eligible for a Help to Save account") shouldBe true
   }
 
-  Given("^HMRC doesn't currently hold an email address for the user$"){ () ⇒
+  Given("^HMRC doesn't currently hold an email address for the user$") {
     AuthorityWizardPage.authenticateUserNoEmail(EligiblePage.expectedURL, 200, "Strong", ScenarioContext.generateEligibleNINO())
     Browser.checkCurrentPageIs(EligiblePage)
   }

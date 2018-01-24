@@ -26,7 +26,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IntroductionCtestontrollerSpec extends AuthSupport with CSRFSupport {
+class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
 
   val fakeRequest = FakeRequest("GET", "/")
   val helpToSave = new IntroductionController(fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector, mockMetrics)

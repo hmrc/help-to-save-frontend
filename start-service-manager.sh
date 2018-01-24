@@ -25,5 +25,3 @@ then
     sm --stop HTS_ALL
     exit 1
 fi
-
-./services-health-check.sh

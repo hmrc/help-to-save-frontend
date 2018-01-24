@@ -24,6 +24,10 @@ object VerifyYourEmailPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/verify-email"
 
+  override val expectedPageHeader: Option[String] = Some("You have 30 minutes to verify your email address")
+
+  override val expectedPageTitle: Option[String] = Some("Verify your email address")
+
   def resendVerificationEmail()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("resend-verification")
 
   def changeEmail()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Change email address")

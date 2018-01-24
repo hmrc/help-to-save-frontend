@@ -24,11 +24,10 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture, urlDecode}
-import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -44,18 +43,17 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
 
   def journeyResult(continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
                     journeyId:   Option[String]): Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       //Will be populated if we arrived here because of an IV success/failure
       val newIVUrl = ivUrl(continueURL)
-      val nino = htsContext.nino
-      lazy val storeNewIVURLThenRedirectTo = storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None)) _
+      lazy val storeNewIVURLThenRedirectTo = storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None), journeyId) _
 
       journeyId match {
         case Some(id) ⇒
           ivConnector.getJourneyStatus(JourneyId(id)).flatMap{
             case Some(Success) ⇒
               metrics.ivSuccessCounter.inc()
-              storeInSessionCacheThenRedirect(HTSSession(None, None, None, None, Some(continueURL)))(
+              storeInSessionCacheThenRedirect(HTSSession(None, None, None, None, Some(continueURL)), Some(id))(
                 routes.IvController.getIVSuccessful().url)
 
             case Some(Incomplete) ⇒
@@ -101,7 +99,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
               metrics.ivTechnicalIssueCounter.inc()
               //A technical issue on the platform caused the journey to end.
               // This is usually a transient issue, so that the user should try again later
-              logger.warn("TechnicalIssue response from identityVerificationFrontendService", nino)
+              logger.warn("TechnicalIssue response from identityVerificationFrontendService")
               storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
 
             case Some(Timeout) ⇒
@@ -110,7 +108,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
               storeNewIVURLThenRedirectTo(routes.IvController.getTimedOut().url)
 
             case _ ⇒
-              logger.warn("unexpected response from identityVerificationFrontendService", nino)
+              logger.warn("unexpected response from identityVerificationFrontendService")
               storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
           }
 
@@ -122,60 +120,59 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
     }(redirectOnLoginURL = routes.IvController.journeyResult(continueURL, journeyId).url)
 
   def getIVSuccessful: Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivSuccessURL)(u ⇒ Ok(iv_success(u)))
 
     }(routes.IvController.getIVSuccessful().url)
 
   def getFailedMatching: Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(failed_matching(u)))
     }(routes.IvController.getFailedMatching().url)
 
   def getFailedIV: Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(failed_iv(u)))
     }(routes.IvController.getFailedIV().url)
 
   def getInsufficientEvidence: Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       Unauthorized(insufficient_evidence())
     }(routes.IvController.getInsufficientEvidence().url)
 
   def getLockedOut: Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       Unauthorized(locked_out())
     }(routes.IvController.getLockedOut().url)
 
   def getUserAborted: Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(user_aborted(u)))
     }(routes.IvController.getUserAborted().url)
 
   def getTimedOut: Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(time_out(u)))
     }(routes.IvController.getTimedOut().url)
 
-  def getTechnicalIssue(): Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+  def getTechnicalIssue: Action[AnyContent] =
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(technical_iv_issues(u)))
     }(routes.IvController.getTechnicalIssue().url)
 
   def getPreconditionFailed: Action[AnyContent] =
-    authorisedForHtsWithNINOAndNoCL{ implicit r ⇒ implicit h ⇒
+    authorisedForHts{ implicit r ⇒ implicit h ⇒
       Unauthorized(precondition_failed())
     }(routes.IvController.getPreconditionFailed().url)
 
-  private def storeInSessionCacheThenRedirect(session: HTSSession)(redirectTo: ⇒ String)(
+  private def storeInSessionCacheThenRedirect(session: HTSSession, journeyId: Option[String])(redirectTo: ⇒ String)(
       implicit
-      request:    Request[_],
-      hc:         HeaderCarrier,
-      htsContext: HtsContextWithNINO
+      request: Request[_],
+      hc:      HeaderCarrier
   ): Future[Result] =
     sessionCacheConnector.put(session) fold ({
       e ⇒
-        logger.warn(s"Could not write to session cache: $e", htsContext.nino)
+        logger.warn(s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e")
         internalServerError()
     }, _ ⇒
       SeeOther(redirectTo)
@@ -183,17 +180,16 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
 
   private def retrieveURLFromSessionCache(url: HTSSession ⇒ Option[String])(f: String ⇒ Result)(
       implicit
-      request:    Request[_],
-      hc:         HeaderCarrier,
-      htsContext: HtsContextWithNINO
+      request: Request[_],
+      hc:      HeaderCarrier
   ): Future[Result] =
     sessionCacheConnector.get.fold({
       e ⇒
-        logger.warn(s"Could not retrieve data from session cache: $e", htsContext.nino)
+        logger.warn(s"Could not retrieve data from session cache: $e")
         internalServerError()
     }, {
       _.flatMap(url).fold {
-        logger.warn("Could not find session data", htsContext.nino)
+        logger.warn("Could not find session data")
         internalServerError()
       }(f)
     })

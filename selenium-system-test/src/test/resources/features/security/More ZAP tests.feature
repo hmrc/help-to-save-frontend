@@ -1,13 +1,9 @@
 Feature: more ZAP tests to hit the rest of the URLS
 
-  @zap
-  Scenario Outline: Hit URIs for ZAP testing
-    Given the user has logged in and passed IV
-    When I call URI <URI>
-    Then I see a valid response
-
-    Examples:
-      | URI                                  |
+  @zap @BrowserStack
+  Scenario: Hit URIs for ZAP testing
+    Given the user logs in and passes IV on a PC, phone or tablet
+    Then if they visit the URIs below they see a valid response
       | no-account                           |
       | check-eligibility                    |
       | not-eligible                         |
@@ -16,7 +12,7 @@ Feature: more ZAP tests to hit the rest of the URLS
       | missing-details                      |
       | select-email                         |
       | enter-email                          |
-      | confirm-email/:email                 |
+      | confirm-email/user@test.com          |
       | verify-email                         |
       | email-verified-callback              |
       | email-verified                       |
