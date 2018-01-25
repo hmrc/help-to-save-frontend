@@ -69,7 +69,7 @@ hts.introduction.how-we-calculate-bonuses.par-2=You''ll get your first bonus aft
 hts.introduction.how-we-calculate-bonuses.par-3=We''ll look back over years 1 and 2 and find your highest balance. We''ll pay you 50% of that amount as a first bonus. Even if you withdrew money.
 hts.introduction.how-we-calculate-bonuses.h3-2=First bonus example
 hts.introduction.how-we-calculate-bonuses.par-4=If you pay in £50 a month for 2 years and don''t make any withdrawals, you''ll get a tax-free bonus of £600.
-hts.introduction.how-we-calculate-bonuses.par-5=If you pay in:
+hts.introduction.how-we-calculate-bonuses.h3-3=Example bonus calculations
 hts.introduction.how-we-calculate-bonuses.tab-1.title=£50 a month
 hts.introduction.how-we-calculate-bonuses.tab-1.url=50-a-month
 hts.introduction.how-we-calculate-bonuses.tab-1.table.th-1=Years
@@ -139,13 +139,13 @@ hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1=50% o
 hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1.br-1=(£480 - £240 = £240,
 hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1.br-2=50% of £240 = £120)
 hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-2=Your bonus will be paid into your UK bank account after 4 years
-hts.introduction.how-we-calculate-bonuses.h3-3=Final bonus
+hts.introduction.how-we-calculate-bonuses.h3-4=Final bonus
 hts.introduction.how-we-calculate-bonuses.par-6=You''ll get your final tax-free bonus after 4 years.
 hts.introduction.how-we-calculate-bonuses.par-7=We use a different calculation to work out this bonus compared to your first bonus:
 hts.introduction.how-we-calculate-bonuses.ol-1-1=We''ll find the highest balance your savings reached over years 1 and 2.
 hts.introduction.how-we-calculate-bonuses.ol-1-2=We''ll then compare it to the highest balance your savings reached over years 3 and 4.
 hts.introduction.how-we-calculate-bonuses.ol-1-3=If your highest balance in years 3 and 4 is more than it was in years 1 and 2, you''ll get a 50% tax-free bonus on the difference.
-hts.introduction.how-we-calculate-bonuses.h3-4=How withdrawals can affect your bonus
+hts.introduction.how-we-calculate-bonuses.h3-5=How withdrawals can affect your bonus
 hts.introduction.how-we-calculate-bonuses.par-8=We use your highest balance to work out your bonus. You can withdraw money at any time and still get a bonus.
 hts.introduction.how-we-calculate-bonuses.par-9=Withdrawing money will not reduce your bonus. It will make it harder for you to increase your highest balance and your bonus.
 
