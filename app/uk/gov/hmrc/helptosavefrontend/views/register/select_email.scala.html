@@ -29,16 +29,15 @@
     <form method="post" action=@routes.RegisterController.selectEmailSubmit>
         @CSRF.formField(request)
 
-    <div class="@{"form-group" + {if(hasNotSelected) " error" else "" }}">
+    <fieldset>
+        <legend>
+            <h1 class="heading-large">
+            @messages("hts.select-email.title")
+            </h1>
+        </legend>
 
-        <fieldset>
-            <legend>
-                <h1 class="heading-large">
-                @messages("hts.select-email.title")
-                </h1>
-            </legend>
-
-            @{if(hasNotSelected) <span class="error-notification">{messages("hts.select-email.select-an-option")}</span> }
+        <div class="@{"form-group" + {if(hasNotSelected) " form-group-error" else "" }}">
+            @{if(hasNotSelected) <span class="error-message">{messages("hts.select-email.select-an-option")}</span> }
 
             <div class="multiple-choice">
                 <input id="registered-email" type="radio" name="email" value="Yes">
@@ -49,18 +48,19 @@
                 <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail){ checked }>
                 <label for="add-new-email">@messages("hts.select-email.select-new-address")</label>
             </div>
-            <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
-                <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
-                <div class="form-group">
-                    <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
-                    @if(hasInvalidEmail) { <span class="error-notification">@email_form_validation_error_message(form, "new-email")</span> }
-                    <input class="form-control" name="new-email" type="text" id="new-email">
-                </div>
+        </div>
+
+        <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
+            <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
+            <div class="form-group">
+                <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
+                @if(hasInvalidEmail) { <span class="error-notification">@email_form_validation_error_message(form, "new-email")</span> }
+                <input class="form-control" name="new-email" type="text" id="new-email">
             </div>
+        </div>
 
-        </fieldset>
+    </fieldset>
 
-    </div>
     <div class="form-field form-field--submit">
         <button class="button " type="submit" class=="getSelectedEmail" onclick="ga('send', 'event', 'button', 'Applicant selected email', 'Applicant select email address page'););">
         @messages("hts.global.continue-button")
