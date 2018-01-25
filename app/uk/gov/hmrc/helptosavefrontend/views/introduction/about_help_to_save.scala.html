@@ -48,10 +48,19 @@
         </ul>
     </section>
 
-    <a class="page-nav__link page-nav__link--next"
-    title="Navigate to next part" rel="next" href=@routes.IntroductionController.getEligibility() id="next">
-        <span class="page-nav__label">Next</span>
-        <span class="page-nav__title">@Messages("hts.introduction.eligibility.title")</span>
-    </a>
-
+    <nav class="page-navigation--previous-next" role="navigation"
+         aria-label="Page navigation">
+        <ul>
+            <li class="page-nav__item page-nav__item--next">
+                <a class="page-nav__link page-nav__link--next"
+                   title="Navigate to next part"
+                   rel="next"
+                   href=@routes.IntroductionController.getEligibility()
+                   id="next">
+                    <span class="page-nav__label">Next</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.eligibility.title")</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 }
