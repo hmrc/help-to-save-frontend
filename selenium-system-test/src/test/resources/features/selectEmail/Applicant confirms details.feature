@@ -15,7 +15,7 @@ Feature: Applicant confirms details
       | address line 4 | the place     |
       | address line 5 | the place     |
       | postcode       | BN43 5QP      |
-      | country code   | 01            |
+      | country code   | GB-ENG        |
 
     When an applicant passes the eligibility check
     Then they see their details

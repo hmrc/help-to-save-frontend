@@ -19,4 +19,5 @@ package hts.pages
 object NsiManageAccountPage extends Page {
 
   val expectedURL: String = "https://www.nsandi.com/"
+
 }

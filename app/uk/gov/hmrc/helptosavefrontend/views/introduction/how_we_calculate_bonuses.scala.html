@@ -16,14 +16,15 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.views.html.introduction.navigation
+@import uk.gov.hmrc.helptosavefrontend.views.html.introduction.{navigation, sidebar}
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.introduction.how-we-calculate-bonuses.title"),
-    sidebarLinks = None,
-    bodyClasses = None) {
+    sidebarLinks = Some(sidebar()),
+    bodyClasses = None,
+    extraMeta = Some(Html("""<meta name="robots" content="noindex, nofollow" />"""))) {
     @navigation(request.uri, "How we calculate bonuses page")
 
     <section class="section">
@@ -34,7 +35,7 @@
         <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-3")</p>
         <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-2")</h3>
         <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-4")</p>
-        <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-5")</p>
+        <h3>@Messages("hts.introduction.how-we-calculate-bonuses.h3-3")</h3>
 
         <div data-tabs class="js-hash-selected-tab">
             <ul class="tabs-nav" role="tablist">
@@ -235,7 +236,7 @@
                 </li>
             </ul>
         </div>
-        <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-3")</h3>
+        <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-4")</h3>
         <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-6")</p>
         <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-7")</p>
         <ol class="list list-number">
@@ -243,24 +244,28 @@
             <li>@Messages("hts.introduction.how-we-calculate-bonuses.ol-1-2")</li>
             <li>@Messages("hts.introduction.how-we-calculate-bonuses.ol-1-3")</li>
         </ol>
-        <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-4")</h3>
+        <h3 class="heading-small">@Messages("hts.introduction.how-we-calculate-bonuses.h3-5")</h3>
         <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-8")</p>
         <p>@Messages("hts.introduction.how-we-calculate-bonuses.par-9")</p>
     </section>
-    <div class="grid-layout grid-layout--no-gutter">
-        <div class="grid-layout__column grid-layout__column--1-2">
-            <a class="page-nav__link page-nav__link--previous"
-            title="Navigate to @Messages("hts.introduction.how-the-account-works.title")" rel="prev" href="@routes.IntroductionController.getHowTheAccountWorks()">
-                <span class="page-nav__label">Previous</span>
-                <span class="page-nav__title">@Messages("hts.introduction.how-the-account-works.title")</span>
-            </a>
-        </div>
-        <div class="grid-layout__column grid-layout__column--1-2">
-            <a class="page-nav__link page-nav__link--next"
-            title="Navigate to @Messages("hts.introduction.apply.title")" rel="next" href=@routes.IntroductionController.getApply() id="next">
-                <span class="page-nav__label">Next</span>
-                <span class="page-nav__title">@Messages("hts.introduction.apply.title")</span>
-            </a>
-        </div>
-    </div>
+
+    <nav class="page-navigation--previous-next" role="navigation"
+         aria-label="Page navigation">
+        <ul>
+            <li class="page-nav__item page-nav__item--previous">
+                <a class="page-nav__link page-nav__link--previous"
+                   title="Navigate to @Messages("hts.introduction.how-the-account-works.title")" rel="prev" href="@routes.IntroductionController.getHowTheAccountWorks()">
+                    <span class="page-nav__label">Previous</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.how-the-account-works.title")</span>
+                </a>
+            </li>
+            <li class="page-nav__item page-nav__item--next">
+                <a class="page-nav__link page-nav__link--next"
+                   title="Navigate to @Messages("hts.introduction.apply.title")" rel="next" href=@routes.IntroductionController.getApply() id="next">
+                    <span class="page-nav__label">Next</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.apply.title")</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 }

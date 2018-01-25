@@ -20,12 +20,11 @@
         contentHeader: Option[Html] = None,
         bodyClasses: Option[String] = None,
         mainClass: Option[String] = None,
-        scriptElem: Option[Html] = None)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+        scriptElem: Option[Html] = None,
+        extraMeta: Option[Html] = None)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @import uk.gov.hmrc.play.views.html.layouts
 
-
-@serviceInfoContent = {}
 
 @sidebar = {
   @{layouts.sidebar(sidebarLinks.getOrElse(Html("")), Some("sidebar"))}
@@ -38,5 +37,6 @@
     sidebar = sidebar,
     contentHeader = contentHeader,
     mainContent = layouts.article(mainContent),
-    scriptElem = scriptElem
+    scriptElem = scriptElem,
+    extraMeta = extraMeta
 )

@@ -16,15 +16,15 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.views.html.introduction.navigation
+@import uk.gov.hmrc.helptosavefrontend.views.html.introduction.{navigation, sidebar}
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.introduction.how-the-account-works.title"),
-    sidebarLinks = None,
-    bodyClasses = None) {
-
+    sidebarLinks = Some(sidebar()),
+    bodyClasses = None,
+    extraMeta = Some(Html("""<meta name="robots" content="noindex, nofollow" />"""))) {
     @navigation(request.uri, "How the account works page")
 
     <section class="section">
@@ -75,20 +75,24 @@
             <li>@Messages("hts.introduction.how-the-account-works.list-3-3")</li>
         </ul>
     </section>
-    <div class="grid-layout grid-layout--no-gutter">
-        <div class="grid-layout__column grid-layout__column--1-2">
-            <a class="page-nav__link page-nav__link--previous"
-            title="Navigate to @Messages("hts.introduction.eligibility.title")" rel="prev" href="@routes.IntroductionController.getEligibility()">
-                <span class="page-nav__label">Previous</span>
-                <span class="page-nav__title">@Messages("hts.introduction.eligibility.title")</span>
-            </a>
-        </div>
-        <div class="grid-layout__column grid-layout__column--1-2">
-            <a class="page-nav__link page-nav__link--next"
-            title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="next" href=@routes.IntroductionController.getHowWeCalculateBonuses()>
-                <span class="page-nav__label">Next</span>
-                <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
-            </a>
-        </div>
-    </div>
+
+    <nav class="page-navigation--previous-next" role="navigation"
+         aria-label="Page navigation">
+        <ul>
+            <li class="page-nav__item page-nav__item--previous">
+                <a class="page-nav__link page-nav__link--previous"
+                   title="Navigate to @Messages("hts.introduction.eligibility.title")" rel="prev" href="@routes.IntroductionController.getEligibility()">
+                    <span class="page-nav__label">Previous</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.eligibility.title")</span>
+                </a>
+            </li>
+            <li class="page-nav__item page-nav__item--next">
+                <a class="page-nav__link page-nav__link--next"
+                   title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="next" href=@routes.IntroductionController.getHowWeCalculateBonuses()>
+                    <span class="page-nav__label">Next</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 }

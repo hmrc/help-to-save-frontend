@@ -24,26 +24,28 @@
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.introduction.apply.title"),
     sidebarLinks = Some(sidebar()),
-    bodyClasses = None) {
+    bodyClasses = None,
+    extraMeta = Some(Html("""<meta name="robots" content="noindex, nofollow" />"""))) {
 
     @navigation(request.uri, "Apply page")
 
     <section class="section">
         <h2>5. @Messages("hts.introduction.apply.title")</h2>
-        <p>@Messages("hts.introduction.apply.par-1")</p>
-        <ul class="bullets">
-            <li>@Messages("hts.introduction.apply.ul-1-1") <a title="Navigate to @Messages("hts.introduction.eligibility.title")"
-                                                              href=@routes.IntroductionController.getEligibility()
-                                                              data-ga-event-category = "links"
-                                                              data-ga-event-action = "Eligible"
-                                                              data-ga-event-label= "Apply page"
-                                                              class="ga-track-event"
-                                                              >@Messages("hts.introduction.apply.ul-1-1-2")</a></li>
-            <li>@Messages("hts.introduction.apply.ul-1-2-1") @Messages("hts.introduction.apply.ul-1-2-2") @Messages("hts.introduction.apply.ul-1-2-3")</li>
-        </ul>
+        <p>@Messages("hts.introduction.apply.par-1a") <a title="Navigate to @Messages("hts.introduction.eligibility.title")"
+            href=@routes.IntroductionController.getEligibility()
+            data-ga-event-category = "links"
+            data-ga-event-action = "Eligible"
+            data-ga-event-label= "Apply page"
+            class="ga-track-event"
+            >@Messages("hts.introduction.apply.par-1b")</a> @Messages("hts.introduction.apply.par-1c")</p>
         <p>@Messages("hts.introduction.apply.par-2")</p>
+        <ul class="bullets">
+            <li>@Messages("hts.introduction.apply.ul-1")</li>
+            <li>@Messages("hts.introduction.apply.ul-2")</li>
+        </ul>
         <p>@Messages("hts.introduction.apply.par-3")</p>
         <p>@Messages("hts.introduction.apply.par-4")</p>
+        <p>@Messages("hts.introduction.apply.par-5")</p>
         @form(routes.IntroductionController.applySubmit(), 'class -> "group subsection--wide") {
           @ga_submit_button("apply-button",
                             "Start now",
@@ -57,9 +59,17 @@
            data-ga-event-label= "Apply page"
            class="ga-track-event">@Messages("hts.introduction.apply.sign-in-link")</a>
     </section>
-    <a class="page-nav__link page-nav__link--previous"
-    title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
-        <span class="page-nav__label">Previous</span>
-        <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
-    </a>
+
+    <nav class="page-navigation--previous-next" role="navigation"
+         aria-label="Page navigation">
+        <ul>
+            <li class="page-nav__item page-nav__item--previous">
+                <a class="page-nav__link page-nav__link--previous"
+                   title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
+                    <span class="page-nav__label">Previous</span>
+                    <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 }

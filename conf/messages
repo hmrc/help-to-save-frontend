@@ -69,7 +69,7 @@ hts.introduction.how-we-calculate-bonuses.par-2=You''ll get your first bonus aft
 hts.introduction.how-we-calculate-bonuses.par-3=We''ll look back over years 1 and 2 and find your highest balance. We''ll pay you 50% of that amount as a first bonus. Even if you withdrew money.
 hts.introduction.how-we-calculate-bonuses.h3-2=First bonus example
 hts.introduction.how-we-calculate-bonuses.par-4=If you pay in £50 a month for 2 years and don''t make any withdrawals, you''ll get a tax-free bonus of £600.
-hts.introduction.how-we-calculate-bonuses.par-5=If you pay in:
+hts.introduction.how-we-calculate-bonuses.h3-3=Example bonus calculations
 hts.introduction.how-we-calculate-bonuses.tab-1.title=£50 a month
 hts.introduction.how-we-calculate-bonuses.tab-1.url=50-a-month
 hts.introduction.how-we-calculate-bonuses.tab-1.table.th-1=Years
@@ -139,26 +139,28 @@ hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1=50% o
 hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1.br-1=(£480 - £240 = £240,
 hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1.br-2=50% of £240 = £120)
 hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-2=Your bonus will be paid into your UK bank account after 4 years
-hts.introduction.how-we-calculate-bonuses.h3-3=Final bonus
+hts.introduction.how-we-calculate-bonuses.h3-4=Final bonus
 hts.introduction.how-we-calculate-bonuses.par-6=You''ll get your final tax-free bonus after 4 years.
 hts.introduction.how-we-calculate-bonuses.par-7=We use a different calculation to work out this bonus compared to your first bonus:
 hts.introduction.how-we-calculate-bonuses.ol-1-1=We''ll find the highest balance your savings reached over years 1 and 2.
 hts.introduction.how-we-calculate-bonuses.ol-1-2=We''ll then compare it to the highest balance your savings reached over years 3 and 4.
 hts.introduction.how-we-calculate-bonuses.ol-1-3=If your highest balance in years 3 and 4 is more than it was in years 1 and 2, you''ll get a 50% tax-free bonus on the difference.
-hts.introduction.how-we-calculate-bonuses.h3-4=How withdrawals can affect your bonus
+hts.introduction.how-we-calculate-bonuses.h3-5=How withdrawals can affect your bonus
 hts.introduction.how-we-calculate-bonuses.par-8=We use your highest balance to work out your bonus. You can withdraw money at any time and still get a bonus.
 hts.introduction.how-we-calculate-bonuses.par-9=Withdrawing money will not reduce your bonus. It will make it harder for you to increase your highest balance and your bonus.
 
-hts.introduction.apply.title=Apply
-hts.introduction.apply.par-1=To apply for a Help to Save account online, you''ll need to:
-hts.introduction.apply.ul-1-1=make sure you''re
-hts.introduction.apply.ul-1-1-2=eligible
-hts.introduction.apply.ul-1-2-1=have a
-hts.introduction.apply.ul-1-2-2=Government Gateway
-hts.introduction.apply.ul-1-2-3=account
-hts.introduction.apply.par-2=If you apply for a Help to Save account but don''t have a Government Gateway account, you can create one as part of the application process.
-hts.introduction.apply.par-3=We''ll use the details you provided when you created a Government Gateway account to check if you''re eligible for a Help to Save account. If you''re eligible and then decide to create a Help to Save account, we''ll set it up for you immediately.
-hts.introduction.apply.par-4=You''ll be able to access your Help to Save account, start saving and earning a bonus as soon as you enter your UK bank account details into your Help to Save account.
+
+hts.introduction.apply.title=Apply or sign in
+hts.introduction.apply.par-1a=To apply for a Help to Save account online, you''ll need to make sure you''re
+hts.introduction.apply.par-1b=eligible
+hts.introduction.apply.par-1c=for one.
+hts.introduction.apply.par-2=If you:
+hts.introduction.apply.ul-1=already have a Government Gateway account you can use those details to sign in and apply for a Help to Save account
+hts.introduction.apply.ul-2=don''t have a Government Gateway account, you can create one as part of the application process
+hts.introduction.apply.par-3=We''ll use the details from your Government Gateway account to check if you''re eligible for a Help to Save account.
+hts.introduction.apply.par-4=If you''re eligible and then decide to create a Help to Save account, we''ll set it up for you immediately.
+hts.introduction.apply.par-5=You''ll be able to access your Help to Save account, start saving and earning a bonus as soon as you enter your UK bank account details into your Help to Save account.
+
 hts.introduction.apply.button-1=Start now
 hts.introduction.apply.sign-in-link=Sign in to your Help to Save account
 
@@ -178,13 +180,14 @@ hts.core.not-eligible.h2-1=Waiting to hear back?
 hts.core.not-eligible.p-3=If you''ve applied for Working Tax Credit, you can only apply for an account again after:
 hts.core.not-eligible.li-1=your application for Working Tax Credit has been approved
 hts.core.not-eligible.li-2=you''re receiving Working Tax Credit payments
-hts.core.not-eligible.h2-2=Elsewhere on GOV.UK
-hts.core.not-eligible.p-4=Working Tax Credit
 hts.helpers.sidebar.header=Elsewhere on GOV.UK
 hts.helpers.sidebar.government-gateway=Government Gateway
 hts.helpers.sidebar.universal-credit=Universal Credit
 hts.helpers.sidebar.apply-for-universal-credit=Apply for Universal Credit
 hts.helpers.sidebar.working-tax-credit=Working Tax Credit
+
+hts.core.not-eligible.sidebar.h2=Elsewhere on GOV.UK
+hts.core.not-eligible.sidebar.p=Working Tax Credit
 
 hts.register.you-are-eligible.notification.step=Step 1 of 4
 hts.register.you-are-eligible.title=You''re eligible for a Help to Save account
@@ -385,9 +388,9 @@ hts.cannot-change-email-try-later.returning.p2=You''ll need to come back later a
 hts.cannot-change-email-try-later.returning.button=Go to account home
 
 hts.no-account.page-title=You don''t have an account
-hts.no-account.title=You don''t have an account
+hts.no-account.title=You don''t have a Help to Save account
 hts.no-account.p1=You''ve signed into your Government Gateway account, but you don''t have a Help to Save account.
-hts.no-account.h2=Apply for an account
+hts.no-account.h2=Apply for a Help to Save account
 hts.no-account.p2=If you want to apply for an account, you should continue and we''ll check if you''re eligible for one. If you are, you can then go on to create your Help to Save account.
 hts.no-account.continue_button=Continue
 hts.no-account.exit-message=Exit and apply another time
@@ -406,9 +409,8 @@ hts.incorrect-details.listOne2=last name
 hts.incorrect-details.listOne3=date of birth
 hts.incorrect-details.listOne4=address
 hts.incorrect-details.h2=What happens next?
-hts.incorrect-details.listTwo1=You''ll need to <a href={0} target="_blank">fill in the form (it will open in a new window)</a> on the HM Revenue & Customs website.
-hts.incorrect-details.listTwo2=You''ll need to wait until we''ve updated your details in our system.
-hts.incorrect-details.listTwo3=You can then apply for a Help to Save account again.
+hts.incorrect-details.listTwo1=You''ll need to go to GOV.UK and <a href={0} target="_blank">give us your correct details</a> (link opens in a new window).
+hts.incorrect-details.listTwo2=You can apply for a Help to Save account again, once we''ve updated your details in our system.
 hts.incorrect-details.exit-button=Back
 
 hts.privacy.page-title=Help to Save privacy statement
