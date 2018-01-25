@@ -18,14 +18,16 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType._
+@import uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligible_sidebar
 @(ineligibilityType: IneligibilityType)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.not-eligible.page-title"),
+    sidebarLinks = Some(not_eligible_sidebar()),
     bodyClasses = None) {
-  
-           
-              
+
+
+
 
   <h1 class="heading-large" id="hts-not-eligible-title">@Messages("hts.core.not-eligible.h1")</h1>
 
@@ -45,10 +47,6 @@
     <li>@Messages("hts.core.not-eligible.li-1")</li>
     <li>@Messages("hts.core.not-eligible.li-2")</li>
   </ul>
-  <section class="section section--blue-top">
-    <h2 class="heading-medium">@Messages("hts.core.not-eligible.h2-2")</h2>
-    <p><a href="https://www.gov.uk/working-tax-credit">@Messages("hts.core.not-eligible.p-4")</a></p>
-  </section>
 
   <!--
   Not currently used
