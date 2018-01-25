@@ -149,7 +149,8 @@ hts.introduction.how-we-calculate-bonuses.h3-5=How withdrawals can affect your b
 hts.introduction.how-we-calculate-bonuses.par-8=We use your highest balance to work out your bonus. You can withdraw money at any time and still get a bonus.
 hts.introduction.how-we-calculate-bonuses.par-9=Withdrawing money will not reduce your bonus. It will make it harder for you to increase your highest balance and your bonus.
 
-hts.introduction.apply.title=Apply
+
+hts.introduction.apply.title=Apply or sign in
 hts.introduction.apply.par-1a=To apply for a Help to Save account online, you''ll need to make sure you''re
 hts.introduction.apply.par-1b=eligible
 hts.introduction.apply.par-1c=for one.
@@ -159,6 +160,7 @@ hts.introduction.apply.ul-2=don''t have a Government Gateway account, you can cr
 hts.introduction.apply.par-3=We''ll use the details from your Government Gateway account to check if you''re eligible for a Help to Save account.
 hts.introduction.apply.par-4=If you''re eligible and then decide to create a Help to Save account, we''ll set it up for you immediately.
 hts.introduction.apply.par-5=You''ll be able to access your Help to Save account, start saving and earning a bonus as soon as you enter your UK bank account details into your Help to Save account.
+
 hts.introduction.apply.button-1=Start now
 hts.introduction.apply.sign-in-link=Sign in to your Help to Save account
 
