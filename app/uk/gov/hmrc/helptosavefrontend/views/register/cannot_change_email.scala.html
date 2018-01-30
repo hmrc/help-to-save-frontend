@@ -29,6 +29,16 @@
     bodyClasses = None) {
 
     @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
+        @{if(hasErrors)
+        <div class="error-summary" role="alert" aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+            <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">Message to alert the user to a problem goes here</h2>
+            <p>Optional description of the errors and how to correct them</p>
+            <ul class="error-summary-list">
+                <li><a href="#example-personal-details">Descriptive link to the question with an error</a></li>
+            </ul>
+        </div>
+        }
+
         <h1 class="heading-large">@Messages("hts.cannot-change-email.title")</h1>
 
         <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
@@ -40,12 +50,12 @@
 
         <fieldset>
             <legend>
-                <h1 class="heading-medium">
+                <h2 class="heading-medium">
                 @Messages("hts.cannot-change-email.header1")
-                </h1>
+                </h2>
             </legend>
 
-            <div class="@{"form-group"  + { if(hasErrors) " form-group-error" else "" }}">
+            <div class="@{"form-group" + { if(hasErrors) " form-group-error" else "" }}">
 
                 @{if(hasErrors) <span class="error-message">{Messages("hts.cannot-change-email.select-option")}</span> }
 
