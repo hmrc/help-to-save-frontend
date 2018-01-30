@@ -26,15 +26,35 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = messages("hts.select-email.page-title"), bodyClasses = None) {
     @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
+
+    @{if(hasNotSelected)
+    <div class="error-summary" role="alert" aria-labelledby="error-summary-heading-example-1" tabindex="-1">
+        <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">Message to alert the user to a problem goes here (for select one user)</h2>
+        <p>Optional description of the errors and how to correct them</p>
+        <ul class="error-summary-list">
+            <li><a href="#example-personal-details">Descriptive link to the question with an error</a></li>
+        </ul>
+    </div>
+    }
+
+    @{if(hasInvalidEmail)
+    <div class="error-summary" role="alert" aria-labelledby="error-summary-heading-example-2" tabindex="-2">
+        <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-2">Message to alert the user to a problem goes here (for enter new email)</h2>
+        <p>Optional description of the errors and how to correct them</p>
+        <ul class="error-summary-list">
+            <li><a href="#example-personal-details">Descriptive link to the question with an error</a></li>
+        </ul>
+    </div>
+    }
+
+    <h1 class="heading-large">
+        @messages("hts.select-email.title")
+    </h1>
+
     <form method="post" action=@routes.RegisterController.selectEmailSubmit>
         @CSRF.formField(request)
 
     <fieldset>
-        <legend>
-            <h1 class="heading-large">
-            @messages("hts.select-email.title")
-            </h1>
-        </legend>
 
         <div class="@{"form-group" + {if(hasNotSelected) " form-group-error" else "" }}">
             @{if(hasNotSelected) <span class="error-message">{messages("hts.select-email.select-an-option")}</span> }
@@ -50,11 +70,11 @@
             </div>
         </div>
 
-        <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " error" else ""}}" id="collect-new-email">
+        <div class="@{"form-group js-hidden" + {if(hasInvalidEmail) " form-group-error" else ""}}" id="collect-new-email">
             <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
             <div class="form-group">
                 <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
-                @if(hasInvalidEmail) { <span class="error-notification">@email_form_validation_error_message(form, "new-email")</span> }
+                @if(hasInvalidEmail) { <span class="error-message">@email_form_validation_error_message(form, "new-email")</span> }
                 <input class="form-control" name="new-email" type="text" id="new-email">
             </div>
         </div>
