@@ -21,10 +21,22 @@
 
 @(form: Form[GiveEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
+@defining(form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))){ errorMessage =>
+
     @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
         title = messages("hts.give-email.title"),
         sidebarLinks = None,
-        bodyClasses = None) {
+        bodyClasses = None,
+        isErrorPage = errorMessage.isDefined) {
+
+        @{if(errorMessage.isDefined)
+        <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
+            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.give-email.error-title")}</h2>
+            <ul class="error-summary-list">
+                <li><a href="#email">{Messages("hts.give-email.error-link-description")}</a></li>
+            </ul>
+        </div>
+        }
 
         <h1 class="heading-large">@messages("hts.give-email.page-title")</h1>
 
@@ -35,11 +47,13 @@
                 id = "email",
                 name = "email",
                 label = messages("hts.give-email-address.label"),
-                errorMessage = form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))
+                errorMessage = errorMessage
             )
+
           <section class="subsection">
             @helpers.submit('_buttonClass -> "", 'id → "continue", '_onclick -> "ga('send', 'event', 'buttons', 'Confirmed given email', 'Applicant gives email address page');") { @messages("hts.global.continue-button") }
           </section>
         }
 
     }
+}
