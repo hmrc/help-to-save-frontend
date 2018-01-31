@@ -323,6 +323,8 @@ hts.give-email.title=Which email address do you want to use for Help to Save?
 hts.give-email.page-title=Which email address do you want to use for Help to Save?
 hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
+hts.give-email.error-title=There is a problem
+hts.give-email.error-link-description=Enter a valid email address
 
 hts.email-verification.page-title=Change your email address
 hts.email-verification.title=Change your email address
@@ -375,6 +377,8 @@ hts.cannot-change-email.opt1=Use {0} for my Help to Save account
 hts.cannot-change-email.opt2=Try again later and exit to About Help to Save
 hts.cannot-change-email.select-option=Select one option
 hts.cannot-change-email.continue-button=Continue
+hts.cannot-change-email.error-summary.title=There is a problem
+hts.cannot-change-email.error-summary.descriptive-link=Select one option
 
 hts.cannot-change-email-try-later.page-title=Something went wrong
 hts.cannot-change-email-try-later.title=Something went wrong
@@ -436,6 +440,8 @@ hts.privacy.h2-2=Seeing what information we hold
 hts.privacy.p11.1=You can ask to see the personal information HMRC holds about you. To help locate the information you want and deal with your request more quickly, you should make your Data Protection Act request to the HMRC office that you''ve been dealing with. You should address your request to the ''Data Protection Officer''. You can get more information on
 hts.privacy.p11.link-text=HMRC''s privacy policy
 hts.privacy.p11.2=(it will open in a new window) on the GOV.UK website.
+
+hts.title.prepended-error-message=Error:
 
 footer.links.privacy_policy.url=/help-to-save/privacy-statement
 global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties

@@ -23,18 +23,19 @@
 @(backupEmail: String, form: Form[Continue])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = messages("hts.cannot-change-email.page-title"),
-    sidebarLinks = None,
-    bodyClasses = None) {
-
     @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
+
+        @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+            title = messages("hts.cannot-change-email.page-title"),
+            sidebarLinks = None,
+            bodyClasses = None,
+            isErrorPage = hasErrors) {
+
         @{if(hasErrors)
-        <div class="error-summary" role="alert" aria-labelledby="error-summary-heading-example-1" tabindex="-1">
-            <h2 class="heading-medium error-summary-heading" id="error-summary-heading-example-1">Message to alert the user to a problem goes here</h2>
-            <p>Optional description of the errors and how to correct them</p>
+        <div class="error-summary" role="alert" aria-labelledby="error-summary-select-one-option" tabindex="-1">
+            <h2 class="heading-medium error-summary-heading" id="error-summary-select-one-option">{Messages("hts.cannot-change-email.error-summary.title")}</h2>
             <ul class="error-summary-list">
-                <li><a href="#example-personal-details">Descriptive link to the question with an error</a></li>
+                <li><a href="#select-email">{Messages("hts.cannot-change-email.error-summary.descriptive-link")}</a></li>
             </ul>
         </div>
         }
@@ -55,7 +56,7 @@
                 </h2>
             </legend>
 
-            <div class="@{"form-group" + { if(hasErrors) " form-group-error" else "" }}">
+            <div class="@{"form-group" + { if(hasErrors) " form-group-error" else "" }}" id="select-email">
 
                 @{if(hasErrors) <span class="error-message">{Messages("hts.cannot-change-email.select-option")}</span> }
 
