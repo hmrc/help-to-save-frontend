@@ -313,7 +313,7 @@ hts.email.error.blank=Enter a valid email address
 hts.email.error.no-at-symbol=Enter a valid email address, like yourname@example.com
 
 
-hts.select-email.page-title=Do you want to use the email address we hold for you?
+hts.select-email.page-title=Which email address do you want us to use for your Help to Save account?
 hts.select-email.title=Which email address do you want us to use for your Help to Save account?
 hts.select-email.select-new-address=I want to enter a new email address
 hts.select-email.enter-new-address-body-text=The email addresses you use for other government services will not change.
@@ -348,6 +348,9 @@ hts.email-verification.check-your-email.where-used-heading=Where your email addr
 hts.email-verification.check-your-email.where-used=We''ll only use this email address for your Help to Save account. The email addresses you use for other government services won''t change.
 hts.email-verification.check-your-email.resend-email=Resend email
 hts.email-verification.check-your-email.change-email-address=Change email address
+hts.email-verification.error-title=There is a problem
+hts.email-verification.error-link-description=Enter a valid email address
+
 hts.we-couldnt-update-your-email.title=Something went wrong - Help to Save - GOV.UK
 hts.we-couldnt-update-your-email.page-title=Something went wrong
 hts.we-couldnt-update-your-email.p1=We cannot change your email address at this time.

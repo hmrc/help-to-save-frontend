@@ -21,29 +21,41 @@
 
 @(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = messages("hts.email-verification.page-title"),
-    sidebarLinks = None,
-    bodyClasses = None) {
+@defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
+    @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+        title = messages("hts.email-verification.page-title"),
+        sidebarLinks = None,
+        bodyClasses = None,
+        isErrorPage = errorMessage.isDefined) {
 
-    <h1 class="heading-large">@messages("hts.email-verification.title")</h1>
-    <p class="lede">@messages("hts.email-verification.intro")</p>
-    @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderUpdateEmailAddressController.onSubmit(), 'class -> "group subsection--wide") {
-        @helpers.input_text(
-            id = "new-email-address",
-            name = "new-email-address",
-            label = messages("hts.email-verification.input.label"),
-            errorMessage = form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))
-        )
-        <div class="panel panel-border-wide">
-          <p>@messages("hts.email-verification.note")</p>
+        @{if(errorMessage.isDefined)
+        <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
+            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.email-verification.error-title")}</h2>
+            <ul class="error-summary-list">
+                <li><a href="#new-email-address">{Messages("hts.email-verification.error-link-description")}</a></li>
+            </ul>
         </div>
+        }
 
-    @helpers.ga_submit_button("apply-button",
-        "Account holder confirmed update",
-        "Account holder update email address page",
-        Messages("hts.global.continue-button"),
-        None
-    )
+        <h1 class="heading-large">@messages("hts.email-verification.title")</h1>
+        <p class="lede">@messages("hts.email-verification.intro")</p>
+        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderUpdateEmailAddressController.onSubmit(), 'class -> "group subsection--wide") {
+            @helpers.input_text(
+                id = "new-email-address",
+                name = "new-email-address",
+                label = messages("hts.email-verification.input.label"),
+                errorMessage = errorMessage
+            )
+            <div class="panel panel-border-wide">
+              <p>@messages("hts.email-verification.note")</p>
+            </div>
+
+        @helpers.ga_submit_button("apply-button",
+            "Account holder confirmed update",
+            "Account holder update email address page",
+            Messages("hts.global.continue-button"),
+            None
+        )
+        }
     }
 }
