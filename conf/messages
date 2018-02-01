@@ -319,6 +319,11 @@ hts.select-email.select-new-address=I want to enter a new email address
 hts.select-email.enter-new-address-body-text=The email addresses you use for other government services will not change.
 hts.select-email.enter-new-address-label=Enter a new email address
 hts.select-email.select-an-option=Select one option
+hts.select-email.select-one.error-summary.title=There is a problem
+hts.select-email.select-one.error-summary.link-description=Select one option
+hts.select-email.invalid-email.error-summary.title=There is a problem
+hts.select-email.invalid-email.error-summary.link-description=Enter a valid email address
+
 hts.give-email.title=Which email address do you want to use for Help to Save?
 hts.give-email.page-title=Which email address do you want to use for Help to Save?
 hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
