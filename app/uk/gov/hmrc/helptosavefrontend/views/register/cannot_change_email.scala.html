@@ -22,6 +22,7 @@
 
 @(backupEmail: String, form: Form[Continue])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
+@{request.headers.get("id"))
 
     @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
 

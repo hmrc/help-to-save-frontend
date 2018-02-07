@@ -112,24 +112,24 @@ sbt "run 7002"
 
 Then (to run against any environment) execute:
  ```
- ./run_selenium_system_test.sh ${ENV} ${BROWSER} ${DRIVERS}
+ ./run_selenium_system_test.sh -e=${ENV} -b=${BROWSER} -d=${DRIVERS}
 ```
 where `${ENV}` indicates the environment the tests should run on (one of `dev`, `qa` or `local`), `${BROWSER}` is
 the browser the tests should run on `chrome` and `${DRIVERS}` is the path to the folder
 containing the Selenium driver files. This command will not run the unit tests. To run only a subset of
 Selenium scenarios, tag the relevant scenarios and then run the command
  ```
- ./run_selenium_system_test.sh ${ENV} ${BROWSER} ${DRIVERS} ${TAGS}
+ ./run_selenium_system_test.sh -e=${ENV} -b=${BROWSER} -d=${DRIVERS} -t=${TAGS}
  ```
-where `${TAGS}` is a space separated list containing the relevant tags. Examples:
+where `${TAGS}` is a comma separated list containing the relevant tags. Examples:
 
 ```
-./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver           # (1) runs all selenium tests on the dev environment using chrome
-./run_selenium_system_test.sh -e=qa -b=chrome -d=/usr/local/bin/chromedriver wip     # (2) runs selenium scenarios tagged with the `@wip` tag on the
-                                                                                #     QA environment using chrome
-./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver @wip   # (3) the same as (2)
-./run_selenium_system_test.sh -e=local -b=chrome -d=/usr/local/bin/chromedriver wip sit # (4) runs selenium scenarios tagged with either the `@wip` or `@sit`
-                                                                                #     tags locally using chrome
+./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver                # (1) runs all selenium tests on the dev environment using chrome
+./run_selenium_system_test.sh -e=qa -b=chrome -d=/usr/local/bin/chromedriver -t="wip"        # (2) runs selenium scenarios tagged with the `@wip` tag on the
+                                                                                             #     QA environment using chrome
+./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver -t="wip"       # (3) the same as (2)
+./run_selenium_system_test.sh -e=local -b=chrome -d=/usr/local/bin/chromedriver -t="wip,sit" # (4) runs selenium scenarios tagged with either the `@wip` or `@sit`
+                                                                                             #     tags locally using chrome
 ```
 
 If you wish to run the Selenium tests from Intellij, you`ll need to:
@@ -139,7 +139,7 @@ If you wish to run the Selenium tests from Intellij, you`ll need to:
 
 ## BrowserStack (cross-browser/-platform compatibility testing)
 
-NOTE: BrowserStack has compatbility issues with Safari accessing localhost, so please run tests against Safari MANUALLY at https://www.browserstack.com/start. All iOS devices run Safari by default.
+NOTE: BrowserStack has compatibility issues with Safari accessing localhost, so please run tests against Safari MANUALLY at https://www.browserstack.com/start. All iOS devices run Safari by default.
 
 To run parallel tests using BrowserStack in AUTOMATED mode, you need to:
 0. If necessary, start mongod using "sudo service mongod start"
