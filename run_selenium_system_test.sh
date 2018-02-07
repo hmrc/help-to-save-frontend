@@ -4,11 +4,12 @@ USAGE="run_selenium_system_test.sh [--environment -e=env] [--browser -b=browser]
 env      - The environment to run the tests on [ dev | qa | local ]
 browser  - The browser to run the tests on [ chrome | zap-chrome | headless | browserstack ]
 driver   - The path to the folder containing Selenium driver files
-javaopts - comma separated list of any extra java arguments that are needed such as BrowserStack,
-           no spaces should be given between these arguments
-           e.g. -j="-Dbrowserstack.os=android,-Dbrowserstack.os_version="7.0",-Dbrowserstack.device=Samsung_Galaxy_S8,-Dbrowserstack.real_mobile=true,-Dbrowserstack.username=username,-Dbrowserstack.key=some-key"
-tags     - comma separated list of tags with no spaces between tags. Only run tests with the given
-           tags. Not specifying any tags will run all tests. Tags may be prefixed with an @ symbol
+javaopts - comma separated list of any extra java arguments that are needed such as BrowserStack with
+           no spaces should be given between these arguments. The list must be enclosed in double
+           quotes, e.g. -j=\"-Dbrowserstack.os=android,-Dbrowserstack.real_mobile=true\"
+tags     - comma separated list of tags with no spaces between tags. The list must be encolsed in
+           double quotes. Only run tests with the given tags. Not specifying any tags will run all tests.
+           Tags may be prefixed with an @ symbol. E.g -t=\"a,b\", -t=\"@c\"
            "
 
 # Join a space delimited string with a given delimiter, e.g. 'join_by , "A B C"' returns the string "A,B,C"
