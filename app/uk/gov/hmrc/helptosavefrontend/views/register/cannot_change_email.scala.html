@@ -22,7 +22,6 @@
 
 @(backupEmail: String, form: Form[Continue])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-
     @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
 
         @uk.gov.hmrc.helptosavefrontend.views.html.main_template(

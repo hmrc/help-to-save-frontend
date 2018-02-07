@@ -1,14 +1,16 @@
 #! /bin/bash
-USAGE="run_selenium_system_test.sh [--environment -e=env] [--browser=browser] [--driver=driver] [--with-java-flags -j java opts] [--with-tags -t tags: optional]
+USAGE="run_selenium_system_test.sh [--environment -e=env] [--browser -b=browser] [--driver -d=driver] [--with-java-flags -j=java_opts: optional] [--with-tags -t=tags: optional]
 
 env      - The environment to run the tests on [ dev | qa | local ]
 browser  - The browser to run the tests on [ chrome | zap-chrome | headless | browserstack ]
 driver   - The path to the folder containing Selenium driver files
-javaopts - Any extra arguments that are needed such as BrowserStack, no spaces should be given between these arguments
-           i.e. -j="-Dbrowserstack.os=android,-Dbrowserstack.os_version="7.0",-Dbrowserstack.device=Samsung_Galaxy_S8,-Dbrowserstack.real_mobile=true,-Dbrowserstack.username=username,-Dbrowserstack.key=some-key"
-tags     - Space separated list of tags. Only run tests with the given
-           tags. Not specifying any tags will run all tests.
-           Tags with an '@' symbol."
+javaopts - comma separated list of any extra java arguments that are needed such as BrowserStack with
+           no spaces should be given between these arguments. The list must be enclosed in double
+           quotes, e.g. -j=\"-Dbrowserstack.os=android,-Dbrowserstack.real_mobile=true\"
+tags     - comma separated list of tags with no spaces between tags. The list must be encolsed in
+           double quotes. Only run tests with the given tags. Not specifying any tags will run all tests.
+           Tags may be prefixed with an @ symbol. E.g -t=\"a,b\", -t=\"@c\"
+           "
 
 # Join a space delimited string with a given delimiter, e.g. 'join_by , "A B C"' returns the string "A,B,C"
 join_by() {
@@ -23,7 +25,7 @@ modify_tags() {
     # loop through the array and create a string which contains the tags each prepended with an '@' symbol
     local modifiedTags=""
 
-    for i in $1
+    for i in $@
       do
         # if the tag already begins with an '@' symbol return the tag as
         # is, otherwise prepend an '@' symbol
@@ -35,7 +37,7 @@ modify_tags() {
         fi
     done
 
-    echo "$(join_by , ${modifiedTags})"
+    echo "$(join_by ',' ${modifiedTags})"
 }
 
 usage(){
@@ -45,6 +47,7 @@ usage(){
 
 java_opts=()
 extra_java_opts=""
+tags=""
 
 while [ "$1" != "" ]; do
  PARAM=$(echo $1 | awk -F= '{print $1}')
@@ -75,8 +78,7 @@ while [ "$1" != "" ]; do
    --with-tags | -t)
      # convert the arguments into a string array
         IFS=',' read -r -a array <<< "$VALUE"
-        tags=$(modify_tags $array)
-        java_opts+=("-Dcucumber.options=--tags ${tags}")
+        tags=$(modify_tags ${array[@]})
        ;;
    *)
      echo "ERROR: unknown parameter \"$PARAM\""
@@ -117,6 +119,12 @@ process_java_options() {
 }
 
 JAVA_OPTS=$(process_java_options "${java_opts[@]}")
+
+if [ "${tags}" != "" ]
+then
+  JAVA_OPTS+=",\"-Dcucumber.options=--tags ${tags}\""
+fi
+
 echo "JAVA options are: $JAVA_OPTS"
 
 # Doing `sbt -Doption1=value1 -Doption2="value2 with spaces" selenium:test` works on some
