@@ -51,11 +51,13 @@ trait Navigation {
     val elementLocation = driver.findElement(By(id)).getLocation
     driver match {
       case executor: JavascriptExecutor ⇒
-        var diff = elementLocation.getY - executor.executeScript("return window.pageYOffset;").toString.toInt
-        if (diff < 0) {
-          diff = diff - 200 // done to avoid any bars or popups blocking elements on mobile devices
-        } else {
-          diff = diff + 200 // done to avoid any bars or popups blocking elements on mobile devices
+        val diff = {
+          val d = elementLocation.getY - executor.executeScript("return window.pageYOffset;").toString.toInt
+          if (d < 0) {
+            d - 200 // done to avoid any bars or popups blocking elements on mobile devices
+          } else {
+            d + 200 // done to avoid any bars or popups blocking elements on mobile devices
+          }
         }
         executor.executeScript("scrollBy(0," + diff.toString + ")")
     }
