@@ -59,7 +59,7 @@ class RegisterControllerSpec
   val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
   implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
-  def newController(earlyCapCheck: Boolean): RegisterController = new RegisterController(
+  def newController(earlyCapCheck: Boolean, crypto: Crypto): RegisterController = new RegisterController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     mockSessionCacheConnector,
@@ -74,7 +74,7 @@ class RegisterControllerSpec
     override lazy val authConnector = mockAuthConnector
   }
 
-  lazy val controller: RegisterController = newController(false)
+  lazy val controller: RegisterController = newController(false, crypto)
 
   def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess())): Unit =
     (mockHelpToSaveService.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
@@ -206,7 +206,7 @@ class RegisterControllerSpec
       }
 
       "skip the cap check at a later point if enable-early-cap-check is set to true" in {
-        val controller = newController(true)
+        val controller = newController(true, crypto)
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -307,7 +307,7 @@ class RegisterControllerSpec
       }
 
       "skip the cap check at a later point if enable-early-cap-check is set to true" in {
-        val controller = newController(true)
+        val controller = newController(true, crypto)
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -338,15 +338,20 @@ class RegisterControllerSpec
 
       "redirect to confirm email if the session data shows that they have been already found to be eligible " +
         "and the form contains no new email" in {
+          val encryptedEmail = "encrypted"
+          val crypto = mock[Crypto]
+          val controller = newController(true, crypto)
+
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
+            (crypto.encrypt(_: String)).expects(emailStr).returning(encryptedEmail)
           }
 
-          val result = doRequest(None)
+          val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "Yes"))
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.confirmEmail(validNSIUserInfo.contactDetails.email).url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.confirmEmail(encryptedEmail).url)
         }
 
       "redirect to verify email if the session data shows that they have been already found to be eligible " +
@@ -513,7 +518,7 @@ class RegisterControllerSpec
             mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo)), Some(email), None))(Right(CacheMap("", Map.empty)))
             mockEmailUpdate(email)(Left(""))
           }
-          await(doRequest(email))
+          await(doRequest(crypto.encrypt(email)))
         }
 
       "redirect to the create an account page if the write to keystore and the email store was successful" in {
@@ -525,12 +530,23 @@ class RegisterControllerSpec
           mockEmailUpdate(email)(Right(()))
         }
 
-        val result = doRequest(email)
+        val result = doRequest(crypto.encrypt(email))
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountHelpToSavePage().url)
       }
 
       "return an error" when {
+
+        "the email cannot be decrypted" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
+          }
+
+          val result = doRequest("notencrypted")
+          checkIsTechnicalErrorPage(result)
+        }
 
         "the email cannot be written to keystore" in {
           inSequence {
@@ -540,7 +556,7 @@ class RegisterControllerSpec
             mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo)), Some(email), None))(Left(""))
           }
 
-          val result = doRequest(email)
+          val result = doRequest(crypto.encrypt(email))
           checkIsTechnicalErrorPage(result)
         }
 
@@ -553,7 +569,7 @@ class RegisterControllerSpec
             mockEmailUpdate(email)(Left(""))
           }
 
-          val result = doRequest(email)
+          val result = doRequest(crypto.encrypt(email))
           checkIsTechnicalErrorPage(result)
         }
       }

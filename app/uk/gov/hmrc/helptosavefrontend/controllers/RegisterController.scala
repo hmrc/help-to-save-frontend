@@ -125,7 +125,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           SelectEmailForm.selectEmailForm.bindFromRequest().fold(
             withErrors ⇒ Ok(views.html.register.select_email(eligibleWithEmail.email, withErrors)),
             _.newEmail.fold[Future[Result]](
-              SeeOther(routes.RegisterController.confirmEmail(eligibleWithEmail.email).url))(
+              SeeOther(routes.RegisterController.confirmEmail(crypto.encrypt(eligibleWithEmail.email)).url))(
                 newEmail ⇒ {
                   val session = new HTSSession(Some(Right(eligibleWithEmail.userInfo)), None, Some(newEmail))
                   sessionCacheConnector.put(session).fold(
@@ -146,8 +146,9 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         val result = for {
-          _ ← sessionCacheConnector.put(HTSSession(Some(Right(eligibleWithEmail.userInfo)), Some(email), None))
-          _ ← helpToSaveService.storeConfirmedEmail(email)
+          e ← EitherT.fromEither[Future](decryptEmail(email))
+          _ ← sessionCacheConnector.put(HTSSession(Some(Right(eligibleWithEmail.userInfo)), Some(e), None))
+          _ ← helpToSaveService.storeConfirmedEmail(e)
         } yield ()
 
         result.fold[Result](
@@ -293,6 +294,12 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, errorMessage: ${failure.errorMessage}, errorDetails: ${failure.errorDetail}"
+
+  private def decryptEmail(encryptedEmail: String): Either[String, String] =
+    crypto.decrypt(encryptedEmail) match {
+      case Success(value) ⇒ Right(value)
+      case Failure(e)     ⇒ Left(s"Could not decode email: ${e.getMessage}")
+    }
 
 }
 

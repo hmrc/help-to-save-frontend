@@ -51,7 +51,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
   lazy val injector: Injector = fakeApplication.injector
   lazy val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-  implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
+  implicit lazy val crypto: Crypto = injector.instanceOf[Crypto]
 
   def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
@@ -65,7 +65,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
   val mockAuditor = mock[HTSAuditor]
 
-  lazy val controller: NewApplicantUpdateEmailAddressController =
+  def newController(crypto: Crypto) =
     new NewApplicantUpdateEmailAddressController(
       mockSessionCacheConnector,
       mockHelpToSaveService,
@@ -77,6 +77,8 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
       override val authConnector = mockAuthConnector
     }
+
+  lazy val controller = newController(crypto)
 
   def mockEmailVerificationConn(nino: String, email: String, firstName: String)(result: Either[VerifyEmailError, Unit]) = {
     (mockEmailVerificationConnector.verifyEmail(_: String, _: String, _: String, _: Boolean)(_: HeaderCarrier, _: ExecutionContext))
@@ -240,15 +242,21 @@ class NewApplicantUpdateEmailAddressControllerSpec
       }
 
       "redirect to the confirmEmail endpoint if there is an email for the user and the user selects to continue" in {
+        val crypto: Crypto = mock[Crypto]
+        val controller = newController(crypto)
+        val encryptedEmail = "encrypted"
+
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
+          (crypto.encrypt(_: String)).expects(emailStr).returning(encryptedEmail)
         }
 
-        val result = doRequest(true)
+        val result = controller.verifyEmailErrorSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("radio-inline-group" → "true"))
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.confirmEmail(emailStr).url)
+
+        redirectLocation(result) shouldBe Some(routes.RegisterController.confirmEmail(encryptedEmail).url)
       }
 
       "redirect to the info endpoint if there is an email for the user and the user selects not to continue" in {
@@ -272,7 +280,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
         val result = controller.verifyEmailErrorSubmit()(fakeRequestWithCSRFToken)
         status(result) shouldBe Status.OK
-        contentAsString(result) should include(":(")
+        contentAsString(result) should include("We cannot change your email address at the moment")
       }
     }
 

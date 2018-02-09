@@ -106,7 +106,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
               form ⇒ Ok(views.html.register.cannot_change_email(email, form)),
               { continue ⇒
                 if (continue.value) {
-                  SeeOther(routes.RegisterController.confirmEmail(email).url)
+                  SeeOther(routes.RegisterController.confirmEmail(crypto.encrypt(email)).url)
                 } else {
                   SeeOther(routes.IntroductionController.getAboutHelpToSave().url)
                 }
