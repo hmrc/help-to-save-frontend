@@ -52,6 +52,8 @@
 
     <logger name="com.google.inject" level="INFO"/>
 
+    <logger name="uk.gov.hmrc.audit" level="WARN"/>
+
     <logger name="uk.gov" level="INFO"/>
 
     <logger name="application" level="DEBUG"/>

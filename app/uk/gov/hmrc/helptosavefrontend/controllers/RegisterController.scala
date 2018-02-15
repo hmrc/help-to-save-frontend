@@ -229,7 +229,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
               helpToSaveService.enrolUser().value.onComplete {
                 case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
                 case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
-                case Success(Right(_)) ⇒ logger.info(s"Process started to enrol user", nino)
+                case Success(Right(_)) ⇒ logger.debug(s"Process started to enrol user", nino)
               }
 
               SeeOther(FrontendAppConfig.nsiManageAccountUrl)

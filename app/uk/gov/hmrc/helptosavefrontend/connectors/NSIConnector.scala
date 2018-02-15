@@ -73,7 +73,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDu
 
     val nino = userInfo.nino
 
-    logger.info(s"Trying to create an account using NSI endpoint $nsiCreateAccountUrl", nino)
+    logger.debug(s"Trying to create an account using NSI endpoint $nsiCreateAccountUrl", nino)
 
     FEATURE("log-account-creation-json", conf, logger).thenOrElse(
       logger.info(s"CreateAccount JSON is ${Json.toJson(userInfo)}", nino),
@@ -88,7 +88,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDu
 
         response.status match {
           case Status.CREATED ⇒
-            logger.info(s"createAccount/insert returned 201 (Created) ${timeString(time)}", nino)
+            logger.debug(s"createAccount/insert returned 201 (Created) ${timeString(time)}", nino)
             SubmissionSuccess()
 
           case Status.CONFLICT ⇒
@@ -122,7 +122,7 @@ class NSIConnectorImpl @Inject() (conf: Configuration, metrics: Metrics, pagerDu
 
         response.status match {
           case Status.OK ⇒
-            logger.info(s"createAccount/update returned 200 OK from NSI ${timeString(time)}", nino)
+            logger.debug(s"createAccount/update returned 200 OK from NSI ${timeString(time)}", nino)
             Right(())
 
           case other ⇒
