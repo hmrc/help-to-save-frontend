@@ -20,11 +20,9 @@ import javax.inject.Singleton
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.{Application, Configuration}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
@@ -34,7 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, GiveEmailForm, Sel
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveService, JSONSchemaValidationService}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, PagerDutyAlerting, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
@@ -44,21 +42,17 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
-class RegisterController @Inject() (val messagesApi:             MessagesApi,
-                                    val helpToSaveService:       HelpToSaveService,
-                                    val sessionCacheConnector:   SessionCacheConnector,
-                                    frontendAuthConnector:       FrontendAuthConnector,
-                                    jsonSchemaValidationService: JSONSchemaValidationService,
-                                    metrics:                     Metrics,
-                                    app:                         Application,
-                                    pagerDutyAlerting:           PagerDutyAlerting,
-                                    configuration:               Configuration
+class RegisterController @Inject() (val messagesApi:           MessagesApi,
+                                    val helpToSaveService:     HelpToSaveService,
+                                    val sessionCacheConnector: SessionCacheConnector,
+                                    frontendAuthConnector:     FrontendAuthConnector,
+                                    metrics:                   Metrics,
+                                    app:                       Application,
+                                    pagerDutyAlerting:         PagerDutyAlerting,
+                                    configuration:             Configuration
 )(implicit crypto: Crypto, emailValidation: EmailValidation, transformer: NINOLogMessageTransformer)
   extends HelpToSaveAuth(frontendAuthConnector, metrics)
   with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging {
-
-  import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.CreateAccountError
-  import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.CreateAccountError._
 
   val earlyCapCheckOn: Boolean = configuration.underlying.getBoolean("enable-early-cap-check")
 
@@ -196,24 +190,13 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         eligibleWithEmail.confirmedEmail.fold[Future[Result]](
-          SeeOther(routes.RegisterController.getSelectEmailPage().url)
+          toFuture(SeeOther(routes.RegisterController.getSelectEmailPage().url))
         ) { confirmedEmail ⇒
             val userInfo = NSIUserInfo(eligibleWithEmail.userInfo, confirmedEmail)
 
-            val result: EitherT[Future, CreateAccountError, Unit] = for {
-              _ ← EitherT.fromEither[Future](validateCreateAccountJsonSchema(userInfo).leftMap(JSONSchemaValidationError))
-              _ ← helpToSaveService.createAccount(userInfo).leftMap[CreateAccountError](f ⇒ BackendError(submissionFailureToString(f)))
-            } yield ()
-
-            result.fold({
-              case JSONSchemaValidationError(e) ⇒
-                logger.warn(s"user info failed validation for creating account: $e", nino)
-                pagerDutyAlerting.alert("JSON schema validation failed")
-                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
-
-              case BackendError(e) ⇒
-                logger.warn(s"Error while trying to create account: $e", nino)
-                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
+            helpToSaveService.createAccount(userInfo).fold[Result]({ e ⇒
+              logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
+              SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             }, { _ ⇒
               logger.info("Successfully created account", nino)
 
@@ -230,7 +213,7 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
               SeeOther(FrontendAppConfig.nsiManageAccountUrl)
             })
           }
-      }{ _ ⇒
+      } { _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
@@ -277,16 +260,6 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
           ))
     }
 
-  private def validateCreateAccountJsonSchema(userInfo: NSIUserInfo): Either[String, Unit] = {
-    import uk.gov.hmrc.helptosavefrontend.util.Toggles._
-
-    FEATURE("create-account-json-validation", app.configuration, logger, Some(userInfo.nino)).thenOrElse(
-      jsonSchemaValidationService.validate(Json.toJson(userInfo)).map(_ ⇒ {
-      }),
-      Right(())
-    )
-  }
-
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, errorMessage: ${failure.errorMessage}, errorDetails: ${failure.errorDetail}"
 
@@ -307,16 +280,6 @@ object RegisterController {
     case class EligibleWithEmail(userInfo: UserInfo, email: Email, confirmedEmail: Option[Email]) extends EligibleInfo
 
     case class EligibleWithNoEmail(userInfo: UserInfo) extends EligibleInfo
-  }
-
-  private sealed trait CreateAccountError
-
-  private object CreateAccountError {
-
-    case class JSONSchemaValidationError(message: String) extends CreateAccountError
-
-    case class BackendError(message: String) extends CreateAccountError
-
   }
 
 }

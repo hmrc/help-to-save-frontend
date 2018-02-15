@@ -73,17 +73,7 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val accountHolderContinueURL: String = s"$helpToSaveFrontendUrl/account-home/email-verified-callback"
 
-  val nsiAuthHeaderKey: String = getString("microservice.services.nsi.client.httpheader.header-key")
-
-  val nsiBasicAuth: String = {
-    val user = new String(base64Decode(getString("microservice.services.nsi.client.httpheader.basicauth.Base64User")))
-    val password = new String(base64Decode(getString("microservice.services.nsi.client.httpheader.basicauth.Base64Password")))
-    val encoding = getString("microservice.services.nsi.client.httpheader.encoding")
-
-    s"Basic: ${new String(base64Encode(s"$user:$password"), encoding)}"
-  }
-
-  val nsiCreateAccountUrl: String = s"${baseUrl("nsi")}/nsi-services/account"
+  val nsiCreateAccountUrl: String = s"${baseUrl("nsi")}/help-to-save-proxy/create-account"
 
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
 

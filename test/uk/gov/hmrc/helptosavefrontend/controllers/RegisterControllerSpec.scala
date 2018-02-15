@@ -35,7 +35,6 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL20
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.services.JSONSchemaValidationService
 import uk.gov.hmrc.helptosavefrontend.testutil.MockPagerDuty
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -52,7 +51,6 @@ class RegisterControllerSpec
   with GeneratorDrivenPropertyChecks
   with MockPagerDuty {
 
-  val jsonSchemaValidationService: JSONSchemaValidationService = mock[JSONSchemaValidationService]
   val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
   implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
@@ -61,7 +59,6 @@ class RegisterControllerSpec
     mockHelpToSaveService,
     mockSessionCacheConnector,
     frontendAuthConnector,
-    jsonSchemaValidationService,
     mockMetrics,
     fakeApplication,
     mockPagerDuty,
@@ -101,11 +98,6 @@ class RegisterControllerSpec
     (crypto.decrypt(_: String))
       .expects(expected)
       .returning(result.fold[Try[String]](Failure(new Exception))(Success.apply))
-
-  def mockJsonSchemaValidation(input: NSIUserInfo)(result: Either[String, Unit]): Unit =
-    (jsonSchemaValidationService.validate(_: JsValue))
-      .expects(Json.toJson(input))
-      .returning(result.map(_ ⇒ Json.toJson(input)))
 
   def checkRedirectIfNoEmailInSession(doRequest: ⇒ Future[PlayResult]): Unit = {
     "redirect to the give email page if the session data does not contain an email for the user" in {
@@ -618,7 +610,6 @@ class RegisterControllerSpec
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), Some(confirmedEmail), None))))
-            mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Right(()))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
             mockUpdateUserCount(Right(Unit))
             mockEnrolUser()(Right(()))
@@ -635,7 +626,6 @@ class RegisterControllerSpec
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), Some(confirmedEmail), None))))
-            mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Right(()))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
             mockUpdateUserCount(Right(Unit))
             mockEnrolUser()(Left("Oh no"))
@@ -660,27 +650,11 @@ class RegisterControllerSpec
 
       "redirect to the create account error page" when {
 
-        "the JSON schema validation fails" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), Some(confirmedEmail), None))))
-            mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Left(""))
-            // WARNING: do not change the message in the following check - this needs to stay in line with the configuration in alert-config
-            mockPagerDutyAlert("JSON schema validation failed")
-          }
-
-          val result = doCreateAccountRequest()
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
-        }
-
         "the help to save service returns with an error" in {
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), Some(confirmedEmail), None))))
-            mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Right(()))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }
 
