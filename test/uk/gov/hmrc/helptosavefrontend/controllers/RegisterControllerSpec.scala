@@ -35,7 +35,6 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL20
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.testutil.MockPagerDuty
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -48,8 +47,7 @@ class RegisterControllerSpec
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionCacheBehaviour
-  with GeneratorDrivenPropertyChecks
-  with MockPagerDuty {
+  with GeneratorDrivenPropertyChecks {
 
   val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
   implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
@@ -61,7 +59,6 @@ class RegisterControllerSpec
     frontendAuthConnector,
     mockMetrics,
     fakeApplication,
-    mockPagerDuty,
     Configuration("enable-early-cap-check" → earlyCapCheck))(
     crypto, mockEmailValidation, transformer) {
     override lazy val authConnector = mockAuthConnector
