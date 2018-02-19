@@ -54,6 +54,11 @@ trait WSHttp
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 
+  def put[A](url:     String,
+             body:    A,
+             headers: Seq[(String, String)] = Seq.empty[(String, String)]
+  )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
+
 }
 
 @Singleton
@@ -83,6 +88,12 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
               body:    A,
               headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.POST(url, body)(w, httpReads, hc, ec)
+
+  def put[A](url:     String,
+             body:    A,
+             headers: Seq[(String, String)] = Seq.empty[(String, String)]
+  )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = super.PUT(url, body)(w, httpReads, hc, ec)
+
 }
 
 @Singleton
