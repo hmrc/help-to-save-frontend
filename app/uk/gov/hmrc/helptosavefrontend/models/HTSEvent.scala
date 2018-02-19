@@ -16,10 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import cats.instances.int._
-import cats.syntax.eq._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -35,68 +31,6 @@ object HTSEvent extends AppName {
             detail:    Map[String, String])(implicit hc: HeaderCarrier): DataEvent =
     DataEvent(appName, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
-}
-
-case class AccountCreated(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier) extends HTSEvent {
-
-  val value: DataEvent = HTSEvent(
-    "AccountCreated",
-    Map[String, String](
-      "forename" → userInfo.forename,
-      "surname" → userInfo.surname,
-      "dateOfBirth" → userInfo.dateOfBirth.toString,
-      "nino" → userInfo.nino,
-      "address1" → userInfo.contactDetails.address1,
-      "address2" → userInfo.contactDetails.address2,
-      "address3" → {
-        userInfo.contactDetails.address3.fold("") {
-          identity
-        }
-      },
-      "address4" → {
-        userInfo.contactDetails.address4.fold("") {
-          identity
-        }
-      },
-      "address5" → {
-        userInfo.contactDetails.address5.fold("") {
-          identity
-        }
-      },
-      "postcode" → userInfo.contactDetails.postcode,
-      "countryCode" → {
-        userInfo.contactDetails.countryCode.fold("") {
-          identity
-        }
-      },
-      "email" → userInfo.contactDetails.email,
-      "phoneNumber" → {
-        userInfo.contactDetails.phoneNumber.fold("") {
-          identity
-        }
-      },
-      "communicationPreference" → userInfo.contactDetails.communicationPreference,
-      "registrationChannel" → userInfo.registrationChannel)
-  )
-}
-
-case class EligibilityResultEvent(nino: NINO, eligibilityResult: EligibilityCheckResult)(implicit hc: HeaderCarrier) extends HTSEvent {
-
-  val value: DataEvent = {
-    val response = eligibilityResult.value
-    val details =
-      if (response.resultCode === 1) {
-        Map[String, String]("nino" → nino, "eligible" → "true")
-      } else {
-        Map[String, String]("nino" → nino, "eligible" → "false",
-          "reason" → ("Response: " +
-            s"resultCode=${response.resultCode}, reasonCode=${response.reasonCode}, " +
-            s"meaning result='${response.result}', reason='${response.reason}'")
-        )
-      }
-
-    HTSEvent("EligibilityResult", details)
-  }
 }
 
 case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit hc: HeaderCarrier) extends HTSEvent {
