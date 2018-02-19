@@ -20,7 +20,6 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
@@ -29,7 +28,6 @@ import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
-import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{AppConfig, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -37,10 +35,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
-import uk.gov.hmrc.helptosavefrontend.util.NINO
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.smartstub.AutoGen
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
@@ -52,13 +47,10 @@ class EligibilityCheckControllerSpec
   with SessionCacheBehaviour
   with GeneratorDrivenPropertyChecks {
 
-  val mockAuditor = mock[HTSAuditor]
-
   def newController(earlyCapCheck: Boolean): EligibilityCheckController = new EligibilityCheckController(
     fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     mockSessionCacheConnector,
-    mockAuditor,
     mockAuthConnector,
     mockMetrics,
     Configuration("enable-early-cap-check" → earlyCapCheck))
@@ -71,11 +63,6 @@ class EligibilityCheckControllerSpec
     (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT.fromEither[Future](result))
-
-  def mockSendAuditEvent(): Unit =
-    (mockAuditor.sendEvent(_: HTSEvent, _: NINO))
-      .expects(*, nino)
-      .returning(Future.successful(AuditResult.Success))
 
   def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
     (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier))
@@ -213,7 +200,6 @@ class EligibilityCheckControllerSpec
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Left("Oh no!"))
               mockEligibilityResult()(Right(AlreadyHasAccount(response)))
-              mockSendAuditEvent()
               mockWriteITMPFlag(Right(()))
             }
 
@@ -233,7 +219,6 @@ class EligibilityCheckControllerSpec
                   mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
                   mockEnrolmentCheck()(Left("Oh no!"))
                   mockEligibilityResult()(Right(AlreadyHasAccount(response)))
-                  mockSendAuditEvent()
                   mockWriteFailure()
                 }
 
@@ -249,7 +234,6 @@ class EligibilityCheckControllerSpec
             mockEnrolmentCheck()(Left("Oh no!"))
             mockEligibilityResult()(Right(randomEligibility()))
             mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo)), None, None))(Right(()))
-            mockSendAuditEvent()
           }
 
           val result = doCheckEligibilityRequest()
@@ -265,7 +249,6 @@ class EligibilityCheckControllerSpec
             mockEnrolmentCheck()(Left("Oh no!"))
             mockEligibilityResult()(Right(ineligibilityReason))
             mockSessionCacheConnectorPut(HTSSession(Some(Left(ineligibilityReason)), None, None))(Right(()))
-            mockSendAuditEvent()
           }
 
           val result = doCheckEligibilityRequest()
@@ -322,7 +305,6 @@ class EligibilityCheckControllerSpec
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult()(Right(AlreadyHasAccount(response)))
-            mockSendAuditEvent()
             mockWriteITMPFlag(Right(()))
           }
 
@@ -340,7 +322,6 @@ class EligibilityCheckControllerSpec
               mockSessionCacheConnectorGet(Right(None))
               mockEligibilityResult()(Right(Eligible(response)))
               mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo)), None, None))(Right(()))
-              mockSendAuditEvent()
             }
 
             val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
@@ -358,7 +339,6 @@ class EligibilityCheckControllerSpec
                 mockSessionCacheConnectorGet(Right(None))
                 mockEligibilityResult()(Right(ineligibility))
                 mockSessionCacheConnectorPut(HTSSession(Some(Left(ineligibility)), None, None))(Right(()))
-                mockSendAuditEvent()
               }
 
               val result = doCheckEligibilityRequest()

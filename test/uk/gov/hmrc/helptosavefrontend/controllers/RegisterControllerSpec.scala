@@ -29,7 +29,6 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
@@ -41,7 +40,6 @@ import uk.gov.hmrc.helptosavefrontend.testutil.MockPagerDuty
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -55,7 +53,6 @@ class RegisterControllerSpec
   with MockPagerDuty {
 
   val jsonSchemaValidationService: JSONSchemaValidationService = mock[JSONSchemaValidationService]
-  val mockAuditor: HTSAuditor = mock[HTSAuditor]
   val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
   implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
@@ -66,7 +63,6 @@ class RegisterControllerSpec
     frontendAuthConnector,
     jsonSchemaValidationService,
     mockMetrics,
-    mockAuditor,
     fakeApplication,
     mockPagerDuty,
     Configuration("enable-early-cap-check" → earlyCapCheck))(
@@ -105,11 +101,6 @@ class RegisterControllerSpec
     (crypto.decrypt(_: String))
       .expects(expected)
       .returning(result.fold[Try[String]](Failure(new Exception))(Success.apply))
-
-  def mockAudit() =
-    (mockAuditor.sendEvent(_: AccountCreated, _: NINO))
-      .expects(*, nino)
-      .returning(Future.successful(AuditResult.Success))
 
   def mockJsonSchemaValidation(input: NSIUserInfo)(result: Either[String, Unit]): Unit =
     (jsonSchemaValidationService.validate(_: JsValue))
@@ -206,7 +197,7 @@ class RegisterControllerSpec
       }
 
       "skip the cap check at a later point if enable-early-cap-check is set to true" in {
-        val controller = newController(true, crypto)
+        val controller = newController(earlyCapCheck = true, crypto)
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -255,7 +246,7 @@ class RegisterControllerSpec
 
         val result = doRequest(email)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
+        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail().url)
       }
 
       "show an error page if the form does contains a valid email but the write to session cache fails" in {
@@ -307,7 +298,7 @@ class RegisterControllerSpec
       }
 
       "skip the cap check at a later point if enable-early-cap-check is set to true" in {
-        val controller = newController(true, crypto)
+        val controller = newController(earlyCapCheck = true, crypto)
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -340,7 +331,7 @@ class RegisterControllerSpec
         "and the form contains no new email" in {
           val encryptedEmail = "encrypted"
           val crypto = mock[Crypto]
-          val controller = newController(true, crypto)
+          val controller = newController(earlyCapCheck = true, crypto)
 
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -368,7 +359,7 @@ class RegisterControllerSpec
 
           val result = doRequest(Some(newEmail))
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
+          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail().url)
         }
 
       "show an error page if writing the pending email to session cache fails" in {
@@ -629,7 +620,6 @@ class RegisterControllerSpec
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), Some(confirmedEmail), None))))
             mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Right(()))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
-            mockAudit()
             mockUpdateUserCount(Right(Unit))
             mockEnrolUser()(Right(()))
           }
@@ -647,7 +637,6 @@ class RegisterControllerSpec
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), Some(confirmedEmail), None))))
             mockJsonSchemaValidation(validNSIUserInfo.updateEmail(confirmedEmail))(Right(()))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
-            mockAudit()
             mockUpdateUserCount(Right(Unit))
             mockEnrolUser()(Left("Oh no"))
           }

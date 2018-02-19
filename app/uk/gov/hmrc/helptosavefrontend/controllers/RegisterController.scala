@@ -26,7 +26,6 @@ import play.api.{Application, Configuration}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -51,7 +50,6 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                                     frontendAuthConnector:       FrontendAuthConnector,
                                     jsonSchemaValidationService: JSONSchemaValidationService,
                                     metrics:                     Metrics,
-                                    auditor:                     HTSAuditor,
                                     app:                         Application,
                                     pagerDutyAlerting:           PagerDutyAlerting,
                                     configuration:               Configuration
@@ -218,9 +216,6 @@ class RegisterController @Inject() (val messagesApi:             MessagesApi,
                 SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             }, { _ ⇒
               logger.info("Successfully created account", nino)
-
-              // Account creation is successful, trigger background tasks but don't worry about the result
-              auditor.sendEvent(AccountCreated(userInfo), nino)
 
               helpToSaveService.updateUserCount().value.onFailure {
                 case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)

@@ -25,7 +25,6 @@ import com.google.inject.Inject
 import play.api.Configuration
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result ⇒ PlayResult}
-import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -47,7 +46,6 @@ import scala.util.{Failure, Success}
 class EligibilityCheckController @Inject() (val messagesApi:           MessagesApi,
                                             val helpToSaveService:     HelpToSaveService,
                                             val sessionCacheConnector: SessionCacheConnector,
-                                            auditor:                   HTSAuditor,
                                             frontendAuthConnector:     FrontendAuthConnector,
                                             metrics:                   Metrics,
                                             configuration:             Configuration)(implicit transformer: NINOLogMessageTransformer)
@@ -177,7 +175,6 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
 
   private def handleEligibilityResult(result: EligibilityCheckResult)(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
     val nino = htsContext.nino
-    auditor.sendEvent(EligibilityResultEvent(nino, result), nino)
     result.fold(
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url),
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
