@@ -16,10 +16,10 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityType._
+@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
+@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason._
 @import uk.gov.hmrc.helptosavefrontend.views.html.core.not_eligible_sidebar
-@(ineligibilityType: IneligibilityType)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(ineligibilityType: IneligibilityReason)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.not-eligible.page-title"),
@@ -48,17 +48,4 @@
     <li>@Messages("hts.core.not-eligible.li-2")</li>
   </ul>
 
-  <!--
-  Not currently used
-  <span> @{
-    ineligibilityType match {
-      case NotEntitledToWTC      ⇒ "You need to be receiving Working Tax Credit"
-      case EntitledToWTCButNilTC ⇒ "You're entitled to Working Tax Credit, but are not receiving any tax credit payments"
-      case Unknown               ⇒ "Dunno"
-      case InvalidNino          => "Retrieved nino is invalid"
-    }
-  }
-    <span>
-
-  -->
 }

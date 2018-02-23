@@ -22,9 +22,9 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 import uk.gov.hmrc.http.cache.client.CacheMap
 
@@ -35,10 +35,17 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
   class TestApparatus {
     val mockWsHttp: WSHttp = mock[WSHttp]
 
+    implicit val eligibleWithUserInfoGen: Gen[EligibleWithUserInfo] = for {
+      eligible ← TestData.Eligibility.randomEligibility()
+      userInfo ← TestData.UserData.userInfoGen
+    } yield EligibleWithUserInfo(eligible, userInfo)
+
     implicit val htsSessionGen: Gen[HTSSession] =
       for {
         result ← Gen.option(
-          Gen.oneOf[Either[Ineligible, UserInfo]](TestData.Eligibility.ineligibilityGen.map(Left(_)), TestData.UserData.userInfoGen.map(Right(_))))
+          Gen.oneOf[Either[Ineligible, EligibleWithUserInfo]](
+            TestData.Eligibility.ineligibilityGen.map(Left(_)),
+            eligibleWithUserInfoGen.map(Right(_))))
         email ← Gen.option(Gen.alphaStr)
         pendingEmail ← Gen.option(Gen.alphaStr)
       } yield HTSSession(result, email, pendingEmail)

@@ -17,7 +17,8 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.util.Email
 
@@ -30,14 +31,20 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
  * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
  *                               if they haven't
  */
-case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, UserInfo]],
+case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]],
                       confirmedEmail:         Option[Email],
                       pendingEmail:           Option[Email],
-                      ivURL:                  Option[String]                       = None,
-                      ivSuccessURL:           Option[String]                       = None
+                      ivURL:                  Option[String]                                   = None,
+                      ivSuccessURL:           Option[String]                                   = None
 )
 
 object HTSSession {
+
+  case class EligibleWithUserInfo(eligible: Eligible, userInfo: UserInfo)
+
+  object EligibleWithUserInfo {
+    implicit val format: Format[EligibleWithUserInfo] = Json.format[EligibleWithUserInfo]
+  }
 
   implicit def eitherFormat[A, B](implicit aFormat: Format[A], bFormat: Format[B]): Format[Either[A, B]] =
     new Format[Either[A, B]] {

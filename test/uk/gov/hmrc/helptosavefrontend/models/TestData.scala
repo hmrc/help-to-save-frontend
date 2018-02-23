@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 import java.time.LocalDate
 
 import org.scalacheck.Gen
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
@@ -33,15 +34,21 @@ object TestData {
 
     implicit val eligibilityCheckResponseGen: Gen[EligibilityCheckResponse] = AutoGen[EligibilityCheckResponse]
 
-    implicit val eligibilityGen: Gen[Eligible] = AutoGen[Eligible]
+    implicit val eligibilityGen: Gen[Eligible] = for {
+      reasonCode ← Gen.oneOf(6, 7, 8)
+    } yield Eligible(EligibilityCheckResponse("", 1, "", reasonCode))
 
-    implicit val ineligibilityGen: Gen[Ineligible] = AutoGen[Ineligible]
+    implicit val ineligibilityGen: Gen[Ineligible] = for {
+      reasonCode ← Gen.oneOf(2, 3, 4, 5, 9)
+    } yield Ineligible(EligibilityCheckResponse("", 2, "", reasonCode))
 
     def randomEligibilityResponse() = sample(eligibilityCheckResponseGen)
 
     def randomEligibility() = sample(eligibilityGen)
 
     def randomIneligibility() = sample(ineligibilityGen)
+
+    def randomEligibleWithUserInfo(userInfo: UserInfo) = EligibleWithUserInfo(randomEligibility(), userInfo)
   }
 
   object UserData {
