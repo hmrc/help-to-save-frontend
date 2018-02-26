@@ -35,7 +35,6 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}

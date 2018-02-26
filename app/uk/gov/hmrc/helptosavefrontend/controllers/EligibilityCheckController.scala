@@ -97,7 +97,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
               logger.warn(s"Could not parse ineligibility reason: ${ineligibleReason}", htsContext.nino)
               internalServerError()
             }{ i ⇒
-              Ok(views.html.core.not_eligible(i))
+              Ok(views.html.register.not_eligible(i))
             }
           },
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
