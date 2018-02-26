@@ -30,7 +30,10 @@ import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, GiveEmailForm, SelectEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityReason}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -80,7 +83,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
           GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
             withErrors ⇒ Ok(views.html.register.give_email(withErrors)),
             form ⇒
-              sessionCacheConnector.put(HTSSession(Some(Right(eligible.userInfo)), None, Some(form.email), None, None))
+              sessionCacheConnector.put(HTSSession(Some(Right(EligibleWithUserInfo(eligible.eligible,
+                                                                                   eligible.userInfo))), None, Some(form.email), None, None))
                 .value.flatMap(
                   _.fold(
                     { e ⇒
@@ -118,7 +122,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
             _.newEmail.fold[Future[Result]](
               SeeOther(routes.RegisterController.confirmEmail(crypto.encrypt(eligibleWithEmail.email)).url))(
                 newEmail ⇒ {
-                  val session = new HTSSession(Some(Right(eligibleWithEmail.userInfo)), None, Some(newEmail))
+                  val session = new HTSSession(Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), None, Some(newEmail))
                   sessionCacheConnector.put(session).fold(
                     e ⇒ internalServerError(),
                     _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
@@ -138,7 +142,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         val result = for {
           e ← EitherT.fromEither[Future](decryptEmail(email))
-          _ ← sessionCacheConnector.put(HTSSession(Some(Right(eligibleWithEmail.userInfo)), Some(e), None))
+          _ ← sessionCacheConnector.put(HTSSession(Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), Some(e), None))
           _ ← helpToSaveService.storeConfirmedEmail(e)
         } yield ()
 
@@ -161,7 +165,13 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         eligibleWithEmail.confirmedEmail.fold[Future[Result]](
           SeeOther(routes.RegisterController.getSelectEmailPage().url))(
-            _ ⇒ Ok(views.html.register.create_account_help_to_save()))
+            _ ⇒
+              EligibilityReason.fromEligible(eligibleWithEmail.eligible).fold{
+                logger.warn(s"Could not parse eligiblity reason: ${eligibleWithEmail.eligible}", eligibleWithEmail.userInfo.nino)
+                internalServerError()
+              }{ reason ⇒
+                Ok(views.html.register.create_account_help_to_save(reason))
+              })
       }{ _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
@@ -253,8 +263,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
             _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
             userInfo ⇒
               // user has gone through journey already this sessions and were found to be eligible
-              userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo)))(email ⇒
-                ifEligibleWithEmail(EligibleWithEmail(userInfo, email, session.confirmedEmail))
+              userInfo.userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible)))(email ⇒
+                ifEligibleWithEmail(EligibleWithEmail(userInfo.userInfo, email, session.confirmedEmail, userInfo.eligible))
               )
           ))
     }
@@ -276,9 +286,9 @@ object RegisterController {
 
   object EligibleInfo {
 
-    case class EligibleWithEmail(userInfo: UserInfo, email: Email, confirmedEmail: Option[Email]) extends EligibleInfo
+    case class EligibleWithEmail(userInfo: UserInfo, email: Email, confirmedEmail: Option[Email], eligible: Eligible) extends EligibleInfo
 
-    case class EligibleWithNoEmail(userInfo: UserInfo) extends EligibleInfo
+    case class EligibleWithNoEmail(userInfo: UserInfo, eligible: Eligible) extends EligibleInfo
   }
 
 }

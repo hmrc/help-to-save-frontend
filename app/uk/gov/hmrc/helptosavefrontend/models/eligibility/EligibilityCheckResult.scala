@@ -30,6 +30,10 @@ object EligibilityCheckResult {
 
   case class AlreadyHasAccount(value: EligibilityCheckResponse) extends EligibilityCheckResult
 
+  object Eligible {
+    implicit val format: Format[Eligible] = Json.format[Eligible]
+  }
+
   object Ineligible {
     implicit val format: Format[Ineligible] = Json.format[Ineligible]
   }

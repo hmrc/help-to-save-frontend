@@ -20,8 +20,8 @@ import cats.instances.future._
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.SessionBehaviour.SessionWithEligibilityCheck
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -64,7 +64,7 @@ trait SessionBehaviour {
 
 object SessionBehaviour {
 
-  case class SessionWithEligibilityCheck(eligibilityResult: Either[Ineligible, UserInfo],
+  case class SessionWithEligibilityCheck(eligibilityResult: Either[Ineligible, EligibleWithUserInfo],
                                          pendingEmail:      Option[Email],
                                          confirmedEmail:    Option[Email])
 

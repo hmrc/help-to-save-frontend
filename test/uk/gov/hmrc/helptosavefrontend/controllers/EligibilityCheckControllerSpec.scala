@@ -81,7 +81,7 @@ class EligibilityCheckControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo.copy(dateOfBirth = LocalDate.of(1980, 12, 31)))), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(dateOfBirth = LocalDate.of(1980, 12, 31))))), None, None))))
         }
 
         val result = getIsEligible()
@@ -142,7 +142,7 @@ class EligibilityCheckControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
         }
 
         val result = getIsNotEligible()
@@ -160,6 +160,17 @@ class EligibilityCheckControllerSpec
         val result = getIsNotEligible()
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      }
+
+      "show an error if th ineligibility reason cannot be parsed" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value = randomIneligibility().value.copy(reasonCode = 999)))), None, None))))
+        }
+
+        val result = getIsNotEligible()
+        checkIsTechnicalErrorPage(result)
       }
 
     }
@@ -229,11 +240,13 @@ class EligibilityCheckControllerSpec
           }
 
         "show the you are eligible page if the eligibility check indicates the user is eligible" in {
+          val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
+
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Left("Oh no!"))
-            mockEligibilityResult()(Right(randomEligibility()))
-            mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo)), None, None))(Right(()))
+            mockEligibilityResult()(Right(eligibleWithUserInfo.eligible))
+            mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))(Right(()))
           }
 
           val result = doCheckEligibilityRequest()
@@ -291,7 +304,7 @@ class EligibilityCheckControllerSpec
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
             }
             val result = doCheckEligibilityRequest()
             status(result) shouldBe Status.SEE_OTHER
@@ -315,13 +328,14 @@ class EligibilityCheckControllerSpec
 
         "return user details if the user is eligible for help-to-save and the " +
           "user is not already enrolled and they have no session data" in {
+            val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
             val response = EligibilityCheckResponse("eligible", 1, "wtc", 6)
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
-              mockEligibilityResult()(Right(Eligible(response)))
-              mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo)), None, None))(Right(()))
+              mockEligibilityResult()(Right(eligibleWithUserInfo.eligible))
+              mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))(Right(()))
             }
 
             val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
@@ -371,7 +385,7 @@ class EligibilityCheckControllerSpec
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockAccountCreationAllowed(Right(userCapResponse))
-              mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
             }
 
             val result = controller.getCheckEligibility(FakeRequest())
@@ -418,7 +432,7 @@ class EligibilityCheckControllerSpec
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo)), None, None))))
+              mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
             }
 
             val result = controller.getCheckEligibility(FakeRequest())
@@ -469,12 +483,13 @@ class EligibilityCheckControllerSpec
           }
 
           "there is an error writing to the session cache" in {
+            val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
             test(inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionCacheConnectorGet(Right(None))
-              mockEligibilityResult()(Right(randomEligibility()))
-              mockSessionCacheConnectorPut(HTSSession(Some(Right(validUserInfo)), None, None))(Left("Bang"))
+              mockEligibilityResult()(Right(eligibleWithUserInfo.eligible))
+              mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))(Left("Bang"))
             })
           }
 
@@ -553,7 +568,7 @@ class EligibilityCheckControllerSpec
       "redirect to the give email page if the user has no email" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo.copy(email = None))), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
         }
 
         val result = doRequest()
@@ -564,7 +579,7 @@ class EligibilityCheckControllerSpec
       "redirect to the select email page if the user has an email" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some("nino"))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(validUserInfo.copy(email = Some("email")))), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = Some("email"))))), None, None))))
         }
 
         val result = doRequest()

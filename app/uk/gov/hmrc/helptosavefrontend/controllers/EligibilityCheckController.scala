@@ -28,9 +28,10 @@ import play.api.mvc.{Action, AnyContent, Request, Result ⇒ PlayResult}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResult, IneligibilityType}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResult, IneligibilityReason}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -90,13 +91,14 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
       } {
         _.eligibilityResult.fold(
           { ineligibleReason ⇒
-            val ineligibilityType = IneligibilityType.fromIneligible(ineligibleReason)
-            if (ineligibilityType === IneligibilityType.Unknown) {
-              logger.warn(s"Could not parse ineligibility reason: reason code was ${ineligibleReason.value.reasonCode} " +
-                s"and reason description was ${ineligibleReason.value.reason}")
-            }
+            val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
 
-            Ok(views.html.core.not_eligible(ineligibilityType))
+            ineligibilityType.fold{
+              logger.warn(s"Could not parse ineligibility reason: ${ineligibleReason}", htsContext.nino)
+              internalServerError()
+            }{ i ⇒
+              Ok(views.html.register.not_eligible(i))
+            }
           },
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
         )
@@ -111,7 +113,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
       } {
         _.eligibilityResult.fold(
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-          userInfo ⇒ Ok(views.html.register.you_are_eligible(userInfo))
+          eligibleWithUserInfo ⇒ Ok(views.html.register.you_are_eligible(eligibleWithUserInfo.userInfo))
         )
       }
     }
@@ -124,7 +126,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
       _.eligibilityResult.fold(
         _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
         { userInfo ⇒
-          val url = userInfo.email.fold(
+          val url = userInfo.userInfo.email.fold(
             routes.RegisterController.getGiveEmailPage()
           )(_ ⇒ routes.RegisterController.getSelectEmailPage()).url
           SeeOther(url)
@@ -164,8 +166,8 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     for {
       eligible ← helpToSaveService.checkEligibility()
       session = {
-        val result = eligible.fold[Option[Either[Ineligible, UserInfo]]](
-          _ ⇒ Some(Right(userInfo)),
+        val result = eligible.fold[Option[Either[Ineligible, EligibleWithUserInfo]]](
+          e ⇒ Some(Right(EligibleWithUserInfo(Eligible(e), userInfo))),
           ineligible ⇒ Some(Left(Ineligible(ineligible))),
           _ ⇒ None)
         result.map(r ⇒ HTSSession(Some(r), None, None))
