@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
@@ -64,9 +64,13 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
 
   "The SessionCacheConnector" should {
 
-    "be able to insert a HTSSession into the cache" in new TestApparatus {
+    "be able to insert a new HTSSession into the cache" in new TestApparatus {
       forAll(htsSessionGen){ htsSession ⇒
         val cache = cacheMap(htsSession)
+
+        (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+          .expects(getUrl, *, *, *)
+          .returning(CacheMap("1", Map.empty[String, JsValue]))
 
         (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
           .expects(putUrl, htsSession, *, *, *, *)
