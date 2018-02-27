@@ -259,7 +259,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       () ⇒ ivController.getFailedMatching()(FakeRequest()),
       Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
     ) { result ⇒
-        status(result) shouldBe UNAUTHORIZED
+        status(result) shouldBe OK
         contentAsString(result) should include(url)
         contentAsString(result) should include("need to try again and check you entered your details correctly")
       }
@@ -269,7 +269,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       () ⇒ ivController.getFailedIV()(FakeRequest()),
       Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
     ) { result ⇒
-        status(result) shouldBe UNAUTHORIZED
+        status(result) shouldBe OK
         contentAsString(result) should include(url)
         contentAsString(result) should include("You did not answer all the questions correctly")
       }
@@ -279,7 +279,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       () ⇒ ivController.getInsufficientEvidence()(FakeRequest()),
       None
     ) { result ⇒
-        status(result) shouldBe UNAUTHORIZED
+        status(result) shouldBe OK
         contentAsString(result) should include("be able to apply for a Help to Save account by phone, after")
       }
 
@@ -288,7 +288,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       () ⇒ ivController.getLockedOut()(FakeRequest()),
       None
     ) { result ⇒
-        status(result) shouldBe UNAUTHORIZED
+        status(result) shouldBe OK
         contentAsString(result) should include("You have tried to verify your identity too many times")
       }
 
@@ -297,7 +297,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       () ⇒ ivController.getUserAborted()(FakeRequest()),
       Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
     ) { result ⇒
-        status(result) shouldBe UNAUTHORIZED
+        status(result) shouldBe OK
         contentAsString(result) should include(url)
         contentAsString(result) should include("You have not provided enough information")
       }
@@ -307,7 +307,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       () ⇒ ivController.getTimedOut()(FakeRequest()),
       Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
     ) { result ⇒
-        status(result) shouldBe UNAUTHORIZED
+        status(result) shouldBe OK
         contentAsString(result) should include(url)
         contentAsString(result) should include("Your session has ended")
       }
@@ -317,7 +317,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       () ⇒ ivController.getTechnicalIssue()(FakeRequest()),
       Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
     ) { result ⇒
-        status(result) shouldBe UNAUTHORIZED
+        status(result) shouldBe OK
         contentAsString(result) should include(url)
         contentAsString(result) should include("Something went wrong")
       }
@@ -327,7 +327,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       () ⇒ ivController.getPreconditionFailed()(FakeRequest()),
       None
     ) { result ⇒
-        status(result) shouldBe UNAUTHORIZED
+        status(result) shouldBe OK
         contentAsString(result) should include("not able to use this service")
       }
 
