@@ -127,42 +127,39 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
 
   def getFailedMatching: Action[AnyContent] =
     authorisedForHts{ implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(failed_matching(u)))
+      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(failed_matching(u)))
     }(routes.IvController.getFailedMatching().url)
 
   def getFailedIV: Action[AnyContent] =
     authorisedForHts{ implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(failed_iv(u)))
+      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(failed_iv(u)))
     }(routes.IvController.getFailedIV().url)
 
   def getInsufficientEvidence: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
-      Unauthorized(insufficient_evidence())
+    authorisedForHts{ implicit r ⇒ implicit h ⇒ Ok(insufficient_evidence())
     }(routes.IvController.getInsufficientEvidence().url)
 
   def getLockedOut: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
-      Unauthorized(locked_out())
+    authorisedForHts{ implicit r ⇒ implicit h ⇒ Ok(locked_out())
     }(routes.IvController.getLockedOut().url)
 
   def getUserAborted: Action[AnyContent] =
     authorisedForHts{ implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(user_aborted(u)))
+      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(user_aborted(u)))
     }(routes.IvController.getUserAborted().url)
 
   def getTimedOut: Action[AnyContent] =
     authorisedForHts{ implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(time_out(u)))
+      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(time_out(u)))
     }(routes.IvController.getTimedOut().url)
 
   def getTechnicalIssue: Action[AnyContent] =
     authorisedForHts{ implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Unauthorized(technical_iv_issues(u)))
+      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(technical_iv_issues(u)))
     }(routes.IvController.getTechnicalIssue().url)
 
   def getPreconditionFailed: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
-      Unauthorized(precondition_failed())
+    authorisedForHts{ implicit r ⇒ implicit h ⇒ Ok(precondition_failed())
     }(routes.IvController.getPreconditionFailed().url)
 
   private def storeInSessionCacheThenRedirect(session: HTSSession, journeyId: Option[String])(redirectTo: ⇒ String)(

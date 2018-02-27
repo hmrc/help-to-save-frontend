@@ -23,10 +23,10 @@ import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.http.cache.client.CacheMap
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 
 import scala.concurrent.ExecutionContext
 
@@ -65,7 +65,7 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
   "The SessionCacheConnector" should {
 
     "be able to insert a new HTSSession into the cache" in new TestApparatus {
-      forAll(htsSessionGen){ htsSession ⇒
+      forAll(htsSessionGen) { htsSession ⇒
         val cache = cacheMap(htsSession)
 
         (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
@@ -79,6 +79,30 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
         val result = sessionCacheConnector.put(htsSession)
 
         result.value.futureValue should be(Right(cache))
+
+      }
+    }
+
+    "be able to update an existing HTSSession" in new TestApparatus {
+      forAll(htsSessionGen) { htsSession ⇒
+        val ivUrl = "/some/iv/url"
+        val ivSuccessUrl = "/some/iv/successUrl"
+
+        val existingSession = HTSSession(None, None, None, ivURL = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl))
+        val expectedSessionToStore = htsSession.copy(ivURL        = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl))
+        val cacheAfterPut = cacheMap(expectedSessionToStore)
+
+        (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+          .expects(getUrl, *, *, *)
+          .returning(cacheMap(existingSession))
+
+        (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+          .expects(putUrl, expectedSessionToStore, *, *, *, *)
+          .returning(cacheAfterPut)
+
+        val result = sessionCacheConnector.put(expectedSessionToStore)
+
+        result.value.futureValue should be(Right(cacheAfterPut))
 
       }
     }
