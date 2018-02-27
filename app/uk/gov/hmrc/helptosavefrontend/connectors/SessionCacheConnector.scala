@@ -56,10 +56,12 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
   override def domain: String = keyStoreDomain
 
   def put(newSession: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[CacheMap] = {
-    val timerContext = metrics.keystoreWriteTimer.time()
-    get.semiflatMap(
-      maybeSession ⇒ {
-        val sessionToStore = maybeSession.fold(
+
+      def doUpdate(newSession: HTSSession,
+                   oldSession: Option[HTSSession])(implicit writes: Writes[HTSSession],
+                                                   hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, CacheMap]] = {
+        val timerContext = metrics.keystoreWriteTimer.time()
+        val sessionToStore = oldSession.fold(
           newSession
         )(existing ⇒
           existing.copy(eligibilityCheckResult = newSession.eligibilityCheckResult,
@@ -68,17 +70,21 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
           )
         )
 
-        cache[HTSSession](sessionKey, sessionToStore)(writes, hc, ec).map { cacheMap ⇒
+        cache[HTSSession](sessionKey, sessionToStore).map { cacheMap ⇒
           val _ = timerContext.stop()
-          cacheMap
+          Right(cacheMap)
+        }.recover {
+          case NonFatal(e) ⇒
+            val _ = timerContext.stop()
+            metrics.keystoreWriteErrorCounter.inc()
+            Left(s"error during storing session in key-store: ${e.getMessage}")
         }
       }
-    ).leftMap {
-        error ⇒
-          val _ = timerContext.stop()
-          metrics.keystoreWriteErrorCounter.inc()
-          error
-      }
+
+    for {
+      oldSession ← get
+      result ← EitherT(doUpdate(newSession, oldSession))
+    } yield result
   }
 
   def get(implicit reads: Reads[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[Option[HTSSession]] =
