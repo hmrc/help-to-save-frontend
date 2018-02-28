@@ -311,7 +311,9 @@ hts.email.error.domain-too-short=Your email address must have one character or m
 hts.email.error.total-too-long=Your email address must be 254 characters or less
 hts.email.error.blank=Enter a valid email address
 hts.email.error.no-at-symbol=Enter a valid email address, like yourname@example.com
-
+hts.email.error.no-dot-symbol=There must be a dot(.) in the email, like yourname@example.com
+hts.email.error.no-text-after-dot-symbol=There must be at least one character after dot(.) in the email, like yourname@example.com
+hts.email.error.no-text-after-at-symbol-but-before-dot=There must be at least one character after @ and before dot(.) in the email, like yourname@example.com
 
 hts.select-email.page-title=Which email address do you want us to use for your Help to Save account?
 hts.select-email.title=Which email address do you want us to use for your Help to Save account?

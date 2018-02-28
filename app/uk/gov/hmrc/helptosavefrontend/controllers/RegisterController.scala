@@ -21,9 +21,9 @@ import javax.inject.Singleton
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.Inject
-import play.api.{Application, Configuration}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.{Application, Configuration}
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -32,8 +32,8 @@ import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, GiveEmailForm, Sel
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityReason}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -61,9 +61,9 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks{ _ ⇒
+        checkIfDoneEligibilityChecks { _ ⇒
           SeeOther(routes.RegisterController.getSelectEmailPage().url)
-        }{ _ ⇒
+        } { _ ⇒
           if (earlyCapCheckOn) {
             Ok(views.html.register.give_email(GiveEmailForm.giveEmailForm))
           } else {
@@ -79,7 +79,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks { _ ⇒
           SeeOther(routes.RegisterController.getSelectEmailPage().url)
-        }{ eligible ⇒
+        } { eligible ⇒
           GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
             withErrors ⇒ Ok(views.html.register.give_email(withErrors)),
             form ⇒
@@ -90,7 +90,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                     { e ⇒
                       logger.warn(s"Could not update session cache: $e", eligible.userInfo.nino)
                       internalServerError()
-                    }, _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
+                    }, _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail().url)
                   )
                 ))
         }
@@ -101,11 +101,15 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-          if (earlyCapCheckOn) {
-            Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm))
-          } else {
-            checkIfAccountCreateAllowed(
-              Ok(views.html.register.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm)))
+          emailValidation.validate(eligibleWithEmail.email).toEither match {
+            case Right(validEmail) ⇒
+              if (earlyCapCheckOn) {
+                Ok(views.html.register.select_email(validEmail, SelectEmailForm.selectEmailForm))
+              } else {
+                checkIfAccountCreateAllowed(
+                  Ok(views.html.register.select_email(validEmail, SelectEmailForm.selectEmailForm)))
+              }
+            case Left(_) ⇒ SeeOther(routes.RegisterController.getGiveEmailPage().url)
           }
         } { _ ⇒
           SeeOther(routes.RegisterController.getGiveEmailPage().url)
@@ -116,7 +120,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
   def selectEmailSubmit(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks{ eligibleWithEmail ⇒
+        checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
           SelectEmailForm.selectEmailForm.bindFromRequest().fold(
             withErrors ⇒ Ok(views.html.register.select_email(eligibleWithEmail.email, withErrors)),
             _.newEmail.fold[Future[Result]](
@@ -124,8 +128,8 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                 newEmail ⇒ {
                   val session = new HTSSession(Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), None, Some(newEmail))
                   sessionCacheConnector.put(session).fold(
-                    e ⇒ internalServerError(),
-                    _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail.url)
+                    _ ⇒ internalServerError(),
+                    _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.verifyEmail().url)
                   )
                 }
               )
@@ -154,7 +158,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
             SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
           }
         )
-      }{ _ ⇒
+      } { _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
@@ -166,13 +170,13 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
         eligibleWithEmail.confirmedEmail.fold[Future[Result]](
           SeeOther(routes.RegisterController.getSelectEmailPage().url))(
             _ ⇒
-              EligibilityReason.fromEligible(eligibleWithEmail.eligible).fold{
+              EligibilityReason.fromEligible(eligibleWithEmail.eligible).fold {
                 logger.warn(s"Could not parse eligiblity reason: ${eligibleWithEmail.eligible}", eligibleWithEmail.userInfo.nino)
                 internalServerError()
-              }{ reason ⇒
+              } { reason ⇒
                 Ok(views.html.register.create_account_help_to_save(reason))
               })
-      }{ _ ⇒
+      } { _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
@@ -234,7 +238,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
         eligibleWithEmail.confirmedEmail.fold[Future[Result]](
           SeeOther(routes.RegisterController.getSelectEmailPage().url))(
             _ ⇒ Ok(views.html.register.create_account_error()))
-      }{ _ ⇒
+      } { _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
@@ -264,7 +268,10 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
             userInfo ⇒
               // user has gone through journey already this sessions and were found to be eligible
               userInfo.userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible)))(email ⇒
-                ifEligibleWithEmail(EligibleWithEmail(userInfo.userInfo, email, session.confirmedEmail, userInfo.eligible))
+                emailValidation.validate(email).toEither match {
+                  case Right(validEmail) ⇒ ifEligibleWithEmail(EligibleWithEmail(userInfo.userInfo, validEmail, session.confirmedEmail, userInfo.eligible))
+                  case Left(_)           ⇒ ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible))
+                }
               )
           ))
     }
@@ -289,6 +296,7 @@ object RegisterController {
     case class EligibleWithEmail(userInfo: UserInfo, email: Email, confirmedEmail: Option[Email], eligible: Eligible) extends EligibleInfo
 
     case class EligibleWithNoEmail(userInfo: UserInfo, eligible: Eligible) extends EligibleInfo
+
   }
 
 }
