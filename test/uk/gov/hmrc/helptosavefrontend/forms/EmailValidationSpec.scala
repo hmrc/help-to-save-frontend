@@ -155,7 +155,15 @@ class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPro
       }
 
       "informs if the form has no dot symbol in the domain part" in {
-        formWithErrorMessage("error").emailHasNoDotSymbol(key) shouldBe true
+        formWithErrorMessage(noDotSymbol).emailHasNoDotSymbol(key) shouldBe true
+      }
+
+      "informs if the form has no text after dot symbol in the domain part" in {
+        formWithErrorMessage(noTextAfterDotSymbol).emailHasNoTextAfterDotSymbol(key) shouldBe true
+      }
+
+      "informs if the form has no text after @ and before dot symbol" in {
+        formWithErrorMessage(noTextAfterAtSymbolButBeforeDot).emailHasNoTextAfterAtSymbolButBeforeDot(key) shouldBe true
       }
 
     }

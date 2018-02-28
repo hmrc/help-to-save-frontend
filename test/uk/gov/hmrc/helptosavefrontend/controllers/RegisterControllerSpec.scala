@@ -288,6 +288,18 @@ class RegisterControllerSpec
         contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
       }
 
+      "handle the case when the email is invalid" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = Some("invalid@email"))))), None, None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getGiveEmailPage().url)
+      }
+
       "skip the cap check at a later point if enable-early-cap-check is set to true" in {
         val controller = newController(earlyCapCheck = true, crypto)
 
