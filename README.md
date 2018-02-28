@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/hmrc/help-to-save-frontend.svg)](https://travis-ci.org/hmrc/help-to-save-frontend) [ ![Download](https://api.bintray.com/packages/hmrc/releases/help-to-save-frontend/images/download.svg) ](https://bintray.com/hmrc/releases/help-to-save-frontend/_latestVersion)
 
-## Help to Save Frontend
+## Help to Save Frontend 
 
 Frontend application process for Help to Save.
 
