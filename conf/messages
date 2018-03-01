@@ -311,7 +311,7 @@ hts.email.error.domain-too-short=Your email address must have one character or m
 hts.email.error.total-too-long=Your email address must be 254 characters or less
 hts.email.error.blank=Enter a valid email address
 hts.email.error.no-at-symbol=Enter a valid email address, like yourname@example.com
-hts.email.error.no-dot-symbol=Your email address must have a 'dot'
+hts.email.error.no-dot-symbol=Your email address must have a ''dot''
 hts.email.error.no-text-after-dot-symbol=Your email address must have characters before and after the ''dot''
 hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the ''dot''
 
