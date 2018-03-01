@@ -27,6 +27,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.AuthProvider
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.config.{AppConfig, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
@@ -171,6 +172,56 @@ class EligibilityCheckControllerSpec
 
         val result = getIsNotEligible()
         checkIsTechnicalErrorPage(result)
+      }
+
+    }
+
+    "displaying the you think you're eligible page" must {
+
+      "redirect to the eligibility check if there is no session data" in {
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
+          mockSessionCacheConnectorGet(Right(None))
+        }
+
+        val result = controller.getThinkYouAreEligiblePage(FakeRequest())
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+
+      }
+
+      "show the you're eligible page if the session data indicates that the user is eligible" in {
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None))))
+        }
+
+        val result = controller.getThinkYouAreEligiblePage(FakeRequest())
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+      }
+
+      "show an error page if the session data indicates that the user is ineligible but the reason cannot be parsed" in {
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(Ineligible(EligibilityCheckResponse("", 99, "", 99)))), None, None, None, None))))
+        }
+
+        val result = controller.getThinkYouAreEligiblePage(FakeRequest())
+        checkIsTechnicalErrorPage(result)
+      }
+
+      "show the correct page if the session data indicates that the user is ineligible and the reason is valid" in {
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None))))
+        }
+
+        val result = controller.getThinkYouAreEligiblePage(FakeRequest())
+        val content = contentAsString(result)
+
+        content should include("If you think")
+        content should include("If you still think")
       }
 
     }
