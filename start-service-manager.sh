@@ -8,7 +8,7 @@ echo "Stop Services = $STOP_SERVICES"
 
 cd ${WORKSPACE}
 rm -rf service-manager-config
-git clone git@github.tools.tax.service.gov.uk:HMRC/service-manager-config.git
+git clone git@github.com:hmrc/service-manager-config.git
 
 if [ "$STOP_SERVICES" == "true" ]; then
 echo "Stopping Services ..."
