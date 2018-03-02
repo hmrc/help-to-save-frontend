@@ -19,15 +19,23 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.form
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.ga_submit_button
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
+@import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason._
 
-@(eligibliityReason: EligibilityReason)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+
+@(eligibilityReason: EligibilityReason)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.create_account_help_to_save.title"), bodyClasses = None) {
     <h1 class="heading-large">@Messages("hts.register.create_account_help_to_save.header-page")</h1>
 
     <p>@Messages("hts.register.create_account_help_to_save.par-1")<p>
     <p>@Messages("hts.register.create_account_help_to_save.par-2")<p>
     <ul class="list list-bullet">
-        <li>@Messages("hts.register.create_account_help_to_save.bullet-1")</li>
+        @defining(eligibilityReason match {
+            case UCClaimantAndIncomeSufficient => "hts.register.create_account_help_to_save.bullet-1-uc"
+            case EntitledToWTC(true) => "hts.register.create_account_help_to_save.bullet-1-uc"
+            case EntitledToWTC(false) => "hts.register.create_account_help_to_save.bullet-1-wtc"
+          }
+        ){ key => <li>@Messages(key)</li> }
+
         <li>@Messages("hts.register.create_account_help_to_save.bullet-2")</li>
     </ul>
     <div class="panel panel-border-wide">
