@@ -11,3 +11,8 @@ Feature: Applicant goes through eligibility check
     Given a user is NOT in receipt of working tax credit
     When they apply for Help to Save
     Then they see that they are NOT eligible for Help to Save
+
+  Scenario: User experiences a technical error
+    Given DES is down
+    When they apply for Help to Save
+    Then they see a technical error page
