@@ -32,6 +32,12 @@
         "hts.email.error.total-too-long"
     } else if(form.emailHasNoAtSymbol(key)) {
         "hts.email.error.no-at-symbol"
+    } else if(form.emailHasNoDotSymbol(key)) {
+        "hts.email.error.no-dot-symbol"
+    } else if(form.emailHasNoTextAfterDotSymbol(key)) {
+        "hts.email.error.no-text-after-dot-symbol"
+    } else if(form.emailHasNoTextAfterAtSymbolButBeforeDot(key)) {
+        "hts.email.error.no-text-after-at-symbol-but-before-dot"
     } else {
         "hts.email.error"
     }

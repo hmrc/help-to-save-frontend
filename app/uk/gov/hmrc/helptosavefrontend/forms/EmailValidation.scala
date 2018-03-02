@@ -26,9 +26,9 @@ import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.text
-import play.api.data.{Form, FormError}
 import play.api.data.format.Formatter
-import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages
+import play.api.data.{Form, FormError}
+import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation._
 
 import scala.annotation.tailrec
 
@@ -41,44 +41,76 @@ class EmailValidation @Inject() (configuration: Configuration) {
 
   private val emailMaxDomainLength: Int = configuration.underlying.getInt("email-validation.max-domain-length")
 
+  private def invalid[A](message: String): ValidatedNel[String, A] = Invalid(NonEmptyList[String](message, Nil))
+
+  private def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
+    if (predicate(a)) Valid(a) else invalid(ifFalse)
+
+  private def charactersBeforeAndAfterChar(c: Char)(s: String): Option[(Int, Int)] = {
+      @tailrec
+      def loop(chars: List[Char], count: Int): Option[(Int, Int)] = chars match {
+        case Nil ⇒ None
+        case h :: t ⇒ if (h === c) {
+          Some(count → t.length)
+        } else {
+          loop(t, count + 1)
+        }
+      }
+
+    loop(s.toList, 0)
+  }
+
+  def validate(email: String): Validated[NonEmptyList[String], String] = {
+
+    val trimmed = email.trim
+    val localAndDomainLength = charactersBeforeAndAfterChar('@')(trimmed)
+    val domainPart = trimmed.substring(trimmed.lastIndexOf('@') + 1)
+
+    val notBlankCheck = validatedFromBoolean(trimmed)(_.nonEmpty, ErrorMessages.blankEmailAddress)
+    val totalLengthCheck = validatedFromBoolean(trimmed)(_.length <= emailMaxTotalLength, ErrorMessages.totalTooLong)
+    val hasAtSymbolCheck = validatedFromBoolean(trimmed)(_.contains('@'), ErrorMessages.noAtSymbol)
+
+    val hasDotSymbolInDomainCheck = validatedFromBoolean(domainPart)(_.contains('.'), ErrorMessages.noDotSymbol)
+
+    val hasTextAfterAtSymbolButBeforeDotCheck = validatedFromBoolean(domainPart)(
+      { text ⇒
+        text.contains('.') && text.substring(0, text.indexOf('.')).length > 0
+      },
+      ErrorMessages.noTextAfterAtSymbolButBeforeDot
+    )
+
+    val hasTextAfterDotCheck = validatedFromBoolean(domainPart)(
+      { text ⇒
+        text.contains('.') && text.substring(text.lastIndexOf('.') + 1).length > 0
+      },
+      ErrorMessages.noTextAfterDotSymbol
+    )
+
+    val localLengthCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._1 <= emailMaxLocalLength), ErrorMessages.localTooLong)
+    val domainLengthCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._2 <= emailMaxDomainLength), ErrorMessages.domainTooLong)
+
+    val localBlankCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._1 > 0), ErrorMessages.localTooShort)
+    val domainBlankCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._2 > 0), ErrorMessages.domainTooShort)
+
+    (notBlankCheck |@|
+      totalLengthCheck |@|
+      hasAtSymbolCheck |@|
+      hasDotSymbolInDomainCheck |@|
+      hasTextAfterDotCheck |@|
+      hasTextAfterAtSymbolButBeforeDotCheck |@|
+      localLengthCheck |@|
+      domainLengthCheck |@|
+      localBlankCheck |@|
+      domainBlankCheck
+    ).map { case _ ⇒ email }
+  }
+
   val emailFormatter: Formatter[String] = new Formatter[String] {
 
-    private def invalid[A](message: String): ValidatedNel[String, A] = Invalid(NonEmptyList[String](message, Nil))
-
-    private def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
-      if (predicate(a)) Valid(a) else invalid(ifFalse)
-
-    private def charactersBeforeAndAfterChar(c: Char)(s: String): Option[(Int, Int)] = {
-        @tailrec
-        def loop(chars: List[Char], count: Int): Option[(Int, Int)] = chars match {
-          case Nil    ⇒ None
-          case h :: t ⇒ if (h === c) { Some(count → t.length) } else { loop(t, count + 1) }
-        }
-
-      loop(s.toList, 0)
-    }
-
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
+
       val validation: Validated[NonEmptyList[String], String] =
-        data.get(key).fold(invalid[String](ErrorMessages.blankEmailAddress)) {
-          s ⇒
-            val trimmed = s.trim
-            val localAndDomainLength = charactersBeforeAndAfterChar('@')(trimmed)
-            val notBlankCheck = validatedFromBoolean(trimmed)(_.nonEmpty, ErrorMessages.blankEmailAddress)
-            val totalLengthCheck = validatedFromBoolean(trimmed)(_.length <= emailMaxTotalLength, ErrorMessages.totalTooLong)
-            val hasAtSymbolCheck = validatedFromBoolean(trimmed)(_.contains('@'), ErrorMessages.noAtSymbol)
-
-            val localLengthCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._1 <= emailMaxLocalLength), ErrorMessages.localTooLong)
-            val domainLengthCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._2 <= emailMaxDomainLength), ErrorMessages.domainTooLong)
-
-            val localBlankCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._1 > 0), ErrorMessages.localTooShort)
-            val domainBlankCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._2 > 0), ErrorMessages.domainTooShort)
-
-            (notBlankCheck |@| totalLengthCheck |@| hasAtSymbolCheck |@|
-              localLengthCheck |@| domainLengthCheck |@| localBlankCheck |@| domainBlankCheck)
-              .map{ case _ ⇒ s }
-
-        }
+        data.get(key).fold(invalid[String](ErrorMessages.blankEmailAddress))(validate)
 
       validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
     }
@@ -105,6 +137,12 @@ object EmailValidation {
 
     val noAtSymbol: String = "no_@_symbol"
 
+    val noDotSymbol: String = "no_._symbol_after_@"
+
+    val noTextAfterDotSymbol: String = "no_text_after_."
+
+    val noTextAfterAtSymbolButBeforeDot: String = "no_text_after_@_but_before_."
+
     val blankEmailAddress = "blank_email_address"
   }
 
@@ -130,6 +168,15 @@ object EmailValidation {
 
     def emailHasNoAtSymbol(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.noAtSymbol)
+
+    def emailHasNoDotSymbol(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.noDotSymbol)
+
+    def emailHasNoTextAfterDotSymbol(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.noTextAfterDotSymbol)
+
+    def emailHasNoTextAfterAtSymbolButBeforeDot(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.noTextAfterAtSymbolButBeforeDot)
 
     def emailIsBlank(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.blankEmailAddress)
