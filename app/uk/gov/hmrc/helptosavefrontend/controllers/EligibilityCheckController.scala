@@ -141,6 +141,24 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     )
   }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
+  val getThinkYouAreEligiblePage: Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+    checkHasDoneEligibilityChecks {
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+    }{
+      _.eligibilityResult.fold(i ⇒
+        IneligibilityReason.fromIneligible(i).fold{
+          logger.warn(s"Could not parse ineligibility reason: $i")
+          internalServerError()
+        }{ reason ⇒
+          Ok(views.html.register.think_you_are_eligible(reason))
+
+        },
+        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+      )
+
+    }
+  }(redirectOnLoginURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
+
   private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
                                            htsContext: HtsContextWithNINOAndUserDetails,
                                            request:    Request[AnyContent]): Future[PlayResult] = {
