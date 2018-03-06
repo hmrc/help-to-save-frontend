@@ -201,17 +201,7 @@ class EligibilityCheckControllerSpec
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
       }
 
-      "show an error page if the session data indicates that the user is ineligible but the reason cannot be parsed" in {
-        inSequence{
-          mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(Ineligible(EligibilityCheckResponse("", 99, "", 99)))), None, None, None, None))))
-        }
-
-        val result = controller.getThinkYouAreEligiblePage(FakeRequest())
-        checkIsTechnicalErrorPage(result)
-      }
-
-      "show the correct page if the session data indicates that the user is ineligible and the reason is valid" in {
+      "show the correct page if the session data indicates that the user is ineligible" in {
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None))))

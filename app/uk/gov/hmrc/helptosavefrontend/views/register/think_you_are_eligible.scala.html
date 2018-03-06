@@ -16,11 +16,8 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason._
-@import cats.syntax.eq._
 
-@(ineligibilityReason: IneligibilityReason)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
 title = Messages("hts.register.think_you_are_eligible.title"),
