@@ -454,7 +454,7 @@ hts.privacy.p11.2=(it will open in a new window) on the GOV.UK website.
 hts.title.prepended-error-message=Error:
 
 footer.links.privacy_policy.url=/help-to-save/privacy-statement
-global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties
+global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties - Help to Save - GOV.UK
 global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties
 global.error.InternalServerError500.message=Please try again later.
 
