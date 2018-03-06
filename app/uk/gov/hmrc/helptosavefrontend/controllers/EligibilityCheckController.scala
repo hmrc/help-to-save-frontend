@@ -147,7 +147,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     }{
       _.eligibilityResult.fold(i ⇒
         IneligibilityReason.fromIneligible(i).fold{
-          logger.warn(s"Could ont parse ineligibility reason: $i")
+          logger.warn(s"Could not parse ineligibility reason: $i")
           internalServerError()
         }{ reason ⇒
           Ok(views.html.register.think_you_are_eligible(reason))
