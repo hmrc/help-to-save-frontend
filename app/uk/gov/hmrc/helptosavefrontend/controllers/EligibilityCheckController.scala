@@ -145,17 +145,10 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     checkHasDoneEligibilityChecks {
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     }{
-      _.eligibilityResult.fold(i ⇒
-        IneligibilityReason.fromIneligible(i).fold{
-          logger.warn(s"Could not parse ineligibility reason: $i")
-          internalServerError()
-        }{ reason ⇒
-          Ok(views.html.register.think_you_are_eligible(reason))
-
-        },
+      _.eligibilityResult.fold(
+        _ ⇒ Ok(views.html.register.think_you_are_eligible()),
         _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
       )
-
     }
   }(redirectOnLoginURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
 
