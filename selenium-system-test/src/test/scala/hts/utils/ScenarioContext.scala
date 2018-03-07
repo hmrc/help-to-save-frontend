@@ -107,7 +107,6 @@ private[utils] trait NINOGenerator {
   def generateHTTPErrorCodePrefix(code: Int): String = {
     val codePrefix = code.toString
     val prefix = "ES" + codePrefix
-    val rnd = new Random
     prefix.toString
   }
 
