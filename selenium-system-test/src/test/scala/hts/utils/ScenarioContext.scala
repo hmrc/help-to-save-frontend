@@ -104,10 +104,22 @@ private[utils] trait NINOGenerator {
     prefixes.toVector(rnd.nextInt(prefixes.size))
   }
 
+  def generateHTTPErrorCodePrefix(code: Int): String = {
+    val codePrefix = code.toString
+    val prefix = "ES" + codePrefix
+    prefix.toString
+  }
+
   def generateIneligibleNINO(): String = {
     val ineligibleNino = generateIneligiblePrefix() + generateNINO().drop(4)
     current = ineligibleNino
     ineligibleNino
+  }
+
+  def generateHTTPErrorCodeNINO(code: Int): String = {
+    val HTTPErrorCodeNino = generateHTTPErrorCodePrefix(code) + generateNINO().drop(5)
+    current = HTTPErrorCodeNino
+    HTTPErrorCodeNino
   }
 
   def currentNINO(): String = current
