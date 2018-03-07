@@ -22,7 +22,7 @@ import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.nsiCreateAccountUrl
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiCreateAccountUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.nsiUserInfoFormat
@@ -74,7 +74,7 @@ class NSIConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOLogMes
   }
 
   override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
-    http.put(nsiCreateAccountUrl, userInfo)(nsiUserInfoFormat, hc.copy(authorization = None), ec)
+    http.put(nsiUpdateEmailUrl, userInfo)
       .map[Either[String, Unit]] { response ⇒
 
         response.status match {
