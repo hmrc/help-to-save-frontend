@@ -17,7 +17,7 @@
 package hts.steps
 
 import hts.browser.Browser
-import hts.pages.{AuthorityWizardPage, EligiblePage, NotEligiblePage, TechnicalErrorPage}
+import hts.pages._
 import hts.utils.ScenarioContext
 
 class EligibilitySteps extends Steps {
@@ -45,9 +45,11 @@ class EligibilitySteps extends Steps {
   Then("^they see that they are NOT eligible for Help to Save$") {
     Browser.checkCurrentPageIs(NotEligiblePage)
   }
+
   Given("^DES is down$"){
     val _ = ScenarioContext.generateHTTPErrorCodeNINO(500)
   }
+
   Then("^they see a technical error page$") {
     Browser.checkCurrentPageIs(TechnicalErrorPage)
   }
