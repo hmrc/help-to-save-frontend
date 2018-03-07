@@ -23,7 +23,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.nsiCreateAccountUrl
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiCreateAccountUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
@@ -62,7 +62,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
 
   "the updateEmail method" must {
     "return a Right when the status is OK" in {
-      mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.OK)))
+      mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(Status.OK)))
 
       val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
       Await.result(result.value, 3.seconds) shouldBe Right(())
@@ -73,7 +73,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
         forAll{ status: Int ⇒
           whenever(status =!= Status.OK && status > 0){
             inSequence{
-              mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(status)))
+              mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(status)))
             }
 
             val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
@@ -84,7 +84,7 @@ class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDriven
 
       "the POST to NS&I fails" in {
         inSequence{
-          mockPut(validNSIUserInfo, nsiCreateAccountUrl)(Left("Oh no!"))
+          mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Left("Oh no!"))
         }
 
         val result = testNSAndIConnectorImpl.updateEmail(validNSIUserInfo)
