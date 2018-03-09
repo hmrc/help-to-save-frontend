@@ -35,7 +35,7 @@ object IdentityVerificationStubPage extends Page {
 
   def selectJourney(reason: String)(implicit driver: WebDriver): Unit = {
     reason match {
-      case "Failed IV"             ⇒ selectRadioButton("Incomplete")
+      case "Failed IV"             ⇒ selectRadioButton("FailedIV")
       case "Precondition Failed"   ⇒ selectRadioButton("PreconditionFailed")
       case "Locked Out"            ⇒ selectRadioButton("LockedOut")
       case "Insufficient Evidence" ⇒ selectRadioButton("InsufficientEvidence")
