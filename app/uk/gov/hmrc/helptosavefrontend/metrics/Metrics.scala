@@ -34,33 +34,33 @@ class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
 
   val keystoreWriteTimer: Timer = timer("frontend.keystore-write-time")
 
-  val keystoreWriteErrorCounter: Counter = counter("frontend.keystore-write-error-counter")
+  val keystoreWriteErrorCounter: Counter = counter("frontend.keystore-write-error.count")
 
   val keystoreReadTimer: Timer = timer("frontend.keystore-read-time")
 
-  val keystoreReadErrorCounter: Counter = counter("frontend.keystore-read-error-counter")
+  val keystoreReadErrorCounter: Counter = counter("frontend.keystore-read-error.count")
 
   val emailVerificationTimer: Timer = timer("frontend.email-verification-timer")
 
-  val emailVerificationErrorCounter: Counter = counter("frontend.email-verification-error-counter")
+  val emailVerificationErrorCounter: Counter = counter("frontend.email-verification-error.count")
 
-  val ivSuccessCounter: Counter = counter("frontend.iv.success-counter")
+  val ivSuccessCounter: Counter = counter("frontend.iv.success.count")
 
-  val ivIncompleteCounter: Counter = counter("frontend.iv.incomplete-counter")
+  val ivIncompleteCounter: Counter = counter("frontend.iv.incomplete.count")
 
-  val ivFailedMatchingCounter: Counter = counter("frontend.iv.failed-matching-counter")
+  val ivFailedMatchingCounter: Counter = counter("frontend.iv.failed-matching.count")
 
-  val ivFailedIVCounter: Counter = counter("frontend.iv.failed-iv-counter")
+  val ivFailedIVCounter: Counter = counter("frontend.iv.failed-iv.count")
 
-  val ivInsufficientEvidenceCounter: Counter = counter("frontend.iv.insufficient-evidence-counter")
+  val ivInsufficientEvidenceCounter: Counter = counter("frontend.iv.insufficient-evidence.count")
 
-  val ivUserAbortedCounter: Counter = counter("frontend.iv.user-aborted-counter")
+  val ivUserAbortedCounter: Counter = counter("frontend.iv.user-aborted.count")
 
-  val ivLockedOutCounter: Counter = counter("frontend.iv.locked-out-counter")
+  val ivLockedOutCounter: Counter = counter("frontend.iv.locked-out.count")
 
-  val ivPreconditionFailedCounter: Counter = counter("frontend.iv.precondition-failed-counter")
+  val ivPreconditionFailedCounter: Counter = counter("frontend.iv.precondition-failed.count")
 
-  val ivTechnicalIssueCounter: Counter = counter("frontend.iv.technical-issue-counter")
+  val ivTechnicalIssueCounter: Counter = counter("frontend.iv.technical-issue.count")
 
   val ivTimeoutCounter: Counter = counter("frontend.iv.timeout-counter")
 
