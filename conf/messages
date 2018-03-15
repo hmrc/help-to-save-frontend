@@ -168,18 +168,23 @@ hts.helpers.header-page=Help to Save
 hts.helpers.link-1=1. About Help to Save
 hts.helpers.link-2=2. Eligibility
 hts.helpers.link-3=3. Apply
+
 hts.core.about-help-to-save.next=Next
 hts.core.about-help-to-save.eligibility=Eligibility
+
 hts.core.not-eligible.page-title=You''re not eligible for a Help to Save account
 hts.core.not-eligible.h1=You''re not eligible for a Help to Save account
-hts.core.not-eligible.p-1=You can only open a Help to Save account if you''re receiving Working Tax Credit payments.
+hts.core.not-eligible.p-1=You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.
 hts.core.not-eligible.p-2=Find out more about
 hts.core.not-eligible.link-1=eligibility for Help to Save
 hts.core.not-eligible.p-2-2=.
-hts.core.not-eligible.h2-1=Waiting to hear back?
-hts.core.not-eligible.p-3=If you''ve applied for Working Tax Credit, you can only apply for an account again after:
-hts.core.not-eligible.li-1=your application for Working Tax Credit has been approved
-hts.core.not-eligible.li-2=you''re receiving Working Tax Credit payments
+hts.core.not-eligible.h2-1=If you’ve recently applied for Working Tax Credit
+hts.core.not-eligible.p-3=You should wait until you''ve received a letter from HM Revenue & Customs confirming that you''re entitled to Working Tax Credit. Once you''ve received this you can apply for a Help to Save account again.
+hts.core.not-eligible.h3=If you think you''re eligible for an account
+hts.core.not-eligible.p-4-1=Find out what to do if you have checked the eligibility criteria and
+hts.core.not-eligible.p-4-link-text=still think you''re eligible
+hts.core.not-eligible.p-4-2=for a Help to Save account.
+
 hts.helpers.sidebar.header=Elsewhere on GOV.UK
 hts.helpers.sidebar.government-gateway=Government Gateway
 hts.helpers.sidebar.universal-credit=Universal Credit
