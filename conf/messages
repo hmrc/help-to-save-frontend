@@ -256,43 +256,35 @@ hts.register.create_account_help_to_save.cancel-label=Cancel
 
 hts.register.think_you_are_eligible.title=If you think you''re eligible for a Help to Save account
 hts.register.think_you_are_eligible.h1=If you think you''re eligible for a Help to Save account
-
-hts.register.think_you_are_eligible.wtc.p1=You should check the <a href={0}>eligibility criteria</a> for a Help to Save account to make sure you''re eligible.
-hts.register.think_you_are_eligible.wtc.p2=If you still think you''re eligible and are told you''re not it might be because:
-hts.register.think_you_are_eligible.wtc.ul1.li1=you''ve recently claimed Universal Credit and are still in your first monthly assessment period
-hts.register.think_you_are_eligible.wtc.ul1.li2=our system has a problem
-hts.register.think_you_are_eligible.wtc.h2=If you''ve recently claimed Universal Credit
-hts.register.think_you_are_eligible.wtc.p3=You''ll need to wait for at least 34 days after you''ve claimed Universal Credit before you can <a href={0}>apply for a Help to Save account</a> again.
-hts.register.think_you_are_eligible.wtc.h3=If you''ve recently applied for Working Tax Credit
-hts.register.think_you_are_eligible.wtc.p4=You should wait until you''ve received a letter from HM Revenue & Customs confirming that you''re entitled to Working Tax Credit. Once you''ve received this you can <a href={0}>apply for a Help to Save account</a> again.
-hts.register.think_you_are_eligible.wtc.h4=If you''ve applied for a Help to Save account again
-hts.register.think_you_are_eligible.wtc.p5=If you''re not eligible for an account but still think you are, you can contact the Help to Save service.
-hts.register.think_you_are_eligible.wtc.p6=You''ll need to have your National Insurance number with you when you phone.
-hts.register.think_you_are_eligible.wtc.h5=Telephone:
-hts.register.think_you_are_eligible.wtc.p7=0300 322 7093
-hts.register.think_you_are_eligible.wtc.h6=Outside UK:
-hts.register.think_you_are_eligible.wtc.p8=+44 300 322 7093
-hts.register.think_you_are_eligible.wtc.h7=Opening times:
-hts.register.think_you_are_eligible.wtc.p9=8am to 8pm, Monday to Friday
-hts.register.think_you_are_eligible.wtc.p10=8am to 4pm, Saturday
-hts.register.think_you_are_eligible.wtc.p11=Closed Sunday and bank holidays.
-hts.register.think_you_are_eligible.wtc.h8=If you still think the decision is wrong
-hts.register.think_you_are_eligible.wtc.p12=You can ask for the decision to be looked at again, if you''re told you’re not eligible for a Help to Save account and think that decision is wrong.
-hts.register.think_you_are_eligible.wtc.p13=You''ll usually need to do this within 30 days of being told you''re not eligible for a Help to Save account.
-hts.register.think_you_are_eligible.wtc.p14=If you think the decision is wrong, you can ask for a review of the decision and must do this in writing. You''ll need to state what you disagree with and why.
-hts.register.think_you_are_eligible.wtc.p15=You should write to:
-hts.register.think_you_are_eligible.wtc.p16-1=Help to Save
-hts.register.think_you_are_eligible.wtc.p16-2=PO Box 1
-hts.register.think_you_are_eligible.wtc.p16-3=Newcastle
-hts.register.think_you_are_eligible.wtc.p16-4=NE88 1AA
-hts.register.think_you_are_eligible.wtc.h9=If you don''t agree with the outcome of the review
-hts.register.think_you_are_eligible.wtc.p17=You can appeal to the First-tier Tribunal (Tax) if all of these things apply to you:
-hts.register.think_you_are_eligible.wtc.ul2-li1=you were not allowed to open a Help to Save account
-hts.register.think_you_are_eligible.wtc.ul2-li2=you have asked for a review of that decision and were still not allowed to open a Help to Save account
-hts.register.think_you_are_eligible.wtc.ul2-li3=you received your review of the decision within the last month
-hts.register.think_you_are_eligible.wtc.ul2-li4=you want to challenge the decision not to allow you to open a Help to Save account
-hts.register.think_you_are_eligible.wtc.p18=The tribunal is independent of government. It will listen to both sides before making a decision.
-hts.register.think_you_are_eligible.wtc.p19=Go to GOV.UK to find out how to <a href={0}>appeal to the tax tribunal</a>.
+hts.register.think_you_are_eligible.p1=Have you been told you''re not eligible for a Help to Save account? If yes, you should check the
+hts.register.think_you_are_eligible.p1-link-text=eligibility criteria
+hts.register.think_you_are_eligible.p1-2=.
+hts.register.think_you_are_eligible.p2=If you''ve done this and still think you''re eligible for an account you can contact the Help to Save service.
+hts.register.think_you_are_eligible.p3=You''ll need to have your National Insurance number with you when you phone.
+hts.register.think_you_are_eligible.contact.service.telephone-header=Telephone:
+hts.register.think_you_are_eligible.contact.service.telephone-number=0300 322 7093
+hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-header=Outside UK:
+hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-number=+44 300 322 7093
+hts.register.think_you_are_eligible.contact.service.opening-times.heading=Opening times:
+hts.register.think_you_are_eligible.contact.service.opening-times.open=8am to 6pm, Monday to Friday
+hts.register.think_you_are_eligible.contact.service.opening-times.closed=Closed weekends and bank holidays.
+hts.register.think_you_are_eligible.h2=If you still think the decision is wrong
+hts.register.think_you_are_eligible.p4=You can ask for the decision to be looked at again, if you''re told you’re not eligible for a Help to Save account and think that decision is wrong.
+hts.register.think_you_are_eligible.p5=You''ll usually need to do this within 30 days of being told you’re not eligible for a Help to Save account.
+hts.register.think_you_are_eligible.p6=If you think the decision is wrong, you can ask for a review of the decision and must do this in writing. You''ll need to state what you disagree with and why.
+hts.register.think_you_are_eligible.h3=You should write to:
+hts.register.think_you_are_eligible.address1=Help to Save
+hts.register.think_you_are_eligible.address2=PO Box 1
+hts.register.think_you_are_eligible.address3=Newcastle
+hts.register.think_you_are_eligible.address4=NE88 1AA
+hts.register.think_you_are_eligible.review.disagree.heading=If you don''t agree with the outcome of the review
+hts.register.think_you_are_eligible.review.disagree.p1=You can appeal to the First-tier Tribunal (Tax) if all of these things apply to you:
+hts.register.think_you_are_eligible.review.disagree.ul1-li1=you were not allowed to open a Help to Save account
+hts.register.think_you_are_eligible.review.disagree.ul1-li2=you have asked for a review of that decision and were still not allowed to open a Help to Save account
+hts.register.think_you_are_eligible.review.disagree.ul1-li3=you received your review of the decision within the last month
+hts.register.think_you_are_eligible.review.disagree.ul1-li4=you want to challenge the decision not to allow you to open a Help to Save account
+hts.register.think_you_are_eligible.review.disagree.p2=The tribunal is independent of government. It will listen to both sides before making a decision.
+hts.register.think_you_are_eligible.review.disagree.p3=Go to GOV.UK to find out how to <a href={0}>appeal to the tax tribunal</a>.
 
 hts.iv.identity_verification.title=We''ve verified your identity
 hts.iv.locked_out.page-title=We were not able to verify your identity
