@@ -29,8 +29,11 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 
 import scala.concurrent.ExecutionContext
+import scala.concurrent.duration._
 
 class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with GeneratorDrivenPropertyChecks {
+
+  implicit val config: PatienceConfig = PatienceConfig().copy(timeout = scaled(10.seconds))
 
   class TestApparatus {
     val mockWsHttp: WSHttp = mock[WSHttp]
@@ -60,6 +63,17 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
 
     val putUrl: String = s"http://localhost:8400/keystore/help-to-save-frontend/${sessionId.value}/data/htsSession"
     val getUrl: String = s"http://localhost:8400/keystore/help-to-save-frontend/${sessionId.value}"
+
+    def mockGet(result: CacheMap) =
+      (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+        .expects(getUrl, *, *, *)
+        .returning(result)
+
+    def mockPut(expectedSession: HTSSession)(result: CacheMap) =
+      (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+        .expects(putUrl, expectedSession, *, *, *, *)
+        .returning(result)
+
   }
 
   "The SessionCacheConnector" should {
@@ -68,13 +82,10 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
       forAll(htsSessionGen) { htsSession ⇒
         val cache = cacheMap(htsSession)
 
-        (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
-          .expects(getUrl, *, *, *)
-          .returning(CacheMap("1", Map.empty[String, JsValue]))
-
-        (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
-          .expects(putUrl, htsSession, *, *, *, *)
-          .returning(cache)
+        inSequence {
+          mockGet(CacheMap("1", Map.empty[String, JsValue]))
+          mockPut(htsSession)(cache)
+        }
 
         val result = sessionCacheConnector.put(htsSession)
 
@@ -92,13 +103,10 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
         val expectedSessionToStore = htsSession.copy(ivURL        = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl))
         val cacheAfterPut = cacheMap(expectedSessionToStore)
 
-        (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
-          .expects(getUrl, *, *, *)
-          .returning(cacheMap(existingSession))
-
-        (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
-          .expects(putUrl, expectedSessionToStore, *, *, *, *)
-          .returning(cacheAfterPut)
+        inSequence {
+          mockGet(cacheMap(existingSession))
+          mockPut(expectedSessionToStore)(cacheAfterPut)
+        }
 
         val result = sessionCacheConnector.put(expectedSessionToStore)
 
@@ -107,16 +115,27 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
       }
     }
 
+    "be able to update IV data" in new TestApparatus {
+      val oldSession = HTSSession(None, None, None, ivURL = Some("a"), None)
+      val expectedSession = HTSSession(None, None, None, Some("a"), Some("b"))
+
+      inSequence {
+        mockGet(cacheMap(oldSession))
+        mockPut(expectedSession)(cacheMap(expectedSession))
+      }
+
+      val result = sessionCacheConnector.put(HTSSession(None, None, None, None, Some("b")))
+
+      result.value.futureValue.isRight should be(true)
+    }
+
     "be able to Get a HTSSession from the cache" in new TestApparatus {
       forAll(htsSessionGen) { htsSession ⇒
         val cache = cacheMap(htsSession)
 
-        (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
-          .expects(getUrl, *, *, *)
-          .returning(cache)
+        mockGet(cache)
 
         val result = sessionCacheConnector.get
-
         result.value.futureValue should be(Right(Some(htsSession)))
 
       }
