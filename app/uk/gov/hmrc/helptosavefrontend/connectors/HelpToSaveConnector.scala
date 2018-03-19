@@ -130,6 +130,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
         case 1     ⇒ Right(EligibilityCheckResult.Eligible(r))
         case 2     ⇒ Right(EligibilityCheckResult.Ineligible(r))
         case 3     ⇒ Right(EligibilityCheckResult.AlreadyHasAccount(r))
+        case 4     ⇒ Left(s"Error while checking eligibility. Received result code 4 (${r.result}) with reason code ${r.reasonCode} (${r.reason})")
         case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$r'")
       }
     }

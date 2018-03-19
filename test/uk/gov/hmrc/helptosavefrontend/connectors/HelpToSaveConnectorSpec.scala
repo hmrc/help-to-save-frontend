@@ -140,15 +140,24 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       }
 
       "return an error" when {
+
+          def testError(resultCode: Int): Unit = {
+            mockHttpGet(eligibilityURL)(
+              Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(
+                EligibilityCheckResponse("", resultCode, "", 1))))))))
+
+            val result = connector.getEligibility()
+            await(result.value).isLeft shouldBe true
+          }
+
+        "the call comes back with a 200 and result code 4" in {
+          testError(4)
+        }
+
         "the call comes back with a 200 and an unknown result code" in {
           forAll { (resultCode: Int) ⇒
             whenever(!(1 to 3).contains(resultCode)) {
-              mockHttpGet(eligibilityURL)(
-                Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(
-                  EligibilityCheckResponse("", resultCode, "", 1))))))))
-
-              val result = connector.getEligibility()
-              await(result.value).isLeft shouldBe true
+              testError(resultCode)
             }
           }
         }
