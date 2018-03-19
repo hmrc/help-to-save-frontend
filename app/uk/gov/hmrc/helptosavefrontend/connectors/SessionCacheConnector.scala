@@ -66,7 +66,9 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
         )(existing ⇒
           existing.copy(eligibilityCheckResult = newSession.eligibilityCheckResult,
                         confirmedEmail         = newSession.confirmedEmail,
-                        pendingEmail           = newSession.pendingEmail
+                        pendingEmail           = newSession.pendingEmail,
+                        ivURL                  = newSession.ivURL.orElse(existing.ivURL),
+                        ivSuccessURL           = newSession.ivSuccessURL.orElse(existing.ivSuccessURL)
           )
         )
 
