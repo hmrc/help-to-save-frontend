@@ -64,11 +64,12 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
         val sessionToStore = oldSession.fold(
           newSession
         )(existing ⇒
-          existing.copy(eligibilityCheckResult = newSession.eligibilityCheckResult,
-                        confirmedEmail         = newSession.confirmedEmail,
-                        pendingEmail           = newSession.pendingEmail,
-                        ivURL                  = newSession.ivURL.orElse(existing.ivURL),
-                        ivSuccessURL           = newSession.ivSuccessURL.orElse(existing.ivSuccessURL)
+          HTSSession(
+            eligibilityCheckResult = newSession.eligibilityCheckResult.orElse(existing.eligibilityCheckResult),
+            confirmedEmail         = newSession.confirmedEmail.orElse(existing.confirmedEmail),
+            pendingEmail           = newSession.pendingEmail.orElse(existing.pendingEmail),
+            ivURL                  = newSession.ivURL.orElse(existing.ivURL),
+            ivSuccessURL           = newSession.ivSuccessURL.orElse(existing.ivSuccessURL)
           )
         )
 

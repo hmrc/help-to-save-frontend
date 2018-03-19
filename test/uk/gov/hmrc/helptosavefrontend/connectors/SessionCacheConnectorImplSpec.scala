@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.time.Span
 import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
@@ -34,7 +33,7 @@ import scala.concurrent.duration._
 
 class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with GeneratorDrivenPropertyChecks {
 
-  implicit val config: PatienceConfig = PatienceConfig().copy(timeout = Span.convertDurationToSpan(10.seconds))
+  implicit val config: PatienceConfig = PatienceConfig().copy(timeout = scaled(10.seconds))
 
   class TestApparatus {
     val mockWsHttp: WSHttp = mock[WSHttp]
