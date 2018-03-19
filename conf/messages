@@ -194,7 +194,6 @@ hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 hts.core.not-eligible.sidebar.h2=Elsewhere on GOV.UK
 hts.core.not-eligible.sidebar.p=Working Tax Credit
 
-hts.register.you-are-eligible.notification.step=Step 1 of 4
 hts.register.you-are-eligible.title=You''re eligible for a Help to Save account
 hts.register.you-are-eligible.notification.h1=We''ve checked the details we hold for you
 hts.register.you-are-eligible.p-1=You''re eligible for a Help to Save account.
@@ -249,7 +248,6 @@ hts.register.service-unavailable.p1=Please try again later.
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
 hts.register.create_account_help_to_save.title=You''re about to create a Help to Save account
-hts.register.create_account_help_to_save.step=Step 2 of 4
 hts.register.create_account_help_to_save.header-page=You''re about to create a Help to Save account
 hts.register.create_account_help_to_save.par-1=Before opening an account, you''ll need to confirm you accept these conditions.
 hts.register.create_account_help_to_save.par-2=You must:
