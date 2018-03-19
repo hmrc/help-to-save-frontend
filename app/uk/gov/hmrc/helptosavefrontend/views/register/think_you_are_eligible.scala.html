@@ -26,61 +26,50 @@ bodyClasses = None) {
 
   <h1>@Messages("hts.register.think_you_are_eligible.h1")</h1>
 
-  <p>@Html(Messages("hts.register.think_you_are_eligible.wtc.p1", routes.IntroductionController.getEligibility().url))</p>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p2")</p>
+  <p>@Messages("hts.register.think_you_are_eligible.p1")
+      <a href="@routes.IntroductionController.getEligibility().url">
+        @Messages("hts.register.think_you_are_eligible.p1-link-text")
+      </a>@Messages("hts.register.think_you_are_eligible.p1-2")</p>
+  <p>@Messages("hts.register.think_you_are_eligible.p2")</p>
+  <p>@Messages("hts.register.think_you_are_eligible.p3")</p>
 
-  <ul class="bullets">
-      <li>@Messages("hts.register.think_you_are_eligible.wtc.ul1.li1")</li>
-      <li>@Messages("hts.register.think_you_are_eligible.wtc.ul1.li2")</li>
-  </ul>
+  <div class="panel">
+      <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.telephone-header")</strong><br />
+      @Messages("hts.register.think_you_are_eligible.contact.service.telephone-number")</p>
+      <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-header")</strong><br />
+      @Messages("hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-number")</p>
+  </div>
 
-  <h2>@Messages("hts.register.think_you_are_eligible.wtc.h2")</h2>
-  <p>@Html(Messages("hts.register.think_you_are_eligible.wtc.p3", routes.IntroductionController.getApply()))</p>
+  <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.opening-times.heading")</strong><br />
+  @Messages("hts.register.think_you_are_eligible.contact.service.opening-times.open")<br />
+  @Messages("hts.register.think_you_are_eligible.contact.service.opening-times.closed")</p>
 
-  <h2>@Messages("hts.register.think_you_are_eligible.wtc.h3")</h2>
-  <p>@Html(Messages("hts.register.think_you_are_eligible.wtc.p4", routes.IntroductionController.getApply()))</p>
+  <h2>@Messages("hts.register.think_you_are_eligible.h2")</h2>
+  <p>@Messages("hts.register.think_you_are_eligible.p4")</p>
+  <p>@Messages("hts.register.think_you_are_eligible.p5")</p>
+  <p>@Messages("hts.register.think_you_are_eligible.p6")</p>
 
-  <h2>@Messages("hts.register.think_you_are_eligible.wtc.h4")</h2>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p5")</p>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p6")</p>
+  <h3>@Messages("hts.register.think_you_are_eligible.h3")</h3>
 
-  <h3>@Messages("hts.register.think_you_are_eligible.wtc.h5")</h3>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p7")</p>
+  <div class="panel">
+    <p>@Messages("hts.register.think_you_are_eligible.address1")<br />
+    @Messages("hts.register.think_you_are_eligible.address2")<br />
+    @Messages("hts.register.think_you_are_eligible.address3")<br />
+    @Messages("hts.register.think_you_are_eligible.address4")</p>
+  </div>
 
-  <h3>@Messages("hts.register.think_you_are_eligible.wtc.h6")</h3>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p8")</p>
-
-  <h3>@Messages("hts.register.think_you_are_eligible.wtc.h7")</h3>
-  <p>
-    @Messages("hts.register.think_you_are_eligible.wtc.p9")
-    <br />
-    @Messages("hts.register.think_you_are_eligible.wtc.p10")
-  </p>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p11")</p>
-
-  <h2>@Messages("hts.register.think_you_are_eligible.wtc.h8")</h2>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p12")</p>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p13")</p>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p14")</p>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p15")</p>
-  <p>
-    @Messages("hts.register.think_you_are_eligible.wtc.p16-1")
-    <br />
-    @Messages("hts.register.think_you_are_eligible.wtc.p16-2")
-    <br />
-    @Messages("hts.register.think_you_are_eligible.wtc.p16-3")
-    <br />
-    @Messages("hts.register.think_you_are_eligible.wtc.p16-4")
-  </p>
-
-  <h2>@Messages("hts.register.think_you_are_eligible.wtc.h9")</h2>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p17")</p>
-  <ul class="bullets">
-    <li>@Messages("hts.register.think_you_are_eligible.wtc.ul2-li1")</li>
-    <li>@Messages("hts.register.think_you_are_eligible.wtc.ul2-li2")</li>
-    <li>@Messages("hts.register.think_you_are_eligible.wtc.ul2-li3")</li>
-    <li>@Messages("hts.register.think_you_are_eligible.wtc.ul2-li4")</li>
-  </ul>
-  <p>@Messages("hts.register.think_you_are_eligible.wtc.p18")</p>
-  <p>@Html(Messages("hts.register.think_you_are_eligible.wtc.p19", "https://www.gov.uk/tax-tribunal/appeal-to-tribunal"))</p>
+  <details>
+    <summary><span class="summary">@Messages("hts.register.think_you_are_eligible.review.disagree.heading")</span></summary>
+    <div class="panel panel-border-narrow">
+      <p>@Messages("hts.register.think_you_are_eligible.review.disagree.p1")</p>
+      <ul class="list list-bullet">
+        <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li1")</li>
+        <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li2")</li>
+        <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li3")</li>
+        <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li4")</li>
+      </ul>
+      <p>@Messages("hts.register.think_you_are_eligible.review.disagree.p2")</p>
+      <p>@Html(Messages("hts.register.think_you_are_eligible.review.disagree.p3", "https://www.gov.uk/tax-tribunal/appeal-to-tribunal"))</p>
+    </div>
+  </details>
 }
