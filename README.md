@@ -44,7 +44,7 @@ but the project will have a controlled go-live with a pilot population in Q1/201
 
 ## Context of this microservice
 
-To request a Help to Save (‘HtS’) account, customers will access a HtS landing page apply.help-to-save.tax.service.gov.uk/about
+To request a Help to Save (‘HtS’) account, customers will access a HtS landing page /help-to-save/about-help-to-save
 fronted by Akamai. Once authenticated via Government Gateway, the customer will access the HtS Service whereby the customer may
 check their HtS Eligibility check via DES API #2A which in turn collates responses from HoD’s NTC (for WTC), ITMP (for WTC)
 and DWP (for UC). The response from DES will confirm whether the customer is eligible to a HtS Account and if so, the customer is
@@ -112,22 +112,22 @@ sbt "run 7002"
 
 Then (to run against any environment) execute:
  ```
- ./run_selenium_system_test.sh -e=${ENV} -b=${BROWSER} -d=${DRIVERS}
+ ./run_selenium_system_test.sh -e=${ENV} -b=${BROWSER} -d=${DRIVERS} -r=${rootUrl}
 ```
 where `${ENV}` indicates the environment the tests should run on (one of `dev`, `qa` or `local`), `${BROWSER}` is
 the browser the tests should run on `chrome` and `${DRIVERS}` is the path to the folder
 containing the Selenium driver files. This command will not run the unit tests. To run only a subset of
 Selenium scenarios, tag the relevant scenarios and then run the command
  ```
- ./run_selenium_system_test.sh -e=${ENV} -b=${BROWSER} -d=${DRIVERS} -t=${TAGS}
+ ./run_selenium_system_test.sh -e=${ENV} -b=${BROWSER} -d=${DRIVERS} -r=${rootUrl} -t=${TAGS}
  ```
 where `${TAGS}` is a comma separated list containing the relevant tags. Examples:
 
 ```
-./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver                # (1) runs all selenium tests on the dev environment using chrome
-./run_selenium_system_test.sh -e=qa -b=chrome -d=/usr/local/bin/chromedriver -t="wip"        # (2) runs selenium scenarios tagged with the `@wip` tag on the
+./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver -r={mdtp dev host url}                # (1) runs all selenium tests on the dev environment using chrome
+./run_selenium_system_test.sh -e=qa -b=chrome -d=/usr/local/bin/chromedriver  -r={mdtp qa host url}  -t="wip"        # (2) runs selenium scenarios tagged with the `@wip` tag on the
                                                                                              #     QA environment using chrome
-./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver -t="wip"       # (3) the same as (2)
+./run_selenium_system_test.sh -e=dev -b=chrome -d=/usr/local/bin/chromedriver -r={mdtp dev host url}  -t="wip"       # (3) the same as (2)
 ./run_selenium_system_test.sh -e=local -b=chrome -d=/usr/local/bin/chromedriver -t="wip,sit" # (4) runs selenium scenarios tagged with either the `@wip` or `@sit`
                                                                                              #     tags locally using chrome
 ```

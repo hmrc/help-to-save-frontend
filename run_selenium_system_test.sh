@@ -1,9 +1,10 @@
 #! /bin/bash
-USAGE="run_selenium_system_test.sh [--environment -e=env] [--browser -b=browser] [--driver -d=driver] [--with-java-flags -j=java_opts: optional] [--with-tags -t=tags: optional]
+USAGE="run_selenium_system_test.sh [--environment -e=env] [--browser -b=browser] [--driver -d=driver] [--rootUrl -r=rootUrl] [--with-java-flags -j=java_opts: optional] [--with-tags -t=tags: optional]
 
 env      - The environment to run the tests on [ dev | qa | local ]
 browser  - The browser to run the tests on [ chrome | zap-chrome | headless | browserstack ]
 driver   - The path to the folder containing Selenium driver files
+rootUrl  - root mdtp host url
 javaopts - comma separated list of any extra java arguments that are needed such as BrowserStack with
            no spaces should be given between these arguments. The list must be enclosed in double
            quotes, e.g. -j=\"-Dbrowserstack.os=android,-Dbrowserstack.real_mobile=true\"
@@ -71,6 +72,9 @@ while [ "$1" != "" ]; do
         ;;
    --driver | -d)
         java_opts+=("-Dwebdriver.driver=$VALUE")
+        ;;
+   --rootUrl | -r)
+        java_opts+=("-DrootUrl=$VALUE")
         ;;
    --with-java-flags | -j)
         extra_java_opts="$VALUE"
