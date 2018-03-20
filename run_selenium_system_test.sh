@@ -4,7 +4,7 @@ USAGE="run_selenium_system_test.sh [--environment -e=env] [--browser -b=browser]
 env      - The environment to run the tests on [ dev | qa | local ]
 browser  - The browser to run the tests on [ chrome | zap-chrome | headless | browserstack ]
 driver   - The path to the folder containing Selenium driver files
-rootUrl  - root mdtp host url
+rootUrl  - root mdtp host url if the environment is not local
 javaopts - comma separated list of any extra java arguments that are needed such as BrowserStack with
            no spaces should be given between these arguments. The list must be enclosed in double
            quotes, e.g. -j=\"-Dbrowserstack.os=android,-Dbrowserstack.real_mobile=true\"
