@@ -26,7 +26,7 @@ import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
-import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIProxyConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -44,7 +44,7 @@ import scala.concurrent.Future
 class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService:          HelpToSaveService,
                                                            frontendAuthConnector:          FrontendAuthConnector,
                                                            val emailVerificationConnector: EmailVerificationConnector,
-                                                           nSIConnector:                   NSIConnector,
+                                                           nSIConnector:                   NSIProxyConnector,
                                                            metrics:                        Metrics,
                                                            val auditor:                    HTSAuditor,
                                                            sessionCacheConnector:          SessionCacheConnector

@@ -24,7 +24,7 @@ import play.api.http.Status
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiCreateAccountUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.nsiUserInfoFormat
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
@@ -34,15 +34,15 @@ import uk.gov.hmrc.play.config.AppName
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[NSIConnectorImpl])
-trait NSIConnector {
+@ImplementedBy(classOf[NSIProxyConnectorImpl])
+trait NSIProxyConnector {
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[SubmissionResult]
 
   def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Unit]
 
 }
 
-object NSIConnector {
+object NSIProxyConnector {
 
   sealed trait SubmissionResult
 
@@ -55,7 +55,7 @@ object NSIConnector {
 }
 
 @Singleton
-class NSIConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOLogMessageTransformer) extends NSIConnector with Logging with AppName {
+class NSIProxyConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOLogMessageTransformer) extends NSIProxyConnector with Logging with AppName {
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[SubmissionResult] = {
     http.post(nsiCreateAccountUrl, userInfo).map[SubmissionResult] { response ⇒
@@ -82,7 +82,7 @@ class NSIConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOLogMes
             Right(())
 
           case other ⇒
-            Left(s"Received unexpected status $other from NS&I while trying to update email. Body was ${maskNino(response.body)}")
+            Left(s"Received unexpected status $other from NS&I proxy while trying to update email. Body was ${maskNino(response.body)}")
 
         }
       }.recover {
@@ -92,7 +92,7 @@ class NSIConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOLogMes
   }
 
   private def handleError(response: HttpResponse): SubmissionFailure = {
-    logger.warn(s"response body from NSI=${maskNino(response.body)}")
+    logger.warn(s"response body from NS&I proxy=${maskNino(response.body)}")
     response.parseJSON[SubmissionFailure](Some("error")) match {
       case Right(submissionFailure) ⇒ submissionFailure
       case Left(error)              ⇒ SubmissionFailure(None, "", error)

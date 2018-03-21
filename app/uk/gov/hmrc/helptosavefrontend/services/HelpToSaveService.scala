@@ -20,8 +20,8 @@ import javax.inject.Singleton
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject}
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIProxyConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
@@ -54,7 +54,7 @@ trait HelpToSaveService {
 }
 
 @Singleton
-class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIConnector) extends HelpToSaveService with Logging {
+class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIProxyConnector) extends HelpToSaveService with Logging {
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
     helpToSaveConnector.getUserEnrolmentStatus()
