@@ -25,7 +25,7 @@ import play.api.libs.json.{JsObject, Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiCreateAccountUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -33,11 +33,11 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-class NSIConnectorSpec extends TestSupport with MockFactory with GeneratorDrivenPropertyChecks {
+class NSIProxyConnectorSpec extends TestSupport with MockFactory with GeneratorDrivenPropertyChecks {
 
   lazy val http = mock[WSHttp]
 
-  def testNSAndIConnectorImpl = new NSIConnectorImpl(http)
+  def testNSAndIConnectorImpl = new NSIProxyConnectorImpl(http)
 
   // put in fake authorization details - these should be removed by the call to create an account
   implicit val hc: HeaderCarrier = HeaderCarrier(authorization = Some(Authorization("auth")))

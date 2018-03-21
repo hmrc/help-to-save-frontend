@@ -19,8 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.services
 import cats.data.EitherT
 import cats.instances.future._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIProxyConnector}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class HelpToSaveServiceSpec extends TestSupport {
 
   val htsConnector = mock[HelpToSaveConnector]
-  val nsiConnector = mock[NSIConnector]
+  val nsiConnector = mock[NSIProxyConnector]
 
   val htsService = new HelpToSaveServiceImpl(htsConnector, nsiConnector)
 
