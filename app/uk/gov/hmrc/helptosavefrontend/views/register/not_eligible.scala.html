@@ -26,44 +26,66 @@
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = Messages("hts.core.not-eligible.page-title"),
     bodyClasses = None) {
+
   <h1 class="heading-large" id="hts-not-eligible-title">@Messages("hts.core.not-eligible.h1")</h1>
 
-  @if(ineligibilityReason === EntitledToWTCNoTCAndInsufficientUC || ineligibilityReason === NotEntitledToWTCAndUCInsufficient){
-    <p>@Messages("hts.core.not-eligible.uc-insufficient-income.p1")</p>
 
-    <p>@Messages("hts.core.not-eligible.uc-insufficient-income.p-2-1")
-      <a href=@routes.IntroductionController.getEligibility().url
-        class="ga-track-event"
-        data-ga-event-category="links"
-        data-ga-event-action="Help to Save"
-        data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.uc-insufficient-income.p-2-link-1")</a>@Messages("hts.core.not-eligible.uc-insufficient-income.p-2-2")
-    </p>
+  @if(ineligibilityReason === NotEntitledToWTCAndUCInsufficient) {
+    <p>@messages("hts.core.not-eligible.uc.p-1")</p>
 
-    <p>@Messages("hts.core.not-eligible.uc-insufficient-income.p-3")</p>
-  } else {
-    <p>@Messages("hts.core.not-eligible.p-1")</p>
-
-    <ul class="list list-bullet">
-      <li>@Messages("hts.core.not-eligible.li1-1")</li>
-      <li>@Messages("hts.core.not-eligible.li1-2")</li>
-    </ul>
-
-    <p>@Messages("hts.core.not-eligible.p-2")</p>
-
-    <p>@Messages("hts.core.not-eligible.p-3-1")
+    <p>@messages("hts.core.not-eligible.uc.p-2")
       <a href=@routes.IntroductionController.getEligibility().url
        class="ga-track-event"
        data-ga-event-category="links"
        data-ga-event-action="Help to Save"
-       data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.p-3-link-1")</a>@Messages("hts.core.not-eligible.p-3-2")
-    </p>
-  }
+       data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.uc.link-1")</a>@Messages("hts.core.not-eligible.uc.p-2-2")</p>
 
-  <h2 class="heading-medium">@Messages("hts.core.not-eligible.h2-1")</h2>
-  <p>@Messages("hts.core.not-eligible.p-3")</p>
+    <p>@messages("hts.core.not-eligible.uc.p-3")</p>
 
-  <h2>@Messages("hts.core.not-eligible.h3")</h2>
+    <h2>@messages("hts.core.not-eligible.uc.h2")</h2>
 
-  <p>@Messages("hts.core.not-eligible.p-4-1") <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.p-4-link-text")</a> @Messages("hts.core.not-eligible.p-4-2")</p>
+    <p>@messages("hts.core.not-eligible.uc.p-4")
+      <a href=@routes.IntroductionController.getEligibility().url
+        class="ga-track-event"
+        data-ga-event-category="links"
+        data-ga-event-action="Help to Save"
+        data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.uc.link-2")</a> @Messages("hts.core.not-eligible.uc.p-4-2")</p>
+
+  } else { @if(ineligibilityReason === EntitledToWTCNoTCAndInsufficientUC) {
+    <p>@messages("hts.core.not-eligible.wtc.uc.p1")</p>
+
+    <ul class="list list-bullet">
+      <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li1")</li>
+      <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li2")</li>
+    </ul>
+
+    <p>@messages("hts.core.not-eligible.wtc.uc.p2")</p>
+    <p>@messages("hts.core.not-eligible.wtc.uc.p3")
+      <a href=@routes.IntroductionController.getEligibility().url
+         class="ga-track-event"
+         data-ga-event-category="links"
+         data-ga-event-action="Help to Save"
+         data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.wtc.uc.p3-link")</a>@Messages("hts.core.not-eligible.wtc.uc.p3-2")</p>
+
+    <h2>@messages("hts.core.not-eligible.wtc.uc.h2")</h2>
+    <p>@Messages("hts.core.not-eligible.wtc.uc.p4")
+      <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.wtc.uc.p4-link")</a> @Messages("hts.core.not-eligible.wtc.uc.p4-2")</p>
+  } else {
+    <p>@Messages("hts.core.not-eligible.wtc.p-1")</p>
+
+    <p>@Messages("hts.core.not-eligible.wtc.p-2")
+      <a href=@routes.IntroductionController.getEligibility().url
+        class="ga-track-event"
+        data-ga-event-category="links"
+        data-ga-event-action="Help to Save"
+        data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.wtc.link-1")</a>@Messages("hts.core.not-eligible.wtc.p-2-2")</p>
+
+    <h2 class="heading-medium">@Messages("hts.core.not-eligible.wtc.h2-1")</h2>
+    <p>@Messages("hts.core.not-eligible.wtc.p-3")</p>
+
+    <h2>@Messages("hts.core.not-eligible.wtc.h3")</h2>
+
+    <p>@Messages("hts.core.not-eligible.wtc.p-4-1") <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.wtc.p-4-link-text")</a> @Messages("hts.core.not-eligible.wtc.p-4-2")</p>
+  }}
 
 }
