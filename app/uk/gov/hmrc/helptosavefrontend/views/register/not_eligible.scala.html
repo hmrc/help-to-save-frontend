@@ -45,11 +45,7 @@
     <h2>@messages("hts.core.not-eligible.uc.h2")</h2>
 
     <p>@messages("hts.core.not-eligible.uc.p-4")
-      <a href=@routes.IntroductionController.getEligibility().url
-        class="ga-track-event"
-        data-ga-event-category="links"
-        data-ga-event-action="Help to Save"
-        data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.uc.link-2")</a> @Messages("hts.core.not-eligible.uc.p-4-2")</p>
+      <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.uc.link-2")</a> @Messages("hts.core.not-eligible.uc.p-4-2")</p>
 
   } else { @if(ineligibilityReason === EntitledToWTCNoTCAndInsufficientUC) {
     <p>@messages("hts.core.not-eligible.wtc.uc.p1")</p>
