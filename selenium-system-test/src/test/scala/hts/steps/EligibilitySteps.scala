@@ -42,6 +42,10 @@ class EligibilitySteps extends Steps {
     val _ = ScenarioContext.generateIneligibleNINO()
   }
 
+  When("^they apply for Help to Save when NOT eligible$") {
+    AuthorityWizardPage.authenticateEligibleUserOnAnyDevice(NotEligiblePage.expectedURL, ScenarioContext.currentNINO())
+  }
+
   Then("^they see that they are NOT eligible for Help to Save$") {
     Browser.checkCurrentPageIs(NotEligiblePage)
   }
@@ -52,5 +56,13 @@ class EligibilitySteps extends Steps {
 
   Then("^they see a technical error page$") {
     Browser.checkCurrentPageIs(TechnicalErrorPage)
+  }
+
+  When("^they then click on still think you're eligible link$") {
+    NotEligiblePage.thinkYouAreEligible()
+  }
+
+  Then("^they see appeals and tax tribunal page$") {
+    Browser.checkCurrentPageIs(ThinkYouAreEligiblePage)
   }
 }
