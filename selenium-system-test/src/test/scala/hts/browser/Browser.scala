@@ -52,7 +52,7 @@ trait Navigation {
     driver match {
       case executor: JavascriptExecutor ⇒
         val diff = {
-          val d = elementLocation.getY - executor.executeScript("return window.pageYOffset;").toString.toInt
+          val d = elementLocation.getY - executor.executeScript("return window.pageYOffset;").toString.toFloat.toInt
           if (d < 0) {
             d - 200 // done to avoid any bars or popups blocking elements on mobile devices
           } else {

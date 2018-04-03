@@ -16,19 +16,10 @@
 
 package hts.pages
 
-import hts.browser.Browser
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
-object NotEligiblePage extends Page {
+object ThinkYouAreEligiblePage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/not-eligible"
-
-  override val expectedPageTitle: Option[String] = Some("You're not eligible for a Help to Save account")
-
-  override val expectedPageHeader: Option[String] = Some("You're not eligible for a Help to Save account")
-
-  def thinkYouAreEligible()(implicit driver: WebDriver): Unit =
-    Browser.clickLinkTextOnceClickable("still think you're eligible")
+  val expectedURL: String = s"${Configuration.host}/help-to-save/think-you-are-eligible"
 
 }

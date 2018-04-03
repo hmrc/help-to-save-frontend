@@ -17,3 +17,11 @@ Feature: Applicant goes through eligibility check
     Given DES is down
     When they apply for Help to Save
     Then they see a technical error page
+
+  @HTS-906
+  Scenario: User is NOT eligible and wishes to view appeals page
+    Given a user is NOT in receipt of working tax credit
+    When they apply for Help to Save when NOT eligible
+    Then they see that they are NOT eligible for Help to Save
+    When they then click on still think you're eligible link
+    Then they see appeals and tax tribunal page
