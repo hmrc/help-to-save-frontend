@@ -14,14 +14,17 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
-@(stubMessage: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(pageTitle: String, heading: String, message: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = "My Stub page",
-    bodyClasses = None) {
-    <div class="grid-layout grid-layout--stacked">
-        <p>@stubMessage</p>
-    </div>
+@contentHeader = {
+    <h1>@heading</h1>
 }
+
+@mainContent = {
+    <p>@message</p>
+}
+
+@uk.gov.hmrc.helptosavefrontend.views.html.govuk_wrapper(appConfig = FrontendAppConfig, title = pageTitle, contentHeader = Some(contentHeader), mainContent = mainContent)

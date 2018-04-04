@@ -49,7 +49,7 @@ class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
 
   def getNoAccountPage: Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
-      () ⇒ Ok(views.html.confirm_check_eligibility())
+      () ⇒ Ok(views.html.core.confirm_check_eligibility())
     }, { _ ⇒
       SeeOther(routes.AccessAccountController.accessAccount().url)
     })
