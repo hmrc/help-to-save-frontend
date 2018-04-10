@@ -1,7 +1,21 @@
 hts.global.continue-button=Continue
+hts.global.sign-in-button=Sign in
 hts.global.back-to-account=Go to account home
 hts.global.title-suffix=- Help to Save - GOV.UK
 hts.introduction.title=Apply for Help to Save
+
+hts.sign-in.title=Sign in to your Help to Save account
+hts.sign-in.h1=Sign in to your Help to Save account
+hts.sign-in.p1=Sign in to your Help to Save account to:
+hts.sign-in.ul1-li1=check your current balance
+hts.sign-in.ul1-li2=grow your savings and bonus
+hts.sign-in.ul1-li3=find out when you''ll get your next bonus
+hts.sign-in.ul1-li4=read your messages
+hts.sign-in.p2=To sign in, you''ll need the Government Gateway ID and password you used to apply.
+hts.sign-in.h2=Before you start
+hts.sign-in.p3=To use this service you must have a:
+hts.sign-in.ul2-li1=Help to Save account
+hts.sign-in.ul2-li2=Government Gateway account
 
 hts.introduction.about-help-to-save.title=About Help to Save
 hts.introduction.about-help-to-save.par-1=Help to Save is a savings scheme backed by HM Treasury, so your savings are 100% secure.
@@ -437,13 +451,14 @@ hts.cannot-change-email-try-later.returning.p1=We cannot change your email addre
 hts.cannot-change-email-try-later.returning.p2=You''ll need to come back later and try again.
 hts.cannot-change-email-try-later.returning.button=Go to account home
 
-hts.no-account.page-title=You don''t have a Help to Save account
-hts.no-account.title=You don''t have a Help to Save account
-hts.no-account.p1=You''ve signed into your Government Gateway account, but you don''t have a Help to Save account.
-hts.no-account.h2=Apply for a Help to Save account
-hts.no-account.p2=If you want to apply for an account, you should continue and we''ll check if you''re eligible for one. If you are, you can then go on to create your Help to Save account.
-hts.no-account.continue_button=Continue
-hts.no-account.exit-message=Exit and apply another time
+hts.no-account.page-title=You do not have a Help to Save account
+hts.no-account.title=You do not have a Help to Save account
+hts.no-account.p1=You''ve signed into your Government Gateway account, but you do not have a Help to Save account.
+hts.no-account.p2=We''re sorry, we''re currently developing the Help to Save service and only a limited number of accounts are available at the moment.
+hts.no-account.h2=Apply later
+hts.no-account.p3=If you want to apply for an account, you''ll need to visit GOV.UK later in 2018 and search for ''Help to Save''.
+hts.no-account.exit-message=Exit to GOV.UK
+
 
 hts.account-creation-error.page-title=Something went wrong
 hts.account-creation-error.title=Something went wrong

@@ -38,6 +38,10 @@ class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveServic
                                                                          val env:               Environment)
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour {
 
+  def getSignInPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.sign_in())
+  }
+
   def accessAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
       // not enrolled
