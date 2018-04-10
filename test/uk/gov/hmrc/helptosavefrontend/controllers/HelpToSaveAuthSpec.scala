@@ -24,8 +24,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.checkEligibilityUrl
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, UserInfo}
@@ -40,14 +38,14 @@ class HelpToSaveAuthSpec extends AuthSupport {
 
   private def actionWithNoEnrols = htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Future.successful(Ok(""))
-  }(FrontendAppConfig.checkEligibilityUrl)
+  }(appConfig.checkEligibilityUrl)
 
   private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     htsContext.userDetails match {
       case Left(_)         ⇒ Future.successful(InternalServerError(""))
       case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
     }
-  }(FrontendAppConfig.checkEligibilityUrl)
+  }(appConfig.checkEligibilityUrl)
 
   private def mockAuthWith(error: String) =
     mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString(error))
@@ -98,7 +96,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
         ItmpAddress(Some("l1"), None, None, None, None, Some("postcode"), None, None),
         ItmpAddress(Some("l1"), Some("l2"), None, None, None, Some(""), None, None),
         ItmpAddress(Some("l1"), Some("l2"), None, None, None, None, None, None)
-      ).foreach{ address ⇒
+      ).foreach { address ⇒
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval(address))
 
           val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
@@ -122,7 +120,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
         val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
-        redirectTo should include(urlEncode(checkEligibilityUrl))
+        redirectTo should include(urlEncode(appConfig.checkEligibilityUrl))
       }
     }
 

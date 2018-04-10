@@ -19,8 +19,9 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.forms.Continue
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(backupEmail: String, form: Form[Continue])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(backupEmail: String, form: Form[Continue])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
     @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
 

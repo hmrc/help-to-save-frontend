@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
@@ -38,7 +37,7 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
     mockHelpToSaveService,
     mockAuthConnector,
     mockMetrics
-  )(fakeApplication.injector.instanceOf[MessagesApi], transformer) {
+  ) {
     override val authConnector = mockAuthConnector
   }
 
@@ -52,7 +51,7 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
     "handling verifyEmailErrorTryLater" must {
 
       "show the we couldn't update your email page if the user is not enrolled yet" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
@@ -64,7 +63,7 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
       }
 
       "show the we couldn't update your email page if the user is enrolled" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
@@ -76,7 +75,7 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
       }
 
       "return an error if there is an error checking the users eligibility" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Left(""))
         }

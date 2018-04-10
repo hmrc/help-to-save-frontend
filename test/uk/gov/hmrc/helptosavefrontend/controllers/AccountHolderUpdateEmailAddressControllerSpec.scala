@@ -26,7 +26,6 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIProxyConnector}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
@@ -44,8 +43,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSRFSupport with SessionCacheBehaviour {
-
-  implicit lazy val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
@@ -88,7 +85,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
     mockMetrics,
     mockAuditor,
     mockSessionCacheConnector
-  )(fakeApplication, crypto, mockEmailValidation, fakeApplication.injector.instanceOf[MessagesApi], transformer) {
+  ) {
     override val authConnector = mockAuthConnector
   }
 
@@ -280,7 +277,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
             val result = verifyEmail(emailVerificationParams.encode())
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
           }
 
       }

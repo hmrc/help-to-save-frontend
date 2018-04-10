@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 
@@ -29,11 +27,9 @@ import scala.concurrent.Future
 class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with SessionCacheBehaviour with CSRFSupport {
 
   lazy val controller = new AccessAccountController(
-    fakeApplication.injector.instanceOf[MessagesApi],
     mockHelpToSaveService,
     mockAuthConnector,
-    mockMetrics
-  )
+    mockMetrics)
 
   "The AccessAccountController" when {
 
@@ -108,7 +104,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
           val result = doRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+          redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
         }
 
         "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
@@ -121,7 +117,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
             val result = doRequest()
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
           }
       }
 

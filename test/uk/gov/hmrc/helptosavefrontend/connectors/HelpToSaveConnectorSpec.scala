@@ -27,9 +27,10 @@ import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{ECResponseHolder, GetEmailResponse}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.util.Email
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,11 +38,35 @@ import scala.concurrent.{ExecutionContext, Future}
 // scalastyle:off magic.number
 class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyChecks {
 
-  import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
-
   val mockHttp: WSHttp = mock[WSHttp]
 
   lazy val connector: HelpToSaveConnector = new HelpToSaveConnectorImpl(mockHttp)
+
+  val helpToSaveUrl = "http://localhost:7001"
+
+  val eligibilityURL =
+    s"$helpToSaveUrl/help-to-save/eligibility-check"
+
+  val enrolmentStatusURL =
+    s"$helpToSaveUrl/help-to-save/enrolment-status"
+
+  val enrolUserURL =
+    s"$helpToSaveUrl/help-to-save/enrol-user"
+
+  val setITMPFlagURL =
+    s"$helpToSaveUrl/help-to-save/set-itmp-flag"
+
+  def storeEmailURL(email: Email) =
+    s"$helpToSaveUrl/help-to-save/store-email?email=$email"
+
+  val getEmailURL =
+    s"$helpToSaveUrl/help-to-save/get-email"
+
+  val accountCreateAllowedURL =
+    s"$helpToSaveUrl/help-to-save/account-create-allowed"
+
+  val updateUserCountURL =
+    s"$helpToSaveUrl/help-to-save/update-user-count"
 
   def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
     (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext))
@@ -96,7 +121,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result " +
         "and a valid reason" in {
-          forAll(eligibleResponseGen){ response ⇒
+          forAll(eligibleResponseGen) { response ⇒
             val reason = Eligible(response)
 
             mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(response)))))))
@@ -108,7 +133,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result " +
         "and a valid reason" in {
-          forAll(ineligibleResponseGen){ response ⇒
+          forAll(ineligibleResponseGen) { response ⇒
             val reason = Ineligible(response)
 
             mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(ECResponseHolder(Some(response)))))))

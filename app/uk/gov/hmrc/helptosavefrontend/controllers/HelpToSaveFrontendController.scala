@@ -16,13 +16,17 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import com.google.inject.{Inject, Singleton}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendGlobal
-import uk.gov.hmrc.play.frontend.controller.FrontendController
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-trait HelpToSaveFrontendController extends FrontendController {
+@Singleton
+class HelpToSaveFrontendController @Inject() (implicit messagesApi: MessagesApi, appConfig: FrontendAppConfig)
+  extends ErrorHandler() with FrontendController {
 
   def internalServerError()(implicit request: Request[_]): Result =
-    InternalServerError(FrontendGlobal.internalServerErrorTemplate(request))
+    InternalServerError(internalServerErrorTemplate(request))
 
 }

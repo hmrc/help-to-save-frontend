@@ -20,14 +20,12 @@ import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Reads, Writes}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{keyStoreDomain, keyStoreUrl, sessionCacheKey}
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
-import uk.gov.hmrc.play.config.AppName
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -44,16 +42,17 @@ trait SessionCacheConnector {
 }
 
 @Singleton
-class SessionCacheConnectorImpl @Inject() (val http: WSHttp, metrics: Metrics)
-  extends SessionCacheConnector with SessionCache with AppName {
+class SessionCacheConnectorImpl @Inject() (val http: WSHttp,
+                                           metrics:  Metrics)(implicit val frontendAppConfig: FrontendAppConfig)
+  extends SessionCacheConnector with SessionCache {
 
-  override def defaultSource: String = appName
+  override def defaultSource: String = frontendAppConfig.appName
 
-  val sessionKey: String = sessionCacheKey
+  val sessionKey: String = frontendAppConfig.sessionCacheKey
 
-  override def baseUri: String = keyStoreUrl
+  override def baseUri: String = frontendAppConfig.keyStoreUrl
 
-  override def domain: String = keyStoreDomain
+  override def domain: String = frontendAppConfig.keyStoreDomain
 
   def put(newSession: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier, ec: ExecutionContext): Result[CacheMap] = {
 

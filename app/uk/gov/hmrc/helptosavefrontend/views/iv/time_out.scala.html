@@ -15,7 +15,9 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+
+@(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.time_out.page-title")) {
 

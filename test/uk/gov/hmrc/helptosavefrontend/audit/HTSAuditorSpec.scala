@@ -29,9 +29,7 @@ class HTSAuditorSpec extends TestSupport {
 
   val mockAuditConnector: AuditConnector = mock[AuditConnector]
 
-  val auditor = new HTSAuditor {
-    override val auditConnector: AuditConnector = mockAuditConnector
-  }
+  val auditor = new HTSAuditor(mockAuditConnector)
 
   "The HTSAuditor" when {
 

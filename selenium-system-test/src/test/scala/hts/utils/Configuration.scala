@@ -46,7 +46,7 @@ object Configuration {
     }
   }
 
-  val (host: String, authHost: String, ggHost: String, feedbackHost) = {
+  val (host: String, authHost: String, ggHost: String, feedbackHost: String) = {
     environment match {
       case Environment.Local ⇒ ("http://localhost:7000", "http://localhost:9949", "http://localhost:9025", "http://localhost:9250")
       case Environment.Dev | Environment.Qa | Environment.Staging | Environment.Esit ⇒

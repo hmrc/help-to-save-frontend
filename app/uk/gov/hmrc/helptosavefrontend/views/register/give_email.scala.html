@@ -18,8 +18,9 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.GiveEmail
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(form: Form[GiveEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(form: Form[GiveEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @defining(form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))){ errorMessage =>
 

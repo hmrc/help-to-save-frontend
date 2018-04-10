@@ -15,8 +15,9 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.were_unable_to_confirm_your_identity.page-title")) {
 

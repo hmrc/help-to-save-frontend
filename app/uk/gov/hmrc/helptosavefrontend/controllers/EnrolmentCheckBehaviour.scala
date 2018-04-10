@@ -22,8 +22,8 @@ import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -32,6 +32,7 @@ import scala.util.{Failure, Success}
 trait EnrolmentCheckBehaviour {
   this: HelpToSaveFrontendController with Logging ⇒
 
+  val frontendAppConfig: FrontendAppConfig
   val helpToSaveService: HelpToSaveService
 
   def checkIfAlreadyEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
@@ -49,14 +50,14 @@ trait EnrolmentCheckBehaviour {
         // if the user is enrolled but the itmp flag is not set then just
         // start the process to set the itmp flag here without worrying about the result
         if (!itmpHtSFlag) {
-          helpToSaveService.setITMPFlag().value.onComplete{
+          helpToSaveService.setITMPFlag().value.onComplete {
             case Failure(e)        ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
             case Success(Left(e))  ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
             case Success(Right(_)) ⇒ logger.info(s"Process started to set ITMP flag", nino)
           }
         }
 
-        SeeOther(FrontendAppConfig.nsiManageAccountUrl)
+        SeeOther(frontendAppConfig.nsiManageAccountUrl)
 
       case EnrolmentStatus.NotEnrolled ⇒
         ifNotEnrolled()

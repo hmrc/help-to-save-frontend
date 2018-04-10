@@ -24,14 +24,13 @@ import com.google.inject.Inject
 import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIProxyConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -42,20 +41,18 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService:          HelpToSaveService,
-                                                           frontendAuthConnector:          FrontendAuthConnector,
+                                                           authConnector:                  AuthConnector,
                                                            val emailVerificationConnector: EmailVerificationConnector,
                                                            nSIConnector:                   NSIProxyConnector,
                                                            metrics:                        Metrics,
                                                            val auditor:                    HTSAuditor,
-                                                           sessionCacheConnector:          SessionCacheConnector
-)(implicit app: Application,
-  crypto:          Crypto,
-  emailValidation: EmailValidation,
-  val messagesApi: MessagesApi,
-  transformer:     NINOLogMessageTransformer
-)
-  extends HelpToSaveAuth(frontendAuthConnector, metrics)
-  with VerifyEmailBehaviour with I18nSupport {
+                                                           sessionCacheConnector:          SessionCacheConnector)(implicit app: Application,
+                                                                                                                  crypto:                   Crypto,
+                                                                                                                  emailValidation:          EmailValidation,
+                                                                                                                  override val messagesApi: MessagesApi,
+                                                                                                                  transformer:              NINOLogMessageTransformer,
+                                                                                                                  frontendAppConfig:        FrontendAppConfig)
+  extends HelpToSaveAuth(authConnector, metrics) with VerifyEmailBehaviour with I18nSupport {
 
   import AccountHolderUpdateEmailAddressController._
 
@@ -68,7 +65,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINOAndName { implicit request ⇒ implicit htsContext ⇒
     htsContext.firstName.fold[Future[Result]](
       SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
-    ){ name ⇒
+    ) { name ⇒
         checkIfAlreadyEnrolled(_ ⇒
           UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
             formWithErrors ⇒ {
@@ -84,7 +81,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                     params ⇒ routes.AccountHolderUpdateEmailAddressController.emailVerifiedCallback(params.encode()).url,
                     _ ⇒ SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url),
                     isNewApplicant = false)
-                ).leftMap{ e ⇒
+                ).leftMap { e ⇒
                   logger.warn(s"Could not write pending email to session cache: $e")
                   SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
                 }.merge
@@ -112,7 +109,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     handleEmailVerified(
       emailVerificationParams,
-      params ⇒ checkIfAlreadyEnrolled (oldEmail ⇒ handleEmailVerified(params, oldEmail)),
+      params ⇒ checkIfAlreadyEnrolled(oldEmail ⇒ handleEmailVerified(params, oldEmail)),
       toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
     )
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerifiedCallback(emailVerificationParams).url)
@@ -174,7 +171,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
             case UpdateEmailError.EmailMongoError(e) ⇒
               logger.warn("Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I", nino)
               auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
-              SeeOther(FrontendAppConfig.nsiManageAccountUrl)
+              SeeOther(frontendAppConfig.nsiManageAccountUrl)
           }, { _ ⇒
             logger.info("Successfully updated email with NS&I", nino)
             auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)

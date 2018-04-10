@@ -19,11 +19,9 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import java.net.URLEncoder
 import java.util.UUID.randomUUID
 
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivUrl
 import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
@@ -40,7 +38,6 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
   lazy val ivController = new IvController(mockSessionCacheConnector,
                                            ivConnector,
-                                           fakeApplication.injector.instanceOf[MessagesApi],
                                            mockAuthConnector,
                                            mockMetrics)
   val continueURL = "continue-here"
@@ -49,7 +46,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
     mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
 
   lazy val mockPutIVURLInSessionCache =
-    mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(ivUrl(continueURL)), None))(Right(()))
+    mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
   def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
     (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
@@ -80,7 +77,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
           inSequence {
             mockAuthWithNoRetrievals(AuthProvider)
             mockIvConnector(journeyId, ivServiceResponse)
-            mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(ivUrl(continueURL)), None))(Right(()))
+            mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
           }
           val result = doRequest()
@@ -92,7 +89,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
           inSequence {
             mockAuthWithNoRetrievals(AuthProvider)
             mockIvConnector(journeyId, ivServiceResponse)
-            mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(ivUrl(continueURL)), None))(Left(""))
+            mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Left(""))
           }
           val result = doRequest()
           checkIsTechnicalErrorPage(result)

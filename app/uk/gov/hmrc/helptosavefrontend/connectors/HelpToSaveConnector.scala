@@ -20,18 +20,17 @@ import cats.data.EitherT
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{ECResponseHolder, GetEmailResponse}
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.MissingUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
@@ -56,7 +55,36 @@ trait HelpToSaveConnector {
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
+class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfig: FrontendAppConfig)
+  extends HelpToSaveConnector {
+
+  private val helpToSaveUrl: String = frontendAppConfig.baseUrl("help-to-save")
+
+  private val eligibilityURL =
+    s"$helpToSaveUrl/help-to-save/eligibility-check"
+
+  private val enrolmentStatusURL =
+    s"$helpToSaveUrl/help-to-save/enrolment-status"
+
+  private val enrolUserURL =
+    s"$helpToSaveUrl/help-to-save/enrol-user"
+
+  private val setITMPFlagURL =
+    s"$helpToSaveUrl/help-to-save/set-itmp-flag"
+
+  private def storeEmailURL(email: Email) =
+    s"$helpToSaveUrl/help-to-save/store-email?email=$email"
+
+  private val getEmailURL =
+    s"$helpToSaveUrl/help-to-save/get-email"
+
+  private val accountCreateAllowedURL =
+    s"$helpToSaveUrl/help-to-save/account-create-allowed"
+
+  private val updateUserCountURL =
+    s"$helpToSaveUrl/help-to-save/update-user-count"
+
+  private val emptyECResponse = EligibilityCheckResponse("No tax credit record found for user's NINO", 2, "", -1)
 
   def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
@@ -119,10 +147,6 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
     })
   }
 
-  private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
-
-  private val emptyECResponse = EligibilityCheckResponse("No tax credit record found for user's NINO", 2, "", -1)
-
   // scalastyle:off magic.number
   private def toEligibilityCheckResult(response: Option[EligibilityCheckResponse]): Either[String, EligibilityCheckResult] =
     response.fold[Either[String, EligibilityCheckResult]](Right(EligibilityCheckResult.Ineligible(emptyECResponse))) { r ⇒
@@ -149,46 +173,19 @@ object HelpToSaveConnectorImpl {
       override def writes(o: ECResponseHolder): JsValue = writesInstance.writes(o)
 
       // fail if there is anything other than `response` in the JSON
-      override def reads(json: JsValue): JsResult[ECResponseHolder] =
-        {
-          val map = json.as[JsObject].value
-          map.get("response").fold[JsResult[ECResponseHolder]]{
-            if (map.keySet.nonEmpty) {
-              JsError(s"Unexpected keys: ${map.keySet.mkString(",")}")
-            } else {
-              JsSuccess(ECResponseHolder(None))
-            }
-          }{
-            _.validate[EligibilityCheckResponse].map(r ⇒ ECResponseHolder(Some(r)))
+      override def reads(json: JsValue): JsResult[ECResponseHolder] = {
+        val map = json.as[JsObject].value
+        map.get("response").fold[JsResult[ECResponseHolder]] {
+          if (map.keySet.nonEmpty) {
+            JsError(s"Unexpected keys: ${map.keySet.mkString(",")}")
+          } else {
+            JsSuccess(ECResponseHolder(None))
           }
+        } {
+          _.validate[EligibilityCheckResponse].map(r ⇒ ECResponseHolder(Some(r)))
         }
+      }
     }
-  }
-
-  private[connectors] object URLS {
-    val eligibilityURL =
-      s"$helpToSaveUrl/help-to-save/eligibility-check"
-
-    val enrolmentStatusURL =
-      s"$helpToSaveUrl/help-to-save/enrolment-status"
-
-    val enrolUserURL =
-      s"$helpToSaveUrl/help-to-save/enrol-user"
-
-    val setITMPFlagURL =
-      s"$helpToSaveUrl/help-to-save/set-itmp-flag"
-
-    def storeEmailURL(email: Email) =
-      s"$helpToSaveUrl/help-to-save/store-email?email=$email"
-
-    val getEmailURL =
-      s"$helpToSaveUrl/help-to-save/get-email"
-
-    val accountCreateAllowedURL =
-      s"$helpToSaveUrl/help-to-save/account-create-allowed"
-
-    val updateUserCountURL =
-      s"$helpToSaveUrl/help-to-save/update-user-count"
   }
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
@@ -198,4 +195,5 @@ object HelpToSaveConnectorImpl {
   private[connectors] object GetEmailResponse {
     implicit val format: Format[GetEmailResponse] = Json.format[GetEmailResponse]
   }
+
 }

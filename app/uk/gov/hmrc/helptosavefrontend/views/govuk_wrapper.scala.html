@@ -15,8 +15,9 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(appConfig: uk.gov.hmrc.helptosavefrontend.config.AppConfig,
+@(appConfig: FrontendAppConfig,
         title: String,
         mainClass: Option[String] = None,
         mainDataAttributes: Option[Html] = None,
@@ -51,7 +52,7 @@
 @headerNavLinks = {
         <li>
             @if(htsContext.isAuthorised) {
-                <a href="@uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.signOutUrl" id="nav-sign-out"
+                <a href="@{appConfig.signOutUrl}" id="nav-sign-out"
                    data-ga-event-category = "Sign out"
                    data-ga-event-action = "Sign out"
                    data-ga-event-label= @request.uri

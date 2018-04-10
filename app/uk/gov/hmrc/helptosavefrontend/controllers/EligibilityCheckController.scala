@@ -19,18 +19,17 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
-import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.Inject
-import play.api.Configuration
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result ⇒ PlayResult}
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResult, IneligibilityReason}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
@@ -39,21 +38,18 @@ import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, 
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.play.config.AppName
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-class EligibilityCheckController @Inject() (val messagesApi:           MessagesApi,
-                                            val helpToSaveService:     HelpToSaveService,
+class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSaveService,
                                             val sessionCacheConnector: SessionCacheConnector,
-                                            frontendAuthConnector:     FrontendAuthConnector,
-                                            metrics:                   Metrics,
-                                            configuration:             Configuration)(implicit transformer: NINOLogMessageTransformer)
-  extends HelpToSaveAuth(frontendAuthConnector, metrics)
-  with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging with AppName {
+                                            authConnector:             AuthConnector,
+                                            metrics:                   Metrics)(implicit override val messagesApi: MessagesApi, transformer: NINOLogMessageTransformer, val frontendAppConfig: FrontendAppConfig)
+  extends HelpToSaveAuth(authConnector, metrics)
+  with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging {
 
-  val earlyCapCheckOn: Boolean = configuration.underlying.getBoolean("enable-early-cap-check")
+  val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
 
   def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     def determineEligibility =
@@ -62,7 +58,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           getEligibilityActionResult()
         } { session ⇒
           // there is a session
-          session.eligibilityCheckResult.fold(getEligibilityActionResult()){
+          session.eligibilityCheckResult.fold(getEligibilityActionResult()) {
             _.fold(
               _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), // user is not eligible
               _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url) // user is eligible
@@ -74,13 +70,17 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
       () ⇒ if (earlyCapCheckOn) {
         logger.info("Checking pre-eligibility cap for nino", htsContext.nino)
         checkIfAccountCreateAllowed(determineEligibility)
-      } else { determineEligibility },
+      } else {
+        determineEligibility
+      },
       { _ ⇒
         // if there is an error checking the enrolment, do the eligibility checks
         if (earlyCapCheckOn) {
           logger.info("Checking pre-eligibility cap for nino", htsContext.nino)
           checkIfAccountCreateAllowed(getEligibilityActionResult())
-        } else { getEligibilityActionResult }
+        } else {
+          getEligibilityActionResult
+        }
       })
   }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
@@ -93,10 +93,10 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           { ineligibleReason ⇒
             val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
 
-            ineligibilityType.fold{
+            ineligibilityType.fold {
               logger.warn(s"Could not parse ineligibility reason: ${ineligibleReason}", htsContext.nino)
               internalServerError()
-            }{ i ⇒
+            } { i ⇒
               Ok(views.html.register.not_eligible(i))
             }
           },
@@ -117,7 +117,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
         )
       }
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = frontendAppConfig.checkEligibilityUrl)
 
   val youAreEligibleSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkHasDoneEligibilityChecks {
@@ -134,17 +134,17 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
     }
   }(redirectOnLoginURL = routes.EligibilityCheckController.youAreEligibleSubmit().url)
 
-  val getMissingInfoPage: Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
+  val getMissingInfoPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     htsContext.userDetails.fold(
       missingInfo ⇒ Ok(views.html.register.missing_user_info(missingInfo.missingInfo)),
       _ ⇒ SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     )
   }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
-  val getThinkYouAreEligiblePage: Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+  val getThinkYouAreEligiblePage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkHasDoneEligibilityChecks {
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-    }{
+    } {
       _.eligibilityResult.fold(
         _ ⇒ Ok(views.html.register.think_you_are_eligible()),
         _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
@@ -199,7 +199,7 @@ class EligibilityCheckController @Inject() (val messagesApi:           MessagesA
           case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user", nino)
         }
 
-        SeeOther(FrontendAppConfig.nsiManageAccountUrl)
+        SeeOther(frontendAppConfig.nsiManageAccountUrl)
       }
     )
   }

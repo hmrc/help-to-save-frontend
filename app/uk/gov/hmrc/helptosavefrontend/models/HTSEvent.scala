@@ -16,36 +16,38 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.config.AppName
 
 trait HTSEvent {
   val value: DataEvent
 }
 
-object HTSEvent extends AppName {
-  def apply(auditType: String,
+object HTSEvent {
+  def apply(appName:   String,
+            auditType: String,
             detail:    Map[String, String])(implicit hc: HeaderCarrier): DataEvent =
     DataEvent(appName, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
 
 }
 
-case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit hc: HeaderCarrier) extends HTSEvent {
+case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
   val value: DataEvent = HTSEvent(
+    appConfig.appName,
     "EmailChanged",
     Map[String, String]("nino" → nino, "originalEmail" → oldEmail, "newEmail" → newEmail)
   )
 }
 
-case class SuspiciousActivity(nino: Option[NINO], activity: String)(implicit hc: HeaderCarrier) extends HTSEvent {
+case class SuspiciousActivity(nino: Option[NINO], activity: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
   val value: DataEvent = {
     val details = nino match {
       case Some(p) ⇒ Map[String, String]("nino" → p, "reason" → activity)
       case None    ⇒ Map[String, String]("reason" → activity)
     }
-    HTSEvent("SuspiciousActivity", details)
+    HTSEvent(appConfig.appName, "SuspiciousActivity", details)
   }
 }

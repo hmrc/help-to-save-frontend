@@ -18,21 +18,17 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
-import play.api.libs.json.{JsValue, Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-trait EnrolmentAndEligibilityCheckBehaviour { this: AuthSupport with SessionCacheBehaviour ⇒
+trait EnrolmentAndEligibilityCheckBehaviour {
+  this: AuthSupport with SessionCacheBehaviour ⇒
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
@@ -64,7 +60,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: AuthSupport with SessionCach
 
       val result = getResult()
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+      redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
     }
 
     "redirect to NS&I if the user is already enrolled and set the ITMP flag " +
@@ -77,7 +73,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: AuthSupport with SessionCach
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+        redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
       }
 
     "redirect to NS&I if the user is already enrolled even if there is an " +
@@ -86,7 +82,7 @@ trait EnrolmentAndEligibilityCheckBehaviour { this: AuthSupport with SessionCach
             mockActions
             val result = getResult()
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
           }
 
         test(inSequence {

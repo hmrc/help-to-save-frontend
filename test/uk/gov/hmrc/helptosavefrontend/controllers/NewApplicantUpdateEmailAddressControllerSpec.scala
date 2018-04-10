@@ -21,28 +21,27 @@ import java.net.URLDecoder
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
-import play.api.i18n.{Messages, MessagesApi}
-import play.api.inject.Injector
+import play.api.i18n.Messages
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector, WSHttp}
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.AlreadyHasAccount
-import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
+import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class NewApplicantUpdateEmailAddressControllerSpec
@@ -51,15 +50,9 @@ class NewApplicantUpdateEmailAddressControllerSpec
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionCacheBehaviour {
 
-  lazy val injector: Injector = fakeApplication.injector
   lazy val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-  implicit lazy val crypto: Crypto = injector.instanceOf[Crypto]
-
-  def messagesApi: MessagesApi = injector.instanceOf[MessagesApi]
 
   lazy val messages: Messages = messagesApi.preferred(request)
-
-  val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
 
   val mockEmailVerificationConnector: EmailVerificationConnector = mock[EmailVerificationConnector]
 
@@ -67,20 +60,19 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
   val mockAuditor = mock[HTSAuditor]
 
-  def newController(crypto: Crypto) =
+  def newController()(implicit crypto: Crypto) =
     new NewApplicantUpdateEmailAddressController(
       mockSessionCacheConnector,
       mockHelpToSaveService,
-      frontendAuthConnector,
+      mockAuthConnector,
       mockEmailVerificationConnector,
       mockMetrics,
       mockAuditor
-    )(fakeApplication, fakeApplication.injector.instanceOf[MessagesApi], crypto, transformer) {
-
+    ) {
       override val authConnector = mockAuthConnector
     }
 
-  lazy val controller = newController(crypto)
+  lazy val controller = newController()
 
   val eligibleWithValidUserInfo = randomEligibleWithUserInfo(validUserInfo)
 
@@ -256,7 +248,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
       "redirect to the confirmEmail endpoint if there is an email for the user and the user selects to continue" in {
         val crypto: Crypto = mock[Crypto]
-        val controller = newController(crypto)
+        val controller = newController()(crypto)
         val encryptedEmail = "encrypted"
 
         inSequence {
@@ -422,7 +414,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         }
 
         "the confirmed email cannot be stored" in {
-          test(inSequence{
+          test(inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
             mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfoWithUpdatedEmail)), Some(testEmail), None))(Right(()))
@@ -457,7 +449,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
     "handling getEmailVerified" must {
 
       "return the email verified page" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
@@ -569,7 +561,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
       val result = doRequest()
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+      redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
     }
 
     "redirect to 'You're not Eligible' if the session data indicates they are ineligible" in {

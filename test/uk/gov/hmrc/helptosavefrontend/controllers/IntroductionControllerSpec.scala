@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
@@ -29,7 +28,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new IntroductionController(fakeApplication.injector.instanceOf[MessagesApi], mockAuthConnector, mockMetrics)
+  val helpToSave = new IntroductionController(mockAuthConnector, mockMetrics)
 
   def mockAuthorise(loggedIn: Boolean) =
     (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))

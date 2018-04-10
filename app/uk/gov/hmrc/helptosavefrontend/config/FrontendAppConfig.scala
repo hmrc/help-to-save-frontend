@@ -17,28 +17,24 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.net.URI
+import javax.inject.{Inject, Singleton}
 
+import play.api.Mode.Mode
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
-import uk.gov.hmrc.helptosavefrontend.util._
+import uk.gov.hmrc.helptosavefrontend.util.urlEncode
 import uk.gov.hmrc.play.config.ServicesConfig
 
-trait AppConfig {
-  val analyticsToken: String
-  val analyticsHost: String
-  val reportAProblemPartialUrl: String
-  val reportAProblemNonJSUrl: String
-  val betaFeedbackUrlNoAuth: String
-}
+@Singleton
+class FrontendAppConfig @Inject() (override val runModeConfiguration: Configuration, val environment: Environment) extends ServicesConfig {
 
-object FrontendAppConfig extends AppConfig with ServicesConfig {
+  override protected def mode: Mode = environment.mode
 
   val appName: String = getString("appName")
 
   private def getUrlFor(service: String) = getString(s"microservice.services.$service.url")
 
   val authUrl: String = baseUrl("auth")
-
-  val helpToSaveUrl: String = baseUrl("help-to-save")
 
   val helpToSaveFrontendUrl: String = getUrlFor("help-to-save-frontend")
 
@@ -93,15 +89,13 @@ object FrontendAppConfig extends AppConfig with ServicesConfig {
 
   val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
 
-  override lazy val analyticsToken: String = getString("google-analytics.token")
-  override lazy val analyticsHost: String = getString("google-analytics.host")
+  lazy val analyticsToken: String = getString("google-analytics.token")
+  lazy val analyticsHost: String = getString("google-analytics.host")
 
   val contactFormServiceIdentifier: String = "HTS"
 
   val contactBaseUrl: String = getUrlFor("contact-frontend")
-  override lazy val reportAProblemPartialUrl: String = s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  override lazy val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-
-  override lazy val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
-
+  lazy val reportAProblemPartialUrl: String = s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  lazy val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  lazy val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
 }

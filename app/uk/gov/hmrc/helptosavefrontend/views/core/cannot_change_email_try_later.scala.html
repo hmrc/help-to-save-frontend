@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.nsiManageAccountUrl
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
-@(returningUser: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(returningUser: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
 title = messages("hts.cannot-change-email-try-later.page-title"),
@@ -30,7 +30,7 @@ bodyClasses = None) {
     <h1 class="heading-large">@Messages("hts.cannot-change-email-try-later.returning.title")</h1>
     <p class="lede">@Messages("hts.cannot-change-email-try-later.returning.p1")</p>
     <p>@Messages("hts.cannot-change-email-try-later.returning.p2")</p>
-    <p class="subsection--wide"><a href=@nsiManageAccountUrl>@Messages("hts.cannot-change-email-try-later.returning.button")</a></p>
+    <p class="subsection--wide"><a href=@{frontendAppConfig.nsiManageAccountUrl}>@Messages("hts.cannot-change-email-try-later.returning.button")</a></p>
 
   } else {
 

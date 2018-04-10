@@ -15,8 +15,9 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.insufficient_evidence.page-title")) {
 

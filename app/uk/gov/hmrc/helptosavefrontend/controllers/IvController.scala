@@ -20,8 +20,8 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
@@ -36,21 +36,22 @@ import scala.concurrent.Future
 @Singleton
 class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
                               ivConnector:               IvConnector,
-                              val messagesApi:           MessagesApi,
-                              frontendAuthConnector:     FrontendAuthConnector,
-                              metrics:                   Metrics)(implicit transformer: NINOLogMessageTransformer)
-  extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport with Logging {
+                              authConnector:             AuthConnector,
+                              metrics:                   Metrics)(implicit override val messagesApi: MessagesApi,
+                                                                  transformer:       NINOLogMessageTransformer,
+                                                                  frontendAppConfig: FrontendAppConfig)
+  extends HelpToSaveAuth(authConnector, metrics) with I18nSupport with Logging {
 
   def journeyResult(continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
                     journeyId:   Option[String]): Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       //Will be populated if we arrived here because of an IV success/failure
-      val newIVUrl = ivUrl(continueURL)
+      val newIVUrl = frontendAppConfig.ivUrl(continueURL)
       lazy val storeNewIVURLThenRedirectTo = storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None), journeyId) _
 
       journeyId match {
         case Some(id) ⇒
-          ivConnector.getJourneyStatus(JourneyId(id)).flatMap{
+          ivConnector.getJourneyStatus(JourneyId(id)).flatMap {
             case Some(Success) ⇒
               metrics.ivSuccessCounter.inc()
               storeInSessionCacheThenRedirect(HTSSession(None, None, None, None, Some(continueURL)), Some(id))(
@@ -120,46 +121,46 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
     }(redirectOnLoginURL = routes.IvController.journeyResult(continueURL, journeyId).url)
 
   def getIVSuccessful: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
+    authorisedForHts { implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivSuccessURL)(u ⇒ Ok(iv_success(u)))
 
     }(routes.IvController.getIVSuccessful().url)
 
   def getFailedMatching: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
+    authorisedForHts { implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(failed_matching(u)))
     }(routes.IvController.getFailedMatching().url)
 
   def getFailedIV: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
+    authorisedForHts { implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(failed_iv(u)))
     }(routes.IvController.getFailedIV().url)
 
   def getInsufficientEvidence: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒ Ok(insufficient_evidence())
+    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(insufficient_evidence())
     }(routes.IvController.getInsufficientEvidence().url)
 
   def getLockedOut: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒ Ok(locked_out())
+    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(locked_out())
     }(routes.IvController.getLockedOut().url)
 
   def getUserAborted: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
+    authorisedForHts { implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(user_aborted(u)))
     }(routes.IvController.getUserAborted().url)
 
   def getTimedOut: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
+    authorisedForHts { implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(time_out(u)))
     }(routes.IvController.getTimedOut().url)
 
   def getTechnicalIssue: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒
+    authorisedForHts { implicit r ⇒ implicit h ⇒
       retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(technical_iv_issues(u)))
     }(routes.IvController.getTechnicalIssue().url)
 
   def getPreconditionFailed: Action[AnyContent] =
-    authorisedForHts{ implicit r ⇒ implicit h ⇒ Ok(precondition_failed())
+    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(precondition_failed())
     }(routes.IvController.getPreconditionFailed().url)
 
   private def storeInSessionCacheThenRedirect(session: HTSSession, journeyId: Option[String])(redirectTo: ⇒ String)(

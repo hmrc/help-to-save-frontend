@@ -20,7 +20,6 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{accountHolderContinueURL, newApplicantContinueURL, verifyEmailURL}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.OtherError
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
@@ -38,14 +37,14 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
 
   val mockHttp: WSHttp = mock[WSHttp]
 
-  implicit val crypto: Crypto = mock[Crypto]
+  implicit override val crypto: Crypto = mock[Crypto]
 
   def emailVerificationRequest(isNewApplicant: Boolean): EmailVerificationRequest =
     EmailVerificationRequest(
       email,
       "hts_verification_email",
       "PT2H",
-      if (isNewApplicant) s"$newApplicantContinueURL?p=" else s"$accountHolderContinueURL?p=",
+      if (isNewApplicant) s"${appConfig.newApplicantContinueURL}?p=" else s"${appConfig.accountHolderContinueURL}?p=",
       Map("name" → name))
 
   lazy val connector: EmailVerificationConnectorImpl =
@@ -53,13 +52,13 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
 
   def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
     (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
-      .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *, *)
+      .expects(appConfig.verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *, *)
       .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
   }
 
   def mockPostFailure[A](expectedBody: A): Unit = {
     (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
-      .expects(verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *, *)
+      .expects(appConfig.verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *, *)
       .returning(Future.failed(new Exception("Oh no!")))
   }
 
