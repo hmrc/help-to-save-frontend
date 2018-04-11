@@ -44,7 +44,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.getUserEnrolmentStatus()(_: HeaderCarrier)).expects(*)
+        (htsConnector.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.pure(EnrolmentStatus.Enrolled(true)))
 
         val result = htsService.getUserEnrolmentStatus()
@@ -58,7 +58,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.enrolUser()(_: HeaderCarrier)).expects(*)
+        (htsConnector.enrolUser()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.pure(Unit))
 
         val result = htsService.enrolUser()
@@ -72,7 +72,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.setITMPFlag()(_: HeaderCarrier)).expects(*)
+        (htsConnector.setITMPFlag()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.pure(Unit))
 
         val result = htsService.setITMPFlag()
@@ -87,7 +87,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.storeEmail(_: String)(_: HeaderCarrier)).expects(email, *)
+        (htsConnector.storeEmail(_: String)(_: HeaderCarrier, _: ExecutionContext)).expects(email, *, *)
           .returning(EitherT.pure(Unit))
 
         val result = htsService.storeConfirmedEmail(email)
@@ -101,7 +101,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.getEmail()(_: HeaderCarrier)).expects(*)
+        (htsConnector.getEmail()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.pure(None))
 
         val result = htsService.getConfirmedEmail()
@@ -117,7 +117,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val eligibilityCheckResult = randomEligibility()
 
-        (htsConnector.getEligibility()(_: HeaderCarrier)).expects(*)
+        (htsConnector.getEligibility()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.pure(eligibilityCheckResult))
 
         val result = htsService.checkEligibility()
@@ -125,7 +125,7 @@ class HelpToSaveServiceSpec extends TestSupport {
       }
 
       "return an unsuccessful response if the connector returns an unsuccessful response" in {
-        (htsConnector.getEligibility()(_: HeaderCarrier)).expects(*)
+        (htsConnector.getEligibility()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.fromEither[Future](Left("uh oh")))
 
         val result = htsService.checkEligibility()
@@ -162,7 +162,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
     "checking if isAccountCreationAllowed" must {
       "return user cap response" in {
-        (htsConnector.isAccountCreationAllowed()(_: HeaderCarrier)).expects(*)
+        (htsConnector.isAccountCreationAllowed()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.pure(UserCapResponse()))
 
         val result = htsService.isAccountCreationAllowed()
@@ -172,7 +172,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
     "updating user-cap-count" must {
       "return a successful response" in {
-        (htsConnector.updateUserCount()(_: HeaderCarrier)).expects(*)
+        (htsConnector.updateUserCount()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.pure(()))
 
         val result = htsService.updateUserCount()

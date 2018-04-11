@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport {
 
@@ -42,8 +42,8 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
   }
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   "The EmailVerificationErrorController" when {

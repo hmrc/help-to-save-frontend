@@ -88,13 +88,13 @@ class NewApplicantUpdateEmailAddressControllerSpec
       .returning(Future.successful(AuditResult.Success))
 
   def mockStoreConfirmedEmail(email: String)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier))
-      .expects(email, *)
+    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(email, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
-    (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   "The NewApplicantUpdateEmailAddressController" when {

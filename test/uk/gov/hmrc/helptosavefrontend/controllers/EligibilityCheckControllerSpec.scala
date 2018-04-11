@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckRespon
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class EligibilityCheckControllerSpec
   extends AuthSupport
@@ -61,13 +61,13 @@ class EligibilityCheckControllerSpec
   lazy val controller = newController(false)
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
-    (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
-    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   "The EligibilityCheckController" when {

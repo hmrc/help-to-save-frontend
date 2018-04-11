@@ -52,18 +52,18 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
   val mockAuditor = mock[HTSAuditor]
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEmailGet()(result: Either[String, Option[String]]): Unit =
-    (mockHelpToSaveService.getConfirmedEmail()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.getConfirmedEmail()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockStoreEmail(email: Email)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.storeConfirmedEmail(_: Email)(_: HeaderCarrier))
-      .expects(email, *)
+    (mockHelpToSaveService.storeConfirmedEmail(_: Email)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(email, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAuditSuspiciousActivity() =

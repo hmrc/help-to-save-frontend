@@ -72,23 +72,23 @@ class RegisterControllerSpec
       .returning(EitherT.fromEither[Future](response))
 
   def mockEnrolUser()(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.enrolUser()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.enrolUser()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier))
-      .expects(email, *)
+    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(email, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
-    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockUpdateUserCount(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.updateUserCount()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.updateUserCount()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockDecrypt(expected: String)(result: Option[String]) =

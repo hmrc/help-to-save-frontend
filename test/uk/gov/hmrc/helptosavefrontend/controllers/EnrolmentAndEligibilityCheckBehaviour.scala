@@ -25,7 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait EnrolmentAndEligibilityCheckBehaviour {
   this: AuthSupport with SessionCacheBehaviour ⇒
@@ -33,13 +33,13 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val mockHelpToSaveService = mock[HelpToSaveService]
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockWriteITMPFlag(result: Option[Either[String, Unit]]): Unit =
-    (mockHelpToSaveService.setITMPFlag()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.setITMPFlag()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(result.fold(EitherT.pure[Future, String, Unit](Future.failed(new Exception)))(r ⇒ EitherT.fromEither[Future](r)))
 
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
