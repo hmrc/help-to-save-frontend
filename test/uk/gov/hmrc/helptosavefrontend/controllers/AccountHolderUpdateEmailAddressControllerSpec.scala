@@ -168,7 +168,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
             mockSessionCacheConnectorPut(HTSSession(None, None, Some(email)))(Right(()))
             mockEmailVerificationConn(nino, email, firstName)(Left(AlreadyVerified))
           }
-          val result = await(controller.onSubmit()(fakePostRequest))(10.seconds)
+          val result = await(controller.onSubmit()(fakePostRequest))(15.seconds)
           status(result) shouldBe Status.SEE_OTHER
 
           val redirectURL = redirectLocation(result)
