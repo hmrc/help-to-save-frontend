@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.email-verification.existing-user.page-title"),
     sidebarLinks = None,
@@ -33,7 +33,7 @@
     <p class="content">@messages("hts.email-verification.check-your-email.content3")</p>
     <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.where-used-heading")</h2>
     <p class="content">@messages("hts.email-verification.existing-user.check-your-email.where-used")</p>
-    <p class="subsection--wide push--bottom"><a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
+    <p class="subsection--wide push--bottom"><a href=@{frontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
 
     @{
         helpers.form(routes.AccountHolderUpdateEmailAddressController.onSubmit())(

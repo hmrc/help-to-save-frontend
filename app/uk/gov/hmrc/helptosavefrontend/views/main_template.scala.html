@@ -15,6 +15,8 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+
 @(title: String,
         sidebarLinks: Option[Html] = None,
         contentHeader: Option[Html] = None,
@@ -22,7 +24,7 @@
         mainClass: Option[String] = None,
         scriptElem: Option[Html] = None,
         extraMeta: Option[Html] = None,
-        isErrorPage: Boolean = false)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+        isErrorPage: Boolean = false)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @import uk.gov.hmrc.play.views.html.layouts
 
@@ -31,7 +33,7 @@
   @{layouts.sidebar(sidebarLinks.getOrElse(Html("")), Some("sidebar"))}
 }
 
-@govuk_wrapper(appConfig = uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig,
+@govuk_wrapper(appConfig = frontendAppConfig,
     title = (if(isErrorPage) messages("hts.title.prepended-error-message") + " " else "" ) + title + " " +messages("hts.global.title-suffix"),
     mainClass = mainClass,
     bodyClasses = bodyClasses,

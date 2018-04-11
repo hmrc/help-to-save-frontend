@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import com.google.inject.Singleton
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.play.frontend.controller.{ActionWithMdc, FrontendController}
+import uk.gov.hmrc.play.bootstrap.controller.{ActionWithMdc, FrontendController}
 
 @Singleton
 class ForbiddenController extends FrontendController {

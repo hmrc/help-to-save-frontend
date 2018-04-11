@@ -20,10 +20,8 @@ import cats.data.EitherT
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{ECResponseHolder, GetEmailResponse}
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.URLS._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.MissingUserInfo
@@ -37,28 +35,56 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult]
+  def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResult]
 
-  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
+  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus]
 
-  def enrolUser()(implicit hc: HeaderCarrier): Result[Unit]
+  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit]
+  def setITMPFlag()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def storeEmail(email: Email)(implicit hc: HeaderCarrier): Result[Unit]
+  def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]]
+  def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]]
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[UserCapResponse]
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse]
 
-  def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit]
+  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionContext) extends HelpToSaveConnector {
+class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfig: FrontendAppConfig) extends HelpToSaveConnector {
 
-  def getEligibility()(implicit hc: HeaderCarrier): EitherT[Future, String, EligibilityCheckResult] =
+  private val helpToSaveUrl: String = frontendAppConfig.baseUrl("help-to-save")
+
+  private val eligibilityURL =
+    s"$helpToSaveUrl/help-to-save/eligibility-check"
+
+  private val enrolmentStatusURL =
+    s"$helpToSaveUrl/help-to-save/enrolment-status"
+
+  private val enrolUserURL =
+    s"$helpToSaveUrl/help-to-save/enrol-user"
+
+  private val setITMPFlagURL =
+    s"$helpToSaveUrl/help-to-save/set-itmp-flag"
+
+  private def storeEmailURL(email: Email) =
+    s"$helpToSaveUrl/help-to-save/store-email?email=$email"
+
+  private val getEmailURL =
+    s"$helpToSaveUrl/help-to-save/get-email"
+
+  private val accountCreateAllowedURL =
+    s"$helpToSaveUrl/help-to-save/account-create-allowed"
+
+  private val updateUserCountURL =
+    s"$helpToSaveUrl/help-to-save/update-user-count"
+
+  private val emptyECResponse = EligibilityCheckResponse("No tax credit record found for user's NINO", 2, "", -1)
+
+  def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
       eligibilityURL,
       _.parseJSON[ECResponseHolder]().flatMap(res ⇒ toEligibilityCheckResult(res.response)),
@@ -66,28 +92,28 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
       identity
     )
 
-  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
+  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus] =
     handleGet(enrolmentStatusURL, _.parseJSON[EnrolmentStatus](), "get user enrolment status", identity)
 
-  def enrolUser()(implicit hc: HeaderCarrier): Result[Unit] =
+  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     handleGet(enrolUserURL, _ ⇒ Right(()), "enrol users", identity)
 
-  def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit] =
+  def setITMPFlag()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     handleGet(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag", identity)
 
-  def storeEmail(email: Email)(implicit hc: HeaderCarrier): Result[Unit] = {
+  def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = {
     val encodedEmail = new String(base64Encode(email))
     handleGet(storeEmailURL(encodedEmail), _ ⇒ Right(()), "store email", identity)
   }
 
-  def getEmail()(implicit hc: HeaderCarrier): Result[Option[String]] =
+  def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     handleGet(getEmailURL, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[UserCapResponse] = {
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] = {
     handleGet(accountCreateAllowedURL, _.parseJSON[UserCapResponse](), "account creation allowed", identity)
   }
 
-  def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit] = {
+  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = {
     handlePost(updateUserCountURL, "", _ ⇒ Right(()), "update user count", identity)
   }
 
@@ -95,19 +121,19 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
                                body:        String,
                                ifHTTP200:   HttpResponse ⇒ Either[B, A],
                                description: ⇒ String,
-                               toError:     String ⇒ B)(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+                               toError:     String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(http.post(url, body), ifHTTP200, description, toError)
 
   private def handleGet[A, B](url:         String,
                               ifHTTP200:   HttpResponse ⇒ Either[B, A],
                               description: ⇒ String,
-                              toError:     String ⇒ B)(implicit hc: HeaderCarrier): EitherT[Future, B, A] =
+                              toError:     String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(http.get(url), ifHTTP200, description, toError)
 
   private def handle[A, B](resF:        Future[HttpResponse],
                            ifHTTP200:   HttpResponse ⇒ Either[B, A],
                            description: ⇒ String,
-                           toError:     String ⇒ B) = {
+                           toError:     String ⇒ B)(implicit ec: ExecutionContext) = {
     EitherT(resF.map { response ⇒
       if (response.status == 200) {
         ifHTTP200(response)
@@ -118,10 +144,6 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit ec: ExecutionCon
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
   }
-
-  private val eligibilityURL = s"$helpToSaveUrl/help-to-save/eligibility-check"
-
-  private val emptyECResponse = EligibilityCheckResponse("No tax credit record found for user's NINO", 2, "", -1)
 
   // scalastyle:off magic.number
   private def toEligibilityCheckResult(response: Option[EligibilityCheckResponse]): Either[String, EligibilityCheckResult] =
@@ -149,46 +171,19 @@ object HelpToSaveConnectorImpl {
       override def writes(o: ECResponseHolder): JsValue = writesInstance.writes(o)
 
       // fail if there is anything other than `response` in the JSON
-      override def reads(json: JsValue): JsResult[ECResponseHolder] =
-        {
-          val map = json.as[JsObject].value
-          map.get("response").fold[JsResult[ECResponseHolder]]{
-            if (map.keySet.nonEmpty) {
-              JsError(s"Unexpected keys: ${map.keySet.mkString(",")}")
-            } else {
-              JsSuccess(ECResponseHolder(None))
-            }
-          }{
-            _.validate[EligibilityCheckResponse].map(r ⇒ ECResponseHolder(Some(r)))
+      override def reads(json: JsValue): JsResult[ECResponseHolder] = {
+        val map = json.as[JsObject].value
+        map.get("response").fold[JsResult[ECResponseHolder]] {
+          if (map.keySet.nonEmpty) {
+            JsError(s"Unexpected keys: ${map.keySet.mkString(",")}")
+          } else {
+            JsSuccess(ECResponseHolder(None))
           }
+        } {
+          _.validate[EligibilityCheckResponse].map(r ⇒ ECResponseHolder(Some(r)))
         }
+      }
     }
-  }
-
-  private[connectors] object URLS {
-    val eligibilityURL =
-      s"$helpToSaveUrl/help-to-save/eligibility-check"
-
-    val enrolmentStatusURL =
-      s"$helpToSaveUrl/help-to-save/enrolment-status"
-
-    val enrolUserURL =
-      s"$helpToSaveUrl/help-to-save/enrol-user"
-
-    val setITMPFlagURL =
-      s"$helpToSaveUrl/help-to-save/set-itmp-flag"
-
-    def storeEmailURL(email: Email) =
-      s"$helpToSaveUrl/help-to-save/store-email?email=$email"
-
-    val getEmailURL =
-      s"$helpToSaveUrl/help-to-save/get-email"
-
-    val accountCreateAllowedURL =
-      s"$helpToSaveUrl/help-to-save/account-create-allowed"
-
-    val updateUserCountURL =
-      s"$helpToSaveUrl/help-to-save/update-user-count"
   }
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
@@ -198,4 +193,5 @@ object HelpToSaveConnectorImpl {
   private[connectors] object GetEmailResponse {
     implicit val format: Format[GetEmailResponse] = Json.format[GetEmailResponse]
   }
+
 }

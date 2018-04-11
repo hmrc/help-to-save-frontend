@@ -17,8 +17,9 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.no-account.page-title")) {
 

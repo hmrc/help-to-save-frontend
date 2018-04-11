@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
@@ -28,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport {
 
@@ -38,13 +37,13 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
     mockHelpToSaveService,
     mockAuthConnector,
     mockMetrics
-  )(fakeApplication.injector.instanceOf[MessagesApi], transformer) {
+  ) {
     override val authConnector = mockAuthConnector
   }
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   "The EmailVerificationErrorController" when {
@@ -52,7 +51,7 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
     "handling verifyEmailErrorTryLater" must {
 
       "show the we couldn't update your email page if the user is not enrolled yet" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
@@ -64,7 +63,7 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
       }
 
       "show the we couldn't update your email page if the user is enrolled" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
@@ -76,7 +75,7 @@ class EmailVerificationErrorControllerSpec extends TestSupport with AuthSupport 
       }
 
       "return an error if there is an error checking the users eligibility" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Left(""))
         }

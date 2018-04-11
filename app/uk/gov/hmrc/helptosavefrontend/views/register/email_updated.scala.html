@@ -16,10 +16,10 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.form
 
-@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.email-updated.page-title"), bodyClasses = None) {
 

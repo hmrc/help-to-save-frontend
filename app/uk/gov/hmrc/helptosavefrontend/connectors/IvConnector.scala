@@ -20,8 +20,7 @@ import cats.instances.int._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.mvc.Http.Status.OK
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.ivJourneyResultUrl
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.models.iv._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -35,11 +34,12 @@ trait IvConnector {
 }
 
 @Singleton
-class IvConnectorImpl @Inject() (http: WSHttp) extends IvConnector with Logging {
+class IvConnectorImpl @Inject() (http: WSHttp)(implicit val frontendAppConfig: FrontendAppConfig)
+  extends IvConnector with Logging {
 
   override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]] = {
 
-    http.get(ivJourneyResultUrl(journeyId)).flatMap {
+    http.get(frontendAppConfig.ivJourneyResultUrl(journeyId)).flatMap {
 
       case r if r.status === OK ⇒
         val result = (r.json \ "result").as[String]

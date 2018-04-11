@@ -19,22 +19,14 @@ package uk.gov.hmrc.helptosavefrontend.config
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Writes}
 import play.api.libs.ws.WSProxyServer
-import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.authUrl
+import uk.gov.hmrc.http.HttpVerbs.{PUT ⇒ PUT_VERB}
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.http.hooks.HttpHook
 import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.audit.http.config.AuditingConfig
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.config.{AppName, RunMode, ServicesConfig}
-import uk.gov.hmrc.play.frontend.config.LoadAuditingConfig
 import uk.gov.hmrc.play.http.ws._
 
 import scala.concurrent.{ExecutionContext, Future}
-
-object FrontendAuditConnector extends AuditConnector with AppName {
-  override lazy val auditingConfig: AuditingConfig = LoadAuditingConfig("auditing")
-}
 
 class RawHttpReads extends HttpReads[HttpResponse] {
   override def read(method: String, url: String, response: HttpResponse): HttpResponse = response
@@ -58,19 +50,16 @@ trait WSHttp
              body:    A,
              headers: Seq[(String, String)] = Seq.empty[(String, String)]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
-
 }
 
 @Singleton
-class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
+class WSHttpExtension @Inject() (override val auditConnector: AuditConnector, config: FrontendAppConfig) extends WSHttp with HttpAuditing {
 
   val httpReads: HttpReads[HttpResponse] = new RawHttpReads
 
   override val hooks: Seq[HttpHook] = NoneRequired
 
-  override def auditConnector: AuditConnector = FrontendAuditConnector
-
-  override def appName: String = getString("appName")
+  override def appName: String = config.runModeConfiguration.underlying.getString("appName")
 
   override def mapErrors(httpMethod: String, url: String, f: Future[HttpResponse])(implicit ec: ExecutionContext): Future[HttpResponse] = f
 
@@ -96,27 +85,21 @@ class WSHttpExtension extends WSHttp with HttpAuditing with ServicesConfig {
 
 }
 
-@Singleton
-class FrontendAuthConnector @Inject() (wsHttp: WSHttp) extends PlayAuthConnector {
-  override lazy val serviceUrl: String = authUrl
-
-  override def http: WSHttp = wsHttp
-}
-
-class WSHttpProxy
-  extends HttpPost with WSPost
-  with HttpPut with WSPut
-  with WSProxy
-  with RunMode
+class WSHttpProxy @Inject() (override val auditConnector: AuditConnector, config: FrontendAppConfig)
+  extends WSPut
+  with HttpPut
+  with WSPost
+  with HttpPost
   with HttpAuditing
-  with HttpVerbs {
+  with WSProxy
+  with HttpVerb {
 
   val httpReads: HttpReads[HttpResponse] = new RawHttpReads
 
-  override lazy val appName: String = FrontendAppConfig.appName
+  override def appName: String = config.runModeConfiguration.underlying.getString("appName")
+
   override lazy val wsProxyServer: Option[WSProxyServer] = WSProxyConfiguration("proxy")
   override val hooks: Seq[HttpHook] = Seq(AuditingHook)
-  override lazy val auditConnector: AuditConnector = FrontendAuditConnector
 
   override def mapErrors(httpMethod: String, url: String, f: Future[HttpResponse])(implicit ec: ExecutionContext): Future[HttpResponse] = f
 
@@ -139,12 +122,12 @@ class WSHttpProxy
              needsAuditing: Boolean             = true,
              headers:       Map[String, String] = Map.empty[String, String]
   )(implicit w: Writes[A], hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
-    withTracing(PUT, url) {
+    withTracing(PUT_VERB, url) {
       val httpResponse = doPut(url, body)(w, hc.withExtraHeaders(headers.toSeq: _*))
       if (needsAuditing) {
-        executeHooks(url, PUT, Option(Json.stringify(w.writes(body))), httpResponse)
+        executeHooks(url, PUT_VERB, Option(Json.stringify(w.writes(body))), httpResponse)
       }
-      mapErrors(PUT, url, httpResponse).map(response ⇒ httpReads.read(PUT, url, response))
+      mapErrors(PUT_VERB, url, httpResponse).map(response ⇒ httpReads.read(PUT_VERB, url, response))
     }
   }
 }

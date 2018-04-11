@@ -23,7 +23,6 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
 import play.api.libs.json.{JsObject, Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiCreateAccountUrl, nsiUpdateEmailUrl}
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
@@ -60,6 +59,9 @@ class NSIProxyConnectorSpec extends TestSupport with MockFactory with GeneratorD
           r ⇒ Future.successful(r)
         ))
 
+  val nsiUpdateEmailUrl = appConfig.nsiUpdateEmailUrl
+  val nsiCreateAccountUrl = appConfig.nsiCreateAccountUrl
+
   "the updateEmail method" must {
     "return a Right when the status is OK" in {
       mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(Status.OK)))
@@ -70,9 +72,9 @@ class NSIProxyConnectorSpec extends TestSupport with MockFactory with GeneratorD
 
     "return a Left " when {
       "the status is not OK" in {
-        forAll{ status: Int ⇒
-          whenever(status =!= Status.OK && status > 0){
-            inSequence{
+        forAll { status: Int ⇒
+          whenever(status =!= Status.OK && status > 0) {
+            inSequence {
               mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Right(HttpResponse(status)))
             }
 
@@ -83,7 +85,7 @@ class NSIProxyConnectorSpec extends TestSupport with MockFactory with GeneratorD
       }
 
       "the POST to NS&I fails" in {
-        inSequence{
+        inSequence {
           mockPut(validNSIUserInfo, nsiUpdateEmailUrl)(Left("Oh no!"))
         }
 

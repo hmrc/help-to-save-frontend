@@ -21,12 +21,13 @@ import cats.data.{NonEmptyList, ValidatedNel}
 import cats.syntax.cartesian._
 import cats.syntax.option._
 import org.joda.time.LocalDate
-import play.api.mvc._
+import play.api.i18n.MessagesApi
+import play.api.mvc.{Result, _}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserInfoRetrievals}
@@ -34,13 +35,22 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, MissingUserInfo,
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndFirstName, HtsContextWithNINOAndUserDetails}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, toFuture, toJavaDate}
+import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.Future
 
-class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metrics)(implicit transformer: NINOLogMessageTransformer)
-  extends HelpToSaveFrontendController with AuthorisedFunctions with Logging {
+class HelpToSaveAuth(authConnector1: AuthConnector,
+                     metrics:        Metrics)(implicit override val messagesApi: MessagesApi,
+                                              transformer:       NINOLogMessageTransformer,
+                                              frontendAppConfig: FrontendAppConfig)
 
-  override def authConnector: AuthConnector = frontendAuthConnector
+  extends HelpToSaveFrontendController() with AuthorisedFunctions with AuthRedirects with Logging {
+
+  override def authConnector: AuthConnector = authConnector1
+
+  override def config: Configuration = frontendAppConfig.runModeConfiguration
+
+  override def env: Environment = frontendAppConfig.environment
 
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
 
@@ -53,17 +63,17 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(Retrievals.name and Retrievals.itmpName and Retrievals.nino){
+    authorised(Retrievals.name and Retrievals.itmpName and Retrievals.nino) {
       case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, time){ nino ⇒
+        withNINO(mayBeNino, time) { nino ⇒
           action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, maybeItmpName.givenName.orElse(maybeName.name)))
         }(request)
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(UserInfoRetrievals and Retrievals.nino){
+    authorised(UserInfoRetrievals and Retrievals.nino) {
       case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, time){ nino ⇒
+        withNINO(mayBeNino, time) { nino ⇒
           val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
           userDetails.fold(
@@ -76,7 +86,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
     }(redirectOnLoginURL)
 
   def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(EmptyRetrieval, AuthProvider){
+    authorised(EmptyRetrieval, AuthProvider) {
       case (_, request, _) ⇒
         action(request)(HtsContext(authorised = true))
     }(redirectOnLoginURL)
@@ -102,13 +112,13 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
   private def authorised[A](retrieval: Retrieval[A],
                             predicate: Predicate    = AuthWithCL200
   )(toResult: (A, Request[AnyContent], Long) ⇒ Future[Result])(redirectOnLoginURL: ⇒ String): Action[AnyContent] =
-    Action.async{ implicit request ⇒
+    Action.async { implicit request ⇒
       val timer = metrics.authTimer.time()
 
-      authorised(predicate).retrieve(retrieval){ a ⇒
+      authorised(predicate).retrieve(retrieval) { a ⇒
         val time = timer.stop()
         toResult(a, request, time)
-      }.recover{
+      }.recover {
         val time = timer.stop()
         handleFailure(redirectOnLoginURL, time)
       }
@@ -142,7 +152,7 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
 
     val addressValidation = {
       val lineCount = List(itmpAddress.line1, itmpAddress.line2, itmpAddress.line3, itmpAddress.line4, itmpAddress.line5)
-        .map(_.map(_.trim).filter(_.nonEmpty)).collect{ case Some(_) ⇒ () }.length
+        .map(_.map(_.trim).filter(_.nonEmpty)).collect { case Some(_) ⇒ () }.length
       if (lineCount < 2 || !itmpAddress.postCode.exists(_.trim.nonEmpty)) {
         Invalid(NonEmptyList.of(MissingUserInfo.Contact))
       } else {
@@ -167,18 +177,18 @@ class HelpToSaveAuth(frontendAuthConnector: FrontendAuthConnector, metrics: Metr
       toGGLogin(redirectOnLoginURL)
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
-      SeeOther(ivUrl(redirectOnLoginURL))
+      SeeOther(frontendAppConfig.ivUrl(redirectOnLoginURL))
 
     case ex: AuthorisationException ⇒
       logger.warn(s"could not authenticate user due to: $ex ${timeString(time)}")
       internalServerError()
   }
 
-  private def toGGLogin(redirectOnLoginURL: String) =
+  override def toGGLogin(redirectOnLoginURL: String): Result =
     Redirect(ggLoginUrl, Map(
       "continue" -> Seq(redirectOnLoginURL),
       "accountType" -> Seq("individual"),
-      "origin" -> Seq(appName)
+      "origin" -> Seq(frontendAppConfig.appName)
     ))
 
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"

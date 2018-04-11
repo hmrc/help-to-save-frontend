@@ -22,15 +22,13 @@ import cats.data.EitherT
 import com.google.inject.ImplementedBy
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{nsiCreateAccountUrl, nsiUpdateEmailUrl}
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionResult, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.nsiUserInfoFormat
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.nsiUserInfoFormat
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, Result, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.config.AppName
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -55,10 +53,11 @@ object NSIProxyConnector {
 }
 
 @Singleton
-class NSIProxyConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOLogMessageTransformer) extends NSIProxyConnector with Logging with AppName {
+class NSIProxyConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOLogMessageTransformer, frontendAppConfig: FrontendAppConfig)
+  extends NSIProxyConnector with Logging {
 
   override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[SubmissionResult] = {
-    http.post(nsiCreateAccountUrl, userInfo).map[SubmissionResult] { response ⇒
+    http.post(frontendAppConfig.nsiCreateAccountUrl, userInfo).map[SubmissionResult] { response ⇒
 
       response.status match {
         case Status.CREATED | Status.CONFLICT ⇒
@@ -73,8 +72,8 @@ class NSIProxyConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOL
     }
   }
 
-  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit]{
-    http.put(nsiUpdateEmailUrl, userInfo)
+  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = EitherT[Future, String, Unit] {
+    http.put(frontendAppConfig.nsiUpdateEmailUrl, userInfo)
       .map[Either[String, Unit]] { response ⇒
 
         response.status match {

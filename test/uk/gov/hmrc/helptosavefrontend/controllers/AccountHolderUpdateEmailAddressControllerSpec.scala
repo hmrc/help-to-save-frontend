@@ -21,12 +21,10 @@ import java.net.URLDecoder
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIProxyConnector}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
@@ -35,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -44,8 +42,6 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSRFSupport with SessionCacheBehaviour {
-
-  implicit lazy val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
@@ -56,28 +52,28 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
   val mockAuditor = mock[HTSAuditor]
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEmailGet()(result: Either[String, Option[String]]): Unit =
-    (mockHelpToSaveService.getConfirmedEmail()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.getConfirmedEmail()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockStoreEmail(email: Email)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.storeConfirmedEmail(_: Email)(_: HeaderCarrier))
-      .expects(email, *)
+    (mockHelpToSaveService.storeConfirmedEmail(_: Email)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(email, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAuditSuspiciousActivity() =
-    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO))
-      .expects(*, nino)
+    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO)(_: ExecutionContext))
+      .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
 
   def mockAuditEmailChanged() =
-    (mockAuditor.sendEvent(_: EmailChanged, _: NINO))
-      .expects(*, nino)
+    (mockAuditor.sendEvent(_: EmailChanged, _: NINO)(_: ExecutionContext))
+      .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
 
   lazy val controller = new AccountHolderUpdateEmailAddressController(
@@ -88,7 +84,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
     mockMetrics,
     mockAuditor,
     mockSessionCacheConnector
-  )(fakeApplication, crypto, mockEmailValidation, fakeApplication.injector.instanceOf[MessagesApi], transformer) {
+  ) {
     override val authConnector = mockAuthConnector
   }
 
@@ -133,13 +129,11 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
         }
     }
 
-    "handling formupdate email forms submits" must {
+    "handling form update email forms submits" must {
 
       val enrolled = EnrolmentStatus.Enrolled(true)
 
       val email = "email@test.com"
-
-      lazy val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
       val fakePostRequest = fakeRequestWithCSRFToken.withFormUrlEncodedBody("new-email-address" → email)
 
@@ -280,7 +274,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
             val result = verifyEmail(emailVerificationParams.encode())
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
           }
 
       }

@@ -17,8 +17,9 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(email: String, oldEmail: Option[String])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String, oldEmail: Option[String])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.email-verification.check-your-email.page-title"),
     sidebarLinks = None,

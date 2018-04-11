@@ -18,8 +18,9 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
     @uk.gov.hmrc.helptosavefrontend.views.html.main_template(

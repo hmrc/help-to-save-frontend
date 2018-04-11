@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.email-verified.title"),
     sidebarLinks = None,
@@ -31,7 +31,7 @@
   </div>
   <p>@messages("hts.email-verified.p1")</p>
   <p>@messages("hts.email-verified.p2")</p>
-  <p class="subsection--wide"><a href=@{FrontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
+  <p class="subsection--wide"><a href=@{appConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
 
 
 }

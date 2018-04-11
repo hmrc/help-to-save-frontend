@@ -20,21 +20,22 @@ import cats.instances.future._
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.NINOLogMessageTransformer
 import uk.gov.hmrc.helptosavefrontend.views
 
-class EmailVerificationErrorController @Inject() (helpToSaveService:     HelpToSaveService,
-                                                  frontendAuthConnector: FrontendAuthConnector,
-                                                  metrics:               Metrics)(
-    implicit
-    val messagesApi: MessagesApi,
-    transformer:     NINOLogMessageTransformer
-) extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport {
+class EmailVerificationErrorController @Inject() (helpToSaveService: HelpToSaveService,
+                                                  authConnector:     AuthConnector,
+                                                  metrics:           Metrics)(implicit override val messagesApi: MessagesApi,
+                                                                              transformer:           NINOLogMessageTransformer,
+                                                                              val frontendAppConfig: FrontendAppConfig)
 
-  def verifyEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+  extends HelpToSaveAuth(authConnector, metrics) with I18nSupport {
+
+  def verifyEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     helpToSaveService.getUserEnrolmentStatus().fold(
       { e ⇒
         logger.warn(s"Could not check enrolment status: $e")

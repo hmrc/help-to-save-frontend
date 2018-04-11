@@ -33,45 +33,45 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[HelpToSaveServiceImpl])
 trait HelpToSaveService {
 
-  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus]
+  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus]
 
-  def checkEligibility()(implicit hc: HeaderCarrier): Result[EligibilityCheckResult]
+  def checkEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EligibilityCheckResult]
 
-  def enrolUser()(implicit hc: HeaderCarrier): Result[Unit]
+  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit]
+  def setITMPFlag()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def storeConfirmedEmail(email: Email)(implicit hv: HeaderCarrier): Result[Unit]
+  def storeConfirmedEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def getConfirmedEmail()(implicit hv: HeaderCarrier): Result[Option[String]]
+  def getConfirmedEmail()(implicit hv: HeaderCarrier, ec: ExecutionContext): Result[Option[String]]
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[UserCapResponse]
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse]
 
-  def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit]
+  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
 }
 
 @Singleton
 class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIProxyConnector) extends HelpToSaveService with Logging {
 
-  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier): Result[EnrolmentStatus] =
+  def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus] =
     helpToSaveConnector.getUserEnrolmentStatus()
 
-  def checkEligibility()(implicit hc: HeaderCarrier): Result[EligibilityCheckResult] =
+  def checkEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EligibilityCheckResult] =
     helpToSaveConnector.getEligibility()
 
-  def enrolUser()(implicit hc: HeaderCarrier): Result[Unit] =
+  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.enrolUser()
 
-  def setITMPFlag()(implicit hc: HeaderCarrier): Result[Unit] =
+  def setITMPFlag()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.setITMPFlag()
 
-  def storeConfirmedEmail(email: Email)(implicit hv: HeaderCarrier): Result[Unit] =
+  def storeConfirmedEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.storeEmail(email)
 
-  def getConfirmedEmail()(implicit hv: HeaderCarrier): Result[Option[String]] =
+  def getConfirmedEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     helpToSaveConnector.getEmail()
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
@@ -82,10 +82,10 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
         Left(failure)
     })
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier): Result[UserCapResponse] =
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] =
     helpToSaveConnector.isAccountCreationAllowed()
 
-  def updateUserCount()(implicit hc: HeaderCarrier): Result[Unit] =
+  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.updateUserCount()
 }
 

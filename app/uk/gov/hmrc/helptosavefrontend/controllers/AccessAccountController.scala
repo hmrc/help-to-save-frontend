@@ -19,21 +19,19 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 
-class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
-                                         val helpToSaveService: HelpToSaveService,
-                                         frontendAuthConnector: FrontendAuthConnector,
-                                         metrics:               Metrics)(
-    implicit
-    transformer: NINOLogMessageTransformer)
-  extends HelpToSaveAuth(frontendAuthConnector, metrics) with I18nSupport with Logging
-  with EnrolmentCheckBehaviour {
+class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveService,
+                                         authConnector:         AuthConnector,
+                                         metrics:               Metrics)(implicit override val messagesApi: MessagesApi, transformer: NINOLogMessageTransformer,
+                                                                         val frontendAppConfig: FrontendAppConfig)
+  extends HelpToSaveAuth(authConnector, metrics) with I18nSupport with Logging with EnrolmentCheckBehaviour {
 
   def accessAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
@@ -45,9 +43,9 @@ class AccessAccountController @Inject() (val messagesApi:       MessagesApi,
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     }
     )
-  }(redirectOnLoginURL = FrontendAppConfig.accessAccountUrl)
+  }(redirectOnLoginURL = frontendAppConfig.accessAccountUrl)
 
-  def getNoAccountPage: Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+  def getNoAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
       () ⇒ Ok(views.html.core.confirm_check_eligibility())
     }, { _ ⇒

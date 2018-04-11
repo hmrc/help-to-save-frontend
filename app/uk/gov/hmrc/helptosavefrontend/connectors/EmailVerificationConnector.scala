@@ -20,12 +20,11 @@ import java.time.Duration
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig.{accountHolderContinueURL, linkTTLMinutes, newApplicantContinueURL, verifyEmailURL}
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
-import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
+import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO, NINOLogMessageTransformer, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -44,7 +43,8 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(implicit crypto: Crypto, transformer: NINOLogMessageTransformer)
+class EmailVerificationConnectorImpl @Inject() (http:    WSHttp,
+                                                metrics: Metrics)(implicit crypto: Crypto, transformer: NINOLogMessageTransformer, frontendAppConfig: FrontendAppConfig)
   extends EmailVerificationConnector with Logging {
 
   val templateId: String = "hts_verification_email"
@@ -56,20 +56,20 @@ class EmailVerificationConnectorImpl @Inject() (http: WSHttp, metrics: Metrics)(
       implicit
       hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]] = {
     val continueUrlWithParams = {
-      val continueURL = if (isNewApplicant) newApplicantContinueURL else accountHolderContinueURL
+      val continueURL = if (isNewApplicant) frontendAppConfig.newApplicantContinueURL else frontendAppConfig.accountHolderContinueURL
       continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()
     }
 
     val verificationRequest = EmailVerificationRequest(
       newEmail,
       templateId,
-      Duration.ofMinutes(linkTTLMinutes).toString,
+      Duration.ofMinutes(frontendAppConfig.linkTTLMinutes).toString,
       continueUrlWithParams,
       Map("name" → firstName))
 
     val timerContext = metrics.emailVerificationTimer.time()
 
-    http.post[EmailVerificationRequest](verifyEmailURL, verificationRequest).map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) ⇒
+    http.post[EmailVerificationRequest](frontendAppConfig.verifyEmailURL, verificationRequest).map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) ⇒
       val time = timerContext.stop()
 
       response.status match {

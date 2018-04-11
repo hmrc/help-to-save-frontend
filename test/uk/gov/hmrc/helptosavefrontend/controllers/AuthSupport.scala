@@ -22,7 +22,6 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAuthConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserInfoRetrievals
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
@@ -47,7 +46,7 @@ trait AuthSupport extends TestSupport {
 
   type UserRetrievalType = Name ~ Option[String] ~ Option[LocalDate] ~ ItmpName ~ Option[LocalDate] ~ ItmpAddress ~ Option[String]
 
-  val mockAuthConnector: FrontendAuthConnector = mock[FrontendAuthConnector]
+  val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   val nino = "WM123456C"
 

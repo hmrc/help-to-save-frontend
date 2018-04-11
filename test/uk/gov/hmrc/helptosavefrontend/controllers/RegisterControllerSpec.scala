@@ -23,11 +23,11 @@ import cats.syntax.eq._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
@@ -49,22 +49,22 @@ class RegisterControllerSpec
   with SessionCacheBehaviour
   with GeneratorDrivenPropertyChecks {
 
-  val frontendAuthConnector: FrontendAuthConnector = stub[FrontendAuthConnector]
-  implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
+  def newController(earlyCapCheck: Boolean)(implicit crypto: Crypto): RegisterController = {
 
-  def newController(earlyCapCheck: Boolean, crypto: Crypto): RegisterController = new RegisterController(
-    fakeApplication.injector.instanceOf[MessagesApi],
-    mockHelpToSaveService,
-    mockSessionCacheConnector,
-    frontendAuthConnector,
-    mockMetrics,
-    fakeApplication,
-    Configuration("enable-early-cap-check" → earlyCapCheck))(
-    crypto, mockEmailValidation, transformer) {
-    override lazy val authConnector = mockAuthConnector
+    implicit lazy val appConfig: FrontendAppConfig =
+      buildFakeApplication(Configuration("enable-early-cap-check" -> earlyCapCheck)).injector.instanceOf[FrontendAppConfig]
+
+    new RegisterController(
+      mockHelpToSaveService,
+      mockSessionCacheConnector,
+      mockAuthConnector,
+      mockMetrics,
+      fakeApplication) {
+      override lazy val authConnector: AuthConnector = mockAuthConnector
+    }
   }
 
-  lazy val controller: RegisterController = newController(false, crypto)
+  lazy val controller: RegisterController = newController(earlyCapCheck = false)(crypto)
 
   def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess())): Unit =
     (mockHelpToSaveService.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
@@ -72,23 +72,23 @@ class RegisterControllerSpec
       .returning(EitherT.fromEither[Future](response))
 
   def mockEnrolUser()(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.enrolUser()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.enrolUser()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier))
-      .expects(email, *)
+    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(email, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
-    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockUpdateUserCount(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.updateUserCount()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.updateUserCount()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockDecrypt(expected: String)(result: Option[String]) =
@@ -186,7 +186,7 @@ class RegisterControllerSpec
       }
 
       "skip the cap check at a later point if enable-early-cap-check is set to true" in {
-        val controller = newController(earlyCapCheck = true, crypto)
+        val controller = newController(earlyCapCheck = true)(crypto)
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -301,7 +301,7 @@ class RegisterControllerSpec
       }
 
       "skip the cap check at a later point if enable-early-cap-check is set to true" in {
-        val controller = newController(earlyCapCheck = true, crypto)
+        val controller = newController(earlyCapCheck = true)(crypto)
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -320,7 +320,7 @@ class RegisterControllerSpec
         def doRequest(newEmail: Option[String]): Future[PlayResult] = {
           newEmail.fold(
             controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "Yes"))
-          ){ e ⇒
+          ) { e ⇒
               controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "No", "new-email" → e))
             }
 
@@ -334,7 +334,7 @@ class RegisterControllerSpec
         "and the form contains no new email" in {
           val encryptedEmail = "encrypted"
           val crypto = mock[Crypto]
-          val controller = newController(earlyCapCheck = true, crypto)
+          val controller = newController(earlyCapCheck = true)(crypto)
 
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -423,8 +423,8 @@ class RegisterControllerSpec
         }
 
         "the 'email' key of the form is not 'Yes' or 'No'" in {
-          forAll{ s: String ⇒
-            whenever(s =!= "Yes" | s =!= "No"){
+          forAll { s: String ⇒
+            whenever(s =!= "Yes" | s =!= "No") {
               inSequence {
                 mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
                 mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
@@ -645,7 +645,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+          redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
         }
 
       "indicate to the user that account creation was successful " +
@@ -661,7 +661,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+          redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
         }
 
       "redirect the user to the confirm details page if the session indicates they have not done so already" in {

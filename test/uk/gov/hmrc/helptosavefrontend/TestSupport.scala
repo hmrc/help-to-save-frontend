@@ -24,15 +24,16 @@ import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{BeforeAndAfterAll, Suite}
+import play.api.i18n.MessagesApi
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Play}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendGlobal
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.util.{NINO, NINOLogMessageTransformer, TestNINOLogMessageTransformer}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, TestNINOLogMessageTransformer}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.test.UnitSpec
@@ -44,7 +45,7 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
 
   lazy val additionalConfig = Configuration()
 
-  lazy val fakeApplication: Application =
+  def buildFakeApplication(additionalConfig: Configuration): Application = {
     new GuiceApplicationBuilder()
       .configure(Configuration(
         ConfigFactory.parseString(
@@ -54,6 +55,9 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
           """.stripMargin)
       ) ++ additionalConfig)
       .build()
+  }
+
+  implicit lazy val fakeApplication: Application = buildFakeApplication(additionalConfig)
 
   implicit lazy val ec: ExecutionContext = fakeApplication.injector.instanceOf[ExecutionContext]
 
@@ -70,7 +74,7 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
     super.afterAll()
   }
 
-  private lazy val technicalErrorPageContent: String = FrontendGlobal.internalServerErrorTemplate(FakeRequest()).body
+  private lazy val technicalErrorPageContent: String = fakeApplication.injector.instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body
 
   def checkIsTechnicalErrorPage(result: Future[Result]): Unit = {
     status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -85,12 +89,17 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
     override def histogram(name: String): Histogram = new Histogram(new UniformReservoir())
   }
 
-  val mockEmailValidation: EmailValidation =
+  implicit val mockEmailValidation: EmailValidation =
     new EmailValidation(Configuration(
       "email-validation.max-total-length" → Int.MaxValue,
       "email-validation.max-local-length" → Int.MaxValue,
       "email-validation.max-domain-length" → Int.MaxValue))
 
+  implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
+
   implicit val transformer: NINOLogMessageTransformer = TestNINOLogMessageTransformer.transformer
 
+  implicit lazy val appConfig: FrontendAppConfig = fakeApplication.injector.instanceOf[FrontendAppConfig]
+
+  implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 }

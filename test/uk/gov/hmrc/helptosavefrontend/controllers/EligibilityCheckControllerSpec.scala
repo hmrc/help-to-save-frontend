@@ -23,13 +23,11 @@ import cats.instances.future._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.AuthProvider
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
-import uk.gov.hmrc.helptosavefrontend.config.{AppConfig, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -39,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckRespon
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 class EligibilityCheckControllerSpec
   extends AuthSupport
@@ -48,26 +46,28 @@ class EligibilityCheckControllerSpec
   with SessionCacheBehaviour
   with GeneratorDrivenPropertyChecks {
 
-  def newController(earlyCapCheck: Boolean): EligibilityCheckController = new EligibilityCheckController(
-    fakeApplication.injector.instanceOf[MessagesApi],
-    mockHelpToSaveService,
-    mockSessionCacheConnector,
-    mockAuthConnector,
-    mockMetrics,
-    Configuration("enable-early-cap-check" → earlyCapCheck))
+  def newController(earlyCapCheck: Boolean): EligibilityCheckController = {
+
+    implicit lazy val appConfig: FrontendAppConfig =
+      buildFakeApplication(Configuration("enable-early-cap-check" -> earlyCapCheck)).injector.instanceOf[FrontendAppConfig]
+
+    new EligibilityCheckController(
+      mockHelpToSaveService,
+      mockSessionCacheConnector,
+      mockAuthConnector,
+      mockMetrics)
+  }
 
   lazy val controller = newController(false)
 
-  val mockAppConfig: AppConfig = mock[AppConfig]
-
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
-    (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
-    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier))
-      .expects(*)
+    (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   "The EligibilityCheckController" when {
@@ -257,7 +257,7 @@ class EligibilityCheckControllerSpec
 
             val result = doCheckEligibilityRequest()
             status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
           }
 
         "redirect to NS&I if the eligibility check indicates the user already has an account " +
@@ -276,7 +276,7 @@ class EligibilityCheckControllerSpec
 
                 val result = doCheckEligibilityRequest()
                 status(result) shouldBe SEE_OTHER
-                redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+                redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
               }
           }
 
@@ -364,7 +364,7 @@ class EligibilityCheckControllerSpec
 
           val result = doCheckEligibilityRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(FrontendAppConfig.nsiManageAccountUrl)
+          redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
         }
 
         "return user details if the user is eligible for help-to-save and the " +

@@ -21,10 +21,11 @@ import javax.inject.Singleton
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.Inject
+import play.api.Application
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{Action, AnyContent, Request, Result}
-import play.api.{Application, Configuration}
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, FrontendAuthConnector}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
@@ -45,18 +46,19 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 @Singleton
-class RegisterController @Inject() (val messagesApi:           MessagesApi,
-                                    val helpToSaveService:     HelpToSaveService,
+class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
                                     val sessionCacheConnector: SessionCacheConnector,
-                                    frontendAuthConnector:     FrontendAuthConnector,
+                                    authConnector:             AuthConnector,
                                     metrics:                   Metrics,
-                                    app:                       Application,
-                                    configuration:             Configuration
-)(implicit crypto: Crypto, emailValidation: EmailValidation, transformer: NINOLogMessageTransformer)
-  extends HelpToSaveAuth(frontendAuthConnector, metrics)
-  with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging {
+                                    app:                       Application)(implicit val crypto: Crypto,
+                                                                            emailValidation:          EmailValidation,
+                                                                            override val messagesApi: MessagesApi,
+                                                                            transformer:              NINOLogMessageTransformer,
+                                                                            val frontendAppConfig:    FrontendAppConfig)
 
-  val earlyCapCheckOn: Boolean = configuration.underlying.getBoolean("enable-early-cap-check")
+  extends HelpToSaveAuth(authConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging {
+
+  val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
 
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -162,7 +164,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = frontendAppConfig.checkEligibilityUrl)
 
   def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -196,7 +198,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
 
   def getDetailsAreIncorrect: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.details_are_incorrect())
-  }(redirectOnLoginURL = FrontendAppConfig.checkEligibilityUrl)
+  }(redirectOnLoginURL = frontendAppConfig.checkEligibilityUrl)
 
   def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
@@ -223,7 +225,7 @@ class RegisterController @Inject() (val messagesApi:           MessagesApi,
                 case Success(Right(_)) ⇒ logger.debug(s"Process started to enrol user", nino)
               }
 
-              SeeOther(FrontendAppConfig.nsiManageAccountUrl)
+              SeeOther(frontendAppConfig.nsiManageAccountUrl)
             })
           }
       } { _ ⇒
