@@ -83,8 +83,8 @@ class NewApplicantUpdateEmailAddressControllerSpec
   }
 
   def mockAudit() =
-    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO))
-      .expects(*, *)
+    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO)(_: ExecutionContext))
+      .expects(*, *, *)
       .returning(Future.successful(AuditResult.Success))
 
   def mockStoreConfirmedEmail(email: String)(result: Either[String, Unit]): Unit =

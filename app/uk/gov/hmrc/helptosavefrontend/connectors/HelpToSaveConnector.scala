@@ -28,9 +28,8 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.MissingUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
@@ -55,7 +54,7 @@ trait HelpToSaveConnector {
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfig: FrontendAppConfig)
+class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfig: FrontendAppConfig, ec: ExecutionContext)
   extends HelpToSaveConnector {
 
   private val helpToSaveUrl: String = frontendAppConfig.baseUrl("help-to-save")

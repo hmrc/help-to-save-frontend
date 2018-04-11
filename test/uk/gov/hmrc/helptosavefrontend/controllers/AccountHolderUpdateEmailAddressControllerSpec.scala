@@ -21,7 +21,6 @@ import java.net.URLDecoder
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
-import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -34,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -68,13 +67,13 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
       .returning(EitherT.fromEither[Future](result))
 
   def mockAuditSuspiciousActivity() =
-    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO))
-      .expects(*, nino)
+    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO)(_: ExecutionContext))
+      .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
 
   def mockAuditEmailChanged() =
-    (mockAuditor.sendEvent(_: EmailChanged, _: NINO))
-      .expects(*, nino)
+    (mockAuditor.sendEvent(_: EmailChanged, _: NINO)(_: ExecutionContext))
+      .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
 
   lazy val controller = new AccountHolderUpdateEmailAddressController(
@@ -130,13 +129,11 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
         }
     }
 
-    "handling formupdate email forms submits" must {
+    "handling form update email forms submits" must {
 
       val enrolled = EnrolmentStatus.Enrolled(true)
 
       val email = "email@test.com"
-
-      lazy val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
       val fakePostRequest = fakeRequestWithCSRFToken.withFormUrlEncodedBody("new-email-address" → email)
 
