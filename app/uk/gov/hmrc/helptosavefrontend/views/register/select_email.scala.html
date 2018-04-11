@@ -76,7 +76,7 @@
             <div class="form-group">
                 <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
                 @if(hasInvalidEmail) { <span class="error-message">@email_form_validation_error_message(form, "new-email")</span> }
-                <input class="form-control" name="new-email" type="text" id="new-email">
+                <input class="form-control @if(hasNotSelected || hasInvalidEmail){form-control-error}" name="new-email" type="text" id="new-email">
             </div>
         </div>
 

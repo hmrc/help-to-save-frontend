@@ -36,12 +36,12 @@ errorMessage: Option[Html] = None
 
     <div class="form-control-wrapper" data-type="@secondaryLabel">
         <input
-        class="form-control @inputClass"
-        type="text"
-        id="@id"
-        name="@name"
-        value="@value"
-            @if(errorMessage.isDefined){aria-describedby="error-message-this-input"}
+          class="form-control @inputClass @if(errorMessage.isDefined){form-control-error}"
+          type="text"
+          id="@id"
+          name="@name"
+          value="@value"
+          @if(errorMessage.isDefined){aria-describedby="error-message-this-input"}
         />
     </div>
 </div>
