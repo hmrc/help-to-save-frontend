@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import javax.inject.Singleton
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
@@ -31,6 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.CreateAccountVoid
 import uk.gov.hmrc.helptosavefrontend.forms.EmailVerificationErrorContinueForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
@@ -39,7 +39,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result => EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
@@ -123,7 +123,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
     handleEmailVerified(
       emailVerificationParams,
       { params ⇒
-        val result: EitherT[Future, String, Either[Ineligible, UserInfo]] = for {
+        val result: EitherT[Future, String, Either[CreateAccountVoid, UserInfo]] = for {
           session ← sessionCacheConnector.get
           userInfo ← updateSession(session, params)
         } yield userInfo
@@ -133,10 +133,15 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
             logger.warn(e)
             internalServerError()
         }, { maybeNSIUserInfo ⇒
-          maybeNSIUserInfo.fold(
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-            _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
-          )
+          maybeNSIUserInfo.fold({
+            createAccountVoid ⇒
+              createAccountVoid.fold(
+              _ ⇒ SeeOther(routes.EligibilityCheckController.alreadyHasAccount().url),
+              _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url))
+            },
+            {
+              _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
+             })
         })
       },
       toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
@@ -227,3 +232,8 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
 
 }
 
+object NewApplicantUpdateEmailAddressController {
+
+  private case class CreateAccountVoid(result: Either[AlreadyHasAccount, Ineligible])
+
+}
