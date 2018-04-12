@@ -152,6 +152,17 @@ class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSav
     }
   }(redirectOnLoginURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
 
+  val getHowToAccessMyAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkHasDoneEligibilityChecks {
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+    } {
+      _.eligibilityResult.fold(
+        _ ⇒ Ok(views.html.how_to_access_my_account()),
+        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+      )
+    }
+  }(redirectOnLoginURL = routes.EligibilityCheckController.getHowToAccessMyAccountPage().url)
+
   private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
                                            htsContext: HtsContextWithNINOAndUserDetails,
                                            request:    Request[AnyContent]): Future[PlayResult] = {

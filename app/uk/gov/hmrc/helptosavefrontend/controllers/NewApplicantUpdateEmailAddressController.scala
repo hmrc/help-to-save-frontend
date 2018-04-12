@@ -39,7 +39,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result => EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
@@ -135,16 +135,18 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         }, { maybeNSIUserInfo ⇒
           maybeNSIUserInfo.fold({
             createAccountVoid ⇒
-              createAccountVoid.fold(
-              _ ⇒ SeeOther(routes.EligibilityCheckController.alreadyHasAccount().url),
-              _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url))
-            },
+              createAccountVoid.result.fold(
+                _ ⇒ SeeOther(routes.EligibilityCheckController.getHowToAccessMyAccountPage().url),
+                _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
+              )
+          },
             {
               _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
-             })
+            })
         })
       },
-      toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
+      toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+      )
     )
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(emailVerificationParams).url)
 
@@ -179,26 +181,26 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   private def getEligibleUserInfo(session: Option[HTSSession])(
       implicit
       htsContext: HtsContextWithNINOAndUserDetails,
-      hc:         HeaderCarrier): EitherT[Future, String, Either[Ineligible, EligibleWithUserInfo]] = session.flatMap(_.eligibilityCheckResult) match {
+      hc:         HeaderCarrier): EitherT[Future, String, Either[CreateAccountVoid, EligibleWithUserInfo]] = session.flatMap(_.eligibilityCheckResult) match {
 
     case Some(eligibilityCheckResult) ⇒
       EitherT.fromEither[Future](
-        eligibilityCheckResult.fold[Either[String, Either[Ineligible, EligibleWithUserInfo]]](
-          r ⇒ Right(Left(r)), // IMPOSSIBLE - this means they are ineligible
+        eligibilityCheckResult.fold[Either[String, Either[CreateAccountVoid, EligibleWithUserInfo]]](
+          r ⇒ Right(Left(CreateAccountVoid(r))), // IMPOSSIBLE - this means they are ineligible
           e ⇒ Right(Right(e))
         ))
 
     case None ⇒
-      htsContext.userDetails.fold[EitherT[Future, String, Either[Ineligible, EligibleWithUserInfo]]](
+      htsContext.userDetails.fold[EitherT[Future, String, Either[CreateAccountVoid, EligibleWithUserInfo]]](
         missingInfos ⇒ EitherT.fromEither[Future](Left(s"Missing user info: ${missingInfos.missingInfo}")),
         userInfo ⇒
           EitherT(
             helpToSaveService.checkEligibility().value.map {
-              _.fold[Either[String, Either[Ineligible, EligibleWithUserInfo]]](
+              _.fold[Either[String, Either[CreateAccountVoid, EligibleWithUserInfo]]](
                 Left(_), {
                   case e: Eligible          ⇒ Right(Right(EligibleWithUserInfo(e, userInfo)))
-                  case i: Ineligible        ⇒ Right(Left(i))
-                  case AlreadyHasAccount(_) ⇒ Left("User already has account")
+                  case i: Ineligible        ⇒ Right(Left(CreateAccountVoid(i)))
+                  case a: AlreadyHasAccount ⇒ Right(Left(CreateAccountVoid(a)))
                 }
               )
             }
@@ -210,12 +212,12 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                             params:  EmailVerificationParams)(
       implicit
       htsContext: HtsContextWithNINOAndUserDetails,
-      hc:         HeaderCarrier): EitherT[Future, String, Either[Ineligible, UserInfo]] = {
+      hc:         HeaderCarrier): EitherT[Future, String, Either[CreateAccountVoid, UserInfo]] = {
 
     getEligibleUserInfo(session).flatMap { e ⇒
-      val result: Either[Ineligible, EitherT[Future, String, UserInfo]] = e.map { eligibleWithUserInfo ⇒
+      val result: Either[CreateAccountVoid, EitherT[Future, String, UserInfo]] = e.map { eligibleWithUserInfo ⇒
         if (eligibleWithUserInfo.userInfo.nino =!= params.nino) {
-          EitherT.fromEither[Future](Left[String, UserInfo]("NINO in confirm details parameters did not match NINO from auth"))
+          EitherT.fromEither[Future](Left("NINO in confirm details parameters did not match NINO from auth"))
         } else {
           val newInfo = eligibleWithUserInfo.userInfo.updateEmail(params.email)
           val newSession = HTSSession(Some(Right(eligibleWithUserInfo.copy(userInfo = newInfo))),
@@ -226,7 +228,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           } yield newInfo
         }
       }
-      result.traverse[EitherTResult, Ineligible, UserInfo](identity)
+      result.traverse[EitherTResult, CreateAccountVoid, UserInfo](identity)
     }
   }
 
@@ -235,5 +237,10 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
 object NewApplicantUpdateEmailAddressController {
 
   private case class CreateAccountVoid(result: Either[AlreadyHasAccount, Ineligible])
+
+  private object CreateAccountVoid {
+    def apply(ineligible: Ineligible): CreateAccountVoid = CreateAccountVoid(Right(ineligible))
+    def apply(alreadyHasAccount: AlreadyHasAccount): CreateAccountVoid = CreateAccountVoid(Left(alreadyHasAccount))
+  }
 
 }
