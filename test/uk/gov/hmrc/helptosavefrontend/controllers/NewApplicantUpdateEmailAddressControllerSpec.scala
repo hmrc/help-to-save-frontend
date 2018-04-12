@@ -348,7 +348,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
           val params = EmailVerificationParams(validUserInfo.nino, testEmail)
           val result = doRequestWithQueryParam(params.encode())
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getHowToAccessMyAccountPage().url)
+          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url)
         }
       }
 
