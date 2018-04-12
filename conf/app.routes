@@ -15,6 +15,7 @@ GET        /access-account                                  @uk.gov.hmrc.helptos
 GET        /no-account                                      @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getNoAccountPage
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
 
+GET        /how-to-access                                   @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getHowToAccessMyAccountPage
 
 GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible

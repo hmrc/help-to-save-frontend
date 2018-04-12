@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.AlreadyHasAccount
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
@@ -337,6 +337,21 @@ class NewApplicantUpdateEmailAddressControllerSpec
         }
       }
 
+      "redirect to the how to access account page" when {
+        "the user clicks on their email verification link but they already have an account" in {
+          val alreadyHasAccountResult = AlreadyHasAccount(EligibilityCheckResponse("User already has an account", 3, "", 1))
+          inSequence {
+            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockSessionCacheConnectorGet(Right(None))
+            mockEligibilityResult()(Right(alreadyHasAccountResult))
+          }
+          val params = EmailVerificationParams(validUserInfo.nino, testEmail)
+          val result = doRequestWithQueryParam(params.encode())
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getHowToAccessMyAccountPage().url)
+        }
+      }
+
       "return an OK status when the link has been corrupted or is incorrect" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -431,16 +446,6 @@ class NewApplicantUpdateEmailAddressControllerSpec
                testEmail
           )
 
-        }
-
-        "there is no session data but an eligibility check indicates that they already have an account" in {
-          test(inSequence {
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockSessionCacheConnectorGet(Right(None))
-            mockEligibilityResult()(Right(AlreadyHasAccount(randomEligibilityResponse())))
-          },
-               validUserInfo.nino,
-               testEmail)
         }
       }
 
@@ -596,6 +601,5 @@ class NewApplicantUpdateEmailAddressControllerSpec
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
     }
-
   }
 }
