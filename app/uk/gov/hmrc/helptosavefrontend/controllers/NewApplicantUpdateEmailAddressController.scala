@@ -151,14 +151,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(emailVerificationParams).url)
 
   val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkHasDoneEligibilityChecks {
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-    } {
-      _.eligibilityResult.fold(
-        _ ⇒ Ok(views.html.link_expired()),
-        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-      )
-    }
+    Ok(views.html.link_expired())
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url)
 
   def getEmailVerified: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
