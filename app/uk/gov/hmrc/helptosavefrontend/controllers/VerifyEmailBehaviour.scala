@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import cats.data.EitherT
 import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -50,13 +51,13 @@ trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
       case Left(e)               ⇒ ifFailure(e)
     }
 
-  def handleEmailVerified(emailVerificationParams: String,
-                          ifValid:                 EmailVerificationParams ⇒ Future[Result],
-                          ifInvalid:               ⇒ Future[Result])(implicit request: Request[AnyContent],
-                                                                     htsContext:  HtsContextWithNINOAndUserDetails,
-                                                                     crypto:      Crypto,
-                                                                     messages:    Messages,
-                                                                     transformer: NINOLogMessageTransformer): Future[Result] =
+  def withEmailVerificationParameters(emailVerificationParams: String,
+                                      ifValid:                 EmailVerificationParams ⇒ EitherT[Future, String, Result],
+                                      ifInvalid:               ⇒ EitherT[Future, String, Result])(implicit request: Request[AnyContent],
+                                                                                                  htsContext:  HtsContextWithNINOAndUserDetails,
+                                                                                                  crypto:      Crypto,
+                                                                                                  messages:    Messages,
+                                                                                                  transformer: NINOLogMessageTransformer): EitherT[Future, String, Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒

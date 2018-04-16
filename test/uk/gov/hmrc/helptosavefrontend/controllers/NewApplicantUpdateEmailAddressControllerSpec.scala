@@ -28,6 +28,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
@@ -94,6 +95,11 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
     (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockGetUserEnrolmentStatus()(result: Either[String, EnrolmentStatus]): Unit =
+    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -306,6 +312,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
               inSequence {
                 mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+                mockGetUserEnrolmentStatus()(Right(NotEnrolled))
                 mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, Some("pending")))))
                 mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfoWithUpdatedEmail)), Some(testEmail), Some("pending")))(Right(()))
                 mockStoreConfirmedEmail(testEmail)(Right(()))
@@ -322,6 +329,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
             "eligiblity check indicates that they are eligible" in {
               inSequence {
                 mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+                mockGetUserEnrolmentStatus()(Right(NotEnrolled))
                 mockSessionCacheConnectorGet(Right(None))
                 mockEligibilityResult()(Right(eligibleWithUserInfoWithUpdatedEmail.eligible))
                 mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfoWithUpdatedEmail)), Some(testEmail), None))(Right(()))
@@ -342,8 +350,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
           val alreadyHasAccountResult = AlreadyHasAccount(EligibilityCheckResponse("User already has an account", 3, "", 1))
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockSessionCacheConnectorGet(Right(None))
-            mockEligibilityResult()(Right(alreadyHasAccountResult))
+            mockGetUserEnrolmentStatus()(Right(Enrolled(true)))
           }
           val params = EmailVerificationParams(validUserInfo.nino, testEmail)
           val result = doRequestWithQueryParam(params.encode())
@@ -355,6 +362,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
       "return an OK status when the link has been corrupted or is incorrect" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockAudit()
         }
         val result = doRequestWithQueryParam("corrupt-link")
@@ -366,6 +374,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         "the session data indicates that they are ineligible" in {
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockGetUserEnrolmentStatus()(Right(NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
           }
           val params = EmailVerificationParams(validUserInfo.nino, testEmail)
@@ -378,6 +387,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
           // TODO
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockGetUserEnrolmentStatus()(Right(NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
             mockEligibilityResult()(Right(randomIneligibility()))
           }
@@ -400,6 +410,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         "the user has not already enrolled and the given nino doesn't match the session nino" in {
           test(inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockGetUserEnrolmentStatus()(Right(NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           },
             "AE1234XXX",
@@ -410,6 +421,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         "the sessionCacheConnector.get method returns an error" in {
           test(inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockGetUserEnrolmentStatus()(Right(NotEnrolled))
             mockSessionCacheConnectorGet(Left("An error occurred"))
           },
                validUserInfo.nino,
@@ -420,6 +432,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         "the sessionCacheConnector.put method returns an error" in {
           test(inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockGetUserEnrolmentStatus()(Right(NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
             mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfoWithUpdatedEmail)), Some(testEmail), None))(Left("An error occurred"))
           },
@@ -431,6 +444,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         "the confirmed email cannot be stored" in {
           test(inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockGetUserEnrolmentStatus()(Right(NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
             mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfoWithUpdatedEmail)), Some(testEmail), None))(Right(()))
             mockStoreConfirmedEmail(testEmail)(Left(""))
@@ -440,6 +454,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         "the user has missing info and they do not have a session" in {
           test(inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+            mockGetUserEnrolmentStatus()(Right(NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
           },
                validUserInfo.nino,

@@ -33,6 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, Se
 import uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.CreateAccountVoid
 import uk.gov.hmrc.helptosavefrontend.forms.EmailVerificationErrorContinueForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
@@ -44,7 +45,7 @@ import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnector:      SessionCacheConnector,
@@ -120,45 +121,53 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
 
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    handleEmailVerified(
-      emailVerificationParams,
-      { params ⇒
-        val result: EitherT[Future, String, Either[CreateAccountVoid, UserInfo]] = for {
-          session ← sessionCacheConnector.get
-          userInfo ← updateSession(session, params)
-        } yield userInfo
+    val result: EitherT[Future, String, Result] =
+      for {
+        s ← helpToSaveService.getUserEnrolmentStatus()
+        r ← handleCallback(s, emailVerificationParams)
+      } yield r
 
-        result.fold({
-          e ⇒
-            logger.warn(e)
-            internalServerError()
-        }, { maybeNSIUserInfo ⇒
-          maybeNSIUserInfo.fold({
-            createAccountVoid ⇒
-              createAccountVoid.result.fold(
-                _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url),
-                _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
-              )
-          },
-            {
-              _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
-            })
-        })
-      },
-      toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
-      )
-    )
+    result.leftMap{ e ⇒
+      logger.warn(e)
+      internalServerError()
+    }.merge
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(emailVerificationParams).url)
 
+  def handleCallback(status: EnrolmentStatus, emailVerificationParams: String)(
+      implicit
+      hc: HeaderCarrier, h: HtsContextWithNINOAndUserDetails, request: Request[AnyContent]): EitherT[Future, String, Result] =
+    status.fold[EitherT[Future, String, Result]](
+      //new applicant
+      {
+        withEmailVerificationParameters(
+          emailVerificationParams,
+          { params ⇒
+            val result: EitherT[Future, String, Either[CreateAccountVoid, UserInfo]] = for {
+              session ← sessionCacheConnector.get
+              userInfo ← updateSession(session, params)
+            } yield userInfo
+
+            result.map{ maybeNSIUserInfo ⇒
+              maybeNSIUserInfo.fold({
+                createAccountVoid ⇒
+                  createAccountVoid.result.fold(
+                    _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url),
+                    _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
+                  )
+              },
+                {
+                  _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
+                })
+            }
+          }, EitherT.pure[Future, String, Result](SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
+        )
+      }, _ ⇒
+        //existing account holder
+        EitherT.pure[Future, String, Result](SeeOther(routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url))
+    )
+
   val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkHasDoneEligibilityChecks {
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-    } {
-      _.eligibilityResult.fold(
-        _ ⇒ Ok(views.html.link_expired()),
-        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-      )
-    }
+    Ok(views.html.link_expired())
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url)
 
   def getEmailVerified: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
