@@ -466,6 +466,18 @@ class NewApplicantUpdateEmailAddressControllerSpec
 
     }
 
+    "getLinkExpiredPage" must {
+
+      "render the link expired page" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        }
+        val result = controller.getLinkExpiredPage(fakeRequestWithCSRFToken)
+        status(result) shouldBe OK
+        contentAsString(result) should include("How To Access My Account")
+      }
+    }
+
     "handling getEmailVerified" must {
 
       "return the email verified page" in {
