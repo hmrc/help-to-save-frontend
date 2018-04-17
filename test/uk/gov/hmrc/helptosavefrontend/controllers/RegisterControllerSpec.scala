@@ -26,7 +26,6 @@ import play.api.http.Status
 import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
@@ -59,9 +58,7 @@ class RegisterControllerSpec
       mockSessionCacheConnector,
       mockAuthConnector,
       mockMetrics,
-      fakeApplication) {
-      override lazy val authConnector: AuthConnector = mockAuthConnector
-    }
+      fakeApplication)
   }
 
   lazy val controller: RegisterController = newController(earlyCapCheck = false)(crypto)

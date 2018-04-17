@@ -16,19 +16,19 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import javax.inject.Singleton
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
-import play.api.Application
-import play.api.i18n.{I18nSupport, MessagesApi}
+import javax.inject.Singleton
+import play.api.i18n.MessagesApi
 import play.api.mvc._
+import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailVerificationErrorContinueForm
@@ -49,15 +49,17 @@ import scala.concurrent.Future
 @Singleton
 class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnector:      SessionCacheConnector,
                                                           val helpToSaveService:          HelpToSaveService,
-                                                          authConnector:                  AuthConnector,
+                                                          val authConnector:              AuthConnector,
                                                           val emailVerificationConnector: EmailVerificationConnector,
-                                                          metrics:                        Metrics,
+                                                          val metrics:                    Metrics,
                                                           val auditor:                    HTSAuditor)(implicit app: Application,
                                                                                                       override val messagesApi: MessagesApi,
                                                                                                       crypto:                   Crypto,
-                                                                                                      transformer:              NINOLogMessageTransformer,
-                                                                                                      val frontendAppConfig:    FrontendAppConfig)
-  extends HelpToSaveAuth(authConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
+                                                                                                      val transformer:          NINOLogMessageTransformer,
+                                                                                                      val frontendAppConfig:    FrontendAppConfig,
+                                                                                                      val config:               Configuration,
+                                                                                                      val env:                  Environment)
+  extends BaseController with HelptoSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
 
   private def checkEnrolledAndSession(ifEligible: (UserInfo, Option[Email], Option[Email]) ⇒ Future[Result])(implicit request: Request[AnyContent],
                                                                                                              htsContext: HtsContextWithNINO): Future[Result] =

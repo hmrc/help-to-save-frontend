@@ -23,14 +23,14 @@ import uk.gov.hmrc.helptosavefrontend.controllers.SessionBehaviour.SessionWithEl
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.{Email, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 trait SessionBehaviour {
-  this: HelpToSaveFrontendController with Logging ⇒
+  this: BaseController ⇒
 
   val sessionCacheConnector: SessionCacheConnector
 

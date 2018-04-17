@@ -14,43 +14,36 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+package uk.gov.hmrc.helptosavefrontend.auth
 
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.syntax.cartesian._
 import cats.syntax.option._
 import org.joda.time.LocalDate
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Result, _}
-import play.api.{Configuration, Environment}
+import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserInfoRetrievals}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, MissingUserInfo, MissingUserInfos, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndFirstName, HtsContextWithNINOAndUserDetails}
-import uk.gov.hmrc.helptosavefrontend.util.Logging._
+import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, toFuture, toJavaDate}
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.Future
 
-class HelpToSaveAuth(authConnector1: AuthConnector,
-                     metrics:        Metrics)(implicit override val messagesApi: MessagesApi,
-                                              transformer:       NINOLogMessageTransformer,
-                                              frontendAppConfig: FrontendAppConfig)
+trait HelptoSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging {
+  this: BaseController ⇒
 
-  extends HelpToSaveFrontendController() with AuthorisedFunctions with AuthRedirects with Logging {
-
-  override def authConnector: AuthConnector = authConnector1
-
-  override def config: Configuration = frontendAppConfig.runModeConfiguration
-
-  override def env: Environment = frontendAppConfig.environment
+  implicit val metrics: Metrics
+  implicit val appConfig: FrontendAppConfig
+  implicit val transformer: NINOLogMessageTransformer
 
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
 
@@ -177,7 +170,7 @@ class HelpToSaveAuth(authConnector1: AuthConnector,
       toGGLogin(redirectOnLoginURL)
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
-      SeeOther(frontendAppConfig.ivUrl(redirectOnLoginURL))
+      SeeOther(appConfig.ivUrl(redirectOnLoginURL))
 
     case ex: AuthorisationException ⇒
       logger.warn(s"could not authenticate user due to: $ex ${timeString(time)}")
@@ -188,9 +181,10 @@ class HelpToSaveAuth(authConnector1: AuthConnector,
     Redirect(ggLoginUrl, Map(
       "continue" -> Seq(redirectOnLoginURL),
       "accountType" -> Seq("individual"),
-      "origin" -> Seq(frontendAppConfig.appName)
+      "origin" -> Seq(appConfig.appName)
     ))
 
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
+  def internalServerError()(implicit request: Request[_]): Result
 }

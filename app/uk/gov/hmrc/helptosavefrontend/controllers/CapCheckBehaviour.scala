@@ -25,7 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.util.toFuture
 import scala.concurrent.Future
 
 trait CapCheckBehaviour {
-  this: HelpToSaveFrontendController with Logging ⇒
+  this: BaseController with Logging ⇒
 
   val helpToSaveService: HelpToSaveService
 

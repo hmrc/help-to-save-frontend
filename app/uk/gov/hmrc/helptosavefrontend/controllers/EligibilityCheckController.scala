@@ -21,9 +21,11 @@ import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.traverse._
 import com.google.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result ⇒ PlayResult}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -34,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, Result, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, Result, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
@@ -44,10 +46,13 @@ import scala.util.{Failure, Success}
 
 class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSaveService,
                                             val sessionCacheConnector: SessionCacheConnector,
-                                            authConnector:             AuthConnector,
-                                            metrics:                   Metrics)(implicit override val messagesApi: MessagesApi, transformer: NINOLogMessageTransformer, val frontendAppConfig: FrontendAppConfig)
-  extends HelpToSaveAuth(authConnector, metrics)
-  with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging {
+                                            val authConnector:         AuthConnector,
+                                            val metrics:               Metrics)(implicit override val messagesApi: MessagesApi,
+                                                                                val transformer:       NINOLogMessageTransformer,
+                                                                                val frontendAppConfig: FrontendAppConfig,
+                                                                                val config:            Configuration,
+                                                                                val env:               Environment)
+  extends BaseController with HelptoSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
 
@@ -94,7 +99,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSav
             val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
 
             ineligibilityType.fold {
-              logger.warn(s"Could not parse ineligibility reason: ${ineligibleReason}", htsContext.nino)
+              logger.warn(s"Could not parse ineligibility reason: $ineligibleReason", htsContext.nino)
               internalServerError()
             } { i ⇒
               Ok(views.html.register.not_eligible(i))

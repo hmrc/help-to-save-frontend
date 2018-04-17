@@ -21,11 +21,12 @@ import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
 import com.google.inject.Inject
-import play.api.Application
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIProxyConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
@@ -41,18 +42,20 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService:          HelpToSaveService,
-                                                           authConnector:                  AuthConnector,
+                                                           val authConnector:              AuthConnector,
                                                            val emailVerificationConnector: EmailVerificationConnector,
                                                            nSIConnector:                   NSIProxyConnector,
-                                                           metrics:                        Metrics,
+                                                           val metrics:                    Metrics,
                                                            val auditor:                    HTSAuditor,
                                                            sessionCacheConnector:          SessionCacheConnector)(implicit app: Application,
                                                                                                                   crypto:                   Crypto,
                                                                                                                   emailValidation:          EmailValidation,
                                                                                                                   override val messagesApi: MessagesApi,
-                                                                                                                  transformer:              NINOLogMessageTransformer,
-                                                                                                                  frontendAppConfig:        FrontendAppConfig)
-  extends HelpToSaveAuth(authConnector, metrics) with VerifyEmailBehaviour with I18nSupport {
+                                                                                                                  val transformer:          NINOLogMessageTransformer,
+                                                                                                                  frontendAppConfig:        FrontendAppConfig,
+                                                                                                                  val config:               Configuration,
+                                                                                                                  val env:                  Environment)
+  extends BaseController with HelptoSaveAuth with VerifyEmailBehaviour {
 
   import AccountHolderUpdateEmailAddressController._
 

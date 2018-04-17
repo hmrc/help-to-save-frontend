@@ -18,16 +18,18 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc._
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -36,11 +38,13 @@ import scala.concurrent.Future
 @Singleton
 class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
                               ivConnector:               IvConnector,
-                              authConnector:             AuthConnector,
-                              metrics:                   Metrics)(implicit override val messagesApi: MessagesApi,
-                                                                  transformer:       NINOLogMessageTransformer,
-                                                                  frontendAppConfig: FrontendAppConfig)
-  extends HelpToSaveAuth(authConnector, metrics) with I18nSupport with Logging {
+                              val authConnector:         AuthConnector,
+                              val metrics:               Metrics)(implicit override val messagesApi: MessagesApi,
+                                                                  val transformer:       NINOLogMessageTransformer,
+                                                                  val frontendAppConfig: FrontendAppConfig,
+                                                                  val config:            Configuration,
+                                                                  val env:               Environment)
+  extends BaseController with HelptoSaveAuth {
 
   def journeyResult(continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
                     journeyId:   Option[String]): Action[AnyContent] =
