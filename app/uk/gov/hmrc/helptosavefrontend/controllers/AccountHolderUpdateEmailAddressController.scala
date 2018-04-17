@@ -26,7 +26,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIProxyConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
@@ -55,7 +55,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                                                                                                                   frontendAppConfig:        FrontendAppConfig,
                                                                                                                   val config:               Configuration,
                                                                                                                   val env:                  Environment)
-  extends BaseController with HelptoSaveAuth with VerifyEmailBehaviour {
+  extends BaseController with HelpToSaveAuth with VerifyEmailBehaviour {
 
   import AccountHolderUpdateEmailAddressController._
 

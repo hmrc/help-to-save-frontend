@@ -33,16 +33,16 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL20
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, MissingUserInfo, MissingUserInfos, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndFirstName, HtsContextWithNINOAndUserDetails}
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, toFuture, toJavaDate}
+import uk.gov.hmrc.helptosavefrontend.util.{NINO, NINOLogMessageTransformer, toFuture, toJavaDate}
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 
 import scala.concurrent.Future
 
-trait HelptoSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging {
+trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
   this: BaseController ⇒
 
-  implicit val metrics: Metrics
-  implicit val appConfig: FrontendAppConfig
+  val metrics: Metrics
+  val appConfig: FrontendAppConfig
   implicit val transformer: NINOLogMessageTransformer
 
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]

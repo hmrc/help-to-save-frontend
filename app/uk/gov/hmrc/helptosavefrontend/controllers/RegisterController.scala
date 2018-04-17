@@ -24,7 +24,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -58,7 +58,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
                                                                             val config:               Configuration,
                                                                             val env:                  Environment)
 
-  extends BaseController with HelptoSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
+  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
 

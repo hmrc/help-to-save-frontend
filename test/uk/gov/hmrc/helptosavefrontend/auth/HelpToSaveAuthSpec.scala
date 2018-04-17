@@ -38,7 +38,7 @@ import scala.concurrent.{Await, Future}
 
 class HelpToSaveAuthSpec extends AuthSupport {
 
-  class HtsAuth extends BaseController with HelptoSaveAuth {
+  class HtsAuth extends BaseController with HelpToSaveAuth {
     override implicit val metrics: Metrics = mockMetrics
     override implicit val transformer: NINOLogMessageTransformer = ninoLogMessageTransformer
 

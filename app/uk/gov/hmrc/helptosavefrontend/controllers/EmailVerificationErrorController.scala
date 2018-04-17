@@ -22,7 +22,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
@@ -37,7 +37,7 @@ class EmailVerificationErrorController @Inject() (helpToSaveService: HelpToSaveS
                                                                               val config:            Configuration,
                                                                               val env:               Environment)
 
-  extends BaseController with HelptoSaveAuth {
+  extends BaseController with HelpToSaveAuth {
 
   def verifyEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     helpToSaveService.getUserEnrolmentStatus().fold(

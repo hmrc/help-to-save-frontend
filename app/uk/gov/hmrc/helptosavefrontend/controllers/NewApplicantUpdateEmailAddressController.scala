@@ -28,7 +28,7 @@ import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailVerificationErrorContinueForm
@@ -59,7 +59,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                                                                                                       val frontendAppConfig:    FrontendAppConfig,
                                                                                                       val config:               Configuration,
                                                                                                       val env:                  Environment)
-  extends BaseController with HelptoSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
+  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
 
   private def checkEnrolledAndSession(ifEligible: (UserInfo, Option[Email], Option[Email]) ⇒ Future[Result])(implicit request: Request[AnyContent],
                                                                                                              htsContext: HtsContextWithNINO): Future[Result] =

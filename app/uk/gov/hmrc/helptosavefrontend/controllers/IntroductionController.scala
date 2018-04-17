@@ -22,7 +22,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.helptosavefrontend.auth.HelptoSaveAuth
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
@@ -37,7 +37,7 @@ class IntroductionController @Inject() (val authConnector: AuthConnector,
                                                                     val config:            Configuration,
                                                                     val env:               Environment)
 
-  extends BaseController with HelptoSaveAuth {
+  extends BaseController with HelpToSaveAuth {
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.introduction.about_help_to_save())
