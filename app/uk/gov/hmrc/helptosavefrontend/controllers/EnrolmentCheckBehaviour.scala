@@ -23,14 +23,14 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 trait EnrolmentCheckBehaviour {
-  this: HelpToSaveFrontendController with Logging ⇒
+  this: BaseController ⇒
 
   val frontendAppConfig: FrontendAppConfig
   val helpToSaveService: HelpToSaveService

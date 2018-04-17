@@ -45,7 +45,7 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val ivJourneyResultUrl: String = s"${baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
   def encodedCallbackUrl(redirectOnLoginURL: String): String =
-    urlEncode(s"${getUrlFor("help-to-save-frontend")}/iv/journey-result?continueURL=$redirectOnLoginURL")
+    urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?continueURL=$redirectOnLoginURL")
 
   val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"
 

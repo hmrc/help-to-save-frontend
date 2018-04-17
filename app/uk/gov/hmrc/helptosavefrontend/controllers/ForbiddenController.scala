@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import com.google.inject.Singleton
+import com.google.inject.{Inject, Singleton}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.play.bootstrap.controller.{ActionWithMdc, FrontendController}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
 @Singleton
-class ForbiddenController extends FrontendController {
+class ForbiddenController @Inject() (implicit messagesApi: MessagesApi, appConfig: FrontendAppConfig) extends BaseController {
 
   def forbidden: Action[AnyContent] = ActionWithMdc {
     Forbidden("Please ask the HtS Dev team for permissions to access this site")
