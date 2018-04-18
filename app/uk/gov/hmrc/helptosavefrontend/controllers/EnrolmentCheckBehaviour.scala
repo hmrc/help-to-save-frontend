@@ -40,29 +40,29 @@ trait EnrolmentCheckBehaviour {
   )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Future[Result] = {
     val nino = htsContext.nino
 
-    val enrolled: EitherT[Future, String, EnrolmentStatus] = helpToSaveService.getUserEnrolmentStatus()
-
-    enrolled.fold[Future[Result]]({ error ⇒
-      logger.warn(s"Error while trying to check if user was already enrolled to HtS: $error", nino)
-      handleEnrolmentServiceError(error)
-    }, {
-      case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
-        // if the user is enrolled but the itmp flag is not set then just
-        // start the process to set the itmp flag here without worrying about the result
-        if (!itmpHtSFlag) {
-          helpToSaveService.setITMPFlag().value.onComplete {
-            case Failure(e)        ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
-            case Success(Left(e))  ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
-            case Success(Right(_)) ⇒ logger.info(s"Process started to set ITMP flag", nino)
+    helpToSaveService.getUserEnrolmentStatus()
+      .leftSemiflatMap{ error ⇒
+        logger.warn(s"Error while trying to check if user was already enrolled to HtS: $error", nino)
+        handleEnrolmentServiceError(error)
+      }
+      .semiflatMap{
+        case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
+          // if the user is enrolled but the itmp flag is not set then just
+          // start the process to set the itmp flag here without worrying about the result
+          if (!itmpHtSFlag) {
+            helpToSaveService.setITMPFlag().value.onComplete {
+              case Failure(e)        ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
+              case Success(Left(e))  ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
+              case Success(Right(_)) ⇒ logger.info(s"Process started to set ITMP flag", nino)
+            }
           }
-        }
 
-        SeeOther(frontendAppConfig.nsiManageAccountUrl)
+          SeeOther(frontendAppConfig.nsiManageAccountUrl)
 
-      case EnrolmentStatus.NotEnrolled ⇒
-        ifNotEnrolled()
-    }
-    ).flatMap(identity)
+        case EnrolmentStatus.NotEnrolled ⇒
+          ifNotEnrolled()
+      }
+      .merge
   }
 
   def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result])(

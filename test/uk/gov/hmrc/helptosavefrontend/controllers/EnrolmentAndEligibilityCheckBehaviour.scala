@@ -40,7 +40,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   def mockWriteITMPFlag(result: Option[Either[String, Unit]]): Unit =
     (mockHelpToSaveService.setITMPFlag()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
-      .returning(result.fold(EitherT.pure[Future, String, Unit](Future.failed(new Exception)))(r ⇒ EitherT.fromEither[Future](r)))
+      .returning(result.fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r ⇒ EitherT.fromEither[Future](r)))
 
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))

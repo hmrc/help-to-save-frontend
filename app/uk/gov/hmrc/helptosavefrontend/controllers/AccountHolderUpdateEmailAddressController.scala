@@ -201,33 +201,34 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
       maybeEmail ← helpToSaveService.getConfirmedEmail()
     } yield (enrolmentStatus, maybeEmail)
 
-    enrolled.fold[Future[Result]]({
-      error ⇒
-        logger.warn(s"Could not check enrolment status: $error")
-        SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
-    }, {
-      case (enrolmentStatus, maybeEmail) ⇒
-        val nino = htsContext.nino
+    enrolled
+      .leftMap {
+        error ⇒
+          logger.warn(s"Could not check enrolment status: $error")
+          SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+      }
+      .semiflatMap {
+        case (enrolmentStatus, maybeEmail) ⇒
+          val nino = htsContext.nino
 
-        (enrolmentStatus, maybeEmail) match {
-          case (EnrolmentStatus.NotEnrolled, _) ⇒
-            // user is not enrolled in this case
-            logger.warn("SuspiciousActivity: missing HtS enrolment record for user", nino)
-            auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_enrolment"), nino)
-            SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+          (enrolmentStatus, maybeEmail) match {
+            case (EnrolmentStatus.NotEnrolled, _) ⇒
+              // user is not enrolled in this case
+              logger.warn("SuspiciousActivity: missing HtS enrolment record for user", nino)
+              auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_enrolment"), nino)
+              SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
 
-          case (EnrolmentStatus.Enrolled(_), None) ⇒
-            // this should never happen since we cannot have created an account
-            // without a successful write to our email store
-            logger.warn("SuspiciousActivity: user is enrolled but the HtS email record does not exist", nino)
-            auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_email_record"), nino)
-            SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+            case (EnrolmentStatus.Enrolled(_), None) ⇒
+              // this should never happen since we cannot have created an account
+              // without a successful write to our email store
+              logger.warn("SuspiciousActivity: user is enrolled but the HtS email record does not exist", nino)
+              auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_email_record"), nino)
+              SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
 
-          case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
-            ifEnrolled(email)
-
-        }
-    }).flatMap(identity)
+            case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
+              ifEnrolled(email)
+          }
+      }.merge
   }
 
 }

@@ -19,9 +19,8 @@ val dependencies = Seq(
   ws,
   "uk.gov.hmrc" %% "govuk-template" % "5.18.0",
   "uk.gov.hmrc" %% "http-caching-client" % "7.1.0",
-  "org.typelevel" %% "cats" % "0.9.0",
+  "org.typelevel" %% "cats-core" % "1.1.0",
   "uk.gov.hmrc" %% "auth-client" % "2.5.0",
-  "uk.gov.hmrc" %% "domain" % "5.1.0",
   "com.github.kxbmap" %% "configs" % "0.4.4",
   "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
@@ -32,14 +31,12 @@ val dependencies = Seq(
 )
 
 def testDependencies(scope: String = "test") = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
-  "org.scalatest" %% "scalatest" % "3.0.4" % scope,
-  "org.jsoup" % "jsoup" % "1.8.1" % scope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % scope,
+  "uk.gov.hmrc" %% "domain" % "5.1.0" % scope,
+  "org.scalatest" %% "scalatest" % "3.0.5" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
-  "uk.gov.hmrc" %% "stub-data-generator" % "0.4.0" % scope,
-  "com.typesafe.akka" %% "akka-testkit" % "2.3.11" % scope,
-  "com.miguno.akka" % "akka-mock-scheduler_2.11" % "0.5.1" % scope,
+  "uk.gov.hmrc" %% "stub-data-generator" % "0.5.3" % scope,
   // below for selenium tests
   "info.cukes" % "cucumber-junit" % "1.2.4" % scope,
   "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
@@ -144,7 +141,7 @@ lazy val microservice = Project(appName, file("."))
       Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
   )
   .settings(
-    libraryDependencies ++= appDependencies,
+      libraryDependencies ++= appDependencies,
     //retrieveManaged := true,
     evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     //testGrouping in Test := oneForkedJvmPerTest((definedTests in Test).value),

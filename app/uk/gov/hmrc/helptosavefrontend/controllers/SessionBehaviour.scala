@@ -39,15 +39,14 @@ trait SessionBehaviour {
       htsContext:  HtsContextWithNINO,
       hc:          HeaderCarrier,
       request:     Request[_],
-      transformer: NINOLogMessageTransformer): Future[Result] = {
-    sessionCacheConnector.get.fold({
-      e ⇒
-        logger.warn(s"Could not read sessions data from keystore: $e", htsContext.nino)
-        toFuture(internalServerError())
-    }, _.fold(noSession)(whenSession)
-    ).flatMap(identity)
-
-  }
+      transformer: NINOLogMessageTransformer): Future[Result] =
+    sessionCacheConnector.get
+      .semiflatMap(_.fold(noSession)(whenSession))
+      .leftMap{
+        e ⇒
+          logger.warn(s"Could not read sessions data from keystore: $e", htsContext.nino)
+          internalServerError()
+      }.merge
 
   def checkHasDoneEligibilityChecks(noSession: ⇒ Future[Result])(hasDoneChecks: SessionWithEligibilityCheck ⇒ Future[Result])(
       implicit
