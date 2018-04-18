@@ -59,7 +59,6 @@ class CrossBrowserCompatibilitySteps extends Steps {
     ApplyPage.clickSignInLink()
 
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
-    //YouDoNotHaveAnAccountPage.clickContinue()
     Browser.goTo(s"${Configuration.host}/help-to-save/check-eligibility")
 
     Browser.checkCurrentPageIs(EligiblePage)
