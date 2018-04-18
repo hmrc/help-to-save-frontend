@@ -11,6 +11,7 @@ GET        /how-we-calculate-bonuses                        @uk.gov.hmrc.helptos
 GET        /apply                                           @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
 POST       /apply                                           @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.applySubmit
 
+GET        /sign-in                                         @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getSignInPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET        /no-account                                      @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getNoAccountPage
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
