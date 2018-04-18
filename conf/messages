@@ -258,7 +258,7 @@ hts.register.total-cap-reached.exit.gov.uk=Exit to GOV.UK
 
 hts.register.service-unavailable.header.page.title=Help to Save - Service Unavailable
 hts.register.service-unavailable.header=Service Unavailable.
-hts.register.service-unavailable.p1=Please try again later.
+hts.register.service-unavailable.p1=You''ll be able to use the Help to Save service later.
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
 hts.register.create_account_help_to_save.title=You''re about to create a Help to Save account
