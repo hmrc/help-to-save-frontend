@@ -47,7 +47,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
         val result = controller.getSignInPage()(FakeRequest())
         status(result) shouldBe OK
-        contentAsString(result) should include("Sign in to your Help to Save Account")
+        contentAsString(result) should include("Sign in to your Help to Save account")
 
       }
     }
@@ -98,7 +98,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
         val result = doRequestWithCSRFToken()
         status(result) shouldBe 200
-        contentAsString(result) should include("If you want to apply for an account, you should continue")
+        contentAsString(result) should include("You do not have a Help to Save account")
       }
 
       "redirect to accessAccount if there is an error checking eligibility" in {
