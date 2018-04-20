@@ -421,6 +421,13 @@ hts.email-verification.existing-user.check-your-email.content2=You have 30 minut
 hts.email-verification.existing-user.check-your-email.where-used-heading=Where your email address is updated
 hts.email-verification.existing-user.check-your-email.where-used=We''ll only use this email address for your Help to Save account. The email addresses you use for other government services won''t change.
 
+hts.email-verification.link-expired.title=This link has expired
+hts.email-verification.link-expired.h1=This link has expired
+hts.email-verification.link-expired.p1=Were you looking for a link to your Help to Save account? If yes, you should go to your account.
+hts.email-verification.link-expired.button=Go to your account
+hts.email-verification.link-expired.p2=Exit to GOV.UK
+
+
 hts.email-updated.page-title=Email address verified 
 hts.email-updated.title=Email address verified
 hts.email-updated.p1=If you create a Help to Save account we''ll use this email address to contact you about it.

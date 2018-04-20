@@ -31,6 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.CannotCreateAccountReason
 import uk.gov.hmrc.helptosavefrontend.forms.EmailVerificationErrorContinueForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
@@ -122,28 +123,54 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.verifyEmailError().url)
 
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    handleEmailVerified(
-      emailVerificationParams,
-      { params ⇒
-        val result: EitherT[Future, String, Either[Ineligible, UserInfo]] = for {
-          session ← sessionCacheConnector.get
-          userInfo ← updateSession(session, params)
-        } yield userInfo
+    val result: EitherT[Future, String, Result] =
+      for {
+        s ← helpToSaveService.getUserEnrolmentStatus()
+        r ← handleCallback(s, emailVerificationParams)
+      } yield r
 
-        result.fold({
-          e ⇒
-            logger.warn(e)
-            internalServerError()
-        }, { maybeNSIUserInfo ⇒
-          maybeNSIUserInfo.fold(
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-            _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
-          )
-        })
-      },
-      toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
-    )
+    result.leftMap{ e ⇒
+      logger.warn(e)
+      internalServerError()
+    }.merge
   }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(emailVerificationParams).url)
+
+  def handleCallback(status: EnrolmentStatus, emailVerificationParams: String)(
+      implicit
+      hc: HeaderCarrier, h: HtsContextWithNINOAndUserDetails, request: Request[AnyContent]): EitherT[Future, String, Result] =
+    status.fold[EitherT[Future, String, Result]](
+      //new applicant
+      {
+        withEmailVerificationParameters(
+          emailVerificationParams,
+          { params ⇒
+            val result: EitherT[Future, String, Either[CannotCreateAccountReason, UserInfo]] = for {
+              session ← sessionCacheConnector.get
+              userInfo ← updateSession(session, params)
+            } yield userInfo
+
+            result.map{ maybeNSIUserInfo ⇒
+              maybeNSIUserInfo.fold({
+                createAccountVoid ⇒
+                  createAccountVoid.result.fold(
+                    _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url),
+                    _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url)
+                  )
+              },
+                {
+                  _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
+                })
+            }
+          }, EitherT.pure[Future, String, Result](SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
+        )
+      }, _ ⇒
+        //existing account holder
+        EitherT.pure[Future, String, Result](SeeOther(routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url))
+    )
+
+  val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.link_expired())
+  }(redirectOnLoginURL = routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url)
 
   def getEmailVerified: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkEnrolledAndSession {
@@ -176,26 +203,26 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   private def getEligibleUserInfo(session: Option[HTSSession])(
       implicit
       htsContext: HtsContextWithNINOAndUserDetails,
-      hc:         HeaderCarrier): EitherT[Future, String, Either[Ineligible, EligibleWithUserInfo]] = session.flatMap(_.eligibilityCheckResult) match {
+      hc:         HeaderCarrier): EitherT[Future, String, Either[CannotCreateAccountReason, EligibleWithUserInfo]] = session.flatMap(_.eligibilityCheckResult) match {
 
     case Some(eligibilityCheckResult) ⇒
       EitherT.fromEither[Future](
-        eligibilityCheckResult.fold[Either[String, Either[Ineligible, EligibleWithUserInfo]]](
-          r ⇒ Right(Left(r)), // IMPOSSIBLE - this means they are ineligible
+        eligibilityCheckResult.fold[Either[String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
+          r ⇒ Right(Left(CannotCreateAccountReason(r))), // IMPOSSIBLE - this means they are ineligible
           e ⇒ Right(Right(e))
         ))
 
     case None ⇒
-      htsContext.userDetails.fold[EitherT[Future, String, Either[Ineligible, EligibleWithUserInfo]]](
+      htsContext.userDetails.fold[EitherT[Future, String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
         missingInfos ⇒ EitherT.fromEither[Future](Left(s"Missing user info: ${missingInfos.missingInfo}")),
         userInfo ⇒
           EitherT(
             helpToSaveService.checkEligibility().value.map {
-              _.fold[Either[String, Either[Ineligible, EligibleWithUserInfo]]](
+              _.fold[Either[String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
                 Left(_), {
                   case e: Eligible          ⇒ Right(Right(EligibleWithUserInfo(e, userInfo)))
-                  case i: Ineligible        ⇒ Right(Left(i))
-                  case AlreadyHasAccount(_) ⇒ Left("User already has account")
+                  case i: Ineligible        ⇒ Right(Left(CannotCreateAccountReason(i)))
+                  case a: AlreadyHasAccount ⇒ Right(Left(CannotCreateAccountReason(a)))
                 }
               )
             }
@@ -207,12 +234,12 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                             params:  EmailVerificationParams)(
       implicit
       htsContext: HtsContextWithNINOAndUserDetails,
-      hc:         HeaderCarrier): EitherT[Future, String, Either[Ineligible, UserInfo]] = {
+      hc:         HeaderCarrier): EitherT[Future, String, Either[CannotCreateAccountReason, UserInfo]] = {
 
     getEligibleUserInfo(session).flatMap { e ⇒
-      val result: Either[Ineligible, EitherT[Future, String, UserInfo]] = e.map { eligibleWithUserInfo ⇒
+      val result: Either[CannotCreateAccountReason, EitherT[Future, String, UserInfo]] = e.map { eligibleWithUserInfo ⇒
         if (eligibleWithUserInfo.userInfo.nino =!= params.nino) {
-          EitherT.fromEither[Future](Left[String, UserInfo]("NINO in confirm details parameters did not match NINO from auth"))
+          EitherT.fromEither[Future](Left("NINO in confirm details parameters did not match NINO from auth"))
         } else {
           val newInfo = eligibleWithUserInfo.userInfo.updateEmail(params.email)
           val newSession = HTSSession(Some(Right(eligibleWithUserInfo.copy(userInfo = newInfo))),
@@ -223,9 +250,19 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           } yield newInfo
         }
       }
-      result.traverse[EitherTResult, Ineligible, UserInfo](identity)
+      result.traverse[EitherTResult, CannotCreateAccountReason, UserInfo](identity)
     }
   }
 
 }
 
+object NewApplicantUpdateEmailAddressController {
+
+  private case class CannotCreateAccountReason(result: Either[AlreadyHasAccount, Ineligible])
+
+  private object CannotCreateAccountReason {
+    def apply(ineligible: Ineligible): CannotCreateAccountReason = CannotCreateAccountReason(Right(ineligible))
+    def apply(alreadyHasAccount: AlreadyHasAccount): CannotCreateAccountReason = CannotCreateAccountReason(Left(alreadyHasAccount))
+  }
+
+}

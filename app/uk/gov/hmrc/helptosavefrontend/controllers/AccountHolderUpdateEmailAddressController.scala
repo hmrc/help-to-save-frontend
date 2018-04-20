@@ -110,11 +110,14 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getCheckYourEmail().url)
 
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    handleEmailVerified(
+    withEmailVerificationParameters(
       emailVerificationParams,
-      params ⇒ checkIfAlreadyEnrolled(oldEmail ⇒ handleEmailVerified(params, oldEmail)),
-      toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
-    )
+      params ⇒ EitherT.right(checkIfAlreadyEnrolled(oldEmail ⇒ handleEmailVerified(params, oldEmail))),
+      EitherT.right(toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)))
+    ).leftMap{ e ⇒
+        logger.warn(e)
+        internalServerError()
+      }.merge
   }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerifiedCallback(emailVerificationParams).url)
 
   def getEmailVerified: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
