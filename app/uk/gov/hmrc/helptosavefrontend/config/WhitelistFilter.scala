@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import akka.stream.Materializer
+import com.google.inject.Inject
 import configs.syntax._
 import play.api.Configuration
 import play.api.mvc.{Call, RequestHeader, Result, Results}
@@ -26,7 +27,7 @@ import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter
 
 import scala.concurrent.Future
 
-class WhitelistFilter(configuration: Configuration, val mat: Materializer) extends AkamaiWhitelistFilter with Logging {
+class WhitelistFilter @Inject() (configuration: Configuration, val mat: Materializer) extends AkamaiWhitelistFilter with Logging {
 
   override def whitelist: Seq[String] =
     configuration.underlying.get[List[String]]("http-header-ip-whitelist").value
