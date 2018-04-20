@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+package uk.gov.hmrc.helptosavefrontend.auth
 
 import akka.util.Timeout
 import play.api.http.Status
@@ -22,19 +22,34 @@ import play.api.libs.json.Json
 import play.api.mvc.Results.{InternalServerError, Ok}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
+import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, BaseController}
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.util.{toJavaDate, urlEncode}
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toJavaDate, urlEncode}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 class HelpToSaveAuthSpec extends AuthSupport {
 
-  val htsAuth = new HelpToSaveAuth(mockAuthConnector, mockMetrics)
+  class HtsAuth extends BaseController with HelpToSaveAuth {
+    override implicit val metrics: Metrics = mockMetrics
+    override implicit val transformer: NINOLogMessageTransformer = ninoLogMessageTransformer
+
+    override def authConnector: AuthConnector = mockAuthConnector
+
+    override def config: Configuration = configuration
+
+    override def env: Environment = environment
+  }
+
+  val htsAuth = new HtsAuth
 
   private def actionWithNoEnrols = htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Future.successful(Ok(""))

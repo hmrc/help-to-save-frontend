@@ -24,9 +24,9 @@ object YouDoNotHaveAnAccountPage extends Page {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/no-account"
 
-  override val expectedPageTitle: Option[String] = Some("You don't have a Help to Save account")
+  override val expectedPageTitle: Option[String] = Some("You do not have a Help to Save account")
 
-  override val expectedPageHeader: Option[String] = Some("You don't have a Help to Save account")
+  override val expectedPageHeader: Option[String] = Some("You do not have a Help to Save account")
 
   def clickContinue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 

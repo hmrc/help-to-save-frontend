@@ -16,24 +16,24 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import javax.inject.Singleton
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
-import play.api.Application
-import play.api.i18n.{I18nSupport, MessagesApi}
+import javax.inject.Singleton
+import play.api.i18n.MessagesApi
 import play.api.mvc._
+import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
-import uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.CreateAccountVoid
+import uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.CannotCreateAccountReason
 import uk.gov.hmrc.helptosavefrontend.forms.EmailVerificationErrorContinueForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
@@ -45,20 +45,22 @@ import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnector:      SessionCacheConnector,
                                                           val helpToSaveService:          HelpToSaveService,
-                                                          authConnector:                  AuthConnector,
+                                                          val authConnector:              AuthConnector,
                                                           val emailVerificationConnector: EmailVerificationConnector,
-                                                          metrics:                        Metrics,
+                                                          val metrics:                    Metrics,
                                                           val auditor:                    HTSAuditor)(implicit app: Application,
                                                                                                       override val messagesApi: MessagesApi,
                                                                                                       crypto:                   Crypto,
-                                                                                                      transformer:              NINOLogMessageTransformer,
-                                                                                                      val frontendAppConfig:    FrontendAppConfig)
-  extends HelpToSaveAuth(authConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour with I18nSupport {
+                                                                                                      val transformer:          NINOLogMessageTransformer,
+                                                                                                      val frontendAppConfig:    FrontendAppConfig,
+                                                                                                      val config:               Configuration,
+                                                                                                      val env:                  Environment)
+  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
 
   private def checkEnrolledAndSession(ifEligible: (UserInfo, Option[Email], Option[Email]) ⇒ Future[Result])(implicit request: Request[AnyContent],
                                                                                                              htsContext: HtsContextWithNINO): Future[Result] =
@@ -142,7 +144,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
         withEmailVerificationParameters(
           emailVerificationParams,
           { params ⇒
-            val result: EitherT[Future, String, Either[CreateAccountVoid, UserInfo]] = for {
+            val result: EitherT[Future, String, Either[CannotCreateAccountReason, UserInfo]] = for {
               session ← sessionCacheConnector.get
               userInfo ← updateSession(session, params)
             } yield userInfo
@@ -201,26 +203,26 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   private def getEligibleUserInfo(session: Option[HTSSession])(
       implicit
       htsContext: HtsContextWithNINOAndUserDetails,
-      hc:         HeaderCarrier): EitherT[Future, String, Either[CreateAccountVoid, EligibleWithUserInfo]] = session.flatMap(_.eligibilityCheckResult) match {
+      hc:         HeaderCarrier): EitherT[Future, String, Either[CannotCreateAccountReason, EligibleWithUserInfo]] = session.flatMap(_.eligibilityCheckResult) match {
 
     case Some(eligibilityCheckResult) ⇒
       EitherT.fromEither[Future](
-        eligibilityCheckResult.fold[Either[String, Either[CreateAccountVoid, EligibleWithUserInfo]]](
-          r ⇒ Right(Left(CreateAccountVoid(r))), // IMPOSSIBLE - this means they are ineligible
+        eligibilityCheckResult.fold[Either[String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
+          r ⇒ Right(Left(CannotCreateAccountReason(r))), // IMPOSSIBLE - this means they are ineligible
           e ⇒ Right(Right(e))
         ))
 
     case None ⇒
-      htsContext.userDetails.fold[EitherT[Future, String, Either[CreateAccountVoid, EligibleWithUserInfo]]](
+      htsContext.userDetails.fold[EitherT[Future, String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
         missingInfos ⇒ EitherT.fromEither[Future](Left(s"Missing user info: ${missingInfos.missingInfo}")),
         userInfo ⇒
           EitherT(
             helpToSaveService.checkEligibility().value.map {
-              _.fold[Either[String, Either[CreateAccountVoid, EligibleWithUserInfo]]](
+              _.fold[Either[String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
                 Left(_), {
                   case e: Eligible          ⇒ Right(Right(EligibleWithUserInfo(e, userInfo)))
-                  case i: Ineligible        ⇒ Right(Left(CreateAccountVoid(i)))
-                  case a: AlreadyHasAccount ⇒ Right(Left(CreateAccountVoid(a)))
+                  case i: Ineligible        ⇒ Right(Left(CannotCreateAccountReason(i)))
+                  case a: AlreadyHasAccount ⇒ Right(Left(CannotCreateAccountReason(a)))
                 }
               )
             }
@@ -232,10 +234,10 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                             params:  EmailVerificationParams)(
       implicit
       htsContext: HtsContextWithNINOAndUserDetails,
-      hc:         HeaderCarrier): EitherT[Future, String, Either[CreateAccountVoid, UserInfo]] = {
+      hc:         HeaderCarrier): EitherT[Future, String, Either[CannotCreateAccountReason, UserInfo]] = {
 
     getEligibleUserInfo(session).flatMap { e ⇒
-      val result: Either[CreateAccountVoid, EitherT[Future, String, UserInfo]] = e.map { eligibleWithUserInfo ⇒
+      val result: Either[CannotCreateAccountReason, EitherT[Future, String, UserInfo]] = e.map { eligibleWithUserInfo ⇒
         if (eligibleWithUserInfo.userInfo.nino =!= params.nino) {
           EitherT.fromEither[Future](Left("NINO in confirm details parameters did not match NINO from auth"))
         } else {
@@ -248,7 +250,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
           } yield newInfo
         }
       }
-      result.traverse[EitherTResult, CreateAccountVoid, UserInfo](identity)
+      result.traverse[EitherTResult, CannotCreateAccountReason, UserInfo](identity)
     }
   }
 
@@ -256,11 +258,11 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
 
 object NewApplicantUpdateEmailAddressController {
 
-  private case class CreateAccountVoid(result: Either[AlreadyHasAccount, Ineligible])
+  private case class CannotCreateAccountReason(result: Either[AlreadyHasAccount, Ineligible])
 
-  private object CreateAccountVoid {
-    def apply(ineligible: Ineligible): CreateAccountVoid = CreateAccountVoid(Right(ineligible))
-    def apply(alreadyHasAccount: AlreadyHasAccount): CreateAccountVoid = CreateAccountVoid(Left(alreadyHasAccount))
+  private object CannotCreateAccountReason {
+    def apply(ineligible: Ineligible): CannotCreateAccountReason = CannotCreateAccountReason(Right(ineligible))
+    def apply(alreadyHasAccount: AlreadyHasAccount): CannotCreateAccountReason = CannotCreateAccountReason(Left(alreadyHasAccount))
   }
 
 }

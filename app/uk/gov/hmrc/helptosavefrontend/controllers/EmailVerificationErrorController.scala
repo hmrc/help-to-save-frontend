@@ -18,9 +18,11 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
 import com.google.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
@@ -28,12 +30,14 @@ import uk.gov.hmrc.helptosavefrontend.util.NINOLogMessageTransformer
 import uk.gov.hmrc.helptosavefrontend.views
 
 class EmailVerificationErrorController @Inject() (helpToSaveService: HelpToSaveService,
-                                                  authConnector:     AuthConnector,
-                                                  metrics:           Metrics)(implicit override val messagesApi: MessagesApi,
-                                                                              transformer:           NINOLogMessageTransformer,
-                                                                              val frontendAppConfig: FrontendAppConfig)
+                                                  val authConnector: AuthConnector,
+                                                  val metrics:       Metrics)(implicit override val messagesApi: MessagesApi,
+                                                                              val transformer:       NINOLogMessageTransformer,
+                                                                              val frontendAppConfig: FrontendAppConfig,
+                                                                              val config:            Configuration,
+                                                                              val env:               Environment)
 
-  extends HelpToSaveAuth(authConnector, metrics) with I18nSupport {
+  extends BaseController with HelpToSaveAuth {
 
   def verifyEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     helpToSaveService.getUserEnrolmentStatus().fold(

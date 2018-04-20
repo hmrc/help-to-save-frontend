@@ -29,7 +29,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.{Application, Configuration, Play}
+import play.api.{Application, Configuration, Environment, Play}
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -97,9 +97,13 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
 
   implicit val messagesApi: MessagesApi = fakeApplication.injector.instanceOf[MessagesApi]
 
-  implicit val transformer: NINOLogMessageTransformer = TestNINOLogMessageTransformer.transformer
+  implicit val ninoLogMessageTransformer: NINOLogMessageTransformer = TestNINOLogMessageTransformer.transformer
 
   implicit lazy val appConfig: FrontendAppConfig = fakeApplication.injector.instanceOf[FrontendAppConfig]
+
+  implicit lazy val configuration: Configuration = appConfig.runModeConfiguration
+
+  implicit lazy val environment: Environment = appConfig.environment
 
   implicit val crypto: Crypto = fakeApplication.injector.instanceOf[Crypto]
 }

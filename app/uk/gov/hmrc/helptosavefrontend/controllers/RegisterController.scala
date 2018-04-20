@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import javax.inject.Singleton
-
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.Inject
-import play.api.Application
-import play.api.i18n.{I18nSupport, MessagesApi}
+import javax.inject.Singleton
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.connectors._
@@ -38,7 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -48,15 +48,17 @@ import scala.util.{Failure, Success}
 @Singleton
 class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
                                     val sessionCacheConnector: SessionCacheConnector,
-                                    authConnector:             AuthConnector,
-                                    metrics:                   Metrics,
+                                    val authConnector:         AuthConnector,
+                                    val metrics:               Metrics,
                                     app:                       Application)(implicit val crypto: Crypto,
                                                                             emailValidation:          EmailValidation,
                                                                             override val messagesApi: MessagesApi,
-                                                                            transformer:              NINOLogMessageTransformer,
-                                                                            val frontendAppConfig:    FrontendAppConfig)
+                                                                            val transformer:          NINOLogMessageTransformer,
+                                                                            val frontendAppConfig:    FrontendAppConfig,
+                                                                            val config:               Configuration,
+                                                                            val env:                  Environment)
 
-  extends HelpToSaveAuth(authConnector, metrics) with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with I18nSupport with Logging {
+  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
 

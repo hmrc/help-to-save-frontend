@@ -30,7 +30,8 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-trait VerifyEmailBehaviour { this: HelpToSaveAuth ⇒
+trait VerifyEmailBehaviour {
+  this: BaseController ⇒
 
   val emailVerificationConnector: EmailVerificationConnector
 

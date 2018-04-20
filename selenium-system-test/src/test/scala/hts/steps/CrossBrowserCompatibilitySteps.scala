@@ -20,8 +20,7 @@ import hts.browser.Browser
 import hts.pages._
 import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
-import hts.utils.ScenarioContext
-import hts.utils.EitherOps._
+import hts.utils.{Configuration, ScenarioContext}
 import org.openqa.selenium.By
 
 class CrossBrowserCompatibilitySteps extends Steps {
@@ -60,7 +59,7 @@ class CrossBrowserCompatibilitySteps extends Steps {
     ApplyPage.clickSignInLink()
 
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
-    YouDoNotHaveAnAccountPage.clickContinue()
+    Browser.goTo(s"${Configuration.host}/help-to-save/check-eligibility")
 
     Browser.checkCurrentPageIs(EligiblePage)
     EligiblePage.detailsNotCorrect()

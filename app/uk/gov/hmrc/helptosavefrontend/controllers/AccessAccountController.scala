@@ -17,21 +17,30 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import com.google.inject.Inject
-import play.api.i18n.{I18nSupport, MessagesApi}
+import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 
 class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveService,
-                                         authConnector:         AuthConnector,
-                                         metrics:               Metrics)(implicit override val messagesApi: MessagesApi, transformer: NINOLogMessageTransformer,
-                                                                         val frontendAppConfig: FrontendAppConfig)
-  extends HelpToSaveAuth(authConnector, metrics) with I18nSupport with Logging with EnrolmentCheckBehaviour {
+                                         val authConnector:     AuthConnector,
+                                         val metrics:           Metrics)(implicit override val messagesApi: MessagesApi,
+                                                                         val transformer:       NINOLogMessageTransformer,
+                                                                         val frontendAppConfig: FrontendAppConfig,
+                                                                         val config:            Configuration,
+                                                                         val env:               Environment)
+  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour {
+
+  def getSignInPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    Ok(views.html.sign_in())
+  }
 
   def accessAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({

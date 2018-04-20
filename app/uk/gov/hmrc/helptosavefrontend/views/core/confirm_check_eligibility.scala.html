@@ -29,20 +29,11 @@
     </h1>
 
     <p class="lede">@Messages("hts.no-account.p1")</p>
-
-    <h2>@Messages("hts.no-account.h2")</h2>
-
     <p>@Messages("hts.no-account.p2")</p>
 
-    @helpers.form(routes.EligibilityCheckController.getCheckEligibility()){
-        <div class="form-group subsection--wide">
-            <button id="continue" class="button subsection--wide" type="submit">@Messages("hts.no-account.continue_button")</button>
-        </div>
-    }
+    <h2>@Messages("hts.no-account.h2")</h2>
+    <p>@Messages("hts.no-account.p3")</p>
 
-    <p>
-        <a href=@routes.IntroductionController.getAboutHelpToSave().url
-           id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a>
-    </p>
+    <p><a href="https://www.gov.uk/" id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a></p>
 
 }

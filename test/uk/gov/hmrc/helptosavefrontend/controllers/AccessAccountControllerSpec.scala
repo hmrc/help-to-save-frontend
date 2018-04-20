@@ -19,10 +19,15 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+
+import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with SessionCacheBehaviour with CSRFSupport {
 
@@ -32,6 +37,20 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     mockMetrics)
 
   "The AccessAccountController" when {
+
+    "handling getSignInPage" must {
+
+      "return the sign in page" in {
+        (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(EmptyPredicate, EmptyRetrieval, *, *)
+          .returning(())
+
+        val result = controller.getSignInPage()(FakeRequest())
+        status(result) shouldBe OK
+        contentAsString(result) should include("Sign in to your Help to Save account")
+
+      }
+    }
 
     "handling accessAccount" must {
 
@@ -79,7 +98,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
         val result = doRequestWithCSRFToken()
         status(result) shouldBe 200
-        contentAsString(result) should include("If you want to apply for an account, you should continue")
+        contentAsString(result) should include("You do not have a Help to Save account")
       }
 
       "redirect to accessAccount if there is an error checking eligibility" in {

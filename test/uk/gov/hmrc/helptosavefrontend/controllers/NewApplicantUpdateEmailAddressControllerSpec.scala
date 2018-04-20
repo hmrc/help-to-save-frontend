@@ -134,7 +134,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, Some(email)))))
             mockEmailVerificationConn(nino, email, firstName)(Left(AlreadyVerified))
           }
-          val result = await(controller.verifyEmail(FakeRequest()))(10.seconds)
+          val result = await(controller.verifyEmail(FakeRequest()))(15.seconds)
           status(result) shouldBe Status.SEE_OTHER
 
           val redirectURL = redirectLocation(result)
@@ -474,7 +474,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         }
         val result = controller.getLinkExpiredPage(fakeRequestWithCSRFToken)
         status(result) shouldBe OK
-        contentAsString(result) should include("How To Access My Account")
+        contentAsString(result) should include("Were you looking for a link to your Help to Save account")
       }
     }
 
