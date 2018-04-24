@@ -215,7 +215,11 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
               logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
               SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             }, { _ ⇒
-              logger.info("Successfully created account", nino)
+              val eligibilityCheckResult = eligibleWithEmail.eligible.value
+              logger.info(s"Successfully created account - eligibility reason was ${eligibilityCheckResult.reasonCode}: " +
+                s"${eligibilityCheckResult.reason}", nino)
+
+              metrics.accountsCreatedEligibilityReasonHistogram.update(eligibilityCheckResult.reasonCode)
 
               helpToSaveService.updateUserCount().value.onFailure {
                 case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
