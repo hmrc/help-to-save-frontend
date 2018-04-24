@@ -187,7 +187,8 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
       def testIndividualPage(name:                      String, // scalastyle:ignore method.length
                              getResult:                 () ⇒ Future[Result],
-                             mockSessionCacheBehaviour: Option[() ⇒ Unit])(
+                             mockSessionCacheBehaviour: Option[() ⇒ Unit],
+                             defaultUrl:                String              = ivController.defaultIVUrl)(
           successChecks: Future[Result] ⇒ Unit): Unit = {
         s"handling $name" must {
 
@@ -223,7 +224,10 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
                   mockSessionCacheConnectorGet(Right(None))
                 }
 
-                checkIsTechnicalErrorPage(getResult())
+                val result = getResult()
+
+                status(result) shouldBe SEE_OTHER
+                redirectLocation(result) shouldBe Some(defaultUrl)
               }
 
               "the data required is not present in the session" in {
@@ -244,7 +248,8 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
     testIndividualPage(
       "IV successful",
       () ⇒ ivController.getIVSuccessful()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, None, Some(url))))))
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, None, Some(url)))))),
+      ivController.eligibilityUrl
     ) { result ⇒
         status(result) shouldBe OK
         contentAsString(result) should include(url)

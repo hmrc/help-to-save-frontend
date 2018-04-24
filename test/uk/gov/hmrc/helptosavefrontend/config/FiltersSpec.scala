@@ -58,7 +58,7 @@ class FiltersSpec extends TestSupport {
   "Filters" must {
 
     "include the whitelist filter if the whitelist from config is non empty" in {
-      val config = Configuration("http-header-ip-whitelist" → List("1.2.3.4"))
+      val config = Configuration("http-header-ip-whitelist" → List("1.2.3"))
 
       val filters = new Filters(config, whiteListFilter, frontendFilters)
       filters.filters shouldBe Seq(whiteListFilter)
