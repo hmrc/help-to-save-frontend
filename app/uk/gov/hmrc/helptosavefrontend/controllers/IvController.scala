@@ -46,6 +46,10 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
                                                                   val env:               Environment)
   extends BaseController with HelpToSaveAuth {
 
+  val eligibilityUrl: String = routes.EligibilityCheckController.getCheckEligibility().url
+
+  val defaultIVUrl: String = appConfig.ivUrl(eligibilityUrl)
+
   def journeyResult(continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
                     journeyId:   Option[String]): Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
@@ -126,18 +130,18 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
 
   def getIVSuccessful: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivSuccessURL)(u ⇒ Ok(iv_success(u)))
+      retrieveURLFromSessionCache(_.ivSuccessURL, eligibilityUrl)(u ⇒ Ok(iv_success(u)))
 
     }(routes.IvController.getIVSuccessful().url)
 
   def getFailedMatching: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(failed_matching(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(failed_matching(u)))
     }(routes.IvController.getFailedMatching().url)
 
   def getFailedIV: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(failed_iv(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(failed_iv(u)))
     }(routes.IvController.getFailedIV().url)
 
   def getInsufficientEvidence: Action[AnyContent] =
@@ -150,17 +154,17 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
 
   def getUserAborted: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(user_aborted(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(user_aborted(u)))
     }(routes.IvController.getUserAborted().url)
 
   def getTimedOut: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(time_out(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(time_out(u)))
     }(routes.IvController.getTimedOut().url)
 
   def getTechnicalIssue: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL)(u ⇒ Ok(technical_iv_issues(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(technical_iv_issues(u)))
     }(routes.IvController.getTechnicalIssue().url)
 
   def getPreconditionFailed: Action[AnyContent] =
@@ -180,7 +184,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
       SeeOther(redirectTo)
     )
 
-  private def retrieveURLFromSessionCache(url: HTSSession ⇒ Option[String])(f: String ⇒ Result)(
+  private def retrieveURLFromSessionCache(url: HTSSession ⇒ Option[String], defaultUrl: String)(f: String ⇒ Result)(
       implicit
       request: Request[_],
       hc:      HeaderCarrier
@@ -190,10 +194,18 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
         logger.warn(s"Could not retrieve data from session cache: $e")
         internalServerError()
     }, {
-      _.flatMap(url).fold {
-        logger.warn("Could not find session data")
-        internalServerError()
-      }(f)
+      mayBeSession ⇒
+        mayBeSession.fold {
+          logger.warn(s"no session found for user in the keystore, redirecting to $defaultUrl")
+          SeeOther(defaultUrl)
+        } { session ⇒
+          url(session).fold {
+            logger.warn("session exists in the keystore but required information is not found")
+            internalServerError()
+          }(
+            f
+          )
+        }
     })
 
 }

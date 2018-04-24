@@ -223,7 +223,10 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
                   mockSessionCacheConnectorGet(Right(None))
                 }
 
-                checkIsTechnicalErrorPage(getResult())
+                val result = getResult()
+
+                status(result) shouldBe SEE_OTHER
+                List(Some(ivController.eligibilityUrl), Some(ivController.defaultIVUrl)) should contain(redirectLocation(result))
               }
 
               "the data required is not present in the session" in {
