@@ -26,7 +26,7 @@ import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.SubmissionFailure
+import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, GiveEmailForm, SelectEmailForm}
@@ -38,7 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -214,31 +214,39 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
             helpToSaveService.createAccount(userInfo).fold[Result]({ e ⇒
               logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
               SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
-            }, { _ ⇒
-              val eligibilityCheckResult = eligibleWithEmail.eligible.value
-              logger.info(s"Successfully created account - eligibility reason was ${eligibilityCheckResult.reasonCode}: " +
-                s"${eligibilityCheckResult.reason}", nino)
-
-              metrics.accountsCreatedEligibilityReasonHistogram.update(eligibilityCheckResult.reasonCode)
-
-              helpToSaveService.updateUserCount().value.onFailure {
-                case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
-              }
-
-              helpToSaveService.enrolUser().value.onComplete {
-                case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
-                case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
-                case Success(Right(_)) ⇒ logger.debug(s"Process started to enrol user", nino)
-              }
-
-              SeeOther(frontendAppConfig.nsiManageAccountUrl)
-            })
+            },
+              handleSuccessfulCreateAccountResult(_, eligibleWithEmail, nino)
+            )
           }
       } { _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.createAccountHelpToSave().url)
+
+  private def handleSuccessfulCreateAccountResult(submissionSuccess: SubmissionSuccess,
+                                                  eligibleWithEmail: EligibleWithEmail,
+                                                  nino:              NINO)(implicit hc: HeaderCarrier): Result = {
+    if (!submissionSuccess.alreadyHadAccount) {
+      val eligibilityCheckResult = eligibleWithEmail.eligible.value
+      logger.info(s"Successfully created account - eligibility reason was ${eligibilityCheckResult.reasonCode}: " +
+        s"${eligibilityCheckResult.reason}", nino)
+
+      metrics.accountsCreatedEligibilityReasonHistogram.update(eligibilityCheckResult.reasonCode)
+
+      helpToSaveService.updateUserCount().value.onFailure {
+        case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
+      }
+
+      helpToSaveService.enrolUser().value.onComplete {
+        case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
+        case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
+        case Success(Right(_)) ⇒ logger.debug(s"Process started to enrol user", nino)
+      }
+    }
+
+    SeeOther(frontendAppConfig.nsiManageAccountUrl)
+  }
 
   def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
