@@ -66,6 +66,8 @@ class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
 
   val authTimer: Timer = timer("frontend.auth-timer")
 
+  val accountsCreatedEligibilityReasonHistogram: Histogram = histogram("frontend.account-created.eligibility-reason")
+
 }
 
 object Metrics {
