@@ -63,7 +63,7 @@ class RegisterControllerSpec
 
   lazy val controller: RegisterController = newController(earlyCapCheck = false)(crypto)
 
-  def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess())): Unit =
+  def mockCreateAccount(nSIUserInfo: NSIUserInfo)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess(false))): Unit =
     (mockHelpToSaveService.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
       .expects(nSIUserInfo, *, *)
       .returning(EitherT.fromEither[Future](response))
@@ -660,6 +660,19 @@ class RegisterControllerSpec
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
         }
+
+      "not update user counts and not enrol the user if the user already had an account" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
+          mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Right(SubmissionSuccess(alreadyHadAccount = true)))
+        }
+
+        val result = doCreateAccountRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
+      }
 
       "redirect the user to the confirm details page if the session indicates they have not done so already" in {
         inSequence {

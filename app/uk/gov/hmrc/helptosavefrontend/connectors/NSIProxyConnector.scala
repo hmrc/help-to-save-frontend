@@ -44,7 +44,7 @@ object NSIProxyConnector {
 
   sealed trait SubmissionResult
 
-  case class SubmissionSuccess() extends SubmissionResult
+  case class SubmissionSuccess(alreadyHadAccount: Boolean) extends SubmissionResult
 
   case class SubmissionFailure(errorMessageId: Option[String], errorMessage: String, errorDetail: String) extends SubmissionResult
 
@@ -60,8 +60,11 @@ class NSIProxyConnectorImpl @Inject() (http: WSHttp)(implicit transformer: NINOL
     http.post(frontendAppConfig.nsiCreateAccountUrl, userInfo).map[SubmissionResult] { response ⇒
 
       response.status match {
-        case Status.CREATED | Status.CONFLICT ⇒
-          SubmissionSuccess()
+        case Status.CREATED ⇒
+          SubmissionSuccess(false)
+
+        case Status.CONFLICT ⇒
+          SubmissionSuccess(true)
 
         case _ ⇒
           handleError(response)

@@ -101,13 +101,13 @@ class NSIProxyConnectorSpec extends TestSupport with MockFactory with GeneratorD
     "Return a SubmissionSuccess when the status is Created" in {
       mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.CREATED)))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
+      Await.result(result, 3.seconds) shouldBe SubmissionSuccess(alreadyHadAccount = false)
     }
 
     "Return a SubmissionSuccess when the status is CONFLICT" in {
       mockPost(validNSIUserInfo, nsiCreateAccountUrl)(Right(HttpResponse(Status.CONFLICT)))
       val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
-      Await.result(result, 3.seconds) shouldBe SubmissionSuccess()
+      Await.result(result, 3.seconds) shouldBe SubmissionSuccess(alreadyHadAccount = true)
     }
 
     "return a SubmissionFailure" when {
@@ -145,7 +145,7 @@ class NSIProxyConnectorSpec extends TestSupport with MockFactory with GeneratorD
 
         val result = testNSAndIConnectorImpl.createAccount(validNSIUserInfo)
         Await.result(result, 3.seconds) match {
-          case SubmissionSuccess()  ⇒ fail()
+          case SubmissionSuccess(_) ⇒ fail()
           case _: SubmissionFailure ⇒ ()
         }
       }

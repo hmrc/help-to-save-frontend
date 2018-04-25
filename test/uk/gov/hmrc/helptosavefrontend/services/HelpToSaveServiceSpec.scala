@@ -138,12 +138,13 @@ class HelpToSaveServiceSpec extends TestSupport {
       val nsiUserInfo = validNSIUserInfo
 
       "return a successful response" in {
+        List(true, false).foreach{ alreadyHadAccount ⇒
+          (nsiConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
+            .returning(Future.successful(SubmissionSuccess(alreadyHadAccount)))
 
-        (nsiConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
-          .returning(Future.successful(SubmissionSuccess()))
-
-        val result = htsService.createAccount(nsiUserInfo)
-        result.value.futureValue should be(Right(SubmissionSuccess()))
+          val result = htsService.createAccount(nsiUserInfo)
+          result.value.futureValue should be(Right(SubmissionSuccess(alreadyHadAccount)))
+        }
 
       }
 
