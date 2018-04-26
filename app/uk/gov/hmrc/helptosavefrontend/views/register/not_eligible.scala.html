@@ -32,7 +32,7 @@
 
 
   @if(ineligibilityReason === NotEntitledToWTCAndUCInsufficient) {
-    <p>@messages("hts.core.not-eligible.uc.p-1")</p>
+      <p>@messages("hts.core.not-eligible.uc.p-1")</p>
 
     <p>@messages("hts.core.not-eligible.uc.p-2")
       <a href=@routes.IntroductionController.getEligibility().url
@@ -48,8 +48,8 @@
     <p>@messages("hts.core.not-eligible.uc.p-4")
       <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.uc.link-2")</a> @Messages("hts.core.not-eligible.uc.p-4-2")</p>
 
-  } else { @if(ineligibilityReason === EntitledToWTCNoTCAndInsufficientUC) {
-    <p>@messages("hts.core.not-eligible.wtc.uc.p1")</p>
+  } else { @if(ineligibilityReason === EntitledToWTCNoTCAndInsufficientUC || ineligibilityReason === NotEntitledToWTCAndNoUC) {
+      <p>@messages("hts.core.not-eligible.wtc.uc.p1")</p>
 
     <ul class="list list-bullet">
       <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li1")</li>
@@ -68,7 +68,7 @@
     <p>@Messages("hts.core.not-eligible.wtc.uc.p4")
       <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.wtc.uc.p4-link")</a> @Messages("hts.core.not-eligible.wtc.uc.p4-2")</p>
   } else {
-    <p>@Messages("hts.core.not-eligible.wtc.p-1")</p>
+      <p>@Messages("hts.core.not-eligible.wtc.p-1")</p>
 
     <p>@Messages("hts.core.not-eligible.wtc.p-2")
       <a href=@routes.IntroductionController.getEligibility().url
