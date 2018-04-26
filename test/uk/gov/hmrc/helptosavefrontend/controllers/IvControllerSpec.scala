@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import java.net.URLEncoder
 import java.util.UUID.randomUUID
 
-import play.api.mvc.Result
+import play.api.mvc.{AnyContent, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
@@ -188,8 +188,9 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
       def testIndividualPage(name:                      String, // scalastyle:ignore method.length
                              getResult:                 () ⇒ Future[Result],
                              mockSessionCacheBehaviour: Option[() ⇒ Unit],
-                             defaultUrl:                String              = ivController.defaultIVUrl)(
-          successChecks: Future[Result] ⇒ Unit): Unit = {
+                             expectedUrl:               Option[String],
+                             defaultUrl:                Option[String])(
+          successChecks: (Option[String], Future[Result]) ⇒ Unit): Unit = {
         s"handling $name" must {
 
           s"show the correct $name page" in {
@@ -202,7 +203,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
                 }
               }
 
-            successChecks(getResult())
+            successChecks(expectedUrl, getResult())
           }
 
           if (mockSessionCacheBehaviour.isDefined) {
@@ -224,10 +225,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
                   mockSessionCacheConnectorGet(Right(None))
                 }
 
-                val result = getResult()
-
-                status(result) shouldBe SEE_OTHER
-                redirectLocation(result) shouldBe Some(defaultUrl)
+                successChecks(defaultUrl, getResult())
               }
 
               "the data required is not present in the session" in {
@@ -245,42 +243,52 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
 
     val url = "my-url"
 
+      def contentAsStringWithAmpersandsEscaped(result: Future[Result]): String =
+        contentAsString(result).replaceAllLiterally("&amp;", "&")
+
     testIndividualPage(
       "IV successful",
       () ⇒ ivController.getIVSuccessful()(FakeRequest()),
       Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, None, Some(url)))))),
-      ivController.eligibilityUrl
-    ) { result ⇒
+      Some(url),
+      Some(ivController.eligibilityUrl)
+    ) { (maybeUrl, result) ⇒
         status(result) shouldBe OK
-        contentAsString(result) should include(url)
+        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
         contentAsString(result) should include("ve verified your identity")
       }
 
     testIndividualPage(
       "failed matching",
       () ⇒ ivController.getFailedMatching()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
-    ) { result ⇒
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(url),
+      Some(ivController.defaultIVUrl)
+    ) { (maybeUrl, result) ⇒
         status(result) shouldBe OK
-        contentAsString(result) should include(url)
+        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
         contentAsString(result) should include("need to try again and check you entered your details correctly")
       }
 
     testIndividualPage(
       "failed iv",
       () ⇒ ivController.getFailedIV()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
-    ) { result ⇒
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(url),
+      Some(ivController.defaultIVUrl)
+    ) { (maybeUrl, result) ⇒
         status(result) shouldBe OK
-        contentAsString(result) should include(url)
+        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
         contentAsString(result) should include("You did not answer all the questions correctly")
       }
 
     testIndividualPage(
       "insufficient evidence",
       () ⇒ ivController.getInsufficientEvidence()(FakeRequest()),
+      None,
+      None,
       None
-    ) { result ⇒
+    ) { (_, result) ⇒
         status(result) shouldBe OK
         contentAsString(result) should include("be able to apply for a Help to Save account by phone, after")
       }
@@ -288,8 +296,10 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
     testIndividualPage(
       "locked out",
       () ⇒ ivController.getLockedOut()(FakeRequest()),
+      None,
+      None,
       None
-    ) { result ⇒
+    ) { (_, result) ⇒
         status(result) shouldBe OK
         contentAsString(result) should include("You have tried to verify your identity too many times")
       }
@@ -297,38 +307,46 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
     testIndividualPage(
       "user aborted",
       () ⇒ ivController.getUserAborted()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
-    ) { result ⇒
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(url),
+      Some(ivController.defaultIVUrl)
+    ) { (maybeUrl, result) ⇒
         status(result) shouldBe OK
-        contentAsString(result) should include(url)
+        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
         contentAsString(result) should include("You have not provided enough information")
       }
 
     testIndividualPage(
       "timed out",
       () ⇒ ivController.getTimedOut()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
-    ) { result ⇒
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(url),
+      Some(ivController.defaultIVUrl)
+    ) { (maybeUrl, result) ⇒
         status(result) shouldBe OK
-        contentAsString(result) should include(url)
+        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
         contentAsString(result) should include("Your session has ended")
       }
 
     testIndividualPage(
       "technical issue",
       () ⇒ ivController.getTechnicalIssue()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None)))))
-    ) { result ⇒
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(url),
+      Some(ivController.defaultIVUrl)
+    ) { (maybeUrl, result) ⇒
         status(result) shouldBe OK
-        contentAsString(result) should include(url)
+        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
         contentAsString(result) should include("Something went wrong")
       }
 
     testIndividualPage(
       "precondition failed",
       () ⇒ ivController.getPreconditionFailed()(FakeRequest()),
+      None,
+      None,
       None
-    ) { result ⇒
+    ) { (_, result) ⇒
         status(result) shouldBe OK
         contentAsString(result) should include("not able to use this service")
       }

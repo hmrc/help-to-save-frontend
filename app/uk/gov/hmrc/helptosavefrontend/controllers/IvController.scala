@@ -197,7 +197,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
       mayBeSession ⇒
         mayBeSession.fold {
           logger.warn(s"no session found for user in the keystore, redirecting to $defaultUrl")
-          SeeOther(defaultUrl)
+          f(defaultUrl)
         } { session ⇒
           url(session).fold {
             logger.warn("session exists in the keystore but required information is not found")
