@@ -29,7 +29,6 @@ class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenP
     "have a method which converts from Ineligible to IneligibilityType" in {
         def ineligible(reasonCode: Int) = Ineligible(EligibilityCheckResponse("", 0, "", reasonCode))
 
-      IneligibilityReason.fromIneligible(ineligible(2)) shouldBe Some(NotEntitledToWTCAndUnknownUC)
       IneligibilityReason.fromIneligible(ineligible(3)) shouldBe Some(EntitledToWTCNoTCAndNoUC)
       IneligibilityReason.fromIneligible(ineligible(4)) shouldBe Some(EntitledToWTCNoTCAndInsufficientUC)
       IneligibilityReason.fromIneligible(ineligible(5)) shouldBe Some(NotEntitledToWTCAndUCInsufficient)
@@ -44,8 +43,8 @@ class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenP
     }
 
     "have an Eq instance" in {
-      val list = List[IneligibilityReason](NotEntitledToWTCAndUnknownUC, EntitledToWTCNoTCAndNoUC, EntitledToWTCNoTCAndInsufficientUC,
-                                           NotEntitledToWTCAndUCInsufficient, InvalidNino, NotEntitledToWTCAndNoUC)
+      val list = List[IneligibilityReason](EntitledToWTCNoTCAndNoUC, EntitledToWTCNoTCAndInsufficientUC,
+                                           NotEntitledToWTCAndUCInsufficient, NotEntitledToWTCAndNoUC)
 
       val uniquePairs: List[(IneligibilityReason, IneligibilityReason)] =
         list.combinations(2).toList.flatMap(_.permutations.toList).map{ case a :: b :: Nil ⇒ a → b }
