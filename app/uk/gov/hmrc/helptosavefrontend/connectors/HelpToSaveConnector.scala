@@ -21,7 +21,7 @@ import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.{ECResponseHolder, GetEmailResponse}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.MissingUserInfo
@@ -82,12 +82,10 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
   private val updateUserCountURL =
     s"$helpToSaveUrl/help-to-save/update-user-count"
 
-  private val emptyECResponse = EligibilityCheckResponse("No tax credit record found for user's NINO", 2, "", -1)
-
   def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
       eligibilityURL,
-      _.parseJSON[ECResponseHolder]().flatMap(res ⇒ toEligibilityCheckResult(res.response)),
+      _.parseJSON[EligibilityCheckResponse]().flatMap(toEligibilityCheckResult),
       "check eligibility",
       identity
     )
@@ -146,45 +144,17 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
   }
 
   // scalastyle:off magic.number
-  private def toEligibilityCheckResult(response: Option[EligibilityCheckResponse]): Either[String, EligibilityCheckResult] =
-    response.fold[Either[String, EligibilityCheckResult]](Right(EligibilityCheckResult.Ineligible(emptyECResponse))) { r ⇒
-      r.resultCode match {
-        case 1     ⇒ Right(EligibilityCheckResult.Eligible(r))
-        case 2     ⇒ Right(EligibilityCheckResult.Ineligible(r))
-        case 3     ⇒ Right(EligibilityCheckResult.AlreadyHasAccount(r))
-        case 4     ⇒ Left(s"Error while checking eligibility. Received result code 4 (${r.result}) with reason code ${r.reasonCode} (${r.reason})")
-        case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$r'")
-      }
+  private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResult] =
+    response.resultCode match {
+      case 1     ⇒ Right(EligibilityCheckResult.Eligible(response))
+      case 2     ⇒ Right(EligibilityCheckResult.Ineligible(response))
+      case 3     ⇒ Right(EligibilityCheckResult.AlreadyHasAccount(response))
+      case 4     ⇒ Left(s"Error while checking eligibility. Received result code 4 ${response.result}) with reason code ${response.reasonCode} (${response.reason})")
+      case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
     }
 }
 
 object HelpToSaveConnectorImpl {
-
-  private[connectors] case class ECResponseHolder(response: Option[EligibilityCheckResponse])
-
-  private[connectors] object ECResponseHolder {
-
-    implicit val format: Format[ECResponseHolder] = new Format[ECResponseHolder] {
-
-      private val writesInstance = Json.writes[ECResponseHolder]
-
-      override def writes(o: ECResponseHolder): JsValue = writesInstance.writes(o)
-
-      // fail if there is anything other than `response` in the JSON
-      override def reads(json: JsValue): JsResult[ECResponseHolder] = {
-        val map = json.as[JsObject].value
-        map.get("response").fold[JsResult[ECResponseHolder]] {
-          if (map.keySet.nonEmpty) {
-            JsError(s"Unexpected keys: ${map.keySet.mkString(",")}")
-          } else {
-            JsSuccess(ECResponseHolder(None))
-          }
-        } {
-          _.validate[EligibilityCheckResponse].map(r ⇒ ECResponseHolder(Some(r)))
-        }
-      }
-    }
-  }
 
   private[connectors] case class MissingUserInfoSet(missingInfo: Set[MissingUserInfo])
 
