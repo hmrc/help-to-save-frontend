@@ -39,7 +39,7 @@ object TestData {
     } yield Eligible(EligibilityCheckResponse("", 1, "", reasonCode))
 
     implicit val ineligibilityGen: Gen[Ineligible] = for {
-      reasonCode ← Gen.oneOf(2, 3, 4, 5, 9)
+      reasonCode ← Gen.oneOf(3, 4, 5, 9)
     } yield Ineligible(EligibilityCheckResponse("", 2, "", reasonCode))
 
     def randomEligibilityResponse() = sample(eligibilityCheckResponseGen)
