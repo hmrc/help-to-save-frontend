@@ -29,6 +29,6 @@ object NotEligiblePage extends Page {
   override val expectedPageHeader: Option[String] = Some("You're not eligible for a Help to Save account")
 
   def thinkYouAreEligible()(implicit driver: WebDriver): Unit =
-    Browser.clickLinkTextOnceClickable("still think you're eligible")
+    Browser.clickLinkTextOnceClickable("think you're eligible")
 
 }
