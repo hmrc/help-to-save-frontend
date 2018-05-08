@@ -106,7 +106,10 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
         }
       }
 
-    isActualUrlExpectedUrl(page.expectedURL) shouldBe true
+    val urlMatches = isActualUrlExpectedUrl(page.expectedURL)
+    val result: Either[String, Unit] = if (urlMatches) Right(()) else Left(s"Expected URL was ${page.expectedURL}, but actual URL was " + driver.getCurrentUrl())
+
+    result shouldBe Right(())
     page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
   }
