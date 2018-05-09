@@ -25,19 +25,18 @@ import uk.gov.hmrc.helptosavefrontend.models.iv._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[IvConnectorImpl])
 trait IvConnector {
-  def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]]
+  def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]]
 }
 
 @Singleton
 class IvConnectorImpl @Inject() (http: WSHttp)(implicit val frontendAppConfig: FrontendAppConfig)
   extends IvConnector with Logging {
 
-  override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier): Future[Option[IvResponse]] = {
+  override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]] = {
 
     http.get(frontendAppConfig.ivJourneyResultUrl(journeyId)).flatMap {
 

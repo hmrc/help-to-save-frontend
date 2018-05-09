@@ -45,7 +45,7 @@ class RegisterControllerSpec
   extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
-  with SessionCacheBehaviour
+  with SessionCacheBehaviourSupport
   with GeneratorDrivenPropertyChecks {
 
   def newController(earlyCapCheck: Boolean)(implicit crypto: Crypto): RegisterController = {

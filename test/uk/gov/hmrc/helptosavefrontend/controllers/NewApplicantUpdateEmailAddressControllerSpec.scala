@@ -49,7 +49,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
   extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
-  with SessionCacheBehaviour {
+  with SessionCacheBehaviourSupport {
 
   lazy val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 

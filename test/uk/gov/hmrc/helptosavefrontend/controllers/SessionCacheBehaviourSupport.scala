@@ -29,7 +29,7 @@ import uk.gov.hmrc.http.cache.client.CacheMap
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait SessionCacheBehaviour { this: MockFactory ⇒
+trait SessionCacheBehaviourSupport { this: MockFactory ⇒
 
   val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
 
