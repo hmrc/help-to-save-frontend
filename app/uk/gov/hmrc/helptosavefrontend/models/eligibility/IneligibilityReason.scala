@@ -31,9 +31,13 @@ object IneligibilityReason {
 
   case object NotEntitledToWTCAndUCInsufficient extends IneligibilityReason
 
+  case object NotEntitledToWTCAndUCNotChecked extends IneligibilityReason
+
+  // scalastyle:ignore magic.number
   def fromIneligible(ineligible: Ineligible): Option[IneligibilityReason] = ineligible.value.reasonCode match {
-    case 3 ⇒ Some(EntitledToWTCNoTCAndNoUC) // scalastyle:ignore magic.number
-    case 4 ⇒ Some(EntitledToWTCNoTCAndInsufficientUC) // scalastyle:ignore magic.number
+    case 2 ⇒ Some(NotEntitledToWTCAndUCNotChecked)
+    case 3 ⇒ Some(EntitledToWTCNoTCAndNoUC)
+    case 4 ⇒ Some(EntitledToWTCNoTCAndInsufficientUC)
     case 5 ⇒ Some(NotEntitledToWTCAndUCInsufficient) // scalastyle:ignore magic.number
     case 9 ⇒ Some(NotEntitledToWTCAndNoUC) // scalastyle:ignore magic.number
     case _ ⇒ None
