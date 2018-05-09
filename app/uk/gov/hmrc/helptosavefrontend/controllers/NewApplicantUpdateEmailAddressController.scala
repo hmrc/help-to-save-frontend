@@ -161,11 +161,11 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
                   _ ⇒ SeeOther(routes.NewApplicantUpdateEmailAddressController.getEmailVerified().url)
                 })
             }
-          }, EitherT.pure[Future, String, Result](SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
+          }, EitherT.pure[Future, String](SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url))
         )
       }, _ ⇒
         //existing account holder
-        EitherT.pure[Future, String, Result](SeeOther(routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url))
+        EitherT.pure[Future, String](SeeOther(routes.NewApplicantUpdateEmailAddressController.getLinkExpiredPage().url))
     )
 
   val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

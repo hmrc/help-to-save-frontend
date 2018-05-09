@@ -20,7 +20,9 @@ import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.instances.char._
 import cats.instances.string._
-import cats.syntax.cartesian._
+import cats.instances.tuple._
+import cats.syntax.apply._
+import cats.syntax.applicative._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
@@ -60,49 +62,57 @@ class EmailValidation @Inject() (configuration: Configuration) {
     loop(s.toList, 0)
   }
 
+  private type ValidOrErrorStrings[A] = ValidatedNel[String, A]
+
   def validate(email: String): Validated[NonEmptyList[String], String] = {
 
     val trimmed = email.trim
     val localAndDomainLength = charactersBeforeAndAfterChar('@')(trimmed)
     val domainPart = trimmed.substring(trimmed.lastIndexOf('@') + 1)
 
-    val notBlankCheck = validatedFromBoolean(trimmed)(_.nonEmpty, ErrorMessages.blankEmailAddress)
-    val totalLengthCheck = validatedFromBoolean(trimmed)(_.length <= emailMaxTotalLength, ErrorMessages.totalTooLong)
-    val hasAtSymbolCheck = validatedFromBoolean(trimmed)(_.contains('@'), ErrorMessages.noAtSymbol)
+    val notBlankCheck: ValidOrErrorStrings[String] = validatedFromBoolean(trimmed)(_.nonEmpty, ErrorMessages.blankEmailAddress)
+    val totalLengthCheck: ValidOrErrorStrings[String] = validatedFromBoolean(trimmed)(_.length <= emailMaxTotalLength, ErrorMessages.totalTooLong)
+    val hasAtSymbolCheck: ValidOrErrorStrings[String] = validatedFromBoolean(trimmed)(_.contains('@'), ErrorMessages.noAtSymbol)
 
-    val hasDotSymbolInDomainCheck = validatedFromBoolean(domainPart)(_.contains('.'), ErrorMessages.noDotSymbol)
+    val hasDotSymbolInDomainCheck: ValidOrErrorStrings[String] = validatedFromBoolean(domainPart)(_.contains('.'), ErrorMessages.noDotSymbol)
 
-    val hasTextAfterAtSymbolButBeforeDotCheck = validatedFromBoolean(domainPart)(
+    val hasTextAfterAtSymbolButBeforeDotCheck: ValidOrErrorStrings[String] = validatedFromBoolean(domainPart)(
       { text ⇒
         text.contains('.') && text.substring(0, text.indexOf('.')).length > 0
       },
       ErrorMessages.noTextAfterAtSymbolButBeforeDot
     )
 
-    val hasTextAfterDotCheck = validatedFromBoolean(domainPart)(
+    val hasTextAfterDotCheck: ValidOrErrorStrings[String] = validatedFromBoolean(domainPart)(
       { text ⇒
         text.contains('.') && text.substring(text.lastIndexOf('.') + 1).length > 0
       },
       ErrorMessages.noTextAfterDotSymbol
     )
 
-    val localLengthCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._1 <= emailMaxLocalLength), ErrorMessages.localTooLong)
-    val domainLengthCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._2 <= emailMaxDomainLength), ErrorMessages.domainTooLong)
+    val localLengthCheck: ValidOrErrorStrings[Option[(Int, Int)]] =
+      validatedFromBoolean(localAndDomainLength)(_.forall(_._1 <= emailMaxLocalLength), ErrorMessages.localTooLong)
 
-    val localBlankCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._1 > 0), ErrorMessages.localTooShort)
-    val domainBlankCheck = validatedFromBoolean(localAndDomainLength)(_.forall(_._2 > 0), ErrorMessages.domainTooShort)
+    val domainLengthCheck: ValidOrErrorStrings[Option[(Int, Int)]] =
+      validatedFromBoolean(localAndDomainLength)(_.forall(_._2 <= emailMaxDomainLength), ErrorMessages.domainTooLong)
 
-    (notBlankCheck |@|
-      totalLengthCheck |@|
-      hasAtSymbolCheck |@|
-      hasDotSymbolInDomainCheck |@|
-      hasTextAfterDotCheck |@|
-      hasTextAfterAtSymbolButBeforeDotCheck |@|
-      localLengthCheck |@|
-      domainLengthCheck |@|
-      localBlankCheck |@|
+    val localBlankCheck: ValidOrErrorStrings[Option[(Int, Int)]] =
+      validatedFromBoolean(localAndDomainLength)(_.forall(_._1 > 0), ErrorMessages.localTooShort)
+
+    val domainBlankCheck: ValidOrErrorStrings[Option[(Int, Int)]] =
+      validatedFromBoolean(localAndDomainLength)(_.forall(_._2 > 0), ErrorMessages.domainTooShort)
+
+    (notBlankCheck,
+      totalLengthCheck,
+      hasAtSymbolCheck,
+      hasDotSymbolInDomainCheck,
+      hasTextAfterDotCheck,
+      hasTextAfterAtSymbolButBeforeDotCheck,
+      localLengthCheck,
+      domainLengthCheck,
+      localBlankCheck,
       domainBlankCheck
-    ).map { case _ ⇒ email }
+    ).mapN{ case _ ⇒ email }
   }
 
   val emailFormatter: Formatter[String] = new Formatter[String] {

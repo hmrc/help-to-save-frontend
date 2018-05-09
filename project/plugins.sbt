@@ -21,3 +21,4 @@ addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.2")
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.0")
 
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.1.1")
+

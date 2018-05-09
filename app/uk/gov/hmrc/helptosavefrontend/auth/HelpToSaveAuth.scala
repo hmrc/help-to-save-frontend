@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.auth
 
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
-import cats.syntax.cartesian._
+import cats.syntax.apply._
 import cats.syntax.option._
 import org.joda.time.LocalDate
 import play.api.mvc.{Action, AnyContent, Request, Result}
@@ -123,6 +123,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
       toFuture(internalServerError())
     }(action)
 
+  // need this type to be able to use the apply syntax on ValidatedNel and mapN
+  private type ValidOrMissingUserInfo[A] = ValidatedNel[MissingUserInfo, A]
+
   private def getUserInfo(nino:        String,
                           name:        Name,
                           email:       Option[String],
@@ -131,19 +134,19 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
                           itmpDob:     Option[LocalDate],
                           itmpAddress: ItmpAddress): Either[MissingUserInfos, UserInfo] = {
 
-    val givenNameValidation: ValidatedNel[MissingUserInfo, String] =
+    val givenNameValidation: ValidOrMissingUserInfo[String] =
       itmpName.givenName.orElse(name.name).filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.GivenName)
 
-    val surnameValidation =
+    val surnameValidation: ValidOrMissingUserInfo[String] =
       itmpName.familyName.orElse(name.lastName).filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.Surname)
 
-    val dateOfBirthValidation =
+    val dateOfBirthValidation: ValidOrMissingUserInfo[LocalDate] =
       itmpDob.orElse(dob)
         .toValidNel(MissingUserInfo.DateOfBirth)
 
-    val addressValidation = {
+    val addressValidation: ValidOrMissingUserInfo[ItmpAddress] = {
       val lineCount = List(itmpAddress.line1, itmpAddress.line2, itmpAddress.line3, itmpAddress.line4, itmpAddress.line5)
         .map(_.map(_.trim).filter(_.nonEmpty)).collect { case Some(_) ⇒ () }.length
       if (lineCount < 2 || !itmpAddress.postCode.exists(_.trim.nonEmpty)) {
@@ -153,12 +156,11 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
       }
     }
 
-    val validation: ValidatedNel[MissingUserInfo, UserInfo] =
-      (givenNameValidation |@| surnameValidation |@| dateOfBirthValidation |@| addressValidation)
-        .map {
-          case (givenName, surname, jodaDob, address) ⇒
-            UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email.filter(_.nonEmpty), Address(address))
-        }
+    val validation: ValidOrMissingUserInfo[UserInfo] =
+      (givenNameValidation, surnameValidation, dateOfBirthValidation, addressValidation).mapN {
+        case (givenName, surname, jodaDob, address) ⇒
+          UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email.filter(_.nonEmpty), Address(address))
+      }
 
     validation
       .leftMap(m ⇒ MissingUserInfos(m.toList.toSet, nino))
