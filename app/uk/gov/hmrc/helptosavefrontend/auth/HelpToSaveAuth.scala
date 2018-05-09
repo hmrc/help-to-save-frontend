@@ -35,6 +35,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, Ht
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util.{NINO, NINOLogMessageTransformer, toFuture, toJavaDate}
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
+import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
 import scala.concurrent.Future
 
@@ -105,7 +106,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
   private def authorised[A](retrieval: Retrieval[A],
                             predicate: Predicate    = AuthWithCL200
   )(toResult: (A, Request[AnyContent], Long) ⇒ Future[Result])(redirectOnLoginURL: ⇒ String): Action[AnyContent] =
-    Action.async { implicit request ⇒
+    ActionWithMdc.async { implicit request ⇒
       val timer = metrics.authTimer.time()
 
       authorised(predicate).retrieve(retrieval) { a ⇒

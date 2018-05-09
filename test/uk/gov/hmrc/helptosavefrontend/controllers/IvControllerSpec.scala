@@ -28,9 +28,9 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
+class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
 
   val ivConnector: IvConnector = mock[IvConnector]
 
@@ -49,7 +49,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviour {
     mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
   def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
-    (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier)).expects(journeyId, *)
+    (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier, _: ExecutionContext)).expects(journeyId, *, *)
       .returning(Future.successful(IvSuccessResponse.fromString(ivServiceResponse)))
 
   private def doRequest() =
