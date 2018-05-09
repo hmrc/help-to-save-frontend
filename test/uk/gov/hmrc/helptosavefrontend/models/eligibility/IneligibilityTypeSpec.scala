@@ -29,6 +29,7 @@ class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenP
     "have a method which converts from Ineligible to IneligibilityType" in {
         def ineligible(reasonCode: Int) = Ineligible(EligibilityCheckResponse("", 0, "", reasonCode))
 
+      IneligibilityReason.fromIneligible(ineligible(2)) shouldBe Some(NotEntitledToWTCAndUCNotChecked)
       IneligibilityReason.fromIneligible(ineligible(3)) shouldBe Some(EntitledToWTCNoTCAndNoUC)
       IneligibilityReason.fromIneligible(ineligible(4)) shouldBe Some(EntitledToWTCNoTCAndInsufficientUC)
       IneligibilityReason.fromIneligible(ineligible(5)) shouldBe Some(NotEntitledToWTCAndUCInsufficient)
