@@ -62,8 +62,7 @@
             data-ga-event-category="links"
             data-ga-event-action="Bonus"
             data-ga-event-label="How the account works page"
-            class="ga-track-event"
-            id="next">
+            class="ga-track-event">
             @Messages("hts.introduction.how-the-account-works.par-7-2")</a>,
             @Messages("hts.introduction.how-the-account-works.par-7-3")
         </p>
@@ -89,7 +88,7 @@
             </li>
             <li class="page-nav__item page-nav__item--next">
                 <a class="page-nav__link page-nav__link--next"
-                   title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="next" href=@routes.IntroductionController.getHowWeCalculateBonuses()>
+                   title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="next" href=@routes.IntroductionController.getHowWeCalculateBonuses() id="next">
                     <span class="page-nav__label">Next</span>
                     <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
                 </a>

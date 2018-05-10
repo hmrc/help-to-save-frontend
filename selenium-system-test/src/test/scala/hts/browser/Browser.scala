@@ -35,7 +35,7 @@ trait Navigation {
 
   def nextPage()(implicit driver: WebDriver): Unit = {
     driver.findElement(By.id("next")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
-    find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
+    find(id("next")).foreach(click.on)
   }
 
   def clickButtonByIdOnceClickable(id: String)(implicit driver: WebDriver): Unit =
