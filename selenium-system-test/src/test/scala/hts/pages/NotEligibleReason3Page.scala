@@ -16,20 +16,9 @@
 
 package hts.pages
 
-import hts.browser.Browser
-import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
+object NotEligibleReason3Page extends NotEligiblePage {
 
-trait NotEligiblePage extends Page {
-
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/not-eligible"
-
-  override val expectedPageTitle: Option[String] = Some("You're not eligible for a Help to Save account")
-
-  override val expectedPageHeader: Option[String] = Some("You're not eligible for a Help to Save account")
-
-  val notEligibleText: List[String]
-
-  def thinkYouAreEligible()(implicit driver: WebDriver): Unit =
-    Browser.clickLinkTextOnceClickable("think you're eligible")
+  override val notEligibleText =
+    List("You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.",
+      "You should wait until you've received a letter from HM Revenue and Customs confirming that you're entitled to Working Tax Credit. Once you've received this you can apply for a Help to Save account again.")
 }

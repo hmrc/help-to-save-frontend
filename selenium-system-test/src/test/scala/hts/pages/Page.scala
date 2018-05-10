@@ -28,6 +28,5 @@ trait Page {
   val expectedPageHeader: Option[String] = None
 
   def navigate()(implicit driver: WebDriver): Unit = Browser.go to expectedURL
-
 }
 
