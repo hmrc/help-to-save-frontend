@@ -1,6 +1,6 @@
 @HTS-90
 Feature: Applicant goes through eligibility check
-
+  @BrowserStack
   Scenario: User is in receipt of WTC and so is eligible
     Given a user is in receipt of WTC
     When they apply for Help to Save
