@@ -68,7 +68,7 @@ class SecuritySteps extends Steps {
   }
 
   Then("^they still see confirmation that they are NOT eligible$") { () ⇒
-    Browser.isTextOnPage("You're not eligible for a Help to Save account") shouldBe true
+    Browser.isTextOnPage("You're not eligible for a Help to Save account") shouldBe Right(())
   }
 
   Given("^HMRC doesn't currently hold an email address for the user$") {

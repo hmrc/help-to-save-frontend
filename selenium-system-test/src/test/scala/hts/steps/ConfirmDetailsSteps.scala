@@ -44,8 +44,8 @@ class ConfirmDetailsSteps extends Steps {
     val displayedNino = nino.grouped(2).mkString(" ")
 
     Browser.checkCurrentPageIs(EligiblePage)
-    Browser.isTextOnPage(fullName) shouldBe true
-    Browser.isTextOnPage(displayedNino) shouldBe true
-    Browser.isTextOnPage(date) shouldBe true
+    Browser.isTextOnPage(fullName) shouldBe Right(())
+    Browser.isTextOnPage(displayedNino) shouldBe Right(())
+    Browser.isTextOnPage(date) shouldBe Right(())
   }
 }

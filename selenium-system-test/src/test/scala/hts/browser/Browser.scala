@@ -35,7 +35,7 @@ trait Navigation {
 
   def nextPage()(implicit driver: WebDriver): Unit = {
     driver.findElement(By.id("next")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
-    find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
+    find(id("next")).foreach(click.on)
   }
 
   def clickButtonByIdOnceClickable(id: String)(implicit driver: WebDriver): Unit =
@@ -89,6 +89,7 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
 
   def isTextOnPage(regex: String)(implicit driver: WebDriver): Either[String, Unit] = {
     val textPresent = regex.r.findAllIn(Browser.getPageContent).nonEmpty
+    println("nonEmpty: " + textPresent.toString)
     if (!textPresent) {
       Left(s"Text not found: $regex")
     } else {
