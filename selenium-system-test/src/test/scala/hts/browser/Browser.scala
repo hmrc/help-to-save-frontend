@@ -87,12 +87,13 @@ trait Retrievals { this: WebBrowser ⇒
 
 trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
 
-  def isTextOnPage(regex: String)(implicit driver: WebDriver): Boolean = {
+  def isTextOnPage(regex: String)(implicit driver: WebDriver): Either[String, Unit] = {
     val textPresent = regex.r.findAllIn(Browser.getPageContent).nonEmpty
     if (!textPresent) {
-      println("Text not found: " + regex)
+      Left(s"Text not found: $regex")
+    } else {
+      Right(())
     }
-    textPresent
   }
 
   def checkCurrentPageIs(page: Page)(implicit driver: WebDriver): Unit = {
