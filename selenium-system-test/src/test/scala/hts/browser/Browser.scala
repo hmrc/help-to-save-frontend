@@ -89,7 +89,6 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
 
   def isTextOnPage(regex: String)(implicit driver: WebDriver): Either[String, Unit] = {
     val textPresent = regex.r.findAllIn(Browser.getPageContent).nonEmpty
-    println("nonEmpty: " + textPresent.toString)
     if (!textPresent) {
       Left(s"Text not found: $regex")
     } else {
