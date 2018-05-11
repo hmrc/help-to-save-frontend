@@ -41,7 +41,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSRFSupport with SessionCacheBehaviourSupport {
+class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with SessionCacheBehaviourSupport {
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
@@ -76,7 +76,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
       .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
 
-  lazy val controller = new AccountHolderUpdateEmailAddressController(
+  lazy val controller = new AccountHolderController(
     mockHelpToSaveService,
     mockAuthConnector,
     mockEmailVerificationConnector,
@@ -103,7 +103,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
     redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
   }
 
-  "The AccountHolderUpdateEmailAddressController" when {
+  "The AccountHolderController" when {
 
     "handling requests to update email addresses" must {
 
@@ -156,7 +156,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
         }
         val result = await(controller.onSubmit()(fakePostRequest))
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getCheckYourEmail().url)
+        redirectLocation(result) shouldBe Some(routes.AccountHolderController.getCheckYourEmail().url)
       }
 
       "return an AlreadyVerified status and redirect the user to email verified page," +
@@ -256,7 +256,7 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
 
           val result = verifyEmail(emailVerificationParams.encode())
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.AccountHolderUpdateEmailAddressController.getEmailVerified.url)
+          redirectLocation(result) shouldBe Some(routes.AccountHolderController.getEmailVerified.url)
         }
 
       "redirect to NS&I" when {
@@ -392,9 +392,9 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
       }
     }
 
-    "handling getCheckYourEnmail" must {
+    "handling getCheckYourEmail" must {
 
-      "return the check your email  page" in {
+      "return the check your email page" in {
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, Some("email")))))
@@ -438,6 +438,28 @@ class AccountHolderUpdateEmailAddressControllerSpec extends AuthSupport with CSR
         }
 
       }
+    }
+
+    "handling getCloseAccountPage" must {
+
+      behave like commonEnrolmentBehaviour(
+        () ⇒ controller.getCloseAccountPage(fakeRequestWithCSRFToken),
+        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino)),
+        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None)
+      )
+
+      "return the close account are you sure page" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockEmailGet()(Right(Some("email")))
+        }
+
+        val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+        status(result) shouldBe OK
+        contentAsString(result) should include("Close account - Are you sure?")
+      }
+
     }
 
   }

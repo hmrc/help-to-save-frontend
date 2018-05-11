@@ -41,29 +41,29 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService:          HelpToSaveService,
-                                                           val authConnector:              AuthConnector,
-                                                           val emailVerificationConnector: EmailVerificationConnector,
-                                                           nSIConnector:                   NSIProxyConnector,
-                                                           val metrics:                    Metrics,
-                                                           val auditor:                    HTSAuditor,
-                                                           sessionCacheConnector:          SessionCacheConnector)(implicit app: Application,
-                                                                                                                  crypto:                   Crypto,
-                                                                                                                  emailValidation:          EmailValidation,
-                                                                                                                  override val messagesApi: MessagesApi,
-                                                                                                                  val transformer:          NINOLogMessageTransformer,
-                                                                                                                  frontendAppConfig:        FrontendAppConfig,
-                                                                                                                  val config:               Configuration,
-                                                                                                                  val env:                  Environment)
+class AccountHolderController @Inject() (val helpToSaveService:          HelpToSaveService,
+                                         val authConnector:              AuthConnector,
+                                         val emailVerificationConnector: EmailVerificationConnector,
+                                         nSIConnector:                   NSIProxyConnector,
+                                         val metrics:                    Metrics,
+                                         val auditor:                    HTSAuditor,
+                                         sessionCacheConnector:          SessionCacheConnector)(implicit app: Application,
+                                                                                                crypto:                   Crypto,
+                                                                                                emailValidation:          EmailValidation,
+                                                                                                override val messagesApi: MessagesApi,
+                                                                                                val transformer:          NINOLogMessageTransformer,
+                                                                                                frontendAppConfig:        FrontendAppConfig,
+                                                                                                val config:               Configuration,
+                                                                                                val env:                  Environment)
   extends BaseController with HelpToSaveAuth with VerifyEmailBehaviour {
 
-  import AccountHolderUpdateEmailAddressController._
+  import AccountHolderController._
 
   def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled(_ ⇒
       Ok(views.html.email.update_email_address(UpdateEmailForm.verifyEmailForm))
     )
-  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress().url)
+  }(redirectOnLoginURL = routes.AccountHolderController.getUpdateYourEmailAddress().url)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINOAndName { implicit request ⇒ implicit htsContext ⇒
     htsContext.firstName.fold[Future[Result]](
@@ -80,8 +80,8 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
                   sendEmailVerificationRequest(
                     details.email,
                     name,
-                    SeeOther(routes.AccountHolderUpdateEmailAddressController.getCheckYourEmail().url),
-                    params ⇒ routes.AccountHolderUpdateEmailAddressController.emailVerifiedCallback(params.encode()).url,
+                    SeeOther(routes.AccountHolderController.getCheckYourEmail().url),
+                    params ⇒ routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
                     _ ⇒ SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url),
                     isNewApplicant = false)
                 ).leftMap { e ⇒
@@ -91,7 +91,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
           )
         )
       }
-  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.onSubmit().url)
+  }(redirectOnLoginURL = routes.AccountHolderController.onSubmit().url)
 
   def getCheckYourEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val result: EitherT[Future, String, Email] = for {
@@ -107,7 +107,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         Ok(views.html.email.check_your_email(pendingEmail))
       }
     )
-  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getCheckYourEmail().url)
+  }(redirectOnLoginURL = routes.AccountHolderController.getCheckYourEmail().url)
 
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     withEmailVerificationParameters(
@@ -118,7 +118,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
         logger.warn(e)
         internalServerError()
       }.merge
-  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.emailVerifiedCallback(emailVerificationParams).url)
+  }(redirectOnLoginURL = routes.AccountHolderController.emailVerifiedCallback(emailVerificationParams).url)
 
   def getEmailVerified: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
     val result: EitherT[Future, String, String] = for {
@@ -133,7 +133,13 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
       },
       email ⇒ Ok(views.html.email.we_updated_your_email(email))
     )
-  }(redirectOnLoginURL = routes.AccountHolderUpdateEmailAddressController.getEmailVerified.url)
+  }(redirectOnLoginURL = routes.AccountHolderController.getEmailVerified.url)
+
+  def getCloseAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled(_ ⇒
+      Ok(views.html.close_account_are_you_sure())
+    )
+  }(redirectOnLoginURL = routes.AccountHolderController.getCloseAccountPage().url)
 
   private def handleEmailVerified(emailVerificationParams: EmailVerificationParams, oldEmail: String)(
       implicit
@@ -181,7 +187,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
           }, { _ ⇒
             logger.info("Successfully updated email with NS&I", nino)
             auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
-            SeeOther(routes.AccountHolderUpdateEmailAddressController.getEmailVerified.url)
+            SeeOther(routes.AccountHolderController.getEmailVerified.url)
           })
       }
     }
@@ -233,7 +239,7 @@ class AccountHolderUpdateEmailAddressController @Inject() (val helpToSaveService
 
 }
 
-object AccountHolderUpdateEmailAddressController {
+object AccountHolderController {
 
   private sealed trait UpdateEmailError
 
