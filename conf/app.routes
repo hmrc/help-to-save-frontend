@@ -59,13 +59,15 @@ GET        /failed-iv-time-out                              @uk.gov.hmrc.helptos
 GET        /failed-iv-technical-issue                       @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getTechnicalIssue
 GET        /failed-iv-precondition-failed                   @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getPreconditionFailed
 
-GET        /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getUpdateYourEmailAddress
-POST       /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.onSubmit
-GET        /account-home/verify-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getCheckYourEmail
-GET        /account-home/email-verified-callback            @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.emailVerifiedCallback(p: String)
-GET        /account-home/email-verified                     @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderUpdateEmailAddressController.getEmailVerified
+GET        /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getUpdateYourEmailAddress
+POST       /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.onSubmit
+GET        /account-home/verify-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getCheckYourEmail
+GET        /account-home/email-verified-callback            @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.emailVerifiedCallback(p: String)
+GET        /account-home/email-verified                     @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getEmailVerified
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
 
 GET        /privacy-statement                               @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.showPrivacyPage
 GET        /think-you-are-eligible                          @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getThinkYouAreEligiblePage
+
+GET        /account-home/close-account-are-you-sure         @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getCloseAccountPage
