@@ -135,12 +135,6 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
     )
   }(redirectOnLoginURL = routes.AccountHolderController.getEmailVerified.url)
 
-  def getCloseAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled(_ ⇒
-      Ok(views.html.close_account_are_you_sure())
-    )
-  }(redirectOnLoginURL = routes.AccountHolderController.getCloseAccountPage().url)
-
   private def handleEmailVerified(emailVerificationParams: EmailVerificationParams, oldEmail: String)(
       implicit
       request:    Request[AnyContent],
