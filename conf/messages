@@ -539,6 +539,21 @@ hts.privacy.p11.1=You can ask to see the personal information HMRC holds about y
 hts.privacy.p11.link-text=HMRC''s privacy policy
 hts.privacy.p11.2=(it will open in a new window) on the GOV.UK website.
 
+hts.close-account.title=Are you sure you want to close your account? - Help to Save account home
+hts.close-account.breadcrumb=Help to Save account home
+hts.close-account.h1=Are you sure you want to close your account?
+hts.close-account.warning=If you close your account now you will not get any bonus payments. You will not be able to open another Help to Save account.
+hts.close-account.p1=If you still need to close your account you can contact the Help to Save service.
+hts.close-account.p2=You''ll need to have your National Insurance number with you when you phone.
+hts.close-account.contact.telephone=Telephone:
+hts.close-account.contact.telephone.number=0300 322 7093
+hts.close-account.contact.outside-uk=Outside UK:
+hts.close-account.contact.outside-uk.number=+44 300 322 7093
+hts.close-account.h2=Opening times:
+hts.close-account.p3=10am to 6pm, Monday to Friday
+hts.close-account.p4=Closed weekends and bank holidays.
+hts.close-account.back=Back
+
 hts.title.prepended-error-message=Error:
 
 footer.links.privacy_policy.url=/help-to-save/privacy-statement

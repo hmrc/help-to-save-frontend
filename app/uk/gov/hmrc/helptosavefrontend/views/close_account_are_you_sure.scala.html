@@ -14,13 +14,51 @@
  * limitations under the License.
  *@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Close account - Are you sure?</title>
-</head>
-<body>
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-</body>
-</html>
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+
+@serviceInfoContent = {
+  <div class="breadcrumbs">
+    <ol>
+      <li><a href=@{appConfig.nsiManageAccountUrl}>@messages("hts.close-account.breadcrumb")</a></li>
+    </ol>
+  </div>
+}
+
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+  title = messages("hts.close-account.title"),
+  sidebarLinks = None,
+  bodyClasses = None,
+  serviceInfoContent = serviceInfoContent) {
+
+  <h1>@messages("hts.close-account.h1")</h1>
+
+  <div class="notice">
+   <i class="icon icon-important">
+    <span class="visually-hidden">Warning</span>
+   </i>
+    <p><strong class="bold-small">@messages("hts.close-account.warning")</strong></p>
+  </div>
+
+  <p>@messages("hts.close-account.p1")</p>
+  <p>@messages("hts.close-account.p2")</p>
+
+  <div class="panel panel-border-narrow">
+    <p>
+      @messages("hts.close-account.contact.telephone")<br />
+      <strong class="bold">@messages("hts.close-account.contact.telephone.number")</strong>
+    </p>
+    <p>
+      @messages("hts.close-account.contact.outside-uk")<br />
+      <strong class="bold">@messages("hts.close-account.contact.outside-uk.number")</strong>
+    </p>
+  </div>
+
+  <h2 class="heading-small">@messages("hts.close-account.h2")</h2>
+  <p>@messages("hts.close-account.p3")</p>
+  <p>@messages("hts.close-account.p4")</p>
+
+  <a href=@{appConfig.nsiManageAccountUrl}>@messages("hts.close-account.back")</a>
+}
