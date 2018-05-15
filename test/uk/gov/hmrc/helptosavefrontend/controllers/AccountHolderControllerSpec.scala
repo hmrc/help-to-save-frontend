@@ -440,28 +440,6 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       }
     }
 
-    "handling getCloseAccountPage" must {
-
-      behave like commonEnrolmentBehaviour(
-        () ⇒ controller.getCloseAccountPage(fakeRequestWithCSRFToken),
-        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino)),
-        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None)
-      )
-
-      "return the close account are you sure page" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
-          mockEnrolmentCheck()(Right(Enrolled(true)))
-          mockEmailGet()(Right(Some("email")))
-        }
-
-        val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
-        status(result) shouldBe OK
-        contentAsString(result) should include("Are you sure you want to close your account?")
-      }
-
-    }
-
   }
 
   def commonEnrolmentBehaviour(getResult:          () ⇒ Future[Result],

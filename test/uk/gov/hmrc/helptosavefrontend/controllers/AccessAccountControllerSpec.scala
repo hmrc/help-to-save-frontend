@@ -16,14 +16,16 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import cats.data.EitherT
+import cats.instances.future._
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
+import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -35,6 +37,11 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
     mockHelpToSaveService,
     mockAuthConnector,
     mockMetrics)
+
+  def mockEmailGet()(result: Either[String, Option[String]]): Unit =
+    (mockHelpToSaveService.getConfirmedEmail()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
+      .returning(EitherT.fromEither[Future](result))
 
   "The AccessAccountController" when {
 
@@ -110,6 +117,43 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
         val result = doRequest()
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.AccessAccountController.accessAccount().url)
+      }
+
+    }
+
+    "handling getCloseAccountPage" must {
+
+      "return the close account are you sure page if they have a help-to-save account" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          //mockEmailGet()(Right(Some("email")))
+        }
+
+        val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+        status(result) shouldBe 303
+        redirectLocation(result) should contain("/account-home/close-account-are-you-sure")
+      }
+
+      "redirect the user to the no account page if they are not enrolled in help-to-save" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
+      }
+
+      "throw an Internal Server Error if the enrolment check fails" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+          mockEnrolmentCheck()(Left("An error occurred"))
+        }
+
+        val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+        status(result) shouldBe 500
       }
 
     }
