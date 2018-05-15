@@ -457,7 +457,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
         val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
         status(result) shouldBe OK
-        contentAsString(result) should include("Close account - Are you sure?")
+        contentAsString(result) should include("Are you sure you want to close your account?")
       }
 
     }
