@@ -23,6 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
@@ -31,17 +32,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with SessionCacheBehaviourSupport with CSRFSupport {
+class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with SessionCacheBehaviourSupport
+  with CSRFSupport with TestSupport {
 
   lazy val controller = new AccessAccountController(
     mockHelpToSaveService,
     mockAuthConnector,
     mockMetrics)
-
-  def mockEmailGet()(result: Either[String, Option[String]]): Unit =
-    (mockHelpToSaveService.getConfirmedEmail()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
-      .returning(EitherT.fromEither[Future](result))
 
   "The AccessAccountController" when {
 
@@ -127,12 +124,11 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Right(Enrolled(true)))
-          //mockEmailGet()(Right(Some("email")))
         }
 
         val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
         status(result) shouldBe 303
-        redirectLocation(result) should contain("/account-home/close-account-are-you-sure")
+        redirectLocation(result) shouldBe Some(appConfig.closeAccountUrl)
       }
 
       "redirect the user to the no account page if they are not enrolled in help-to-save" in {
