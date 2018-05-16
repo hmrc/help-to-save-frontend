@@ -88,10 +88,11 @@
 @footerLinks = {}
 
 @serviceInfo = {
-@uiLayouts.serviceInfo(
-    betaBanner = HtmlFormat.empty,
+  @uiLayouts.serviceInfo(
+    betaBanner = betaBanner,
     includeGridWrapper = false,
-    serviceInfoContent = Some(serviceInfoContent))
+    serviceInfoContent = Some(serviceInfoContent)
+  )
 }
 
 @mainContentHeader = {
@@ -101,11 +102,7 @@
 @getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
 
 @betaBanner = {
-@uiLayouts.betaBanner(false, appConfig.betaFeedbackUrlNoAuth, appConfig.betaFeedbackUrlNoAuth, true, true)
-}
-
-@serviceInfoContent = {
-@uiLayouts.serviceInfo(betaBanner, false, None, true )
+  @uiLayouts.betaBanner(false, appConfig.betaFeedbackUrlNoAuth, appConfig.betaFeedbackUrlNoAuth, true, true)
 }
 
 @content = {
@@ -114,7 +111,7 @@
     mainClass = mainClass,
     mainDataAttributes = mainDataAttributes,
     mainContentHeader = mainContentHeader,
-    serviceInfo = serviceInfoContent,
+    serviceInfo = serviceInfo,
     getHelpForm = getHelpForm,
     sidebar = sidebar)
 }

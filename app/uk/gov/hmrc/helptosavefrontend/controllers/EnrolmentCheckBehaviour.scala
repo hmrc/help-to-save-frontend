@@ -73,4 +73,24 @@ trait EnrolmentCheckBehaviour {
       transformer: NINOLogMessageTransformer): Future[Result] =
     checkIfAlreadyEnrolled(ifNotEnrolled, _ ⇒ internalServerError())
 
+  def checkIfEnrolledForCloseAccount(ifNotEnrolled:               () ⇒ Future[Result],
+                                     handleEnrolmentServiceError: String ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO,
+                                                                                           hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Future[Result] = {
+    val nino = htsContext.nino
+
+    helpToSaveService.getUserEnrolmentStatus()
+      .leftSemiflatMap{ error ⇒
+        logger.warn(s"Error while trying to check if user was already enrolled to HtS: $error", nino)
+        handleEnrolmentServiceError(error)
+      }
+      .semiflatMap{
+        case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
+          SeeOther(frontendAppConfig.closeAccountUrl)
+
+        case EnrolmentStatus.NotEnrolled ⇒
+          ifNotEnrolled()
+      }
+      .merge
+  }
+
 }

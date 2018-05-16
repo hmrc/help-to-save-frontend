@@ -36,7 +36,7 @@
     <p class="subsection--wide push--bottom"><a href=@{frontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
 
     @{
-        helpers.form(routes.AccountHolderUpdateEmailAddressController.onSubmit())(
+        helpers.form(routes.AccountHolderController.onSubmit())(
             Html(
                 s"""
              |<input type="hidden" name="new-email-address" value="$email">
