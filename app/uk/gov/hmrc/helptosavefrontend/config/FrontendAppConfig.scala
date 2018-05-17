@@ -42,8 +42,6 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val accessAccountUrl: String = s"${getUrlFor("help-to-save-frontend")}/access-account"
 
-  val closeAccountUrl: String = s"$helpToSaveFrontendUrl/account-home/close-account-are-you-sure"
-
   val ivJourneyResultUrl: String = s"${baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
   def encodedCallbackUrl(redirectOnLoginURL: String): String =

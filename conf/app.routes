@@ -70,4 +70,4 @@ GET        /forbidden                                       @uk.gov.hmrc.helptos
 GET        /privacy-statement                               @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.showPrivacyPage
 GET        /think-you-are-eligible                          @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getThinkYouAreEligiblePage
 
-GET        /account-home/close-account-are-you-sure         @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getCloseAccountPage
+GET        /account-home/close-account-are-you-sure         @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getCloseAccountPage

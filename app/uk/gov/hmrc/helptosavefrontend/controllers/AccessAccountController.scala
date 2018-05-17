@@ -63,16 +63,4 @@ class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveServic
     )
   }(redirectOnLoginURL = routes.AccessAccountController.getNoAccountPage().url)
 
-  def getCloseAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkIfEnrolledForCloseAccount(
-      { // not enrolled
-        () ⇒ SeeOther(routes.AccessAccountController.getNoAccountPage().url)
-      }, {
-        e ⇒
-          logger.warn(s"Could not check enrolment during call to close account page ($e)", htsContext.nino)
-          internalServerError
-      }
-    )
-  }(redirectOnLoginURL = frontendAppConfig.closeAccountUrl)
-
 }
