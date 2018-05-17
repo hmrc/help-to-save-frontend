@@ -15,9 +15,10 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.models.account.Account
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(account: Option[Account])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @serviceInfoContent = {
   <div class="breadcrumbs">
@@ -32,6 +33,8 @@
   sidebarLinks = None,
   bodyClasses = None,
   serviceInfoContent = serviceInfoContent) {
+
+{{{@account}}}
 
   <h1>@messages("hts.close-account.h1")</h1>
 

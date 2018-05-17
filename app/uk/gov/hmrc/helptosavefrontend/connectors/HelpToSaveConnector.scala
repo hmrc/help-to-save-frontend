@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import java.util.UUID
+
 import cats.data.EitherT
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
@@ -23,6 +25,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.account.AccountO
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.MissingUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
@@ -50,6 +53,8 @@ trait HelpToSaveConnector {
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse]
 
   def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+
+  def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountO]
 
 }
 
@@ -82,6 +87,9 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
   private val updateUserCountURL =
     s"$helpToSaveUrl/help-to-save/update-user-count"
 
+  private def getAccountURL(nino: String, correlationId: UUID) =
+    s"$helpToSaveUrl/help-to-save/nsi-account?nino=$nino&correlationId=$correlationId&version=V1.0&systemId=help-to-save-frontend"
+
   def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
       eligibilityURL,
@@ -107,13 +115,14 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
   def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     handleGet(getEmailURL, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
 
-  def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] = {
+  def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] =
     handleGet(accountCreateAllowedURL, _.parseJSON[UserCapResponse](), "account creation allowed", identity)
-  }
 
-  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = {
+  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     handlePost(updateUserCountURL, "", _ ⇒ Right(()), "update user count", identity)
-  }
+
+  def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountO] =
+    handleGet(getAccountURL(nino, correlationId), _.parseJSON[AccountO](), "get Account", identity)
 
   private def handlePost[A, B](url:         String,
                                body:        String,

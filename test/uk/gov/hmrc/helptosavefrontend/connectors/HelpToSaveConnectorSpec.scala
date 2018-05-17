@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.util.Base64
+import java.time.LocalDate
+import java.util.{Base64, UUID}
 
 import cats.data.EitherT
 import cats.instances.int._
@@ -28,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountO, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.util.Email
@@ -354,6 +356,30 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       "return a Right if the call comes with with HTTP 200" in {
         mockHttpPost(updateUserCountURL, "")(Some(HttpResponse(200, Some(Json.toJson(())))))
         await(connector.updateUserCount().value) shouldBe Right(())
+      }
+    }
+
+    "getting Account" must {
+
+      val correlationId = UUID.randomUUID()
+      val url = s"$helpToSaveUrl/help-to-save/nsi-account?nino=$nino&correlationId=$correlationId&version=V1.0&systemId=help-to-save-frontend"
+      val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+
+      behave like testCommon(
+        mockHttpGet(url),
+        () ⇒ connector.getAccount(nino, correlationId),
+        account,
+        false
+      )
+
+      "be able to handle 200 responses with valid Account json" in {
+        mockHttpGet(url)(Some(HttpResponse(200, Some(Json.toJson(AccountO(Some(account)))))))
+        await(connector.getAccount(nino, correlationId).value) shouldBe Right(AccountO(Some(account)))
+      }
+
+      "be able to handle 200 responses with NO Account json in the response" in {
+        mockHttpGet(url)(Some(HttpResponse(200, Some(Json.toJson(())))))
+        await(connector.getAccount(nino, correlationId).value) shouldBe Right(AccountO(None))
       }
     }
 

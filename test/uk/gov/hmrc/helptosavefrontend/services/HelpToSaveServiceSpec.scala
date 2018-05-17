@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
+import java.time.LocalDate
+import java.util.UUID
+
 import cats.data.EitherT
 import cats.instances.future._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
@@ -24,6 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIProxyC
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountO, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -138,7 +142,7 @@ class HelpToSaveServiceSpec extends TestSupport {
       val nsiUserInfo = validNSIUserInfo
 
       "return a successful response" in {
-        List(true, false).foreach{ alreadyHadAccount ⇒
+        List(true, false).foreach { alreadyHadAccount ⇒
           (nsiConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
             .returning(Future.successful(SubmissionSuccess(alreadyHadAccount)))
 
@@ -178,6 +182,20 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val result = htsService.updateUserCount()
         result.value.futureValue should be(Right(()))
+      }
+    }
+
+    "get Account" must {
+      "return a successful response" in {
+        val nino = "WM123456C"
+        val correlationId = UUID.randomUUID()
+        val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+
+        (htsConnector.getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext)).expects(nino, correlationId, *, *)
+          .returning(EitherT.pure(AccountO(Some(account))))
+
+        val result = htsService.getAccount(nino, correlationId)
+        result.value.futureValue should be(Right(AccountO(Some(account))))
       }
     }
   }

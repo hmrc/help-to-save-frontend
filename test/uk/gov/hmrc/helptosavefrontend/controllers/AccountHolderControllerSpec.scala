@@ -17,6 +17,8 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.net.URLDecoder
+import java.time.LocalDate
+import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -29,6 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NS
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountO, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
@@ -75,6 +78,11 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
     (mockAuditor.sendEvent(_: EmailChanged, _: NINO)(_: ExecutionContext))
       .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
+
+  def mockGetAccount(nino: String)(result: Either[String, AccountO]): Unit =
+    (mockHelpToSaveService.getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *, *)
+      .returning(EitherT.fromEither[Future](result))
 
   lazy val controller = new AccountHolderController(
     mockHelpToSaveService,
@@ -444,15 +452,29 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
   "handling getCloseAccountPage" must {
 
+    val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+
     "return the close account are you sure page if they have a help-to-save account" in {
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
         mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockGetAccount(nino)(Right(AccountO(Some(account))))
       }
 
       val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
       status(result) shouldBe 200
       contentAsString(result) should include("Are you sure you want to close your account?")
+    }
+
+    "return server error if there is any error during retrieving Account from NS&I" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockGetAccount(nino)(Left("unknown error"))
+      }
+
+      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+      status(result) shouldBe 500
     }
 
     "redirect the user to the no account page if they are not enrolled in help-to-save" in {
