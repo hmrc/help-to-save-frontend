@@ -52,10 +52,10 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
                                                                                                 emailValidation:          EmailValidation,
                                                                                                 override val messagesApi: MessagesApi,
                                                                                                 val transformer:          NINOLogMessageTransformer,
-                                                                                                frontendAppConfig:        FrontendAppConfig,
+                                                                                                val frontendAppConfig:    FrontendAppConfig,
                                                                                                 val config:               Configuration,
                                                                                                 val env:                  Environment)
-  extends BaseController with HelpToSaveAuth with VerifyEmailBehaviour {
+  extends BaseController with HelpToSaveAuth with VerifyEmailBehaviour with EnrolmentCheckBehaviour {
 
   import AccountHolderController._
 
@@ -134,6 +134,19 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
       email ⇒ Ok(views.html.email.we_updated_your_email(email))
     )
   }(redirectOnLoginURL = routes.AccountHolderController.getEmailVerified.url)
+
+  def getCloseAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfEnrolledForCloseAccount(
+      { // not enrolled
+        () ⇒ SeeOther(routes.AccessAccountController.getNoAccountPage().url)
+      }, {
+        e ⇒
+          logger.warn(s"Could not check enrolment during call to close account page ($e)", htsContext.nino)
+          internalServerError
+      },
+      () ⇒ Ok(views.html.close_account_are_you_sure())
+    )
+  }(redirectOnLoginURL = routes.AccountHolderController.getCloseAccountPage().url)
 
   private def handleEmailVerified(emailVerificationParams: EmailVerificationParams, oldEmail: String)(
       implicit
