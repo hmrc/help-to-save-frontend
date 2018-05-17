@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.util.UUID
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
@@ -114,7 +116,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
       emailVerificationParams,
       params ⇒ EitherT.right(checkIfAlreadyEnrolled(oldEmail ⇒ handleEmailVerified(params, oldEmail))),
       EitherT.right(toFuture(SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)))
-    ).leftMap{ e ⇒
+    ).leftMap { e ⇒
         logger.warn(e)
         internalServerError()
       }.merge
@@ -142,9 +144,19 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
       }, {
         e ⇒
           logger.warn(s"Could not check enrolment during call to close account page ($e)", htsContext.nino)
-          internalServerError
+          internalServerError()
       },
-      () ⇒ Ok(views.html.close_account_are_you_sure())
+      () ⇒
+        helpToSaveService.getAccount(htsContext.nino, UUID.randomUUID())
+          .fold(
+            e ⇒ {
+              logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+              internalServerError()
+            },
+            {
+              accountO ⇒ Ok(views.html.close_account_are_you_sure(accountO.account))
+            }
+          )
     )
   }(redirectOnLoginURL = routes.AccountHolderController.getCloseAccountPage().url)
 

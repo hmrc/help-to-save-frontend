@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import cats.data.EitherT
 import cats.instances.future._
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
