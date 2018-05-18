@@ -105,7 +105,7 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
     handleGet(enrolUserURL, _ ⇒ Right(()), "enrol users", identity)
 
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag", identity)
+    handleGet(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag and update mongo", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = {
     val encodedEmail = new String(base64Encode(email))
