@@ -44,7 +44,7 @@ trait HelpToSaveConnector {
 
   def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def setITMPFlag()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
@@ -104,8 +104,8 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
   def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     handleGet(enrolUserURL, _ ⇒ Right(()), "enrol users", identity)
 
-  def setITMPFlag()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag", identity)
+  def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+    handleGet(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag and update mongo", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = {
     val encodedEmail = new String(base64Encode(email))

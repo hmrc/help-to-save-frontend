@@ -238,10 +238,11 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
         case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
       }
 
+      //enrolling user sets the ITMP flag and creates mongo enrolment record
       helpToSaveService.enrolUser().value.onComplete {
-        case Failure(e)        ⇒ logger.warn(s"Could not start process to enrol user, future failed: $e", nino)
-        case Success(Left(e))  ⇒ logger.warn(s"Could not start process to enrol user: $e", nino)
-        case Success(Right(_)) ⇒ logger.debug(s"Process started to enrol user", nino)
+        case Failure(e)        ⇒ logger.warn(s"error in enrolling user, future failed: $e", nino)
+        case Success(Left(e))  ⇒ logger.warn(s"error in enrolling user: $e", nino)
+        case Success(Right(_)) ⇒ logger.debug(s"successfully enrolled user", nino)
       }
     }
 

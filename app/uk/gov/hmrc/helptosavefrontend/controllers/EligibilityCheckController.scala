@@ -197,11 +197,10 @@ class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSav
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url),
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
       _ ⇒ {
-        // set the ITMP flag here but don't worry about the result
-        helpToSaveService.setITMPFlag().value.onComplete {
-          case Failure(e)        ⇒ logger.warn(s"Could not set ITMP flag, future failed: ${e.getMessage}", nino)
-          case Success(Left(e))  ⇒ logger.warn(s"Could not set ITMP flag: $e", nino)
-          case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag for user", nino)
+        helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
+          case Failure(e)        ⇒ logger.warn(s"error in setting ITMP flag and updating mongo, future failed: ${e.getMessage}", nino)
+          case Success(Left(e))  ⇒ logger.warn(s"error in setting ITMP flag and updating mongo: $e", nino)
+          case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag and updated mongo for user", nino)
         }
 
         SeeOther(frontendAppConfig.nsiManageAccountUrl)
