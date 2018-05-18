@@ -147,16 +147,17 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
           internalServerError()
       },
       () ⇒
-        helpToSaveService.getAccount(htsContext.nino, UUID.randomUUID())
-          .fold(
-            e ⇒ {
-              logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-              internalServerError()
-            },
-            {
-              accountO ⇒ Ok(views.html.close_account_are_you_sure(accountO.account))
-            }
-          )
+        //        helpToSaveService.getAccount(htsContext.nino, UUID.randomUUID())
+        //          .fold(
+        //            e ⇒ {
+        //              logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+        //              internalServerError()
+        //            },
+        //            {
+        //              accountO ⇒ Ok(views.html.close_account_are_you_sure(accountO.account))
+        //            }
+        //          )
+        Ok(views.html.close_account_are_you_sure(None))
     )
   }(redirectOnLoginURL = routes.AccountHolderController.getCloseAccountPage().url)
 

@@ -458,7 +458,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
         mockEnrolmentCheck()(Right(Enrolled(true)))
-        mockGetAccount(nino)(Right(AccountO(Some(account))))
+        //mockGetAccount(nino)(Right(AccountO(Some(account))))
       }
 
       val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
@@ -466,16 +466,16 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       contentAsString(result) should include("Are you sure you want to close your account?")
     }
 
-    "return server error if there is any error during retrieving Account from NS&I" in {
-      inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
-        mockEnrolmentCheck()(Right(Enrolled(true)))
-        mockGetAccount(nino)(Left("unknown error"))
-      }
-
-      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
-      status(result) shouldBe 500
-    }
+    //    "return server error if there is any error during retrieving Account from NS&I" in {
+    //      inSequence {
+    //        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+    //        mockEnrolmentCheck()(Right(Enrolled(true)))
+    //        mockGetAccount(nino)(Left("unknown error"))
+    //      }
+    //
+    //      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+    //      status(result) shouldBe 500
+    //    }
 
     "redirect the user to the no account page if they are not enrolled in help-to-save" in {
       inSequence {
