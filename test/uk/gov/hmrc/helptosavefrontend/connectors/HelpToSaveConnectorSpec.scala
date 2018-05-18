@@ -274,7 +274,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       behave like testCommon(
         mockHttpGet(setITMPFlagURL),
-        () ⇒ connector.setITMPFlag(),
+        () ⇒ connector.setITMPFlagAndUpdateMongo(),
         (),
         testInvalidJSON = false
       )
@@ -283,7 +283,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         "valid JSON in the body" in {
           mockHttpGet(setITMPFlagURL)(Some(HttpResponse(200)))
 
-          await(connector.setITMPFlag().value) shouldBe Right(())
+          await(connector.setITMPFlagAndUpdateMongo().value) shouldBe Right(())
         }
     }
 

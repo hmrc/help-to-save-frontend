@@ -41,7 +41,7 @@ trait HelpToSaveService {
 
   def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def setITMPFlag()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def storeConfirmedEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
@@ -69,8 +69,8 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
   def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.enrolUser()
 
-  def setITMPFlag()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    helpToSaveConnector.setITMPFlag()
+  def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+    helpToSaveConnector.setITMPFlagAndUpdateMongo()
 
   def storeConfirmedEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.storeEmail(email)

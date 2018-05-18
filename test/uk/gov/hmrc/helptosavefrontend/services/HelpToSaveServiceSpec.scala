@@ -76,10 +76,10 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       "return a successful response" in {
 
-        (htsConnector.setITMPFlag()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
+        (htsConnector.setITMPFlagAndUpdateMongo()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
           .returning(EitherT.pure(Unit))
 
-        val result = htsService.setITMPFlag()
+        val result = htsService.setITMPFlagAndUpdateMongo()
         result.value.futureValue.isRight should be(true)
       }
     }
