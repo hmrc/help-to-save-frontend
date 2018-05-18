@@ -661,12 +661,13 @@ class RegisterControllerSpec
           redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
         }
 
-      "not update user counts and not enrol the user if the user already had an account" in {
+      "not update user counts but enrol the user if the user already had an account" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
           mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Right(SubmissionSuccess(alreadyHadAccount = true)))
+          mockEnrolUser()(Right(()))
         }
 
         val result = doCreateAccountRequest()

@@ -237,13 +237,14 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       helpToSaveService.updateUserCount().value.onFailure {
         case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
       }
+    }
 
-      //enrolling user sets the ITMP flag and creates mongo enrolment record
-      helpToSaveService.enrolUser().value.onComplete {
-        case Failure(e)        ⇒ logger.warn(s"error in enrolling user, future failed: $e", nino)
-        case Success(Left(e))  ⇒ logger.warn(s"error in enrolling user: $e", nino)
-        case Success(Right(_)) ⇒ logger.debug(s"successfully enrolled user", nino)
-      }
+    //enrolling user sets the ITMP flag and creates mongo enrolment record
+    //even if user already had account- the prior enrolUser() might have failed due to both mongo and DES was down -  HTS-1057
+    helpToSaveService.enrolUser().value.onComplete {
+      case Failure(e)        ⇒ logger.warn(s"error in enrolling user, future failed: $e", nino)
+      case Success(Left(e))  ⇒ logger.warn(s"error in enrolling user: $e", nino)
+      case Success(Right(_)) ⇒ logger.debug(s"successfully enrolled user", nino)
     }
 
     SeeOther(frontendAppConfig.nsiManageAccountUrl)
