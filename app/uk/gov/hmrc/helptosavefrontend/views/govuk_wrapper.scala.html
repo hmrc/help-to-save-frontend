@@ -57,7 +57,7 @@
                    data-ga-event-action = "Sign out"
                    data-ga-event-label= @request.uri
                    class="ga-track-event">
-                    Sign out
+                    @messages("hts.sign-out")
                 </a>
             }
         </li>
@@ -65,7 +65,7 @@
 
 @insideHeader = {
 @uiLayouts.header_nav(
-    navTitle = Some("Help to Save"),
+    navTitle = Some(messages("hts.nav.title")),
     navTitleLink = None,
     showBetaLink = false,
     navLinks = Some(headerNavLinks))
