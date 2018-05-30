@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(account: Option[Account])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(account: Account)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @serviceInfoContent = {
   <div class="breadcrumbs">

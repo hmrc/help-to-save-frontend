@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountO, Blocking}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.util.Email
@@ -362,7 +362,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     "getting Account" must {
 
       val correlationId = UUID.randomUUID()
-      val url = s"$helpToSaveUrl/help-to-save/nsi-account?nino=$nino&correlationId=$correlationId&version=V1.0&systemId=help-to-save-frontend"
+      val url = s"$helpToSaveUrl/help-to-save/$nino/account?correlationId=$correlationId&systemId=help-to-save-frontend"
       val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
       behave like testCommon(
@@ -373,14 +373,10 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       )
 
       "be able to handle 200 responses with valid Account json" in {
-        mockHttpGet(url)(Some(HttpResponse(200, Some(Json.toJson(AccountO(Some(account)))))))
-        await(connector.getAccount(nino, correlationId).value) shouldBe Right(AccountO(Some(account)))
+        mockHttpGet(url)(Some(HttpResponse(200, Some(Json.toJson(account)))))
+        await(connector.getAccount(nino, correlationId).value) shouldBe Right(account)
       }
 
-      "be able to handle 200 responses with NO Account json in the response" in {
-        mockHttpGet(url)(Some(HttpResponse(200, Some(Json.toJson(())))))
-        await(connector.getAccount(nino, correlationId).value) shouldBe Right(AccountO(None))
-      }
     }
 
   }

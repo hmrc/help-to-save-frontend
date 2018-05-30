@@ -24,7 +24,7 @@ import com.google.inject.{ImplementedBy, Inject}
 import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIProxyConnector}
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountO}
+import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result}
@@ -53,7 +53,7 @@ trait HelpToSaveService {
 
   def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountO]
+  def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account]
 
 }
 
@@ -92,7 +92,7 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
   def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.updateUserCount()
 
-  def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountO] =
+  def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account] =
     helpToSaveConnector.getAccount(nino, correlationId)
 }
 

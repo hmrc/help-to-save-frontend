@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NS
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountO, Blocking}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
@@ -79,7 +79,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
 
-  def mockGetAccount(nino: String)(result: Either[String, AccountO]): Unit =
+  def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
     (mockHelpToSaveService.getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
       .expects(nino, *, *, *)
       .returning(EitherT.fromEither[Future](result))
@@ -458,7 +458,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
         mockEnrolmentCheck()(Right(Enrolled(true)))
-        mockGetAccount(nino)(Right(AccountO(Some(account))))
+        mockGetAccount(nino)(Right(account))
       }
 
       val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
