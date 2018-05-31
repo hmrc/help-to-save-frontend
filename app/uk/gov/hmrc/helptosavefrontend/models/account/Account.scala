@@ -49,10 +49,3 @@ case class Account(isClosed:               Boolean,
 object Account {
   implicit val format: Format[Account] = Json.format[Account]
 }
-
-case class AccountO(account: Option[Account])
-
-object AccountO {
-  implicit val format: Format[AccountO] = Json.format[AccountO]
-}
-

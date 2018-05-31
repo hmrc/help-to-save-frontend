@@ -154,7 +154,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
               internalServerError()
             },
             {
-              accountO ⇒ Ok(views.html.close_account_are_you_sure(accountO.account))
+              account ⇒ Ok(views.html.close_account_are_you_sure(account))
             }
           )
     )

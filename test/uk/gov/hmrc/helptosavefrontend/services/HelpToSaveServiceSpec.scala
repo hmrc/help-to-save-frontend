@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIProxyC
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountO, Blocking}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -192,10 +192,10 @@ class HelpToSaveServiceSpec extends TestSupport {
         val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
         (htsConnector.getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext)).expects(nino, correlationId, *, *)
-          .returning(EitherT.pure(AccountO(Some(account))))
+          .returning(EitherT.pure(account))
 
         val result = htsService.getAccount(nino, correlationId)
-        result.value.futureValue should be(Right(AccountO(Some(account))))
+        result.value.futureValue should be(Right(account))
       }
     }
   }
