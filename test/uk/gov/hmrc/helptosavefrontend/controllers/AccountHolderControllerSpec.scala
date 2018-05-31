@@ -466,7 +466,19 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       contentAsString(result) should include("Are you sure you want to close your account?")
     }
 
-    "return server error if there is any error during retrieving Account from NS&I" in {
+    "redirect to NS&I if the account is already closed" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockGetAccount(nino)(Right(account.copy(isClosed = true)))
+      }
+
+      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
+    }
+
+    "return close account page with no account if there is any error during retrieving Account from NS&I" in {
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
         mockEnrolmentCheck()(Right(Enrolled(true)))
@@ -474,7 +486,8 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       }
 
       val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
-      status(result) shouldBe 500
+      status(result) shouldBe 200
+      contentAsString(result) should include("If you close your account now you will not get any bonus payments. You will not be able to open another Help to Save account.")
     }
 
     "redirect the user to the no account page if they are not enrolled in help-to-save" in {
