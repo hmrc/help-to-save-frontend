@@ -20,10 +20,21 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
+
+@serviceInfoContent = {
+  <div class="breadcrumbs">
+    <ol>
+      <li><a href=@{frontendAppConfig.nsiManageAccountUrl}>@messages("hts.global.breadcrumb.account.home")</a></li>
+      <li><a href=@{frontendAppConfig.nsiManageEmailUrl}>@messages("hts.global.breadcrumb.account.manage-email")</a></li>
+    </ol>
+  </div>
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
     title = messages("hts.email-verification.existing-user.page-title"),
     sidebarLinks = None,
-    bodyClasses = None) {
+    bodyClasses = None,
+    serviceInfoContent = serviceInfoContent) {
 
     <h1 class="heading-large">@messages("hts.email-verification.existing-user.check-your-email.title")</h1>
     <p class="lede">@messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail")<br />@email</p>

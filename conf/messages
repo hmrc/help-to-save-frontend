@@ -2,6 +2,9 @@ hts.global.continue-button=Continue
 hts.global.sign-in-button=Sign in
 hts.global.back-to-account=Go to account home
 hts.global.title-suffix=- Help to Save - GOV.UK
+hts.global.breadcrumb.account.home=Help to Save account home
+hts.global.breadcrumb.account.manage-email=Manage your email address
+
 hts.introduction.title=Apply for Help to Save
 
 hts.sign-in.title=Sign in to your Help to Save account
@@ -413,7 +416,7 @@ hts.give-email-address.label=Enter your email address
 hts.give-email.error-title=There is a problem
 hts.give-email.error-link-description=Enter a valid email address
 
-hts.email-verification.page-title=Change your email address
+hts.email-verification.page-title=Change your email address - Manage your email address
 hts.email-verification.title=Change your email address
 hts.email-verification.intro=Once you''ve entered a new email address, we''ll send you an email so you can verify it.
 hts.email-verification.note=The email addresses you use for other government services will not change.
@@ -437,12 +440,14 @@ hts.we-couldnt-update-your-email.title=Something went wrong - Help to Save - GOV
 hts.we-couldnt-update-your-email.page-title=Something went wrong
 hts.we-couldnt-update-your-email.p1=We cannot change your email address at this time.
 hts.we-couldnt-update-your-email.p2=You''ll need to come back later and try again.
-hts.email-verified.title=Email address verified
+
+hts.email-verified.title=Email address verified - Manage your email address
+hts.email-verified.h1=Email address verified
 hts.email-verified.p1=We''ll use this address to contact you about your Help to Save account.
 hts.email-verified.p2=Your email has not been updated in other government services.
 
 
-hts.email-verification.existing-user.page-title=Verify your email address
+hts.email-verification.existing-user.page-title=You have 30 minutes to verify your email address - Manage your email address
 hts.email-verification.existing-user.check-your-email.title=You have 30 minutes to verify your email address
 hts.email-verification.existing-user.check-your-email.we-have-sent-mail=We''ve sent an email to you at:
 hts.email-verification.existing-user.check-your-email.what-next=What happens next?
@@ -458,7 +463,7 @@ hts.email-verification.link-expired.button=Go to your account
 hts.email-verification.link-expired.p2=Exit to GOV.UK
 
 
-hts.email-updated.page-title=Email address verified 
+hts.email-updated.page-title=Email address verified
 hts.email-updated.title=Email address verified
 hts.email-updated.p1=If you create a Help to Save account we''ll use this email address to contact you about it.
 hts.email-updated.p2=Your email address has not been updated in other government services.
@@ -540,7 +545,6 @@ hts.privacy.p11.link-text=HMRC''s privacy policy
 hts.privacy.p11.2=(it will open in a new window) on the GOV.UK website.
 
 hts.close-account.title=Are you sure you want to close your account? - Help to Save account home
-hts.close-account.breadcrumb=Help to Save account home
 hts.close-account.h1=Are you sure you want to close your account?
 hts.close-account.warning=If you close your account now you will not get any bonus payments. You will not be able to open another Help to Save account.
 hts.close-account.p1=If you still need to close your account you can contact the Help to Save service.
