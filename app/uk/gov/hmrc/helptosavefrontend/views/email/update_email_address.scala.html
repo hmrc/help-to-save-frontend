@@ -22,12 +22,22 @@
 
 @(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@serviceInfoContent = {
+  <div class="breadcrumbs">
+    <ol>
+      <li><a href=@{appConfig.nsiManageAccountUrl}>@messages("hts.global.breadcrumb.account.home")</a></li>
+      <li><a href=@{appConfig.nsiManageEmailUrl}>@messages("hts.global.breadcrumb.account.manage-email")</a></li>
+    </ol>
+  </div>
+}
+
 @defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
     @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
         title = messages("hts.email-verification.page-title"),
         sidebarLinks = None,
         bodyClasses = None,
-        isErrorPage = errorMessage.isDefined) {
+        isErrorPage = errorMessage.isDefined,
+        serviceInfoContent = serviceInfoContent) {
 
         @{if(errorMessage.isDefined)
         <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
