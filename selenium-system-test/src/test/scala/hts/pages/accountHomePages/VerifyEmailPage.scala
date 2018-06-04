@@ -25,7 +25,7 @@ object VerifyEmailPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/verify-email"
 
-  override val expectedPageTitle: Option[String] = Some("Verify your email address")
+  override val expectedPageTitle: Option[String] = Some("You have 30 minutes to verify your email address - Manage your email address")
 
   override val expectedPageHeader: Option[String] = Some("You have 30 minutes to verify your email address")
 
