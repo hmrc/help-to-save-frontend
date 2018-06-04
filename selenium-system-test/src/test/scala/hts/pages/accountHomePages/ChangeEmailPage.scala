@@ -25,11 +25,11 @@ object ChangeEmailPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/change-email"
 
-  override val expectedPageTitle: Option[String] = Some("Change your email address")
+  override val expectedPageTitle: Option[String] = Some("Change your email address - Manage your email address")
 
   override val expectedPageHeader: Option[String] = Some("Change your email address")
 
-  def setNewEmailAddress(email: String)(implicit driver: WebDriver): Unit = {
+  def setNewEmailAddress(email: String)(implicit driver: WebDriver):it = {
     Browser.textField("new-email-address").value = email
     Browser.submit()
   }
