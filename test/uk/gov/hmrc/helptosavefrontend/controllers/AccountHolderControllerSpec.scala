@@ -500,6 +500,42 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
   }
 
+  "handling getNotChangedToOnlineAccountPage" must {
+
+    "show the noAccount page if the person doesn't have an account" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockEnrolmentCheck()(Right(NotEnrolled))
+      }
+
+      val result = controller.getNotChangedToOnlineAccountPage(fakeRequestWithCSRFToken)
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
+    }
+
+    "show an error page if the the enrolment status could not be retrieved" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockEnrolmentCheck()(Left("oh no!"))
+      }
+
+      val result = controller.getNotChangedToOnlineAccountPage(fakeRequestWithCSRFToken)
+      status(result) shouldBe 500
+    }
+
+    "show the notChangedToOnlineAccountPage if there are no errors" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockEnrolmentCheck()(Right(Enrolled(itmpHtSFlag = true)))
+      }
+
+      val result = controller.getNotChangedToOnlineAccountPage(fakeRequestWithCSRFToken)
+      status(result) shouldBe 200
+      contentAsString(result) should include("You did not change to an online account")
+    }
+
+  }
+
   def commonEnrolmentBehaviour(getResult:          () ⇒ Future[Result],
                                mockSuccessfulAuth: () ⇒ Unit,
                                mockNoNINOAuth:     () ⇒ Unit
