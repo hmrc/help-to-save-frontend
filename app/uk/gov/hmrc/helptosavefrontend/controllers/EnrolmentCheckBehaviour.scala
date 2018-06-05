@@ -70,10 +70,10 @@ trait EnrolmentCheckBehaviour {
       transformer: NINOLogMessageTransformer): Future[Result] =
     checkIfAlreadyEnrolled(ifNotEnrolled, _ ⇒ internalServerError())
 
-  def checkIfEnrolledForCloseAccount(ifNotEnrolled:               () ⇒ Future[Result],
-                                     handleEnrolmentServiceError: String ⇒ Future[Result],
-                                     ifEnrolled:                  () ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO,
-                                                                                       hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Future[Result] = {
+  def checkIfEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
+                      handleEnrolmentServiceError: String ⇒ Future[Result],
+                      ifEnrolled:                  () ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO,
+                                                                        hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Future[Result] = {
     val nino = htsContext.nino
 
     helpToSaveService.getUserEnrolmentStatus()

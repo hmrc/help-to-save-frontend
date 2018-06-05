@@ -71,3 +71,4 @@ GET        /privacy-statement                               @uk.gov.hmrc.helptos
 GET        /think-you-are-eligible                          @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getThinkYouAreEligiblePage
 
 GET        /account-home/close-account-are-you-sure         @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getCloseAccountPage
+GET        /not-changed-to-online-account                   @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getNotChangedToOnlineAccountPage
