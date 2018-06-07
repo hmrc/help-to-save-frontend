@@ -341,7 +341,6 @@ hts.iv.locked_out.page-title=We were not able to verify your identity
 hts.iv.locked_out.title=We were not able to verify your identity
 hts.iv.locked_out.p1=You have tried to verify your identity too many times.
 hts.iv.locked_out.p2=You''ll need to wait 24 hours and try again.
-hts.iv.cant_confirm_your_identity=We can''t to confirm your identity
 hts.iv.were_unable_to_confirm_your_identity.page-title=We were not able to verify your identity
 hts.iv.were_unable_to_confirm_your_identity.title=We were not able to verify your identity
 hts.iv.were_unable_to_confirm_your_identity.p1=You have not provided enough information.
