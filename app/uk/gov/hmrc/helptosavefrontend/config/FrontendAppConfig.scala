@@ -73,11 +73,7 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val nsiUpdateEmailUrl: String = s"${baseUrl("nsi")}/help-to-save-proxy/update-email"
 
-  val nsiFrontendBaseUrl: String = getString("microservice.services.nsi.fe.base-url")
-
-  val nsiManageAccountUrl: String = s"$nsiFrontendBaseUrl${getString("microservice.services.nsi.fe.uri.account-home")}"
-
-  val nsiManageEmailUrl: String = s"$nsiFrontendBaseUrl${getString("microservice.services.nsi.fe.uri.manage-email")}"
+  val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
 
   val sessionCacheKey: String = getString("microservice.services.keystore.session-key")
 
