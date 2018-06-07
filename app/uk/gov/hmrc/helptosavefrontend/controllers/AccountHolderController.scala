@@ -160,14 +160,6 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
     )
   }(redirectOnLoginURL = routes.AccountHolderController.getCloseAccountPage().url)
 
-  def getNotChangedToOnlineAccountPage: Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
-    checkIfEnrolled(
-      () ⇒ SeeOther(routes.AccessAccountController.getNoAccountPage().url),
-      _ ⇒ internalServerError(),
-      () ⇒ Ok(views.html.not_changed_to_online_account())
-    )
-  }(redirectOnLoginURL = routes.AccountHolderController.getNotChangedToOnlineAccountPage().url)
-
   private def handleEmailVerified(emailVerificationParams: EmailVerificationParams, oldEmail: String)(
       implicit
       request:    Request[AnyContent],
