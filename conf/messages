@@ -464,7 +464,7 @@ hts.email-verification.link-expired.p2=Exit to GOV.UK
 
 
 hts.email-updated.page-title=Email address verified
-hts.email-updated.title=Email address verified
+hts.email-updated.h1=Email address verified
 hts.email-updated.p1=If you create a Help to Save account we''ll use this email address to contact you about it.
 hts.email-updated.p2=Your email address has not been updated in other government services.
 hts.email-updated.continue_button=Continue
