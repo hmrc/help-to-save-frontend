@@ -36,6 +36,8 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionSuccess, submissionFailureFormat}
 
 // scalastyle:off magic.number
 class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyChecks {
@@ -69,6 +71,12 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
   val updateUserCountURL =
     s"$helpToSaveUrl/help-to-save/update-user-count"
+
+  private val createAccountURL =
+    s"$helpToSaveUrl/help-to-save/create-account"
+
+  private val updateEmailURL =
+    s"$helpToSaveUrl/help-to-save/update-email"
 
   def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
     (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext))
@@ -379,13 +387,31 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
     }
 
+    "creating account" must {
+
+      "return http response as it is to the caller" in {
+        val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(false))))
+        mockHttpPost(createAccountURL, Json.toJson(validNSIUserInfo))(Some(response))
+        await(connector.createAccount(validNSIUserInfo).value) shouldBe Right(response)
+      }
+    }
+
+    "update email" must {
+
+      "return http response as it is to the caller" in {
+        val response = HttpResponse(200, Some(Json.toJson(())))
+        mockHttpPost(updateEmailURL, Json.toJson(validNSIUserInfo))(Some(response))
+        await(connector.updateEmail(validNSIUserInfo).value) shouldBe Right(response)
+      }
+    }
+
   }
 
   private def testCommon[E, A, B](mockHttp:        ⇒ Option[HttpResponse] ⇒ Unit,
                                   result:          () ⇒ EitherT[Future, E, A],
                                   validBody:       B,
                                   testInvalidJSON: Boolean                       = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
-    "perform a GET request to the help-to-save-service" in {
+    "make a request to the help-to-save backend" in {
       mockHttp(Some(HttpResponse(200)))
       await(result())
     }

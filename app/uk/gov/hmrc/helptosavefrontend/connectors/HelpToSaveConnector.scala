@@ -23,11 +23,11 @@ import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.MissingUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -55,6 +55,10 @@ trait HelpToSaveConnector {
   def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account]
+
+  def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
+
+  def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
 
 }
 
@@ -86,6 +90,12 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
 
   private val updateUserCountURL =
     s"$helpToSaveUrl/help-to-save/update-user-count"
+
+  private val createAccountURL =
+    s"$helpToSaveUrl/help-to-save/create-account"
+
+  private val updateEmailURL =
+    s"$helpToSaveUrl/help-to-save/update-email"
 
   private def getAccountURL(nino: String, correlationId: UUID) =
     s"$helpToSaveUrl/help-to-save/$nino/account?correlationId=$correlationId&systemId=help-to-save-frontend"
@@ -161,6 +171,12 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
       case 4     ⇒ Left(s"Error while checking eligibility. Received result code 4 ${response.result}) with reason code ${response.reasonCode} (${response.reason})")
       case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
     }
+
+  override def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+    http.post(createAccountURL, userInfo)
+
+  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+    http.put(updateEmailURL, userInfo)
 }
 
 object HelpToSaveConnectorImpl {

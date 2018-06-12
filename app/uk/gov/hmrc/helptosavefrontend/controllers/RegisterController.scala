@@ -26,7 +26,7 @@ import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, GiveEmailForm, SelectEmailForm}
@@ -227,24 +227,13 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   private def handleSuccessfulCreateAccountResult(submissionSuccess: SubmissionSuccess,
                                                   eligibleWithEmail: EligibleWithEmail,
                                                   nino:              NINO)(implicit hc: HeaderCarrier): Result = {
+    //TODO: in next step this if block can be moved to backend
     if (!submissionSuccess.alreadyHadAccount) {
       val eligibilityCheckResult = eligibleWithEmail.eligible.value
       logger.info(s"Successfully created account - eligibility reason was ${eligibilityCheckResult.reasonCode}: " +
         s"${eligibilityCheckResult.reason}", nino)
 
       metrics.accountsCreatedEligibilityReasonHistogram.update(eligibilityCheckResult.reasonCode)
-
-      helpToSaveService.updateUserCount().value.onFailure {
-        case e ⇒ logger.warn(s"Could not update the user count, future failed: $e", nino)
-      }
-    }
-
-    //enrolling user sets the ITMP flag and creates mongo enrolment record
-    //even if user already had account- the prior enrolUser() might have failed due to both mongo and DES was down -  HTS-1057
-    helpToSaveService.enrolUser().value.onComplete {
-      case Failure(e)        ⇒ logger.warn(s"error in enrolling user, future failed: $e", nino)
-      case Success(Left(e))  ⇒ logger.warn(s"error in enrolling user: $e", nino)
-      case Success(Right(_)) ⇒ logger.debug(s"successfully enrolled user", nino)
     }
 
     SeeOther(frontendAppConfig.nsiManageAccountUrl)

@@ -21,24 +21,25 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIProxyConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
+// scalastyle:off magic.number
 class HelpToSaveServiceSpec extends TestSupport {
 
   val htsConnector = mock[HelpToSaveConnector]
-  val nsiConnector = mock[NSIProxyConnector]
 
-  val htsService = new HelpToSaveServiceImpl(htsConnector, nsiConnector)
+  val htsService = new HelpToSaveServiceImpl(htsConnector)
 
   "The HelpToSaveService" when {
 
@@ -141,27 +142,67 @@ class HelpToSaveServiceSpec extends TestSupport {
 
       val nsiUserInfo = validNSIUserInfo
 
-      "return a successful response" in {
-        List(true, false).foreach { alreadyHadAccount ⇒
-          (nsiConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
-            .returning(Future.successful(SubmissionSuccess(alreadyHadAccount)))
+        def mockCreateAccount(response: Option[HttpResponse]) = {
+          (htsConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
+            .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r ⇒ Future.successful(r)))
+        }
 
+      "return a successful response" in {
+        List(201, 409).foreach { status ⇒
+          mockCreateAccount(Some(HttpResponse(status)))
           val result = htsService.createAccount(nsiUserInfo)
-          result.value.futureValue should be(Right(SubmissionSuccess(alreadyHadAccount)))
+          result.value.futureValue shouldBe oneOf(Right(SubmissionSuccess(false)), Right(SubmissionSuccess(true)))
         }
 
       }
 
       "should handle a failure result" in {
 
-        val failureResponse = SubmissionFailure(Some("submission failure"), "failure message", "failure details")
-
-        (nsiConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
-          .returning(Future.successful(failureResponse))
+        val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
+        mockCreateAccount(Some(HttpResponse(400, Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
 
         val result = htsService.createAccount(nsiUserInfo)
-        result.value.futureValue should be(Left(failureResponse))
+        result.value.futureValue should be(Left(submissionFailure))
+      }
 
+      "recover from unexpected errors" in {
+        mockCreateAccount(None)
+
+        val result = htsService.createAccount(nsiUserInfo)
+        result.value.futureValue should be(SubmissionFailure(None, "Encountered error while trying to create account", "oh no!"))
+      }
+    }
+
+    "update email" must {
+
+      val nsiUserInfo = validNSIUserInfo
+
+        def mockUpdateEmail(response: Option[HttpResponse]) = {
+          (htsConnector.updateEmail(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
+            .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r ⇒ Future.successful(r)))
+        }
+
+      "return a success response" in {
+
+        mockUpdateEmail(Some(HttpResponse(200)))
+
+        val result = htsService.updateEmail(nsiUserInfo)
+        result.value.futureValue shouldBe Right(())
+
+      }
+
+      "handle failure response" in {
+        mockUpdateEmail(Some(HttpResponse(400)))
+
+        val result = htsService.updateEmail(nsiUserInfo)
+        result.value.futureValue shouldBe Left("xxx")
+      }
+
+      "recover from unexpected errors" in {
+        mockUpdateEmail(None)
+
+        val result = htsService.updateEmail(nsiUserInfo)
+        result.value.futureValue should be(Left("Encountered error while trying to create account: oh no!"))
       }
     }
 
