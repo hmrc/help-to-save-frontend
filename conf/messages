@@ -4,8 +4,12 @@ hts.global.back-to-account=Go to account home
 hts.global.title-suffix=- Help to Save - GOV.UK
 hts.global.breadcrumb.account.home=Help to Save account home
 hts.global.breadcrumb.account.manage-email=Manage your email address
-
+hts.nav.title=Help to Save
+hts.nav.next=Next
+hts.nav.previous=Previous
 hts.introduction.title=Apply for Help to Save
+hts.sign-out=Sign out
+hts.sign-in=Sign in
 
 hts.sign-in.title=Sign in to your Help to Save account
 hts.sign-in.h1=Sign in to your Help to Save account
