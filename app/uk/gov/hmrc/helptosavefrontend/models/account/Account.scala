@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.account
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 
+import cats.Show
 import play.api.libs.json.{Format, Json}
 
 case class BonusTerm(bonusEstimate:          BigDecimal,
@@ -48,4 +49,17 @@ case class Account(isClosed:               Boolean,
 
 object Account {
   implicit val format: Format[Account] = Json.format[Account]
+
+  private val clock = Clock.systemUTC()
+
+  implicit class AccountOps(val account: Account) extends AnyVal {
+    def currentBonusTerm(): Option[BonusTerm] = {
+      val dateNow = LocalDate.now(clock)
+      account.bonusTerms.sortWith((t1, t2) ⇒ t1.endDate.isBefore(t2.endDate))
+        .find(_.endDate.isAfter(dateNow))
+    }
+  }
+
+  implicit val currencyValueShows: Show[BigDecimal] = Show.show[BigDecimal](d ⇒ f"$d%.2f")
+
 }

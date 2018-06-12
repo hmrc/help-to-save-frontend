@@ -151,10 +151,14 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
           .fold(
             e ⇒ {
               logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-              internalServerError()
+              Ok(views.html.close_account_are_you_sure(None))
             },
-            {
-              account ⇒ Ok(views.html.close_account_are_you_sure(account))
+            { account ⇒
+              if (account.isClosed) {
+                SeeOther(appConfig.nsiManageAccountUrl)
+              } else {
+                Ok(views.html.close_account_are_you_sure(Some(account)))
+              }
             }
           )
     )
