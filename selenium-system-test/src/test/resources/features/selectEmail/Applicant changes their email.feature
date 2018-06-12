@@ -29,3 +29,10 @@ Feature: Applicant changes their email
     Given they've chosen to enter a new email address during the application process
     When they want to change their email again
     Then they are asked to check their email for a verification email
+
+    @blah
+  Scenario: Applicant updates email address
+    Given they've chosen to enter a new email address during the application process
+    When they click on the email verification link
+    Then they see that their email has been successfully verified
+

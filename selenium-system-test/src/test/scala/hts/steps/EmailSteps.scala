@@ -16,11 +16,16 @@
 
 package hts.steps
 
+import com.typesafe.config.ConfigFactory
 import hts.browser.Browser
 import hts.pages._
 import hts.utils.ScenarioContext
+import play.api.Configuration
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, CryptoImpl, EmailVerificationParams}
 
 class EmailSteps extends Steps {
+
+  lazy implicit val crypto: Crypto = new CryptoImpl(Configuration(ConfigFactory.defaultApplication()))
 
   And("^they select their GG email and proceed$") {
     Browser.checkCurrentPageIs(SelectEmailPage)
@@ -39,6 +44,15 @@ class EmailSteps extends Steps {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.currentNINO())
     EligiblePage.clickConfirmAndContinue()
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
+  }
+
+  When("^they click on the email verification link$"){
+    val params = EmailVerificationParams(ScenarioContext.currentNINO(), "newemail@mail.com")
+    Browser.navigateTo(s"email-verified-callback?p=${params.encode()}")
+  }
+
+  Then("^they see that their email has been successfully verified$"){
+    Browser.checkCurrentPageIs(EmailVerifiedPage)
   }
 
   When("^they request a re-send of the verification email$") {
