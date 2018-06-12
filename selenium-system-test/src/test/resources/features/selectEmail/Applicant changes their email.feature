@@ -6,13 +6,6 @@ Feature: Applicant changes their email
     And they select their GG email and proceed
     Then they see the final Create Account page
 
-  @zap
-  Scenario: An eligible applicant chooses to give a new email address for hts
-    Given the user has logged in and passed IV
-    When they start to create an account
-    And they enter a new email address
-    Then they see the email verification page
-
   Scenario: An eligible applicant wants to give an email address
     Given HMRC doesn't currently hold an email address for the user
     When they start to create an account
@@ -30,7 +23,7 @@ Feature: Applicant changes their email
     When they want to change their email again
     Then they are asked to check their email for a verification email
 
-    @blah
+  @HTS-876 @zap
   Scenario: Applicant updates email address
     Given they've chosen to enter a new email address during the application process
     When they click on the email verification link

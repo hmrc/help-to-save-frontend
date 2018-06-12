@@ -22,6 +22,7 @@ import cats.syntax.either._
 import cucumber.api.Scenario
 import cucumber.api.scala.{EN, ScalaDsl}
 import hts.driver.Driver
+import hts.pages.{CreateAccountPage, EligiblePage, SelectEmailPage}
 import hts.utils.ScenarioContext
 import org.openqa.selenium.{OutputType, TakesScreenshot, TimeoutException, WebDriver, WebDriverException}
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
@@ -82,6 +83,11 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
     }
   }
 
+  def createAccountUsingGGEmail(): Unit = {
+    EligiblePage.clickConfirmAndContinue()
+    SelectEmailPage.selectGGEmail()
+    CreateAccountPage.createAccount()
+  }
 }
 
 private[steps] object Steps {

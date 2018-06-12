@@ -19,6 +19,7 @@ package hts.steps
 import com.typesafe.config.ConfigFactory
 import hts.browser.Browser
 import hts.pages._
+import hts.pages.accountHomePages.{AccountHolderEmailVerifiedPage, ChangeEmailPage}
 import hts.utils.ScenarioContext
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, CryptoImpl, EmailVerificationParams}
@@ -52,7 +53,7 @@ class EmailSteps extends Steps {
   }
 
   Then("^they see that their email has been successfully verified$"){
-    Browser.checkCurrentPageIs(EmailVerifiedPage)
+    Browser.checkCurrentPageIs(ApplicantEmailVerifiedPage)
   }
 
   When("^they request a re-send of the verification email$") {
@@ -72,13 +73,21 @@ class EmailSteps extends Steps {
     Browser.checkCurrentPageIs(CreateAccountPage)
   }
 
-  When("^they enter a new email address$") {
-    Browser.checkCurrentPageIs(SelectEmailPage)
-    SelectEmailPage.setAndVerifyNewEmail("newemail@gmail.com")
+  Given("^the account holder has chosen to enter a new email address$"){ () ⇒
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
+    createAccountUsingGGEmail()
+
+    ChangeEmailPage.navigate()
+    ChangeEmailPage.setNewEmailAddress("anotheremail@mail.com")
   }
 
-  Then("^they see the email verification page$") {
-    Browser.checkCurrentPageIs(VerifyYourEmailPage)
+  When("^the account holder clicks on the email verification link$"){ () ⇒
+    val params = EmailVerificationParams(ScenarioContext.currentNINO(), "anotheremail@mail.com")
+    Browser.navigateTo(s"account-home/email-verified-callback?p=${params.encode()}")
+  }
+
+  Then("^the account holder sees that their email has been successfully verified$"){ () ⇒
+    Browser.checkCurrentPageIs(AccountHolderEmailVerifiedPage)
   }
 
 }
