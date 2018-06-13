@@ -81,7 +81,6 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
       case e: WebDriverException ⇒ System.err.println(s"Error creating screenshot: ${e.getMessage}")
     }
   }
-
 }
 
 private[steps] object Steps {

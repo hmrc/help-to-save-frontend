@@ -24,12 +24,6 @@ import hts.utils.{Configuration, ScenarioContext}
 
 class CreateAccountSteps extends Steps {
 
-  private def createAccountUsingGGEmail(): Unit = {
-    EligiblePage.clickConfirmAndContinue()
-    SelectEmailPage.selectGGEmail()
-    CreateAccountPage.createAccount()
-  }
-
   Given("^an applicant is on the home page$") {
     AboutPage.navigate()
   }
