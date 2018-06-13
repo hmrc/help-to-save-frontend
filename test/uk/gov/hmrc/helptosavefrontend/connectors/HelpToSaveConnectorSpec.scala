@@ -90,6 +90,12 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       .returning(result.fold(
         Future.failed[HttpResponse](new Exception("")))(Future.successful))
 
+  def mockHttpPut[A](url: String, body: A)(result: Option[HttpResponse]): Unit =
+    (mockHttp.put(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
+      .expects(url, body, Seq.empty[(String, String)], *, *, *)
+      .returning(result.fold(
+        Future.failed[HttpResponse](new Exception("")))(Future.successful))
+
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
 
@@ -260,24 +266,6 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
     }
 
-    "enrolling a user" must {
-
-      behave like testCommon(
-        mockHttpGet(enrolUserURL),
-        () ⇒ connector.enrolUser(),
-        (),
-        testInvalidJSON = false
-      )
-
-      "return a Right if the call comes back with HTTP status 200 with " +
-        "valid JSON in the body" in {
-          mockHttpGet(enrolUserURL)(Some(HttpResponse(200)))
-
-          await(connector.enrolUser().value) shouldBe Right(())
-        }
-
-    }
-
     "setting the ITMP flag" must {
 
       behave like testCommon(
@@ -352,21 +340,6 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       }
     }
 
-    "updating user-cap-count" must {
-
-      behave like testCommon(
-        mockHttpPost(updateUserCountURL, ""),
-        () ⇒ connector.updateUserCount(),
-        Json.toJson(()),
-        false
-      )
-
-      "return a Right if the call comes with with HTTP 200" in {
-        mockHttpPost(updateUserCountURL, "")(Some(HttpResponse(200, Some(Json.toJson(())))))
-        await(connector.updateUserCount().value) shouldBe Right(())
-      }
-    }
-
     "getting Account" must {
 
       val correlationId = UUID.randomUUID()
@@ -391,8 +364,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return http response as it is to the caller" in {
         val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(false))))
-        mockHttpPost(createAccountURL, Json.toJson(validNSIUserInfo))(Some(response))
-        await(connector.createAccount(validNSIUserInfo).value) shouldBe Right(response)
+        mockHttpPost(createAccountURL, validNSIUserInfo)(Some(response))
+        await(connector.createAccount(validNSIUserInfo)) shouldBe response
       }
     }
 
@@ -400,8 +373,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return http response as it is to the caller" in {
         val response = HttpResponse(200, Some(Json.toJson(())))
-        mockHttpPost(updateEmailURL, Json.toJson(validNSIUserInfo))(Some(response))
-        await(connector.updateEmail(validNSIUserInfo).value) shouldBe Right(response)
+        mockHttpPut(updateEmailURL, validNSIUserInfo)(Some(response))
+        await(connector.updateEmail(validNSIUserInfo)) shouldBe response
       }
     }
 

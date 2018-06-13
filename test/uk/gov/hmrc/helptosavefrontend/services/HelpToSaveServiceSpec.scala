@@ -57,20 +57,6 @@ class HelpToSaveServiceSpec extends TestSupport {
       }
     }
 
-    "enrol user" must {
-
-      val nino = "WM123456C"
-
-      "return a successful response" in {
-
-        (htsConnector.enrolUser()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
-          .returning(EitherT.pure(Unit))
-
-        val result = htsService.enrolUser()
-        result.value.futureValue.isRight should be(true)
-      }
-    }
-
     "set ITMPFlag" must {
 
       val nino = "WM123456C"
@@ -151,7 +137,7 @@ class HelpToSaveServiceSpec extends TestSupport {
         List(201, 409).foreach { status ⇒
           mockCreateAccount(Some(HttpResponse(status)))
           val result = htsService.createAccount(nsiUserInfo)
-          result.value.futureValue shouldBe oneOf(Right(SubmissionSuccess(false)), Right(SubmissionSuccess(true)))
+          List(result.value.futureValue) should contain oneOf (Right(SubmissionSuccess(false)), Right(SubmissionSuccess(true)))
         }
 
       }
@@ -169,7 +155,7 @@ class HelpToSaveServiceSpec extends TestSupport {
         mockCreateAccount(None)
 
         val result = htsService.createAccount(nsiUserInfo)
-        result.value.futureValue should be(SubmissionFailure(None, "Encountered error while trying to create account", "oh no!"))
+        result.value.futureValue should be(Left(SubmissionFailure(None, "Encountered error while trying to create account", "oh no!")))
       }
     }
 
@@ -195,14 +181,14 @@ class HelpToSaveServiceSpec extends TestSupport {
         mockUpdateEmail(Some(HttpResponse(400)))
 
         val result = htsService.updateEmail(nsiUserInfo)
-        result.value.futureValue shouldBe Left("xxx")
+        result.value.futureValue shouldBe Left("Received unexpected status 400 from NS&I proxy while trying to update email. Body was null")
       }
 
       "recover from unexpected errors" in {
         mockUpdateEmail(None)
 
         val result = htsService.updateEmail(nsiUserInfo)
-        result.value.futureValue should be(Left("Encountered error while trying to create account: oh no!"))
+        result.value.futureValue should be(Left("Encountered error while trying to update email: oh no!"))
       }
     }
 
@@ -213,16 +199,6 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val result = htsService.isAccountCreationAllowed()
         result.value.futureValue should be(Right(UserCapResponse()))
-      }
-    }
-
-    "updating user-cap-count" must {
-      "return a successful response" in {
-        (htsConnector.updateUserCount()(_: HeaderCarrier, _: ExecutionContext)).expects(*, *)
-          .returning(EitherT.pure(()))
-
-        val result = htsService.updateUserCount()
-        result.value.futureValue should be(Right(()))
       }
     }
 

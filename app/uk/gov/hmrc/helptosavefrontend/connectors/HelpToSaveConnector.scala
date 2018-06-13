@@ -42,8 +42,6 @@ trait HelpToSaveConnector {
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus]
 
-  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
-
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
@@ -51,8 +49,6 @@ trait HelpToSaveConnector {
   def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]]
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse]
-
-  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account]
 

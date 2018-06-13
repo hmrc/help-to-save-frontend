@@ -42,8 +42,6 @@ trait HelpToSaveService {
 
   def checkEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EligibilityCheckResult]
 
-  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
-
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def storeConfirmedEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
@@ -53,8 +51,6 @@ trait HelpToSaveService {
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse]
-
-  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account]
 
@@ -70,9 +66,6 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
 
   def checkEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EligibilityCheckResult] =
     helpToSaveConnector.getEligibility()
-
-  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    helpToSaveConnector.enrolUser()
 
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.setITMPFlagAndUpdateMongo()
@@ -105,9 +98,6 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] =
     helpToSaveConnector.isAccountCreationAllowed()
-
-  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    helpToSaveConnector.updateUserCount()
 
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account] =
     helpToSaveConnector.getAccount(nino, correlationId)
@@ -142,6 +132,8 @@ object HelpToSaveServiceImpl {
   sealed trait SubmissionResult
 
   case class SubmissionSuccess(alreadyHadAccount: Boolean) extends SubmissionResult
+
+  implicit val submissionSuccessFormat: Format[SubmissionSuccess] = Json.format[SubmissionSuccess]
 
   case class SubmissionFailure(errorMessageId: Option[String], errorMessage: String, errorDetail: String) extends SubmissionResult
 
