@@ -36,6 +36,8 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionSuccess, submissionFailureFormat}
 
 // scalastyle:off magic.number
 class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyChecks {
@@ -70,6 +72,12 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
   val updateUserCountURL =
     s"$helpToSaveUrl/help-to-save/update-user-count"
 
+  private val createAccountURL =
+    s"$helpToSaveUrl/help-to-save/create-account"
+
+  private val updateEmailURL =
+    s"$helpToSaveUrl/help-to-save/update-email"
+
   def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
     (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(url, *, *)
@@ -78,6 +86,12 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
   def mockHttpPost[A](url: String, body: A)(result: Option[HttpResponse]): Unit =
     (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
+      .expects(url, body, Seq.empty[(String, String)], *, *, *)
+      .returning(result.fold(
+        Future.failed[HttpResponse](new Exception("")))(Future.successful))
+
+  def mockHttpPut[A](url: String, body: A)(result: Option[HttpResponse]): Unit =
+    (mockHttp.put(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
       .expects(url, body, Seq.empty[(String, String)], *, *, *)
       .returning(result.fold(
         Future.failed[HttpResponse](new Exception("")))(Future.successful))
@@ -252,24 +266,6 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
     }
 
-    "enrolling a user" must {
-
-      behave like testCommon(
-        mockHttpGet(enrolUserURL),
-        () ⇒ connector.enrolUser(),
-        (),
-        testInvalidJSON = false
-      )
-
-      "return a Right if the call comes back with HTTP status 200 with " +
-        "valid JSON in the body" in {
-          mockHttpGet(enrolUserURL)(Some(HttpResponse(200)))
-
-          await(connector.enrolUser().value) shouldBe Right(())
-        }
-
-    }
-
     "setting the ITMP flag" must {
 
       behave like testCommon(
@@ -344,21 +340,6 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       }
     }
 
-    "updating user-cap-count" must {
-
-      behave like testCommon(
-        mockHttpPost(updateUserCountURL, ""),
-        () ⇒ connector.updateUserCount(),
-        Json.toJson(()),
-        false
-      )
-
-      "return a Right if the call comes with with HTTP 200" in {
-        mockHttpPost(updateUserCountURL, "")(Some(HttpResponse(200, Some(Json.toJson(())))))
-        await(connector.updateUserCount().value) shouldBe Right(())
-      }
-    }
-
     "getting Account" must {
 
       val correlationId = UUID.randomUUID()
@@ -379,13 +360,31 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
     }
 
+    "creating account" must {
+
+      "return http response as it is to the caller" in {
+        val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(false))))
+        mockHttpPost(createAccountURL, validNSIUserInfo)(Some(response))
+        await(connector.createAccount(validNSIUserInfo)) shouldBe response
+      }
+    }
+
+    "update email" must {
+
+      "return http response as it is to the caller" in {
+        val response = HttpResponse(200, Some(Json.toJson(())))
+        mockHttpPut(updateEmailURL, validNSIUserInfo)(Some(response))
+        await(connector.updateEmail(validNSIUserInfo)) shouldBe response
+      }
+    }
+
   }
 
   private def testCommon[E, A, B](mockHttp:        ⇒ Option[HttpResponse] ⇒ Unit,
                                   result:          () ⇒ EitherT[Future, E, A],
                                   validBody:       B,
                                   testInvalidJSON: Boolean                       = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
-    "perform a GET request to the help-to-save-service" in {
+    "make a request to the help-to-save backend" in {
       mockHttp(Some(HttpResponse(200)))
       await(result())
     }

@@ -18,17 +18,20 @@ package uk.gov.hmrc.helptosavefrontend.services
 
 import java.util.UUID
 
-import javax.inject.Singleton
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject}
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, NSIProxyConnector}
+import javax.inject.Singleton
+import play.api.http.Status
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -38,8 +41,6 @@ trait HelpToSaveService {
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus]
 
   def checkEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EligibilityCheckResult]
-
-  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
@@ -51,23 +52,20 @@ trait HelpToSaveService {
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse]
 
-  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
-
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account]
+
+  def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
 }
 
 @Singleton
-class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector, nSIConnector: NSIProxyConnector) extends HelpToSaveService with Logging {
+class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector) extends HelpToSaveService with Logging {
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus] =
     helpToSaveConnector.getUserEnrolmentStatus()
 
   def checkEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EligibilityCheckResult] =
     helpToSaveConnector.getEligibility()
-
-  def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    helpToSaveConnector.enrolUser()
 
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveConnector.setITMPFlagAndUpdateMongo()
@@ -79,20 +77,66 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector,
     helpToSaveConnector.getEmail()
 
   def createAccount(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
-    EitherT(nSIConnector.createAccount(userInfo).map[Either[SubmissionFailure, SubmissionSuccess]] {
-      case success: SubmissionSuccess ⇒
-        Right(success)
-      case failure: SubmissionFailure ⇒
-        Left(failure)
-    })
+    EitherT(helpToSaveConnector.createAccount(userInfo)
+      .map[Either[SubmissionFailure, SubmissionSuccess]] { response ⇒
+
+        response.status match {
+          case Status.CREATED ⇒
+            Right(SubmissionSuccess(false))
+
+          case Status.CONFLICT ⇒
+            Right(SubmissionSuccess(true))
+
+          case _ ⇒
+            Left(handleError(response))
+        }
+      }.recover {
+        case e ⇒
+          Left(SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage))
+      }
+    )
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] =
     helpToSaveConnector.isAccountCreationAllowed()
 
-  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    helpToSaveConnector.updateUserCount()
-
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account] =
     helpToSaveConnector.getAccount(nino, correlationId)
+
+  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+    EitherT(helpToSaveConnector.updateEmail(userInfo).map[Either[String, Unit]] { response ⇒
+
+      response.status match {
+        case Status.OK ⇒
+          Right(())
+
+        case other ⇒
+          Left(s"Received unexpected status $other from NS&I proxy while trying to update email. Body was ${maskNino(response.body)}")
+
+      }
+    }.recover {
+      case e ⇒
+        Left(s"Encountered error while trying to update email: ${e.getMessage}")
+    }
+    )
+
+  private def handleError(response: HttpResponse): SubmissionFailure = {
+    response.parseJSON[SubmissionFailure](Some("error")) match {
+      case Right(submissionFailure) ⇒ submissionFailure
+      case Left(error)              ⇒ SubmissionFailure(None, "", error)
+    }
+  }
+}
+
+object HelpToSaveServiceImpl {
+
+  sealed trait SubmissionResult
+
+  case class SubmissionSuccess(alreadyHadAccount: Boolean) extends SubmissionResult
+
+  implicit val submissionSuccessFormat: Format[SubmissionSuccess] = Json.format[SubmissionSuccess]
+
+  case class SubmissionFailure(errorMessageId: Option[String], errorMessage: String, errorDetail: String) extends SubmissionResult
+
+  implicit val submissionFailureFormat: Format[SubmissionFailure] = Json.format[SubmissionFailure]
 }
 

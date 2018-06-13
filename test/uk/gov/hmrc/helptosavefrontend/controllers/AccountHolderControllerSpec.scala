@@ -27,7 +27,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIProxyConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth._
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -49,8 +49,6 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
   val mockHelpToSaveService = mock[HelpToSaveService]
 
   val mockEmailVerificationConnector = mock[EmailVerificationConnector]
-
-  val mockNSIConnector = mock[NSIProxyConnector]
 
   val mockAuditor = mock[HTSAuditor]
 
@@ -88,7 +86,6 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
     mockHelpToSaveService,
     mockAuthConnector,
     mockEmailVerificationConnector,
-    mockNSIConnector,
     mockMetrics,
     mockAuditor,
     mockSessionCacheConnector
@@ -102,7 +99,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       .returning(Future.successful(result))
 
   def mockUpdateEmailWithNSI(userInfo: NSIUserInfo)(result: Either[String, Unit]): Unit =
-    (mockNSIConnector.updateEmail(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService.updateEmail(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
       .expects(userInfo, *, *)
       .returning(EitherT.fromEither[Future](result))
 

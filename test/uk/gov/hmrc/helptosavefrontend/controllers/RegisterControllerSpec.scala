@@ -27,7 +27,7 @@ import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.NSIProxyConnector.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
@@ -68,11 +68,6 @@ class RegisterControllerSpec
       .expects(nSIUserInfo, *, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockEnrolUser()(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.enrolUser()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
-      .returning(EitherT.fromEither[Future](result))
-
   def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(email, *, *)
@@ -80,11 +75,6 @@ class RegisterControllerSpec
 
   def mockAccountCreationAllowed(result: Either[String, UserCapResponse]): Unit =
     (mockHelpToSaveService.isAccountCreationAllowed()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
-      .returning(EitherT.fromEither[Future](result))
-
-  def mockUpdateUserCount(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.updateUserCount()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -636,8 +626,6 @@ class RegisterControllerSpec
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
-            mockUpdateUserCount(Right(Unit))
-            mockEnrolUser()(Right(()))
           }
 
           val result = doCreateAccountRequest()
@@ -652,8 +640,6 @@ class RegisterControllerSpec
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
             mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))()
-            mockUpdateUserCount(Right(Unit))
-            mockEnrolUser()(Left("Oh no"))
           }
 
           val result = doCreateAccountRequest()
@@ -667,7 +653,6 @@ class RegisterControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
           mockCreateAccount(validNSIUserInfo.updateEmail(confirmedEmail))(Right(SubmissionSuccess(alreadyHadAccount = true)))
-          mockEnrolUser()(Right(()))
         }
 
         val result = doCreateAccountRequest()

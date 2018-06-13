@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, NSIProxyConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -46,7 +46,6 @@ import scala.concurrent.Future
 class AccountHolderController @Inject() (val helpToSaveService:          HelpToSaveService,
                                          val authConnector:              AuthConnector,
                                          val emailVerificationConnector: EmailVerificationConnector,
-                                         nSIConnector:                   NSIProxyConnector,
                                          val metrics:                    Metrics,
                                          val auditor:                    HTSAuditor,
                                          sessionCacheConnector:          SessionCacheConnector)(implicit app: Application,
@@ -185,7 +184,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
 
         case Right(userInfo) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
-            _ ← nSIConnector.updateEmail(NSIUserInfo(userInfo, emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
+            _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo, emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
             _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap(UpdateEmailError.EmailMongoError)
             _ ← sessionCacheConnector.put(HTSSession(None, Some(emailVerificationParams.email), None))
               .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
