@@ -159,7 +159,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
             logger.warn(s"Could not write confirmed email: $e", nino)
             internalServerError()
           }, { _ ⇒
-            SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
+            SeeOther(routes.RegisterController.getCreateAccountPage().url)
           }
         )
       } { _ ⇒
@@ -168,7 +168,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     }
   }(redirectOnLoginURL = frontendAppConfig.checkEligibilityUrl)
 
-  def getCreateAccountHelpToSavePage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+  def getCreateAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
         eligibleWithEmail.confirmedEmail.fold[Future[Result]](
@@ -178,13 +178,13 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
                 logger.warn(s"Could not parse eligiblity reason: ${eligibleWithEmail.eligible}", eligibleWithEmail.userInfo.nino)
                 internalServerError()
               } { reason ⇒
-                Ok(views.html.register.create_account_help_to_save(reason))
+                Ok(views.html.register.create_account(reason))
               })
       } { _ ⇒
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountHelpToSavePage().url)
+  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
 
   def getDailyCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.daily_cap_reached())
@@ -202,7 +202,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     Ok(views.html.register.details_are_incorrect())
   }(redirectOnLoginURL = frontendAppConfig.checkEligibilityUrl)
 
-  def createAccountHelpToSave: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+  def createAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
@@ -222,7 +222,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.createAccountHelpToSave().url)
+  }(redirectOnLoginURL = routes.RegisterController.createAccount().url)
 
   private def handleSuccessfulCreateAccountResult(submissionSuccess: SubmissionSuccess,
                                                   eligibleWithEmail: EligibleWithEmail,
@@ -249,7 +249,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
         SeeOther(routes.RegisterController.getGiveEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountHelpToSavePage().url)
+  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility

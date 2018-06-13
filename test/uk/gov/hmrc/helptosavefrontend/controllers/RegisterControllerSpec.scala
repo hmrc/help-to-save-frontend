@@ -516,7 +516,7 @@ class RegisterControllerSpec
 
         val result = doRequest(crypto.encrypt(email))
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountHelpToSavePage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
       }
 
       "return an error" when {
@@ -566,7 +566,7 @@ class RegisterControllerSpec
       val email = "email"
 
         def doRequest(): Future[PlayResult] =
-          controller.getCreateAccountHelpToSavePage()(fakeRequestWithCSRFToken)
+          controller.getCreateAccountPage()(fakeRequestWithCSRFToken)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
@@ -613,7 +613,7 @@ class RegisterControllerSpec
     "creating an account" must {
       val confirmedEmail = "confirmed"
 
-        def doCreateAccountRequest(): Future[PlayResult] = controller.createAccountHelpToSave(FakeRequest())
+        def doCreateAccountRequest(): Future[PlayResult] = controller.createAccount(FakeRequest())
 
       behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 

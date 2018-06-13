@@ -196,7 +196,7 @@ class NewApplicantUpdateEmailAddressController @Inject() (val sessionCacheConnec
   }(redirectOnLoginURL = frontendAppConfig.checkEligibilityUrl)
 
   def emailUpdatedSubmit: Action[AnyContent] = ActionWithMdc {
-    SeeOther(routes.RegisterController.getCreateAccountHelpToSavePage().url)
+    SeeOther(routes.RegisterController.getCreateAccountPage().url)
   }
 
   /** Return `None` if user is ineligible */
