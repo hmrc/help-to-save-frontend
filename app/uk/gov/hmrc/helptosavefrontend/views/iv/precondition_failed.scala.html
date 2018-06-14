@@ -20,13 +20,15 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.precondition_failed.page-title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+  title = Messages("hts.global.title", Messages("hts.iv.precondition_failed.title.h1"), "", Messages("hts.global.title-suffix"))
+) {
 
-    <h1 class="heading-large">@Messages("hts.iv.precondition_failed.title")</h1>
+  <h1 class="heading-large">@Messages("hts.iv.precondition_failed.title.h1")</h1>
 
-    <p>@Messages("hts.iv.precondition_failed.message")</p>
-    <section class="subsection--wide">
-      <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
-    </section>
+  <p>@Messages("hts.iv.precondition_failed.message")</p>
+  <section class="subsection--wide">
+    <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
+  </section>
 
 }

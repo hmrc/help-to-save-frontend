@@ -23,8 +23,10 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
 @(eligibilityReason: EligibilityReason)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.register.create_account_help_to_save.title"), bodyClasses = None) {
-    <h1 class="heading-large">@Messages("hts.register.create_account_help_to_save.header-page")</h1>
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+  title = Messages("hts.global.title", Messages("hts.register.create_account_help_to_save.title.h1"), "", Messages("hts.global.title-suffix")),
+  bodyClasses = None) {
+    <h1 class="heading-large">@Messages("hts.register.create_account_help_to_save.title.h1")</h1>
 
     <p>@Messages("hts.register.create_account_help_to_save.par-1")<p>
     <p>@Messages("hts.register.create_account_help_to_save.par-2")<p>

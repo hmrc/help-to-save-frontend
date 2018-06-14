@@ -21,11 +21,11 @@
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-  title = messages("hts.sign-in.title"),
+  title = Messages("hts.global.title", Messages("hts.sign-in.title.h1"), "", Messages("hts.global.title-suffix")),
   sidebarLinks = None,
   bodyClasses = None) {
 
-  <h1 class="heading-large">@messages("hts.sign-in.h1")</h1>
+  <h1 class="heading-large">@messages("hts.sign-in.title.h1")</h1>
   <p>@messages("hts.sign-in.p1")</p>
 
   <ul class="list list-bullet">

@@ -19,13 +19,13 @@
 
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = messages("hts.email-verified.title"),
+    title = Messages("hts.global.title", Messages("hts.email-verified.title.h1"), Messages("hts.global.title.section.email"), Messages("hts.global.title-suffix")),
     sidebarLinks = None,
     bodyClasses = None) {
 
   <div class="govuk-box-highlight">
     <h1 class="heading-xlarge">
-      @messages("hts.email-verified.h1")
+      @messages("hts.email-verified.title.h1")
     </h1>
     <p>@email</p>
   </div>

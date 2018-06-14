@@ -19,9 +19,11 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.iv.insufficient_evidence.page-title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+  title = Messages("hts.global.title", Messages("hts.iv.insufficient_evidence.title.h1"), "", Messages("hts.global.title-suffix"))
+) {
 
-    <h1 class="heading-large">@Messages("hts.iv.insufficient_evidence.title")</h1>
+    <h1 class="heading-large">@Messages("hts.iv.insufficient_evidence.title.h1")</h1>
     <p>@Messages("hts.iv.insufficient_evidence.p1")</p>
     <p>
         @Messages("hts.iv.insufficient_evidence.telephone-title")

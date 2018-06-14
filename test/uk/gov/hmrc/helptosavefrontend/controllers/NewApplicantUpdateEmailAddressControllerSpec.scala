@@ -121,7 +121,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
         }
         val result = await(controller.verifyEmail(fakeRequestWithCSRFToken))
         status(result) shouldBe Status.OK
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title")) shouldBe true
+        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title.h1")) shouldBe true
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content2")) shouldBe true
 
       }

@@ -24,9 +24,9 @@ object EligiblePage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/eligible"
 
-  override val expectedPageTitle: Option[String] = Some("You're eligible for a Help to Save account")
+  override val expectedPageTitle: Option[String] = Some("We’ve checked the details we hold for you")
 
-  override val expectedPageHeader: Option[String] = Some("We've checked the details we hold for you")
+  override val expectedPageHeader: Option[String] = Some("We’ve checked the details we hold for you")
 
   def clickConfirmAndContinue()(implicit driver: WebDriver): Unit =
     Browser.clickButtonByIdOnceClickable("start-creating-account")

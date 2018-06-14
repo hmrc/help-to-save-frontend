@@ -25,7 +25,7 @@
 @defining(form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))){ errorMessage =>
 
     @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-        title = messages("hts.give-email.title"),
+        title = Messages("hts.global.title", Messages("hts.give-email.title.h1"), "", Messages("hts.global.title-suffix")),
         sidebarLinks = None,
         bodyClasses = None,
         isErrorPage = errorMessage.isDefined) {
@@ -39,7 +39,7 @@
         </div>
         }
 
-        <h1 class="heading-large">@messages("hts.give-email.page-title")</h1>
+        <h1 class="heading-large">@messages("hts.give-email.title.h1")</h1>
 
         <p>@messages("hts.give-email-address.p")</p>
 
