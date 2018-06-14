@@ -125,9 +125,6 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] =
     handleGet(accountCreateAllowedURL, _.parseJSON[UserCapResponse](), "account creation allowed", identity)
 
-  def updateUserCount()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handlePost(updateUserCountURL, "", _ ⇒ Right(()), "update user count", identity)
-
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account] =
     handleGet(getAccountURL(nino, correlationId), _.parseJSON[Account](), "get Account", identity)
 
