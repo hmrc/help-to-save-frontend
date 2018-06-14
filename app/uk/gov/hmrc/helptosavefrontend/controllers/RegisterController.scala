@@ -211,7 +211,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
           toFuture(SeeOther(routes.RegisterController.getSelectEmailPage().url))
         ) { confirmedEmail ⇒
             val userInfo = NSIUserInfo(eligibleWithEmail.userInfo, confirmedEmail)
-            val createAccountRequest = CreateAccountRequest(userInfo, Some(eligibleWithEmail.eligible.value.reasonCode))
+            val createAccountRequest = CreateAccountRequest(userInfo, eligibleWithEmail.eligible.value.reasonCode)
             helpToSaveService.createAccount(createAccountRequest).fold[Result]({ e ⇒
               logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
               SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)

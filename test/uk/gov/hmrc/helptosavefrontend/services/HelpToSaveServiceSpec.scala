@@ -127,7 +127,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
     "createAccount" must {
 
-      val createAccountRequest = CreateAccountRequest(validNSIUserInfo, Some(1))
+      val createAccountRequest = CreateAccountRequest(validNSIUserInfo, 7)
 
         def mockCreateAccount(response: Option[HttpResponse]) = {
           (htsConnector.createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext)).expects(createAccountRequest, *, *)

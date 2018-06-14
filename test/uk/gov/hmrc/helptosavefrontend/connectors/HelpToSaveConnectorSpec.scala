@@ -364,7 +364,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     "creating account" must {
 
       "return http response as it is to the caller" in {
-        val request = CreateAccountRequest(validNSIUserInfo, Some(1))
+        val request = CreateAccountRequest(validNSIUserInfo, 7)
         val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(false))))
         mockHttpPost(createAccountURL, request)(Some(response))
         await(connector.createAccount(request)) shouldBe response
