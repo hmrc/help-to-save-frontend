@@ -31,8 +31,8 @@ GET        /enter-email                                     @uk.gov.hmrc.helptos
 POST       /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit
 GET        /confirm-email/:email                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
 
-GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountHelpToSavePage
-POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccountHelpToSave
+GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountPage
+POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccount
 GET        /error-no-account                                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
 
 GET        /verify-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail

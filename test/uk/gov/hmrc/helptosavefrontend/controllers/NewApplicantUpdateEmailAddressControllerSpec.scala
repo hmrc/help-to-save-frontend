@@ -575,7 +575,7 @@ class NewApplicantUpdateEmailAddressControllerSpec
       "redirect to the create account page" in {
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountHelpToSavePage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
 
       }
 

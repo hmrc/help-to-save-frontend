@@ -28,6 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibil
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
+import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -126,17 +127,17 @@ class HelpToSaveServiceSpec extends TestSupport {
 
     "createAccount" must {
 
-      val nsiUserInfo = validNSIUserInfo
+      val createAccountRequest = CreateAccountRequest(validNSIUserInfo, 7)
 
         def mockCreateAccount(response: Option[HttpResponse]) = {
-          (htsConnector.createAccount(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
+          (htsConnector.createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext)).expects(createAccountRequest, *, *)
             .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r ⇒ Future.successful(r)))
         }
 
       "return a successful response" in {
         List(201, 409).foreach { status ⇒
           mockCreateAccount(Some(HttpResponse(status)))
-          val result = htsService.createAccount(nsiUserInfo)
+          val result = htsService.createAccount(createAccountRequest)
           List(result.value.futureValue) should contain oneOf (Right(SubmissionSuccess(false)), Right(SubmissionSuccess(true)))
         }
 
@@ -147,14 +148,14 @@ class HelpToSaveServiceSpec extends TestSupport {
         val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
         mockCreateAccount(Some(HttpResponse(400, Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
 
-        val result = htsService.createAccount(nsiUserInfo)
+        val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue should be(Left(submissionFailure))
       }
 
       "recover from unexpected errors" in {
         mockCreateAccount(None)
 
-        val result = htsService.createAccount(nsiUserInfo)
+        val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue should be(Left(SubmissionFailure(None, "Encountered error while trying to create account", "oh no!")))
       }
     }

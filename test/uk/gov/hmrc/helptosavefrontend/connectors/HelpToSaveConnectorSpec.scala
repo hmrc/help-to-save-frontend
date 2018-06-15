@@ -37,6 +37,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionSuccess, submissionFailureFormat}
 
 // scalastyle:off magic.number
@@ -363,9 +364,10 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     "creating account" must {
 
       "return http response as it is to the caller" in {
+        val request = CreateAccountRequest(validNSIUserInfo, 7)
         val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(false))))
-        mockHttpPost(createAccountURL, validNSIUserInfo)(Some(response))
-        await(connector.createAccount(validNSIUserInfo)) shouldBe response
+        mockHttpPost(createAccountURL, request)(Some(response))
+        await(connector.createAccount(request)) shouldBe response
       }
     }
 
