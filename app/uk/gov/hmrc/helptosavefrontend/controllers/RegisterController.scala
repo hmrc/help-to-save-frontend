@@ -216,7 +216,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
               logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
               SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             },
-              handleSuccessfulCreateAccountResult(_, eligibleWithEmail, nino)
+              _ ⇒ SeeOther(frontendAppConfig.nsiManageAccountUrl)
             )
           }
       } { _ ⇒
@@ -224,21 +224,6 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.createAccount().url)
-
-  private def handleSuccessfulCreateAccountResult(submissionSuccess: SubmissionSuccess,
-                                                  eligibleWithEmail: EligibleWithEmail,
-                                                  nino:              NINO)(implicit hc: HeaderCarrier): Result = {
-    //TODO: in next step this if block can be moved to backend
-    if (!submissionSuccess.alreadyHadAccount) {
-      val eligibilityCheckResult = eligibleWithEmail.eligible.value
-      logger.info(s"Successfully created account - eligibility reason was ${eligibilityCheckResult.reasonCode}: " +
-        s"${eligibilityCheckResult.reason}", nino)
-
-      metrics.accountsCreatedEligibilityReasonHistogram.update(eligibilityCheckResult.reasonCode)
-    }
-
-    SeeOther(frontendAppConfig.nsiManageAccountUrl)
-  }
 
   def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒

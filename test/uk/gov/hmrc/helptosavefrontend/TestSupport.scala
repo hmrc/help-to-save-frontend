@@ -85,8 +85,6 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
     override def timer(name: String): Timer = new Timer()
 
     override def counter(name: String): Counter = new Counter()
-
-    override def histogram(name: String): Histogram = new Histogram(new UniformReservoir())
   }
 
   implicit val mockEmailValidation: EmailValidation =
