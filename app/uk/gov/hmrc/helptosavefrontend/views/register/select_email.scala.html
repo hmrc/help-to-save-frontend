@@ -72,11 +72,13 @@
         </div>
 
         <div class="@{"form-group js-hidden" + {if(hasInvalidEmail) " form-group-error" else ""}}" id="collect-new-email">
-            <span class="body-text">@messages("hts.select-email.enter-new-address-body-text")</span>
-            <div class="form-group">
-                <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
-                @if(hasInvalidEmail) { <span class="error-message">@email_form_validation_error_message(form, "new-email")</span> }
-                <input class="form-control @if(hasNotSelected || hasInvalidEmail){form-control-error}" name="new-email" type="text" id="new-email">
+            <div class="panel panel-border-narrow">
+                <p>@messages("hts.select-email.enter-new-address-body-text")</p>
+                <div class="form-group">
+                    <label class="form-label" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
+                    @if(hasInvalidEmail) { <span class="error-message">@email_form_validation_error_message(form, "new-email")</span> }
+                    <input class="form-control @if(hasNotSelected || hasInvalidEmail){form-control-error}" name="new-email" type="text" id="new-email">
+                </div>
             </div>
         </div>
 
