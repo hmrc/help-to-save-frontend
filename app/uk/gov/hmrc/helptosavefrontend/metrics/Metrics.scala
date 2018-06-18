@@ -30,8 +30,6 @@ class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
 
   def counter(name: String): Counter = metrics.defaultRegistry.counter(name)
 
-  def histogram(name: String): Histogram = metrics.defaultRegistry.histogram(name)
-
   val keystoreWriteTimer: Timer = timer("frontend.keystore-write-time")
 
   val keystoreWriteErrorCounter: Counter = counter("frontend.keystore-write-error.count")
@@ -65,9 +63,6 @@ class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
   val ivTimeoutCounter: Counter = counter("frontend.iv.timeout.count")
 
   val authTimer: Timer = timer("frontend.auth-timer")
-
-  val accountsCreatedEligibilityReasonHistogram: Histogram = histogram("frontend.account-created.eligibility-reason")
-
 }
 
 object Metrics {
