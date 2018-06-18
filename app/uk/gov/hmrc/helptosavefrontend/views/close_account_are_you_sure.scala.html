@@ -51,7 +51,7 @@
           if(bd === BigDecimal(0.0) && account.balance === BigDecimal(0.0)) {
             <div class="notice">
               <i class="icon icon-important">
-                <span class="visually-hidden">Warning</span>
+                <span class="visually-hidden">{Messages("hts.global.hidden-icon-text.warning")}</span>
               </i>
               <p><strong class="bold-small">{messages("hts.close-account.warning")}</strong></p>
             </div>
@@ -59,7 +59,7 @@
               if(bd > BigDecimal(0.0) && account.balance > BigDecimal(0.0)) {
                 <div class="notice">
                   <i class="icon icon-important">
-                    <span class="visually-hidden">Warning</span>
+                    <span class="visually-hidden">{Messages("hts.global.hidden-icon-text.warning")}</span>
                   </i>
                   <p>
                     <strong class="bold-small">
@@ -76,7 +76,7 @@
                 if(bd > BigDecimal(0.0) && account.balance === BigDecimal(0.0)) {
                   <div class="notice">
                     <i class="icon icon-important">
-                    <span class="visually-hidden">Warning</span>
+                    <span class="visually-hidden">{Messages("hts.global.hidden-icon-text.warning")}</span>
                     </i>
                     <p>
                       <strong class="bold-small">
@@ -93,7 +93,7 @@
         case _ => {
           <div class="notice">
             <i class="icon icon-important">
-              <span class="visually-hidden">Warning</span>
+              <span class="visually-hidden">{Messages("hts.global.hidden-icon-text.warning")}</span>
             </i>
             <p><strong class="bold-small">{messages("hts.close-account.account-retrieval-error.warning")}</strong></p>
           </div>
