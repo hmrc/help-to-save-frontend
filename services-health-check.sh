@@ -7,7 +7,7 @@ SM_STATUS_OUTPUT=`sm -s`
 echo $SM_STATUS_OUTPUT
 
 echo "*********** Checking for services that are not running ***********"
-SERVICES_STRING="$(sm -d | grep  HTS_ALL  | cut -d '>' -f 2 | tr -d '[:space:]')"
+SERVICES_STRING="$(sm -d | grep  HTS_DIGITAL_SELENIUM  | cut -d '>' -f 2 | tr -d '[:space:]')"
 IFS=',' read -r -a SERVICES <<< "$SERVICES_STRING"
 status=0
 for SERVICE in "${SERVICES[@]}";
@@ -20,9 +20,9 @@ do
 done
 
 if [ $status != 0 ]; then
-  echo "*********** HTS_ALL failed status check ***********"
+  echo "*********** HTS_DIGITAL_SELENIUM failed status check ***********"
 else
-  echo "*********** HTS_ALL passed status check ***********"
+  echo "*********** HTS_DIGITAL_SELENIUM passed status check ***********"
 fi
 
 exit $status

@@ -18,10 +18,10 @@ fi
 
 
 echo "Starting HTS dependencies from snapshots"
-sm --start HTS_ALL -f --wait 1200 --noprogress
+sm --start HTS_DIGITAL_SELENIUM -f --wait 1200 --noprogress
 if [ $? != 0 ]
 then
     echo "HTS dependencies failed to start"
-    sm --stop HTS_ALL
+    sm --stop HTS_DIGITAL_SELENIUM
     exit 1
 fi
