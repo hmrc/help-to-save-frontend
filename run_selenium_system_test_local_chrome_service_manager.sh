@@ -7,7 +7,7 @@ exit_if_status_1() {
   fi
 }
 
-echo "Starting Service Manager with HTS_ALL"
+echo "Starting Service Manager with HTS_DIGITAL_SELENIUM"
 ./start-service-manager.sh
 exit_if_status_1
 
@@ -22,5 +22,5 @@ echo "EXIT_CODE = $EXIT_CODE"
 
 ./output-log-exceptions.sh
 
-sm --stop HTS_ALL
+sm --stop HTS_DIGITAL_SELENIUM
 exit $EXIT_CODE

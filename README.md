@@ -96,7 +96,7 @@ This command will not run the Selenium tests.
 
 Only if you want to run the Selenium tests locally, execute the following commands to start the relevant services:
 
-sm --start HTS_DEP -f
+sm --start HTS_ALL -f
 
 cd {front end path}
 
