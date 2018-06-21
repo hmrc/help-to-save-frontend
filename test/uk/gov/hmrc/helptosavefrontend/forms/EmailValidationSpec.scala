@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
+import cats.data.NonEmptyList
+import cats.data.Validated.Valid
 import cats.syntax.either._
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
@@ -23,11 +25,12 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.data.Forms.{mapping, text}
 import play.api.data.{Form, FormError}
 import play.api.{Configuration, Logger}
+import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages._
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
 
 // scalastyle:off magic.number
-class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
+class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks with TestSupport {
 
   "EmailValidation" must {
 
@@ -107,6 +110,14 @@ class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPro
           test(emailValidation)(s"$l@")(Left(Set(domainTooShort, noDotSymbol, noTextAfterDotSymbol, noTextAfterAtSymbolButBeforeDot)))
         }
       }
+    }
+
+    "make sure any white spaces before and after are trimmed" in {
+      val emailValidation = newValidation()
+      val emailWithSpaces = "  email@gmail.com  "
+
+      val result = emailValidation.validate(emailWithSpaces)
+      result shouldBe Valid("email@gmail.com")
     }
 
     "have an implicit class which provides methods" which {

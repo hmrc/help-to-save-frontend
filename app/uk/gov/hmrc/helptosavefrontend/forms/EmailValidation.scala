@@ -112,7 +112,7 @@ class EmailValidation @Inject() (configuration: Configuration) {
       domainLengthCheck,
       localBlankCheck,
       domainBlankCheck
-    ).mapN{ case _ ⇒ email }
+    ).mapN{ case _ ⇒ trimmed }
   }
 
   val emailFormatter: Formatter[String] = new Formatter[String] {
