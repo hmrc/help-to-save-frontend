@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import cats.data.NonEmptyList
 import cats.data.Validated.Valid
 import cats.syntax.either._
 import org.scalacheck.Gen
