@@ -76,19 +76,26 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
               BadRequest(views.html.email.update_email_address(formWithErrors))
             },
             (details: UpdateEmail) ⇒
-              sessionCacheConnector.put(HTSSession(None, None, Some(details.email)))
-                .semiflatMap(_ ⇒
-                  sendEmailVerificationRequest(
-                    details.email,
-                    name,
-                    SeeOther(routes.AccountHolderController.getCheckYourEmail().url),
-                    params ⇒ routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
-                    _ ⇒ SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url),
-                    isNewApplicant = false)
-                ).leftMap { e ⇒
-                  logger.warn(s"Could not write pending email to session cache: $e")
-                  SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
-                }.merge
+              emailValidation.validate(details.email).toEither match {
+                case Right(validEmail) ⇒
+                  sessionCacheConnector.put(HTSSession(None, None, Some(validEmail)))
+                    .semiflatMap(_ ⇒
+                      sendEmailVerificationRequest(
+                        validEmail,
+                        name,
+                        SeeOther(routes.AccountHolderController.getCheckYourEmail().url),
+                        params ⇒ routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
+                        _ ⇒ SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url),
+                        isNewApplicant = false)
+                    ).leftMap { e ⇒
+                      logger.warn(s"Could not write pending email to session cache: $e")
+                      SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+                    }.merge
+                case Left(e) ⇒ {
+                  logger.warn(s"Given email address failed validation, errors: $e")
+                  SeeOther(routes.AccountHolderController.getUpdateYourEmailAddress().url)
+                }
+              }
           )
         )
       }
