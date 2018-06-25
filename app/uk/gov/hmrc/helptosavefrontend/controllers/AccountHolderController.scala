@@ -91,7 +91,10 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
                       logger.warn(s"Could not write pending email to session cache: $e")
                       SeeOther(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
                     }.merge
-                case Left(_) ⇒ SeeOther(routes.AccountHolderController.getUpdateYourEmailAddress().url)
+                case Left(e) ⇒ {
+                  logger.warn(s"Given email address failed validation, errors: $e")
+                  SeeOther(routes.AccountHolderController.getUpdateYourEmailAddress().url)
+                }
               }
           )
         )
