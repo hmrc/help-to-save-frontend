@@ -26,7 +26,7 @@ object VerifyYourEmailPage extends Page {
 
   override val expectedPageHeader: Option[String] = Some("You have 30 minutes to verify your email address")
 
-  override val expectedPageTitle: Option[String] = Some("Verify your email address")
+  override val expectedPageTitle: Option[String] = Some("You have 30 minutes to verify your email address")
 
   def resendVerificationEmail()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("resend-verification")
 

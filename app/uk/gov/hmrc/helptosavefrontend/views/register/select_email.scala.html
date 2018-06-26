@@ -21,12 +21,13 @@
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.error_prefix
 
 @(email: String, form: Form[SelectEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
     @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-        title = messages("hts.select-email.page-title"),
+        title = error_prefix(form).toString + Messages("hts.global.title", Messages("hts.select-email.title.h1"), "", Messages("hts.global.title-suffix")),
         bodyClasses = None,
         isErrorPage = hasNotSelected || hasInvalidEmail) {
 
@@ -48,9 +49,7 @@
     </div>
     }
 
-    <h1 class="heading-large">
-        @messages("hts.select-email.title")
-    </h1>
+    <h1 class="heading-large">@messages("hts.select-email.title.h1")</h1>
 
     <form method="post" action=@routes.RegisterController.selectEmailSubmit>
         @CSRF.formField(request)

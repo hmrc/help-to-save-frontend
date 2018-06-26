@@ -38,65 +38,32 @@
 }
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = messages("hts.close-account.title"),
+    title = Messages("hts.global.title", Messages("hts.close-account.title.h1"), Messages("hts.close-account.section.title"), Messages("hts.global.title-suffix")
+    ),
     sidebarLinks = None,
     bodyClasses = None,
     serviceInfoContent = serviceInfoContent) {
 
-    <h1>@messages("hts.close-account.h1")</h1>
+    <h1>@messages("hts.close-account.title.h1")</h1>
 
     @{
       maybeAccount -> maybeAccount.flatMap(_.currentBonusTerm.map(_.bonusEstimate)) match {
         case (Some(account), Some(bd)) ⇒ {
           if(bd === BigDecimal(0.0) && account.balance === BigDecimal(0.0)) {
-            <div class="notice">
-              <i class="icon icon-important">
-                <span class="visually-hidden">{Messages("hts.global.hidden-icon-text.warning")}</span>
-              </i>
-              <p><strong class="bold-small">{messages("hts.close-account.warning")}</strong></p>
-            </div>
+            {zero_balance_zero_bonus()}
           } else {
               if(bd > BigDecimal(0.0) && account.balance > BigDecimal(0.0)) {
-                <div class="notice">
-                  <i class="icon icon-important">
-                    <span class="visually-hidden">{Messages("hts.global.hidden-icon-text.warning")}</span>
-                  </i>
-                  <p>
-                    <strong class="bold-small">
-                    {Html(messages("hts.close-account.positive-balance.positive-bonus.warning",
-                    bd.show))}
-                    </strong>
-                  </p>
-                </div>
-
-                <p>{messages("hts.close-account.positive-balance.positive-bonus.withdraw.p1")}
-                  <a href={appConfig.nsiManageAccountUrl}>{messages("hts.close-account.positive-balance.positive-bonus.withdraw.p2")}</a>
-                  {messages("hts.close-account.positive-balance.positive-bonus.withdraw.p3")}</p>
+                {positive_balance_positive_bonus(bd)}
               } else {
                 if(bd > BigDecimal(0.0) && account.balance === BigDecimal(0.0)) {
-                  <div class="notice">
-                    <i class="icon icon-important">
-                    <span class="visually-hidden">{Messages("hts.global.hidden-icon-text.warning")}</span>
-                    </i>
-                    <p>
-                      <strong class="bold-small">
-                      {Html(messages("hts.close-account.positive-balance.positive-bonus.warning",
-                      bd.show))}
-                      </strong>
-                    </p>
-                  </div>
+                  {zero_balance_positive_bonus(bd)}
                 }
               }
           }
         }
 
         case _ => {
-          <div class="notice">
-            <i class="icon icon-important">
-              <span class="visually-hidden">{Messages("hts.global.hidden-icon-text.warning")}</span>
-            </i>
-            <p><strong class="bold-small">{messages("hts.close-account.account-retrieval-error.warning")}</strong></p>
-          </div>
+          {balance_unknown()}
         }
       }
     }

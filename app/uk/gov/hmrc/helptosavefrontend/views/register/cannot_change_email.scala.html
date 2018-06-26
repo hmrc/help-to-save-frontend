@@ -26,7 +26,7 @@
     @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
 
         @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-            title = messages("hts.cannot-change-email.page-title"),
+            title = Messages("hts.global.title", Messages("hts.cannot-change-email.title.h1"), "", Messages("hts.global.title-suffix")),
             sidebarLinks = None,
             bodyClasses = None,
             isErrorPage = hasErrors) {
@@ -40,7 +40,7 @@
         </div>
         }
 
-        <h1 class="heading-large">@Messages("hts.cannot-change-email.title")</h1>
+        <h1 class="heading-large">@Messages("hts.cannot-change-email.title.h1")</h1>
 
         <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
         <p>@Messages("hts.cannot-change-email.p2")</p>

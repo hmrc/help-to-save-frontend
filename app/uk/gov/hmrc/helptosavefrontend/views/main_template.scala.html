@@ -35,7 +35,7 @@
 }
 
 @govuk_wrapper(appConfig = frontendAppConfig,
-  title = (if(isErrorPage) messages("hts.title.prepended-error-message") + " " else "" ) + title + " " +messages("hts.global.title-suffix"),
+  title,
   mainClass = mainClass,
   bodyClasses = bodyClasses,
   sidebar = sidebar,

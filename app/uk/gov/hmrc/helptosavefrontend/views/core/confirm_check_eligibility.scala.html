@@ -21,11 +21,13 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.no-account.page-title")) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+  title = Messages("hts.global.title", Messages("hts.no-account.title.h1"), "", Messages("hts.global.title-suffix"))
+) {
 
 
     <h1 class="heading-large">
-        @Messages("hts.no-account.title")
+        @Messages("hts.no-account.title.h1")
     </h1>
 
     <p class="lede">@Messages("hts.no-account.p1")</p>

@@ -26,6 +26,7 @@ import com.google.inject.Inject
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.{Application, Configuration, Environment}
+import play.twirl.api.Html
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
@@ -157,13 +158,13 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
           .fold(
             e ⇒ {
               logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-              Ok(views.html.close_account_are_you_sure(None))
+              Ok(views.html.closeaccount.close_account_are_you_sure(None))
             },
             { account ⇒
               if (account.isClosed) {
                 SeeOther(appConfig.nsiManageAccountUrl)
               } else {
-                Ok(views.html.close_account_are_you_sure(Some(account)))
+                Ok(views.html.closeaccount.close_account_are_you_sure(Some(account)))
               }
             }
           )
