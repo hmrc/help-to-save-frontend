@@ -45,10 +45,10 @@
 
             <p>@messages("hts.core.not-eligible.uc.p-3")</p>
 
-            <h2>@messages("hts.core.not-eligible.uc.h2")</h2>
+            <h2>@Html(Messages("hts.core.not-eligible.uc.h2"))</h2>
 
             <p>@messages("hts.core.not-eligible.uc.p-4")
-            <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.uc.link-2")</a> @Messages("hts.core.not-eligible.uc.p-4-2")</p>
+            <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Html(Messages("hts.core.not-eligible.uc.link-2"))</a> @Messages("hts.core.not-eligible.uc.p-4-2")</p>
         }
 
         case EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC=> {
@@ -67,9 +67,9 @@
             data-ga-event-action="Help to Save"
             data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.wtc.uc.p3-link")</a>@Messages("hts.core.not-eligible.wtc.uc.p3-2")</p>
 
-            <h2>@messages("hts.core.not-eligible.wtc.uc.h2")</h2>
+            <h2>@Html(Messages("hts.core.not-eligible.wtc.uc.h2"))</h2>
             <p>@Messages("hts.core.not-eligible.wtc.uc.p4")
-            <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.wtc.uc.p4-link")</a> @Messages("hts.core.not-eligible.wtc.uc.p4-2")</p>
+            <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Html(Messages("hts.core.not-eligible.wtc.uc.p4-link"))</a> @Messages("hts.core.not-eligible.wtc.uc.p4-2")</p>
         }
 
         case EntitledToWTCNoTCAndNoUC => {
@@ -82,12 +82,12 @@
             data-ga-event-action="Help to Save"
             data-ga-event-label="Not eligible page">@Messages("hts.core.not-eligible.wtc.link-1")</a>@Messages("hts.core.not-eligible.wtc.p-2-2")</p>
 
-            <h2 class="heading-medium">@Messages("hts.core.not-eligible.wtc.h2-1")</h2>
-            <p>@Messages("hts.core.not-eligible.wtc.p-3")</p>
+            <h2 class="heading-medium">@Html(Messages("hts.core.not-eligible.wtc.h2-1"))</h2>
+            <p>@Html(Messages("hts.core.not-eligible.wtc.p-3"))</p>
 
-            <h2>@Messages("hts.core.not-eligible.wtc.h3")</h2>
+            <h2>@Html(Messages("hts.core.not-eligible.wtc.h3"))</h2>
 
-            <p>@Messages("hts.core.not-eligible.wtc.p-4-1") <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Messages("hts.core.not-eligible.wtc.p-4-link-text")</a> @Messages("hts.core.not-eligible.wtc.p-4-2")</p>
+            <p>@Messages("hts.core.not-eligible.wtc.p-4-1") <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Html(Messages("hts.core.not-eligible.wtc.p-4-link-text"))</a> @Messages("hts.core.not-eligible.wtc.p-4-2")</p>
 
         }
     }

@@ -24,18 +24,14 @@
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
   title = Messages("hts.global.title", Messages("hts.no-account.title.h1"), "", Messages("hts.global.title-suffix"))
 ) {
+  <h1 class="heading-large">@Messages("hts.no-account.title.h1")</h1>
 
+  <p class="lede">@Html(Messages("hts.no-account.p1"))</p>
+  <p>@Html(Messages("hts.no-account.p2"))</p>
 
-    <h1 class="heading-large">
-        @Messages("hts.no-account.title.h1")
-    </h1>
+  <h2>@Messages("hts.no-account.h2")</h2>
+  <p>@Html(Messages("hts.no-account.p3"))</p>
 
-    <p class="lede">@Messages("hts.no-account.p1")</p>
-    <p>@Messages("hts.no-account.p2")</p>
-
-    <h2>@Messages("hts.no-account.h2")</h2>
-    <p>@Messages("hts.no-account.p3")</p>
-
-    <p><a href="https://www.gov.uk/" id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a></p>
+  <p><a href="https://www.gov.uk/" id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a></p>
 
 }

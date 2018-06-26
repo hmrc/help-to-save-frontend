@@ -48,7 +48,7 @@
         }
 
         <h1 class="heading-large">@messages("hts.email-verification.title.h1")</h1>
-        <p class="lede">@messages("hts.email-verification.intro")</p>
+        <p class="lede">@Html(Messages("hts.email-verification.intro"))</p>
         @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit(), 'class -> "group subsection--wide") {
             @helpers.input_text(
                 id = "new-email-address",

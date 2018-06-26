@@ -26,7 +26,7 @@
     bodyClasses = None) {
 
     <h1 class="heading-large">@Messages("hts.incorrect-details.title.h1")</h1>
-    <p>@Messages("hts.incorrect-details.p1")</p>
+    <p>@Html(Messages("hts.incorrect-details.p1"))</p>
 
     <ul class="list list-bullet">
         <li>@Messages("hts.incorrect-details.listOne1")</li>
@@ -39,7 +39,7 @@
 
     <ol class="list list-number">
         <li>@Html(Messages("hts.incorrect-details.listTwo1", "https://www.gov.uk/tell-hmrc-change-of-details"))</li>
-        <li>@Messages("hts.incorrect-details.listTwo2")</li>
+        <li>@Html(Messages("hts.incorrect-details.listTwo2"))</li>
     </ol>
 
     <p class="subsection--wide push--bottom"><a href=@routes.EligibilityCheckController.getIsEligible() id="incorrect-details-goback">@Messages("hts.incorrect-details.exit-button")</a></p>

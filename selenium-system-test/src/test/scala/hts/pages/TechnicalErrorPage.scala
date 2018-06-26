@@ -22,8 +22,8 @@ object TechnicalErrorPage extends Page {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/check-eligibility"
 
-  override val expectedPageTitle: Option[String] = Some("Sorry, we are experiencing technical difficulties")
+  override val expectedPageTitle: Option[String] = Some("Sorry, we’re experiencing technical difficulties")
 
-  override val expectedPageHeader: Option[String] = Some("Sorry, we're experiencing technical difficulties")
+  override val expectedPageHeader: Option[String] = Some("Sorry, we’re experiencing technical difficulties")
 
 }

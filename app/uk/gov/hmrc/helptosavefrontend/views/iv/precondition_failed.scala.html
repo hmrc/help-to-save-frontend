@@ -24,9 +24,9 @@
   title = Messages("hts.global.title", Messages("hts.iv.precondition_failed.title.h1"), "", Messages("hts.global.title-suffix"))
 ) {
 
-  <h1 class="heading-large">@Messages("hts.iv.precondition_failed.title.h1")</h1>
+  <h1 class="heading-large">@Html(Messages("hts.iv.precondition_failed.title.h1"))</h1>
 
-  <p>@Messages("hts.iv.precondition_failed.message")</p>
+  <p>@Html(Messages("hts.iv.precondition_failed.message"))</p>
   <section class="subsection--wide">
     <p><a href=@routes.IntroductionController.getAboutHelpToSave().url>@Messages("hts.exit_to_about_hts")</a></p>
   </section>

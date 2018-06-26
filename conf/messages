@@ -24,7 +24,7 @@ hts.sign-in.ul1-li1=check your current balance
 hts.sign-in.ul1-li2=grow your savings and bonus
 hts.sign-in.ul1-li3=find out when you''ll get your next bonus
 hts.sign-in.ul1-li4=read your messages
-hts.sign-in.p2=To sign in, you''ll need the Government Gateway ID and password you used to apply.
+hts.sign-in.p2=To sign in, you&rsquo;ll need the Government Gateway ID and password you used to apply.
 hts.sign-in.h2=Before you start
 hts.sign-in.p3=To use this service you must have a:
 hts.sign-in.ul2-li1=Help to Save account
@@ -36,17 +36,17 @@ hts.introduction.about-help-to-save.par-1=Help to Save is a savings scheme backe
 hts.introduction.about-help-to-save.par-2=You can only open a Help to Save account if you meet all the eligibility criteria. This includes being entitled to either of these benefits:
 hts.introduction.about-help-to-save.list-1-1=Working Tax Credit
 hts.introduction.about-help-to-save.list-1-2=Universal Credit
-hts.introduction.about-help-to-save.par-3=If you''re eligible for an account, you could earn a 50% bonus on the money you''ve paid in.
-hts.introduction.about-help-to-save.par-4=If you pay in £2,400 over 4 years and don''t make any withdrawals, you will earn the highest possible bonus of £1,200. All bonus money is tax-free.
+hts.introduction.about-help-to-save.par-3=If you&rsquo;re eligible for an account, you could earn a 50% bonus on the money you&rsquo;ve paid in.
+hts.introduction.about-help-to-save.par-4=If you pay in £2,400 over 4 years and don&rsquo;t make any withdrawals, you will earn the highest possible bonus of £1,200. All bonus money is tax-free.
 hts.introduction.about-help-to-save.h3-1=What you need to know
 hts.introduction.about-help-to-save.par-5=We are currently developing the Help to Save online service. Tell us if you have any feedback or issues using the website - it will help us improve it.
 hts.introduction.about-help-to-save.par-6=You can:
-hts.introduction.about-help-to-save.list-2-1=earn bonuses rather than interest, so it''s not like a typical bank account
-hts.introduction.about-help-to-save.list-2-2=maximise your bonus if you pay in money regularly and don''t withdraw it
+hts.introduction.about-help-to-save.list-2-1=earn bonuses rather than interest, so it&rsquo;s not like a typical bank account
+hts.introduction.about-help-to-save.list-2-2=maximise your bonus if you pay in money regularly and don&rsquo;t withdraw it
 hts.introduction.about-help-to-save.list-2-3=pay in up to £50 per month or miss months if you need to
-hts.introduction.about-help-to-save.par-7=You can''t:
+hts.introduction.about-help-to-save.par-7=You can&rsquo;t:
 hts.introduction.about-help-to-save.list-3-1=open more than one account in your lifetime
-hts.introduction.about-help-to-save.list-3-2=access your Help to Save account until you''ve entered your UK bank account details
+hts.introduction.about-help-to-save.list-3-2=access your Help to Save account until you&rsquo;ve entered your UK bank account details
 
 # Eligibility
 hts.introduction.eligibility.title=Eligibility
@@ -57,17 +57,17 @@ hts.introduction.eligibility.list-1-1=entitled to Working Tax Credit and receivi
 hts.introduction.eligibility.list-1-2=claiming Universal Credit and your household income - in your last monthly assessment period - was £542.88 or more
 hts.introduction.eligibility.par-1-4=Payments from Universal Credit do not count as income.
 hts.introduction.eligibility.h3-1=If your situation changes
-hts.introduction.eligibility.par-2=If you stop claiming Working Tax Credit or Universal Credit you can still keep your account. You can also pay in money and get any bonuses you''re entitled to.
+hts.introduction.eligibility.par-2=If you stop claiming Working Tax Credit or Universal Credit you can still keep your account. You can also pay in money and get any bonuses you&rsquo;re entitled to.
 hts.introduction.eligibility.h3-2=UK residency
 hts.introduction.eligibility.par-3=To apply for an account, you must be a UK resident.
-hts.introduction.eligibility.par-4=If you''re living overseas, you can apply for an account if you''re a:
+hts.introduction.eligibility.par-4=If you&rsquo;re living overseas, you can apply for an account if you&rsquo;re a:
 hts.introduction.eligibility.list-2-1=Crown servant - or their spouse or civil partner
 hts.introduction.eligibility.list-2-2=member of the British armed forces - or their spouse or civil partner
-hts.introduction.eligibility.par-5=If you''re living and working in the Republic of Ireland you''re not eligible for an account.
+hts.introduction.eligibility.par-5=If you&rsquo;re living and working in the Republic of Ireland you&rsquo;re not eligible for an account.
 hts.introduction.eligibility.par-6=You must tell us if you leave the UK for:
 hts.introduction.eligibility.list-3-1=8 weeks or more if you were eligible for Working Tax Credit when you opened your account
 hts.introduction.eligibility.list-3-2=4 weeks or more if you were claiming Universal Credit when you opened your account
-hts.introduction.eligibility.par-7=You don''t have to tell us you''ve left the UK, if you:
+hts.introduction.eligibility.par-7=You don&rsquo;t have to tell us you&rsquo;ve left the UK, if you:
 hts.introduction.eligibility.list-4-1=or your partner, or child, are getting medical treatment
 hts.introduction.eligibility.list-4-2=are a mariner
 hts.introduction.eligibility.list-4-3=are an oil worker based on the continental shelf
@@ -80,7 +80,7 @@ hts.introduction.how-the-account-works.par-1=You can pay in money:
 hts.introduction.how-the-account-works.list-1-1=when you want to, or miss months if you choose to
 hts.introduction.how-the-account-works.list-1-2=up to £50 each calendar month
 hts.introduction.how-the-account-works.list-1-3=by standing order or debit card
-hts.introduction.how-the-account-works.par-2=You can''t pay in more than £50 a month to make up for any months you''ve missed.
+hts.introduction.how-the-account-works.par-2=You can&rsquo;t pay in more than £50 a month to make up for any months you&rsquo;ve missed.
 hts.introduction.how-the-account-works.h3-2=Earn a bonus
 hts.introduction.how-the-account-works.par-3=You can earn over 4 years:
 hts.introduction.how-the-account-works.list-2-1-1=2 tax-free
@@ -89,11 +89,11 @@ hts.introduction.how-the-account-works.list-2-1-3=worth up to £600 each
 hts.introduction.how-the-account-works.list-2-2=up to £1,200 in total bonuses
 hts.introduction.how-the-account-works.par-4=You can only get your bonus money paid into your UK bank account, not your Help to Save account.
 hts.introduction.how-the-account-works.h3-3=Withdraw money
-hts.introduction.how-the-account-works.par-5=Any money you withdraw is paid into your UK bank account. You''ll need to enter these details into your Help to Save account once it''s created.
+hts.introduction.how-the-account-works.par-5=Any money you withdraw is paid into your UK bank account. You&rsquo;ll need to enter these details into your Help to Save account once it&rsquo;s created.
 hts.introduction.how-the-account-works.par-6=It takes 3 working days for withdrawals to reach your UK bank account.
 hts.introduction.how-the-account-works.par-7-1=If you withdraw money at any time you can still earn a
 hts.introduction.how-the-account-works.par-7-2=bonus
-hts.introduction.how-the-account-works.par-7-3=but you won''t be able to earn the maximum possible bonus of £1,200.
+hts.introduction.how-the-account-works.par-7-3=but you won&rsquo;t be able to earn the maximum possible bonus of £1,200.
 hts.introduction.how-the-account-works.h3-4=Close your account
 hts.introduction.how-the-account-works.par-7=You can:
 hts.introduction.how-the-account-works.list-3-1=close your account at any time, but it might affect your bonuses
@@ -104,10 +104,10 @@ hts.introduction.how-the-account-works.list-3-3=have your account mature early i
 hts.introduction.how-we-calculate-bonuses.title=How we calculate bonuses
 hts.introduction.how-we-calculate-bonuses.par-1=You can earn 2 tax-free bonuses over the lifetime of your account. These bonuses are calculated differently.
 hts.introduction.how-we-calculate-bonuses.h3-1=First bonus
-hts.introduction.how-we-calculate-bonuses.par-2=You''ll get your first bonus after 2 years.
-hts.introduction.how-we-calculate-bonuses.par-3=We''ll look back over years 1 and 2 and find your highest balance. We''ll pay you 50% of that amount as a first bonus. Even if you withdrew money.
+hts.introduction.how-we-calculate-bonuses.par-2=You&rsquo;ll get your first bonus after 2 years.
+hts.introduction.how-we-calculate-bonuses.par-3=We&rsquo;ll look back over years 1 and 2 and find your highest balance. We&rsquo;ll pay you 50% of that amount as a first bonus. Even if you withdrew money.
 hts.introduction.how-we-calculate-bonuses.h3-2=First bonus example
-hts.introduction.how-we-calculate-bonuses.par-4=If you pay in £50 a month for 2 years and don''t make any withdrawals, you''ll get a tax-free bonus of £600.
+hts.introduction.how-we-calculate-bonuses.par-4=If you pay in £50 a month for 2 years and don&rsquo;t make any withdrawals, you&rsquo;ll get a tax-free bonus of £600.
 hts.introduction.how-we-calculate-bonuses.h3-3=Example bonus calculations
 hts.introduction.how-we-calculate-bonuses.tab-1.title=£50 a month
 hts.introduction.how-we-calculate-bonuses.tab-1.url=50-a-month
@@ -179,26 +179,26 @@ hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1.br-1=
 hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-1.br-2=50% of £240 = £120)
 hts.introduction.how-we-calculate-bonuses.tab-3.table.tr-4.td-col-4.span-2=Your bonus will be paid into your UK bank account after 4 years
 hts.introduction.how-we-calculate-bonuses.h3-4=Final bonus
-hts.introduction.how-we-calculate-bonuses.par-6=You''ll get your final tax-free bonus after 4 years.
+hts.introduction.how-we-calculate-bonuses.par-6=You&rsquo;ll get your final tax-free bonus after 4 years.
 hts.introduction.how-we-calculate-bonuses.par-7=We use a different calculation to work out this bonus compared to your first bonus:
-hts.introduction.how-we-calculate-bonuses.ol-1-1=We''ll find the highest balance your savings reached over years 1 and 2.
-hts.introduction.how-we-calculate-bonuses.ol-1-2=We''ll then compare it to the highest balance your savings reached over years 3 and 4.
-hts.introduction.how-we-calculate-bonuses.ol-1-3=If your highest balance in years 3 and 4 is more than it was in years 1 and 2, you''ll get a 50% tax-free bonus on the difference.
+hts.introduction.how-we-calculate-bonuses.ol-1-1=We&rsquo;ll find the highest balance your savings reached over years 1 and 2.
+hts.introduction.how-we-calculate-bonuses.ol-1-2=We&rsquo;ll then compare it to the highest balance your savings reached over years 3 and 4.
+hts.introduction.how-we-calculate-bonuses.ol-1-3=If your highest balance in years 3 and 4 is more than it was in years 1 and 2, you&rsquo;ll get a 50% tax-free bonus on the difference.
 hts.introduction.how-we-calculate-bonuses.h3-5=How withdrawals can affect your bonus
 hts.introduction.how-we-calculate-bonuses.par-8=We use your highest balance to work out your bonus. You can withdraw money at any time and still get a bonus.
 hts.introduction.how-we-calculate-bonuses.par-9=Withdrawing money will not reduce your bonus. It will make it harder for you to increase your highest balance and your bonus.
 
 # Apply
 hts.introduction.apply.title=Apply or sign in
-hts.introduction.apply.par-1a=To apply for a Help to Save account online, you''ll need to make sure you''re
+hts.introduction.apply.par-1a=To apply for a Help to Save account online, you&rsquo;ll need to make sure you&rsquo;re
 hts.introduction.apply.par-1b=eligible
 hts.introduction.apply.par-1c=for one.
 hts.introduction.apply.par-2=If you:
 hts.introduction.apply.ul-1=already have a Government Gateway account you can use those details to sign in and apply for a Help to Save account
-hts.introduction.apply.ul-2=don''t have a Government Gateway account, you can create one as part of the application process
-hts.introduction.apply.par-3=We''ll use the details from your Government Gateway account to check if you''re eligible for a Help to Save account.
-hts.introduction.apply.par-4=If you''re eligible and then decide to create a Help to Save account, we''ll set it up for you immediately.
-hts.introduction.apply.par-5=You''ll be able to access your Help to Save account, start saving and earning a bonus as soon as you enter your UK bank account details into your Help to Save account.
+hts.introduction.apply.ul-2=don&rsquo;t have a Government Gateway account, you can create one as part of the application process
+hts.introduction.apply.par-3=We&rsquo;ll use the details from your Government Gateway account to check if you&rsquo;re eligible for a Help to Save account.
+hts.introduction.apply.par-4=If you&rsquo;re eligible and then decide to create a Help to Save account, we&rsquo;ll set it up for you immediately.
+hts.introduction.apply.par-5=You&rsquo;ll be able to access your Help to Save account, start saving and earning a bonus as soon as you enter your UK bank account details into your Help to Save account.
 
 hts.introduction.apply.button-1=Start now
 hts.introduction.apply.sign-in-link=Sign in to your Help to Save account
@@ -213,16 +213,16 @@ hts.core.about-help-to-save.next=Next
 hts.core.about-help-to-save.eligibility=Eligibility
 
 # Not eligible
-hts.core.not-eligible.title.h1=You''re not eligible for a Help to Save account
+hts.core.not-eligible.title.h1=You’re not eligible for a Help to Save account
 hts.core.not-eligible.wtc.p-1=You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.
 hts.core.not-eligible.wtc.p-2=Find out more about
 hts.core.not-eligible.wtc.link-1=eligibility for Help to Save
 hts.core.not-eligible.wtc.p-2-2=.
-hts.core.not-eligible.wtc.h2-1=If you''ve recently applied for Working Tax Credit
-hts.core.not-eligible.wtc.p-3=You should wait until you''ve received a letter from HM Revenue and Customs confirming that you''re entitled to Working Tax Credit. Once you''ve received this you can apply for a Help to Save account again.
-hts.core.not-eligible.wtc.h3=If you think you''re eligible for an account
+hts.core.not-eligible.wtc.h2-1=If you&rsquo;ve recently applied for Working Tax Credit
+hts.core.not-eligible.wtc.p-3=You should wait until you&rsquo;ve received a letter from HM Revenue and Customs confirming that you&rsquo;re entitled to Working Tax Credit. Once you&rsquo;ve received this you can apply for a Help to Save account again.
+hts.core.not-eligible.wtc.h3=If you think you&rsquo;re eligible for an account
 hts.core.not-eligible.wtc.p-4-1=Find out what to do if you have checked the eligibility criteria and still
-hts.core.not-eligible.wtc.p-4-link-text=think you''re eligible
+hts.core.not-eligible.wtc.p-4-link-text=think you&rsquo;re eligible
 hts.core.not-eligible.wtc.p-4-2=for a Help to Save account.
 
 hts.core.not-eligible.uc.p-1=This is because your household income - in your last monthly assessment period - was less than £542.88. Your Universal Credit payments are not considered to be income.
@@ -230,9 +230,9 @@ hts.core.not-eligible.uc.p-2=Find out about
 hts.core.not-eligible.uc.link-1=eligibility for Help to Save
 hts.core.not-eligible.uc.p-2-2=.
 hts.core.not-eligible.uc.p-3=If your situation changes, you can apply for a Help to Save account again.
-hts.core.not-eligible.uc.h2=If you think you''re eligible for an account
+hts.core.not-eligible.uc.h2=If you think you&rsquo;re eligible for an account
 hts.core.not-eligible.uc.p-4=Find out what to do if you have checked the eligibility criteria and still
-hts.core.not-eligible.uc.link-2=think you''re eligible
+hts.core.not-eligible.uc.link-2=think you&rsquo;re eligible
 hts.core.not-eligible.uc.p-4-2=for a Help to Save account.
 
 hts.core.not-eligible.wtc.uc.p1=You can only open a Help to Save account if one of the following applies to you. You are:
@@ -242,9 +242,9 @@ hts.core.not-eligible.wtc.uc.p2=Payments from Universal Credit are not considere
 hts.core.not-eligible.wtc.uc.p3=Find out about
 hts.core.not-eligible.wtc.uc.p3-link=eligibility for Help to Save
 hts.core.not-eligible.wtc.uc.p3-2=.
-hts.core.not-eligible.wtc.uc.h2=If you think you''re eligible for an account
+hts.core.not-eligible.wtc.uc.h2=If you think you&rsquo;re eligible for an account
 hts.core.not-eligible.wtc.uc.p4=Find out what to do if you have checked the eligibility criteria and still
-hts.core.not-eligible.wtc.uc.p4-link=think you''re eligible
+hts.core.not-eligible.wtc.uc.p4-link=think you&rsquo;re eligible
 hts.core.not-eligible.wtc.uc.p4-2=for a Help to Save account.
 
 # Sidebar
@@ -259,7 +259,7 @@ hts.core.not-eligible.sidebar.p=Working Tax Credit
 
 # Eligible
 hts.register.you-are-eligible.title.h1=We’ve checked the details we hold for you
-hts.register.you-are-eligible.p-1=You''re eligible for a Help to Save account.
+hts.register.you-are-eligible.p-1=You&rsquo;re eligible for a Help to Save account.
 hts.register.you-are-eligible.p-3=By continuing you are confirming you are eligible for a Help to Save account, and that these are your details and they are correct.
 hts.register.you-are-eligible.button-1=Confirm and continue
 hts.register.you-are-eligible.button-2=These details are not correct
@@ -275,11 +275,11 @@ hts.register.check-and-confirm-your-details.p-1=By submitting this notification 
 hts.register.check-and-confirm-your-details.continue-button-label=Continue
 
 # Register - missing information
-hts.register.missinguserinfo.title.h1=We''re missing some important details
-hts.register.missinguserinfo.p1=We can''t create your account until we have your:
+hts.register.missinguserinfo.title.h1=We’re missing some important details
+hts.register.missinguserinfo.p1=We can&rsquo;t create your account until we have your:
 hts.register.missinguserinfo.title2=What happens next?
-hts.register.missinguserinfo.next.step1=You''ll need to <a href={0} target="_blank">fill in the form (it will open in a new window)</a> on the HM Revenue & Customs website.
-hts.register.missinguserinfo.next.step2=You''ll need to wait until we''ve updated your details in our system.
+hts.register.missinguserinfo.next.step1=You&rsquo;ll need to <a href={0} target="_blank">fill in the form (it will open in a new window)</a> on the HM Revenue & Customs website.
+hts.register.missinguserinfo.next.step2=You&rsquo;ll need to wait until we&rsquo;ve updated your details in our system.
 hts.register.missinguserinfo.next.step3=You can apply for a Help to Save account again.
 hts.register.missinguserinfo.firstName=first name
 hts.register.missinguserinfo.lastName=last name
@@ -288,43 +288,43 @@ hts.register.missinguserinfo.address=address
 hts.register.missinguserinfo.exit_button=Exit to GOV.UK
 
 # Daily cap reached
-hts.register.daily-cap-reached.title.h1=You''ll need to try again tomorrow
+hts.register.daily-cap-reached.title.h1=You’ll need to try again tomorrow
 hts.register.daily-cap-reached.p1=Thank you for applying for a Help to Save account.
 hts.register.daily-cap-reached.p2=We have a limit on the number of people who can open an account each day.
-hts.register.daily-cap-reached.p3=We''re sorry, we''ve reached our limit today.
-hts.register.daily-cap-reached.p4=You''ll need to try again tomorrow.
+hts.register.daily-cap-reached.p3=We&rsquo;re sorry, we&rsquo;ve reached our limit today.
+hts.register.daily-cap-reached.p4=You&rsquo;ll need to try again tomorrow.
 hts.register.daily-cap-reached.exit.gov.uk=Exit to GOV.UK
 
-hts.register.total-cap-reached.title.h1=You can''t open an account yet
+hts.register.total-cap-reached.title.h1=You can’t open an account yet
 hts.register.total-cap-reached.p1=Thank you for applying for a Help to Save account.
 hts.register.total-cap-reached.p2=We have a limit on the number of people who can open an account at the moment.
-hts.register.total-cap-reached.p3=We''re sorry, we''ve reached our limit.
-hts.register.total-cap-reached.p4=If you want to open an account, you''ll need to try again later in the year.
+hts.register.total-cap-reached.p3=We&rsquo;re sorry, we&rsquo;ve reached our limit.
+hts.register.total-cap-reached.p4=If you want to open an account, you&rsquo;ll need to try again later in the year.
 hts.register.total-cap-reached.exit.gov.uk=Exit to GOV.UK
 
 # Service unavailable
 hts.register.service-unavailable.title.h1=Service Unavailable
-hts.register.service-unavailable.p1=You''ll be able to use the Help to Save service later.
+hts.register.service-unavailable.p1=You&rsquo;ll be able to use the Help to Save service later.
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
 # Create account
-hts.register.create_account_help_to_save.title.h1=You''re about to create a Help to Save account
-hts.register.create_account_help_to_save.par-1=Before opening an account, you''ll need to confirm you accept these conditions.
+hts.register.create_account_help_to_save.title.h1=You’re about to create a Help to Save account
+hts.register.create_account_help_to_save.par-1=Before opening an account, you&rsquo;ll need to confirm you accept these conditions.
 hts.register.create_account_help_to_save.par-2=You must:
 hts.register.create_account_help_to_save.bullet-1-wtc=inform us each time you leave the UK for a period of 8 weeks or more
 hts.register.create_account_help_to_save.bullet-1-uc=inform us each time you leave the UK for a period of 4 weeks or more
 hts.register.create_account_help_to_save.bullet-2=be opening a Help to Save account for the first time
-hts.register.create_account_help_to_save.par-3=If you create a Help to Save account, it will last for 4 years. This time will start as soon as you create your account. You''ll need to enter your UK bank account details before you can use your account, start saving and earning a bonus.
+hts.register.create_account_help_to_save.par-3=If you create a Help to Save account, it will last for 4 years. This time will start as soon as you create your account. You&rsquo;ll need to enter your UK bank account details before you can use your account, start saving and earning a bonus.
 hts.register.create_account_help_to_save.accept-label=Accept and create account
 hts.register.create_account_help_to_save.cancel-label=Cancel
 
 # Think you are eligible
-hts.register.think_you_are_eligible.title.h1=If you think you''re eligible for a Help to Save account
-hts.register.think_you_are_eligible.p1=Have you been told you''re not eligible for a Help to Save account? If yes, you should check the
+hts.register.think_you_are_eligible.title.h1=If you think you’re eligible for a Help to Save account
+hts.register.think_you_are_eligible.p1=Have you been told you&rsquo;re not eligible for a Help to Save account? If yes, you should check the
 hts.register.think_you_are_eligible.p1-link-text=eligibility criteria
 hts.register.think_you_are_eligible.p1-2=.
-hts.register.think_you_are_eligible.p2=If you''ve done this and still think you''re eligible for an account you can contact the Help to Save service.
-hts.register.think_you_are_eligible.p3=You''ll need to have your National Insurance number with you when you phone.
+hts.register.think_you_are_eligible.p2=If you&rsquo;ve done this and still think you&rsquo;re eligible for an account you can contact the Help to Save service.
+hts.register.think_you_are_eligible.p3=You&rsquo;ll need to have your National Insurance number with you when you phone.
 hts.register.think_you_are_eligible.contact.service.telephone-header=Telephone:
 hts.register.think_you_are_eligible.contact.service.telephone-number=0300 322 7093
 hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-header=Outside UK:
@@ -333,15 +333,15 @@ hts.register.think_you_are_eligible.contact.service.opening-times.heading=Openin
 hts.register.think_you_are_eligible.contact.service.opening-times.open=10am to 6pm, Monday to Friday
 hts.register.think_you_are_eligible.contact.service.opening-times.closed=Closed weekends and bank holidays.
 hts.register.think_you_are_eligible.h2=If you still think the decision is wrong
-hts.register.think_you_are_eligible.p4=You can ask for the decision to be looked at again, if you''re told you’re not eligible for a Help to Save account and think that decision is wrong.
-hts.register.think_you_are_eligible.p5=You''ll usually need to do this within 30 days of being told you’re not eligible for a Help to Save account.
-hts.register.think_you_are_eligible.p6=If you think the decision is wrong, you can ask for a review of the decision and must do this in writing. You''ll need to state what you disagree with and why.
+hts.register.think_you_are_eligible.p4=You can ask for the decision to be looked at again, if you&rsquo;re told you&rsquo;re not eligible for a Help to Save account and think that decision is wrong.
+hts.register.think_you_are_eligible.p5=You&rsquo;ll usually need to do this within 30 days of being told you&rsquo;re not eligible for a Help to Save account.
+hts.register.think_you_are_eligible.p6=If you think the decision is wrong, you can ask for a review of the decision and must do this in writing. You&rsquo;ll need to state what you disagree with and why.
 hts.register.think_you_are_eligible.h3=You should write to:
 hts.register.think_you_are_eligible.address1=Help to Save
 hts.register.think_you_are_eligible.address2=PO Box 1
 hts.register.think_you_are_eligible.address3=Newcastle
 hts.register.think_you_are_eligible.address4=NE88 1AA
-hts.register.think_you_are_eligible.review.disagree.heading=If you don''t agree with the outcome of the review
+hts.register.think_you_are_eligible.review.disagree.heading=If you don&rsquo;t agree with the outcome of the review
 hts.register.think_you_are_eligible.review.disagree.p1=You can appeal to the First-tier Tribunal (Tax) if all of these things apply to you:
 hts.register.think_you_are_eligible.review.disagree.ul1-li1=you were not allowed to open a Help to Save account
 hts.register.think_you_are_eligible.review.disagree.ul1-li2=you have asked for a review of that decision and were still not allowed to open a Help to Save account
@@ -353,55 +353,55 @@ hts.register.think_you_are_eligible.review.disagree.p3=Go to GOV.UK to find out 
 # IV Locked Out
 hts.iv.locked_out.title.h1=We were not able to verify your identity
 hts.iv.locked_out.p1=You have tried to verify your identity too many times.
-hts.iv.locked_out.p2=You''ll need to wait 24 hours and try again.
+hts.iv.locked_out.p2=You&rsquo;ll need to wait 24 hours and try again.
 
 # IV User Aborted
 hts.iv.were_unable_to_confirm_your_identity.title.h1=We were not able to verify your identity
 hts.iv.were_unable_to_confirm_your_identity.p1=You have not provided enough information.
-hts.iv.were_unable_to_confirm_your_identity.p2=To apply for a Help to Save account you''ll need to answer security questions based on the information we hold about you.
+hts.iv.were_unable_to_confirm_your_identity.p2=To apply for a Help to Save account you&rsquo;ll need to answer security questions based on the information we hold about you.
 hts.iv.were_unable_to_confirm_your_identity.p3=This is to prevent anyone other than you accessing your personal details.
 
 # Failed IV
 hts.iv.failed_iv.title.h1=We were not able to verify your identity
 hts.iv.failed_iv.p1=You did not answer all the questions correctly.
 hts.iv.failed_iv.p2=Your answers to the questions need to match the answers we already have for you.
-hts.iv.failed_iv.p3=You''ll need to try again.
+hts.iv.failed_iv.p3=You&rsquo;ll need to try again.
 hts.iv.failed_iv.try-again-button=Try Again
 
 # Failed Matching
 hts.iv.failed_matching.title.h1=We were not able to verify your identity
-hts.iv.failed_matching.p=You''ll need to try again and check you entered your details correctly. This includes your:
+hts.iv.failed_matching.p=You&rsquo;ll need to try again and check you entered your details correctly. This includes your:
 hts.iv.failed_matching.li1=name
 hts.iv.failed_matching.li2=date of birth
 hts.iv.failed_matching.li3=National Insurance number
 
 # Insufficient Evidence
 hts.iv.insufficient_evidence.title.h1=We were not able to verify your identity
-hts.iv.insufficient_evidence.p1=You''ll need to call us and we''ll ask you for more details.
+hts.iv.insufficient_evidence.p1=You&rsquo;ll need to call us and we&rsquo;ll ask you for more details.
 hts.iv.insufficient_evidence.telephone-title=Telephone:
 hts.iv.insufficient_evidence.telephone-number=0300 322 7093
 hts.iv.insufficient_evidence.h2=What happens next?
-hts.iv.insufficient_evidence.p2=You''ll be able to apply for a Help to Save account by phone, after we''ve been able to verify your identity.
+hts.iv.insufficient_evidence.p2=You&rsquo;ll be able to apply for a Help to Save account by phone, after we&rsquo;ve been able to verify your identity.
 
 # IV Timed Out
 hts.iv.time_out.title.h1=Your session has ended
-hts.iv.time_out.p1=You''ve been inactive for too long so we''ve ended your session.
-hts.iv.time_out.p2=You''ll need to try again.
+hts.iv.time_out.p1=You&rsquo;ve been inactive for too long so we&rsquo;ve ended your session.
+hts.iv.time_out.p2=You&rsquo;ll need to try again.
 
 # IV Technical Issue
 hts.iv.there_s_a_technical_issues.title.h1=Something went wrong
-hts.iv.there_s_a_technical_issues.p1=We''re sorry, we''re having some technical problems.
-hts.iv.there_s_a_technical_issues.p2=You''ll need to try again later.
+hts.iv.there_s_a_technical_issues.p1=We&rsquo;re sorry, we&rsquo;re having some technical problems.
+hts.iv.there_s_a_technical_issues.p2=You&rsquo;ll need to try again later.
 
 # IV Success
-hts.iv.we_ve_confirmed_your_identity.title.h1=We''ve verified your identity
+hts.iv.we_ve_confirmed_your_identity.title.h1=We’ve verified your identity
 hts.iv.we_ve_confirmed_your_identity.p1=If you want to apply for a Help to Save account, you should continue.
 hts.iv.you_now_access_hts_account=What happens next?
-hts.iv.we_ve_confirmed_your_identity.p2=We''ll check if you''re eligible for a Help to Save account. If you''re eligible, you can then go on to create an account.
+hts.iv.we_ve_confirmed_your_identity.p2=We&rsquo;ll check if you&rsquo;re eligible for a Help to Save account. If you&rsquo;re eligible, you can then go on to create an account.
 
 # IV Precondition Failed
-hts.iv.precondition_failed.title.h1=You''re not able to use this service
-hts.iv.precondition_failed.message=We''ve checked the details in your Government Gateway account and you don''t meet the criteria to use this service.
+hts.iv.precondition_failed.title.h1=You&rsquo;re not able to use this service
+hts.iv.precondition_failed.message=We&rsquo;ve checked the details in your Government Gateway account and you don&rsquo;t meet the criteria to use this service.
 hts.exit_to_about_hts=Exit to About Help to Save
 hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
@@ -432,26 +432,26 @@ hts.select-email.invalid-email.error-summary.link-description=Enter a valid emai
 
 # Give email
 hts.give-email.title.h1=Which email address do you want to use for Help to Save?
-hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
+hts.give-email-address.p=We&rsquo;ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
 hts.give-email.error-title=There is a problem
 hts.give-email.error-link-description=Enter a valid email address
 
 # Existing User Change Email
 hts.email-verification.title.h1=Change your email address
-hts.email-verification.intro=Once you''ve entered a new email address, we''ll send you an email so you can verify it.
+hts.email-verification.intro=Once you&rsquo;ve entered a new email address, we&rsquo;ll send you an email so you can verify it.
 hts.email-verification.note=The email addresses you use for other government services will not change.
 hts.email-verification.input.label=New email address
 hts.email-verification.submit.text=Verify your email
 
 hts.email-verification.check-your-email.title.h1=You have 30 minutes to verify your email address
-hts.email-verification.check-your-email.we-have-sent-mail=We''ve sent you an email to:
+hts.email-verification.check-your-email.we-have-sent-mail=We&rsquo;ve sent you an email to:
 hts.email-verification.check-your-email.what-next=What happens next?
-hts.email-verification.check-your-email.content1=You''ll need to go to that email account and click the link in the message we sent you.
+hts.email-verification.check-your-email.content1=You&rsquo;ll need to go to that email account and click the link in the message we sent you.
 hts.email-verification.check-your-email.content2=You have 30 minutes to do this.
-hts.email-verification.check-your-email.content3=We''ll only use this email address to contact you about your Help to Save account once you have done this.
+hts.email-verification.check-your-email.content3=We&rsquo;ll only use this email address to contact you about your Help to Save account once you have done this.
 hts.email-verification.check-your-email.where-used-heading=Where your email address is updated
-hts.email-verification.check-your-email.where-used=We''ll only use this email address for your Help to Save account. The email addresses you use for other government services won''t change.
+hts.email-verification.check-your-email.where-used=We&rsquo;ll only use this email address for your Help to Save account. The email addresses you use for other government services won&rsquo;t change.
 hts.email-verification.check-your-email.resend-email=Resend email
 hts.email-verification.check-your-email.change-email-address=Change email address
 hts.email-verification.error-title=There is a problem
@@ -465,7 +465,7 @@ hts.we-couldnt-update-your-email.p2=You''ll need to come back later and try agai
 
 # Existing Account - Email verified
 hts.email-verified.title.h1=Email address verified
-hts.email-verified.p1=We''ll use this address to contact you about your Help to Save account.
+hts.email-verified.p1=We&rsquo;ll use this address to contact you about your Help to Save account.
 hts.email-verified.p2=Your email has not been updated in other government services.
 
 # Existing Account - Verify your email address
@@ -473,12 +473,12 @@ hts.email-verified.p2=Your email has not been updated in other government servic
 # hts.email-verification.existing-user.check-your-email.title=You have 30 minutes to verify your email address
 
 hts.email-verification.existing-user.check-your-email.title.h1=You have 30 minutes to verify your email address
-hts.email-verification.existing-user.check-your-email.we-have-sent-mail=We''ve sent an email to you at:
+hts.email-verification.existing-user.check-your-email.we-have-sent-mail=We&rsquo;ve sent an email to you at:
 hts.email-verification.existing-user.check-your-email.what-next=What happens next?
-hts.email-verification.existing-user.check-your-email.content1=You''ll need to go to that email account and click the link in the message we sent you.
+hts.email-verification.existing-user.check-your-email.content1=You&rsquo;ll need to go to that email account and click the link in the message we sent you.
 hts.email-verification.existing-user.check-your-email.content2=You have 30 minutes to do this.
 hts.email-verification.existing-user.check-your-email.where-used-heading=Where your email address is updated
-hts.email-verification.existing-user.check-your-email.where-used=We''ll only use this email address for your Help to Save account. The email addresses you use for other government services won''t change.
+hts.email-verification.existing-user.check-your-email.where-used=We&rsquo;ll only use this email address for your Help to Save account. The email addresses you use for other government services won&rsquo;t change.
 
 # Link expired
 hts.email-verification.link-expired.title.h1=This link has expired
@@ -488,14 +488,14 @@ hts.email-verification.link-expired.p2=Exit to GOV.UK
 
 # Email updated
 hts.email-updated.title.h1=Email address verified
-hts.email-updated.p1=If you create a Help to Save account we''ll use this email address to contact you about it.
+hts.email-updated.p1=If you create a Help to Save account we&rsquo;ll use this email address to contact you about it.
 hts.email-updated.p2=Your email address has not been updated in other government services.
 hts.email-updated.continue_button=Continue
 
 # Cannot change email
 hts.cannot-change-email.title.h1=Something went wrong
 hts.cannot-change-email.p1=We cannot change your email address at the moment.
-hts.cannot-change-email.p2=You can create a Help to Save account now using the email address we hold for you. If you create an account, you''ll be able to change your email address from within your account.
+hts.cannot-change-email.p2=You can create a Help to Save account now using the email address we hold for you. If you create an account, you&rsquo;ll be able to change your email address from within your account.
 hts.cannot-change-email.p3=Or you can come back later and use a different email address.
 hts.cannot-change-email.header1=What do you want to do?
 hts.cannot-change-email.opt1=Use {0} for my Help to Save account
@@ -507,37 +507,39 @@ hts.cannot-change-email.error-summary.descriptive-link=Select one option
 
 # Cannot change email try later
 hts.cannot-change-email-try-later.title.h1=Something went wrong
-hts.cannot-change-email-try-later.p1=We can''t change your email
+hts.cannot-change-email-try-later.p1=We can&rsquo;t change your email
 hts.cannot-change-email-try-later.try_later_button=Try again
 hts.cannot-change-email-try-later.back_button=Go to About Help to Save
+
+# Cannot change email try later / returning user
 hts.cannot-change-email-try-later.returning.p1=We cannot change your email address at this time.
-hts.cannot-change-email-try-later.returning.p2=You''ll need to come back later and try again.
+hts.cannot-change-email-try-later.returning.p2=You&rsquo;ll need to come back later and try again.
 hts.cannot-change-email-try-later.returning.button=Go to account home
 
 # No account
 hts.no-account.title.h1=You do not have a Help to Save account
-hts.no-account.p1=You''ve signed into your Government Gateway account, but you do not have a Help to Save account.
-hts.no-account.p2=We''re sorry, we''re currently developing the Help to Save service and only a limited number of accounts are available at the moment.
+hts.no-account.p1=You&rsquo;ve signed into your Government Gateway account, but you do not have a Help to Save account.
+hts.no-account.p2=We&rsquo;re sorry, we&rsquo;re currently developing the Help to Save service and only a limited number of accounts are available at the moment.
 hts.no-account.h2=Apply later
-hts.no-account.p3=If you want to apply for an account, you''ll need to visit GOV.UK later in 2018 and search for ''Help to Save''.
+hts.no-account.p3=If you want to apply for an account, you&rsquo;ll need to visit GOV.UK later in 2018 and search for &lsquo;Help to Save&rsquo;.
 hts.no-account.exit-message=Exit to GOV.UK
 
 # Account creation error
 hts.account-creation-error.title.h1=Something went wrong
-hts.account-creation-error.p1=We couldn''t create a Help to Save account for you at this time.
-hts.account-creation-error.p2=You''ll need to come back later and try again.
+hts.account-creation-error.p1=We couldn&rsquo;t create a Help to Save account for you at this time.
+hts.account-creation-error.p2=You&rsquo;ll need to come back later and try again.
 hts.account-creation-error.exit-button=Exit and go to About Help to Save
 
 # Incorrect details
 hts.incorrect-details.title.h1=We need your correct details
-hts.incorrect-details.p1=We can''t create your account until we have your:
+hts.incorrect-details.p1=We can&rsquo;t create your account until we have your:
 hts.incorrect-details.listOne1=first name
 hts.incorrect-details.listOne2=last name
 hts.incorrect-details.listOne3=date of birth
 hts.incorrect-details.listOne4=address
 hts.incorrect-details.h2=What happens next?
-hts.incorrect-details.listTwo1=You''ll need to go to GOV.UK and <a href={0} target="_blank">give us your correct details</a> (link opens in a new window).
-hts.incorrect-details.listTwo2=You can apply for a Help to Save account again, once we''ve updated your details in our system.
+hts.incorrect-details.listTwo1=You&rsquo;ll need to go to GOV.UK and <a href={0} target="_blank">give us your correct details</a> (link opens in a new window).
+hts.incorrect-details.listTwo2=You can apply for a Help to Save account again, once we&rsquo;ve updated your details in our system.
 hts.incorrect-details.exit-button=Back
 
 # Privacy page
@@ -547,21 +549,21 @@ hts.privacy.p2=HM Revenue and Customs (HMRC) is a Data Controller under the Data
 hts.privacy.p3=As part of our processing and compliance checks, we may:
 hts.privacy.ul1.li1=check your entitlement to benefits, Working Tax Credit, Child Tax Credit and Universal Credit
 hts.privacy.ul1.li2=confirm your employment status and income
-hts.privacy.ul1.li3=check whether you''re entitled to a Help to Save account and any bonuses due
+hts.privacy.ul1.li3=check whether you&rsquo;re entitled to a Help to Save account and any bonuses due
 hts.privacy.ul1.li4=check whether you have held a Help to Save account previously
 hts.privacy.p4=We will gather only the data that we need to establish your entitlement to open and maintain a Help to Save account.
 hts.privacy.p5=The data that we currently gather and use to achieve that with regard to Working Tax Credit and Universal Credit customers will be your name, National Insurance number, address, date of birth and email address.  We will gather this information from your Government Gateway account.
-hts.privacy.p6=We will establish your entitlement as a Working Tax Credit recipient through information already held on HMRC''s internal National Tax Credits system. We will establish your entitlement as a Universal Credit recipient based on information obtained from the Department for Work and Pensions (DWP).
+hts.privacy.p6=We will establish your entitlement as a Working Tax Credit recipient through information already held on HMRC&rsquo;s internal National Tax Credits system. We will establish your entitlement as a Universal Credit recipient based on information obtained from the Department for Work and Pensions (DWP).
 hts.privacy.p7=The only information that we will directly ask you for beyond this is where you need to provide a change of your email address.
-hts.privacy.p8=We''ll be sharing all of this information with NS&I who are helping to administer the Help to Save scheme.
+hts.privacy.p8=We&rsquo;ll be sharing all of this information with NS&I who are helping to administer the Help to Save scheme.
 hts.privacy.p9=We will only share your information with third parties for purposes other than Help to Save if the law permits us to, and if then, for the:
 hts.privacy.ul2.li1=prevention or detection of crime
 hts.privacy.ul2.li2=protection of public funds
 hts.privacy.h2-1=HMRC staff handling your information
-hts.privacy.p10=HMRC''s staff are trained in handling information and understand how important it is to protect personal and other sensitive information.
+hts.privacy.p10=HMRC&rsquo;s staff are trained in handling information and understand how important it is to protect personal and other sensitive information.
 hts.privacy.h2-2=Seeing what information we hold
-hts.privacy.p11.1=You can ask to see the personal information HMRC holds about you. To help locate the information you want and deal with your request more quickly, you should make your Data Protection Act request to the HMRC office that you''ve been dealing with. You should address your request to the ''Data Protection Officer''. You can get more information on
-hts.privacy.p11.link-text=HMRC''s privacy policy
+hts.privacy.p11.1=You can ask to see the personal information HMRC holds about you. To help locate the information you want and deal with your request more quickly, you should make your Data Protection Act request to the HMRC office that you&rsquo;ve been dealing with. You should address your request to the &lsquo;Data Protection Officer&rsquo;. You can get more information on
+hts.privacy.p11.link-text=HMRC&rsquo;s privacy policy
 hts.privacy.p11.2=(it will open in a new window) on the GOV.UK website.
 
 # Close Account
@@ -569,7 +571,7 @@ hts.close-account.section.title=- Help to Save account home
 hts.close-account.title.h1=Are you sure you want to close your account?
 hts.close-account.warning=If you close your account now you will not be able to earn any bonus money. You will not be able to open another Help to Save account.
 hts.close-account.p1=If you still need to close your account you can contact the Help to Save service.
-hts.close-account.p2=You''ll need to have your National Insurance number with you when you phone.
+hts.close-account.p2=You&rsquo;ll need to have your National Insurance number with you when you phone.
 hts.close-account.contact.telephone=Telephone:
 hts.close-account.contact.telephone.number=0300 322 7093
 hts.close-account.contact.outside-uk=Outside UK:
@@ -587,8 +589,8 @@ hts.close-account.positive-balance.positive-bonus.withdraw.p3=at any time withou
 hts.close-account.account-retrieval-error.warning=If you close your account now you will not get any bonus payments. You will not be able to open another Help to Save account.
 
 footer.links.privacy_policy.url=/help-to-save/privacy-statement
-global.error.InternalServerError500.title=Sorry, we are experiencing technical difficulties - Help to Save - GOV.UK
-global.error.InternalServerError500.heading=Sorry, we''re experiencing technical difficulties
+global.error.InternalServerError500.title=Sorry, we’re experiencing technical difficulties - Help to Save - GOV.UK
+global.error.InternalServerError500.heading=Sorry, we’re experiencing technical difficulties
 global.error.InternalServerError500.message=Please try again later.
 
 report.a.problem.link=Is there anything wrong with this page?

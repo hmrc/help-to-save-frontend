@@ -24,12 +24,12 @@ trait NotEligiblePage extends Page {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/not-eligible"
 
-  override val expectedPageTitle: Option[String] = Some("You're not eligible for a Help to Save account")
+  override val expectedPageTitle: Option[String] = Some("You’re not eligible for a Help to Save account")
 
-  override val expectedPageHeader: Option[String] = Some("You're not eligible for a Help to Save account")
+  override val expectedPageHeader: Option[String] = Some("You’re not eligible for a Help to Save account")
 
   val notEligibleText: List[String]
 
   def thinkYouAreEligible()(implicit driver: WebDriver): Unit =
-    Browser.clickLinkTextOnceClickable("think you're eligible")
+    Browser.clickLinkTextOnceClickable("think you’re eligible")
 }
