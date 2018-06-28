@@ -432,7 +432,7 @@ hts.select-email.invalid-email.error-summary.link-description=Enter a valid emai
 
 # Give email
 hts.give-email.title.h1=Which email address do you want to use for Help to Save?
-hts.give-email-address.p=We''ll use this email address to let you know yo§u have a new message in your account.
+hts.give-email-address.p=We''ll use this email address to let you know you have a new message in your account.
 hts.give-email-address.label=Enter your email address
 hts.give-email.error-title=There is a problem
 hts.give-email.error-link-description=Enter a valid email address
