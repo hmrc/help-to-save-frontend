@@ -89,7 +89,7 @@ class EligibilityCheckControllerSpec
         status(result) shouldBe OK
 
         val content = contentAsString(result)
-        content should include("You&#x27;re eligible for a Help to Save account")
+        content should include("You&rsquo;re eligible for a Help to Save account")
         content should include("By continuing you are confirming you are eligible for a Help to Save account, and that these are your details and they are correct")
         content should include(validUserInfo.forename)
         content should include(validUserInfo.surname)

@@ -24,9 +24,9 @@ object CreateAccountPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/create-account"
 
-  override val expectedPageHeader: Option[String] = Some("You're about to create a Help to Save account")
+  override val expectedPageHeader: Option[String] = Some("You’re about to create a Help to Save account")
 
-  override val expectedPageTitle: Option[String] = Some("You're about to create a Help to Save account")
+  override val expectedPageTitle: Option[String] = Some("You’re about to create a Help to Save account")
 
   def createAccount()(implicit driver: WebDriver): Unit =
     Browser.clickButtonByIdOnceClickable("accept-and-create-account")

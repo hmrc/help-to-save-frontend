@@ -26,9 +26,9 @@
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
   title = Messages("hts.global.title", Messages("hts.register.create_account_help_to_save.title.h1"), "", Messages("hts.global.title-suffix")),
   bodyClasses = None) {
-    <h1 class="heading-large">@Messages("hts.register.create_account_help_to_save.title.h1")</h1>
+    <h1 class="heading-large">@Html(Messages("hts.register.create_account_help_to_save.title.h1"))</h1>
 
-    <p>@Messages("hts.register.create_account_help_to_save.par-1")<p>
+    <p>@Html(Messages("hts.register.create_account_help_to_save.par-1"))<p>
     <p>@Messages("hts.register.create_account_help_to_save.par-2")<p>
     <ul class="list list-bullet">
         @defining(eligibilityReason match {
@@ -41,7 +41,7 @@
         <li>@Messages("hts.register.create_account_help_to_save.bullet-2")</li>
     </ul>
     <div class="panel panel-border-wide">
-        <p>@Messages("hts.register.create_account_help_to_save.par-3")</p>
+        <p>@Html(Messages("hts.register.create_account_help_to_save.par-3"))</p>
     </div>
     <div class="form-field form-field--submit">
         @form(routes.RegisterController.createAccount){

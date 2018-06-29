@@ -27,10 +27,10 @@ bodyClasses = None) {
 
   <h1>@Messages("hts.register.think_you_are_eligible.title.h1")</h1>
 
-  <p>@Messages("hts.register.think_you_are_eligible.p1")
+  <p>@Html(Messages("hts.register.think_you_are_eligible.p1"))
       <a href="@routes.IntroductionController.getEligibility().url">@Messages("hts.register.think_you_are_eligible.p1-link-text")</a>@Messages("hts.register.think_you_are_eligible.p1-2")</p>
-  <p>@Messages("hts.register.think_you_are_eligible.p2")</p>
-  <p>@Messages("hts.register.think_you_are_eligible.p3")</p>
+  <p>@Html(Messages("hts.register.think_you_are_eligible.p2"))</p>
+  <p>@Html(Messages("hts.register.think_you_are_eligible.p3"))</p>
 
   <div class="panel">
       <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.telephone-header")</strong><br />
@@ -44,9 +44,9 @@ bodyClasses = None) {
   @Messages("hts.register.think_you_are_eligible.contact.service.opening-times.closed")</p>
 
   <h2>@Messages("hts.register.think_you_are_eligible.h2")</h2>
-  <p>@Messages("hts.register.think_you_are_eligible.p4")</p>
-  <p>@Messages("hts.register.think_you_are_eligible.p5")</p>
-  <p>@Messages("hts.register.think_you_are_eligible.p6")</p>
+  <p>@Html(Messages("hts.register.think_you_are_eligible.p4"))</p>
+  <p>@Html(Messages("hts.register.think_you_are_eligible.p5"))</p>
+  <p>@Html(Messages("hts.register.think_you_are_eligible.p6"))</p>
 
   <h3>@Messages("hts.register.think_you_are_eligible.h3")</h3>
 
@@ -58,7 +58,7 @@ bodyClasses = None) {
   </div>
 
   <details>
-    <summary><span class="summary">@Messages("hts.register.think_you_are_eligible.review.disagree.heading")</span></summary>
+    <summary><span class="summary">@Html(Messages("hts.register.think_you_are_eligible.review.disagree.heading"))</span></summary>
     <div class="panel panel-border-narrow">
       <p>@Messages("hts.register.think_you_are_eligible.review.disagree.p1")</p>
       <ul class="list list-bullet">

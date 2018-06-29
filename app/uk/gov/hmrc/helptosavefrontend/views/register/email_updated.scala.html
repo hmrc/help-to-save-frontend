@@ -31,7 +31,7 @@
     <p>@email</p>
  </div>
 
- <p>@messages("hts.email-updated.p1")</p>
+ <p>@Html(Messages("hts.email-updated.p1"))</p>
  <p>@messages("hts.email-updated.p2")</p>
  @form(routes.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit())(
   Html("""<div class="form-group subsection--wide"><button id="continue-to-create-account" class="button" type="submit">""" + messages("hts.email-updated.continue_button") + """</button></div>"""))

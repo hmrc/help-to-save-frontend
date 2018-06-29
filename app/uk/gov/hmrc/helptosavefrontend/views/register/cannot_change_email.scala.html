@@ -43,7 +43,7 @@
         <h1 class="heading-large">@Messages("hts.cannot-change-email.title.h1")</h1>
 
         <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
-        <p>@Messages("hts.cannot-change-email.p2")</p>
+        <p>@Html(Messages("hts.cannot-change-email.p2"))</p>
         <p>@Messages("hts.cannot-change-email.p3")</p>
 
     @helpers.form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit){

@@ -25,9 +25,9 @@ object IdentityVerifiedPage extends Page {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/identity-verified"
 
-  override val expectedPageTitle: Option[String] = Some("We've verified your identity")
+  override val expectedPageTitle: Option[String] = Some("We’ve verified your identity")
 
-  override val expectedPageHeader: Option[String] = Some("We've verified your identity")
+  override val expectedPageHeader: Option[String] = Some("We’ve verified your identity")
 
   def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 

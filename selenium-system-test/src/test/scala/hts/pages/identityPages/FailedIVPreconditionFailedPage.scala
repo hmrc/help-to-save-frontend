@@ -25,9 +25,9 @@ object FailedIVPreconditionFailedPage extends IVPage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-precondition-failed"
 
-  override val expectedPageHeader: Option[String] = Some("You're not able to use this service")
+  override val expectedPageHeader: Option[String] = Some("You’re not able to use this service")
 
-  override val expectedPageTitle: Option[String] = Some("You're not able to use this service")
+  override val expectedPageTitle: Option[String] = Some("You’re not able to use this service")
 
   override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Exit to About Help to Save")
 }
