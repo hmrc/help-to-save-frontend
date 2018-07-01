@@ -35,7 +35,8 @@ bodyClasses = None) {
 
     <h1 class="heading-large">@Messages("hts.cannot-change-email-try-later.title.h1")</h1>
     <p class="lede">@Html(Messages("hts.cannot-change-email-try-later.p1"))</p>
-    <a href=@routes.RegisterController.getGiveEmailPage class="button">@messages("hts.cannot-change-email-try-later.try_later_button")</a>
+    <a href=@routes.EmailController.getGiveEmailPage class="button">@messages("hts.cannot-change-email-try-later.try_later_button")</a>
+
     <p class="subsection--wide push--bottom">
       <a href=@routes.IntroductionController.getAboutHelpToSave().url id="exit-without-creating-account"
        class="font-xsmall">@Messages("hts.cannot-change-email-try-later.back_button")</a>

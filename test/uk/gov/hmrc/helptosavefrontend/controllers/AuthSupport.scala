@@ -85,6 +85,9 @@ trait AuthSupport extends TestSupport {
   val mockedRetrievals: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Option[String]] =
     new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and mockedNINORetrieval
 
+  def mockedRetrievalsWithEmail(email: Option[String]): ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Option[String]] =
+    new ~(name, email) and Option(dob) and itmpName and itmpDob and itmpAddress and mockedNINORetrieval
+
   val mockedRetrievalsMissingUserInfo: ~[~[~[~[~[~[Name, Option[String]], Option[LocalDate]], ItmpName], Option[LocalDate]], ItmpAddress], Option[String]] =
     new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and itmpAddress and mockedNINORetrieval
 

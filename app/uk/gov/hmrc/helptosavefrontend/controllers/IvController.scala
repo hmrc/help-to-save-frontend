@@ -55,14 +55,14 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       //Will be populated if we arrived here because of an IV success/failure
       val newIVUrl = frontendAppConfig.ivUrl(continueURL)
-      lazy val storeNewIVURLThenRedirectTo = storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None), journeyId) _
+      lazy val storeNewIVURLThenRedirectTo = storeInSessionCacheThenRedirect(HTSSession(None, None, None, true, Some(newIVUrl), None), journeyId) _
 
       journeyId match {
         case Some(id) ⇒
           ivConnector.getJourneyStatus(JourneyId(id)).flatMap {
             case Some(Success) ⇒
               metrics.ivSuccessCounter.inc()
-              storeInSessionCacheThenRedirect(HTSSession(None, None, None, None, Some(continueURL)), Some(id))(
+              storeInSessionCacheThenRedirect(HTSSession(None, None, None, true, None, Some(continueURL)), Some(id))(
                 routes.IvController.getIVSuccessful().url)
 
             case Some(Incomplete) ⇒

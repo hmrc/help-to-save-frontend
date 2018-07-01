@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import java.net.URLEncoder
 import java.util.UUID.randomUUID
 
-import play.api.mvc.{AnyContent, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
@@ -43,10 +43,10 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
   val continueURL = "continue-here"
 
   lazy val mockPutContinueURLInSessionCache =
-    mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
+    mockSessionCacheConnectorPut(HTSSession(None, None, None, true, None, Some(continueURL)))(Right(()))
 
   lazy val mockPutIVURLInSessionCache =
-    mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
+    mockSessionCacheConnectorPut(HTSSession(None, None, None, true, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
   def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
     (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier, _: ExecutionContext)).expects(journeyId, *, *)
@@ -77,7 +77,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
           inSequence {
             mockAuthWithNoRetrievals(AuthProvider)
             mockIvConnector(journeyId, ivServiceResponse)
-            mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
+            mockSessionCacheConnectorPut(HTSSession(None, None, None, true, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
           }
           val result = doRequest()
@@ -89,7 +89,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
           inSequence {
             mockAuthWithNoRetrievals(AuthProvider)
             mockIvConnector(journeyId, ivServiceResponse)
-            mockSessionCacheConnectorPut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Left(""))
+            mockSessionCacheConnectorPut(HTSSession(None, None, None, true, Some(appConfig.ivUrl(continueURL)), None))(Left(""))
           }
           val result = doRequest()
           checkIsTechnicalErrorPage(result)
@@ -103,7 +103,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
         inSequence {
           mockAuthWithNoRetrievals(AuthProvider)
           mockIvConnector(journeyId, "Success")
-          mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
+          mockSessionCacheConnectorPut(HTSSession(None, None, None, true, None, Some(continueURL)))(Right(()))
 
         }
         val result = doRequest()
@@ -115,7 +115,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
         inSequence {
           mockAuthWithNoRetrievals(AuthProvider)
           mockIvConnector(journeyId, "Success")
-          mockSessionCacheConnectorPut(HTSSession(None, None, None, None, Some(continueURL)))(Left(""))
+          mockSessionCacheConnectorPut(HTSSession(None, None, None, true, None, Some(continueURL)))(Left(""))
         }
         val result = doRequest()
         checkIsTechnicalErrorPage(result)
@@ -231,7 +231,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
               "the data required is not present in the session" in {
                 inSequence {
                   mockAuthWithNoRetrievals(AuthProvider)
-                  mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, None, None))))
+                  mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, true, None, None))))
                 }
 
                 checkIsTechnicalErrorPage(getResult())
@@ -249,7 +249,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
     testIndividualPage(
       "IV successful",
       () ⇒ ivController.getIVSuccessful()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, None, Some(url)))))),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, true, None, Some(url)))))),
       Some(url),
       Some(ivController.eligibilityUrl)
     ) { (maybeUrl, result) ⇒
@@ -261,7 +261,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
     testIndividualPage(
       "failed matching",
       () ⇒ ivController.getFailedMatching()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, true, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒
@@ -273,7 +273,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
     testIndividualPage(
       "failed iv",
       () ⇒ ivController.getFailedIV()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, true, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒
@@ -307,7 +307,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
     testIndividualPage(
       "user aborted",
       () ⇒ ivController.getUserAborted()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, true, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒
@@ -319,7 +319,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
     testIndividualPage(
       "timed out",
       () ⇒ ivController.getTimedOut()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, true, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒
@@ -331,7 +331,7 @@ class IvControllerSpec extends AuthSupport with SessionCacheBehaviourSupport {
     testIndividualPage(
       "technical issue",
       () ⇒ ivController.getTechnicalIssue()(FakeRequest()),
-      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(() ⇒ mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, true, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒

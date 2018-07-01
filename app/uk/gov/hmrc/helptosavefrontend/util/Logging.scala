@@ -40,13 +40,6 @@ object Logging {
 
     def warn(message: String, e: ⇒ Throwable, nino: NINO)(implicit transformer: NINOLogMessageTransformer): Unit =
       logger.warn(transformer.transform(message, nino), e)
-
-    def error(message: String, nino: NINO)(implicit transformer: NINOLogMessageTransformer): Unit =
-      logger.error(transformer.transform(message, nino))
-
-    def error(message: String, e: ⇒ Throwable, nino: NINO)(implicit transformer: NINOLogMessageTransformer): Unit =
-      logger.error(transformer.transform(message, nino), e)
-
   }
 }
 

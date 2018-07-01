@@ -14,39 +14,35 @@ POST       /apply                                           @uk.gov.hmrc.helptos
 GET        /sign-in                                         @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getSignInPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET        /no-account                                      @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getNoAccountPage
+
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility
-
-GET        /link-expired                                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getLinkExpiredPage
-
 GET        /not-eligible                                    @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsNotEligible
 GET        /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getIsEligible
 POST       /eligible                                        @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.youAreEligibleSubmit
-
-GET        /incorrect-details                               @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDetailsAreIncorrect
 GET        /missing-details                                 @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getMissingInfoPage
 
-GET        /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getSelectEmailPage
-POST       /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.selectEmailSubmit
-GET        /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getGiveEmailPage
-POST       /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.giveEmailSubmit
-GET        /confirm-email/:email                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.confirmEmail(email)
+GET        /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getSelectEmailPage
+POST       /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.selectEmailSubmit
+GET        /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getGiveEmailPage
+POST       /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.giveEmailSubmit
+GET        /confirm-email/:email                            @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmail(email)
+GET        /verify-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmail
+GET        /email-verified-callback                         @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailVerifiedCallback(p: String)
+GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailVerified
+GET        /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmailError
+POST       /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmailErrorSubmit
+GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmailErrorTryLater
+GET        /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailUpdated()
+POST       /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailUpdatedSubmit
+GET        /link-expired                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getLinkExpiredPage
 
 GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountPage
 POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccount
 GET        /error-no-account                                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
-
-GET        /verify-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmail
-GET        /email-verified-callback                         @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailVerifiedCallback(p: String)
-GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailVerified
-GET        /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailError
-POST       /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit
-GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailVerificationErrorController.verifyEmailErrorTryLater
-GET        /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.getEmailUpdated()
-POST       /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.NewApplicantUpdateEmailAddressController.emailUpdatedSubmit
-
 GET        /try-again-tomorrow                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /try-again-later-in-year                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
 GET        /service-unavailable                             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceUnavailablePage
+GET        /incorrect-details                               @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDetailsAreIncorrect
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String, journeyId: Option[String])
 GET        /identity-verified                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getIVSuccessful

@@ -116,15 +116,15 @@ class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with G
     }
 
     "be able to update IV data" in new TestApparatus {
-      val oldSession = HTSSession(None, None, None, ivURL = Some("a"), None)
-      val expectedSession = HTSSession(None, None, None, Some("a"), Some("b"))
+      val oldSession = HTSSession(None, None, None, true, ivURL = Some("a"), None)
+      val expectedSession = HTSSession(None, None, None, true, Some("a"), Some("b"))
 
       inSequence {
         mockGet(cacheMap(oldSession))
         mockPut(expectedSession)(cacheMap(expectedSession))
       }
 
-      val result = sessionCacheConnector.put(HTSSession(None, None, None, None, Some("b")))
+      val result = sessionCacheConnector.put(HTSSession(None, None, None, true, None, Some("b")))
 
       result.value.futureValue.isRight should be(true)
     }

@@ -105,7 +105,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
   def checkIsErrorPage(result: Future[Result]): Unit = {
     status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+    redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
   }
 
   "The AccountHolderController" when {
@@ -206,7 +206,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
         }
         val result = controller.onSubmit()(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
       }
 
       "show an error page if the email verification fails" in {
@@ -220,7 +220,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
         }
         val result = controller.onSubmit()(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
       }
 
       "redirect to the error page if the name retrieval fails" in {
@@ -228,7 +228,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
         val result = controller.onSubmit()(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailVerificationErrorController.verifyEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
       }
 
     }

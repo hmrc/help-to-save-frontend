@@ -19,42 +19,26 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
-
-@serviceInfoContent = {
-  <div class="breadcrumbs">
-    <ol>
-      <li><a href=@{frontendAppConfig.nsiManageAccountUrl}>@messages("hts.global.breadcrumb.account.home")</a></li>
-    </ol>
-  </div>
-}
-
+@(email: String, oldEmail: Option[String])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-  title = Messages("hts.global.title", Messages("hts.email-verification.existing-user.check-your-email.title.h1"), Messages("hts.global.title.section.email"), Messages("hts.global.title-suffix")),
-  sidebarLinks = None,
-  bodyClasses = None,
-  serviceInfoContent = serviceInfoContent) {
+    title = Messages("hts.global.title", Messages("hts.email-verification.check-your-email.title.h1"), "", Messages("hts.global.title-suffix")),
+    sidebarLinks = None,
+    bodyClasses = None) {
 
-  <h1 class="heading-large">@messages("hts.email-verification.existing-user.check-your-email.title.h1")</h1>
-  <p class="lede">@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail"))<br />@email</p>
-  <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.what-next")</h2>
-  <p class="content">@Html(Messages("hts.email-verification.existing-user.check-your-email.content1"))</p>
-  <p class="content">@messages("hts.email-verification.existing-user.check-your-email.content2")</p>
-  <p class="content">@Html(Messages("hts.email-verification.check-your-email.content3"))</p>
-  <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.where-used-heading")</h2>
-  <p class="content">@Html(Messages("hts.email-verification.existing-user.check-your-email.where-used"))</p>
-  <p class="subsection--wide push--bottom"><a href=@{frontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
+    <h1 class="heading-large">@messages("hts.email-verification.check-your-email.title.h1")</h1>
+    <p class="lede">@messages("hts.email-verification.check-your-email.we-have-sent-mail") <br />@email</p>
+    <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.what-next")</h2>
+    <p class="content">@messages("hts.email-verification.check-your-email.content1")</p>
+    <p class="content">@messages("hts.email-verification.check-your-email.content2")</p>
+    <p class="content">@messages("hts.email-verification.check-your-email.content3")</p>
+    <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.where-used-heading")</h2>
+    <p class="content">@messages("hts.email-verification.check-your-email.where-used")</p>
 
-  @{
-    helpers.form(routes.AccountHolderController.onSubmit())(
-      Html(
-          s"""
-        |<input type="hidden" name="new-email-address" value="$email">
-        |<p>
-        |${helpers.submit('_buttonClass -> "button button--link soft--sides", 'id → "resend-verification")(Html(messages("hts.email-verification.check-your-email.resend-email")))}
-        |</p>
-        |""".stripMargin
-      )
-    )
-  }
+    <p class="subsection--wide push--bottom"><a href=@{appConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
+
+    @defining(
+        oldEmail.fold(routes.EmailController.getGiveEmailPage)(_ => routes.EmailController.getSelectEmailPage)
+    ){ call =>
+        <a href=@call class="font-xsmall">@messages("hts.email-verification.check-your-email.change-email-address")</a>
+    }
 }

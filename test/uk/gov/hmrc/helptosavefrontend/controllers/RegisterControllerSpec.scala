@@ -18,8 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.string._
-import cats.syntax.eq._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
@@ -27,16 +25,15 @@ import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -93,7 +90,7 @@ class RegisterControllerSpec
 
       val result = doRequest
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.RegisterController.getGiveEmailPage().url)
+      redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
     }
   }
 
@@ -107,330 +104,11 @@ class RegisterControllerSpec
 
       val result = doRequest
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
+      redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
     }
   }
 
   "The RegisterController" when {
-
-    "handling getGiveEmailPage" must {
-
-        def doRequest(): Future[PlayResult] = controller.getGiveEmailPage(fakeRequestWithCSRFToken)
-
-      checkRedirectIfEmailInSession(doRequest())
-
-      "indicate to the user that daily-cap has already reached and account creation not possible" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
-          mockAccountCreationAllowed(Right(UserCapResponse(isDailyCapReached = true)))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
-      }
-
-      "indicate to the user that total-cap has already reached and account creation not possible" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
-          mockAccountCreationAllowed(Right(UserCapResponse(isTotalCapReached = true)))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage().url)
-      }
-
-      "return the give email page" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
-          mockAccountCreationAllowed(Right(UserCapResponse()))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which email address do you want to use for Help to Save")
-        contentAsString(result) should include(routes.RegisterController.giveEmailSubmit().url)
-      }
-
-      "indicate to the user that service is unavailable due to both caps are disabled" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
-          mockAccountCreationAllowed(Right(UserCapResponse(isDailyCapDisabled = true, isTotalCapDisabled = true)))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getServiceUnavailablePage().url)
-      }
-
-      "skip the cap check at a later point if enable-early-cap-check is set to true" in {
-        val controller = newController(earlyCapCheck = true)(crypto)
-
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
-        }
-
-        val result = controller.getGiveEmailPage(fakeRequestWithCSRFToken)
-        status(result) shouldBe Status.OK
-      }
-
-    }
-
-    "handling giveEmailSubmit" must {
-
-      val email = "email@test.com"
-
-        def doRequest(email: String): Future[PlayResult] = controller.giveEmailSubmit()(
-          fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → email))
-
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest(email))
-
-      checkRedirectIfEmailInSession(doRequest(email))
-
-      "return to the give email page if the form does not contain a valid email" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
-        }
-
-        val result = doRequest("this is not an email")
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which email address do you want to use for Help to Save")
-        contentAsString(result) should include(routes.RegisterController.giveEmailSubmit().url)
-
-      }
-
-      "write the email to session cache redirect to verify email if the form does contains a valid email" in {
-        val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo.copy(email = None))
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), None, Some(email)))(Right(()))
-        }
-
-        val result = doRequest(email)
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail().url)
-      }
-
-      "show an error page if the form does contains a valid email but the write to session cache fails" in {
-        val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo.copy(email = None))
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), None, Some(email)))(Left(""))
-        }
-
-        val result = doRequest(email)
-        checkIsTechnicalErrorPage(result)
-      }
-
-    }
-
-    "handling getSelectEmailPage" must {
-
-        def doRequest(): Future[PlayResult] = controller.getSelectEmailPage(fakeRequestWithCSRFToken)
-
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
-
-      checkRedirectIfNoEmailInSession(doRequest())
-
-      "indicate to the user that user-cap has already reached and account creation not possible" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-          mockAccountCreationAllowed(Right(UserCapResponse(isTotalCapReached = true)))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage().url)
-      }
-
-      "return the confirm email page" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-          mockAccountCreationAllowed(Right(UserCapResponse()))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
-      }
-
-      "handle the case when the email is invalid" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = Some("invalid@email"))))), None, None))))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getGiveEmailPage().url)
-      }
-
-      "skip the cap check at a later point if enable-early-cap-check is set to true" in {
-        val controller = newController(earlyCapCheck = true)(crypto)
-
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = Some("test@user.com"))))), None, None))))
-        }
-
-        val result = controller.getSelectEmailPage(fakeRequestWithCSRFToken)
-        status(result) shouldBe Status.OK
-      }
-
-    }
-
-    "handling getSelectEmailSubmit" must {
-
-        def doRequest(newEmail: Option[String]): Future[PlayResult] = {
-          newEmail.fold(
-            controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "Yes"))
-          ) { e ⇒
-              controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "No", "new-email" → e))
-            }
-
-        }
-
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest(None))
-
-      checkRedirectIfNoEmailInSession(doRequest(None))
-
-      "redirect to confirm email if the session data shows that they have been already found to be eligible " +
-        "and the form contains no new email" in {
-          val encryptedEmail = "encrypted"
-          val crypto = mock[Crypto]
-          val controller = newController(earlyCapCheck = true)(crypto)
-
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-            (crypto.encrypt(_: String)).expects(emailStr).returning(encryptedEmail)
-          }
-
-          val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "Yes"))
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.confirmEmail(encryptedEmail).url)
-        }
-
-      "redirect to verify email if the session data shows that they have been already found to be eligible " +
-        "and the form contains a valid new email" in {
-          val newEmail = "email@test.com"
-          val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), None, Some(newEmail)))(Right(()))
-
-          }
-
-          val result = doRequest(Some(newEmail))
-          status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.NewApplicantUpdateEmailAddressController.verifyEmail().url)
-        }
-
-      "show an error page if writing the pending email to session cache fails" in {
-        val newEmail = "email@test.com"
-        val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), None, Some(newEmail)))(Left(""))
-
-        }
-
-        val result = doRequest(Some(newEmail))
-        checkIsTechnicalErrorPage(result)
-      }
-
-      "redirect to the confirm email page if the session data shows that they have been already found to be eligible and " when {
-
-        "the form contains a invalid new email" in {
-          val invalidEmail = "not-an-email"
-
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-          }
-
-          val result = doRequest(Some(invalidEmail))
-          status(result) shouldBe Status.OK
-          contentAsString(result) should include("Which email")
-        }
-
-        "no option has been selected" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-          }
-
-          val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("new-email" → "email@test.com"))
-
-          status(result) shouldBe Status.OK
-          contentAsString(result) should include("Which email")
-        }
-
-        "a new email has been selected but there is no new email given" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-          }
-
-          val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "No"))
-
-          status(result) shouldBe Status.OK
-          contentAsString(result) should include("Which email")
-        }
-
-        "the 'email' key of the form is not 'Yes' or 'No'" in {
-          forAll { s: String ⇒
-            whenever(s =!= "Yes" | s =!= "No") {
-              inSequence {
-                mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-                mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-                mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-              }
-
-              val result = controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → s))
-
-              status(result) shouldBe Status.OK
-              contentAsString(result) should include("Which email")
-
-            }
-
-          }
-        }
-
-      }
-
-    }
 
     "handling getDailyCapReachedPage" must {
 
@@ -479,88 +157,6 @@ class RegisterControllerSpec
       }
     }
 
-    "handling a confirmEmail" must {
-
-      val email = "email"
-
-        def doRequest(email: String): Future[PlayResult] =
-          controller.confirmEmail(email)(FakeRequest())
-
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest(email))
-
-      checkRedirectIfNoEmailInSession(doRequest(email))
-
-      "write the email to keystore and the email store if the user has not already enrolled and " +
-        "the session data shows that they have been already found to be eligible" in {
-          val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), Some(email), None))(Right(CacheMap("", Map.empty)))
-            mockEmailUpdate(email)(Left(""))
-          }
-          await(doRequest(crypto.encrypt(email)))
-        }
-
-      "redirect to the create an account page if the write to keystore and the email store was successful" in {
-        val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
-
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), Some(email), None))(Right(CacheMap("", Map.empty)))
-          mockEmailUpdate(email)(Right(()))
-        }
-
-        val result = doRequest(crypto.encrypt(email))
-        status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
-      }
-
-      "return an error" when {
-
-        "the email cannot be decrypted" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-          }
-
-          val result = doRequest("notencrypted")
-          checkIsTechnicalErrorPage(result)
-        }
-
-        "the email cannot be written to keystore" in {
-          val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), Some(email), None))(Left(""))
-          }
-
-          val result = doRequest(crypto.encrypt(email))
-          checkIsTechnicalErrorPage(result)
-        }
-
-        "the email cannot be written to the email store" in {
-          val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-            mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo)), Some(email), None))(Right(CacheMap("", Map.empty)))
-            mockEmailUpdate(email)(Left(""))
-          }
-
-          val result = doRequest(crypto.encrypt(email))
-          checkIsTechnicalErrorPage(result)
-        }
-      }
-    }
-
     "handling a getCreateAccountHelpToSave" must {
 
       val email = "email"
@@ -581,7 +177,7 @@ class RegisterControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
       }
 
       "show the user the create account page if the session data contains a confirmed email" in {
@@ -675,7 +271,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
       }
 
       "redirect to the create account error page" when {
