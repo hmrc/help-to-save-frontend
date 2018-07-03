@@ -132,8 +132,8 @@ class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSav
         _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
         { userInfo ⇒
           val url = userInfo.userInfo.email.fold(
-            routes.RegisterController.getGiveEmailPage()
-          )(_ ⇒ routes.RegisterController.getSelectEmailPage()).url
+            routes.EmailController.getGiveEmailPage()
+          )(_ ⇒ routes.EmailController.getSelectEmailPage()).url
           SeeOther(url)
         })
     }

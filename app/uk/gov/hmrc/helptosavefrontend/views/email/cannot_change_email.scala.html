@@ -46,7 +46,7 @@
         <p>@Html(Messages("hts.cannot-change-email.p2"))</p>
         <p>@Messages("hts.cannot-change-email.p3")</p>
 
-    @helpers.form(routes.NewApplicantUpdateEmailAddressController.verifyEmailErrorSubmit){
+    @helpers.form(routes.EmailController.verifyEmailErrorSubmit){
         @CSRF.formField(request)
 
         <fieldset>

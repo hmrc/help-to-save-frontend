@@ -67,6 +67,7 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp,
             eligibilityCheckResult = newSession.eligibilityCheckResult.orElse(existing.eligibilityCheckResult),
             confirmedEmail         = newSession.confirmedEmail.orElse(existing.confirmedEmail),
             pendingEmail           = newSession.pendingEmail.orElse(existing.pendingEmail),
+            isDigital              = newSession.isDigital,
             ivURL                  = newSession.ivURL.orElse(existing.ivURL),
             ivSuccessURL           = newSession.ivSuccessURL.orElse(existing.ivSuccessURL)
           )

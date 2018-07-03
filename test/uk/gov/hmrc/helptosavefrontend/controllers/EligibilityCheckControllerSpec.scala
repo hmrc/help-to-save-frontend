@@ -193,7 +193,7 @@ class EligibilityCheckControllerSpec
       "show the you're eligible page if the session data indicates that the user is eligible" in {
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, true, None, None))))
         }
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
@@ -204,7 +204,7 @@ class EligibilityCheckControllerSpec
       "show the correct page if the session data indicates that the user is ineligible" in {
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, true, None, None))))
         }
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
@@ -614,7 +614,7 @@ class EligibilityCheckControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getGiveEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
       }
 
       "redirect to the select email page if the user has an email" in {
@@ -625,7 +625,7 @@ class EligibilityCheckControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
       }
 
       "redirect to the check eligibility page if the user has no session" in {
