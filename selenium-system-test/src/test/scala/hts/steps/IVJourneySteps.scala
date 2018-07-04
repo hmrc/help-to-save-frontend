@@ -21,6 +21,7 @@ import hts.pages._
 import hts.pages.identityPages._
 import hts.pages.registrationPages._
 import hts.utils.ScenarioContext
+import hts.steps.CommonSteps._
 
 class IVJourneySteps extends Steps {
 
@@ -28,7 +29,7 @@ class IVJourneySteps extends Steps {
     AuthorityWizardPage.authenticateIneligibleUser(ApplyPage.expectedURL, ScenarioContext.generateEligibleNINO())
     ApplyPage.navigate()
 
-    Browser.checkCurrentPageIs(ApplyPage)
+    Browser.checkHeader(ApplyPage)
     ApplyPage.clickStartNow()
   }
 
@@ -40,10 +41,10 @@ class IVJourneySteps extends Steps {
   }
 
   Then("^they see that they have passed the eligibility check$") {
-    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.checkHeader(EligiblePage)
 
     AboutPage.navigate()
-    Browser.checkCurrentPageIs(AboutPage)
+    Browser.checkHeader(AboutPage)
   }
 
   When("^they go through the IV journey and fail because of (.+)$") { reason: String ⇒

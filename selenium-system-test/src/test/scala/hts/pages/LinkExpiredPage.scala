@@ -18,12 +18,11 @@ package hts.pages
 
 import hts.utils.Configuration
 
-object ThinkYouAreEligiblePage extends Page {
+object LinkExpiredPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/think-you-are-eligible"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/link-expired"
 
-  override val expectedPageTitle: Option[String] = Some("If you think you’re eligible for a Help to Save account")
+  override val expectedPageHeader: Option[String] = Some("This link has expired")
 
-  override val expectedPageHeader: Option[String] = Some("If you think you’re eligible for a Help to Save account")
-
+  override val expectedPageTitle: Option[String] = Some("This link has expired")
 }

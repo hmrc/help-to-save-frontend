@@ -56,6 +56,24 @@ object AuthorityWizardPage extends Page {
     clickSubmit()
   }
 
+  def authenticateMissingDetailsUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
+    navigate()
+    setRedirect(redirectUrl)
+    setCredentialStrength("strong")
+    setConfidenceLevel(200)
+    setNino(nino)
+    setDateOfBirth("1980-12-31")
+    setAddressLine1("AddressLine1")
+    setAddressLine2("AddressLine2")
+    setAddressLine3("AddressLine3")
+    setAddressLine4("AddressLine4")
+    setAddressLine5("AddressLine5")
+    setPostCode("S24AH")
+    setCountryCode("GB-ENG")
+
+    clickSubmit()
+  }
+
   private def fillInAuthDetails(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     navigate()
     setRedirect(redirectUrl)

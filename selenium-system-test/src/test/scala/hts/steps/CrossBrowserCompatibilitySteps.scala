@@ -30,9 +30,9 @@ class CrossBrowserCompatibilitySteps extends Steps {
   }
 
   Then("^they go through the happy path$") {
-    Browser.checkCurrentPageIs(AboutPage)
+    Browser.checkHeader(AboutPage)
     Browser.clickButtonByIdOnceClickable("feedback-link")
-    Browser.checkCurrentPageIs(FeedbackPage)
+    Browser.checkHeader(FeedbackPage)
 
     Browser.goBack()
     Browser.clickButtonByIdOnceClickable("get-help-action")
@@ -41,33 +41,33 @@ class CrossBrowserCompatibilitySteps extends Steps {
     checkPrivacyPolicyPage(AboutPage)
     Browser.nextPage()
 
-    Browser.checkCurrentPageIs(EligibilityInfoPage)
+    Browser.checkHeader(EligibilityInfoPage)
     Browser.nextPage()
 
-    Browser.checkCurrentPageIs(HowTheAccountWorksPage)
+    Browser.checkHeader(HowTheAccountWorksPage)
     Browser.nextPage()
 
-    Browser.checkCurrentPageIs(HowWeCalculateBonusesPage)
+    Browser.checkHeader(HowWeCalculateBonusesPage)
     verifyGovUKLink()
     Browser.nextPage()
 
-    Browser.checkCurrentPageIs(ApplyPage)
+    Browser.checkHeader(ApplyPage)
     ApplyPage.clickStartNow()
 
-    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.checkHeader(EligiblePage)
     Browser.goBack()
     ApplyPage.clickSignInLink()
 
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
     Browser.goTo(s"${Configuration.host}/help-to-save/check-eligibility")
 
-    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.checkHeader(EligiblePage)
     EligiblePage.detailsNotCorrect()
 
     Browser.checkCurrentPageIs(IncorrectDetailsPage)
     IncorrectDetailsPage.clickBack
 
-    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.checkHeader(EligiblePage)
     Browser.scrollToElement("start-creating-account", By.id)
     EligiblePage.clickConfirmAndContinue()
 
@@ -78,7 +78,7 @@ class CrossBrowserCompatibilitySteps extends Steps {
     SelectEmailPage.selectGGEmail()
     CreateAccountPage.createAccount()
 
-    Browser.checkCurrentPageIs(NsiManageAccountPage)
+    Browser.checkHeader(NsiManageAccountPage)
 
     ChangeEmailPage.navigate()
     Browser.checkCurrentPageIs(ChangeEmailPage)
@@ -87,10 +87,10 @@ class CrossBrowserCompatibilitySteps extends Steps {
     Browser.checkCurrentPageIs(VerifyEmailPage)
     VerifyEmailPage.resendEmail
 
-    Browser.checkCurrentPageIs(VerifyEmailPage)
+    Browser.checkHeader(VerifyEmailPage)
     VerifyEmailPage.goToAccountHome
 
-    Browser.checkCurrentPageIs(NsiManageAccountPage)
+    Browser.checkHeader(NsiManageAccountPage)
   }
 
   private def checkPrivacyPolicyPage(currentPage: Page): Unit = {

@@ -18,12 +18,11 @@ package hts.pages
 
 import hts.utils.Configuration
 
-object ThinkYouAreEligiblePage extends Page {
+object CloseAccountPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/think-you-are-eligible"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/close-account-are-you-sure"
 
-  override val expectedPageTitle: Option[String] = Some("If you think you’re eligible for a Help to Save account")
+  override val expectedPageHeader: Option[String] = Some("Help to Save account home")
 
-  override val expectedPageHeader: Option[String] = Some("If you think you’re eligible for a Help to Save account")
-
+  override val expectedPageTitle: Option[String] = Some("Are you sure you want to close your account?")
 }

@@ -19,6 +19,7 @@ package hts.steps
 import hts.browser.Browser
 import hts.pages._
 import hts.utils.ScenarioContext
+import hts.steps.CommonSteps._
 
 class EligibilitySteps extends Steps {
 
@@ -31,7 +32,7 @@ class EligibilitySteps extends Steps {
   }
 
   Then("^they see that they are eligible for Help to Save$") {
-    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.checkHeader(EligiblePage)
   }
 
   When("^they confirm their details and continue to create an account$") {
@@ -43,7 +44,7 @@ class EligibilitySteps extends Steps {
   }
 
   Then("^they see a technical error page$") {
-    Browser.checkCurrentPageIs(TechnicalErrorPage)
+    Browser.checkHeader(TechnicalErrorPage)
   }
 
   When("^they then click on still think you're eligible link$") {
@@ -51,7 +52,7 @@ class EligibilitySteps extends Steps {
   }
 
   Then("^they see appeals and tax tribunal page$") {
-    Browser.checkCurrentPageIs(ThinkYouAreEligiblePage)
+    Browser.checkHeader(ThinkYouAreEligiblePage)
   }
 
   Given("^a user has NINO (.*)$") { (nino: String) ⇒
@@ -61,17 +62,17 @@ class EligibilitySteps extends Steps {
   Then("^they see that they are NOT eligible for Help to Save with reason code (.+)$") { (reason: Int) ⇒
     reason match {
       case 3 ⇒
-        Browser.checkCurrentPageIs(NotEligibleReason3Page)
+        Browser.checkHeader(NotEligibleReason3Page)
         val notEligibleTextItems = NotEligibleReason3Page.notEligibleText
         notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(())
         )
       case 5 ⇒
-        Browser.checkCurrentPageIs(NotEligibleReason5Page)
+        Browser.checkHeader(NotEligibleReason5Page)
         val notEligibleTextItems = NotEligibleReason5Page.notEligibleText
         notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(())
         )
       case 4 | 9 ⇒
-        Browser.checkCurrentPageIs(NotEligibleReason4And9Page)
+        Browser.checkHeader(NotEligibleReason4And9Page)
         val notEligibleTextItems = NotEligibleReason4And9Page.notEligibleText
         notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(())
         )

@@ -19,6 +19,7 @@ package hts.pages.identityPages
 import hts.browser.Browser
 import hts.pages.Page
 import org.openqa.selenium.WebDriver
+import hts.steps.CommonSteps._
 
 object IdentityVerificationStubPage extends Page {
 

@@ -115,6 +115,9 @@ trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
   }
 
+  def checkHeader(page: Page)(implicit driver: WebDriver): Unit =
+    page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+
   def scrollDown()(implicit driver: WebDriver): AnyRef = driver match {
     case executor: JavascriptExecutor ⇒
       executor.executeScript("scrollBy(0,250)")

@@ -6,6 +6,7 @@ Feature: Applicant changes their email
     And they select their GG email and proceed
     Then they see the final Create Account page
 
+  @VerifyHeaderAndFooter
   Scenario: An eligible applicant wants to give an email address
     Given HMRC doesn't currently hold an email address for the user
     When they start to create an account
@@ -23,7 +24,7 @@ Feature: Applicant changes their email
     When they want to change their email again
     Then they are asked to check their email for a verification email
 
-  @HTS-876 @zap
+  @HTS-876 @zap @VerifyHeaderAndFooter
   Scenario: Applicant updates email address
     Given they've chosen to enter a new email address during the application process
     When they click on the email verification link
