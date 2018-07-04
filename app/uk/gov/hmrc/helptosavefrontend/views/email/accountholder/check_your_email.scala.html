@@ -35,15 +35,15 @@
   bodyClasses = None,
   serviceInfoContent = serviceInfoContent) {
 
-  <h1 class="heading-large">@messages("hts.email-verification.existing-user.check-your-email.title.h1")</h1>
-  <p class="lede">@messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail")<br />@email</p>
-  <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.what-next")</h2>
-  <p class="content">@messages("hts.email-verification.existing-user.check-your-email.content1")</p>
-  <p class="content">@messages("hts.email-verification.existing-user.check-your-email.content2")</p>
-  <p class="content">@messages("hts.email-verification.check-your-email.content3")</p>
-  <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.where-used-heading")</h2>
-  <p class="content">@messages("hts.email-verification.existing-user.check-your-email.where-used")</p>
-  <p class="subsection--wide push--bottom"><a href=@{frontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
+    <h1 class="heading-large">@messages("hts.email-verification.existing-user.check-your-email.title.h1")</h1>
+    <p class="lede">@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail"))<br />@email</p>
+    <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.what-next")</h2>
+    <p class="content">@Html(Messages("hts.email-verification.existing-user.check-your-email.content1"))</p>
+    <p class="content">@messages("hts.email-verification.existing-user.check-your-email.content2")</p>
+    <p class="content">@Html(Messages("hts.email-verification.check-your-email.content3"))</p>
+    <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.where-used-heading")</h2>
+    <p class="content">@Html(Messages("hts.email-verification.existing-user.check-your-email.where-used"))</p>
+    <p class="subsection--wide push--bottom"><a href=@{frontendAppConfig.nsiManageAccountUrl} class="button">@messages("hts.global.back-to-account")</a></p>
 
   @{
     helpers.form(routes.AccountHolderController.onSubmit())(
