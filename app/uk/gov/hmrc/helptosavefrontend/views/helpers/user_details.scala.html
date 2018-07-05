@@ -21,14 +21,14 @@
 @(userDetails: UserInfo)(implicit messages: play.api.i18n.Messages)
 
 <div class="divider--bottom">
-    <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.name")</h4>
+    <h4 class="heading-small">@Messages("hts.register.you-are-eligible.name")</h4>
     <p>@(userDetails.forename + " " + userDetails.surname)</p>
 </div>
 <div class="divider--bottom">
-    <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.nino")</h4>
+    <h4 class="heading-small">@Messages("hts.register.you-are-eligible.nino")</h4>
     <p>@(userDetails.nino.grouped(2).mkString(" "))</p>
 </div>
 <div class="divider--bottom">
-    <h4 class="heading-small">@Messages("hts.register.check-and-confirm-your-details.dob")</h4>
+    <h4 class="heading-small">@Messages("hts.register.you-are-eligible.dob")</h4>
     <p>@(userDetails.dateOfBirth.show)</p>
 </div>
