@@ -946,7 +946,7 @@ class EmailControllerSpec
 
         val result = verifyEmailErrorTryLater
         status(result) shouldBe 200
-        contentAsString(result) should include("We can&rsquo;t change your email")
+        contentAsString(result) should include("We cannot change your email")
       }
 
       "handle DE users" in {
