@@ -26,8 +26,8 @@ import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 trait SessionCacheBehaviourSupport { this: MockFactory ⇒
 

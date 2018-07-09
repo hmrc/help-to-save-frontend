@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import play.api.data._
 import play.api.data.Forms._
+import play.api.data._
 
 object GiveEmailForm {
   def giveEmailForm(implicit emailValidation: EmailValidation): Form[GiveEmail] = Form(

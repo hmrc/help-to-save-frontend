@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.eligibility
 
-import EligibilityReason.EntitledToWTC
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason._
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason.{EntitledToWTC, _}
 
 // scalastyle:off magic.number
 class EligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {

@@ -18,7 +18,6 @@ package hts.pages.registrationPages
 
 import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
 object AboutPage extends Page {
 
