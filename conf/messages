@@ -263,16 +263,9 @@ hts.register.you-are-eligible.p-1=You&rsquo;re eligible for a Help to Save accou
 hts.register.you-are-eligible.p-3=By continuing you are confirming you are eligible for a Help to Save account, and that these are your details and they are correct.
 hts.register.you-are-eligible.button-1=Confirm and continue
 hts.register.you-are-eligible.button-2=These details are not correct
-
-# Confirm your details
-hts.register.check-and-confirm-your-details.title=Check and confirm your details
-hts.register.check-and-confirm-your-details.name=Name
-hts.register.check-and-confirm-your-details.nino=National Insurance number
-hts.register.check-and-confirm-your-details.dob=Date of birth
-hts.register.check-and-confirm-your-details.email=Email
-hts.register.check-and-confirm-your-details.change-button-label=Change
-hts.register.check-and-confirm-your-details.p-1=By submitting this notification you are confirming that, to the best of your knowledge, the details you are providing are correct.
-hts.register.check-and-confirm-your-details.continue-button-label=Continue
+hts.register.you-are-eligible.name=Name
+hts.register.you-are-eligible.nino=National Insurance number
+hts.register.you-are-eligible.dob=Date of birth
 
 # Register - missing information
 hts.register.missinguserinfo.title.h1=We’re missing some important details
