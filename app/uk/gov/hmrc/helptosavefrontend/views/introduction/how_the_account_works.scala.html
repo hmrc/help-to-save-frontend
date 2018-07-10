@@ -42,8 +42,7 @@
         <p>@Messages("hts.introduction.how-the-account-works.par-3")</p>
         <ul class="bullets">
             <li>@Messages("hts.introduction.how-the-account-works.list-2-1-1")
-                <a title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")"
-                   href=@routes.IntroductionController.getHowWeCalculateBonuses()
+                <a href=@routes.IntroductionController.getHowWeCalculateBonuses()
                    data-ga-event-category="links"
                    data-ga-event-action="Bonuses"
                    data-ga-event-label="How the account works page"
@@ -57,8 +56,7 @@
         <p>@Html(Messages("hts.introduction.how-the-account-works.par-5"))</p>
         <p>@Messages("hts.introduction.how-the-account-works.par-6")</p>
         <p class="indent">@Messages("hts.introduction.how-the-account-works.par-7-1")
-            <a title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")"
-            href=@routes.IntroductionController.getHowWeCalculateBonuses()
+            <a href=@routes.IntroductionController.getHowWeCalculateBonuses()
             data-ga-event-category="links"
             data-ga-event-action="Bonus"
             data-ga-event-label="How the account works page"
@@ -81,14 +79,14 @@
         <ul>
             <li class="page-nav__item page-nav__item--previous">
                 <a class="page-nav__link page-nav__link--previous"
-                   title="Navigate to @Messages("hts.introduction.eligibility.title")" rel="prev" href="@routes.IntroductionController.getEligibility()">
+                  rel="prev" href="@routes.IntroductionController.getEligibility()">
                     <span class="page-nav__label">@Messages("hts.nav.previous")</span>
                     <span class="page-nav__title">@Messages("hts.introduction.eligibility.title")</span>
                 </a>
             </li>
             <li class="page-nav__item page-nav__item--next">
                 <a class="page-nav__link page-nav__link--next"
-                   title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="next" href=@routes.IntroductionController.getHowWeCalculateBonuses() id="next">
+                  rel="next" href=@routes.IntroductionController.getHowWeCalculateBonuses() id="next">
                     <span class="page-nav__label">@Messages("hts.nav.next")</span>
                     <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
                 </a>

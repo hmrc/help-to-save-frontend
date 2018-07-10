@@ -32,8 +32,7 @@
 
     <section class="section">
         <h2>5. @Messages("hts.introduction.apply.title")</h2>
-        <p>@Html(Messages("hts.introduction.apply.par-1a")) <a title="Navigate to @Messages("hts.introduction.eligibility.title")"
-            href=@routes.IntroductionController.getEligibility()
+        <p>@Html(Messages("hts.introduction.apply.par-1a")) <a href=@routes.IntroductionController.getEligibility()
             data-ga-event-category = "links"
             data-ga-event-action = "Eligible"
             data-ga-event-label= "Apply page"
@@ -66,7 +65,7 @@
         <ul>
             <li class="page-nav__item page-nav__item--previous">
                 <a class="page-nav__link page-nav__link--previous"
-                   title="Navigate to @Messages("hts.introduction.how-we-calculate-bonuses.title")" rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
+                  rel="prev" href="@routes.IntroductionController.getHowWeCalculateBonuses()">
                     <span class="page-nav__label">@Messages("hts.nav.previous")</span>
                     <span class="page-nav__title">@Messages("hts.introduction.how-we-calculate-bonuses.title")</span>
                 </a>
