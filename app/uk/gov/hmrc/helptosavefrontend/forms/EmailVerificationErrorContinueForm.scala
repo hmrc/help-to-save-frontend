@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import play.api.data.{Form, FormError}
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 
 object EmailVerificationErrorContinueForm {
 

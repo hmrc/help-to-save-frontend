@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import configs.syntax._
 import com.google.inject.{Inject, Singleton}
+import configs.syntax._
 import play.api.Configuration
+import play.api.http.HttpFilters
 import play.api.mvc.EssentialFilter
 import uk.gov.hmrc.play.bootstrap.filters.FrontendFilters
-import play.api.http.HttpFilters
 
 @Singleton
 class Filters @Inject() (

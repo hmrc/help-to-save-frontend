@@ -20,7 +20,6 @@ import hts.browser.Browser
 import hts.pages._
 import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
-import hts.utils.ScenarioContext
 
 class VerifyLinksSteps extends Steps {
 

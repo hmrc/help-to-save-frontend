@@ -18,9 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.mvc.Result
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.Logging
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.helptosavefrontend.util.toFuture
 
 import scala.concurrent.Future
 

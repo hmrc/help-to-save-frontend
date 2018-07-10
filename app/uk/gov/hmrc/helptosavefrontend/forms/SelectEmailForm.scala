@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import play.api.data._
-import play.api.data.Forms._
+import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
-import cats.instances.string._
+import play.api.data.Forms._
+import play.api.data._
 import play.api.data.format.Formatter
 
 object SelectEmailForm {
