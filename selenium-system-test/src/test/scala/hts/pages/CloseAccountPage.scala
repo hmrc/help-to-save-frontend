@@ -22,7 +22,5 @@ object CloseAccountPage extends Page {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/close-account-are-you-sure"
 
-  override val expectedPageHeader: Option[String] = Some("Help to Save account home")
-
-  override val expectedPageTitle: Option[String] = Some("Are you sure you want to close your account?")
+  override val expectedPageHeader: Option[String] = Some("Are you sure you want to close your account?")
 }

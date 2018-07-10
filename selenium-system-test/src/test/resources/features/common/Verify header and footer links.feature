@@ -27,6 +27,7 @@ Feature: Verifying header and footer links on every page
     When an applicant logs into gg with missing details
     Then they see a page showing which details are missing
 
-
-
-
+   @VerifyHeaderAndFooter
+   Scenario: checking the Header and Footer links of the close account are you sure page
+    When they log in and proceed to create an account using their GG email
+    Then they navigate to and see the close account are you sure page

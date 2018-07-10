@@ -89,7 +89,6 @@ class VerifyLinksSteps extends Steps {
   }
 
   When("^the user is not logged in$") {
-
   }
 
   Then("^they can access the cannot change email try later page$") {
@@ -127,7 +126,7 @@ class VerifyLinksSteps extends Steps {
     Browser.checkCurrentPageIs(CannotChangeEmailPageTryLater)
   }
 
-  Then("^they see the close account are you sure page$") {
+  Then("^they navigate to and see the close account are you sure page$") {
     CloseAccountPage.navigate()
     Browser.checkCurrentPageIs(CloseAccountPage)
   }
@@ -141,7 +140,6 @@ class VerifyLinksSteps extends Steps {
   }
 
   Then("^they see a page showing which details are missing$") {
-    //think I need to pass in a missing info object
     MissingInfoPage.navigate()
     Browser.checkCurrentPageIs(MissingInfoPage)
   }
