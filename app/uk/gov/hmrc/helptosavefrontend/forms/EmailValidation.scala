@@ -41,7 +41,7 @@ class EmailValidation @Inject() (configuration: Configuration) {
 
   private val emailMaxDomainLength: Int = configuration.underlying.getInt("email-validation.max-domain-length")
 
-  private def invalid[A](message: String): ValidatedNel[String, A] = Invalid(NonEmptyList[String](message, Nil))
+  private def invalid[A](message: String): ValidatedNel[String, A] = Invalid(NonEmptyList.one(message))
 
   private def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
     if (predicate(a)) Valid(a) else invalid(ifFalse)

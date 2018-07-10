@@ -6,7 +6,7 @@ Feature: Applicant goes through eligibility check
     When they apply for Help to Save
     Then they see that they are eligible for Help to Save
 
-  @BrowserStack
+  @BrowserStack @VerifyHeaderAndFooter
   Scenario: User is entitled to WTC but NOT in receipt of WTC and NOT in receipt of UC and so is NOT eligible
     Given a user has NINO ZX368514A
     When they apply for Help to Save

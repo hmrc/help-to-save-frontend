@@ -19,6 +19,7 @@ package hts.steps
 import hts.browser.Browser
 import hts.pages._
 import hts.pages.registrationPages._
+import hts.steps.CommonSteps.checkForLinksThatExistOnEveryPage
 import hts.utils.EitherOps._
 import hts.utils.ScenarioContext
 
@@ -63,12 +64,13 @@ class CreateAccountSteps extends Steps {
     EligiblePage.detailsNotCorrect()
 
     Browser.checkCurrentPageIs(IncorrectDetailsPage)
+    checkForLinksThatExistOnEveryPage(IncorrectDetailsPage)
     IncorrectDetailsPage.clickBack
 
-    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.checkHeader(EligiblePage)
     EligiblePage.detailsNotCorrect()
 
-    Browser.checkCurrentPageIs(IncorrectDetailsPage)
+    Browser.checkHeader(IncorrectDetailsPage)
   }
 
   Then("^they see the relevant page$") {
@@ -111,7 +113,7 @@ class CreateAccountSteps extends Steps {
 
   When("^the user continues$") {
     YouDoNotHaveAnAccountPage.clickContinue()
-    Browser.checkCurrentPageIs(EligiblePage)
+    Browser.checkHeader(EligiblePage)
   }
 
   When("^they log in again$") {
@@ -121,14 +123,15 @@ class CreateAccountSteps extends Steps {
 
   Then("^they are informed they don't have an account$") {
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
+    checkForLinksThatExistOnEveryPage(YouDoNotHaveAnAccountPage)
   }
 
   Then("^they see the Help to Save About page$") {
-    Browser.checkCurrentPageIs(AboutPage)
+    Browser.checkHeader(AboutPage)
   }
 
   Then("^they see that the account is created$|^they will be on the account home page$") {
-    Browser.checkCurrentPageIs(NsiManageAccountPage)
+    Browser.checkHeader(NsiManageAccountPage)
   }
 
 }

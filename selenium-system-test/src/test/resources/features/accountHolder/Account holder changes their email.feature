@@ -1,6 +1,6 @@
 Feature: Account holder changes their email
 
-  @HTS-876
+  @HTS-876 @VerifyHeaderAndFooter
   Scenario: Account holder updates email address
     Given the account holder has chosen to enter a new email address
     When the account holder clicks on the email verification link

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.registrationPages
 
+import hts.pages.Page
 import hts.utils.Configuration
 
-object ThinkYouAreEligiblePage extends Page {
+object DailyCapReachedPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/think-you-are-eligible"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/try-again-tomorrow"
 
-  override val expectedPageTitle: Option[String] = Some("If you think you’re eligible for a Help to Save account")
+  override val expectedPageHeader: Option[String] = Some("You’ll need to try again tomorrow")
 
-  override val expectedPageHeader: Option[String] = Some("If you think you’re eligible for a Help to Save account")
-
+  override val expectedPageTitle: Option[String] = Some("You’ll need to try again tomorrow")
 }
