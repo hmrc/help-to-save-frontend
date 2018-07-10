@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.userinfo
 
-import cats.instances.string._
-import cats.syntax.eq._
-
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import cats.instances.string._
+import cats.syntax.eq._
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
 

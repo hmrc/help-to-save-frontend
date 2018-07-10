@@ -17,14 +17,15 @@
 package hts.steps
 
 import java.util.concurrent.TimeUnit
+import java.util.function.Function
 
 import cats.syntax.either._
 import cucumber.api.Scenario
 import cucumber.api.scala.{EN, ScalaDsl}
 import hts.driver.Driver
 import hts.utils.ScenarioContext
-import org.openqa.selenium.{OutputType, TakesScreenshot, TimeoutException, WebDriver, WebDriverException}
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
+import org.openqa.selenium._
 import org.scalatest.Matchers
 
 private[steps] trait Steps extends ScalaDsl with EN with Matchers {
@@ -71,8 +72,15 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
 
       // Try to take screen shot of previous page
       driver.navigate().back()
-      val wait = new WebDriverWait(driver, 2);
-      wait.until(ExpectedConditions.not(ExpectedConditions.urlToBe(failurePageUrl)))
+
+      val wait = new WebDriverWait(driver, 2) // scalastyle:ignore magic.number
+      val expectedCondition = new Function[WebDriver, Boolean]() {
+        override def apply(t: WebDriver): Boolean = {
+          ExpectedConditions.not(ExpectedConditions.urlToBe(failurePageUrl)).apply(driver)
+        }
+      }
+
+      wait.until(expectedCondition)
       val screenshotPreviousPage = driver.getScreenshotAs(OutputType.BYTES)
       scenario.embed(screenshotPreviousPage, "image/png")
 

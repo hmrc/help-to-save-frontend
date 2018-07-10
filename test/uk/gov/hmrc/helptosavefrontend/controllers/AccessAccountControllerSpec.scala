@@ -16,15 +16,12 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import cats.data.EitherT
-import cats.instances.future._
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus
-import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.http.HeaderCarrier
 

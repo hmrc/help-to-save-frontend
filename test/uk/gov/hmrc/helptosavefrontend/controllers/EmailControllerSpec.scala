@@ -36,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -946,7 +946,7 @@ class EmailControllerSpec
 
         val result = verifyEmailErrorTryLater
         status(result) shouldBe 200
-        contentAsString(result) should include("We can&rsquo;t change your email")
+        contentAsString(result) should include("We cannot change your email")
       }
 
       "handle DE users" in {

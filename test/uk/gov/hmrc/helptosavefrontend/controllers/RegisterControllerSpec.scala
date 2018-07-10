@@ -306,7 +306,7 @@ class RegisterControllerSpec
           }
 
           val result = doRequest()
-          contentAsString(result) should include("We couldn&rsquo;t create a Help to Save account for you at this time")
+          contentAsString(result) should include("We could not create a Help to Save account for you at this time")
 
         }
 

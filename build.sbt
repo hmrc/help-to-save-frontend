@@ -2,6 +2,7 @@ import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import play.core.PlayVersion
 import sbt.Keys.{testOptions, _}
 import sbt.{Compile, _}
+import scalariform.formatter.preferences._
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
@@ -9,25 +10,20 @@ import uk.gov.hmrc.versioning.SbtGitVersioning
 import uk.gov.hmrc.{SbtAutoBuildPlugin, _}
 import wartremover.{Wart, Warts, wartremoverErrors, wartremoverExcluded}
 
-import scalariform.formatter.preferences._
-
 val appName = "help-to-save-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = dependencies ++ testDependencies() ++ testDependencies("it")
 
 val dependencies = Seq(
   ws,
-  "uk.gov.hmrc" %% "govuk-template" % "5.18.0",
+  "uk.gov.hmrc" %% "govuk-template" % "5.22.0",
   "uk.gov.hmrc" %% "http-caching-client" % "7.1.0",
   "org.typelevel" %% "cats-core" % "1.1.0",
-  "uk.gov.hmrc" %% "auth-client" % "2.5.0",
+  "uk.gov.hmrc" %% "auth-client" % "2.6.0",
   "com.github.kxbmap" %% "configs" % "0.4.4",
-  "com.eclipsesource" %% "play-json-schema-validator" % "0.8.9",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
-  "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
-  "uk.gov.hmrc" %% "mongo-lock" % "5.1.0",
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "1.4.0",
-  "uk.gov.hmrc" %% "play-ui" % "7.13.0"
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "1.7.0",
+  "uk.gov.hmrc" %% "play-ui" % "7.17.0"
 )
 
 def testDependencies(scope: String = "test") = Seq(
@@ -38,12 +34,13 @@ def testDependencies(scope: String = "test") = Seq(
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "uk.gov.hmrc" %% "stub-data-generator" % "0.5.3" % scope,
   // below for selenium tests
-  "info.cukes" % "cucumber-junit" % "1.2.4" % scope,
-  "info.cukes" % "cucumber-picocontainer" % "1.2.4" % scope,
-  "info.cukes" %% "cucumber-scala" % "1.2.4" % scope,
-  "org.seleniumhq.selenium" % "selenium-java" % "2.53.1" % scope,
-  "org.seleniumhq.selenium" % "selenium-firefox-driver" % "2.53.1" % scope,
-  "uk.gov.hmrc" %% "zap-automation" % "0.15.0" % scope
+  "info.cukes" % "cucumber-junit" % "1.2.5" % scope,
+  "info.cukes" % "cucumber-picocontainer" % "1.2.5" % scope,
+  "info.cukes" %% "cucumber-scala" % "1.2.5" % scope,
+  "org.seleniumhq.selenium" % "selenium-java" % "3.13.0" % scope,
+  "org.seleniumhq.selenium" % "selenium-firefox-driver" % "3.13.0" % scope,
+  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.52.0" % scope,
+  "uk.gov.hmrc" %% "zap-automation" % "0.17.0" % scope
 )
 
 lazy val plugins: Seq[Plugins] = Seq.empty

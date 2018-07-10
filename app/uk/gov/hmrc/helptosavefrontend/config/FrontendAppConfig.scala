@@ -17,8 +17,8 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.net.URI
-import javax.inject.{Inject, Singleton}
 
+import javax.inject.{Inject, Singleton}
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId

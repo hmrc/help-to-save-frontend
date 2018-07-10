@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.metrics
 
 import cats.instances.long._
 import cats.syntax.eq._
-import com.codahale.metrics.{Counter, Histogram, Timer}
+import com.codahale.metrics.{Counter, Timer}
 import com.google.inject.{Inject, Singleton}
 
 import scala.annotation.tailrec

@@ -20,9 +20,7 @@ import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.instances.char._
 import cats.instances.string._
-import cats.instances.tuple._
 import cats.syntax.apply._
-import cats.syntax.applicative._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}

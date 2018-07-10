@@ -21,7 +21,7 @@ import hts.pages._
 import hts.pages.registrationPages._
 import hts.steps.CommonSteps.checkForLinksThatExistOnEveryPage
 import hts.utils.EitherOps._
-import hts.utils.{Configuration, ScenarioContext}
+import hts.utils.ScenarioContext
 
 class CreateAccountSteps extends Steps {
 
