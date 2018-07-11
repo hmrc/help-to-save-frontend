@@ -26,7 +26,12 @@
     bodyClasses = None) {
 
     <h1 class="heading-large">@messages("hts.email-verification.check-your-email.title.h1")</h1>
-    <p class="lede">@Html(messages("hts.email-verification.check-your-email.we-have-sent-mail")) <br />@email</p>
+    <p class="lede">@Html(messages("hts.email-verification.check-your-email.we-have-sent-mail")) @email</p>
+    @defining(
+    oldEmail.fold(routes.EmailController.getGiveEmailPage)(_ => routes.EmailController.getSelectEmailPage)
+    ){ call =>
+        <p><a href=@call class="font-xsmall">@messages("hts.email-verification.check-your-email.change-email-address")</a></p>
+    }
     <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.what-next")</h2>
     <p class="content">@Html(messages("hts.email-verification.check-your-email.content1"))</p>
     <p class="content">@messages("hts.email-verification.check-your-email.content2")</p>
@@ -38,11 +43,5 @@
     <div class="form-group subsection--wide">
         <button id="resend-verification" class="button subsection--wide" type="submit">@messages("hts.email-verification.check-your-email.resend-email")</button>
     </div>
-    }
-
-    @defining(
-    oldEmail.fold(routes.EmailController.getGiveEmailPage)(_ => routes.EmailController.getSelectEmailPage)
-    ){ call =>
-        <a href=@call class="font-xsmall">@messages("hts.email-verification.check-your-email.change-email-address")</a>
     }
 }
