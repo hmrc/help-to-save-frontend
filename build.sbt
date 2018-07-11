@@ -40,7 +40,8 @@ def testDependencies(scope: String = "test") = Seq(
   "org.seleniumhq.selenium" % "selenium-java" % "3.13.0" % scope,
   "org.seleniumhq.selenium" % "selenium-firefox-driver" % "3.13.0" % scope,
   "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.52.0" % scope,
-  "uk.gov.hmrc" %% "zap-automation" % "0.17.0" % scope
+  "uk.gov.hmrc" %% "zap-automation" % "0.17.0" % scope,
+  "com.google.guava" % "guava" % "25.1-jre" % scope
 )
 
 lazy val plugins: Seq[Plugins] = Seq.empty
