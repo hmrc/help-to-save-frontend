@@ -197,6 +197,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
               .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
           } yield ()
 
+          lazy val auditEvent = EmailChanged(nino, oldEmail, emailVerificationParams.email, duringRegistrationJourney = false)
           result.fold({
             case UpdateEmailError.NSIError(e) ⇒
               logger.warn(s"Could not update email with NS&I: $e", nino)
@@ -204,18 +205,18 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
 
             case UpdateEmailError.SessionCacheError(e) ⇒
               logger.warn(s"Could not write to session cache: $e", nino)
-              auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
+              auditor.sendEvent(auditEvent, nino)
               // TODO: what is the best course of action here? The email has actually been updated but
               // TODO: we can't display it to them on the next page
               SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
 
             case UpdateEmailError.EmailMongoError(e) ⇒
               logger.warn("Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I", nino)
-              auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
+              auditor.sendEvent(auditEvent, nino)
               SeeOther(frontendAppConfig.nsiManageAccountUrl)
           }, { _ ⇒
             logger.info("Successfully updated email with NS&I", nino)
-            auditor.sendEvent(EmailChanged(nino, oldEmail, emailVerificationParams.email), nino)
+            auditor.sendEvent(auditEvent, nino)
             SeeOther(routes.AccountHolderController.getEmailVerified.url)
           })
       }

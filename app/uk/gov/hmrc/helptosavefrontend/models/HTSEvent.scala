@@ -34,11 +34,20 @@ object HTSEvent {
 
 }
 
-case class EmailChanged(nino: NINO, oldEmail: String, newEmail: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
+case class EmailChanged(nino:                      NINO,
+                        oldEmail:                  String,
+                        newEmail:                  String,
+                        duringRegistrationJourney: Boolean
+)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
   val value: DataEvent = HTSEvent(
     appConfig.appName,
     "EmailChanged",
-    Map[String, String]("nino" → nino, "originalEmail" → oldEmail, "newEmail" → newEmail)
+    Map[String, String](
+      "nino" → nino,
+      "originalEmail" → oldEmail,
+      "newEmail" → newEmail,
+      "duringRegistrationJourney" → duringRegistrationJourney.toString
+    )
   )
 }
 
