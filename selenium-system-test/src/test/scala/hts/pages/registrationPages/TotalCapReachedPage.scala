@@ -23,7 +23,7 @@ object TotalCapReachedPage extends Page {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/try-again-later-in-year"
 
-  override val expectedPageHeader: Option[String] = Some("You can’t open an account yet")
+  override val expectedPageHeader: Option[String] = Some("You cannot open an account yet")
 
-  override val expectedPageTitle: Option[String] = Some("You can’t open an account yet")
+  override val expectedPageTitle: Option[String] = Some("You cannot open an account yet")
 }
