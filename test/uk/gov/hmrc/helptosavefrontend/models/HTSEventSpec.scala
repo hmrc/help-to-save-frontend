@@ -25,10 +25,11 @@ class HTSEventSpec extends TestSupport {
 
   "EmailChanged" must {
     "be created with the appropriate auditSource and auditDetails" in {
-      val event = EmailChanged(validNSIUserInfo.nino, "old-email@test.com", "new-email@test.com")
+      val event = EmailChanged(validNSIUserInfo.nino, "old-email@test.com", "new-email@test.com", true)
       event.value.auditSource shouldBe appName
       event.value.auditType shouldBe "EmailChanged"
-      event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "originalEmail" -> "old-email@test.com", "newEmail" -> "new-email@test.com")
+      event.value.detail shouldBe Map[String, String](
+        "nino" → validNSIUserInfo.nino, "originalEmail" → "old-email@test.com", "newEmail" → "new-email@test.com", "duringRegistrationJourney" → "true")
     }
   }
 
@@ -37,14 +38,14 @@ class HTSEventSpec extends TestSupport {
       val event = SuspiciousActivity(None, "nino_mismatch, expected foo, received bar")
       event.value.auditSource shouldBe appName
       event.value.auditType shouldBe "SuspiciousActivity"
-      event.value.detail shouldBe Map[String, String]("reason" -> "nino_mismatch, expected foo, received bar")
+      event.value.detail shouldBe Map[String, String]("reason" → "nino_mismatch, expected foo, received bar")
     }
 
     "be created with the appropriate auditSource and auditDetails incase of missing_email_record" in {
       val event = SuspiciousActivity(Some(validNSIUserInfo.nino), "missing_email_record")
       event.value.auditSource shouldBe appName
       event.value.auditType shouldBe "SuspiciousActivity"
-      event.value.detail shouldBe Map[String, String]("nino" -> validNSIUserInfo.nino, "reason" -> "missing_email_record")
+      event.value.detail shouldBe Map[String, String]("nino" → validNSIUserInfo.nino, "reason" → "missing_email_record")
     }
   }
 }

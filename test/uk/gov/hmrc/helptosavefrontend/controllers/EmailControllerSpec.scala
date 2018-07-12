@@ -27,7 +27,9 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.helptosavefrontend.controllers.EmailControllerSpec.EligibleWithUserInfoOps
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
@@ -35,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
@@ -85,9 +87,9 @@ class EmailControllerSpec
       .returning(Future.successful(result))
   }
 
-  def mockAudit() =
-    (mockAuditor.sendEvent(_: SuspiciousActivity, _: NINO)(_: ExecutionContext))
-      .expects(*, *, *)
+  def mockAudit(expectedEvent: HTSEvent) =
+    (mockAuditor.sendEvent(_: HTSEvent, _: NINO)(_: ExecutionContext))
+      .expects(expectedEvent, *, *)
       .returning(Future.successful(AuditResult.Success))
 
   def mockStoreConfirmedEmail(email: String)(result: Either[String, Unit]): Unit =
@@ -163,7 +165,7 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = Some("invalidEmail"))))), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None))))
         }
 
         val result = getSelectEmailPage()
@@ -404,7 +406,7 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = Some("invalidEmail"))))), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None))))
         }
 
         val result = getGiveEmailPage()
@@ -589,9 +591,9 @@ class EmailControllerSpec
 
       val email = "test@user.com"
       val userInfo = randomEligibleWithUserInfo(validUserInfo)
-      val userInfoWithInvalidEmail = randomEligibleWithUserInfo(validUserInfo.copy(email = Some("invalidEmail")))
+      val userInfoWithInvalidEmail = randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail"))
 
-        def confirmEmail(email: String): Future[Result] = controller.confirmEmail(encryptedEmail)(fakeRequestWithCSRFToken)
+        def confirmEmail(encryptedEmail: String): Future[Result] = controller.confirmEmail(encryptedEmail)(fakeRequestWithCSRFToken)
 
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
@@ -663,18 +665,39 @@ class EmailControllerSpec
 
       val encryptedParams = new String(Base64.getEncoder.encode("encrypted".getBytes))
 
-      val userInfo = randomEligibleWithUserInfo(validUserInfo.copy(email = Some(email)))
+      val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo.copy(email = Some(email), nino = nino))
 
       "handle Digital users and return success result" in {
+        val newEmail = "new@email.com"
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockDecrypt("encrypted")("WM123456C#test@user.com")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None))(Right(None))
-          mockStoreConfirmedEmail(email)(Right(None))
+          mockDecrypt("encrypted")(s"$nino#$newEmail")
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockStoreConfirmedEmail(newEmail)(Right(None))
+          mockAudit(EmailChanged(nino, email, newEmail, true))
+        }
 
+        val result = emailVerifiedCallback(encryptedParams)
+
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailVerified().url)
+
+      }
+
+      "handle Digital users and return success result when there is no GG email" in {
+        val newEmail = "new@email.com"
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockDecrypt("encrypted")(s"$nino#$newEmail")
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), None, None))))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockStoreConfirmedEmail(newEmail)(Right(None))
+          mockAudit(EmailChanged(nino, "", newEmail, true))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -690,7 +713,7 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")("AE123456C#test@user.com")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -702,8 +725,7 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          //mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
-          mockAudit()
+          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect"))
         }
 
         val result = emailVerifiedCallback("blah blah")
@@ -712,15 +734,19 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
       }
 
-      "handle Digital users who have not gone through eligibility checks and eligible" in {
-        val eligibilityResult = randomEligibleWithUserInfo(validUserInfo)
+      "handle Digital users who have not gone through eligibility checks and are eligible" in {
+        val newEmail = "new@email.com"
+
+        val eligibilityResult = randomEligibleWithUserInfo(validUserInfo.copy(email = Some(email)))
+
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockDecrypt("encrypted")("WM123456C#test@user.com")
+          mockDecrypt("encrypted")(s"$nino#$newEmail")
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibilityResult)), Some(email), None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibilityResult.copy(userInfo = eligibilityResult.userInfo.copy(email = Some(email))))), Some(email), None))(Right(None))
-          mockStoreConfirmedEmail(email)(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibilityResult.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockStoreConfirmedEmail(newEmail)(Right(None))
+          mockAudit(EmailChanged(nino, email, newEmail, true))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -773,9 +799,10 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-          mockDecrypt("encrypted")("WM123456C#test@user.com")
+          mockDecrypt("encrypted")(s"WM123456C#$email")
           mockUpdateEmail(updatedNSIUserInfo)(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, Some(email), None, false))(Right(None))
+          mockAudit(EmailChanged(nino, "", email, false))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -802,7 +829,7 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-          mockAudit()
+          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect"))
         }
 
         val result = emailVerifiedCallback("blah blah")
@@ -1168,4 +1195,14 @@ class EmailControllerSpec
 
     }
   }
+}
+
+object EmailControllerSpec {
+
+  implicit class EligibleWithUserInfoOps(val e: EligibleWithUserInfo) extends AnyVal {
+
+    def withEmail(email: Option[String]): EligibleWithUserInfo =
+      e.copy(userInfo = e.userInfo.copy(email = email))
+  }
+
 }

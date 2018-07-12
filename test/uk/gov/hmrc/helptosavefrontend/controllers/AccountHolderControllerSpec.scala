@@ -72,9 +72,9 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
 
-  def mockAuditEmailChanged() =
+  def mockAuditEmailChanged(nino: String, oldEmail: String, newEmail: String) =
     (mockAuditor.sendEvent(_: EmailChanged, _: NINO)(_: ExecutionContext))
-      .expects(*, nino, *)
+      .expects(EmailChanged(nino, oldEmail, newEmail, false), nino, *)
       .returning(Future.successful(AuditResult.Success))
 
   def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
@@ -256,7 +256,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
             mockSessionCacheConnectorPut(HTSSession(None, Some(verifiedEmail), None))(Right(()))
-            mockAuditEmailChanged()
+            mockAuditEmailChanged(nino, "email", verifiedEmail)
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
@@ -274,7 +274,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
               mockEmailGet()(Right(Some("email")))
               mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
               mockStoreEmail(verifiedEmail)(Left(""))
-              mockAuditEmailChanged()
+              mockAuditEmailChanged(nino, "email", verifiedEmail)
             }
 
             val result = verifyEmail(emailVerificationParams.encode())
@@ -339,7 +339,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
             mockSessionCacheConnectorPut(HTSSession(None, Some(verifiedEmail), None))(Left(""))
-            mockAuditEmailChanged()
+            mockAuditEmailChanged(nino, "email", verifiedEmail)
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
