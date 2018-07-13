@@ -242,23 +242,24 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
     }.merge
   }
 
-  def confirmEmail(email: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+  def confirmEmail(email: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
+    val decryptedEmailEither = EitherT.fromEither[Future](decryptEmail(email))
 
-      def doUpdate(hTSSession: HTSSession)(ifSuccess: ⇒ Result) = {
-        val result = for {
-          e ← EitherT.fromEither[Future](decryptEmail(email))
+      def doUpdate(hTSSession: HTSSession)(ifSuccess: ⇒ Future[Result]): Future[Result] = {
+        val result: EitherT[Future, String, Result] = for {
+          e ← decryptedEmailEither
           _ ← sessionCacheConnector.put(hTSSession.copy(confirmedEmail = Some(e)))
           _ ← helpToSaveService.storeConfirmedEmail(e)
-        } yield ()
+          r ← EitherT.liftF(ifSuccess)
+        } yield r
 
-        result.fold[Result](
+        result.fold(
           { e ⇒
             logger.warn(s"Could not write confirmed email: $e", nino)
             internalServerError()
-          }, { _ ⇒
-            ifSuccess
-          }
+          },
+          identity
         )
       }
 
@@ -266,7 +267,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
         checkIfAlreadyEnrolled { () ⇒
           checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
             doUpdate(HTSSession(Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), None, None))(
-              SeeOther(routes.RegisterController.getCreateAccountPage().url)
+              toFuture(SeeOther(routes.RegisterController.getCreateAccountPage().url))
             )
           } { _ ⇒
             SeeOther(routes.EmailController.getGiveEmailPage().url)
@@ -276,9 +277,34 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       def ifDE = {
         _: HTSSession ⇒
           {
-            doUpdate(HTSSession(None, None, None, false))(
-              SeeOther(routes.EmailController.verifyEmail().url)
-            )
+            doUpdate(HTSSession(None, None, None, false)) {
+              htsContext.userDetails.fold[Future[Result]](
+                missingInfo ⇒ {
+                  logger.warn(s"DE user missing infos, missing = ${missingInfo.missingInfo.mkString(",")}")
+                  internalServerError()
+                },
+                userInfo ⇒ {
+                  val result = for {
+                    e ← decryptedEmailEither
+                    _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo.copy(email = Some(e)), e))
+                    r ← EitherT.liftF(toFuture(SeeOther(routes.EmailController.getEmailUpdated().url)))
+                    _ ← {
+                      val auditEvent = EmailChanged(htsContext.nino, "", e, duringRegistrationJourney = false)
+                      auditor.sendEvent(auditEvent, htsContext.nino)
+                      EitherT.pure[Future, String](())
+                    }
+                  } yield r
+
+                  result.fold[Result](
+                    errors ⇒ {
+                      logger.warn(s"error during update email, error = $errors")
+                      internalServerError()
+                    },
+                    identity
+                  )
+                }
+              )
+            }
           }
       }
 
