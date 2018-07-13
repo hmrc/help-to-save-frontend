@@ -247,20 +247,20 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
     val decryptedEmailEither = EitherT.fromEither[Future](decryptEmail(email))
 
       def doUpdate(hTSSession: HTSSession)(ifSuccess: ⇒ Future[Result]): Future[Result] = {
-        val result = for {
+        val result: EitherT[Future, String, Result] = for {
           e ← decryptedEmailEither
           _ ← sessionCacheConnector.put(hTSSession.copy(confirmedEmail = Some(e)))
           _ ← helpToSaveService.storeConfirmedEmail(e)
-        } yield ()
+          r ← EitherT.liftF(ifSuccess)
+        } yield r
 
         result.fold(
           { e ⇒
             logger.warn(s"Could not write confirmed email: $e", nino)
-            toFuture(internalServerError())
-          }, { _ ⇒
-            ifSuccess
-          }
-        ).flatMap(identity)
+            internalServerError()
+          },
+          identity
+        )
       }
 
       def ifDigital =
