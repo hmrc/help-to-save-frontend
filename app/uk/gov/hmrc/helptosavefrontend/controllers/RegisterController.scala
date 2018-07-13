@@ -163,13 +163,6 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 
   private def submissionFailureToString(failure: SubmissionFailure): String =
     s"Account creation failed. ErrorId: ${failure.errorMessageId.getOrElse("-")}, errorMessage: ${failure.errorMessage}, errorDetails: ${failure.errorDetail}"
-
-  private def decryptEmail(encryptedEmail: String): Either[String, String] =
-    crypto.decrypt(encryptedEmail) match {
-      case Success(value) ⇒ Right(value)
-      case Failure(e)     ⇒ Left(s"Could not decode email: ${e.getMessage}")
-    }
-
 }
 
 object RegisterController {

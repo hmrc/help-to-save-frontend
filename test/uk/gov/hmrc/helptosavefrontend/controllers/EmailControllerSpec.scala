@@ -598,7 +598,7 @@ class EmailControllerSpec
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
           mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
@@ -612,7 +612,7 @@ class EmailControllerSpec
       "handle Digital(new applicant) users with an existing valid email from GG and already gone through eligibility checks" in {
 
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
           mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
@@ -629,7 +629,7 @@ class EmailControllerSpec
       "handle Digital(new applicant) users with an existing INVALID email from GG and already gone through eligibility checks" in {
 
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfoWithInvalidEmail)), None, None))))
           mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfoWithInvalidEmail)), None, None))))
@@ -641,18 +641,19 @@ class EmailControllerSpec
       }
 
       "handle DE users with an existing valid email from GG" in {
-
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(email), false))))
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(email), false))))
           mockSessionCacheConnectorPut(HTSSession(None, Some("decrypted"), None, false))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
+          mockUpdateEmail(NSIUserInfo(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted"))(Right(None))
+          mockAudit(EmailChanged(nino, "", "decrypted", false))
         }
 
         val result = confirmEmail(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailUpdated().url)
       }
     }
 
