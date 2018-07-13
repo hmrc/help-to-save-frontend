@@ -599,6 +599,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockDecrypt("encrypted")("decrypted")
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
           mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
@@ -613,10 +614,10 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockDecrypt("encrypted")("decrypted")
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
           mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
-          mockDecrypt("encrypted")("decrypted")
           mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
         }
@@ -630,6 +631,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockDecrypt("encrypted")("decrypted")
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfoWithInvalidEmail)), None, None))))
           mockGetUserEnrolmentStatus()(Right(NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfoWithInvalidEmail)), None, None))))
