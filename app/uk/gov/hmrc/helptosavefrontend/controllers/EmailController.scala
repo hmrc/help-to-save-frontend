@@ -287,7 +287,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                   val result = for {
                     e ← decryptedEmailEither
                     _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo.copy(email = Some(e)), e))
-                    r ← EitherT.liftF(toFuture(SeeOther(routes.EmailController.getEmailUpdated().url)))
+                    r ← EitherT.liftF(toFuture(SeeOther(frontendAppConfig.nsiManageAccountUrl)))
                     _ ← {
                       val auditEvent = EmailChanged(htsContext.nino, "", e, duringRegistrationJourney = false)
                       auditor.sendEvent(auditEvent, htsContext.nino)
