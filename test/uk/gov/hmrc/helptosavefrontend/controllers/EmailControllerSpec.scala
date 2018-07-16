@@ -655,7 +655,7 @@ class EmailControllerSpec
 
         val result = confirmEmail(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailUpdated().url)
+        redirectLocation(result) shouldBe Some("https://nsandi.com")
       }
     }
 
