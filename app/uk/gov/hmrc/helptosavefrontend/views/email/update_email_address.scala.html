@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.error_prefix
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
 @(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -33,7 +33,7 @@
 
 @defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
     @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-        title = error_prefix(form).toString + Messages("hts.global.title", Messages("hts.email-verification.title.h1"), Messages("hts.global.title.section.email"), Messages("hts.global.title-suffix")),
+        title = errorPrefix(form) + Messages("hts.global.title", Messages("hts.email-verification.title.h1"), Messages("hts.global.title.section.email"), Messages("hts.global.title-suffix")),
         sidebarLinks = None,
         bodyClasses = None,
         isErrorPage = errorMessage.isDefined,
