@@ -407,7 +407,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                                                                    request: Request[AnyContent]): EitherT[Future, String, Result] = {
     htsContext.userDetails.fold[EitherT[Future, String, Result]](
       missingInfo ⇒ {
-        logger.warn(s"DE user missing infos, missing = ${missingInfo.missingInfo.mkString(",")}")
+        logger.warn(s"DE user misssssssssssing infos, missing = ${missingInfo.missingInfo.mkString(",")}")
         EitherT.pure[Future, String](internalServerError())
       },
       userInfo ⇒ {
