@@ -804,6 +804,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockDecrypt("encrypted")(s"WM123456C#$email")
           mockUpdateEmail(updatedNSIUserInfo)(Right(None))
+          mockStoreConfirmedEmail(email)(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, Some(email), None, false))(Right(None))
           mockAudit(EmailChanged(nino, "", email, false))
         }

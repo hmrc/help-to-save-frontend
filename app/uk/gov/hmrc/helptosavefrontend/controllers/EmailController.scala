@@ -416,6 +416,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           params ⇒ {
             for {
               _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo.copy(email = Some(params.email)), params.email))
+              _ ← helpToSaveService.storeConfirmedEmail(params.email)
               r ← EitherT.liftF(updateSessionAndReturnResult(
                 HTSSession(None, Some(params.email), None, false),
                 SeeOther(routes.EmailController.getEmailVerified().url))
