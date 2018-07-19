@@ -28,10 +28,14 @@ object EligiblePage extends Page {
 
   override val expectedPageHeader: Option[String] = Some("We’ve checked the details we hold for you")
 
-  def clickConfirmAndContinue()(implicit driver: WebDriver): Unit =
+  def clickConfirmAndContinue()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
     Browser.clickButtonByIdOnceClickable("start-creating-account")
+  }
 
-  def detailsNotCorrect()(implicit driver: WebDriver): Unit =
+  def detailsNotCorrect()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
     Browser.clickLinkTextOnceClickable("These details are not correct")
+  }
 
 }

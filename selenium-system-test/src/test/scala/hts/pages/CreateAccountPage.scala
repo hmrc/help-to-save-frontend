@@ -28,10 +28,14 @@ object CreateAccountPage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("You’re about to create a Help to Save account")
 
-  def createAccount()(implicit driver: WebDriver): Unit =
+  def createAccount()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
     Browser.clickButtonByIdOnceClickable("accept-and-create-account")
+  }
 
-  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit =
+  def exitWithoutCreatingAccount()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
     Browser.clickLinkTextOnceClickable("Cancel")
+  }
 
 }

@@ -18,6 +18,8 @@ package hts.browser
 
 import java.util.function.Function
 
+import cats.syntax.either._
+
 import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium._
@@ -98,12 +100,12 @@ trait Retrievals {
 trait Assertions {
   this: WebBrowser with Retrievals with Matchers ⇒
 
-  def isTextOnPage(regex: String)(implicit driver: WebDriver): Either[String, Unit] = {
-    val textPresent = regex.r.findAllIn(Browser.getPageContent).nonEmpty
-    if (!textPresent) {
+  def isTextOnPage(regex: String)(implicit driver: WebDriver): Either[String, Set[String]] = {
+    val textPresent = regex.r.findAllIn(Browser.getPageContent)
+    if (textPresent.isEmpty) {
       Left(s"Text not found: $regex")
     } else {
-      Right(())
+      Right(textPresent.toSet)
     }
   }
 
@@ -124,12 +126,21 @@ trait Assertions {
         }
       }
 
-    val urlMatches = isActualUrlExpectedUrl(page.expectedURL)
-    val result: Either[String, Unit] = if (urlMatches) Right(()) else Left(s"Expected URL was ${page.expectedURL}, but actual URL was " + driver.getCurrentUrl())
+    val urlMatches =
+      Either.cond(isActualUrlExpectedUrl(page.expectedURL),
+        (),
+        s"Expected URL was ${page.expectedURL}, but actual URL was " + driver.getCurrentUrl()
+      )
 
-    result shouldBe Right(())
+    urlMatches shouldBe Right(())
     page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+
+    // check that there are no unmapped message keys on the page
+    isTextOnPage("hts(\\..+)+").fold(
+      _ ⇒ (),
+      s ⇒ fail(s"Found unescaped message keys on page: [${s.mkString("; ")}]")
+    )
   }
 
   def checkHeader(page: Page)(implicit driver: WebDriver): Unit =

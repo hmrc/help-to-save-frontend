@@ -25,8 +25,14 @@ object ApplyPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/apply"
 
-  def clickStartNow()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("apply-button")
+  def clickStartNow()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickButtonByIdOnceClickable("apply-button")
+  }
 
-  def clickSignInLink()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Sign in to your Help to Save account")
+  def clickSignInLink()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickLinkTextOnceClickable("Sign in to your Help to Save account")
+  }
 
 }
