@@ -231,8 +231,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       case (Enrolled(_), Some(_)) ⇒
         //Digital users with stored email should be in the /account-home flow
         logger.warn(s"not expecting email requests from Digital users with stored email in session", htsContext.nino)
-        //SeeOther(frontendAppConfig.nsiManageAccountUrl)
-        internalServerError()
+        SeeOther(frontendAppConfig.nsiManageAccountUrl)
 
       case (Enrolled(_), None) ⇒ //DE user as no email found
         ifDE
