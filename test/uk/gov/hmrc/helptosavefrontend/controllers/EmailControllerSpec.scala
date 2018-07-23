@@ -235,7 +235,7 @@ class EmailControllerSpec
         status(result) shouldBe 500
       }
 
-      "throw server error if request comes from already enrolled Digital users with valid email in mongo" in {
+      "redirect to NS&I if request comes from already enrolled Digital users with valid email in mongo" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockGetUserEnrolmentStatus()(Right(Enrolled(true)))
@@ -243,7 +243,8 @@ class EmailControllerSpec
         }
 
         val result = getSelectEmailPage()
-        status(result) shouldBe 500
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("https://nsandi.com")
       }
     }
 
@@ -478,7 +479,7 @@ class EmailControllerSpec
         status(result) shouldBe 500
       }
 
-      "throw server error if request comes from already enrolled Digital users with valid email in mongo" in {
+      "redirect to NS&I if request comes from already enrolled Digital users with valid email in mongo" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockGetUserEnrolmentStatus()(Right(Enrolled(true)))
@@ -486,7 +487,8 @@ class EmailControllerSpec
         }
 
         val result = getGiveEmailPage()
-        status(result) shouldBe 500
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("https://nsandi.com")
       }
 
     }
