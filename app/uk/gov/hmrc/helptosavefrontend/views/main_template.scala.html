@@ -31,7 +31,9 @@
 
 
 @sidebar = {
-  @{layouts.sidebar(sidebarLinks.getOrElse(Html("")), Some("sidebar"))}
+  @if(sidebarLinks.isDefined) {
+    @layouts.sidebar(sidebarLinks.getOrElse(Html("")), Some("sidebar"))
+  }
 }
 
 @govuk_wrapper(appConfig = frontendAppConfig,
