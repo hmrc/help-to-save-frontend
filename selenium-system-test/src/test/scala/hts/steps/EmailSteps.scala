@@ -23,7 +23,6 @@ import hts.pages.accountHomePages.{AccountHolderEmailVerifiedPage, ChangeEmailPa
 import hts.utils.ScenarioContext
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, CryptoImpl, EmailVerificationParams}
-import hts.steps.CommonSteps._
 
 class EmailSteps extends Steps {
 

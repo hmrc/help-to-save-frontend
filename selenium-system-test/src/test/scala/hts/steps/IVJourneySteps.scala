@@ -21,7 +21,6 @@ import hts.pages._
 import hts.pages.identityPages._
 import hts.pages.registrationPages._
 import hts.utils.ScenarioContext
-import hts.steps.CommonSteps._
 
 class IVJourneySteps extends Steps {
 
