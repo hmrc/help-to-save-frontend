@@ -28,6 +28,9 @@ object YouDoNotHaveAnAccountPage extends Page {
 
   override val expectedPageHeader: Option[String] = Some("You do not have a Help to Save account")
 
-  def clickContinue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
+  def clickContinue()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickButtonByIdOnceClickable("continue")
+  }
 
 }

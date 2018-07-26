@@ -28,8 +28,14 @@ object IncorrectDetailsPage extends Page {
 
   override val expectedPageHeader: Option[String] = Some("We need your correct details")
 
-  def clickBack(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("incorrect-details-goback")
+  def clickBack(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickButtonByIdOnceClickable("incorrect-details-goback")
+  }
 
-  def openForm()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("fill in the form (it will open in a new window)")
+  def openForm()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickLinkTextOnceClickable("fill in the form (it will open in a new window)")
+  }
 
 }

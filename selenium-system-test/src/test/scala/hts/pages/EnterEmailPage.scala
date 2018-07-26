@@ -28,5 +28,8 @@ object EnterEmailPage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("Which email address do you want to use for Help to Save?")
 
-  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
+  def continue()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickButtonByIdOnceClickable("continue")
+  }
 }

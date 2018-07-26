@@ -43,11 +43,11 @@ class SecuritySteps extends Steps {
   }
 
   When("^they try to view their details without having logged in GG$") {
-    EligiblePage.navigate()
+    EligiblePage.navigate(checkNavigationSuccessful = false)
   }
 
   When("^they try to view the create-an-account page$") {
-    CreateAccountPage.navigate()
+    CreateAccountPage.navigate(checkNavigationSuccessful = false)
   }
 
   Then("^they are prompted to log into GG$") {
@@ -68,7 +68,8 @@ class SecuritySteps extends Steps {
   }
 
   Then("^they still see confirmation that they are NOT eligible$") { () ⇒
-    Browser.isTextOnPage("You’re not eligible for a Help to Save account") shouldBe Right(())
+    val text = "You’re not eligible for a Help to Save account"
+    Browser.isTextOnPage(text) shouldBe Right(Set(text))
     Browser.checkCurrentPageIs(NotEligibleReason3Page)
   }
 

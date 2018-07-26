@@ -28,5 +28,8 @@ object FailedIVLockedOutPage extends IVPage {
 
   override val expectedPageTitle: Option[String] = Some("We were not able to verify your identity")
 
-  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Exit to About Help to Save")
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickLinkTextOnceClickable("Exit to About Help to Save")
+  }
 }

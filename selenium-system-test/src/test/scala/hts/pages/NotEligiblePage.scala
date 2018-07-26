@@ -30,6 +30,8 @@ trait NotEligiblePage extends Page {
 
   val notEligibleText: List[String]
 
-  def thinkYouAreEligible()(implicit driver: WebDriver): Unit =
+  def thinkYouAreEligible()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
     Browser.clickLinkTextOnceClickable("think you’re eligible")
+  }
 }

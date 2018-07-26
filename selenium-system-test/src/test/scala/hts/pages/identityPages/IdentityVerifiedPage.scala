@@ -29,6 +29,9 @@ object IdentityVerifiedPage extends Page {
 
   override val expectedPageHeader: Option[String] = Some("We’ve verified your identity")
 
-  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
+  def continue()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickButtonByIdOnceClickable("continue")
+  }
 
 }

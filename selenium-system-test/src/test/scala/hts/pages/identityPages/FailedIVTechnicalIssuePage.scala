@@ -28,5 +28,8 @@ object FailedIVTechnicalIssuePage extends IVPage {
 
   override val expectedPageTitle: Option[String] = Some("Something went wrong")
 
-  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Try again")
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.clickLinkTextOnceClickable("Try again")
+  }
 }

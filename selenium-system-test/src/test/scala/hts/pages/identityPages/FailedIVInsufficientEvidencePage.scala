@@ -28,6 +28,9 @@ object FailedIVInsufficientEvidencePage extends IVPage {
 
   override val expectedPageTitle: Option[String] = Some("We were not able to verify your identity")
 
-  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.contain("0300 322 7093")
+  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = {
+    Browser.checkCurrentPageIs(this)
+    Browser.contain("0300 322 7093")
+  }
 
 }
