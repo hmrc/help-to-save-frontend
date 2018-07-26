@@ -19,7 +19,6 @@ package hts.steps
 import hts.browser.Browser
 import hts.pages._
 import hts.utils.ScenarioContext
-import hts.steps.CommonSteps._
 
 class EligibilitySteps extends Steps {
 
@@ -64,17 +63,17 @@ class EligibilitySteps extends Steps {
       case 3 ⇒
         Browser.checkHeader(NotEligibleReason3Page)
         val notEligibleTextItems = NotEligibleReason3Page.notEligibleText
-        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(())
+        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
         )
       case 5 ⇒
         Browser.checkHeader(NotEligibleReason5Page)
         val notEligibleTextItems = NotEligibleReason5Page.notEligibleText
-        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(())
+        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
         )
       case 4 | 9 ⇒
         Browser.checkHeader(NotEligibleReason4And9Page)
         val notEligibleTextItems = NotEligibleReason4And9Page.notEligibleText
-        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(())
+        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
         )
     }
   }

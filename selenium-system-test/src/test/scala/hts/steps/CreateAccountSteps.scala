@@ -19,7 +19,6 @@ package hts.steps
 import hts.browser.Browser
 import hts.pages._
 import hts.pages.registrationPages._
-import hts.steps.CommonSteps.checkForLinksThatExistOnEveryPage
 import hts.utils.EitherOps._
 import hts.utils.ScenarioContext
 
@@ -64,7 +63,7 @@ class CreateAccountSteps extends Steps {
     EligiblePage.detailsNotCorrect()
 
     Browser.checkCurrentPageIs(IncorrectDetailsPage)
-    checkForLinksThatExistOnEveryPage(IncorrectDetailsPage)
+    Browser.checkForLinksThatExistOnEveryPage(IncorrectDetailsPage)
     IncorrectDetailsPage.clickBack
 
     Browser.checkHeader(EligiblePage)
@@ -123,7 +122,7 @@ class CreateAccountSteps extends Steps {
 
   Then("^they are informed they don't have an account$") {
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
-    checkForLinksThatExistOnEveryPage(YouDoNotHaveAnAccountPage)
+    Browser.checkForLinksThatExistOnEveryPage(YouDoNotHaveAnAccountPage)
   }
 
   Then("^they see the Help to Save About page$") {

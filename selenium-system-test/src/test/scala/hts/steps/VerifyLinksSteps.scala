@@ -21,62 +21,60 @@ import hts.pages._
 import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
 import hts.utils.ScenarioContext
-import hts.steps.CommonSteps._
 
 class VerifyLinksSteps extends Steps {
 
+  def checkPage(page: Page): Unit = {
+    Browser.checkCurrentPageIs(page)
+    Browser.checkHeader(page)
+    Browser.checkForBadContent(page)
+    Browser.checkForLinksThatExistOnEveryPage(page)
+  }
+
   Then("^they go through the happy path they can see and access all header and footer links$") {
     AboutPage.navigate()
-    Browser.checkHeader(AboutPage)
-    checkForLinksThatExistOnEveryPage(AboutPage)
+    checkPage(AboutPage)
     Browser.nextPage()
 
-    Browser.checkHeader(EligibilityInfoPage)
-    checkForLinksThatExistOnEveryPage(EligibilityInfoPage)
+    checkPage(EligibilityInfoPage)
     Browser.nextPage()
 
-    Browser.checkHeader(HowTheAccountWorksPage)
-    checkForLinksThatExistOnEveryPage(HowTheAccountWorksPage)
+    checkPage(HowTheAccountWorksPage)
     Browser.nextPage()
 
-    Browser.checkHeader(HowWeCalculateBonusesPage)
-    checkForLinksThatExistOnEveryPage(HowWeCalculateBonusesPage)
+    checkPage(HowWeCalculateBonusesPage)
     verifyGovUKLink()
     Browser.nextPage()
 
-    Browser.checkHeader(ApplyPage)
-    checkForLinksThatExistOnEveryPage(ApplyPage)
+    checkPage(ApplyPage)
     ApplyPage.clickStartNow()
 
-    Browser.checkHeader(EligiblePage)
-    checkForLinksThatExistOnEveryPage(EligiblePage)
-
+    checkPage(EligiblePage)
     EligiblePage.clickConfirmAndContinue()
-    checkForLinksThatExistOnEveryPage(SelectEmailPage)
 
+    checkPage(SelectEmailPage)
     //try to change the email and verify links
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
-    Browser.checkHeader(VerifyYourEmailPage)
-    checkForLinksThatExistOnEveryPage(VerifyYourEmailPage)
+
+    checkPage(VerifyYourEmailPage)
 
     //go back to original select email page and continue
     Browser.goBack()
     SelectEmailPage.selectGGEmail()
-    checkForLinksThatExistOnEveryPage(CreateAccountPage)
+
+    checkPage(CreateAccountPage)
     CreateAccountPage.createAccount()
 
     Browser.checkHeader(NsiManageAccountPage)
 
     ChangeEmailPage.navigate()
-    Browser.checkHeader(ChangeEmailPage)
-    checkForLinksThatExistOnEveryPage(ChangeEmailPage)
+    checkPage(ChangeEmailPage)
     ChangeEmailPage.setNewEmailAddress("anotheremail@mail.com")
 
-    Browser.checkHeader(VerifyEmailPage)
-    checkForLinksThatExistOnEveryPage(VerifyEmailPage)
+    checkPage(VerifyEmailPage)
     VerifyEmailPage.resendEmail
 
-    Browser.checkHeader(VerifyEmailPage)
+    checkPage(VerifyEmailPage)
     VerifyEmailPage.goToAccountHome
 
     Browser.checkHeader(NsiManageAccountPage)
@@ -94,6 +92,7 @@ class VerifyLinksSteps extends Steps {
   Then("^they can access the cannot change email try later page$") {
     CannotChangeEmailPageTryLater.navigate()
     Browser.checkCurrentPageIs(CannotChangeEmailPageTryLater)
+    Browser.checkForBadContent(CannotChangeEmailPageTryLater)
   }
 
   Then("^they access the sign in page$") {
@@ -104,11 +103,13 @@ class VerifyLinksSteps extends Steps {
   Then("^they see the daily cap reached page$") {
     DailyCapReachedPage.navigate()
     Browser.checkCurrentPageIs(DailyCapReachedPage)
+    Browser.checkForBadContent(DailyCapReachedPage)
   }
 
   Then("^they see the total cap reached page$") {
     TotalCapReachedPage.navigate()
     Browser.checkCurrentPageIs(TotalCapReachedPage)
+    Browser.checkForBadContent(TotalCapReachedPage)
   }
 
   Then("^they see the service unavailable page$") {
@@ -119,16 +120,19 @@ class VerifyLinksSteps extends Steps {
   Then("^they see the cannot change email page$") {
     CannotChangeEmailPage.navigate()
     Browser.checkCurrentPageIs(CannotChangeEmailPage)
+    Browser.checkForBadContent(CannotChangeEmailPage)
   }
 
   Then("^they see the cannot change email try later page$") {
     CannotChangeEmailPageTryLater.navigate()
     Browser.checkCurrentPageIs(CannotChangeEmailPageTryLater)
+    Browser.checkForBadContent(CannotChangeEmailPageTryLater)
   }
 
   Then("^they navigate to and see the close account are you sure page$") {
     CloseAccountPage.navigate()
     Browser.checkCurrentPageIs(CloseAccountPage)
+    Browser.checkForBadContent(CloseAccountPage)
   }
 
   When("^an eligible applicant logs into gg$") {
@@ -142,16 +146,19 @@ class VerifyLinksSteps extends Steps {
   Then("^they see a page showing which details are missing$") {
     MissingInfoPage.navigate()
     Browser.checkCurrentPageIs(MissingInfoPage)
+    Browser.checkForBadContent(MissingInfoPage)
   }
 
   Then("^they see the your link has expired page$") {
     LinkExpiredPage.navigate()
     Browser.checkCurrentPageIs(LinkExpiredPage)
+    Browser.checkForBadContent(LinkExpiredPage)
   }
 
   Then("^they see the create account error page$") {
     CreateAccountErrorPage.navigate()
     Browser.checkCurrentPageIs(CreateAccountErrorPage)
+    Browser.checkForBadContent(CreateAccountErrorPage)
   }
 
 }

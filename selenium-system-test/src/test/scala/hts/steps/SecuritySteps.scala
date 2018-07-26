@@ -54,7 +54,7 @@ class SecuritySteps extends Steps {
     Browser.checkCurrentPageIs(GGSignInPage)
   }
 
-  Given("^if they visit the URIs below they see a valid response$") { (URIs: java.util.List[String]) ⇒
+  Given("^if they visit the URIs below they see a valid response$") { URIs: java.util.List[String] ⇒
     URIs.asScala.foreach { uri ⇒
       Browser.navigateTo(uri)
       Browser.checkPageIsLoaded()
@@ -68,7 +68,8 @@ class SecuritySteps extends Steps {
   }
 
   Then("^they still see confirmation that they are NOT eligible$") { () ⇒
-    Browser.isTextOnPage("You’re not eligible for a Help to Save account") shouldBe Right(())
+    val text = "You’re not eligible for a Help to Save account"
+    Browser.isTextOnPage(text) shouldBe Right(Set(text))
     Browser.checkCurrentPageIs(NotEligibleReason3Page)
   }
 
