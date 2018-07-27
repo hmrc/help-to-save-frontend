@@ -524,9 +524,9 @@ hts.incorrect-details.listOne1=first name
 hts.incorrect-details.listOne2=last name
 hts.incorrect-details.listOne3=date of birth
 hts.incorrect-details.listOne4=address
-hts.incorrect-details.h2=What happens next?
-hts.incorrect-details.listTwo1=You&rsquo;ll need to go to GOV.UK and <a href={0} target="_blank">give us your correct details</a> (link opens in a new window).
-hts.incorrect-details.listTwo2=You can apply for a Help to Save account again, once we&rsquo;ve updated your details in our system.
+hts.incorrect-details.h2=What you need to do
+hts.incorrect-details.listTwo1=<a href={0}>Tell HMRC about a change to your personal details</a>.
+hts.incorrect-details.listTwo2=When we have updated your details, apply for a Help to Save account.
 hts.incorrect-details.exit-button=Back
 
 # Privacy page
