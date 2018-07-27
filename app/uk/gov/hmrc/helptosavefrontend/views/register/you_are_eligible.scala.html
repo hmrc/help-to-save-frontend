@@ -34,7 +34,9 @@
 
     @user_details(userInfo)
 
-    <p class="subsection--wide push--bottom">@Messages("hts.register.you-are-eligible.p-3")</p>
+    <p class="subsection"><a href=@routes.RegisterController.getDetailsAreIncorrect()>@Messages("hts.register.you-are-eligible.button-2")</a></p>
+
+    <p class="push--bottom">@Messages("hts.register.you-are-eligible.p-3")</p>
 
     @form(routes.EligibilityCheckController.youAreEligibleSubmit(), 'class -> "group subsection--wide") {
         @CSRF.formField(request)
@@ -42,7 +44,5 @@
             @Messages("hts.register.you-are-eligible.button-1")
         }
     }
-
-    <a href=@routes.RegisterController.getDetailsAreIncorrect() class="font-xsmall">@Messages("hts.register.you-are-eligible.button-2")</a>
 
 }
