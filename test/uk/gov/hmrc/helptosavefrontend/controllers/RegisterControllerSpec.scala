@@ -141,7 +141,7 @@ class RegisterControllerSpec
 
         val result = controller.getServiceUnavailablePage(FakeRequest())
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Service Unavailable")
+        contentAsString(result) should include("Service unavailable")
       }
 
     }

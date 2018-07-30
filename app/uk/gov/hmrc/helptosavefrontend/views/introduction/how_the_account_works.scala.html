@@ -55,15 +55,19 @@
         <h3 class="heading-small">@Messages("hts.introduction.how-the-account-works.h3-3")</h3>
         <p>@Html(Messages("hts.introduction.how-the-account-works.par-5"))</p>
         <p>@Messages("hts.introduction.how-the-account-works.par-6")</p>
-        <p class="indent">@Messages("hts.introduction.how-the-account-works.par-7-1")
-            <a href=@routes.IntroductionController.getHowWeCalculateBonuses()
-            data-ga-event-category="links"
-            data-ga-event-action="Bonus"
-            data-ga-event-label="How the account works page"
-            class="ga-track-event">
-            @Messages("hts.introduction.how-the-account-works.par-7-2")</a>,
-            @Html(Messages("hts.introduction.how-the-account-works.par-7-3"))
-        </p>
+
+        <div class="panel panel-border-wide">
+            <p>@Messages("hts.introduction.how-the-account-works.par-7-1")
+                <a href=@routes.IntroductionController.getHowWeCalculateBonuses()
+                data-ga-event-category="links"
+                data-ga-event-action="Bonus"
+                data-ga-event-label="How the account works page"
+                class="ga-track-event">
+                @Messages("hts.introduction.how-the-account-works.par-7-2")</a>,
+                @Html(Messages("hts.introduction.how-the-account-works.par-7-3"))
+            </p>
+        </div>
+        
 
         <h3 class="heading-small">@Messages("hts.introduction.how-the-account-works.h3-4")</h3>
         <p>@Messages("hts.introduction.how-the-account-works.par-7")</p>

@@ -23,7 +23,7 @@ package object helpers {
 
   def errorPrefix(form: Form[_])(implicit messages: Messages): String =
     if (form.hasErrors) {
-      Messages("hts.global.error.prefix")
+      Messages("hts.global.error.prefix") + " "
     } else {
       ""
     }
