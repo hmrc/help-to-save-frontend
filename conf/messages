@@ -296,7 +296,7 @@ hts.register.total-cap-reached.p4=If you want to open an account, you&rsquo;ll n
 hts.register.total-cap-reached.exit.gov.uk=Exit to GOV.UK
 
 # Service unavailable
-hts.register.service-unavailable.title.h1=Service Unavailable
+hts.register.service-unavailable.title.h1=Service unavailable
 hts.register.service-unavailable.p1=You&rsquo;ll be able to use the Help to Save service later.
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
