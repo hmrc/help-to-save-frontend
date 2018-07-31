@@ -72,8 +72,9 @@ class CreateAccountSteps extends Steps {
     Browser.checkHeader(IncorrectDetailsPage)
   }
 
-  Then("^they see the relevant page$") {
-    Browser.openAndCheckPageInNewWindowUsingLinkText("give us your correct details", HMRCChangeOfDetailsPage)
+  Then("^they see the HMRC change of details page$") {
+    Browser.clickLinkTextOnceClickable("Tell HMRC about a change to your personal details")
+    Browser.checkExternalPageIs(HMRCChangeOfDetailsPage)
   }
 
   When("^an applicant cancels their application just before creating an account$") {

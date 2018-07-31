@@ -20,4 +20,7 @@ object HMRCChangeOfDetailsPage extends Page {
 
   val expectedURL: String = "https://www.gov.uk/tell-hmrc-change-of-details"
 
+  override val expectedPageTitle: Option[String] = Some("Tell HMRC about a change to your personal details")
+
+  override val expectedPageHeader: Option[String] = Some("Tell HMRC about a change to your personal details")
 }

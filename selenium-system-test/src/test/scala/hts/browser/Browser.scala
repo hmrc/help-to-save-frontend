@@ -149,6 +149,11 @@ trait Assertions {
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
   }
 
+  def checkExternalPageIs(page: Page)(implicit driver: WebDriver) {
+    page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - GOV.UK")
+    page.expectedPageHeader.foreach(getPageHeading shouldBe _)
+  }
+
   def checkForBadContent(page: Page)(implicit driver: WebDriver): Unit = {
     checkCurrentPageIs(page)
     // check for unmapped message keys on the page

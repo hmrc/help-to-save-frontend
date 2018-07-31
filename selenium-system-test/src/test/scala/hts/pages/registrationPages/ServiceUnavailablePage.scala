@@ -23,7 +23,7 @@ object ServiceUnavailablePage extends Page {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/service-unavailable"
 
-  override val expectedPageHeader: Option[String] = Some("Service Unavailable")
+  override val expectedPageHeader: Option[String] = Some("Service unavailable")
 
-  override val expectedPageTitle: Option[String] = Some("Service Unavailable")
+  override val expectedPageTitle: Option[String] = Some("Service unavailable")
 }
