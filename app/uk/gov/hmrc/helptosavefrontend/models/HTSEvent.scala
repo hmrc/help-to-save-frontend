@@ -27,17 +27,20 @@ trait HTSEvent {
 }
 
 object HTSEvent {
-  def apply(appName:   String,
-            auditType: String,
-            detail:    Map[String, String])(implicit hc: HeaderCarrier): DataEvent =
-    DataEvent(appName, auditType = auditType, detail = detail, tags = hc.toAuditTags("", "N/A"))
+  def apply(appName:         String,
+            auditType:       String,
+            detail:          Map[String, String],
+            transactionName: String,
+            path:            String)(implicit hc: HeaderCarrier): DataEvent =
+    DataEvent(appName, auditType = auditType, detail = detail, tags = hc.toAuditTags(transactionName, path))
 
 }
 
 case class EmailChanged(nino:                      NINO,
                         oldEmail:                  String,
                         newEmail:                  String,
-                        duringRegistrationJourney: Boolean
+                        duringRegistrationJourney: Boolean,
+                        path:                      String
 )(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
   val value: DataEvent = HTSEvent(
     appConfig.appName,
@@ -47,16 +50,18 @@ case class EmailChanged(nino:                      NINO,
       "originalEmail" → oldEmail,
       "newEmail" → newEmail,
       "duringRegistrationJourney" → duringRegistrationJourney.toString
-    )
+    ),
+    "email-changed",
+    path
   )
 }
 
-case class SuspiciousActivity(nino: Option[NINO], activity: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
+case class SuspiciousActivity(nino: Option[NINO], activity: String, path: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
   val value: DataEvent = {
     val details = nino match {
       case Some(p) ⇒ Map[String, String]("nino" → p, "reason" → activity)
       case None    ⇒ Map[String, String]("reason" → activity)
     }
-    HTSEvent(appConfig.appName, "SuspiciousActivity", details)
+    HTSEvent(appConfig.appName, "SuspiciousActivity", details, "suspicious-activity", path)
   }
 }

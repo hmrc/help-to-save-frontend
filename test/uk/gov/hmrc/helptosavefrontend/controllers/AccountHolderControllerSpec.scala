@@ -72,9 +72,9 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       .expects(*, nino, *)
       .returning(Future.successful(AuditResult.Success))
 
-  def mockAuditEmailChanged(nino: String, oldEmail: String, newEmail: String) =
+  def mockAuditEmailChanged(nino: String, oldEmail: String, newEmail: String, path: String) =
     (mockAuditor.sendEvent(_: EmailChanged, _: NINO)(_: ExecutionContext))
-      .expects(EmailChanged(nino, oldEmail, newEmail, false), nino, *)
+      .expects(EmailChanged(nino, oldEmail, newEmail, false, path), nino, *)
       .returning(Future.successful(AuditResult.Success))
 
   def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
@@ -249,6 +249,8 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
       "show a success page if the NINO in the URL matches the NINO from auth, the update with " +
         "NS&I is successful and the email is successfully updated in mongo" in {
+          val encodedParams = emailVerificationParams.encode()
+
           inSequence{
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
@@ -256,10 +258,11 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
             mockSessionCacheConnectorPut(HTSSession(None, Some(verifiedEmail), None))(Right(()))
-            mockAuditEmailChanged(nino, "email", verifiedEmail)
+            mockAuditEmailChanged(nino, "email", verifiedEmail,
+                                  routes.AccountHolderController.emailVerifiedCallback(encodedParams).url)
           }
 
-          val result = verifyEmail(emailVerificationParams.encode())
+          val result = verifyEmail(encodedParams)
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(routes.AccountHolderController.getEmailVerified.url)
         }
@@ -268,16 +271,19 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
         "the NINO in the URL matches the NINO from auth, the update with " +
           "NS&I is successful but the email is not successfully updated in mongo" in {
+            val encodedParams = emailVerificationParams.encode()
+
             inSequence{
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(Enrolled(true)))
               mockEmailGet()(Right(Some("email")))
               mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
               mockStoreEmail(verifiedEmail)(Left(""))
-              mockAuditEmailChanged(nino, "email", verifiedEmail)
+              mockAuditEmailChanged(nino, "email", verifiedEmail,
+                                    routes.AccountHolderController.emailVerifiedCallback(encodedParams).url)
             }
 
-            val result = verifyEmail(emailVerificationParams.encode())
+            val result = verifyEmail(encodedParams)
             status(result) shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
           }
@@ -332,6 +338,8 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
         }
 
         "the write to session cache is unsuccessful" in {
+          val encodedParams = emailVerificationParams.encode()
+
           inSequence{
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
@@ -339,10 +347,11 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
             mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
             mockSessionCacheConnectorPut(HTSSession(None, Some(verifiedEmail), None))(Left(""))
-            mockAuditEmailChanged(nino, "email", verifiedEmail)
+            mockAuditEmailChanged(nino, "email", verifiedEmail,
+                                  routes.AccountHolderController.emailVerifiedCallback(encodedParams).url)
           }
 
-          val result = verifyEmail(emailVerificationParams.encode())
+          val result = verifyEmail(encodedParams)
           checkIsErrorPage(result)
         }
 
