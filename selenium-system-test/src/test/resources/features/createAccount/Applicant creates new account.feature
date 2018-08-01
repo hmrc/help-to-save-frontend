@@ -27,4 +27,4 @@ Feature: Applicant creates new account
   Scenario: An authenticated eligible user wishes to create account but sees their details are incorrect
     Given they apply for Help to Save
     When they see their details are incorrect and report it
-    Then they see the relevant page
+    Then they see the HMRC change of details page
