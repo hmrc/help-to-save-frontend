@@ -36,6 +36,7 @@ class IVJourneySteps extends Steps {
     IdentityVerificationStubPage.selectSuccessfulJourney()
 
     Browser.checkCurrentPageIs(IdentityVerifiedPage)
+    IdentityVerifiedPage.checkForOldQuotes()
     IdentityVerifiedPage.continue()
   }
 

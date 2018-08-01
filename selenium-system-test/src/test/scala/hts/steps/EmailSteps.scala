@@ -54,6 +54,7 @@ class EmailSteps extends Steps {
 
   Then("^they see that their email has been successfully verified$"){
     Browser.checkCurrentPageIs(ApplicantEmailVerifiedPage)
+    ApplicantEmailVerifiedPage.checkForOldQuotes()
   }
 
   When("^they request a re-send of the verification email$") {
@@ -67,10 +68,12 @@ class EmailSteps extends Steps {
 
   Then("^they are asked to enter an email address$") {
     Browser.checkCurrentPageIs(EnterEmailPage)
+    EnterEmailPage.checkForOldQuotes()
   }
 
   Then("^they see the final Create Account page$") {
     Browser.checkCurrentPageIs(CreateAccountPage)
+    CreateAccountPage.checkForOldQuotes()
   }
 
   Given("^the account holder has chosen to enter a new email address$"){ () ⇒
@@ -88,6 +91,7 @@ class EmailSteps extends Steps {
 
   Then("^the account holder sees that their email has been successfully verified$"){ () ⇒
     Browser.checkCurrentPageIs(AccountHolderEmailVerifiedPage)
+    AccountHolderEmailVerifiedPage.checkForOldQuotes()
   }
 
 }

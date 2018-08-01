@@ -25,4 +25,9 @@ package object steps {
     SelectEmailPage.selectGGEmail()
     CreateAccountPage.createAccount()
   }
+
+  def createAccountError()(implicit driver: WebDriver): Unit = {
+    EligiblePage.clickConfirmAndContinue()
+    SelectEmailPage.selectGGEmail()
+  }
 }

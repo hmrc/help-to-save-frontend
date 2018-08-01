@@ -14,6 +14,7 @@ Feature: Applicant goes through eligibility check
     When they then click on still think you're eligible link
     Then they see appeals and tax tribunal page
 
+  @HTS-1183
   Scenario: User is entitled to WTC but NOT in receipt of WTC and in receipt of UC but income is insufficient and so is NOT eligible
     Given a user has NINO EK978215B
     When they apply for Help to Save
@@ -35,7 +36,7 @@ Feature: Applicant goes through eligibility check
     When they then click on still think you're eligible link
     Then they see appeals and tax tribunal page
 
-  @HTS-859
+  @HTS-859 @HTS-1183
   Scenario: User experiences a technical error
     Given DES is down
     When they apply for Help to Save
