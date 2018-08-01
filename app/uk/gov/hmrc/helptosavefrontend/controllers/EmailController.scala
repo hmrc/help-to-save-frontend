@@ -143,7 +143,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
       def ifDigital =
-          checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
+          checkIfDoneEligibilityChecks { _ ⇒
             SeeOther(routes.EmailController.getSelectEmailPage().url)
           } { _ ⇒
             Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
@@ -287,7 +287,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                     _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo.copy(email = Some(e)), e))
                     r ← EitherT.liftF(toFuture(SeeOther(frontendAppConfig.nsiManageAccountUrl)))
                     _ ← {
-                      val auditEvent = EmailChanged(htsContext.nino, "", e, duringRegistrationJourney = false)
+                      val auditEvent = EmailChanged(htsContext.nino, "", e, duringRegistrationJourney = false, routes.EmailController.confirmEmail(email).url)
                       auditor.sendEvent(auditEvent, htsContext.nino)
                       EitherT.pure[Future, String](())
                     }
@@ -352,7 +352,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
     val result: EitherT[Future, String, Result] =
       for {
         s ← helpToSaveService.getUserEnrolmentStatus()
-        r ← handleCallback(s, emailVerificationParams)
+        r ← handleCallback(s, emailVerificationParams, routes.EmailController.emailVerifiedCallback(emailVerificationParams).url)
       } yield r
 
     result.leftMap { e ⇒
@@ -361,15 +361,16 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
     }.merge
   }(redirectOnLoginURL = routes.EmailController.emailVerifiedCallback(emailVerificationParams).url)
 
-  private def handleCallback(status: EnrolmentStatus, emailVerificationParams: String)(
+  private def handleCallback(status: EnrolmentStatus, emailVerificationParams: String, path: String)(
       implicit
       hc: HeaderCarrier, h: HtsContextWithNINOAndUserDetails, request: Request[AnyContent]): EitherT[Future, String, Result] =
     status.fold[EitherT[Future, String, Result]](
-      handleCallBackForDigital(emailVerificationParams),
-      _ ⇒ handleCallBackForDE(emailVerificationParams)
+      handleCallBackForDigital(emailVerificationParams, path),
+      _ ⇒ handleCallBackForDE(emailVerificationParams, path)
     )
 
-  private def handleCallBackForDigital(emailVerificationParams: String)(implicit htsContext: HtsContextWithNINOAndUserDetails,
+  private def handleCallBackForDigital(emailVerificationParams: String,
+                                       path:                    String)(implicit htsContext: HtsContextWithNINOAndUserDetails,
                                                                         hc:      HeaderCarrier,
                                                                         request: Request[AnyContent]): EitherT[Future, String, Result] = {
     withEmailVerificationParameters(
@@ -385,7 +386,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             },
               {
                 case (oldEmail, updatedUserInfo) ⇒
-                  val auditEvent = EmailChanged(updatedUserInfo.nino, oldEmail.getOrElse(""), params.email, duringRegistrationJourney = true)
+                  val auditEvent = EmailChanged(updatedUserInfo.nino, oldEmail.getOrElse(""), params.email, duringRegistrationJourney = true, path)
                   auditor.sendEvent(auditEvent, updatedUserInfo.nino)
                   SeeOther(routes.EmailController.getEmailVerified().url)
               })
@@ -397,10 +398,11 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
         } yield result
 
       }, EitherT.pure[Future, String](SeeOther(routes.EmailController.verifyEmailErrorTryLater().url))
-    )
+    )(path)
   }
 
-  private def handleCallBackForDE(emailVerificationParams: String)(implicit htsContext: HtsContextWithNINOAndUserDetails,
+  private def handleCallBackForDE(emailVerificationParams: String,
+                                  path:                    String)(implicit htsContext: HtsContextWithNINOAndUserDetails,
                                                                    hc:      HeaderCarrier,
                                                                    request: Request[AnyContent]): EitherT[Future, String, Result] = {
     htsContext.userDetails.fold[EitherT[Future, String, Result]](
@@ -420,7 +422,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                 SeeOther(routes.EmailController.getEmailVerified().url))
               )
               _ ← {
-                val auditEvent = EmailChanged(params.nino, "", params.email, duringRegistrationJourney = false)
+                val auditEvent = EmailChanged(params.nino, "", params.email, duringRegistrationJourney = false, path)
                 auditor.sendEvent(auditEvent, params.nino)
                 EitherT.pure[Future, String](())
               }
@@ -430,7 +432,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             logger.warn("invalid emailVerificationParams during email verification")
             EitherT.pure[Future, String](SeeOther(routes.EmailController.verifyEmailErrorTryLater().url))
           }
-        )
+        )(path)
       }
     )
   }

@@ -652,7 +652,7 @@ class EmailControllerSpec
           mockSessionCacheConnectorPut(HTSSession(None, Some("decrypted"), None, false))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
           mockUpdateEmail(NSIUserInfo(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted"))(Right(None))
-          mockAudit(EmailChanged(nino, "", "decrypted", false))
+          mockAudit(EmailChanged(nino, "", "decrypted", false, routes.EmailController.confirmEmail(encryptedEmail).url))
         }
 
         val result = confirmEmail(encryptedEmail)
@@ -682,7 +682,7 @@ class EmailControllerSpec
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
           mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, email, newEmail, true))
+          mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -702,7 +702,7 @@ class EmailControllerSpec
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), None, None))))
           mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, "", newEmail, true))
+          mockAudit(EmailChanged(nino, "", newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -730,7 +730,7 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect"))
+          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect", routes.EmailController.emailVerifiedCallback("blah blah").url))
         }
 
         val result = emailVerifiedCallback("blah blah")
@@ -751,7 +751,7 @@ class EmailControllerSpec
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibilityResult)), Some(email), None))))
           mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibilityResult.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, email, newEmail, true))
+          mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -808,7 +808,7 @@ class EmailControllerSpec
           mockUpdateEmail(updatedNSIUserInfo)(Right(None))
           mockStoreConfirmedEmail(email)(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, Some(email), None, false))(Right(None))
-          mockAudit(EmailChanged(nino, "", email, false))
+          mockAudit(EmailChanged(nino, "", email, false, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -835,7 +835,7 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect"))
+          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect", routes.EmailController.emailVerifiedCallback("blah blah").url))
         }
 
         val result = emailVerifiedCallback("blah blah")

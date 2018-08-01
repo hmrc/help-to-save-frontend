@@ -54,18 +54,18 @@ trait VerifyEmailBehaviour {
 
   def withEmailVerificationParameters(emailVerificationParams: String,
                                       ifValid:                 EmailVerificationParams ⇒ EitherT[Future, String, Result],
-                                      ifInvalid:               ⇒ EitherT[Future, String, Result])(implicit request: Request[AnyContent],
-                                                                                                  htsContext:  HtsContextWithNINOAndUserDetails,
-                                                                                                  crypto:      Crypto,
-                                                                                                  messages:    Messages,
-                                                                                                  transformer: NINOLogMessageTransformer): EitherT[Future, String, Result] =
+                                      ifInvalid:               ⇒ EitherT[Future, String, Result])(path: String)(implicit request: Request[AnyContent],
+                                                                                                                htsContext:  HtsContextWithNINOAndUserDetails,
+                                                                                                                crypto:      Crypto,
+                                                                                                                messages:    Messages,
+                                                                                                                transformer: NINOLogMessageTransformer): EitherT[Future, String, Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒
         val nino = htsContext.nino
         logger.warn("SuspiciousActivity: malformed redirect from email verification service back to HtS, " +
           s"could not decode email verification parameters: ${e.getMessage}", e, nino)
-        auditor.sendEvent(SuspiciousActivity(Some(nino), "malformed_redirect"), nino)
+        auditor.sendEvent(SuspiciousActivity(Some(nino), "malformed_redirect", path), nino)
         ifInvalid
 
       case Success(params) ⇒
