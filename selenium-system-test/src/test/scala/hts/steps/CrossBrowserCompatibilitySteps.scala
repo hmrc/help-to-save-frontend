@@ -99,7 +99,6 @@ class CrossBrowserCompatibilitySteps extends Steps {
 
   private def checkPrivacyPolicyPage(currentPage: Page): Unit = {
     Browser.openAndCheckPageInNewWindowUsingLinkText("Privacy policy", PrivacyPolicyPage)
-    PrivacyPolicyPage.checkForOldQuotes()
     currentPage.navigate()
     Browser.checkCurrentPageIs(currentPage)
   }
