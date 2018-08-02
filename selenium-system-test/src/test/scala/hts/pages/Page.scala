@@ -17,7 +17,8 @@
 package hts.pages
 
 import hts.browser.Browser
-import org.openqa.selenium.WebDriver
+import junit.framework.Assert
+import org.openqa.selenium.{By, WebDriver}
 
 trait Page {
 
@@ -28,6 +29,12 @@ trait Page {
   val expectedPageHeader: Option[String] = None
 
   def navigate()(implicit driver: WebDriver): Unit = Browser.go to expectedURL
+
+  def checkForOldQuotes()(implicit driver: WebDriver): Unit = {
+    val bodyText: String = driver.findElement(By.tagName("body")).getText()
+    Assert.assertFalse("No old single quotes were found!", bodyText.contains("'"))
+    Assert.assertFalse("No old double quotes were found!", bodyText.contains('"'))
+  }
 
 }
 

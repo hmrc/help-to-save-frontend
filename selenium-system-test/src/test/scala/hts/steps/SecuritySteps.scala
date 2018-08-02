@@ -18,7 +18,7 @@ package hts.steps
 
 import hts.browser.Browser
 import hts.pages._
-import hts.utils.ScenarioContext
+import hts.utils.{Configuration, ScenarioContext}
 
 import scala.collection.JavaConverters._
 

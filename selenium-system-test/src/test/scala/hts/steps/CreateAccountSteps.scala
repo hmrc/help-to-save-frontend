@@ -30,6 +30,7 @@ class CreateAccountSteps extends Steps {
 
   When("^they try to sign in through the Apply page without being logged in GG$") {
     ApplyPage.navigate()
+    ApplyPage.checkForOldQuotes()
     driver.manage().deleteAllCookies()
     ApplyPage.clickSignInLink()
   }
@@ -63,6 +64,7 @@ class CreateAccountSteps extends Steps {
     EligiblePage.detailsNotCorrect()
 
     Browser.checkCurrentPageIs(IncorrectDetailsPage)
+    IncorrectDetailsPage.checkForOldQuotes()
     Browser.checkForLinksThatExistOnEveryPage(IncorrectDetailsPage)
     IncorrectDetailsPage.clickBack
 
@@ -80,6 +82,8 @@ class CreateAccountSteps extends Steps {
   When("^an applicant cancels their application just before creating an account$") {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
     EligiblePage.clickConfirmAndContinue()
+    Browser.checkCurrentPageIs(SelectEmailPage)
+    SelectEmailPage.checkForOldQuotes()
     SelectEmailPage.selectGGEmail()
     CreateAccountPage.exitWithoutCreatingAccount()
   }
@@ -87,6 +91,11 @@ class CreateAccountSteps extends Steps {
   When("^they proceed to create an account using their GG email$") {
     EligiblePage.navigate()
     createAccountUsingGGEmail()
+  }
+
+  When("^they proceed to create an account$"){
+    EligiblePage.navigate()
+    createAccountError()
   }
 
   When("^they proceed to the Apply page and click on the Start now button$") {
@@ -128,6 +137,7 @@ class CreateAccountSteps extends Steps {
 
   Then("^they see the Help to Save About page$") {
     Browser.checkHeader(AboutPage)
+    AboutPage.checkForOldQuotes()
   }
 
   Then("^they see that the account is created$|^they will be on the account home page$") {

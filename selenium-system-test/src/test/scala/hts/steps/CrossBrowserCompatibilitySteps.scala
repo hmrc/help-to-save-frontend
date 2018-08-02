@@ -45,6 +45,7 @@ class CrossBrowserCompatibilitySteps extends Steps {
     Browser.nextPage()
 
     Browser.checkHeader(HowTheAccountWorksPage)
+    HowTheAccountWorksPage.checkForOldQuotes()
     Browser.nextPage()
 
     Browser.checkHeader(HowWeCalculateBonusesPage)
@@ -59,6 +60,7 @@ class CrossBrowserCompatibilitySteps extends Steps {
     ApplyPage.clickSignInLink()
 
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
+    YouDoNotHaveAnAccountPage.checkForOldQuotes()
     Browser.goTo(s"${Configuration.host}/help-to-save/check-eligibility")
 
     Browser.checkHeader(EligiblePage)
@@ -82,9 +84,11 @@ class CrossBrowserCompatibilitySteps extends Steps {
 
     ChangeEmailPage.navigate()
     Browser.checkCurrentPageIs(ChangeEmailPage)
+    ChangeEmailPage.checkForOldQuotes()
     ChangeEmailPage.setNewEmailAddress("anotheremail@mail.com")
 
     Browser.checkCurrentPageIs(VerifyEmailPage)
+    VerifyEmailPage.checkForOldQuotes()
     VerifyEmailPage.resendEmail
 
     Browser.checkHeader(VerifyEmailPage)
@@ -95,7 +99,6 @@ class CrossBrowserCompatibilitySteps extends Steps {
 
   private def checkPrivacyPolicyPage(currentPage: Page): Unit = {
     Browser.openAndCheckPageInNewWindowUsingLinkText("Privacy policy", PrivacyPolicyPage)
-
     currentPage.navigate()
     Browser.checkCurrentPageIs(currentPage)
   }

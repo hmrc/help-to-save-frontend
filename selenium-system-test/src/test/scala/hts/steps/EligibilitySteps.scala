@@ -44,6 +44,7 @@ class EligibilitySteps extends Steps {
 
   Then("^they see a technical error page$") {
     Browser.checkHeader(TechnicalErrorPage)
+    TechnicalErrorPage.checkForOldQuotes()
   }
 
   When("^they then click on still think you're eligible link$") {
@@ -52,6 +53,7 @@ class EligibilitySteps extends Steps {
 
   Then("^they see appeals and tax tribunal page$") {
     Browser.checkHeader(ThinkYouAreEligiblePage)
+    ThinkYouAreEligiblePage.checkForOldQuotes()
   }
 
   Given("^a user has NINO (.*)$") { (nino: String) ⇒
@@ -62,16 +64,19 @@ class EligibilitySteps extends Steps {
     reason match {
       case 3 ⇒
         Browser.checkHeader(NotEligibleReason3Page)
+        NotEligibleReason3Page.checkForOldQuotes()
         val notEligibleTextItems = NotEligibleReason3Page.notEligibleText
         notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
         )
       case 5 ⇒
         Browser.checkHeader(NotEligibleReason5Page)
+        NotEligibleReason5Page.checkForOldQuotes()
         val notEligibleTextItems = NotEligibleReason5Page.notEligibleText
         notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
         )
       case 4 | 9 ⇒
         Browser.checkHeader(NotEligibleReason4And9Page)
+        NotEligibleReason4And9Page.checkForOldQuotes()
         val notEligibleTextItems = NotEligibleReason4And9Page.notEligibleText
         notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
         )

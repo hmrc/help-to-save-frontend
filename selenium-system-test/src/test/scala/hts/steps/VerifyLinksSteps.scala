@@ -37,12 +37,14 @@ class VerifyLinksSteps extends Steps {
     Browser.nextPage()
 
     checkPage(EligibilityInfoPage)
+    EligibilityInfoPage.checkForOldQuotes()
     Browser.nextPage()
 
     checkPage(HowTheAccountWorksPage)
     Browser.nextPage()
 
     checkPage(HowWeCalculateBonusesPage)
+    HowWeCalculateBonusesPage.checkForOldQuotes()
     verifyGovUKLink()
     Browser.nextPage()
 
@@ -57,6 +59,7 @@ class VerifyLinksSteps extends Steps {
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
 
     checkPage(VerifyYourEmailPage)
+    VerifyYourEmailPage.checkForOldQuotes()
 
     //go back to original select email page and continue
     Browser.goBack()
@@ -92,12 +95,14 @@ class VerifyLinksSteps extends Steps {
   Then("^they can access the cannot change email try later page$") {
     CannotChangeEmailPageTryLater.navigate()
     Browser.checkCurrentPageIs(CannotChangeEmailPageTryLater)
+    CannotChangeEmailPageTryLater.checkForOldQuotes()
     Browser.checkForBadContent(CannotChangeEmailPageTryLater)
   }
 
   Then("^they access the sign in page$") {
     HTSSignInPage.navigate()
     Browser.checkCurrentPageIs(HTSSignInPage)
+    HTSSignInPage.checkForOldQuotes()
   }
 
   Then("^they see the daily cap reached page$") {
@@ -115,11 +120,13 @@ class VerifyLinksSteps extends Steps {
   Then("^they see the service unavailable page$") {
     ServiceUnavailablePage.navigate()
     Browser.checkCurrentPageIs(ServiceUnavailablePage)
+    ServiceUnavailablePage.checkForOldQuotes()
   }
 
   Then("^they see the cannot change email page$") {
     CannotChangeEmailPage.navigate()
     Browser.checkCurrentPageIs(CannotChangeEmailPage)
+    CannotChangeEmailPage.checkForOldQuotes()
     Browser.checkForBadContent(CannotChangeEmailPage)
   }
 
@@ -132,6 +139,7 @@ class VerifyLinksSteps extends Steps {
   Then("^they navigate to and see the close account are you sure page$") {
     CloseAccountPage.navigate()
     Browser.checkCurrentPageIs(CloseAccountPage)
+    CloseAccountPage.checkForOldQuotes()
     Browser.checkForBadContent(CloseAccountPage)
   }
 
@@ -146,17 +154,20 @@ class VerifyLinksSteps extends Steps {
   Then("^they see a page showing which details are missing$") {
     MissingInfoPage.navigate()
     Browser.checkCurrentPageIs(MissingInfoPage)
+    MissingInfoPage.checkForOldQuotes()
     Browser.checkForBadContent(MissingInfoPage)
   }
 
   Then("^they see the your link has expired page$") {
     LinkExpiredPage.navigate()
     Browser.checkCurrentPageIs(LinkExpiredPage)
+    LinkExpiredPage.checkForOldQuotes()
     Browser.checkForBadContent(LinkExpiredPage)
   }
 
   Then("^they see the create account error page$") {
     CreateAccountErrorPage.navigate()
+    CreateAccountErrorPage.checkForOldQuotes()
     Browser.checkCurrentPageIs(CreateAccountErrorPage)
     Browser.checkForBadContent(CreateAccountErrorPage)
   }
