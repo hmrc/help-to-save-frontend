@@ -32,8 +32,8 @@ trait Page {
 
   def checkForOldQuotes()(implicit driver: WebDriver): Unit = {
     val bodyText: String = driver.findElement(By.tagName("body")).getText()
-    Assert.assertFalse("No old single quotes were found!", bodyText.contains("'"))
-    Assert.assertFalse("No old double quotes were found!", bodyText.contains('"'))
+    Assert.assertFalse("Old single quotes were found!", bodyText.contains("'"))
+    Assert.assertFalse("Old double quotes were found!", bodyText.contains('"'))
   }
 
 }
