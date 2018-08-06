@@ -711,8 +711,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           }
 
         case None ⇒
-          logger.warn("expecting a valid session for the user during email submit, but not found")
-          internalServerError()
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       }.merge
   }
 }
