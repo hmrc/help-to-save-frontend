@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckRespon
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIUserInfo}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, base64Encode, maskNino}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -60,9 +60,7 @@ trait HelpToSaveConnector {
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfig: FrontendAppConfig) extends HelpToSaveConnector with Logging {
-
-  logger.info(s"crypto.encryption-key is ${frontendAppConfig.getString("crypto.encryption-key")}")
+class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfig: FrontendAppConfig) extends HelpToSaveConnector {
 
   private val helpToSaveUrl: String = frontendAppConfig.baseUrl("help-to-save")
 
