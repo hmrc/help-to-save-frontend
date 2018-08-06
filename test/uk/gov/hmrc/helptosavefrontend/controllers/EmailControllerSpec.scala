@@ -266,7 +266,8 @@ class EmailControllerSpec
         }
 
         val result = selectEmailSubmit(None)
-        status(result) shouldBe 500
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
       "handle errors during session cache lookup in keystore" in {
@@ -317,7 +318,8 @@ class EmailControllerSpec
         }
 
         val result = selectEmailSubmit(None)
-        status(result) shouldBe 500
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
       "handle DE users - throw server error if there is an existing session but no email" in {
@@ -508,7 +510,8 @@ class EmailControllerSpec
         }
 
         val result = giveEmailSubmit(email)
-        status(result) shouldBe 500
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
       "handle errors during session cache lookup in keystore" in {
@@ -551,7 +554,7 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
       }
 
-      "handle DE users - throw server error if no existing session found" in {
+      "handle DE users - redirect to check eligibility if no existing session found" in {
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -559,7 +562,8 @@ class EmailControllerSpec
         }
 
         val result = giveEmailSubmit(email)
-        status(result) shouldBe 500
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
       "handle DE user who submitted form with new-email" in {
@@ -1090,7 +1094,7 @@ class EmailControllerSpec
         contentAsString(result) should include("Email address verified")
       }
 
-      "handle Digital users and throw error" when {
+      "handle Digital users and redirect to check eligibility" when {
 
         "there is no session" in {
           inSequence {
@@ -1099,7 +1103,8 @@ class EmailControllerSpec
           }
 
           val result = getEmailVerified
-          status(result) shouldBe 500
+          status(result) shouldBe 303
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
         }
 
       }
