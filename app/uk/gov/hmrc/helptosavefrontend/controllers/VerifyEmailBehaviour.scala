@@ -58,7 +58,8 @@ trait VerifyEmailBehaviour {
                                                                                                                 htsContext:  HtsContextWithNINOAndUserDetails,
                                                                                                                 crypto:      Crypto,
                                                                                                                 messages:    Messages,
-                                                                                                                transformer: NINOLogMessageTransformer): EitherT[Future, String, Result] =
+                                                                                                                transformer: NINOLogMessageTransformer
+  ): EitherT[Future, String, Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒
@@ -71,10 +72,5 @@ trait VerifyEmailBehaviour {
       case Success(params) ⇒
         ifValid(params)
     }
-
-  def getEmailFromSession(session: Option[HTSSession])(getEmail: HTSSession ⇒ Option[Email], description: String): Either[String, Email] =
-    session.fold[Either[String, Email]](
-      Left("Could not find session")
-    )(getEmail(_).fold[Either[String, Email]](Left(s"Could not find $description in session"))(Right(_)))
 
 }

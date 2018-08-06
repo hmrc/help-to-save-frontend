@@ -77,7 +77,6 @@ class EmailVerificationConnectorImpl @Inject() (http:    WSHttp,
           logger.info(s"Email verification successfully triggered, received status ${response.status} " +
             s"(round-trip time: ${nanosToPrettyString(time)})", nino)
           Right(())
-
         case other ⇒
           handleErrorStatus(other, response, time, nino)
       }

@@ -17,14 +17,13 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
-import play.api.mvc.{AnyContent, Request, Result}
+import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.controllers.SessionBehaviour.SessionWithEligibilityCheck
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, NINOLogMessageTransformer}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -47,17 +46,6 @@ trait SessionBehaviour {
           logger.warn(s"Could not read sessions data from keystore: $e", htsContext.nino)
           internalServerError()
       }.merge
-
-  def checkHasDoneEligibilityChecks(noSession: ⇒ Future[Result])(hasDoneChecks: SessionWithEligibilityCheck ⇒ Future[Result])(
-      implicit
-      htsContext:  HtsContextWithNINO,
-      hc:          HeaderCarrier,
-      request:     Request[AnyContent],
-      transformer: NINOLogMessageTransformer): Future[Result] =
-    checkSession(noSession){ session ⇒
-      session.eligibilityCheckResult.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(
-        result ⇒ hasDoneChecks(SessionWithEligibilityCheck(result, session.pendingEmail, session.confirmedEmail)))
-    }
 
 }
 

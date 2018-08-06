@@ -480,14 +480,21 @@ hts.email-updated.p1=If you create a Help to Save account we&rsquo;ll use this e
 hts.email-updated.p2=Your email address has not been updated in other government services.
 hts.email-updated.continue_button=Continue
 
+# Email updated - DE to Digital
+hts.email-updated.de-digital.p1=We&rsquo;ll use this email address to contact you about your Help to Save account.
+
 # Cannot change email
 hts.cannot-change-email.title.h1=Something went wrong
 hts.cannot-change-email.p1=We cannot change your email address at the moment.
-hts.cannot-change-email.p2=You can create a Help to Save account now using the email address we hold for you. If you create an account, you&rsquo;ll be able to change your email address from within your account.
-hts.cannot-change-email.p3=Or you can come back later and use a different email address.
+
+hts.cannot-change-email.registration.p2=You can create a Help to Save account now using the email address we hold for you. If you create an account, you&rsquo;ll be able to change your email address from within your account.
+hts.cannot-change-email.registration.p3=Or you can come back later and use a different email address.
+hts.cannot-change-email.de.to.digital.p2=You can change to an online Help to Save account now by using the email address we hold for you. You&rsquo;ll be able to update your email address later from within your online account.
+hts.cannot-change-email.de.to.digital.p3=Or you can exit now and come back later to use a different email address.
 hts.cannot-change-email.header1=What do you want to do?
-hts.cannot-change-email.opt1=Use {0} for my Help to Save account
-hts.cannot-change-email.opt2=Try again later and exit to About Help to Save
+hts.cannot-change-email.p4=I want to:
+hts.cannot-change-email.opt1=use {0}
+hts.cannot-change-email.opt2=try again later and exit to About Help to Save
 hts.cannot-change-email.select-option=Select one option
 hts.cannot-change-email.continue-button=Continue
 hts.cannot-change-email.error-summary.title=There is a problem
@@ -495,7 +502,7 @@ hts.cannot-change-email.error-summary.descriptive-link=Select one option
 
 # Cannot change email try later
 hts.cannot-change-email-try-later.title.h1=Something went wrong
-hts.cannot-change-email-try-later.p1=We cannot change your email
+hts.cannot-change-email-try-later.p1=We cannot change your email address at the moment.
 hts.cannot-change-email-try-later.try_later_button=Try again
 hts.cannot-change-email-try-later.back_button=Go to About Help to Save
 

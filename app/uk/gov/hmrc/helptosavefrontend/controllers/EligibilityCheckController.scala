@@ -28,6 +28,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import uk.gov.hmrc.helptosavefrontend.controllers.SessionBehaviour.SessionWithEligibilityCheck
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -207,6 +208,17 @@ class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSav
       }
     )
   }
+
+  private def checkHasDoneEligibilityChecks(noSession: ⇒ Future[PlayResult])(hasDoneChecks: SessionWithEligibilityCheck ⇒ Future[PlayResult])(
+      implicit
+      htsContext:  HtsContextWithNINO,
+      hc:          HeaderCarrier,
+      request:     Request[AnyContent],
+      transformer: NINOLogMessageTransformer): Future[PlayResult] =
+    checkSession(noSession){ session ⇒
+      session.eligibilityCheckResult.fold[Future[PlayResult]](SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(
+        result ⇒ hasDoneChecks(SessionWithEligibilityCheck(result, session.pendingEmail, session.confirmedEmail)))
+    }
 
 }
 

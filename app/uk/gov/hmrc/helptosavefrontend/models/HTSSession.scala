@@ -34,7 +34,6 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
 case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]],
                       confirmedEmail:         Option[Email],
                       pendingEmail:           Option[Email],
-                      isDigital:              Boolean                                          = true,
                       ivURL:                  Option[String]                                   = None,
                       ivSuccessURL:           Option[String]                                   = None
 )

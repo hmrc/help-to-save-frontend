@@ -274,6 +274,11 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
       }.merge
   }
 
+  private def getEmailFromSession(session: Option[HTSSession])(getEmail: HTSSession ⇒ Option[Email], description: String): Either[String, Email] =
+    session.fold[Either[String, Email]](
+      Left("Could not find session")
+    )(getEmail(_).fold[Either[String, Email]](Left(s"Could not find $description in session"))(Right(_)))
+
 }
 
 object AccountHolderController {

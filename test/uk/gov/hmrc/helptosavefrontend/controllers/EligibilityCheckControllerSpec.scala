@@ -193,7 +193,7 @@ class EligibilityCheckControllerSpec
       "show the you're eligible page if the session data indicates that the user is eligible" in {
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, true, None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None))))
         }
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
@@ -204,7 +204,7 @@ class EligibilityCheckControllerSpec
       "show the correct page if the session data indicates that the user is ineligible" in {
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200)(Some(nino))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, true, None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None))))
         }
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
