@@ -22,7 +22,7 @@ hts.sign-in.title.h1=Sign in to your Help to Save account
 hts.sign-in.p1=Sign in to your Help to Save account to:
 hts.sign-in.ul1-li1=check your current balance
 hts.sign-in.ul1-li2=grow your savings and bonus
-hts.sign-in.ul1-li3=find out when you''ll get your next bonus
+hts.sign-in.ul1-li3=find out when you&rsquo;ll get your next bonus
 hts.sign-in.ul1-li4=read your messages
 hts.sign-in.p2=To sign in, you&rsquo;ll need the Government Gateway ID and password you used to apply.
 hts.sign-in.h2=Before you start
@@ -401,16 +401,16 @@ hts.iv.continue_button=Continue
 
 # Email error
 hts.email.error=Enter a valid email address
-hts.email.error.local-too-long=The number of characters before the ''@'' must be 64 or less
-hts.email.error.domain-too-long=The number of characters after the ''@'' must be 252 or less
-hts.email.error.local-too-short=Your email address must have one character or more before and after the ''@''
-hts.email.error.domain-too-short=Your email address must have one character or more before and after the ''@''
+hts.email.error.local-too-long=The number of characters before the &lsquo;@&rsquo; must be 64 or less
+hts.email.error.domain-too-long=The number of characters after the &lsquo;@&rsquo; must be 252 or less
+hts.email.error.local-too-short=Your email address must have one character or more before and after the &lsquo;@&rsquo;
+hts.email.error.domain-too-short=Your email address must have one character or more before and after the &lsquo;@&rsquo;
 hts.email.error.total-too-long=Your email address must be 254 characters or less
-hts.email.error.blank=Enter a valid email address
-hts.email.error.no-at-symbol=Enter a valid email address, like yourname@example.com
-hts.email.error.no-dot-symbol=Your email address must have a ''dot''
-hts.email.error.no-text-after-dot-symbol=Your email address must have characters before and after the ''dot''
-hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the ''dot''
+hts.email.error.blank=Enter the email address you want to use for your Help to Save account
+hts.email.error.no-at-symbol=Enter an email address with a name, &lsquo;@&rsquo; symbol and a domain name, like yourname@example.com
+hts.email.error.no-dot-symbol=Your email address must have a &lsquo;dot&rsquo;
+hts.email.error.no-text-after-dot-symbol=Your email address must have characters before and after the &lsquo;dot&rsquo;
+hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the &lsquo;dot&rsquo;
 
 # Select email
 hts.select-email.title.h1=Which email address do you want us to use for your Help to Save account?
