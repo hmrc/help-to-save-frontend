@@ -423,7 +423,6 @@ hts.select-email.select-an-option=Select one option
 hts.select-email.select-one.error-summary.title=There is a problem
 hts.select-email.select-one.error-summary.link-description=Select one option
 hts.select-email.invalid-email.error-summary.title=There is a problem
-hts.select-email.invalid-email.error-summary.link-description=Enter a valid email address
 
 # Give email
 hts.give-email.title.h1=Which email address do you want to use for Help to Save?
