@@ -40,11 +40,11 @@
   </div>
   }
 
-  @{if(hasInvalidEmail)
+  @if(hasInvalidEmail) {
   <div class="error-summary" role="alert" aria-labelledby="error-summary-invalid-email" tabindex="-2">
-    <h2 class="heading-medium error-summary-heading" id="error-summary-invalid-email">{Messages("hts.select-email.invalid-email.error-summary.title")}</h2>
+    <h2 class="heading-medium error-summary-heading" id="error-summary-invalid-email">@Messages("hts.select-email.invalid-email.error-summary.title")</h2>
     <ul class="error-summary-list">
-      <li><a href="#collect-new-email">{Messages("hts.select-email.invalid-email.error-summary.link-description")}</a></li>
+      <li><a href="#collect-new-email">@email_form_validation_error_message(form, "new-email")</a></li>
     </ul>
   </div>
   }
