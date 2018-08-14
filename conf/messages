@@ -359,7 +359,7 @@ hts.iv.failed_iv.title.h1=We were not able to verify your identity
 hts.iv.failed_iv.p1=You did not answer all the questions correctly.
 hts.iv.failed_iv.p2=Your answers to the questions need to match the answers we already have for you.
 hts.iv.failed_iv.p3=You&rsquo;ll need to try again.
-hts.iv.failed_iv.try-again-button=Try Again
+hts.iv.failed_iv.try-again-button=Try again
 
 # Failed Matching
 hts.iv.failed_matching.title.h1=We were not able to verify your identity
