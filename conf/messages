@@ -395,7 +395,7 @@ hts.iv.we_ve_confirmed_your_identity.p2=We&rsquo;ll check if you&rsquo;re eligib
 # IV Precondition Failed
 hts.iv.precondition_failed.title.h1=You’re not able to use this service
 hts.iv.precondition_failed.message=We&rsquo;ve checked the details in your Government Gateway account and you do not meet the criteria to use this service.
-hts.exit_to_about_hts=Exit to About Help to Save
+hts.exit_to_gov_uk=Exit to GOV.UK
 hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
 
