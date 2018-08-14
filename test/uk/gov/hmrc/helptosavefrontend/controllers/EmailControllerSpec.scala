@@ -1108,7 +1108,7 @@ class EmailControllerSpec
 
         val result = verifyEmailErrorTryLater
         status(result) shouldBe 200
-        contentAsString(result) should include("We cannot change your email address at this time")
+        contentAsString(result) should include("We cannot change your email address at the moment")
       }
     }
 
