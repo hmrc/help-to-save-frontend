@@ -85,13 +85,14 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
 
-  lazy val analyticsToken: String = getString("google-analytics.token")
-  lazy val analyticsHost: String = getString("google-analytics.host")
+  val analyticsToken: String = getString("google-analytics.token")
+  val analyticsHost: String = getString("google-analytics.host")
 
   val contactFormServiceIdentifier: String = "HTS"
 
   val contactBaseUrl: String = getUrlFor("contact-frontend")
-  lazy val reportAProblemPartialUrl: String = s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  lazy val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  lazy val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
+  val reportAProblemPartialUrl: String = s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
+  val govUkURL: String = getString("gov-uk.url")
 }
