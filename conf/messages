@@ -9,6 +9,7 @@ hts.global.hidden-icon-text.warning=Warning
 hts.global.error.prefix=Error:
 hts.global.title={0} {1} - {2} - GOV.UK
 hts.global.title.section.email=- Manage your email address
+hts.global.exit.to.gov.uk=Exit to GOV.UK
 
 hts.nav.title=Help to Save
 hts.nav.next=Next
@@ -395,7 +396,6 @@ hts.iv.we_ve_confirmed_your_identity.p2=We&rsquo;ll check if you&rsquo;re eligib
 # IV Precondition Failed
 hts.iv.precondition_failed.title.h1=You’re not able to use this service
 hts.iv.precondition_failed.message=We&rsquo;ve checked the details in your Government Gateway account and you do not meet the criteria to use this service.
-hts.exit_to_gov_uk=Exit to GOV.UK
 hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
 
