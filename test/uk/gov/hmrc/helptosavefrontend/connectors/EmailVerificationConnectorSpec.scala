@@ -108,7 +108,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
           "the call comes back with an unexpected status" in {
             val statuses = Set(Status.OK, Status.CREATED, Status.BAD_REQUEST, Status.CONFLICT, Status.SERVICE_UNAVAILABLE)
 
-            forAll { (status: Int) ⇒
+            forAll { status: Int ⇒
               whenever(!statuses.contains(status)) {
                 mockEncrypt(nino + "#" + email)("")
                 mockPost(verificationRequest)(status, None)

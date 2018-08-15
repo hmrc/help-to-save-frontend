@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
-@(backupEmail: String, form: Form[Continue])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(backupEmail: String, form: Form[Continue], duringRegistrationJourney: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
     @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
 
@@ -42,19 +42,26 @@
         }
 
         <h1 class="heading-large">@Messages("hts.cannot-change-email.title.h1")</h1>
-
         <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
-        <p>@Html(Messages("hts.cannot-change-email.p2"))</p>
-        <p>@Messages("hts.cannot-change-email.p3")</p>
+
+        @if(duringRegistrationJourney){
+            <p>@Html(Messages("hts.cannot-change-email.registration.p2"))</p>
+            <p>@Messages("hts.cannot-change-email.registration.p3")</p>
+        } else {
+            <p>@Html(Messages("hts.cannot-change-email.de.to.digital.p2"))</p>
+            <p>@Messages("hts.cannot-change-email.de.to.digital.p3")</p>
+        }
+
+
+
 
     @helpers.form(routes.EmailController.verifyEmailErrorSubmit){
         @CSRF.formField(request)
 
         <fieldset>
             <legend>
-                <h2 class="heading-medium">
-                @Messages("hts.cannot-change-email.header1")
-                </h2>
+                <h2 class="heading-medium">@Messages("hts.cannot-change-email.header1")</h2>
+                <span class="body-text">@Messages("hts.cannot-change-email.p4")</span>
             </legend>
 
             <div class="@{"form-group" + { if(hasErrors) " form-group-error" else "" }}" id="select-email">

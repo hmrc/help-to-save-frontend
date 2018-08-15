@@ -34,7 +34,6 @@ import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.CannotCreateAc
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, EmailVerificationErrorContinueForm, GiveEmailForm, SelectEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
@@ -68,14 +67,14 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
   def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
-      def ifDigital: Future[Result] =
-          checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-            Ok(views.html.email.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm))
-          } { _ ⇒
-            SeeOther(routes.EmailController.getGiveEmailPage().url)
-          }
+      def ifDigitalNewApplicant = { session: Option[HTSSession] ⇒
+          withEligibleSession (
+            { case (_, eligibleWithEmail) ⇒ Ok(views.html.email.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm)) },
+            { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url) }
+          )(session)
+        }
 
-        def ifDE: Future[Result] =
+        def ifDE = { _: Option[HTSSession] ⇒
           htsContext.userDetails.fold[Future[Result]](
             _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url),
             userInfo ⇒ userInfo.email.fold[Future[Result]](
@@ -84,80 +83,87 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                 email ⇒
                   emailValidation.validate(email).toEither match {
                     case Right(validEmail) ⇒
-                      updateSessionAndReturnResult(HTSSession(None, None, Some(validEmail), isDigital = false),
-                                                   Ok(views.html.email.select_email(validEmail, SelectEmailForm.selectEmailForm)))
+                      updateSessionAndReturnResult(
+                        HTSSession(None, None, Some(validEmail)),
+                        Ok(views.html.email.select_email(validEmail, SelectEmailForm.selectEmailForm)))
 
                     case Left(_) ⇒
-                      updateSessionAndReturnResult(HTSSession(None, None, None, false),
-                                                   SeeOther(routes.EmailController.getGiveEmailPage().url)
+                      updateSessionAndReturnResult(
+                        HTSSession(None, None, None),
+                        SeeOther(routes.EmailController.getGiveEmailPage().url)
                       )
                   }
               )
           )
+        }
 
-      checkIfDigitalAlready(ifDigital, ifDE)
+      checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
     }(redirectOnLoginURL = routes.EmailController.getSelectEmailPage().url)
 
   def selectEmailSubmit(): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
-      def handleForm(email: String, eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]], isDigital: Boolean = true): Future[Result] =
+      def handleForm(email: String, eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]]): Future[Result] =
           SelectEmailForm.selectEmailForm.bindFromRequest().fold(
             withErrors ⇒ Ok(views.html.email.select_email(email, withErrors)),
             _.newEmail.fold[Future[Result]](
 
               SeeOther(routes.EmailController.confirmEmail(crypto.encrypt(email)).url))(
                 newEmail ⇒ {
-                  updateSessionAndReturnResult(HTSSession(eligibilityCheckResult, None, Some(newEmail), isDigital),
+                  updateSessionAndReturnResult(HTSSession(eligibilityCheckResult, None, Some(newEmail)),
                                                SeeOther(routes.EmailController.verifyEmail().url)
                   )
                 }
               )
           )
 
-        def ifDigital: Future[Result] =
-          checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-            handleForm(eligibleWithEmail.email, Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))))
-          } { _ ⇒
-            SeeOther(routes.EmailController.getGiveEmailPage().url)
-          }
-
-        def ifDE = { htsSession: HTSSession ⇒
-          htsSession.pendingEmail.fold[Future[Result]](
-            {
-              logger.warn("expecting a stored pending email in session, but not found")
-              internalServerError()
-            }
-          )(email ⇒ {
-              handleForm(email, None, false)
-            }
-            )
+        def ifDigitalNewApplicant = { session: Option[HTSSession] ⇒
+          withEligibleSession({
+            case (_, eligibleWithEmail) ⇒
+              handleForm(eligibleWithEmail.email, Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))))
+          }, {
+            case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
+          })(session)
         }
 
-      checkSessionExists(ifDigital, ifDE)
+        def ifDE = { htsSession: Option[HTSSession] ⇒
+          htsSession.fold[Future[Result]](
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+          ){
+              _.pendingEmail.fold[Future[Result]]{
+                logger.warn("Could not find pending email for select email submit")
+                internalServerError()
+              }{
+                email ⇒ handleForm(email, None)
+              }
+            }
+        }
+
+      checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
     }(redirectOnLoginURL = routes.EmailController.selectEmailSubmit().url)
 
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
-      def ifDigital =
-          checkIfDoneEligibilityChecks { _ ⇒
-            SeeOther(routes.EmailController.getSelectEmailPage().url)
-          } { _ ⇒
-            Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
-          }
+      def ifDigitalNewApplicant = { session: Option[HTSSession] ⇒
+          withEligibleSession ({
+            case _ ⇒ SeeOther(routes.EmailController.getSelectEmailPage().url)
+          }, {
+            case _ ⇒ Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
+          })(session)
+        }
 
-        def ifDE =
+        def ifDE = { _: Option[HTSSession] ⇒
           htsContext.userDetails.fold(
             _ ⇒ {
-              updateSessionAndReturnResult(HTSSession(None, None, None, false),
+              updateSessionAndReturnResult(HTSSession(None, None, None),
                                            Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
               )
             },
             userInfo ⇒ userInfo.email.fold[Future[Result]]({
-              updateSessionAndReturnResult(HTSSession(None, None, None, false),
+              updateSessionAndReturnResult(HTSSession(None, None, None),
                                            Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
               )
             }
@@ -165,19 +171,20 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
               email ⇒
                 emailValidation.validate(email).toEither match {
                   case Right(validEmail) ⇒
-                    updateSessionAndReturnResult(HTSSession(None, None, Some(validEmail), false),
+                    updateSessionAndReturnResult(HTSSession(None, None, Some(validEmail)),
                                                  SeeOther(routes.EmailController.getSelectEmailPage().url)
                     )
 
                   case Left(_) ⇒
-                    updateSessionAndReturnResult(HTSSession(None, None, None, false),
+                    updateSessionAndReturnResult(HTSSession(None, None, None),
                                                  Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
                     )
                 }
             )
           )
+        }
 
-      checkIfDigitalAlready(ifDigital, ifDE)
+      checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
     }(redirectOnLoginURL = routes.EmailController.getGiveEmailPage().url)
 
@@ -191,54 +198,33 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                                          SeeOther(routes.EmailController.verifyEmail().url)
             ))
 
-      def ifDigital =
-        checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-          handleForm(eligibleWithEmail.eligible, eligibleWithEmail.userInfo)
-        } { eligibleWithNoEmail ⇒
-          handleForm(eligibleWithNoEmail.eligible, eligibleWithNoEmail.userInfo)
-        }
+      def ifDigitalNewApplicant(session: Option[HTSSession]) =
+        withEligibleSession ({
+          case (_, eligibleWithEmail) ⇒
+            handleForm(eligibleWithEmail.eligible, eligibleWithEmail.userInfo)
+        }, {
+          case (_, eligibleWithNoEmail) ⇒
+            handleForm(eligibleWithNoEmail.eligible, eligibleWithNoEmail.userInfo)
+        })(session)
 
       def ifDE = {
-        session: HTSSession ⇒
-          {
-            GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
-              withErrors ⇒ Ok(views.html.email.give_email(withErrors)),
-              form ⇒
-                updateSessionAndReturnResult(HTSSession(None, None, Some(form.email), false),
-                                             SeeOther(routes.EmailController.verifyEmail().url)
-                )
-            )
-          }
+        htsSession: Option[HTSSession] ⇒
+          htsSession.fold[Future[Result]](
+            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+          ) { _ ⇒
+              GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
+                withErrors ⇒ Ok(views.html.email.give_email(withErrors)),
+                form ⇒
+                  updateSessionAndReturnResult(HTSSession(None, None, Some(form.email)),
+                                               SeeOther(routes.EmailController.verifyEmail().url)
+                  )
+              )
+            }
       }
 
-    checkSessionExists(ifDigital, ifDE)
+    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
   }(redirectOnLoginURL = routes.EmailController.getGiveEmailPage().url)
-
-  private def checkIfDigitalAlready(ifDigital: ⇒ Future[Result],
-                                    ifDE:      ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO,
-                                                                 hc:      HeaderCarrier,
-                                                                 request: Request[_]): Future[Result] = {
-    val r = for {
-      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
-      storedEmail ← helpToSaveService.getConfirmedEmail()
-    } yield (enrolmentStatus, storedEmail)
-
-    r.leftSemiflatMap { error ⇒
-      logger.warn(s"Error while trying to check user enrolment status: $error", htsContext.nino)
-      internalServerError()
-    }.semiflatMap {
-      case (Enrolled(_), Some(_)) ⇒
-        //Digital users with stored email should be in the /account-home flow
-        SeeOther(frontendAppConfig.nsiManageAccountUrl)
-
-      case (Enrolled(_), None) ⇒ //DE user as no email found
-        ifDE
-
-      case (NotEnrolled, _) ⇒ //Digital user Registration
-        ifDigital
-    }.merge
-  }
 
   def confirmEmail(email: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
@@ -261,21 +247,21 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
         )
       }
 
-      def ifDigital =
-        checkIfAlreadyEnrolled { () ⇒
-          checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-            doUpdate(HTSSession(Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), None, None))(
-              toFuture(SeeOther(routes.RegisterController.getCreateAccountPage().url))
-            )
-          } { _ ⇒
-            SeeOther(routes.EmailController.getGiveEmailPage().url)
-          }
-        }
+      def ifDigitalNewApplicant(session: Option[HTSSession]) =
+        withEligibleSession(
+          {
+            case (_, eligibleWithEmail) ⇒
+              doUpdate(HTSSession(Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), None, None))(
+                toFuture(SeeOther(routes.RegisterController.getCreateAccountPage().url))
+              )
+          },
+          { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url) }
+        )(session)
 
       def ifDE = {
-        _: HTSSession ⇒
-          {
-            doUpdate(HTSSession(None, None, None, false)) {
+        session: Option[HTSSession] ⇒
+          withSession(session){ _ ⇒
+            doUpdate(HTSSession(None, None, None)) {
               htsContext.userDetails.fold[Future[Result]](
                 missingInfo ⇒ {
                   logger.warn(s"DE user missing infos, missing = ${missingInfo.missingInfo.mkString(",")}")
@@ -306,47 +292,9 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           }
       }
 
-    checkSessionExists(ifDigital, ifDE)
+    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
   }(redirectOnLoginURL = routes.EmailController.confirmEmail(email).url)
-
-  /**
-   * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
-   * checks yet this session and they are redirected to the 'apply now' page. If the session data indicates
-   * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
-   * given action if the the session data indicates that they are eligible
-   */
-  private def checkIfDoneEligibilityChecks(
-      ifEligibleWithEmail: EligibleWithEmail ⇒ Future[Result])(
-      ifEligibleWithoutEmail: EligibleWithNoEmail ⇒ Future[Result])(
-      implicit
-      htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] =
-    checkSession {
-      // no session data => user has not gone through the journey this session => take them to eligibility checks
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-    } {
-      session ⇒
-        session.eligibilityCheckResult.fold[Future[Result]](
-          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-        )(_.fold(
-            // user has gone through journey already this sessions and were found to be ineligible
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-            userInfo ⇒
-              // user has gone through journey already this sessions and were found to be eligible
-              userInfo.userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible)))(email ⇒
-                emailValidation.validate(email).toEither match {
-                  case Right(validEmail) ⇒ ifEligibleWithEmail(EligibleWithEmail(userInfo.userInfo, validEmail, session.confirmedEmail, userInfo.eligible))
-                  case Left(_)           ⇒ ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible))
-                }
-              )
-          ))
-    }
-
-  private def decryptEmail(encryptedEmail: String): Either[String, String] =
-    crypto.decrypt(encryptedEmail) match {
-      case Success(value) ⇒ Right(value)
-      case Failure(e)     ⇒ Left(s"Could not decode email: ${e.getMessage}")
-    }
 
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     val result: EitherT[Future, String, Result] =
@@ -418,7 +366,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
               _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo.copy(email = Some(params.email)), params.email))
               _ ← helpToSaveService.storeConfirmedEmail(params.email)
               r ← EitherT.liftF(updateSessionAndReturnResult(
-                HTSSession(None, Some(params.email), None, false),
+                HTSSession(None, Some(params.email), None),
                 SeeOther(routes.EmailController.getEmailVerified().url))
               )
               _ ← {
@@ -515,20 +463,20 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
               _ ⇒ routes.EmailController.verifyEmailError().url)),
           isNewApplicant = true)
 
-      def ifDigital =
-        checkEnrolledAndSession {
-          case (userInfo, maybePendingEmail, _) ⇒
-            maybePendingEmail.fold[Future[Result]](
+      def ifDigitalNewApplicant(session: Option[HTSSession]) =
+        withEligibleSession({
+          case (s, eligibleWithEmail) ⇒
+            s.pendingEmail.fold[Future[Result]](
               internalServerError()
             ) { pendingEmail ⇒
-                sendVerificationRequest(pendingEmail, userInfo)
+                sendVerificationRequest(pendingEmail, eligibleWithEmail.userInfo)
               }
-        }
+        })(session)
 
       def ifDE = {
-        session: HTSSession ⇒
+        session: Option[HTSSession] ⇒
           {
-            session.pendingEmail.fold[Future[Result]](
+            session.flatMap(_.pendingEmail).fold[Future[Result]](
               internalServerError()
             ) { pendingEmail ⇒
                 htsContext.userDetails.fold[Future[Result]](
@@ -544,68 +492,50 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           }
       }
 
-    checkSessionExists(ifDigital, ifDE)
-  }(redirectOnLoginURL = routes.EmailController.verifyEmail.url)
+    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
+  }(redirectOnLoginURL = routes.EmailController.verifyEmail().url)
 
   def verifyEmailError: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
-    def ifDigital =
-        checkEnrolledAndSession {
-          case (info, _, _) ⇒
-            info.email.fold(
+    def ifDigitalNewApplicant(session: Option[HTSSession]) =
+        withEligibleSession {
+          case (_, eligible) ⇒
+            eligible.userInfo.email.fold(
               SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
-            )(email ⇒ Ok(views.html.email.cannot_change_email(email, EmailVerificationErrorContinueForm.continueForm)))
-        }
+            )(email ⇒ Ok(views.html.email.cannot_change_email(email, EmailVerificationErrorContinueForm.continueForm, duringRegistrationJourney = true)))
+        }(session)
 
       def ifDE = {
-        session: HTSSession ⇒
+        _: Option[HTSSession] ⇒
           {
-            session.confirmedEmail.fold[Future[Result]](
+            htsContext.userDetails.toOption.flatMap(_.email).fold[Future[Result]](
               SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
             )(email ⇒
-                Ok(views.html.email.cannot_change_email(email, EmailVerificationErrorContinueForm.continueForm)))
+                Ok(views.html.email.cannot_change_email(email, EmailVerificationErrorContinueForm.continueForm, duringRegistrationJourney = false)))
           }
       }
 
-    checkSessionExists(ifDigital, ifDE)
+    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
   }(redirectOnLoginURL = routes.EmailController.verifyEmailError().url)
 
   def verifyEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    helpToSaveService.getUserEnrolmentStatus().fold(
-      { e ⇒
-        logger.warn(s"Could not check enrolment status: $e")
-        internalServerError()
-      }, { status ⇒
-        status.fold(
-          Ok(views.html.email.cannot_change_email_try_later(returningUser = false)),
-          _ ⇒ Ok(views.html.email.cannot_change_email_try_later(returningUser = true))
-        )
-      }
+    checkSessionAndEnrolmentStatus(
+      { _ ⇒ Ok(views.html.email.cannot_change_email_try_later(returningUser = false, None)) },
+      { _ ⇒ Ok(views.html.email.cannot_change_email_try_later(returningUser = true, None)) },
+      { (_, email) ⇒ Ok(views.html.email.cannot_change_email_try_later(returningUser = true, Some(email))) }
     )
-  }(redirectOnLoginURL = routes.EmailController.verifyEmailErrorTryLater().url)
 
-  private def checkEnrolledAndSession(ifEligible: (UserInfo, Option[Email], Option[Email]) ⇒ Future[Result])(implicit request: Request[AnyContent],
-                                                                                                             htsContext: HtsContextWithNINO): Future[Result] =
-    checkIfAlreadyEnrolled { () ⇒
-      checkHasDoneEligibilityChecks {
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-      } { session ⇒
-        session.eligibilityResult.fold(
-          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-          info ⇒ ifEligible(info.userInfo, session.pendingEmail, session.confirmedEmail)
-        )
-      }
-    }
+  }(redirectOnLoginURL = routes.EmailController.verifyEmailErrorTryLater().url)
 
   def verifyEmailErrorSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-    def handleForm(email: Option[String]) =
+    def handleForm(email: Option[String], duringRegistrationJourney: Boolean) =
         email.fold[Future[Result]](
           SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
         )(e ⇒
             EmailVerificationErrorContinueForm.continueForm.bindFromRequest().fold(
-              form ⇒ Ok(views.html.email.cannot_change_email(e, form)),
+              form ⇒ Ok(views.html.email.cannot_change_email(e, form, duringRegistrationJourney)),
               { continue ⇒
                 if (continue.value) {
                   SeeOther(routes.EmailController.confirmEmail(crypto.encrypt(e)).url)
@@ -616,15 +546,16 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             )
           )
 
-      def ifDigital =
-        checkEnrolledAndSession {
-          case (info, _, _) ⇒
-            handleForm(info.email)
-        }
+      def ifDigitalNewApplicant(session: Option[HTSSession]) =
+        withEligibleSession {
+          case (_, eligible) ⇒
+            handleForm(eligible.userInfo.email, true)
+        }(session)
 
-      def ifDE = (session: HTSSession) ⇒ handleForm(session.confirmedEmail)
+      def ifDE =
+        (session: Option[HTSSession]) ⇒ handleForm(session.flatMap(_.confirmedEmail), false)
 
-    checkSessionExists(ifDigital, ifDE)
+    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
   }(redirectOnLoginURL = routes.EmailController.verifyEmailError().url)
 
@@ -634,86 +565,154 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   def getEmailVerified: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-    def ifDigital =
-        checkEnrolledAndSession {
-          case (info, _, confirmedEmail) ⇒
-            confirmedEmail.fold[Future[Result]] {
+    def ifDigitalNewApplicant(session: Option[HTSSession]) =
+        withEligibleSession {
+          case (s, eligible) ⇒
+            s.confirmedEmail.fold[Future[Result]] {
               logger.warn("Could not find confirmed email", htsContext.nino)
-              val url = info.email.fold(
+              val url = eligible.userInfo.email.fold(
                 routes.EmailController.verifyEmailErrorTryLater().url)(
                   _ ⇒ routes.EmailController.verifyEmailError().url
                 )
               toFuture(SeeOther(url))
-            }(email ⇒ toFuture(Ok(views.html.email.email_updated(email))))
-        }
+            }(email ⇒ toFuture(Ok(views.html.email.email_updated(email, duringRegistrationJourney = true))))
+        }(session)
 
-      def ifDE = {
-        session: HTSSession ⇒
-          {
-            session.confirmedEmail.fold[Future[Result]] {
+      def ifDE = SeeOther(routes.EmailController.getGiveEmailPage().url)
+
+      def ifDigitalAccountHolder = {
+        (session: Option[HTSSession], _: Email) ⇒
+          withSession(session){
+            _.confirmedEmail.fold[Future[Result]] {
               logger.warn("Could not find confirmed email in the session for DE user", htsContext.nino)
               internalServerError()
-            }(email ⇒ toFuture(Ok(views.html.email.email_updated(email)))
+            }(email ⇒ toFuture(Ok(views.html.email.email_updated(email, duringRegistrationJourney = false)))
             )
           }
       }
 
-    checkSessionExists(ifDigital, ifDE)
+    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ ⇒ ifDE, ifDigitalAccountHolder)
 
   }(redirectOnLoginURL = routes.EmailController.getEmailVerified().url)
 
   def getEmailUpdated: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-    def handle(email: Option[String]) =
+    def handle(email: Option[String], duringRegistrationJourney: Boolean) =
         email.fold[Future[Result]](
           SeeOther(routes.EmailController.getGiveEmailPage().url))(
-            email ⇒ Ok(views.html.email.email_updated(email)))
+            email ⇒ Ok(views.html.email.email_updated(email, duringRegistrationJourney)))
 
-      def ifDigital =
-        checkEnrolledAndSession {
-          case (info, _, _) ⇒
-            handle(info.email)
-        }
+      def ifDigitalNewApplicant(session: Option[HTSSession]) =
+        withEligibleSession {
+          case (_, eligible) ⇒
+            handle(eligible.userInfo.email, duringRegistrationJourney = true)
+        }(session)
 
-      def ifDE = {
-        session: HTSSession ⇒
-          {
-            handle(session.confirmedEmail)
+      def ifDE = SeeOther(routes.EmailController.getGiveEmailPage().url)
+
+      def ifDigitalAccountHolder = {
+        (session: Option[HTSSession], _: Email) ⇒
+          withSession(session){
+            s ⇒ handle(s.confirmedEmail, duringRegistrationJourney = false)
           }
       }
 
-    checkSessionExists(ifDigital, ifDE)
+    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ ⇒ ifDE, ifDigitalAccountHolder)
 
   }(redirectOnLoginURL = routes.EmailController.getEmailUpdated().url)
 
   def emailUpdatedSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkSessionExists(
-      SeeOther(routes.RegisterController.getCreateAccountPage().url),
-      _ ⇒ SeeOther(frontendAppConfig.nsiManageAccountUrl)
+    checkSessionAndEnrolmentStatus(
+      _ ⇒ SeeOther(routes.RegisterController.getCreateAccountPage().url),
+      _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
     )
   }(redirectOnLoginURL = routes.EmailController.emailUpdatedSubmit().url)
 
-  private def checkSessionExists(ifDigital: ⇒ Future[Result], ifDE: HTSSession ⇒ Future[Result])(implicit hc: HeaderCarrier,
-                                                                                                 request: Request[_]): Future[Result] = {
+  private def withSession(session: Option[HTSSession])(f: HTSSession ⇒ Future[Result]): Future[Result] =
+    session.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(f)
 
-      def handleSessionError: String ⇒ Future[Result] = _ ⇒ internalServerError()
+  private def withEligibleSession(
+      ifEligible: (HTSSession, EligibleWithUserInfo) ⇒ Future[Result]
+  )(session: Option[HTSSession]): Future[Result] =
+    session.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(s ⇒
+      s.eligibilityCheckResult.fold[Future[Result]](
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+      ){
+          _.fold(
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+            eligible ⇒ ifEligible(s, eligible)
+          )
+        }
+    )
 
-    sessionCacheConnector.get
-      .leftSemiflatMap { error ⇒
-        logger.warn(s"error retrieving the session from keystore, error = $error")
-        handleSessionError(error)
-      }.semiflatMap {
-        case Some(session) ⇒
-          if (session.isDigital) {
-            ifDigital
-          } else {
-            ifDE(session)
-          }
+  private def withEligibleSession(
+      ifEligibleWithEmail:   (HTSSession, EligibleWithEmail) ⇒ Future[Result],
+      ifEligibleWithNoEmail: (HTSSession, EligibleWithNoEmail) ⇒ Future[Result]
+  )(session: Option[HTSSession]): Future[Result] =
+    session.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(s ⇒
+      s.eligibilityCheckResult.fold[Future[Result]](
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+      ){
+          _.fold(
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+            eligible ⇒
+              eligible.userInfo.email.fold(
+                ifEligibleWithNoEmail(s, EligibleWithNoEmail(eligible.userInfo, eligible.eligible))
+              )(email ⇒
+                  emailValidation.validate(email).toEither match {
+                    case Left(e) ⇒
+                      logger.warn(s"GG email was invalid: $e")
+                      ifEligibleWithNoEmail(s, EligibleWithNoEmail(eligible.userInfo, eligible.eligible))
 
-        case None ⇒
-          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+                    case Right(e) ⇒
+                      ifEligibleWithEmail(s, EligibleWithEmail(eligible.userInfo, e, s.confirmedEmail, eligible.eligible))
+
+                  }
+                )
+          )
+        }
+    )
+
+  private def checkSessionAndEnrolmentStatus(ifDuringRegistrationJourney: Option[HTSSession] ⇒ Future[Result],
+                                             ifDE:                        Option[HTSSession] ⇒ Future[Result],
+                                             ifDigitalAccountHolder:      (Option[HTSSession], Email) ⇒ Future[Result] = { case _ ⇒ SeeOther(frontendAppConfig.nsiManageAccountUrl) }
+  )(implicit hc: HeaderCarrier,
+    request: Request[_]): Future[Result] = {
+    val result = for {
+      session ← sessionCacheConnector.get
+      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
+    } yield session → enrolmentStatus
+
+    result
+      .leftSemiflatMap{ e ⇒
+        logger.warn(s"Could not get session or enrolment status: $e")
+        internalServerError
+      }.semiflatMap{
+        case (session, enrolmentStatus) ⇒
+          enrolmentStatus.fold(
+            ifDuringRegistrationJourney(session),
+            { _ ⇒
+              helpToSaveService.getConfirmedEmail
+                .leftSemiflatMap{ e ⇒
+                  logger.warn(s"Could not get confirmed email: $e")
+                  internalServerError()
+                }
+                .semiflatMap{
+                  // Digital account holder
+                  case Some(email) ⇒ ifDigitalAccountHolder(session, email)
+                  // DE account holder
+                  case None        ⇒ ifDE(session)
+                }.merge
+
+            })
       }.merge
   }
+
+  private def decryptEmail(encryptedEmail: String): Either[String, String] =
+    crypto.decrypt(encryptedEmail) match {
+      case Success(value) ⇒ Right(value)
+      case Failure(e)     ⇒ Left(s"Could not decode email: ${e.getMessage}")
+    }
 }
 
 object EmailController {
