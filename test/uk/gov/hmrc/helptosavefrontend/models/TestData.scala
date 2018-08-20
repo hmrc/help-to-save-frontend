@@ -52,13 +52,6 @@ object TestData {
   }
 
   object UserData {
-    implicit def providerLocalDate(s: String): GenProvider[LocalDate] = instance({
-      s.toLowerCase match {
-        case "dateofbirth" | "dob" | "birthdate" ⇒ Gen.date(LocalDate.of(1900, 1, 1), LocalDate.now())
-        case _                                   ⇒ Gen.date
-      }
-    })
-
     implicit val userInfoGen: Gen[UserInfo] = AutoGen[UserInfo]
 
     def randomUserInfo(): UserInfo = sample(userInfoGen)
