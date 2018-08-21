@@ -43,7 +43,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 @Singleton
 class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
@@ -129,6 +128,10 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+
+  def checkYourDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    toFuture(Ok(views.html.register.check_your_details()))
+  }(redirectOnLoginURL = routes.RegisterController.checkYourDetails().url)
 
   def getCannotCheckDetailsPage: Action[AnyContent] = ActionWithMdc { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
