@@ -22,12 +22,18 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(form: Form[BankDetails], referrer: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[BankDetails])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "Enter Bank Details", bodyClasses = None) {
 @helpers.form(routes.BankAccountController.submitBankDetails(), 'id -> "bankDetailsForm") {
 
-<a href="@referrer">Back</a>
+<a onclick="goBack();return false;">Back</a>
+
+<script>
+function goBack() {
+    window.history.back();
+}
+</script>
 
 <div class="form-field-group">
     <div class="form-field-group @if(form.hasErrors || form.hasGlobalErrors) {error}">

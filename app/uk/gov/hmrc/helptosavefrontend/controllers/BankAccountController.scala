@@ -48,12 +48,12 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
 
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    toFuture(Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), request.headers.get("referer").getOrElse(""))))
+    toFuture(Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm())))
   }(redirectOnLoginURL = routes.BankAccountController.getBankDetailsPage().url)
 
   def submitBankDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     BankDetails.giveBankDetailsForm().bindFromRequest().fold(
-      withErrors ⇒ Ok(views.html.register.bank_account_details(withErrors, routes.BankAccountController.getBankDetailsPage().url)),
+      withErrors ⇒ Ok(views.html.register.bank_account_details(withErrors)),
       { bankDetails ⇒
         checkIfAlreadyEnrolled { () ⇒
           checkSession(
@@ -74,12 +74,13 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
                   },
                   { _ ⇒
                     sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails)))
-                      .semiflatMap(_ ⇒
-                        SeeOther(routes.RegisterController.checkYourDetails().url)
-                      ).leftMap { e ⇒
-                        logger.warn(s"Could not update session with bank details: $e")
-                        internalServerError()
-                      }.merge
+                      .fold(
+                        error ⇒ {
+                          logger.warn(s"Could not update session with bank details: $error")
+                          internalServerError()
+                        },
+                        _ ⇒ SeeOther(routes.RegisterController.checkYourDetails().url)
+                      )
                   }
                 )
                 )

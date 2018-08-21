@@ -22,10 +22,10 @@ import play.api.libs.json.{Format, Json}
 
 object BankDetails {
   def giveBankDetailsForm(): Form[BankDetails] = Form(
-    mapping("sortCode" -> nonEmptyText(6, 6),
-      "accountNumber" -> nonEmptyText(maxLength = 10),
+    mapping("sortCode" -> nonEmptyText,
+      "accountNumber" -> nonEmptyText,
       "rollNumber" -> optional(text),
-      "accountName" -> nonEmptyText(maxLength = 50)
+      "accountName" -> nonEmptyText
     )(BankDetails.apply)(BankDetails.unapply)
   )
 

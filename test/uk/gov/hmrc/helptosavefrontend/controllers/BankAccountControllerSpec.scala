@@ -66,11 +66,9 @@ class BankAccountControllerSpec extends AuthSupport
 
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
 
-        val fakePostRequest = fakeRequestWithCSRFToken.withFormUrlEncodedBody("sortCode" → "invalid-sort-code-blah")
-
-        val result = controller.submitBankDetails()(fakePostRequest)
+        val result = controller.submitBankDetails()(fakeRequestWithCSRFToken)
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("sortCode Maximum length is {0}")
+        contentAsString(result) should include("sortCode This field is required")
         contentAsString(result) should include("accountNumber This field is required")
         contentAsString(result) should include("accountName This field is required")
       }

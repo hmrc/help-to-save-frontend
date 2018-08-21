@@ -128,7 +128,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
 
-  def checkYourDetails(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def checkYourDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     toFuture(Ok(views.html.register.check_your_details()))
   }(redirectOnLoginURL = routes.RegisterController.checkYourDetails().url)
 
