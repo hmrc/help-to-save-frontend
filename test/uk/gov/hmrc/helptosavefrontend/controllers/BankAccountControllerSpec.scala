@@ -17,12 +17,15 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import play.api.http.Status
+import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
+
+import scala.concurrent.Future
 
 class BankAccountControllerSpec extends AuthSupport
   with CSRFSupport
@@ -39,11 +42,19 @@ class BankAccountControllerSpec extends AuthSupport
 
     "handling getBankDetailsPage" must {
 
+        def doRequest() = controller.getBankDetailsPage()(fakeRequestWithCSRFToken)
+
+      doCommonChecks(doRequest)
+
       "handle the request and display the page" in {
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+        }
 
-        val result = controller.getBankDetailsPage()(fakeRequestWithCSRFToken)
+        val result = doRequest()
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Enter Bank Details")
 
@@ -73,54 +84,7 @@ class BankAccountControllerSpec extends AuthSupport
         contentAsString(result) should include("accountName This field is required")
       }
 
-      "redirect user to eligibility checks if there is no session found" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(None))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
-      }
-
-      "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
-      }
-
-      "show user an in-eligible page if the session is found but user is not eligible" in {
-
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe 200
-        contentAsString(result) should include("You’re not eligible for a Help to Save account")
-      }
-
-      "show user an error page if the session is found but user is not eligible and in-eligibility reason can't be parsed" in {
-
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value = randomIneligibility().value.copy(reasonCode = 999)))), None, None))))
-        }
-
-        val result = doRequest()
-        checkIsTechnicalErrorPage(result)
-      }
+      doCommonChecks(doRequest)
 
       "update the session with bank details when all other checks are passed" in {
 
@@ -162,6 +126,57 @@ class BankAccountControllerSpec extends AuthSupport
         val result = doRequest()
         status(result) shouldBe 303
       }
+    }
+  }
+
+  private def doCommonChecks(doRequest: () ⇒ Future[Result]): Unit = {
+    "redirect user to eligibility checks if there is no session found" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(None))
+      }
+
+      val result = doRequest()
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+    }
+
+    "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+      }
+
+      val result = doRequest()
+      status(result) shouldBe 303
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+    }
+
+    "show user an in-eligible page if the session is found but user is not eligible" in {
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
+      }
+
+      val result = doRequest()
+      status(result) shouldBe 200
+      contentAsString(result) should include("You’re not eligible for a Help to Save account")
+    }
+
+    "show user an error page if the session is found but user is not eligible and in-eligibility reason can't be parsed" in {
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value = randomIneligibility().value.copy(reasonCode = 999)))), None, None))))
+      }
+
+      val result = doRequest()
+      checkIsTechnicalErrorPage(result)
     }
   }
 
