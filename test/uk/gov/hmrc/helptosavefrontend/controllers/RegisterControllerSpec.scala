@@ -312,6 +312,19 @@ class RegisterControllerSpec
 
       }
 
+      "handling checkYourDetails page" must {
+          def doRequest(): Future[PlayResult] = controller.checkYourDetails()(FakeRequest())
+
+        "show the details page" in {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          val result = doRequest()
+
+          status(result) shouldBe 200
+          contentAsString(result) should include("Check your details")
+        }
+
+      }
+
     }
   }
 }

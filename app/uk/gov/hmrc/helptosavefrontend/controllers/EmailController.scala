@@ -252,7 +252,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           {
             case (_, eligibleWithEmail) ⇒
               doUpdate(HTSSession(Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), None, None))(
-                toFuture(SeeOther(routes.RegisterController.getCreateAccountPage().url))
+                toFuture(SeeOther(routes.BankAccountController.getBankDetailsPage().url))
               )
           },
           { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url) }
@@ -623,7 +623,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   def emailUpdatedSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkSessionAndEnrolmentStatus(
-      _ ⇒ SeeOther(routes.RegisterController.getCreateAccountPage().url),
+      _ ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url),
       _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
     )
   }(redirectOnLoginURL = routes.EmailController.emailUpdatedSubmit().url)

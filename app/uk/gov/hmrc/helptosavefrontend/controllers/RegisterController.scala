@@ -42,7 +42,6 @@ import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 @Singleton
 class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
@@ -128,6 +127,10 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+
+  def checkYourDetails(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    toFuture(Ok(views.html.register.check_your_details()))
+  }(redirectOnLoginURL = routes.RegisterController.checkYourDetails().url)
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
