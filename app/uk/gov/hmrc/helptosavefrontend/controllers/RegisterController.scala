@@ -107,7 +107,12 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
               logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
               SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             },
-              _ ⇒ SeeOther(frontendAppConfig.nsiManageAccountUrl)
+              submissionSuccess ⇒ submissionSuccess.accountNumber.fold(
+                SeeOther(frontendAppConfig.nsiManageAccountUrl)
+              ) {
+                  acNumber ⇒
+                    Ok(views.html.register.account_created(acNumber.accountNumber))
+                }
             )
           }
       } { _ ⇒

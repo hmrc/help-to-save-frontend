@@ -20,5 +20,19 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.form
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.ga_submit_button
+
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 Check your details
+
+
+<div class="form-field form-field--submit">
+ @form(routes.RegisterController.getCreateAccountPage){
+ @ga_submit_button("hts.account-created.continue-button",
+ "Create account",
+ "Check your details page",
+ Messages("hts.account-created.continue-button"))
+ }
+</div>
