@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
-import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, EmailValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
@@ -128,9 +128,20 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
 
-  def checkYourDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    toFuture(Ok(views.html.register.check_your_details()))
-  }(redirectOnLoginURL = routes.RegisterController.checkYourDetails().url)
+  def checkDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { () ⇒
+      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
+        (eligibleWithEmail.confirmedEmail, eligibleWithEmail.bankDetails) match {
+          case (Some(email), Some(bankDetails)) ⇒
+            Ok(views.html.register.check_your_details(eligibleWithEmail.userInfo, email, bankDetails))
+          case (Some(_), None) ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+          case (None, _)       ⇒ SeeOther(routes.EmailController.getSelectEmailPage().url)
+        }
+      } { _ ⇒
+        SeeOther(routes.EmailController.getSelectEmailPage().url)
+      }
+    }
+  }(redirectOnLoginURL = routes.RegisterController.checkDetails().url)
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
@@ -154,11 +165,12 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
             // user has gone through journey already this sessions and were found to be ineligible
             _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
             userInfo ⇒
-              // user has gone through journey already this sessions and were found to be eligible
-              userInfo.userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible)))(email ⇒
+              // user has gone through journey already this sessions and were found to be eligible,
+              // but they might not have gone through the email journey, so check if the email is valid or not
+              userInfo.userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible, session.bankDetails)))(email ⇒
                 emailValidation.validate(email).toEither match {
-                  case Right(validEmail) ⇒ ifEligibleWithEmail(EligibleWithEmail(userInfo.userInfo, validEmail, session.confirmedEmail, userInfo.eligible))
-                  case Left(_)           ⇒ ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible))
+                  case Right(_) ⇒ ifEligibleWithEmail(EligibleWithEmail(userInfo.userInfo, session.confirmedEmail, userInfo.eligible, session.bankDetails))
+                  case Left(_)  ⇒ ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible, session.bankDetails))
                 }
               )
           ))
@@ -174,9 +186,9 @@ object RegisterController {
 
   object EligibleInfo {
 
-    case class EligibleWithEmail(userInfo: UserInfo, email: Email, confirmedEmail: Option[Email], eligible: Eligible) extends EligibleInfo
+    case class EligibleWithEmail(userInfo: UserInfo, confirmedEmail: Option[Email], eligible: Eligible, bankDetails: Option[BankDetails]) extends EligibleInfo
 
-    case class EligibleWithNoEmail(userInfo: UserInfo, eligible: Eligible) extends EligibleInfo
+    case class EligibleWithNoEmail(userInfo: UserInfo, eligible: Eligible, bankDetails: Option[BankDetails]) extends EligibleInfo
 
   }
 
