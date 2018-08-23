@@ -72,4 +72,4 @@ GET        /account-home/close-account-are-you-sure         @uk.gov.hmrc.helptos
 GET        /enter-uk-bank-details                           @uk.gov.hmrc.helptosavefrontend.controllers.BankAccountController.getBankDetailsPage
 POST       /enter-uk-bank-details                           @uk.gov.hmrc.helptosavefrontend.controllers.BankAccountController.submitBankDetails
 
-GET        /check-your-details                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.checkYourDetails
+GET        /check-details                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.checkDetails

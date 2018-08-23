@@ -19,6 +19,94 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
+@import cats.syntax.show._
+@import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo.localDateShow
 
-Check your details
+@(userInfo: UserInfo, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+title = Messages("hts.global.title", Messages("hts.register.you-are-eligible.title.h1"), "", Messages("hts.global.title-suffix")),
+sidebarLinks = None,
+bodyClasses = None) {
+
+@browser_back()
+
+<h2>check your details</h2>
+
+<p>You'll need to check and confirm your details are correct before you can create an account</p>
+
+<h3 class="govuk-heading-xl">Your details</h3>
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row"> </th>
+        <td class="govuk-table__cell "><a href="@routes.RegisterController.getDetailsAreIncorrect().url">change</a></td>
+    </tr>
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row">Name</th>
+        <td class="govuk-table__cell ">@(userInfo.forename + " " + userInfo.surname)</td>
+    </tr>
+
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row">Date of Birth</th>
+        <td class="govuk-table__cell ">@(userInfo.dateOfBirth.show)</td>
+    </tr>
+
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row">National insurance numbber</th>
+        <td class="govuk-table__cell ">@(userInfo.nino.grouped(2).mkString(" "))</td>
+    </tr>
+    </tbody>
+</table>
+
+
+<h3 class="govuk-heading-xl">Your email address</h3>
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row"> </th>
+        <td class="govuk-table__cell "><a href="@routes.EmailController.getSelectEmailPage().url">change</a></td>
+    </tr>
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row">Email</th>
+        <td class="govuk-table__cell ">@email</td>
+    </tr>
+    </tbody>
+</table>
+
+<h3 class="govuk-heading-xl">Your bank details</h3>
+<table class="govuk-table">
+    <tbody class="govuk-table__body">
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row"> </th>
+        <td class="govuk-table__cell "><a href="@routes.BankAccountController.getBankDetailsPage().url">change</a></td>
+    </tr>
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row">Sort code</th>
+        <td class="govuk-table__cell ">@bankDetails.sortCode</td>
+    </tr>
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row">Account number</th>
+        <td class="govuk-table__cell ">@bankDetails.accountNumber</td>
+    </tr>
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row">Roll no</th>
+        <td class="govuk-table__cell ">@bankDetails.rollNumber</td>
+    </tr>
+    <tr class="govuk-table__row">
+        <th class="govuk-table__header" scope="row">Account name</th>
+        <td class="govuk-table__cell ">@bankDetails.accountName</td>
+    </tr>
+    </tbody>
+</table>
+<br>
+
+by continuing you confirm your details are correct.
+<br>
+
+<a href="@routes.RegisterController.getCreateAccountPage().url">Confirm and continue</a>
+
+}
