@@ -66,7 +66,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
                   logger.warn(s"Could not update session with bank details: $error")
                   internalServerError()
                 },
-                _ ⇒ SeeOther(routes.RegisterController.checkYourDetails().url)
+                _ ⇒ SeeOther(routes.RegisterController.checkDetails().url)
               )
         }
       }

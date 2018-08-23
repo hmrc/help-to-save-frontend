@@ -25,6 +25,7 @@ import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
@@ -82,20 +83,6 @@ class RegisterControllerSpec
 
   def checkRedirectIfNoEmailInSession(doRequest: ⇒ Future[PlayResult]): Unit = {
     "redirect to the give email page if the session data does not contain an email for the user" in {
-      inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
-      }
-
-      val result = doRequest
-      status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
-    }
-  }
-
-  def checkRedirectIfEmailInSession(doRequest: ⇒ Future[PlayResult]): Unit = {
-    "redirect to the confirm email page if the session data contains an email for the user" in {
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
@@ -157,7 +144,7 @@ class RegisterControllerSpec
       }
     }
 
-    "handling a getCreateAccountHelpToSave" must {
+    "handling a getCreateAccountPage" must {
 
       val email = "email"
 
@@ -167,18 +154,6 @@ class RegisterControllerSpec
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
       checkRedirectIfNoEmailInSession(doRequest())
-
-      "redirect the user to the confirm details page if there is no email in the session data" in {
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-        }
-
-        val result = doRequest()
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
-      }
 
       "show the user the create account page if the session data contains a confirmed email" in {
         inSequence {
@@ -311,20 +286,53 @@ class RegisterControllerSpec
         }
 
       }
+    }
 
-      "handling checkYourDetails page" must {
-          def doRequest(): Future[PlayResult] = controller.checkYourDetails()(FakeRequest())
+    "handling checkYourDetails page" must {
 
-        "show the details page" in {
+      val bankDetails = BankDetails("123456", "12345678", None, "test user name")
+
+        def doRequest(): Future[PlayResult] = controller.checkDetails()(FakeRequest())
+
+      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+
+      checkRedirectIfNoEmailInSession(doRequest())
+
+      "show the details page for valid users" in {
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          val result = doRequest()
-
-          status(result) shouldBe 200
-          contentAsString(result) should include("Check your details")
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some("valid@email.com"), None, None, None, Some(bankDetails)))))
         }
+        val result = doRequest()
 
+        status(result) shouldBe 200
+        contentAsString(result) should include("check your details")
       }
 
+      "show user not eligible page if the user is not eligible" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None, Some(bankDetails)))))
+        }
+        val result = doRequest()
+
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+      }
+
+      "handle the case when there are no bank details stored in the session" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some("valid@email.com"), None))))
+        }
+        val result = doRequest()
+
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+      }
     }
   }
 }

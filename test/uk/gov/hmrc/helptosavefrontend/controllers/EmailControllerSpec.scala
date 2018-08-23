@@ -28,6 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailControllerSpec.EligibleWithUserInfoOps
+import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -299,9 +300,9 @@ class EmailControllerSpec
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails("1", "1", None, "name"))))))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(testEmail), None, None, Some(BankDetails("1", "1", None, "name"))))(Right(None))
         }
 
         val result = selectEmailSubmit(Some(testEmail))
@@ -579,27 +580,12 @@ class EmailControllerSpec
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails("1", "1", None, "name"))))))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(email)))(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(email), None, None, Some(BankDetails("1", "1", None, "name"))))(Right(None))
         }
 
         val result = giveEmailSubmit(email)
-        status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
-      }
-
-      "handle Digital(new applicant) who submitted form with new-email" in {
-
-        val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
-          mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))(Right(None))
-        }
-
-        val result = giveEmailSubmit(testEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
       }
@@ -682,7 +668,7 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
-      "handle Digital(new applicant) users with an existing valid email from GG and already gone through eligibility checks" in {
+      "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks and no bank details in session" in {
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -696,6 +682,22 @@ class EmailControllerSpec
         val result = confirmEmail(encryptedEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+      }
+
+      "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks but bank details are already in session" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockDecrypt("encrypted")("decrypted")
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails("1", "1", Some("1"), "a"))))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None, None, None, Some(BankDetails("1", "1", Some("1"), "a"))))(Right(None))
+          mockStoreConfirmedEmail("decrypted")(Right(None))
+        }
+
+        val result = confirmEmail(encryptedEmail)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.RegisterController.checkDetails().url)
       }
 
       "handle Digital(new applicant) users with an existing INVALID email from GG and already gone through eligibility checks" in {
@@ -1305,7 +1307,7 @@ class EmailControllerSpec
 
     "handling emailUpdatedSubmit" must {
 
-      "handle Digital users and redirect to the create account page" in {
+      "handle Digital users and redirect to the getBankDetailsPage if bank details are not already in session" in {
 
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -1316,6 +1318,32 @@ class EmailControllerSpec
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+      }
+
+      "handle Digital users and redirect to the checkDetailsPage if bank details are already in session" in {
+
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None, None, None, Some(BankDetails("1", "1", None, "name"))))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = controller.emailUpdatedSubmit()(FakeRequest())
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.checkDetails().url)
+      }
+
+      "handle Digital users and redirect to the eligibilityCheck if session doesnt contain eligibility result" in {
+
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockSessionCacheConnectorGet(Right(None))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = controller.emailUpdatedSubmit()(FakeRequest())
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
       "handle existing digital account holders and redirect them to NSI" in {
