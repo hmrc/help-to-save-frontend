@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 @import cats.syntax.show._
@@ -31,15 +32,7 @@ title = Messages("hts.global.title", Messages("hts.register.you-are-eligible.tit
 sidebarLinks = None,
 bodyClasses = None) {
 
-<a onclick="goBack();return false;">Back</a>
-
-<script>
-function goBack() {
-    window.history.back();
-}
-
-
-</script>
+@browser_back()
 
 <h2>check your details</h2>
 

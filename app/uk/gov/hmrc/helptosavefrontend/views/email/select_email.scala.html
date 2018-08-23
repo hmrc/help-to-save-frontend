@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.forms.SelectEmail
 @import views.html.helper.CSRF
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
@@ -49,13 +49,7 @@
   </div>
   }
 
-<a onclick="goBack();return false;">Back</a>
-
-<script>
-function goBack() {
-    window.history.back();
-}
-</script>
+  @browser_back()
 
   <h1 class="heading-large">@messages("hts.select-email.title.h1")</h1>
 
