@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
@@ -27,13 +28,7 @@
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "Enter Bank Details", bodyClasses = None) {
 @helpers.form(routes.BankAccountController.submitBankDetails(), 'id -> "bankDetailsForm") {
 
-<a onclick="goBack();return false;">Back</a>
-
-<script>
-function goBack() {
-    window.history.back();
-}
-</script>
+@browser_back()
 
 <div class="form-field-group">
     <div class="form-field-group @if(form.hasErrors || form.hasGlobalErrors) {error}">
