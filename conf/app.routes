@@ -36,7 +36,7 @@ GET        /email-updated                                   @uk.gov.hmrc.helptos
 POST       /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailUpdatedSubmit
 GET        /link-expired                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getLinkExpiredPage
 
-GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountPage
+GET        /agree-conditions-to-create-account              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountPage
 POST       /account-created                                 @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccount
 GET        /error-no-account                                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
 GET        /try-again-tomorrow                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
