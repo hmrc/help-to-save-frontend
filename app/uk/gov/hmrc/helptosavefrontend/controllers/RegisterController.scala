@@ -42,7 +42,6 @@ import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 @Singleton
 class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
@@ -108,7 +107,12 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
               logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
               SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             },
-              _ ⇒ SeeOther(frontendAppConfig.nsiManageAccountUrl)
+              submissionSuccess ⇒ submissionSuccess.accountNumber.fold(
+                SeeOther(frontendAppConfig.nsiManageAccountUrl)
+              ) {
+                  acNumber ⇒
+                    Ok(views.html.register.account_created(acNumber.accountNumber))
+                }
             )
           }
       } { _ ⇒
@@ -128,6 +132,10 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+
+  def checkYourDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    toFuture(Ok(views.html.register.check_your_details()))
+  }(redirectOnLoginURL = routes.RegisterController.checkYourDetails().url)
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility

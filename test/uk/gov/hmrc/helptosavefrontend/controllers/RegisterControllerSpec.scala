@@ -29,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL20
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
@@ -60,7 +61,7 @@ class RegisterControllerSpec
 
   lazy val controller: RegisterController = newController(earlyCapCheck = false)(crypto)
 
-  def mockCreateAccount(createAccountRequest: CreateAccountRequest)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess(false))): Unit =
+  def mockCreateAccount(createAccountRequest: CreateAccountRequest)(response: Either[SubmissionFailure, SubmissionSuccess] = Right(SubmissionSuccess(Some(AccountNumber("1234567890123"))))): Unit =
     (mockHelpToSaveService.createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
       .expects(createAccountRequest, *, *)
       .returning(EitherT.fromEither[Future](response))
@@ -209,7 +210,7 @@ class RegisterControllerSpec
     "creating an account" must {
       val confirmedEmail = "confirmed"
 
-        def doCreateAccountRequest(): Future[PlayResult] = controller.createAccount(FakeRequest())
+        def doCreateAccountRequest(): Future[PlayResult] = controller.createAccount(fakeRequestWithCSRFToken)
 
       behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 
@@ -227,8 +228,8 @@ class RegisterControllerSpec
           }
 
           val result = doCreateAccountRequest()
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
+          status(result) shouldBe OK
+          contentAsString(result) should include("Now your Help to Save account has been created, you can start saving and earning bonuses.")
         }
 
       "indicate to the user that account creation was successful " +
@@ -243,8 +244,8 @@ class RegisterControllerSpec
           }
 
           val result = doCreateAccountRequest()
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
+          status(result) shouldBe OK
+          contentAsString(result) should include("Now your Help to Save account has been created, you can start saving and earning bonuses.")
         }
 
       "not update user counts but enrol the user if the user already had an account" in {
@@ -254,10 +255,26 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
-          mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(alreadyHadAccount = true)))
+          mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
         }
 
         val result = doCreateAccountRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
+      }
+
+      "redirect the user to nsi when they already have an account" in {
+        val userInfo = randomEligibleWithUserInfo(validUserInfo)
+        val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
+          mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
+        }
+
+        val result = doCreateAccountRequest()
+
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
       }
@@ -308,6 +325,19 @@ class RegisterControllerSpec
           val result = doRequest()
           contentAsString(result) should include("We could not create a Help to Save account for you at this time")
 
+        }
+
+      }
+
+      "handling checkYourDetails page" must {
+          def doRequest(): Future[PlayResult] = controller.checkYourDetails()(fakeRequestWithCSRFToken)
+
+        "show the details page" in {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          val result = doRequest()
+
+          status(result) shouldBe 200
+          contentAsString(result) should include("Check your details")
         }
 
       }

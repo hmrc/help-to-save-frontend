@@ -25,7 +25,7 @@ import play.api.http.Status
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.Account
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
@@ -77,16 +77,21 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
   def getConfirmedEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     helpToSaveConnector.getEmail()
 
-  def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
+  def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier,
+                                                                ec: ExecutionContext
+  ): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
     EitherT(helpToSaveConnector.createAccount(createAccountRequest)
       .map[Either[SubmissionFailure, SubmissionSuccess]] { response ⇒
 
         response.status match {
           case Status.CREATED ⇒
-            Right(SubmissionSuccess(false))
+            response.parseJSON[AccountNumber]().fold[Either[SubmissionFailure, SubmissionSuccess]](
+              e ⇒ Left(SubmissionFailure(None, "Couldn't parse account number JSON", e)),
+              account ⇒ Right(SubmissionSuccess(Some(account)))
+            )
 
           case Status.CONFLICT ⇒
-            Right(SubmissionSuccess(true))
+            Right(SubmissionSuccess(None))
 
           case _ ⇒
             Left(handleError(response))
@@ -132,7 +137,7 @@ object HelpToSaveServiceImpl {
 
   sealed trait SubmissionResult
 
-  case class SubmissionSuccess(alreadyHadAccount: Boolean) extends SubmissionResult
+  case class SubmissionSuccess(accountNumber: Option[AccountNumber]) extends SubmissionResult
 
   implicit val submissionSuccessFormat: Format[SubmissionSuccess] = Json.format[SubmissionSuccess]
 

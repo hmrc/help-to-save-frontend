@@ -695,7 +695,7 @@ class EmailControllerSpec
 
         val result = confirmEmail(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
       }
 
       "handle Digital(new applicant) users with an existing INVALID email from GG and already gone through eligibility checks" in {
@@ -1315,7 +1315,7 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
       }
 
       "handle existing digital account holders and redirect them to NSI" in {

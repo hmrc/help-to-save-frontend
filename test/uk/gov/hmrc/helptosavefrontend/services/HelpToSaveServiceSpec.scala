@@ -21,13 +21,13 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
@@ -135,12 +135,12 @@ class HelpToSaveServiceSpec extends TestSupport {
         }
 
       "return a successful response" in {
-        List(201, 409).foreach { status ⇒
-          mockCreateAccount(Some(HttpResponse(status)))
-          val result = htsService.createAccount(createAccountRequest)
-          List(result.value.futureValue) should contain oneOf (Right(SubmissionSuccess(false)), Right(SubmissionSuccess(true)))
+        List[(Int, Option[JsValue])]((201, Some(Json.parse("""{"accountNumber" : "1234567890123"}"""))), (409, None)).foreach {
+          case (status, body) ⇒
+            mockCreateAccount(Some(HttpResponse(status, body)))
+            val result = htsService.createAccount(createAccountRequest)
+            List(result.value.futureValue) should contain oneOf (Right(SubmissionSuccess(Some(AccountNumber("1234567890123")))), Right(SubmissionSuccess(None)))
         }
-
       }
 
       "should handle a failure result" in {
