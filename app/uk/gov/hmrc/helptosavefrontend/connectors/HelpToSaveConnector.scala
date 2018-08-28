@@ -22,8 +22,9 @@ import cats.data.EitherT
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
+import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
@@ -32,6 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIUserI
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -60,7 +62,7 @@ trait HelpToSaveConnector {
 }
 
 @Singleton
-class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfig: FrontendAppConfig) extends HelpToSaveConnector {
+class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppConfig: FrontendAppConfig) extends HelpToSaveConnector {
 
   private val helpToSaveUrl: String = frontendAppConfig.baseUrl("help-to-save")
 
@@ -85,61 +87,57 @@ class HelpToSaveConnectorImpl @Inject() (http: WSHttp)(implicit frontendAppConfi
   private val accountCreateAllowedURL =
     s"$helpToSaveUrl/help-to-save/account-create-allowed"
 
-  private val updateUserCountURL =
-    s"$helpToSaveUrl/help-to-save/update-user-count"
-
   private val createAccountURL =
     s"$helpToSaveUrl/help-to-save/create-account"
 
   private val updateEmailURL =
     s"$helpToSaveUrl/help-to-save/update-email"
 
-  private def getAccountURL(nino: String, correlationId: UUID) =
-    s"$helpToSaveUrl/help-to-save/$nino/account?correlationId=$correlationId&systemId=help-to-save-frontend"
+  private def getAccountUrl(nino: String) = s"$helpToSaveUrl/help-to-save/$nino/account"
+
+  private def getAccountQueryParams(correlationId: UUID): Map[String, String] =
+    Map("correlationId" → correlationId.toString, "systemId" → "help-to-save-frontend")
+
+  private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
 
   def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResult] =
     handleGet(
       eligibilityURL,
+      emptyQueryParameters,
       _.parseJSON[EligibilityCheckResponse]().flatMap(toEligibilityCheckResult),
       "check eligibility",
       identity
     )
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus] =
-    handleGet(enrolmentStatusURL, _.parseJSON[EnrolmentStatus](), "get user enrolment status", identity)
+    handleGet(enrolmentStatusURL, emptyQueryParameters, _.parseJSON[EnrolmentStatus](), "get user enrolment status", identity)
 
   def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(enrolUserURL, _ ⇒ Right(()), "enrol users", identity)
+    handleGet(enrolUserURL, emptyQueryParameters, _ ⇒ Right(()), "enrol users", identity)
 
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(setITMPFlagURL, _ ⇒ Right(()), "set ITMP flag and update mongo", identity)
+    handleGet(setITMPFlagURL, emptyQueryParameters, _ ⇒ Right(()), "set ITMP flag and update mongo", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = {
     val encodedEmail = new String(base64Encode(email))
-    handleGet(storeEmailURL(encodedEmail), _ ⇒ Right(()), "store email", identity)
+    handleGet(storeEmailURL(encodedEmail), emptyQueryParameters, _ ⇒ Right(()), "store email", identity)
   }
 
   def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
-    handleGet(getEmailURL, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
+    handleGet(getEmailURL, emptyQueryParameters, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] =
-    handleGet(accountCreateAllowedURL, _.parseJSON[UserCapResponse](), "account creation allowed", identity)
+    handleGet(accountCreateAllowedURL, emptyQueryParameters, _.parseJSON[UserCapResponse](), "account creation allowed", identity)
 
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account] =
-    handleGet(getAccountURL(nino, correlationId), _.parseJSON[Account](), "get Account", identity)
+    handleGet(getAccountUrl(nino), getAccountQueryParams(correlationId), _.parseJSON[Account](), "get Account", identity)
 
-  private def handlePost[A, B](url:         String,
-                               body:        String,
-                               ifHTTP200:   HttpResponse ⇒ Either[B, A],
-                               description: ⇒ String,
-                               toError:     String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
-    handle(http.post(url, body), ifHTTP200, description, toError)
-
-  private def handleGet[A, B](url:         String,
-                              ifHTTP200:   HttpResponse ⇒ Either[B, A],
-                              description: ⇒ String,
-                              toError:     String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
-    handle(http.get(url), ifHTTP200, description, toError)
+  private def handleGet[A, B](url:             String,
+                              queryParameters: Map[String, String],
+                              ifHTTP200:       HttpResponse ⇒ Either[B, A],
+                              description:     ⇒ String,
+                              toError:         String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
+    handle(http.get(url, queryParameters), ifHTTP200, description, toError)
 
   private def handle[A, B](resF:        Future[HttpResponse],
                            ifHTTP200:   HttpResponse ⇒ Either[B, A],
