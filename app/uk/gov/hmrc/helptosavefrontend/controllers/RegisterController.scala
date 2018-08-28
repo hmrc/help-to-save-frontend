@@ -20,7 +20,7 @@ import cats.instances.future._
 import com.google.inject.Inject
 import javax.inject.Singleton
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
@@ -99,7 +99,12 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
           logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
           SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
         },
-          _ ⇒ SeeOther(frontendAppConfig.nsiManageAccountUrl)
+          submissionSuccess ⇒ submissionSuccess.accountNumber.fold(
+            SeeOther(frontendAppConfig.nsiManageAccountUrl)
+          ) {
+              acNumber ⇒
+                Ok(views.html.register.account_created(acNumber.accountNumber))
+            }
         )
       }
     }
