@@ -22,22 +22,26 @@ import java.time.format.DateTimeFormatter
 import cats.instances.string._
 import cats.syntax.eq._
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 
 import scala.util.{Failure, Success, Try}
 
-case class NSIUserInfo(forename:            String,
-                       surname:             String,
-                       dateOfBirth:         LocalDate,
-                       nino:                String,
-                       contactDetails:      ContactDetails,
-                       registrationChannel: String         = "online")
+case class NSIPayload(forename:            String,
+                      surname:             String,
+                      dateOfBirth:         LocalDate,
+                      nino:                String,
+                      contactDetails:      ContactDetails,
+                      registrationChannel: String              = "online",
+                      nbaDetails:          Option[BankDetails] = None,
+                      version:             Option[String]      = None,
+                      systemId:            Option[String]      = None)
 
-object NSIUserInfo {
+object NSIPayload {
 
-  implicit class NSIUserInfoOps(val nsiUserInfo: NSIUserInfo) {
-    def updateEmail(newEmail: String): NSIUserInfo =
-      nsiUserInfo.copy(contactDetails = nsiUserInfo.contactDetails.copy(email = newEmail))
+  implicit class NSIPayloadOps(val nsiPayload: NSIPayload) {
+    def updateEmail(newEmail: String): NSIPayload =
+      nsiPayload.copy(contactDetails = nsiPayload.contactDetails.copy(email = newEmail))
   }
 
   case class ContactDetails(address1:                String,
@@ -59,10 +63,10 @@ object NSIUserInfo {
   }
 
   /**
-   * Performs validation checks on the given [[UserInfo]] and converts to [[NSIUserInfo]]
+   * Performs validation checks on the given [[UserInfo]] and converts to [[NSIPayload]]
    * if successful.
    */
-  def apply(userInfo: UserInfo, email: String): NSIUserInfo = {
+  def apply(userInfo: UserInfo, email: String): NSIPayload = {
       def extractContactDetails(userInfo: UserInfo): ContactDetails = {
         val (line1, line2, line3, line4, line5) =
           userInfo.address.lines.map(_.cleanupSpecialCharacters).filter(_.nonEmpty) match {
@@ -83,7 +87,7 @@ object NSIUserInfo {
         )
       }
 
-    NSIUserInfo(
+    NSIPayload(
       userInfo.forename.cleanupSpecialCharacters,
       userInfo.surname.cleanupSpecialCharacters,
       userInfo.dateOfBirth,
@@ -109,6 +113,6 @@ object NSIUserInfo {
 
   implicit val contactDetailsFormat: Format[ContactDetails] = Json.format[ContactDetails]
 
-  implicit val nsiUserInfoFormat: Format[NSIUserInfo] = Json.format[NSIUserInfo]
+  implicit val nsiPayloadFormat: Format[NSIPayload] = Json.format[NSIPayload]
 
 }

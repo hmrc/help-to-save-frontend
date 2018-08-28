@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -108,9 +108,9 @@ class EmailControllerSpec
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockUpdateEmail(nSIUserInfo: NSIUserInfo)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.updateEmail(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nSIUserInfo, *, *)
+  def mockUpdateEmail(nsiPayload: NSIPayload)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveService.updateEmail(_: NSIPayload)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nsiPayload, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEncrypt(p: String)(result: String): Unit =
@@ -738,7 +738,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, Some("decrypted"), None))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
-          mockUpdateEmail(NSIUserInfo(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted"))(Right(None))
+          mockUpdateEmail(NSIPayload(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted"))(Right(None))
           mockAudit(EmailChanged(nino, "", "decrypted", false, routes.EmailController.confirmEmail(encryptedEmail).url))
         }
 
@@ -886,12 +886,12 @@ class EmailControllerSpec
 
       "handle DE users and update email successfully with NS&I" in {
 
-        val updatedNSIUserInfo = NSIUserInfo(validUserInfo.copy(email = Some(email)), email)
+        val updatedNSIPayload = NSIPayload(validUserInfo.copy(email = Some(email)), email)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockDecrypt("encrypted")(s"WM123456C#$email")
-          mockUpdateEmail(updatedNSIUserInfo)(Right(None))
+          mockUpdateEmail(updatedNSIPayload)(Right(None))
           mockStoreConfirmedEmail(email)(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, Some(email), None))(Right(None))
           mockAudit(EmailChanged(nino, "", email, false, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
@@ -905,7 +905,7 @@ class EmailControllerSpec
 
       "handle DE users and handle errors during updating email with NS&I" in {
 
-        val updatedNSIUserInfo = NSIUserInfo(validUserInfo.copy(email = Some(email)), email)
+        val updatedNSIUserInfo = NSIPayload(validUserInfo.copy(email = Some(email)), email)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))

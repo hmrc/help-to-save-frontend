@@ -36,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.forms._
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
@@ -274,7 +274,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                 userInfo ⇒ {
                   val result = for {
                     e ← decryptedEmailEither
-                    _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo.copy(email = Some(e)), e))
+                    _ ← helpToSaveService.updateEmail(NSIPayload(userInfo.copy(email = Some(e)), e))
                     r ← EitherT.liftF(toFuture(SeeOther(frontendAppConfig.nsiManageAccountUrl)))
                     _ ← {
                       val auditEvent = EmailChanged(htsContext.nino, "", e, duringRegistrationJourney = false, routes.EmailController.confirmEmail(email).url)
@@ -367,7 +367,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           emailVerificationParams,
           params ⇒ {
             for {
-              _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo.copy(email = Some(params.email)), params.email))
+              _ ← helpToSaveService.updateEmail(NSIPayload(userInfo.copy(email = Some(params.email)), params.email))
               _ ← helpToSaveService.storeConfirmedEmail(params.email)
               r ← EitherT.liftF(updateSessionAndReturnResult(
                 HTSSession(None, Some(params.email), None),

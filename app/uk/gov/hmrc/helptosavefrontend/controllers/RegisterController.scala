@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -93,7 +93,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-        val userInfo = NSIUserInfo(eligibleWithEmail.userInfo, eligibleWithEmail.confirmedEmail)
+        val userInfo = NSIPayload(eligibleWithEmail.userInfo, eligibleWithEmail.confirmedEmail)
         val createAccountRequest = CreateAccountRequest(userInfo, eligibleWithEmail.eligible.value.reasonCode)
         helpToSaveService.createAccount(createAccountRequest).fold[Result]({ e ⇒
           logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)

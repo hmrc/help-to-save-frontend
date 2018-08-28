@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
-import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
@@ -194,7 +194,7 @@ class RegisterControllerSpec
       "retrieve the user info from session cache and indicate to the user that the creation was successful " +
         "and enrol the user if the creation was successful" in {
           val userInfo = randomEligibleWithUserInfo(validUserInfo)
-          val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
+          val createAccountRequest = CreateAccountRequest(validNSIPayload.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
@@ -210,7 +210,7 @@ class RegisterControllerSpec
       "indicate to the user that account creation was successful " +
         "even if the user couldn't be enrolled into hts at this time" in {
           val userInfo = randomEligibleWithUserInfo(validUserInfo)
-          val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
+          val createAccountRequest = CreateAccountRequest(validNSIPayload.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
@@ -225,7 +225,7 @@ class RegisterControllerSpec
 
       "not update user counts but enrol the user if the user already had an account" in {
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
+        val createAccountRequest = CreateAccountRequest(validNSIPayload.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
@@ -270,7 +270,7 @@ class RegisterControllerSpec
 
         "the help to save service returns with an error" in {
           val userInfo = randomEligibleWithUserInfo(validUserInfo)
-          val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
+          val createAccountRequest = CreateAccountRequest(validNSIPayload.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))

@@ -34,7 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, Se
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture}
@@ -198,7 +198,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
 
         case Right(userInfo) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
-            _ ← helpToSaveService.updateEmail(NSIUserInfo(userInfo, emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
+            _ ← helpToSaveService.updateEmail(NSIPayload(userInfo, emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
             _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap(UpdateEmailError.EmailMongoError)
             _ ← sessionCacheConnector.put(HTSSession(None, Some(emailVerificationParams.email), None))
               .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)

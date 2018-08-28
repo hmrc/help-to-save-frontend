@@ -20,35 +20,35 @@ import java.time.LocalDate
 
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
 
-class NSIUserInfoSpec extends WordSpec with Matchers {
+class NSIPayloadSpec extends WordSpec with Matchers {
 
-  val email = validNSIUserInfo.contactDetails.email
+  val email = validNSIPayload.contactDetails.email
 
-  "The NSIUSerInfo" must {
+  "The NSIPayload" must {
 
     "have JSON format" which {
 
-      "reads and writes NSIUserInfo" in {
-        Json.fromJson[NSIUserInfo](Json.toJson(validNSIUserInfo)) shouldBe JsSuccess(validNSIUserInfo)
+      "reads and writes NSIPayload" in {
+        Json.fromJson[NSIPayload](Json.toJson(validNSIPayload)) shouldBe JsSuccess(validNSIPayload)
       }
 
       "reads and writes dates in the format 'yyyyMMdd'" in {
         val date = LocalDate.of(1234, 5, 6)
 
         // check the happy path
-        val json1 = Json.toJson(validNSIUserInfo.copy(dateOfBirth = date))
+        val json1 = Json.toJson(validNSIPayload.copy(dateOfBirth = date))
         (json1 \ "dateOfBirth").get shouldBe JsString("12340506")
 
         // check the read will fail if the date is in the wrong format
         val json2 = json1.as[JsObject] ++ Json.obj("dateOfBirth" → JsString("not a date"))
-        Json.fromJson[NSIUserInfo](json2).isError shouldBe true
+        Json.fromJson[NSIPayload](json2).isError shouldBe true
 
         // check that read will fail if the date is not a string
         val json3 = json1.as[JsObject] ++ Json.obj("dateOfBirth" → JsNumber(0))
-        Json.fromJson[NSIUserInfo](json3).isError shouldBe true
+        Json.fromJson[NSIPayload](json3).isError shouldBe true
       }
     }
 
@@ -57,47 +57,47 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
       "takes in a UserInfo" which {
 
         "converts appropriately" in {
-          NSIUserInfo(validUserInfo, email) shouldBe validNSIUserInfo
+          NSIPayload(validUserInfo, email) shouldBe validNSIPayload
         }
 
         "removes new line, tab and carriage return in forename" in {
           val modifiedForename = "\n\t\rname\t"
-          val userInfo = NSIUserInfo(validUserInfo.copy(forename = modifiedForename), email)
+          val userInfo = NSIPayload(validUserInfo.copy(forename = modifiedForename), email)
           userInfo.forename shouldBe "name"
         }
 
         "removes white spaces in forename" in {
           val forenameWithSpaces = " " + "forename" + " "
-          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameWithSpaces), email)
+          val userInfo = NSIPayload(validUserInfo.copy(forename = forenameWithSpaces), email)
           userInfo.forename shouldBe "forename"
         }
 
         "removes spaces, tabs, new lines and carriage returns from a double barrel forename" in {
           val forenameDoubleBarrel = "   John\t\n\r   Paul\t\n\r   "
-          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel), email)
+          val userInfo = NSIPayload(validUserInfo.copy(forename = forenameDoubleBarrel), email)
           userInfo.forename shouldBe "John Paul"
         }
 
         "removes spaces, tabs, new lines and carriage returns from a double barrel forename with a hyphen" in {
           val forenameDoubleBarrel = "   John\t\n\r-Paul\t\n\r   "
-          val userInfo = NSIUserInfo(validUserInfo.copy(forename = forenameDoubleBarrel), email)
+          val userInfo = NSIPayload(validUserInfo.copy(forename = forenameDoubleBarrel), email)
           userInfo.forename shouldBe "John -Paul"
         }
 
         "removes whitespace from surname" in {
-          val userInfo = NSIUserInfo(validUserInfo.copy(surname = " surname"), email)
+          val userInfo = NSIPayload(validUserInfo.copy(surname = " surname"), email)
           userInfo.surname shouldBe "surname"
         }
 
         "removes leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname" in {
           val modifiedSurname = "   Luis\t\n\r   Guerra\t\n\r   "
-          val userInfo = NSIUserInfo(validUserInfo.copy(surname = modifiedSurname), email)
+          val userInfo = NSIPayload(validUserInfo.copy(surname = modifiedSurname), email)
           userInfo.surname shouldBe "Luis Guerra"
         }
 
         "removes leading and trailing whitespaces, tabs, new lines and carriage returns from double barrel surname with a hyphen" in {
           val modifiedSurname = "   Luis\t\n\r-Guerra\t\n\r   "
-          val userInfo = NSIUserInfo(validUserInfo.copy(surname = " " + modifiedSurname), email)
+          val userInfo = NSIPayload(validUserInfo.copy(surname = " " + modifiedSurname), email)
           userInfo.surname shouldBe "Luis -Guerra"
         }
 
@@ -115,7 +115,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
               None
             )
           val ui: UserInfo = validUserInfo.copy(address = specialAddress)
-          val userInfo = NSIUserInfo(ui, email)
+          val userInfo = NSIPayload(ui, email)
           userInfo.contactDetails.address1 shouldBe "address line1"
           userInfo.contactDetails.address2 shouldBe "line2"
           userInfo.contactDetails.address3 shouldBe Some("line3")
@@ -135,7 +135,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
           )
 
           val ui: UserInfo = validUserInfo.copy(address = specialAddress)
-          val userInfo = NSIUserInfo(ui, email)
+          val userInfo = NSIPayload(ui, email)
           userInfo.contactDetails.address1 shouldBe "Address line1"
           userInfo.contactDetails.address2 shouldBe "Address line2"
           userInfo.contactDetails.address3 shouldBe Some("Address line3")
@@ -159,7 +159,7 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
 
           val ui: UserInfo = validUserInfo.copy(forename = longName, surname = longSurname, address = specialAddress)
 
-          val userInfo = NSIUserInfo(ui, email)
+          val userInfo = NSIPayload(ui, email)
           userInfo.forename shouldBe "John Paul Harry"
           userInfo.surname shouldBe "Smith Brown"
           userInfo.contactDetails.address1 shouldBe "Address line1"
@@ -174,18 +174,18 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
         "filters out country codes equal to the string 'other'" in {
           Set("other", "OTHER", "Other").foreach{ other ⇒
             val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(country = Some(other)))
-            NSIUserInfo(ui, email).contactDetails.countryCode shouldBe None
+            NSIPayload(ui, email).contactDetails.countryCode shouldBe None
           }
         }
 
         "takes the first two characters only of country codes" in {
           val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(country = Some("ABCDEF")))
-          NSIUserInfo(ui, email).contactDetails.countryCode shouldBe Some("AB")
+          NSIPayload(ui, email).contactDetails.countryCode shouldBe Some("AB")
         }
 
         "returns a blank string for the postcode if it is not present" in {
           val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(postcode = None))
-          NSIUserInfo(ui, email).contactDetails.postcode shouldBe ""
+          NSIPayload(ui, email).contactDetails.postcode shouldBe ""
         }
 
         "returns a blank string for address lines 1 or 2 if they are missing" in {
@@ -193,21 +193,21 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
           val ui1: UserInfo = validUserInfo.copy(address =
             validUserInfo.address.copy(lines = List()))
 
-          NSIUserInfo(ui1, email).contactDetails.address1 shouldBe ""
-          NSIUserInfo(ui1, email).contactDetails.address2 shouldBe ""
-          NSIUserInfo(ui1, email).contactDetails.address3 shouldBe None
-          NSIUserInfo(ui1, email).contactDetails.address4 shouldBe None
-          NSIUserInfo(ui1, email).contactDetails.address5 shouldBe None
+          NSIPayload(ui1, email).contactDetails.address1 shouldBe ""
+          NSIPayload(ui1, email).contactDetails.address2 shouldBe ""
+          NSIPayload(ui1, email).contactDetails.address3 shouldBe None
+          NSIPayload(ui1, email).contactDetails.address4 shouldBe None
+          NSIPayload(ui1, email).contactDetails.address5 shouldBe None
 
           // check when there is only one address line
           val ui2: UserInfo = validUserInfo.copy(address =
             validUserInfo.address.copy(lines = List("line")))
 
-          NSIUserInfo(ui2, email).contactDetails.address1 shouldBe "line"
-          NSIUserInfo(ui2, email).contactDetails.address2 shouldBe ""
-          NSIUserInfo(ui2, email).contactDetails.address3 shouldBe None
-          NSIUserInfo(ui2, email).contactDetails.address4 shouldBe None
-          NSIUserInfo(ui2, email).contactDetails.address5 shouldBe None
+          NSIPayload(ui2, email).contactDetails.address1 shouldBe "line"
+          NSIPayload(ui2, email).contactDetails.address2 shouldBe ""
+          NSIPayload(ui2, email).contactDetails.address3 shouldBe None
+          NSIPayload(ui2, email).contactDetails.address4 shouldBe None
+          NSIPayload(ui2, email).contactDetails.address5 shouldBe None
         }
 
         "filter out address lines which are empty" in {
@@ -220,11 +220,11 @@ class NSIUserInfoSpec extends WordSpec with Matchers {
           val ui: UserInfo = validUserInfo.copy(address =
             validUserInfo.address.copy(lines = willBeFilteredOut ::: List("line")))
 
-          NSIUserInfo(ui, email).contactDetails.address1 shouldBe "line"
-          NSIUserInfo(ui, email).contactDetails.address2 shouldBe ""
-          NSIUserInfo(ui, email).contactDetails.address3 shouldBe None
-          NSIUserInfo(ui, email).contactDetails.address4 shouldBe None
-          NSIUserInfo(ui, email).contactDetails.address5 shouldBe None
+          NSIPayload(ui, email).contactDetails.address1 shouldBe "line"
+          NSIPayload(ui, email).contactDetails.address2 shouldBe ""
+          NSIPayload(ui, email).contactDetails.address3 shouldBe None
+          NSIPayload(ui, email).contactDetails.address4 shouldBe None
+          NSIPayload(ui, email).contactDetails.address5 shouldBe None
         }
 
       }
