@@ -21,13 +21,13 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
@@ -134,13 +134,17 @@ class HelpToSaveServiceSpec extends TestSupport {
             .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r ⇒ Future.successful(r)))
         }
 
-      "return a successful response" in {
-        List(201, 409).foreach { status ⇒
-          mockCreateAccount(Some(HttpResponse(status)))
-          val result = htsService.createAccount(createAccountRequest)
-          List(result.value.futureValue) should contain oneOf (Right(SubmissionSuccess(false)), Right(SubmissionSuccess(true)))
-        }
+      "return a CREATED response along with the account number when a new account has been created" in {
+        mockCreateAccount(Some(HttpResponse(201, Some(Json.parse("""{"accountNumber" : "1234567890123"}""")))))
+        val result = htsService.createAccount(createAccountRequest)
+        result.value.futureValue shouldBe Right(SubmissionSuccess(Some(AccountNumber("1234567890123"))))
 
+      }
+
+      "return a CONFLICT response with no Json when an account has already been created" in {
+        mockCreateAccount(Some(HttpResponse(409, None)))
+        val result = htsService.createAccount(createAccountRequest)
+        result.value.futureValue shouldBe Right(SubmissionSuccess(None))
       }
 
       "should handle a failure result" in {

@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
@@ -365,7 +365,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return http response as it is to the caller" in {
         val request = CreateAccountRequest(validNSIUserInfo, 7)
-        val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(false))))
+        val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(Some(AccountNumber("1234567890123"))))))
         mockHttpPost(createAccountURL, request)(Some(response))
         await(connector.createAccount(request)) shouldBe response
       }
