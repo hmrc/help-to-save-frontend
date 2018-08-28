@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.models.register
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 
-case class CreateAccountRequest(userInfo: NSIPayload, eligibilityReason: Int, source: String = "Digital")
+case class CreateAccountRequest(payload: NSIPayload, eligibilityReason: Int, source: String = "Digital")
 
 object CreateAccountRequest {
   implicit val createAccountRequestFormat: Format[CreateAccountRequest] = Json.format[CreateAccountRequest]

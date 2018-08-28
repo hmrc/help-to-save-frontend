@@ -83,7 +83,7 @@ object TestData {
       val nsiValidContactDetails = ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
       val nsiPayload =
         NSIPayload(forename, surname, dateOfBirth, nino,
-                    ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
+                   ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
         )
 
       (userInfo, nsiValidContactDetails, nsiPayload)
