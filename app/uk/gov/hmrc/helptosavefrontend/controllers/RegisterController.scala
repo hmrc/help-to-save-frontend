@@ -96,10 +96,8 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
         eligibleWithEmail.bankDetails match {
           case Some(bankDetails) ⇒
             val payload =
-              NSIPayload(eligibleWithEmail.userInfo, eligibleWithEmail.confirmedEmail)
+              NSIPayload(eligibleWithEmail.userInfo, eligibleWithEmail.confirmedEmail, frontendAppConfig.version, frontendAppConfig.systemId)
                 .copy(nbaDetails = Some(bankDetails))
-                .copy(version = Some(frontendAppConfig.version))
-                .copy(systemId = Some(frontendAppConfig.systemId))
 
             val createAccountRequest = CreateAccountRequest(payload, eligibleWithEmail.eligible.value.reasonCode)
             helpToSaveService.createAccount(createAccountRequest).fold[Result]({ e ⇒
@@ -109,9 +107,9 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
               submissionSuccess ⇒ submissionSuccess.accountNumber.fold(
                 SeeOther(frontendAppConfig.nsiManageAccountUrl)
               ) {
-                acNumber ⇒
-                  Ok(views.html.register.account_created(acNumber.accountNumber))
-              }
+                  acNumber ⇒
+                    Ok(views.html.register.account_created(acNumber.accountNumber))
+                }
             )
 
           case None ⇒

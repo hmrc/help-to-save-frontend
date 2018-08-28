@@ -34,8 +34,8 @@ case class NSIPayload(forename:            String,
                       contactDetails:      ContactDetails,
                       registrationChannel: String              = "online",
                       nbaDetails:          Option[BankDetails] = None,
-                      version:             Option[String]      = None,
-                      systemId:            Option[String]      = None)
+                      version:             String,
+                      systemId:            String)
 
 object NSIPayload {
 
@@ -66,7 +66,7 @@ object NSIPayload {
    * Performs validation checks on the given [[UserInfo]] and converts to [[NSIPayload]]
    * if successful.
    */
-  def apply(userInfo: UserInfo, email: String): NSIPayload = {
+  def apply(userInfo: UserInfo, email: String, version: String, systemId: String): NSIPayload = {
       def extractContactDetails(userInfo: UserInfo): ContactDetails = {
         val (line1, line2, line3, line4, line5) =
           userInfo.address.lines.map(_.cleanupSpecialCharacters).filter(_.nonEmpty) match {
@@ -92,7 +92,11 @@ object NSIPayload {
       userInfo.surname.cleanupSpecialCharacters,
       userInfo.dateOfBirth,
       userInfo.nino.cleanupSpecialCharacters.removeAllSpaces,
-      extractContactDetails(userInfo)
+      extractContactDetails(userInfo),
+      "online",
+      None,
+      version,
+      systemId
     )
   }
 

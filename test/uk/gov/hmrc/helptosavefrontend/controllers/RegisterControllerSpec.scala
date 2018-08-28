@@ -188,8 +188,8 @@ class RegisterControllerSpec
       val userInfo = randomEligibleWithUserInfo(validUserInfo)
       val payload = validNSIPayload.updateEmail(confirmedEmail)
         .copy(nbaDetails = Some(bankDetails))
-        .copy(version = Some("V2.0"))
-        .copy(systemId = Some("MDTP REGISTRATION"))
+        .copy(version = "V2.0")
+        .copy(systemId = "MDTP REGISTRATION")
 
       val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.reasonCode)
 
@@ -241,12 +241,10 @@ class RegisterControllerSpec
       }
 
       "redirect the user to nsi when they already have an account" in {
-        val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        val createAccountRequest = CreateAccountRequest(validNSIPayload.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
           mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
         }
 

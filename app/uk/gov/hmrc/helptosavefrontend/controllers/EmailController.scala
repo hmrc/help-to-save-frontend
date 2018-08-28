@@ -274,7 +274,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                 userInfo ⇒ {
                   val result = for {
                     e ← decryptedEmailEither
-                    _ ← helpToSaveService.updateEmail(NSIPayload(userInfo.copy(email = Some(e)), e))
+                    _ ← helpToSaveService.updateEmail(NSIPayload(userInfo.copy(email = Some(e)), e, frontendAppConfig.version, frontendAppConfig.systemId))
                     r ← EitherT.liftF(toFuture(SeeOther(frontendAppConfig.nsiManageAccountUrl)))
                     _ ← {
                       val auditEvent = EmailChanged(htsContext.nino, "", e, duringRegistrationJourney = false, routes.EmailController.confirmEmail(email).url)
@@ -367,7 +367,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           emailVerificationParams,
           params ⇒ {
             for {
-              _ ← helpToSaveService.updateEmail(NSIPayload(userInfo.copy(email = Some(params.email)), params.email))
+              _ ← helpToSaveService.updateEmail(NSIPayload(userInfo.copy(email = Some(params.email)), params.email, frontendAppConfig.version, frontendAppConfig.systemId))
               _ ← helpToSaveService.storeConfirmedEmail(params.email)
               r ← EitherT.liftF(updateSessionAndReturnResult(
                 HTSSession(None, Some(params.email), None),

@@ -72,7 +72,7 @@ trait AuthSupport extends TestSupport {
   val nsiPayload = NSIPayload(
     firstName, lastName, toJavaDate(dob), nino, ContactDetails(
     line1, line2, Some(line3), None, None, postCode, Some(countryCode), emailStr
-  )
+  ), "online", None, "V2.0", "MDTP REGISTRATION"
   )
   val mockedNINORetrieval: Option[String] = Some(nino)
 

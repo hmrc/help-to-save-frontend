@@ -92,10 +92,9 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
                       logger.warn(s"Could not write pending email to session cache: $e")
                       SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
                     }.merge
-                case Left(e) ⇒ {
+                case Left(e) ⇒
                   logger.warn(s"Given email address failed validation, errors: $e")
                   SeeOther(routes.AccountHolderController.getUpdateYourEmailAddress().url)
-                }
               }
           ),
           routes.AccountHolderController.getUpdateYourEmailAddress().url
@@ -198,7 +197,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
 
         case Right(userInfo) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
-            _ ← helpToSaveService.updateEmail(NSIPayload(userInfo, emailVerificationParams.email)).leftMap(UpdateEmailError.NSIError)
+            _ ← helpToSaveService.updateEmail(NSIPayload(userInfo, emailVerificationParams.email, frontendAppConfig.version, frontendAppConfig.systemId)).leftMap(UpdateEmailError.NSIError)
             _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap(UpdateEmailError.EmailMongoError)
             _ ← sessionCacheConnector.put(HTSSession(None, Some(emailVerificationParams.email), None))
               .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)

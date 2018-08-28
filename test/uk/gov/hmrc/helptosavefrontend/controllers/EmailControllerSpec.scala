@@ -121,6 +121,9 @@ class EmailControllerSpec
 
   "The EmailController" when {
 
+    val version = appConfig.version
+    val systemId = appConfig.systemId
+
     val testEmail = "email@gmail.com"
 
     "handling getSelectEmailPage requests" must {
@@ -738,7 +741,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, Some("decrypted"), None))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
-          mockUpdateEmail(NSIPayload(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted"))(Right(None))
+          mockUpdateEmail(NSIPayload(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted", version, systemId))(Right(None))
           mockAudit(EmailChanged(nino, "", "decrypted", false, routes.EmailController.confirmEmail(encryptedEmail).url))
         }
 
@@ -886,7 +889,7 @@ class EmailControllerSpec
 
       "handle DE users and update email successfully with NS&I" in {
 
-        val updatedNSIPayload = NSIPayload(validUserInfo.copy(email = Some(email)), email)
+        val updatedNSIPayload = NSIPayload(validUserInfo.copy(email = Some(email)), email, version, systemId)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
@@ -905,7 +908,7 @@ class EmailControllerSpec
 
       "handle DE users and handle errors during updating email with NS&I" in {
 
-        val updatedNSIUserInfo = NSIPayload(validUserInfo.copy(email = Some(email)), email)
+        val updatedNSIUserInfo = NSIPayload(validUserInfo.copy(email = Some(email)), email, version, systemId)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
