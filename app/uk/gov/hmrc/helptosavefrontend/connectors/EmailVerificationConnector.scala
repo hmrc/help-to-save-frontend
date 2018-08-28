@@ -20,8 +20,7 @@ import java.time.Duration
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status._
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
@@ -29,7 +28,6 @@ import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, Ve
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO, NINOLogMessageTransformer, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -45,9 +43,8 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http:    HttpClient,
-                                                metrics: Metrics
-)(implicit crypto: Crypto, transformer: NINOLogMessageTransformer, frontendAppConfig: FrontendAppConfig)
+class EmailVerificationConnectorImpl @Inject() (http:    WSHttp,
+                                                metrics: Metrics)(implicit crypto: Crypto, transformer: NINOLogMessageTransformer, frontendAppConfig: FrontendAppConfig)
   extends EmailVerificationConnector with Logging {
 
   val templateId: String = "hts_verification_email"

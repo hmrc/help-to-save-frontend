@@ -19,21 +19,24 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
-class SessionCacheConnectorImplSpec extends TestSupport with HttpSupport with ScalaFutures with GeneratorDrivenPropertyChecks {
+class SessionCacheConnectorImplSpec extends TestSupport with ScalaFutures with GeneratorDrivenPropertyChecks {
 
   implicit val config: PatienceConfig = PatienceConfig().copy(timeout = scaled(10.seconds))
 
   class TestApparatus {
+    val mockWsHttp: WSHttp = mock[WSHttp]
 
     implicit val eligibleWithUserInfoGen: Gen[EligibleWithUserInfo] = for {
       eligible ← TestData.Eligibility.randomEligibility()
@@ -54,30 +57,34 @@ class SessionCacheConnectorImplSpec extends TestSupport with HttpSupport with Sc
 
     def cacheMap(htsSession: HTSSession) = CacheMap("1", Map("htsSession" -> Json.toJson(htsSession)))
 
-    val sessionCacheConnector = new SessionCacheConnectorImpl(mockHttp, mockMetrics)
+    val sessionCacheConnector = new SessionCacheConnectorImpl(mockWsHttp, mockMetrics)
 
     val sessionId = headerCarrier.sessionId.getOrElse(sys.error("Could not find session iD"))
 
     val putUrl: String = s"http://localhost:8400/keystore/help-to-save-frontend/${sessionId.value}/data/htsSession"
     val getUrl: String = s"http://localhost:8400/keystore/help-to-save-frontend/${sessionId.value}"
 
+    def mockGet(result: CacheMap) =
+      (mockWsHttp.GET[CacheMap](_: String)(_: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+        .expects(getUrl, *, *, *)
+        .returning(result)
+
+    def mockPut(expectedSession: HTSSession)(result: CacheMap) =
+      (mockWsHttp.PUT[HTSSession, CacheMap](_: String, _: HTSSession)(_: Writes[HTSSession], _: HttpReads[CacheMap], _: HeaderCarrier, _: ExecutionContext))
+        .expects(putUrl, expectedSession, *, *, *, *)
+        .returning(result)
+
   }
 
   "The SessionCacheConnector" should {
-
-      def mockSessionGet(url: String)(response: CacheMap) =
-        mockGet(url)(Some(HttpResponse(200, Some(Json.toJson(response)))))
-
-      def mockSessionPut(url: String, session: HTSSession)(response: CacheMap) =
-        mockPut(url, session)(Some(HttpResponse(200, Some(Json.toJson(response)))))
 
     "be able to insert a new HTSSession into the cache" in new TestApparatus {
       forAll(htsSessionGen) { htsSession ⇒
         val cache = cacheMap(htsSession)
 
         inSequence {
-          mockSessionGet(getUrl)(CacheMap("1", Map.empty[String, JsValue]))
-          mockSessionPut(putUrl, htsSession)(cache)
+          mockGet(CacheMap("1", Map.empty[String, JsValue]))
+          mockPut(htsSession)(cache)
         }
 
         val result = sessionCacheConnector.put(htsSession)
@@ -97,8 +104,8 @@ class SessionCacheConnectorImplSpec extends TestSupport with HttpSupport with Sc
         val cacheAfterPut = cacheMap(expectedSessionToStore)
 
         inSequence {
-          mockSessionGet(getUrl)(cacheMap(existingSession))
-          mockSessionPut(putUrl, expectedSessionToStore)(cacheAfterPut)
+          mockGet(cacheMap(existingSession))
+          mockPut(expectedSessionToStore)(cacheAfterPut)
         }
 
         val result = sessionCacheConnector.put(expectedSessionToStore)
@@ -113,11 +120,12 @@ class SessionCacheConnectorImplSpec extends TestSupport with HttpSupport with Sc
       val expectedSession = HTSSession(None, None, None, Some("a"), Some("b"))
 
       inSequence {
-        mockSessionGet(getUrl)(cacheMap(oldSession))
-        mockSessionPut(putUrl, expectedSession)(cacheMap(expectedSession))
+        mockGet(cacheMap(oldSession))
+        mockPut(expectedSession)(cacheMap(expectedSession))
       }
 
       val result = sessionCacheConnector.put(HTSSession(None, None, None, None, Some("b")))
+
       result.value.futureValue.isRight should be(true)
     }
 
@@ -125,7 +133,7 @@ class SessionCacheConnectorImplSpec extends TestSupport with HttpSupport with Sc
       forAll(htsSessionGen) { htsSession ⇒
         val cache = cacheMap(htsSession)
 
-        mockSessionGet(getUrl)(cache)
+        mockGet(cache)
 
         val result = sessionCacheConnector.get
         result.value.futureValue should be(Right(Some(htsSession)))

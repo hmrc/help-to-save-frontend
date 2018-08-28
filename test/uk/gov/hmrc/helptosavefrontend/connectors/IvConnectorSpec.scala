@@ -21,14 +21,18 @@ import java.util.UUID
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+
+import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off magic.number
-class IvConnectorSpec extends TestSupport with HttpSupport with ScalaFutures {
+class IvConnectorSpec extends TestSupport with ScalaFutures {
 
   class TestApparatus {
+    val mockHttp: WSHttp = mock[WSHttp]
 
     val journeyId = JourneyId(UUID.randomUUID().toString)
 
@@ -36,6 +40,11 @@ class IvConnectorSpec extends TestSupport with HttpSupport with ScalaFutures {
 
     val ivConnector = new IvConnectorImpl(mockHttp)
 
+    def mockHttpResponse(httpResponse: HttpResponse) = {
+      (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext))
+        .expects(url, *, *)
+        .returning(httpResponse)
+    }
   }
 
   "The IvConnectorImpl" when {
@@ -46,7 +55,7 @@ class IvConnectorSpec extends TestSupport with HttpSupport with ScalaFutures {
 
         val httpResponse = HttpResponse(200, Some(Json.parse("""{"result": "Success"}""")))
 
-        mockGet(url)(Some(httpResponse))
+        mockHttpResponse(httpResponse)
 
         val result = ivConnector.getJourneyStatus(journeyId)
 
@@ -57,7 +66,7 @@ class IvConnectorSpec extends TestSupport with HttpSupport with ScalaFutures {
 
         val httpResponse = HttpResponse(600)
 
-        mockGet(url)(Some(httpResponse))
+        mockHttpResponse(httpResponse)
 
         val result = ivConnector.getJourneyStatus(journeyId)
 
@@ -65,16 +74,17 @@ class IvConnectorSpec extends TestSupport with HttpSupport with ScalaFutures {
       }
 
       "handle failure scenarios" in new TestApparatus {
-        mockGet(url)(None)
+
+        val exception = new RuntimeException("some failure")
+
+        (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(url, *, *)
+          .returning(Future.failed(exception))
 
         val result = ivConnector.getJourneyStatus(journeyId)
 
-        result.futureValue match {
-          case Some(IvErrorResponse(_)) ⇒ ()
-          case other                    ⇒ fail(s"Expected IvErrorResponse but got $other")
-        }
+        result.futureValue should be(Some(IvErrorResponse(exception)))
       }
-
     }
   }
 }

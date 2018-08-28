@@ -25,6 +25,7 @@ import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailControllerSpec.EligibleWithUserInfoOps
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
@@ -55,6 +56,8 @@ class EmailControllerSpec
   lazy val messages: Messages = messagesApi.preferred(request)
 
   val mockEmailVerificationConnector: EmailVerificationConnector = mock[EmailVerificationConnector]
+
+  val mockHttp: WSHttp = mock[WSHttp]
 
   val mockAuditor = mock[HTSAuditor]
 

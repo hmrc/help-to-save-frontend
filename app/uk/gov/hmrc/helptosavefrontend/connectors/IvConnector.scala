@@ -20,12 +20,10 @@ import cats.instances.int._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.mvc.Http.Status.OK
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
+import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
 import uk.gov.hmrc.helptosavefrontend.models.iv._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -35,7 +33,7 @@ trait IvConnector {
 }
 
 @Singleton
-class IvConnectorImpl @Inject() (http: HttpClient)(implicit val frontendAppConfig: FrontendAppConfig)
+class IvConnectorImpl @Inject() (http: WSHttp)(implicit val frontendAppConfig: FrontendAppConfig)
   extends IvConnector with Logging {
 
   override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]] = {
