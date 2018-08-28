@@ -18,24 +18,18 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
-import play.api.libs.json.{JsValue, Writes}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.OtherError
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.{ExecutionContext, Future}
-
-class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with GeneratorDrivenPropertyChecks {
+class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with HttpSupport with GeneratorDrivenPropertyChecks {
 
   val nino: NINO = "AE123XXXX"
   val name: String = "first-name"
   val email: Email = "email@gmail.com"
-
-  val mockHttp: WSHttp = mock[WSHttp]
 
   implicit override val crypto: Crypto = mock[Crypto]
 
@@ -49,18 +43,6 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
 
   lazy val connector: EmailVerificationConnectorImpl =
     new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
-
-  def mockPost[A](expectedBody: A)(returnedStatus: Int, returnedData: Option[JsValue]): Unit = {
-    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
-      .expects(appConfig.verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *, *)
-      .returning(Future.successful(HttpResponse(returnedStatus, returnedData)))
-  }
-
-  def mockPostFailure[A](expectedBody: A): Unit = {
-    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
-      .expects(appConfig.verifyEmailURL, expectedBody, Seq.empty[(String, String)], *, *, *)
-      .returning(Future.failed(new Exception("Oh no!")))
-  }
 
   def mockEncrypt(expected: String)(result: String): Unit =
     (crypto.encrypt(_: String)).expects(expected).returning(result)
@@ -81,13 +63,13 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
 
         "return a success when given good json" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(verificationRequest)(Status.OK, None)
+          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(Status.OK)))
           await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Right(())
         }
 
         "indicate the email has already been verified when the email has already been verified" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(verificationRequest)(Status.CONFLICT, None)
+          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(Status.CONFLICT)))
           await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
         }
 
@@ -95,13 +77,13 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
 
           "given bad json" in {
             mockEncrypt(nino + "#" + email)("")
-            mockPost(verificationRequest)(Status.BAD_REQUEST, None)
+            mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(Status.BAD_REQUEST)))
             await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
           }
 
           "the email verification service is down" in {
             mockEncrypt(nino + "#" + email)("")
-            mockPost(verificationRequest)(Status.SERVICE_UNAVAILABLE, None)
+            mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(Status.SERVICE_UNAVAILABLE)))
             await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
           }
 
@@ -111,7 +93,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
             forAll { status: Int ⇒
               whenever(!statuses.contains(status)) {
                 mockEncrypt(nino + "#" + email)("")
-                mockPost(verificationRequest)(status, None)
+                mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(status)))
                 await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
               }
             }
@@ -119,7 +101,7 @@ class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with Gene
 
           "the future fails" in {
             mockEncrypt(nino + "#" + email)("")
-            mockPostFailure(verificationRequest)
+            mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(None)
             await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
           }
         }

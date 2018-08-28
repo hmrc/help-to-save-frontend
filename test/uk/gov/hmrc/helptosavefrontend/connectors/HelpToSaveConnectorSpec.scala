@@ -26,7 +26,6 @@ import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -36,14 +35,12 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
 import uk.gov.hmrc.helptosavefrontend.util.Email
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 // scalastyle:off magic.number
-class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyChecks {
-
-  val mockHttp: WSHttp = mock[WSHttp]
+class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with GeneratorDrivenPropertyChecks {
 
   lazy val connector: HelpToSaveConnector = new HelpToSaveConnectorImpl(mockHttp)
 
@@ -79,24 +76,6 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
   private val updateEmailURL =
     s"$helpToSaveUrl/help-to-save/update-email"
 
-  def mockHttpGet[I](url: String)(result: Option[HttpResponse]): Unit =
-    (mockHttp.get(_: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(url, *, *)
-      .returning(result.fold(
-        Future.failed[HttpResponse](new Exception("")))(Future.successful))
-
-  def mockHttpPost[A](url: String, body: A)(result: Option[HttpResponse]): Unit =
-    (mockHttp.post(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
-      .expects(url, body, Seq.empty[(String, String)], *, *, *)
-      .returning(result.fold(
-        Future.failed[HttpResponse](new Exception("")))(Future.successful))
-
-  def mockHttpPut[A](url: String, body: A)(result: Option[HttpResponse]): Unit =
-    (mockHttp.put(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HeaderCarrier, _: ExecutionContext))
-      .expects(url, body, Seq.empty[(String, String)], *, *, *)
-      .returning(result.fold(
-        Future.failed[HttpResponse](new Exception("")))(Future.successful))
-
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
 
@@ -131,7 +110,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     "getting eligibility status" should {
 
       behave like testCommon(
-        mockHttpGet(eligibilityURL),
+        mockGet(eligibilityURL),
         () ⇒ connector.getEligibility(),
         EligibilityCheckResponse("eligible!", 1, "???", 6)
       )
@@ -141,7 +120,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           forAll(eligibleResponseGen) { response ⇒
             val reason = Eligible(response)
 
-            mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+            mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
 
             val result = connector.getEligibility()
             await(result.value) shouldBe Right(reason)
@@ -153,7 +132,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           forAll(ineligibleResponseGen) { response ⇒
             val reason = Ineligible(response)
 
-            mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+            mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
 
             val result = connector.getEligibility()
             await(result.value) shouldBe Right(reason)
@@ -166,7 +145,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
           val response = EligibilityCheckResponse("HtS account already exists", 3, reasonString, 1)
 
-          mockHttpGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+          mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
 
           val result = connector.getEligibility()
           await(result.value) shouldBe Right(AlreadyHasAccount(response))
@@ -175,7 +154,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       "return an error" when {
 
           def testError(resultCode: Int): Unit = {
-            mockHttpGet(eligibilityURL)(
+            mockGet(eligibilityURL)(
               Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse("", resultCode, "", 1))))))
 
             val result = connector.getEligibility()
@@ -187,7 +166,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
         }
 
         "the call comes back with a 200 and an unknown result code" in {
-          forAll { (resultCode: Int) ⇒
+          forAll { resultCode: Int ⇒
             whenever(!(1 to 3).contains(resultCode)) {
               testError(resultCode)
             }
@@ -216,14 +195,14 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       }
 
       behave like testCommon(
-        mockHttpGet(enrolmentStatusURL),
+        mockGet(enrolmentStatusURL),
         () ⇒ connector.getUserEnrolmentStatus(),
         EnrolmentStatus.NotEnrolled
       )
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-          mockHttpGet(enrolmentStatusURL)(Some(HttpResponse(
+          mockGet(enrolmentStatusURL)(Some(HttpResponse(
             200,
             Some(Json.parse(
               """
@@ -237,7 +216,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           await(connector.getUserEnrolmentStatus().value) shouldBe Right(
             EnrolmentStatus.Enrolled(itmpHtSFlag = true))
 
-          mockHttpGet(enrolmentStatusURL)(Some(HttpResponse(
+          mockGet(enrolmentStatusURL)(Some(HttpResponse(
             200,
             Some(Json.parse(
               """
@@ -251,7 +230,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
           await(connector.getUserEnrolmentStatus().value) shouldBe Right(
             EnrolmentStatus.Enrolled(itmpHtSFlag = false))
 
-          mockHttpGet(enrolmentStatusURL)(Some(HttpResponse(
+          mockGet(enrolmentStatusURL)(Some(HttpResponse(
             200,
             Some(Json.parse(
               """
@@ -270,7 +249,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     "setting the ITMP flag" must {
 
       behave like testCommon(
-        mockHttpGet(setITMPFlagURL),
+        mockGet(setITMPFlagURL),
         () ⇒ connector.setITMPFlagAndUpdateMongo(),
         (),
         testInvalidJSON = false
@@ -278,7 +257,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-          mockHttpGet(setITMPFlagURL)(Some(HttpResponse(200)))
+          mockGet(setITMPFlagURL)(Some(HttpResponse(200)))
 
           await(connector.setITMPFlagAndUpdateMongo().value) shouldBe Right(())
         }
@@ -290,7 +269,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       val encodedEmail = new String(Base64.getEncoder.encode(email.getBytes()))
       behave like testCommon(
-        mockHttpGet(storeEmailURL(encodedEmail)),
+        mockGet(storeEmailURL(encodedEmail)),
         () ⇒ connector.storeEmail(email),
         (),
         testInvalidJSON = false
@@ -298,7 +277,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-          mockHttpGet(storeEmailURL(encodedEmail))(Some(HttpResponse(200)))
+          mockGet(storeEmailURL(encodedEmail))(Some(HttpResponse(200)))
 
           await(connector.storeEmail(email).value) shouldBe Right(())
         }
@@ -306,12 +285,10 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
     "getting emails" must {
 
-      val nino = "nino"
-
       val email = "email"
 
       behave like testCommon(
-        mockHttpGet(getEmailURL),
+        mockGet(getEmailURL),
         () ⇒ connector.getEmail(),
         GetEmailResponse(None),
         false
@@ -319,24 +296,24 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return a Right if the call comes back with HTTP status 200 and " +
         "valid JSON in the body" in {
-          mockHttpGet(getEmailURL)(Some(HttpResponse(200, Some(Json.toJson(GetEmailResponse(Some(email)))))))
+          mockGet(getEmailURL)(Some(HttpResponse(200, Some(Json.toJson(GetEmailResponse(Some(email)))))))
           await(connector.getEmail().value) shouldBe Right(Some(email))
 
-          mockHttpGet(getEmailURL)(Some(HttpResponse(200, Some(Json.toJson(GetEmailResponse(None))))))
+          mockGet(getEmailURL)(Some(HttpResponse(200, Some(Json.toJson(GetEmailResponse(None))))))
           await(connector.getEmail().value) shouldBe Right(None)
         }
     }
 
     "getting account-creation-allowed response" must {
       behave like testCommon(
-        mockHttpGet(accountCreateAllowedURL),
+        mockGet(accountCreateAllowedURL),
         () ⇒ connector.isAccountCreationAllowed(),
         Json.toJson(true),
         true
       )
 
       "return a Right if the call comes with HTTP 200 and valid response in the body" in {
-        mockHttpGet(accountCreateAllowedURL)(Some(HttpResponse(200, Some(Json.toJson(UserCapResponse())))))
+        mockGet(accountCreateAllowedURL)(Some(HttpResponse(200, Some(Json.toJson(UserCapResponse())))))
         await(connector.isAccountCreationAllowed().value) shouldBe Right(UserCapResponse())
       }
     }
@@ -344,18 +321,19 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     "getting Account" must {
 
       val correlationId = UUID.randomUUID()
-      val url = s"$helpToSaveUrl/help-to-save/$nino/account?correlationId=$correlationId&systemId=help-to-save-frontend"
+      val url = s"$helpToSaveUrl/help-to-save/$nino/account"
+      val queryParameters = Map("correlationId" → correlationId.toString, "systemId" → "help-to-save-frontend")
       val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
       behave like testCommon(
-        mockHttpGet(url),
+        mockGet(url, queryParameters),
         () ⇒ connector.getAccount(nino, correlationId),
         account,
         false
       )
 
       "be able to handle 200 responses with valid Account json" in {
-        mockHttpGet(url)(Some(HttpResponse(200, Some(Json.toJson(account)))))
+        mockGet(url, queryParameters)(Some(HttpResponse(200, Some(Json.toJson(account)))))
         await(connector.getAccount(nino, correlationId).value) shouldBe Right(account)
       }
 
@@ -366,7 +344,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
       "return http response as it is to the caller" in {
         val request = CreateAccountRequest(validNSIUserInfo, 7)
         val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(false))))
-        mockHttpPost(createAccountURL, request)(Some(response))
+        mockPost(createAccountURL, Map.empty[String, String], request)(Some(response))
         await(connector.createAccount(request)) shouldBe response
       }
     }
@@ -375,7 +353,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return http response as it is to the caller" in {
         val response = HttpResponse(200, Some(Json.toJson(())))
-        mockHttpPut(updateEmailURL, validNSIUserInfo)(Some(response))
+        mockPut(updateEmailURL, validNSIUserInfo)(Some(response))
         await(connector.updateEmail(validNSIUserInfo)) shouldBe response
       }
     }
@@ -385,7 +363,7 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
   private def testCommon[E, A, B](mockHttp:        ⇒ Option[HttpResponse] ⇒ Unit,
                                   result:          () ⇒ EitherT[Future, E, A],
                                   validBody:       B,
-                                  testInvalidJSON: Boolean                       = true)(implicit writes: Writes[B]) = { // scalstyle:ignore method.length
+                                  testInvalidJSON: Boolean                       = true)(implicit writes: Writes[B]): Unit = { // scalstyle:ignore method.length
     "make a request to the help-to-save backend" in {
       mockHttp(Some(HttpResponse(200)))
       await(result())
