@@ -48,7 +48,7 @@
       value = form.data.getOrElse("sortCode", ""),
       hint = Some(messages("hts.register.bank-details.sort-code.hint")),
       name = "sortCode",
-      errorMessage = if(form.error("sortCode").isDefined) Some(Html(Messages(s"hts.sortCode.error"))) else None
+      errorMessage = if(form.error("sortCode").isDefined) Some(Html(Messages("hts.sortCode.error"))) else None
     )
 
     @input_text(
@@ -56,7 +56,7 @@
       label = messages("hts.register.bank-details.accountNumber.label"),
       value = form.data.getOrElse("accountNumber", ""),
       name = "accountNumber",
-      errorMessage = if(form.error("accountNumber").isDefined) Some(Html(Messages(s"hts.accountNumber.error"))) else None
+      errorMessage = if(form.error("accountNumber").isDefined) Some(Html(Messages("hts.accountNumber.error"))) else None
     )
 
     @input_text(
@@ -65,7 +65,7 @@
       value = form.data.getOrElse("rollNumber", ""),
       hint = Some(messages("hts.register.bank-details.rollNumber.hint")),
       name = "rollNumber",
-      errorMessage = if(form.error("rollNumber").isDefined) Some(Html(Messages(s"hts.rollNumber.error"))) else None
+      errorMessage = if(form.error("rollNumber").isDefined) Some(Html(Messages("hts.rollNumber.error"))) else None
     )
 
     @input_text(
@@ -73,7 +73,7 @@
       label = messages("hts.register.bank-details.accountName.label"),
       value = form.data.getOrElse("accountName", ""),
       name = "accountName",
-      errorMessage = if(form.error("accountName").isDefined) Some(Html(Messages(s"hts.accountName.error"))) else None
+      errorMessage = if(form.error("accountName").isDefined) Some(Html(Messages("hts.accountName.error"))) else None
     )
 
     @ga_submit_button(
