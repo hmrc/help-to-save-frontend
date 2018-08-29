@@ -11,4 +11,17 @@ $(document).ready(function () {
   var showHideContent = new GOVUK.ShowHideContent()
   showHideContent.init()
 
+  function setUpErrorSummary($el) {
+    $el.find('a').each(function (i, link) {
+      $(link).on('click', function () {
+        var focuses = $(this).attr('data-focuses');
+        $('#' + focuses).trigger('focus')
+      })
+    });
+    // focus on the error summary
+    $el.trigger('focus');
+  }
+
+  setUpErrorSummary($('.error-summary'));
+
 })

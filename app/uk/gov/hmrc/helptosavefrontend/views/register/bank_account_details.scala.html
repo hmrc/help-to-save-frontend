@@ -25,42 +25,63 @@
 
 @(form: Form[BankDetails])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = "Enter Bank Details", bodyClasses = None) {
-@helpers.form(routes.BankAccountController.submitBankDetails(), 'id -> "bankDetailsForm") {
+@title = @{messages("hts.register.bank-details.title.h1")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
 
-@browser_back()
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.global.title", pageTitle, "", Messages("hts.global.title-suffix")), bodyClasses = None) {
 
-<div class="form-field-group">
-    <div class="form-field-group @if(form.hasErrors || form.hasGlobalErrors) {error}">
+  @browser_back()
 
-        @form.errors.map { error =>
-        <span class="error-notification">@error.key @Messages(error.message)</span>
-        }
+  @if(hasErrors) {
+    @error_summary(form.errors)
+  }
 
-        <h3>Which UK bank account do you want us to pay your bonuses and withdrawals into ?</h3>
+  <h1>@title</h1>
 
-        <div class="form-field">
-            <label class="label--inline">Sort Code:</label>
-            <input type="text" name="sortCode">
-        </div>
+  @helpers.form(routes.BankAccountController.submitBankDetails(), 'id -> "bankDetailsForm") {
 
-        <div class="form-field">
-            <label class="label--inline">Account Number:</label>
-            <input type="text" name="accountNumber">
-        </div>
+    @input_text(
+      id = "sortCode",
+      label = messages("hts.register.bank-details.sort-code.label"),
+      inputClass = Some("input--small"),
+      value = form.data.getOrElse("sortCode", ""),
+      hint = Some(messages("hts.register.bank-details.sort-code.hint")),
+      name = "sortCode",
+      errorMessage = if(form.error("sortCode").isDefined) Some(Html(Messages(s"hts.sortCode.error"))) else None
+    )
 
-        <div class="form-field">
-            <label class="label--inline">Roll Number:</label>
-            <input type="text" name="rollNumber">
-        </div>
+    @input_text(
+      id = "accountNumber",
+      label = messages("hts.register.bank-details.accountNumber.label"),
+      value = form.data.getOrElse("accountNumber", ""),
+      name = "accountNumber",
+      errorMessage = if(form.error("accountNumber").isDefined) Some(Html(Messages(s"hts.accountNumber.error"))) else None
+    )
 
-        <div class="form-field">
-            <label class="label--inline">Account Name:</label>
-            <input type="text" name="accountName">
-        </div>
+    @input_text(
+      id = "rollNumber",
+      label = messages("hts.register.bank-details.rollNumber.label"),
+      value = form.data.getOrElse("rollNumber", ""),
+      hint = Some(messages("hts.register.bank-details.rollNumber.hint")),
+      name = "rollNumber",
+      errorMessage = if(form.error("rollNumber").isDefined) Some(Html(Messages(s"hts.rollNumber.error"))) else None
+    )
 
-        <p><input class="button" type="submit" value="Submit"></p>
-    </div>
-</div>
-}
+    @input_text(
+      id = "accountName",
+      label = messages("hts.register.bank-details.accountName.label"),
+      value = form.data.getOrElse("accountName", ""),
+      name = "accountName",
+      errorMessage = if(form.error("accountName").isDefined) Some(Html(Messages(s"hts.accountName.error"))) else None
+    )
+
+    @ga_submit_button(
+      id = "bankDetailsSubmit",
+      action = "Applicant submitted bank account details",
+      label = title,
+      message = messages("hts.global.continue-button")
+    )
+
+  }
 }
