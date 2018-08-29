@@ -29,6 +29,10 @@
 
 @title = @{Messages("hts.cya.title")}
 
+@display2CharFormat(str: String) = @{
+  str.filterNot((x: Char) => x.isWhitespace).grouped(2).mkString(" ")
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
 title = Messages("hts.global.title", title, "", Messages("hts.global.title-suffix")),
 sidebarLinks = None,
@@ -45,7 +49,7 @@ bodyClasses = None) {
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.cya.your-details.name"), userInfo.forename + " " + userInfo.surname)
     @summary_row(Messages("hts.cya.your-details.dob"), userInfo.dateOfBirth.show)
-    @summary_row(Messages("hts.cya.your-details.nino"), userInfo.nino.grouped(2).mkString(" "))
+    @summary_row(Messages("hts.cya.your-details.nino"), display2CharFormat(userInfo.nino))
   </dl>
 
   @summary_section_head(heading = Messages("hts.cya.your-email"))
@@ -57,7 +61,7 @@ bodyClasses = None) {
   @summary_section_head(heading = Messages("hts.cya.your-bank-details"))
   @summary_section_change(routes.BankAccountController.getBankDetailsPage().url, Messages("hts.cya.your-bank-details"))
   <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.cya.your-bank-details.sort-code"), bankDetails.sortCode.grouped(2).mkString(" "))
+    @summary_row(Messages("hts.cya.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode))
     @summary_row(Messages("hts.cya.your-bank-details.account-number"), bankDetails.accountNumber)
     @if(bankDetails.rollNumber.nonEmpty) {
       @summary_row(Messages("hts.cya.your-bank-details.roll-number"), bankDetails.rollNumber.getOrElse(""))
