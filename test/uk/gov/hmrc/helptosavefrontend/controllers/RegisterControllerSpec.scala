@@ -330,7 +330,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 200
-        contentAsString(result) should include("check your details")
+        contentAsString(result) should include("Check your details")
       }
 
       "show user not eligible page if the user is not eligible" in {

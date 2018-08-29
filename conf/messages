@@ -560,6 +560,23 @@ hts.incorrect-details.listTwo1=<a href={0}>Tell HMRC about a change to your pers
 hts.incorrect-details.listTwo2=When we have updated your details, apply for a Help to Save account.
 hts.incorrect-details.exit-button=Back
 
+# Check your details page
+hts.cya.change=Change
+hts.cya.title=Check your details
+hts.cya.intro=You’ll need to check and confirm your details are correct before you can create an account.
+hts.cya.your-details=Your details
+hts.cya.your-details.name=Name
+hts.cya.your-details.dob=Date of birth
+hts.cya.your-details.nino=National Insurance number
+hts.cya.your-email=Your email address
+hts.cya.your-email.email=Email
+hts.cya.your-bank-details=Your bank details
+hts.cya.your-bank-details.sort-code=Sort code
+hts.cya.your-bank-details.account-number=Account number
+hts.cya.your-bank-details.roll-number=Roll number
+hts.cya.your-bank-details.account-name=Account name
+hts.cya.by-continuing=By continuing you confirm your details are correct.
+
 # Privacy page
 hts.privacy.title.h1=Help to Save privacy statement
 hts.privacy.p1=This document sets out how we will use your information to deliver the Help to Save scheme.
