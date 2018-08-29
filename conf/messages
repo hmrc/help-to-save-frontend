@@ -10,6 +10,7 @@ hts.global.error.prefix=Error:
 hts.global.title={0} {1} - {2} - GOV.UK
 hts.global.title.section.email=- Manage your email address
 hts.global.exit.to.gov.uk=Exit to GOV.UK
+hts.global.link.back=Back
 
 hts.global.error-summary.title=There are errors on the page
 

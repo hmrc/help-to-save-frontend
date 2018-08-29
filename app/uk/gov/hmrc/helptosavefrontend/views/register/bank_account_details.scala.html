@@ -27,12 +27,11 @@
 
 @title = @{messages("hts.register.bank-details.title.h1")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = title, bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.global.title", pageTitle, "", Messages("hts.global.title-suffix")), bodyClasses = None) {
 
-
-@browser_back()
-
+  @browser_back()
 
   @if(hasErrors) {
     @error_summary(form.errors)
@@ -45,6 +44,7 @@
     @input_text(
       id = "sortCode",
       label = messages("hts.register.bank-details.sort-code.label"),
+      inputClass = Some("input--small"),
       value = form.data.getOrElse("sortCode", ""),
       hint = Some(messages("hts.register.bank-details.sort-code.hint")),
       name = "sortCode",
@@ -76,6 +76,12 @@
       errorMessage = if(form.error("accountName").isDefined) Some(Html(Messages(s"hts.accountName.error"))) else None
     )
 
-  <p><input class="button" type="submit" value="Submit"></p>
-}
+    @ga_submit_button(
+      id = "bankDetailsSubmit",
+      action = "Applicant submitted bank account details",
+      label = "Bank details page",
+      message = messages("hts.global.continue-button")
+    )
+
+  }
 }
