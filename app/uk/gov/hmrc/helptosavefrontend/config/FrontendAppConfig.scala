@@ -32,6 +32,10 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val appName: String = getString("appName")
 
+  val version: String = getString("microservice.services.nsi.version")
+
+  val systemId: String = getString("microservice.services.nsi.systemId")
+
   private def getUrlFor(service: String) = getString(s"microservice.services.$service.url")
 
   val authUrl: String = baseUrl("auth")

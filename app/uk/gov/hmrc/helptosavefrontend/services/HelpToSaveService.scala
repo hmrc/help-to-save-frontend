@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
@@ -38,6 +38,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[HelpToSaveServiceImpl])
 trait HelpToSaveService {
+
+  type CreateAccountResultType = EitherT[Future, SubmissionFailure, SubmissionSuccess]
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus]
 
@@ -49,13 +51,13 @@ trait HelpToSaveService {
 
   def getConfirmedEmail()(implicit hv: HeaderCarrier, ec: ExecutionContext): Result[Option[String]]
 
-  def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, SubmissionFailure, SubmissionSuccess]
+  def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): CreateAccountResultType
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse]
 
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account]
 
-  def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
 }
 
@@ -77,9 +79,7 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
   def getConfirmedEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     helpToSaveConnector.getEmail()
 
-  def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier,
-                                                                ec: ExecutionContext
-  ): EitherT[Future, SubmissionFailure, SubmissionSuccess] =
+  def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): CreateAccountResultType =
     EitherT(helpToSaveConnector.createAccount(createAccountRequest)
       .map[Either[SubmissionFailure, SubmissionSuccess]] { response ⇒
 
@@ -108,7 +108,7 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account] =
     helpToSaveConnector.getAccount(nino, correlationId)
 
-  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+  override def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     EitherT(helpToSaveConnector.updateEmail(userInfo).map[Either[String, Unit]] { response ⇒
 
       response.status match {

@@ -23,8 +23,8 @@ import uk.gov.hmrc.auth.core.authorise._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserInfoRetrievals
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.util.toJavaDate
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -69,10 +69,10 @@ trait AuthSupport extends TestSupport {
   val countryCode = "GB"
   val itmpAddress = ItmpAddress(Some(line1), Some(line2), Some(line3), None, None, Some(postCode), Some(countryCode), Some(countryCode))
 
-  val nsiUserInfo = NSIUserInfo(
+  val nsiPayload = NSIPayload(
     firstName, lastName, toJavaDate(dob), nino, ContactDetails(
     line1, line2, Some(line3), None, None, postCode, Some(countryCode), emailStr
-  )
+  ), "online", None, "V2.0", "MDTP REGISTRATION"
   )
   val mockedNINORetrieval: Option[String] = Some(nino)
 
