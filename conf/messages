@@ -10,6 +10,9 @@ hts.global.error.prefix=Error:
 hts.global.title={0} {1} - {2} - GOV.UK
 hts.global.title.section.email=- Manage your email address
 hts.global.exit.to.gov.uk=Exit to GOV.UK
+hts.global.link.back=Back
+
+hts.global.error-summary.title=There are errors on the page
 
 hts.nav.title=Help to Save
 hts.nav.next=Next
@@ -257,6 +260,17 @@ hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 
 hts.core.not-eligible.sidebar.h2=Elsewhere on GOV.UK
 hts.core.not-eligible.sidebar.p=Working Tax Credit
+
+hts.register.bank-details.title.h1=Which UK bank account do you want us to pay your bonuses and withdrawals into?
+hts.register.bank-details.sort-code.label=Sort code
+hts.register.bank-details.sort-code.hint=For example, 02 03 04
+hts.sortCode.error=Sort code must be entered
+hts.register.bank-details.accountNumber.label=Account number
+hts.accountNumber.error=Account number must be entered
+hts.register.bank-details.accountName.label=Account name
+hts.accountName.error=Account name must be entered
+hts.register.bank-details.rollNumber.label=Roll number (optional)
+hts.register.bank-details.rollNumber.hint=Building societies only
 
 # Eligible
 hts.register.you-are-eligible.title.h1=We’ve checked the details we hold for you
