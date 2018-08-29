@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -93,19 +93,29 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-        val userInfo = NSIUserInfo(eligibleWithEmail.userInfo, eligibleWithEmail.confirmedEmail)
-        val createAccountRequest = CreateAccountRequest(userInfo, eligibleWithEmail.eligible.value.reasonCode)
-        helpToSaveService.createAccount(createAccountRequest).fold[Result]({ e ⇒
-          logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
-          SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
-        },
-          submissionSuccess ⇒ submissionSuccess.accountNumber.fold(
-            SeeOther(frontendAppConfig.nsiManageAccountUrl)
-          ) {
-              acNumber ⇒
-                Ok(views.html.register.account_created(acNumber.accountNumber))
-            }
-        )
+        eligibleWithEmail.bankDetails match {
+          case Some(bankDetails) ⇒
+            val payload =
+              NSIPayload(eligibleWithEmail.userInfo, eligibleWithEmail.confirmedEmail, frontendAppConfig.version, frontendAppConfig.systemId)
+                .copy(nbaDetails = Some(bankDetails))
+
+            val createAccountRequest = CreateAccountRequest(payload, eligibleWithEmail.eligible.value.reasonCode)
+            helpToSaveService.createAccount(createAccountRequest).fold[Result]({ e ⇒
+              logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
+              SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
+            },
+              submissionSuccess ⇒ submissionSuccess.accountNumber.fold(
+                SeeOther(frontendAppConfig.nsiManageAccountUrl)
+              ) {
+                  acNumber ⇒
+                    Ok(views.html.register.account_created(acNumber.accountNumber))
+                }
+            )
+
+          case None ⇒
+            logger.warn("no bank details found in session, redirect user to bank_details page")
+            SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+        }
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.createAccount().url)

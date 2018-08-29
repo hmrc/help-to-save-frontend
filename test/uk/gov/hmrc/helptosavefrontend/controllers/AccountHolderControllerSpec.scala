@@ -34,7 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -98,8 +98,8 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       .expects(nino, email, firstName, false, *, *)
       .returning(Future.successful(result))
 
-  def mockUpdateEmailWithNSI(userInfo: NSIUserInfo)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.updateEmail(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
+  def mockUpdateEmailWithNSI(userInfo: NSIPayload)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveService.updateEmail(_: NSIPayload)(_: HeaderCarrier, _: ExecutionContext))
       .expects(userInfo, *, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -255,7 +255,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
-            mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
+            mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
             mockSessionCacheConnectorPut(HTSSession(None, Some(verifiedEmail), None))(Right(()))
             mockAuditEmailChanged(nino, "email", verifiedEmail,
@@ -277,7 +277,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(Enrolled(true)))
               mockEmailGet()(Right(Some("email")))
-              mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
+              mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
               mockStoreEmail(verifiedEmail)(Left(""))
               mockAuditEmailChanged(nino, "email", verifiedEmail,
                                     routes.AccountHolderController.emailVerifiedCallback(encodedParams).url)
@@ -330,7 +330,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
-            mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Left(""))
+            mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Left(""))
           }
 
           val result = verifyEmail(emailVerificationParams.encode())
@@ -344,7 +344,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(Enrolled(true)))
             mockEmailGet()(Right(Some("email")))
-            mockUpdateEmailWithNSI(nsiUserInfo.updateEmail(verifiedEmail))(Right(()))
+            mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
             mockStoreEmail(verifiedEmail)(Right(()))
             mockSessionCacheConnectorPut(HTSSession(None, Some(verifiedEmail), None))(Left(""))
             mockAuditEmailChanged(nino, "email", verifiedEmail,

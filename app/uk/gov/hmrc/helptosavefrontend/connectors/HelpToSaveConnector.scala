@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIPayload}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -57,7 +57,7 @@ trait HelpToSaveConnector {
 
   def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
 
-  def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
+  def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
 
 }
 
@@ -166,7 +166,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   override def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     http.post(createAccountURL, createAccountRequest)
 
-  override def updateEmail(userInfo: NSIUserInfo)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+  override def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     http.put(updateEmailURL, userInfo)
 }
 

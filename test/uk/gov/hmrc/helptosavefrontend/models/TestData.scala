@@ -22,8 +22,8 @@ import org.scalacheck.Gen
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo.ContactDetails
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.testutil._
 import uk.gov.hmrc.smartstub.AutoGen.{GenProvider, instance}
 import uk.gov.hmrc.smartstub.{AutoGen, _}
@@ -59,7 +59,7 @@ object TestData {
     /**
      * Valid user details which will pass NSI validation checks
      */
-    val (validUserInfo, nsiValidContactDetails, validNSIUserInfo) = {
+    val (validUserInfo, nsiValidContactDetails, validNSIPayload) = {
       val (forename, surname) = "Tyrion" → "Lannister"
       val dateOfBirth = LocalDate.ofEpochDay(0L)
       val addressLine1 = "Casterly Rock"
@@ -74,12 +74,12 @@ object TestData {
 
       val userInfo = UserInfo(forename, surname, nino, dateOfBirth, Some(email), address)
       val nsiValidContactDetails = ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
-      val nsiUserInfo =
-        NSIUserInfo(forename, surname, dateOfBirth, nino,
-                    ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
+      val nsiPayload =
+        NSIPayload(forename, surname, dateOfBirth, nino,
+                   ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email), "online", None, "V2.0", "systemId"
         )
 
-      (userInfo, nsiValidContactDetails, nsiUserInfo)
+      (userInfo, nsiValidContactDetails, nsiPayload)
     }
   }
 
