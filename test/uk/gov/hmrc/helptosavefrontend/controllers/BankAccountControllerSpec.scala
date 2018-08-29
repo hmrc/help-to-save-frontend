@@ -59,6 +59,20 @@ class BankAccountControllerSpec extends AuthSupport
         contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
 
       }
+
+      "send already stored bank details in the session back to the UI" in {
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, Some(BankDetails("sortCode", "accountNumber", Some(""), "accountName"))))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.OK
+        contentAsString(result) should (include("Enter Bank Details") and include("sortCode") and include("accountNumber") and include("accountName"))
+
+      }
     }
 
     "handling submitBankDetails" must {
