@@ -14,5 +14,18 @@
  * limitations under the License.
  *@
 
-@()(implicit messages: Messages)
-<a href="#" onclick="window.history.back();return false;" class="link-back">@Messages("hts.global.link.back")</a>
+@(errors: Seq[play.api.data.FormError])(implicit messages: Messages)
+
+<div
+  class="error-summary"
+  id="error-summary-display"
+  role="alert"
+  aria-labelledby="error-summary-heading"
+  tabindex="-1">
+  <h2 id="error-summary-heading" class="heading-medium error-summary-heading">@Messages("hts.global.error-summary.title")</h2>
+  <ul class="error-summary-list">
+  @for(error <- errors) {
+    <li><a href="#@{error.key}" data-focuses="@{error.key}">@Messages(s"hts.${error.key}.error")</a></li>
+  }
+  </ul>
+</div>

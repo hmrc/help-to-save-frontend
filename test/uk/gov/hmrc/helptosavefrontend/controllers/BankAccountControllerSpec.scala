@@ -56,7 +56,7 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Enter Bank Details")
+        contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
 
       }
     }
@@ -67,7 +67,7 @@ class BankAccountControllerSpec extends AuthSupport
         .withFormUrlEncodedBody(
           "sortCode" → "123456",
           "accountNumber" -> "12345678",
-          "rollNumbber" -> "",
+          "rollNumber" -> "",
           "accountName" -> "test user name"
         )
 
@@ -79,9 +79,9 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = controller.submitBankDetails()(fakeRequestWithCSRFToken)
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("sortCode This field is required")
-        contentAsString(result) should include("accountNumber This field is required")
-        contentAsString(result) should include("accountName This field is required")
+        contentAsString(result) should include("Sort code must be entered")
+        contentAsString(result) should include("Account number must be entered")
+        contentAsString(result) should include("Account name must be entered")
       }
 
       doCommonChecks(doRequest)
