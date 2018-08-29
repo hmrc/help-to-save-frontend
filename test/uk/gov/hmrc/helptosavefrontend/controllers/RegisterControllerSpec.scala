@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
-import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIUserInfo, validUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
@@ -184,6 +184,14 @@ class RegisterControllerSpec
 
     "creating an account" must {
       val confirmedEmail = "confirmed"
+      val bankDetails = BankDetails("1", "1", None, "name")
+      val userInfo = randomEligibleWithUserInfo(validUserInfo)
+      val payload = validNSIPayload.updateEmail(confirmedEmail)
+        .copy(nbaDetails = Some(bankDetails))
+        .copy(version = "V2.0")
+        .copy(systemId = "MDTP REGISTRATION")
+
+      val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.reasonCode)
 
         def doCreateAccountRequest(): Future[PlayResult] = controller.createAccount(fakeRequestWithCSRFToken)
 
@@ -193,12 +201,10 @@ class RegisterControllerSpec
 
       "retrieve the user info from session cache and indicate to the user that the creation was successful " +
         "and enrol the user if the creation was successful" in {
-          val userInfo = randomEligibleWithUserInfo(validUserInfo)
-          val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
             mockCreateAccount(createAccountRequest)()
           }
 
@@ -209,12 +215,10 @@ class RegisterControllerSpec
 
       "indicate to the user that account creation was successful " +
         "even if the user couldn't be enrolled into hts at this time" in {
-          val userInfo = randomEligibleWithUserInfo(validUserInfo)
-          val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
             mockCreateAccount(createAccountRequest)()
           }
 
@@ -224,12 +228,10 @@ class RegisterControllerSpec
         }
 
       "not update user counts but enrol the user if the user already had an account" in {
-        val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
           mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
         }
 
@@ -239,12 +241,10 @@ class RegisterControllerSpec
       }
 
       "redirect the user to nsi when they already have an account" in {
-        val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
           mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
         }
 
@@ -266,41 +266,47 @@ class RegisterControllerSpec
         redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
       }
 
-      "redirect to the create account error page" when {
-
-        "the help to save service returns with an error" in {
-          val userInfo = randomEligibleWithUserInfo(validUserInfo)
-          val createAccountRequest = CreateAccountRequest(validNSIUserInfo.updateEmail(confirmedEmail), userInfo.eligible.value.reasonCode)
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
-            mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
-          }
-
-          val result = doCreateAccountRequest()
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
+      "redirect user to bank_details page if the session doesn't contain bank details" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
         }
+
+        val result = doCreateAccountRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
       }
 
-      "handling getCreateAccountErrorPage" must {
-
-          def doRequest(): Future[PlayResult] = controller.getCreateAccountErrorPage(FakeRequest())
-
-        behave like commonEnrolmentAndSessionBehaviour(doRequest)
-
-        "show the error page" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
-          }
-
-          val result = doRequest()
-          contentAsString(result) should include("We could not create a Help to Save account for you at this time")
-
+      "redirect to the create account error page the help to save service returns with an error" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+          mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
         }
+
+        val result = doCreateAccountRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
+      }
+    }
+
+    "handling getCreateAccountErrorPage" must {
+      val confirmedEmail = "confirmed"
+        def doRequest(): Future[PlayResult] = controller.getCreateAccountErrorPage(FakeRequest())
+
+      behave like commonEnrolmentAndSessionBehaviour(doRequest)
+
+      "show the error page" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
+        }
+
+        val result = doRequest()
+        contentAsString(result) should include("We could not create a Help to Save account for you at this time")
 
       }
     }

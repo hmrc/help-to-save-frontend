@@ -28,7 +28,7 @@ import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.WSHttp
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
-import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
@@ -364,8 +364,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
     "creating account" must {
 
       "return http response as it is to the caller" in {
-        val request = CreateAccountRequest(validNSIUserInfo, 7)
         val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(Some(AccountNumber("1234567890123"))))))
+        val request = CreateAccountRequest(validNSIPayload, 7)
         mockHttpPost(createAccountURL, request)(Some(response))
         await(connector.createAccount(request)) shouldBe response
       }
@@ -375,8 +375,8 @@ class HelpToSaveConnectorSpec extends TestSupport with GeneratorDrivenPropertyCh
 
       "return http response as it is to the caller" in {
         val response = HttpResponse(200, Some(Json.toJson(())))
-        mockHttpPut(updateEmailURL, validNSIUserInfo)(Some(response))
-        await(connector.updateEmail(validNSIUserInfo)) shouldBe response
+        mockHttpPut(updateEmailURL, validNSIPayload)(Some(response))
+        await(connector.updateEmail(validNSIPayload)) shouldBe response
       }
     }
 
