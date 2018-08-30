@@ -39,13 +39,12 @@ bodyClasses = None) {
   <p>@Html(Messages("hts.account-created.p1"))</p>
   <p>@Html(Messages("hts.account-created.p2"))</p>
 
-
-  <div class="form-field form-field--submit">
-      @form(routes.AccessAccountController.accessAccount){
-      @ga_submit_button("hts.account-created.continue-button",
-      "Continue to your account",
-      "Account created page",
-      Messages("hts.account-created.continue-button"))
-      }
-  </div>
+  @form(routes.AccessAccountController.accessAccount){
+      @ga_submit_button(
+        "continueToAccount",
+        "Continue to your account",
+        "Account created page",
+        Messages("hts.account-created.continue-button")
+      )
+  }
 }
