@@ -30,7 +30,7 @@
 @title = @{Messages("hts.cya.title")}
 
 @display2CharFormat(str: String) = @{
-  str.filterNot((x: Char) => x.isWhitespace).grouped(2).mkString(" ")
+  str.filterNot((x: Char) => x.isWhitespace || x.toString.matches("-")).grouped(2).mkString(" ")
 }
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
