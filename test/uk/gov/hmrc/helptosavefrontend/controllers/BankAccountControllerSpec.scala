@@ -70,7 +70,7 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should (include("Enter Bank Details") and include("sortCode") and include("accountNumber") and include("accountName"))
+        contentAsString(result) should (include("Which UK bank account do you want us to pay your bonuses and withdrawals into?") and include("sortCode") and include("accountNumber") and include("accountName"))
 
       }
     }
