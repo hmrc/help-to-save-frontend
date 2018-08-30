@@ -28,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -110,10 +110,14 @@ class SessionCacheConnectorImpl @Inject() (val http: HttpClient,
     }
 
   override def get(uri: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[CacheMap] =
-    http.get(uri).flatMap{
-      _.parseJSON[CacheMap]() match {
-        case Right(c: CacheMap) ⇒ Future.successful(c)
-        case Left(e)            ⇒ Future.failed(new Exception(s"Could not parse response: $e"))
+    http.get(uri).flatMap { r ⇒
+      r.status match {
+        case 200 ⇒
+          r.parseJSON[CacheMap]() match {
+            case Right(c: CacheMap) ⇒ Future.successful(c)
+            case Left(e)            ⇒ Future.failed(new Exception(s"Could not parse response: $e"))
+          }
+        case 404 ⇒ Future.failed(new NotFoundException(""))
       }
     }
 
