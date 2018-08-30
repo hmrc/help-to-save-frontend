@@ -544,7 +544,7 @@ hts.account-created.title.h1=Help to Save account created
 hts.account-created.title.p1=Your account number is
 hts.account-created.h2=What you need to do next
 hts.account-created.p1=Now your Help to Save account has been created, you can start saving and earning bonuses.
-hts.account-created.p2=You can save up to £50 each calendar month. You have until [Day Date Year] to pay in money this month to start earning a bonus.
+hts.account-created.p2=You can save up to £50 each calendar month.
 hts.account-created.continue-button=Continue to your account
 
 # Incorrect details

@@ -6,5 +6,14 @@
   text-align: center;
   h1 {
     color: #FFFFFF;
+    margin-top: 0;
+    margin-bottom: 30px;
+  }
+  span {
+    display: block;
+    font-weight: normal;
+    strong {
+      font-weight: bold;
+    }
   }
 }
