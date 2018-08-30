@@ -24,23 +24,25 @@
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
 title = Messages("hts.global.title", Messages("hts.account-created.title.h1"), "", Messages("hts.global.title-suffix")),
 bodyClasses = None) {
-<h1 class="heading-large">@Html(Messages("hts.account-created.title.h1"))</h1>
 
-<p>@Html(Messages("hts.account-created.title.p1"))<p>
-<p>Account number is @accountNumber</p>
+  <div class="govuk-box-highlight">
+    <h1 class="heading-large">@Messages("hts.account-created.title.h1")</h1>
+    <span>@Messages("hts.account-created.title.p1")</span>
+    <span class="bold">@accountNumber</span>
+  </div>
 
-<h2>@Messages("hts.account-created.h2")</h2>
+  <h2>@Messages("hts.account-created.h2")</h2>
 
-<p>@Html(Messages("hts.account-created.p1"))</p>
-<p>@Html(Messages("hts.account-created.p2"))</p>
+  <p>@Html(Messages("hts.account-created.p1"))</p>
+  <p>@Html(Messages("hts.account-created.p2"))</p>
 
 
-<div class="form-field form-field--submit">
-    @form(routes.AccessAccountController.accessAccount){
-    @ga_submit_button("hts.account-created.continue-button",
-    "Continue to your account",
-    "Account created page",
-    Messages("hts.account-created.continue-button"))
-    }
-</div>
+  <div class="form-field form-field--submit">
+      @form(routes.AccessAccountController.accessAccount){
+      @ga_submit_button("hts.account-created.continue-button",
+      "Continue to your account",
+      "Account created page",
+      Messages("hts.account-created.continue-button"))
+      }
+  </div>
 }
