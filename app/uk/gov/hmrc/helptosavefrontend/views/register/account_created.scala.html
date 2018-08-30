@@ -26,9 +26,12 @@ title = Messages("hts.global.title", Messages("hts.account-created.title.h1"), "
 bodyClasses = None) {
 
   <div class="govuk-box-highlight">
-    <h1 class="heading-large">@Messages("hts.account-created.title.h1")</h1>
-    <span>@Messages("hts.account-created.title.p1")</span>
-    <span class="bold">@accountNumber</span>
+    <h1 class="heading-xlarge">@Messages("hts.account-created.title.h1")</h1>
+    <span class="heading-large">
+      @Messages("hts.account-created.title.p1")
+      <br>
+      <strong>@accountNumber</strong>
+    </span>
   </div>
 
   <h2>@Messages("hts.account-created.h2")</h2>
