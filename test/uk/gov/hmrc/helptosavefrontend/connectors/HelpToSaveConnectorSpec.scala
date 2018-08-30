@@ -34,7 +34,6 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckRespons
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
-import uk.gov.hmrc.helptosavefrontend.util.Email
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -58,8 +57,8 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
   val setITMPFlagURL =
     s"$helpToSaveUrl/help-to-save/set-itmp-flag"
 
-  def storeEmailURL(email: Email) =
-    s"$helpToSaveUrl/help-to-save/store-email?email=$email"
+  val storeEmailURL =
+    s"$helpToSaveUrl/help-to-save/store-email"
 
   val getEmailURL =
     s"$helpToSaveUrl/help-to-save/get-email"
@@ -269,7 +268,7 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
 
       val encodedEmail = new String(Base64.getEncoder.encode(email.getBytes()))
       behave like testCommon(
-        mockGet(storeEmailURL(encodedEmail)),
+        mockGet(storeEmailURL, Map("email" -> encodedEmail)),
         () ⇒ connector.storeEmail(email),
         (),
         testInvalidJSON = false
@@ -277,7 +276,7 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-          mockGet(storeEmailURL(encodedEmail))(Some(HttpResponse(200)))
+          mockGet(storeEmailURL, Map("email" -> encodedEmail))(Some(HttpResponse(200)))
 
           await(connector.storeEmail(email).value) shouldBe Right(())
         }

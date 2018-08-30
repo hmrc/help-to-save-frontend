@@ -78,8 +78,8 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   private val setITMPFlagURL =
     s"$helpToSaveUrl/help-to-save/set-itmp-flag"
 
-  private def storeEmailURL(email: Email) =
-    s"$helpToSaveUrl/help-to-save/store-email?email=$email"
+  private val storeEmailURL =
+    s"$helpToSaveUrl/help-to-save/store-email"
 
   private val getEmailURL =
     s"$helpToSaveUrl/help-to-save/get-email"
@@ -119,8 +119,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
     handleGet(setITMPFlagURL, emptyQueryParameters, _ ⇒ Right(()), "set ITMP flag and update mongo", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] = {
-    val encodedEmail = new String(base64Encode(email))
-    handleGet(storeEmailURL(encodedEmail), emptyQueryParameters, _ ⇒ Right(()), "store email", identity)
+    handleGet(storeEmailURL, Map("email" -> new String(base64Encode(email))), _ ⇒ Right(()), "store email", identity)
   }
 
   def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
