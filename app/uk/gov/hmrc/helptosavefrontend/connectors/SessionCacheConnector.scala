@@ -18,14 +18,19 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.either._
+import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Reads, Writes}
-import uk.gov.hmrc.helptosavefrontend.config.{FrontendAppConfig, WSHttp}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.util.Result
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.http.cache.client.{CacheMap, SessionCache}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
@@ -42,7 +47,7 @@ trait SessionCacheConnector {
 }
 
 @Singleton
-class SessionCacheConnectorImpl @Inject() (val http: WSHttp,
+class SessionCacheConnectorImpl @Inject() (val http: HttpClient,
                                            metrics:  Metrics)(implicit val frontendAppConfig: FrontendAppConfig)
   extends SessionCacheConnector with SessionCache {
 
@@ -101,6 +106,26 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp,
           val _ = timerContext.stop()
           metrics.keystoreReadErrorCounter.inc()
           Left(e.getMessage)
+      }
+    }
+
+  override def get(uri: String)(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Future[CacheMap] =
+    http.get(uri).flatMap { r ⇒
+      r.status match {
+        case 200 ⇒
+          r.parseJSON[CacheMap]() match {
+            case Right(c: CacheMap) ⇒ Future.successful(c)
+            case Left(e)            ⇒ Future.failed(new Exception(s"Could not parse response: $e"))
+          }
+        case 404 ⇒ Future.failed(new NotFoundException(""))
+      }
+    }
+
+  override def put[T](uri: String, body: T)(implicit hc: HeaderCarrier, wts: Writes[T], executionContext: ExecutionContext): Future[CacheMap] =
+    http.put(uri, body).flatMap{
+      _.parseJSON[CacheMap]() match {
+        case Right(c: CacheMap) ⇒ Future.successful(c)
+        case Left(e)            ⇒ Future.failed(new Exception(s"Could not parse response: $e"))
       }
     }
 
