@@ -89,8 +89,8 @@ class EligibilityCheckControllerSpec
         status(result) shouldBe OK
 
         val content = contentAsString(result)
-        content should include("You&rsquo;re eligible for a Help to Save account")
-        content should include("By continuing you are confirming you are eligible for a Help to Save account, and that these are your details and they are correct")
+        content should include("You’re eligible for a Help to Save account")
+        content should include("Before you can create an account, start saving and earning bonuses, you’ll need to:")
         content should include(validUserInfo.forename)
         content should include(validUserInfo.surname)
         content should include("31 December 1980")
@@ -163,7 +163,7 @@ class EligibilityCheckControllerSpec
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
-      "show an error if th ineligibility reason cannot be parsed" in {
+      "show an error if the ineligibility reason cannot be parsed" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
