@@ -315,15 +315,14 @@ hts.register.service-unavailable.p1=You&rsquo;ll be able to use the Help to Save
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
 # Create account
-hts.register.create_account_help_to_save.title.h1=You’re about to create a Help to Save account
-hts.register.create_account_help_to_save.par-1=Before opening an account, you&rsquo;ll need to confirm you accept these conditions.
-hts.register.create_account_help_to_save.par-2=You must:
-hts.register.create_account_help_to_save.bullet-1-wtc=inform us each time you leave the UK for a period of 8 weeks or more
-hts.register.create_account_help_to_save.bullet-1-uc=inform us each time you leave the UK for a period of 4 weeks or more
-hts.register.create_account_help_to_save.bullet-2=be opening a Help to Save account for the first time
-hts.register.create_account_help_to_save.par-3=If you create a Help to Save account, it will last for 4 years. This time will start as soon as you create your account. You&rsquo;ll need to enter your UK bank account details before you can use your account, start saving and earning a bonus.
-hts.register.create_account_help_to_save.accept-label=Accept and create account
-hts.register.create_account_help_to_save.cancel-label=Cancel
+hts.register.create_account.title.h1=Agree with conditions to create a Help to Save account
+hts.register.create_account.p1=Before opening an account, you’ll need to confirm you accept these conditions.
+hts.register.create_account.p2=You agree that:
+hts.register.create_account.condition-wtc=you will tell us each time you leave the UK for 8 weeks or more
+hts.register.create_account.condition-uc=you will tell us each time you leave the UK for 4 weeks or more
+hts.register.create_account.generic-condition=you are creating a Help to Save account for the first time
+hts.register.create_account.accept-label=Accept and create account
+hts.register.create_account.cancel-label=Cancel
 
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=If you think you’re eligible for a Help to Save account
