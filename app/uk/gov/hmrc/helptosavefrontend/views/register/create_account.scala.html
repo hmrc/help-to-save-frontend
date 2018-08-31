@@ -37,10 +37,6 @@
     case EntitledToWTC(false) => {
         <li>@{Messages("hts.register.create_account.condition-wtc")}</li>
     }
-    case _ => {
-        <li>@{Messages("hts.register.create_account.condition-wtc")} @{Messages("hts.register.create_account.reason-unknown.condition-wtc")}</li>
-        <li>@{Messages("hts.register.create_account.condition-uc")} @{Messages("hts.register.create_account.reason-unknown.condition-uc")}</li>
-    }
   }
 }
 
