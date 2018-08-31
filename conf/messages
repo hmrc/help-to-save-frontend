@@ -269,7 +269,7 @@ hts.register.bank-details.accountNumber.label=Account number
 hts.accountNumber.error=Account number must be entered
 hts.register.bank-details.accountName.label=Account name
 hts.accountName.error=Account name must be entered
-hts.register.bank-details.rollNumber.label=Roll number (optional)
+hts.register.bank-details.rollNumber.label=Roll number
 hts.register.bank-details.rollNumber.hint=Building societies only
 
 # Eligible
