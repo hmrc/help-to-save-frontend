@@ -28,20 +28,29 @@
     sidebarLinks = None,
     bodyClasses = None) {
 
-    <h1 class="heading-large">@Messages("hts.register.you-are-eligible.title.h1")</h1>
+    <h1 class="heading-large">
+      @Messages("hts.register.you-are-eligible.title.h1")
+    </h1>
 
-    <p>@Html(Messages("hts.register.you-are-eligible.p-1"))</p>
+    <p class="lede">
+      @Messages("hts.register.you-are-eligible.p1", userInfo.forename + " " + userInfo.surname)
+    </p>
 
-    @user_details(userInfo)
+    <p>
+      @Messages("hts.register.you-are-eligible.p2")
+    </p>
 
-    <p class="subsection"><a href=@routes.RegisterController.getDetailsAreIncorrect()>@Messages("hts.register.you-are-eligible.button-2")</a></p>
-
-    <p class="push--bottom">@Messages("hts.register.you-are-eligible.p-3")</p>
+    <ul class="bullets">
+      <li>@Messages("hts.register.you-are-eligible.li1")</li>
+      <li>@Messages("hts.register.you-are-eligible.li2")</li>
+      <li>@Messages("hts.register.you-are-eligible.li3")</li>
+      <li>@Messages("hts.register.you-are-eligible.li4")</li>
+    </ul>
 
     @form(routes.EligibilityCheckController.youAreEligibleSubmit(), 'class -> "group subsection--wide") {
         @CSRF.formField(request)
         @submit('_buttonClass -> "", 'id → "start-creating-account") {
-            @Messages("hts.register.you-are-eligible.button-1")
+            @Messages("hts.global.continue-button")
         }
     }
 
