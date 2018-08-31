@@ -93,7 +93,6 @@ class EligibilityCheckControllerSpec
         content should include("Before you can create an account, start saving and earning bonuses, you’ll need to:")
         content should include(validUserInfo.forename)
         content should include(validUserInfo.surname)
-        content should include("31 December 1980")
       }
 
       "redirect to the you are not eligible page if session data indicates that they are not eligible" in {
