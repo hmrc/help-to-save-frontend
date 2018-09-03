@@ -95,4 +95,6 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
   val govUkExitURL: String = getString("gov-uk.url")
+
+  val eligibilityInfoUrl: String = getString("eligibility-info-url")
 }
