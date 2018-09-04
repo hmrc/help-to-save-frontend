@@ -28,7 +28,7 @@ bodyClasses = None) {
   <h1>@Messages("hts.register.think_you_are_eligible.title.h1")</h1>
 
   <p>@Html(Messages("hts.register.think_you_are_eligible.p1"))
-      <a href="@routes.IntroductionController.getEligibility().url">@Messages("hts.register.think_you_are_eligible.p1-link-text")</a>@Messages("hts.register.think_you_are_eligible.p1-2")</p>
+      <a href="@appConfig.eligibilityInfoUrl">@Messages("hts.register.think_you_are_eligible.p1-link-text")</a>@Messages("hts.register.think_you_are_eligible.p1-2")</p>
   <p>@Html(Messages("hts.register.think_you_are_eligible.p2"))</p>
   <p>@Html(Messages("hts.register.think_you_are_eligible.p3"))</p>
 
