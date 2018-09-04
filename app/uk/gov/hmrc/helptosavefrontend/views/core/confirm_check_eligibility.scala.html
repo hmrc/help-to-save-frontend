@@ -16,10 +16,10 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
   title = Messages("hts.global.title", Messages("hts.no-account.title.h1"), "", Messages("hts.global.title-suffix"))
@@ -27,11 +27,18 @@
   <h1 class="heading-large">@Messages("hts.no-account.title.h1")</h1>
 
   <p class="lede">@Html(Messages("hts.no-account.p1"))</p>
+
+  <h2>@Html(Messages("hts.no-account.h2-1"))</h2>
   <p>@Html(Messages("hts.no-account.p2"))</p>
 
-  <h2>@Messages("hts.no-account.h2")</h2>
-  <p>@Html(Messages("hts.no-account.p3"))</p>
+  <div class="form-field form-field--submit">
+    @form(routes.EligibilityCheckController.getCheckEligibility()){
+    @submit('_buttonClass -> "", 'id → "start-creating-account") {
+      @Messages("hts.no-account.button-1")
+    }
+  }
+  </div>
 
-  <p><a href="https://www.gov.uk/" id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a></p>
+  <p><a href="@appConfig.govUkURL" id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a></p>
 
 }
