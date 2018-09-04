@@ -513,11 +513,11 @@ hts.cannot-change-email-try-later.returning.button=Go to account home
 
 # No account
 hts.no-account.title.h1=You do not have a Help to Save account
-hts.no-account.p1=You tried to sign into a Help to Save account, but you do not have one.
-hts.no-account.h2-1=How to apply for a Help to Save account
-hts.no-account.p2=If you select &lsquo;Continue&rsquo; we&rsquo;ll check if you&rsquo;re eligible for a Help to Save account. If you are, you can then create a Help to Save account.
-hts.no-account.button-1=Continue
-hts.no-account.exit-message=Cancel and go to GOV.UK
+hts.no-account.p1=You&rsquo;ve signed into your Government Gateway account, but you do not have a Help to Save account.
+hts.no-account.p2=We&rsquo;re sorry, we&rsquo;re currently developing the Help to Save service and only a limited number of accounts are available at the moment.
+hts.no-account.h2=Apply later
+hts.no-account.p3=If you want to apply for an account, you&rsquo;ll need to visit GOV.UK later in 2018 and search for &lsquo;Help to Save&rsquo;.
+hts.no-account.exit-message=Exit to GOV.UK
 
 # Account creation error
 hts.account-creation-error.title.h1=Something went wrong
