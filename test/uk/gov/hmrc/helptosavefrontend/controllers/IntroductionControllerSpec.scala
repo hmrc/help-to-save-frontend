@@ -35,62 +35,45 @@ class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
       .expects(EmptyPredicate, EmptyRetrieval, *, *)
       .returning(if (loggedIn) Future.successful(()) else Future.failed(new Exception("")))
 
-  "GET /" should {
-    "the getAboutHelpToSave should return html" in {
+  "the about help to save page" should {
+    "redirect to correct GOV.UK page" in {
       mockAuthorise(false)
 
       val result = helpToSave.getAboutHelpToSave(fakeRequest)
-      status(result) shouldBe Status.OK
-
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-
-      contentAsString(result) should not include "Sign out"
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income")
     }
 
-    "the getEligibility should  return 200" in {
+    "the getEligibility should redirect to correct GOV.UK page" in {
       mockAuthorise(true)
 
       val result = helpToSave.getEligibility(fakeRequest)
-      status(result) shouldBe Status.OK
-
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-
-      contentAsString(result) should include("Sign out")
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income/eligibility")
     }
 
     "the getHowTheAccountWorks return 200" in {
       mockAuthorise(false)
 
       val result = helpToSave.getHowTheAccountWorks(fakeRequest)
-      status(result) shouldBe Status.OK
-
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-      contentAsString(result) should not include "Sign out"
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income")
     }
 
     "the getHowWeCalculateBonuses return 200" in {
       mockAuthorise(true)
 
       val result = helpToSave.getHowWeCalculateBonuses(fakeRequest)
-      status(result) shouldBe Status.OK
-
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-      contentAsString(result) should include("Sign out")
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income/what-youll-get")
     }
 
     "the getApply return 200" in {
       mockAuthorise(false)
 
       val result = helpToSave.getApply(fakeRequestWithCSRFToken)
-      status(result) shouldBe Status.OK
-
-      contentType(result) shouldBe Some("text/html")
-      charset(result) shouldBe Some("utf-8")
-      contentAsString(result) should not include "Sign out"
+      status(result) shouldBe Status.SEE_OTHER
+      redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income/how-to-apply")
     }
 
     "applySubmit return 303" in {

@@ -39,14 +39,14 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
 
     "handling getSignInPage" must {
 
-      "return the sign in page" in {
+      "redirect to the govuk sign in page" in {
         (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
           .expects(EmptyPredicate, EmptyRetrieval, *, *)
           .returning(())
 
         val result = controller.getSignInPage()(FakeRequest())
-        status(result) shouldBe OK
-        contentAsString(result) should include("Sign in to your Help to Save account")
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some("https://www.gov.uk/sign-in-help-to-save")
 
       }
     }

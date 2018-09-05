@@ -21,6 +21,7 @@ import javax.inject.Singleton
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.{Configuration, Environment}
+import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
@@ -40,23 +41,38 @@ class IntroductionController @Inject() (val authConnector: AuthConnector,
   extends BaseController with HelpToSaveAuth {
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.introduction.about_help_to_save())
+    handleIntroductionPage(
+      views.html.introduction.about_help_to_save(),
+      "https://www.gov.uk/get-help-savings-low-income"
+    )
   }
 
   def getEligibility: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.introduction.eligibility())
+    handleIntroductionPage(
+      views.html.introduction.eligibility(),
+      "https://www.gov.uk/get-help-savings-low-income/eligibility"
+    )
   }
 
   def getHowTheAccountWorks: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.introduction.how_the_account_works())
+    handleIntroductionPage(
+      views.html.introduction.how_the_account_works(),
+      "https://www.gov.uk/get-help-savings-low-income"
+    )
   }
 
   def getHowWeCalculateBonuses: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.introduction.how_we_calculate_bonuses())
+    handleIntroductionPage(
+      views.html.introduction.how_the_account_works(),
+      "https://www.gov.uk/get-help-savings-low-income/what-youll-get"
+    )
   }
 
   def getApply: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.introduction.apply())
+    handleIntroductionPage(
+      views.html.introduction.apply(),
+      "https://www.gov.uk/get-help-savings-low-income/how-to-apply"
+    )
   }
 
   def applySubmit: Action[AnyContent] = ActionWithMdc { _ ⇒
@@ -67,4 +83,10 @@ class IntroductionController @Inject() (val authConnector: AuthConnector,
     Ok(views.html.core.privacy())
   }
 
+  private def handleIntroductionPage(mdtpPage: Html, govUkPage: String): Result =
+    if (appConfig.startPageRedirectionEnabled) {
+      SeeOther(govUkPage)
+    } else {
+      Ok(mdtpPage)
+    }
 }
