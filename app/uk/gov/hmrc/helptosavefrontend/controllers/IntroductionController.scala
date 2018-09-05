@@ -84,9 +84,5 @@ class IntroductionController @Inject() (val authConnector: AuthConnector,
   }
 
   private def handleIntroductionPage(mdtpPage: Html, govUkPage: String): Result =
-    if (appConfig.startPageRedirectionEnabled) {
-      SeeOther(govUkPage)
-    } else {
-      Ok(mdtpPage)
-    }
+    if (appConfig.startPageRedirectionEnabled) { SeeOther(govUkPage) } else { Ok(mdtpPage) }
 }
