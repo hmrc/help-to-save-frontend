@@ -150,7 +150,7 @@ class HelpToSaveServiceSpec extends TestSupport {
       "should handle a failure result" in {
 
         val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-        mockCreateAccount(Some(HttpResponse(400, Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
+        mockCreateAccount(Some(HttpResponse(400, Some(Json.toJson(submissionFailure)))))
 
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue should be(Left(submissionFailure))

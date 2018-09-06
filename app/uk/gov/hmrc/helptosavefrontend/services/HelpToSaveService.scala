@@ -126,7 +126,7 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
     )
 
   private def handleError(response: HttpResponse): SubmissionFailure = {
-    response.parseJSON[SubmissionFailure](Some("error")) match {
+    response.parseJSON[SubmissionFailure]() match {
       case Right(submissionFailure) ⇒ submissionFailure
       case Left(error)              ⇒ SubmissionFailure(None, "", error)
     }
