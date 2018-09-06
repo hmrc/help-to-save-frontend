@@ -310,7 +310,7 @@ hts.register.create_account_help_to_save.bullet-1-uc=inform us each time you lea
 hts.register.create_account_help_to_save.bullet-2=be opening a Help to Save account for the first time
 hts.register.create_account_help_to_save.par-3=If you create a Help to Save account, it will last for 4 years. This time will start as soon as you create your account. You&rsquo;ll need to enter your UK bank account details before you can use your account, start saving and earning a bonus.
 hts.register.create_account_help_to_save.accept-label=Accept and create account
-hts.register.create_account_help_to_save.cancel-label=Cancel
+hts.register.create_account_help_to_save.cancel-label=Cancel and go to GOV.UK
 
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=If you think you’re eligible for a Help to Save account
