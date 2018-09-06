@@ -504,7 +504,7 @@ hts.cannot-change-email.error-summary.descriptive-link=Select one option
 hts.cannot-change-email-try-later.title.h1=Something went wrong
 hts.cannot-change-email-try-later.p1=We cannot change your email address at the moment.
 hts.cannot-change-email-try-later.try_later_button=Try again
-hts.cannot-change-email-try-later.back_button=Go to About Help to Save
+hts.cannot-change-email-try-later.back_button=Exit to GOV.UK
 
 # Cannot change email try later / returning user
 hts.cannot-change-email-try-later.returning.p1=We cannot change your email address at this time.
