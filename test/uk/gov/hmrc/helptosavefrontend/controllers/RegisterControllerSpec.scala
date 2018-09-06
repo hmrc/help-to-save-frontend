@@ -180,6 +180,42 @@ class RegisterControllerSpec
         checkIsTechnicalErrorPage(result)
       }
 
+      "show the appropriate page content for when user is eligible with reason code 6: UCClaimantAndIncomeSufficient" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6))), Some(email), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe OK
+        contentAsString(result) should include("you will tell us each time you leave the UK for 4 weeks or more")
+      }
+
+      "show the appropriate page content for when user is eligible with reason code 7: UCClaimantButNoWTC" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 7))), Some(email), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe OK
+        contentAsString(result) should include("you will tell us each time you leave the UK for 8 weeks or more")
+      }
+
+      "show the appropriate page content for when user is eligible with reason code 8: UCClaimantAndWTC" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 8))), Some(email), None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe OK
+        contentAsString(result) should include("you will tell us each time you leave the UK for 4 weeks or more")
+      }
+
     }
 
     "creating an account" must {
