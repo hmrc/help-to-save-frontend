@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-package hts
+package hts.pages
 
-import hts.pages.{BankAccountDetailsPage, CheckDetailsPage, CreateAccountPage, EligiblePage, SelectEmailPage}
+import hts.browser.Browser
+import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-package object steps {
-  def createAccountUsingGGEmail()(implicit driver: WebDriver): Unit = {
-    EligiblePage.clickConfirmAndContinue()
-    SelectEmailPage.selectGGEmail()
-    BankAccountDetailsPage.enterValidDetails()
-    CheckDetailsPage.continue()
-    CreateAccountPage.createAccount()
-  }
+object CheckDetailsPage extends Page {
 
-  def createAccountError()(implicit driver: WebDriver): Unit = {
-    EligiblePage.clickConfirmAndContinue()
-    SelectEmailPage.selectGGEmail()
-  }
+  val expectedURL: String = s"${Configuration.host}/help-to-save/check-details"
+
+  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("confirm-and-continue")
+
 }
