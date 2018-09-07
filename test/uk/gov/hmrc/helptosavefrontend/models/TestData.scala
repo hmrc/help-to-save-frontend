@@ -49,6 +49,9 @@ object TestData {
     def randomIneligibility() = sample(ineligibilityGen)
 
     def randomEligibleWithUserInfo(userInfo: UserInfo) = EligibleWithUserInfo(randomEligibility(), userInfo)
+
+    def eligibleSpecificReasonCodeWithUserInfo(userInfo: UserInfo, reasonCode: Int) =
+      EligibleWithUserInfo(Eligible(EligibilityCheckResponse("", 1, "", reasonCode)), userInfo)
   }
 
   object UserData {
