@@ -521,8 +521,10 @@ hts.no-account.exit-message=Cancel and go to GOV.UK
 
 # Account creation error
 hts.account-creation-error.title.h1=Something went wrong
-hts.account-creation-error.p1=We could not create a Help to Save account for you at this time.
-hts.account-creation-error.p2=You&rsquo;ll need to come back later and try again.
+hts.account-creation-error.p1=We cannot create a Help to Save account for you at the moment.
+hts.account-creation-error.p2=You can try again now to create an account as we may have already fixed the problem.
+hts.account-creation-error.p3=Or you can come back later and try again.
+hts.account-creation-error.button.try-again=Try again
 hts.account-creation-error.exit-button=Exit to GOV.UK
 
 # Incorrect details
