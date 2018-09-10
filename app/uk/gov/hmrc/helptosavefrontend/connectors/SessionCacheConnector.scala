@@ -69,7 +69,8 @@ class SessionCacheConnectorImpl @Inject() (val http: WSHttp,
             pendingEmail           = newSession.pendingEmail.orElse(existing.pendingEmail),
             ivURL                  = newSession.ivURL.orElse(existing.ivURL),
             ivSuccessURL           = newSession.ivSuccessURL.orElse(existing.ivSuccessURL),
-            bankDetails            = newSession.bankDetails
+            bankDetails            = newSession.bankDetails,
+            backLink               = newSession.backLink
           )
         )
 

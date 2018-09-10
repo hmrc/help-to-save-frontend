@@ -14,5 +14,5 @@
  * limitations under the License.
  *@
 
-@()(implicit messages: Messages)
-<a href="#" onclick="window.history.back();return false;" class="link-back">@Messages("hts.global.link.back")</a>
+@(url: String)(implicit messages: Messages)
+<a href="@url" class="link-back">@Messages("hts.global.link.back")</a>

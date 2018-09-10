@@ -60,6 +60,36 @@ class BankAccountControllerSpec extends AuthSupport
 
       }
 
+      "display the page with correct Back link when they came from SelectEmail page" in {
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+        contentAsString(result) should include("/help-to-save/select-email")
+
+      }
+
+      "display the page with correct Back link when they came from check details page" in {
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, Some("/help-to-save/check-details")))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+        contentAsString(result) should include("/help-to-save/check-details")
+
+      }
+
       "send already stored bank details in the session back to the UI" in {
 
         inSequence {

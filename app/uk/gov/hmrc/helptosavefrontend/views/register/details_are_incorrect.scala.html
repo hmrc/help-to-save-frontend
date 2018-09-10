@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -25,7 +26,7 @@
     sidebarLinks = None,
     bodyClasses = None) {
 
-    <a href=@routes.RegisterController.checkDetails().url class="link-back" id="incorrect-details-goback">@Messages("hts.incorrect-details.exit-button")</a>
+    @navigate_back(routes.RegisterController.checkDetails().url)
 
     <h1 class="heading-large">@Messages("hts.incorrect-details.title.h1")</h1>
     <p>@Html(Messages("hts.incorrect-details.p1"))</p>

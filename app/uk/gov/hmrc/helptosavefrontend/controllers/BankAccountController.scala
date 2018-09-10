@@ -48,19 +48,23 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
 
+  private lazy val selectEmailPage = routes.EmailController.getSelectEmailPage().url
+
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
-      _.bankDetails.fold(
-        Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm()))
-      )(bankDetails ⇒
-          Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm().fill(bankDetails)))
-        )
+      s ⇒
+        val backLink = s.backLink.getOrElse(selectEmailPage)
+        s.bankDetails.fold(
+          Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), backLink))
+        )(bankDetails ⇒
+            Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm().fill(bankDetails), backLink))
+          )
     }
   }(redirectOnLoginURL = routes.BankAccountController.getBankDetailsPage().url)
 
   def submitBankDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     BankDetails.giveBankDetailsForm().bindFromRequest().fold(
-      withErrors ⇒ Ok(views.html.register.bank_account_details(withErrors)),
+      withErrors ⇒ Ok(views.html.register.bank_account_details(withErrors, selectEmailPage)),
       { bankDetails ⇒
         checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
           session ⇒

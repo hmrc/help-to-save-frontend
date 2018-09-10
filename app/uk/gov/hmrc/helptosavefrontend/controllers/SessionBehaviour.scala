@@ -23,7 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, NINOLogMessageTransformer}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -41,12 +41,24 @@ trait SessionBehaviour {
       transformer: NINOLogMessageTransformer): Future[Result] =
     sessionCacheConnector.get
       .semiflatMap(_.fold(noSession)(whenSession))
-      .leftMap{
+      .leftMap {
         e ⇒
           logger.warn(s"Could not read sessions data from keystore: $e", htsContext.nino)
           internalServerError()
       }.merge
 
+  def updateSessionWithBackLink(session: HTSSession)(redirectAfterUpdate: ⇒ Result)(implicit htsContext: HtsContextWithNINO,
+                                                                                    hc:          HeaderCarrier,
+                                                                                    request:     Request[_],
+                                                                                    transformer: NINOLogMessageTransformer): Future[Result] = {
+    sessionCacheConnector.put(session)
+      .semiflatMap(_ ⇒ toFuture(redirectAfterUpdate))
+      .leftMap {
+        e ⇒
+          logger.warn(s"Could not update session data in keystore: $e", htsContext.nino)
+          internalServerError()
+      }.merge
+  }
 }
 
 object SessionBehaviour {
