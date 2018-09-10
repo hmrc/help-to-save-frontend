@@ -21,8 +21,7 @@ import cats.syntax.either._
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
-import play.api.data.Forms.{mapping, text}
-import play.api.data.{Form, FormError}
+import play.api.data.FormError
 import play.api.{Configuration, Logger}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages._
@@ -121,59 +120,48 @@ class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPro
 
     "have an implicit class which provides methods" which {
 
-      case class TestData(s: String)
-
-      val key = "key"
-
-      val form: Form[TestData] = Form(
-        mapping(
-          key → text
-        )(TestData.apply)(TestData.unapply)
-      )
-
-        def formWithErrorMessage(message: String): Form[TestData] =
-          form.copy(errors = List(FormError(key, message)))
+      import TestForm._
 
       "informs if the form has an email which is too long" in {
-        form.emailTotalLengthTooLong("text") shouldBe false
-        formWithErrorMessage("error").emailTotalLengthTooLong(key) shouldBe false
-        formWithErrorMessage(totalTooLong).emailTotalLengthTooLong(key) shouldBe true
+        testForm.emailTotalLengthTooLong("text") shouldBe false
+        testFormWithErrorMessage("error").emailTotalLengthTooLong(TestForm.key) shouldBe false
+        testFormWithErrorMessage(totalTooLong).emailTotalLengthTooLong(TestForm.key) shouldBe true
       }
 
       "informs if the form has an email whose local part is too long" in {
-        form.emailLocalLengthTooLong("text") shouldBe false
-        formWithErrorMessage("error").emailLocalLengthTooLong(key) shouldBe false
-        formWithErrorMessage(localTooLong).emailLocalLengthTooLong(key) shouldBe true
+        testForm.emailLocalLengthTooLong("text") shouldBe false
+        testFormWithErrorMessage("error").emailLocalLengthTooLong(TestForm.key) shouldBe false
+        testFormWithErrorMessage(localTooLong).emailLocalLengthTooLong(TestForm.key) shouldBe true
       }
 
       "informs if the form has an email whose domain part is too long" in {
-        form.emailDomainLengthTooLong("text") shouldBe false
-        formWithErrorMessage("error").emailDomainLengthTooLong(key) shouldBe false
-        formWithErrorMessage(domainTooLong).emailDomainLengthTooLong(key) shouldBe true
+        testForm.emailDomainLengthTooLong("text") shouldBe false
+        testFormWithErrorMessage("error").emailDomainLengthTooLong(TestForm.key) shouldBe false
+        testFormWithErrorMessage(domainTooLong).emailDomainLengthTooLong(TestForm.key) shouldBe true
       }
 
       "informs if the form has an email which has no @ symbol" in {
-        form.emailHasNoAtSymbol("text") shouldBe false
-        formWithErrorMessage("error").emailHasNoAtSymbol(key) shouldBe false
-        formWithErrorMessage(noAtSymbol).emailHasNoAtSymbol(key) shouldBe true
+        testForm.emailHasNoAtSymbol("text") shouldBe false
+        testFormWithErrorMessage("error").emailHasNoAtSymbol(TestForm.key) shouldBe false
+        testFormWithErrorMessage(noAtSymbol).emailHasNoAtSymbol(TestForm.key) shouldBe true
       }
 
       "informs if the form has an email which is blank" in {
-        form.emailIsBlank("text") shouldBe false
-        formWithErrorMessage("error").emailIsBlank(key) shouldBe false
-        formWithErrorMessage(blankEmailAddress).emailIsBlank(key) shouldBe true
+        testForm.emailIsBlank("text") shouldBe false
+        testFormWithErrorMessage("error").emailIsBlank(TestForm.key) shouldBe false
+        testFormWithErrorMessage(blankEmailAddress).emailIsBlank(TestForm.key) shouldBe true
       }
 
       "informs if the form has no dot symbol in the domain part" in {
-        formWithErrorMessage(noDotSymbol).emailHasNoDotSymbol(key) shouldBe true
+        testFormWithErrorMessage(noDotSymbol).emailHasNoDotSymbol(TestForm.key) shouldBe true
       }
 
       "informs if the form has no text after dot symbol in the domain part" in {
-        formWithErrorMessage(noTextAfterDotSymbol).emailHasNoTextAfterDotSymbol(key) shouldBe true
+        testFormWithErrorMessage(noTextAfterDotSymbol).emailHasNoTextAfterDotSymbol(TestForm.key) shouldBe true
       }
 
       "informs if the form has no text after @ and before dot symbol" in {
-        formWithErrorMessage(noTextAfterAtSymbolButBeforeDot).emailHasNoTextAfterAtSymbolButBeforeDot(key) shouldBe true
+        testFormWithErrorMessage(noTextAfterAtSymbolButBeforeDot).emailHasNoTextAfterAtSymbolButBeforeDot(TestForm.key) shouldBe true
       }
 
     }

@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
+@import uk.gov.hmrc.helptosavefrontend.views.register.BankDetailsErrors
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
@@ -26,6 +27,10 @@
 @(form: Form[BankDetails], backLink: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{messages("hts.register.bank-details.title.h1")}
+@sortCodeErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "sortCode")}
+@accountNumberErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "accountNumber")}
+@rollNumberErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "rollNumber")}
+@accountNameErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "accountName")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
 
@@ -34,7 +39,27 @@
   @navigate_back(Some(backLink))
 
   @if(hasErrors) {
-    @error_summary(form.errors)
+      @defining(List(
+          "sortCode" → sortCodeErrorMessage,
+          "accountNumber" → accountNumberErrorMessage,
+          "rollNumber" → rollNumberErrorMessage,
+          "accountName" → accountNameErrorMessage
+      ).collect{ case (name, Some(s)) ⇒ name → s }
+      ){ errors =>
+          <div
+          class="error-summary"
+          id="error-summary-display"
+          role="alert"
+          aria-labelledby="error-summary-heading"
+          tabindex="-1">
+              <h2 id="error-summary-heading" class="heading-medium error-summary-heading">@Messages("hts.global.error-summary.title")</h2>
+              <ul class="error-summary-list">
+              @for(error <- errors) {
+                  <li><a href="#@error._1" data-focuses="@error._1">@error._2</a></li>
+              }
+              </ul>
+          </div>
+      }
   }
 
   <h1>@title</h1>
@@ -48,7 +73,7 @@
       value = form.data.getOrElse("sortCode", ""),
       hint = Some(messages("hts.register.bank-details.sort-code.hint")),
       name = "sortCode",
-      errorMessage = if(form.error("sortCode").isDefined) Some(Html(Messages("hts.sortCode.error"))) else None
+      errorMessage = sortCodeErrorMessage.map(Html(_))
     )
 
     @input_text(
@@ -56,7 +81,7 @@
       label = messages("hts.register.bank-details.accountNumber.label"),
       value = form.data.getOrElse("accountNumber", ""),
       name = "accountNumber",
-      errorMessage = if(form.error("accountNumber").isDefined) Some(Html(Messages("hts.accountNumber.error"))) else None
+      errorMessage = accountNumberErrorMessage.map(Html(_))
     )
 
     @input_text(
@@ -65,7 +90,7 @@
       value = form.data.getOrElse("rollNumber", ""),
       hint = Some(messages("hts.register.bank-details.rollNumber.hint")),
       name = "rollNumber",
-      errorMessage = if(form.error("rollNumber").isDefined) Some(Html(Messages("hts.rollNumber.error"))) else None
+      errorMessage = rollNumberErrorMessage.map(Html(_))
     )
 
     @input_text(
@@ -73,7 +98,7 @@
       label = messages("hts.register.bank-details.accountName.label"),
       value = form.data.getOrElse("accountName", ""),
       name = "accountName",
-      errorMessage = if(form.error("accountName").isDefined) Some(Html(Messages("hts.accountName.error"))) else None
+      errorMessage = accountNameErrorMessage.map(Html(_))
     )
 
     @ga_submit_button(

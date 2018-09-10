@@ -99,4 +99,14 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
   val govUkExitURL: String = getString("gov-uk.url")
+
+  object BankDetailsValidation {
+    val sortCodeLength: Int = getInt("bank-details-validation.sort-code.length")
+    val accountNumberLength: Int = getInt("bank-details-validation.account-number.length")
+    val rollNumberMinLength: Int = getInt("bank-details-validation.roll-number.min-length")
+    val rollNumberMaxLength: Int = getInt("bank-details-validation.roll-number.max-length")
+    val accountNameMinLength: Int = getInt("bank-details-validation.account-name.min-length")
+    val accountNameMaxLength: Int = getInt("bank-details-validation.account-name.max-length")
+  }
+
 }
