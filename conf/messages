@@ -216,7 +216,7 @@ hts.core.about-help-to-save.eligibility=Eligibility
 # Not eligible
 hts.core.not-eligible.title.h1=You’re not eligible for a Help to Save account
 hts.core.not-eligible.wtc.p-1=You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.
-hts.core.not-eligible.wtc.p-2=Find out more about
+hts.core.not-eligible.wtc.p-2=Go to GOV.UK to find out about
 hts.core.not-eligible.wtc.link-1=eligibility for Help to Save
 hts.core.not-eligible.wtc.p-2-2=.
 hts.core.not-eligible.wtc.h2-1=If you&rsquo;ve recently applied for Working Tax Credit
@@ -227,7 +227,7 @@ hts.core.not-eligible.wtc.p-4-link-text=think you&rsquo;re eligible
 hts.core.not-eligible.wtc.p-4-2=for a Help to Save account.
 
 hts.core.not-eligible.uc.p-1=This is because your household income - in your last monthly assessment period - was less than £542.88. Your Universal Credit payments are not considered to be income.
-hts.core.not-eligible.uc.p-2=Find out about
+hts.core.not-eligible.uc.p-2=Go to GOV.UK to find out about
 hts.core.not-eligible.uc.link-1=eligibility for Help to Save
 hts.core.not-eligible.uc.p-2-2=.
 hts.core.not-eligible.uc.p-3=If your situation changes, you can apply for a Help to Save account again.
@@ -240,7 +240,7 @@ hts.core.not-eligible.wtc.uc.p1=You can only open a Help to Save account if one 
 hts.core.not-eligible.wtc.uc.ul1-li1=entitled to Working Tax Credit and receiving payments for Working Tax Credit or Child Tax Credit
 hts.core.not-eligible.wtc.uc.ul1-li2=claiming Universal Credit and your household income - in your last monthly assessment period - was £542.88 or more
 hts.core.not-eligible.wtc.uc.p2=Payments from Universal Credit are not considered to be income.
-hts.core.not-eligible.wtc.uc.p3=Find out about
+hts.core.not-eligible.wtc.uc.p3=Go to GOV.UK to find out about
 hts.core.not-eligible.wtc.uc.p3-link=eligibility for Help to Save
 hts.core.not-eligible.wtc.uc.p3-2=.
 hts.core.not-eligible.wtc.uc.h2=If you think you&rsquo;re eligible for an account
@@ -310,11 +310,11 @@ hts.register.create_account_help_to_save.bullet-1-uc=inform us each time you lea
 hts.register.create_account_help_to_save.bullet-2=be opening a Help to Save account for the first time
 hts.register.create_account_help_to_save.par-3=If you create a Help to Save account, it will last for 4 years. This time will start as soon as you create your account. You&rsquo;ll need to enter your UK bank account details before you can use your account, start saving and earning a bonus.
 hts.register.create_account_help_to_save.accept-label=Accept and create account
-hts.register.create_account_help_to_save.cancel-label=Cancel
+hts.register.create_account_help_to_save.cancel-label=Cancel and go to GOV.UK
 
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=If you think you’re eligible for a Help to Save account
-hts.register.think_you_are_eligible.p1=Have you been told you&rsquo;re not eligible for a Help to Save account? If yes, you should check the
+hts.register.think_you_are_eligible.p1=Have you been told you&rsquo;re not eligible for a Help to Save account? If yes, you should go to GOV.UK to check the
 hts.register.think_you_are_eligible.p1-link-text=eligibility criteria
 hts.register.think_you_are_eligible.p1-2=.
 hts.register.think_you_are_eligible.p2=If you&rsquo;ve done this and still think you&rsquo;re eligible for an account you can contact the Help to Save service.
@@ -504,7 +504,7 @@ hts.cannot-change-email.error-summary.descriptive-link=Select one option
 hts.cannot-change-email-try-later.title.h1=Something went wrong
 hts.cannot-change-email-try-later.p1=We cannot change your email address at the moment.
 hts.cannot-change-email-try-later.try_later_button=Try again
-hts.cannot-change-email-try-later.back_button=Go to About Help to Save
+hts.cannot-change-email-try-later.back_button=Exit to GOV.UK
 
 # Cannot change email try later / returning user
 hts.cannot-change-email-try-later.returning.p1=We cannot change your email address at this time.
@@ -513,17 +513,19 @@ hts.cannot-change-email-try-later.returning.button=Go to account home
 
 # No account
 hts.no-account.title.h1=You do not have a Help to Save account
-hts.no-account.p1=You&rsquo;ve signed into your Government Gateway account, but you do not have a Help to Save account.
-hts.no-account.p2=We&rsquo;re sorry, we&rsquo;re currently developing the Help to Save service and only a limited number of accounts are available at the moment.
-hts.no-account.h2=Apply later
-hts.no-account.p3=If you want to apply for an account, you&rsquo;ll need to visit GOV.UK later in 2018 and search for &lsquo;Help to Save&rsquo;.
-hts.no-account.exit-message=Exit to GOV.UK
+hts.no-account.p1=You tried to sign into a Help to Save account, but you do not have one.
+hts.no-account.h2-1=How to apply for a Help to Save account
+hts.no-account.p2=If you select &lsquo;Continue&rsquo; we&rsquo;ll check if you&rsquo;re eligible for a Help to Save account. If you are, you can then create a Help to Save account.
+hts.no-account.button-1=Continue
+hts.no-account.exit-message=Cancel and go to GOV.UK
 
 # Account creation error
 hts.account-creation-error.title.h1=Something went wrong
-hts.account-creation-error.p1=We could not create a Help to Save account for you at this time.
-hts.account-creation-error.p2=You&rsquo;ll need to come back later and try again.
-hts.account-creation-error.exit-button=Exit and go to About Help to Save
+hts.account-creation-error.p1=We cannot create a Help to Save account for you at the moment.
+hts.account-creation-error.p2=You can try again now to create an account as we may have already fixed the problem.
+hts.account-creation-error.p3=Or you can come back later and try again.
+hts.account-creation-error.button.try-again=Try again
+hts.account-creation-error.exit-button=Exit to GOV.UK
 
 # Incorrect details
 hts.incorrect-details.title.h1=We need your correct details
