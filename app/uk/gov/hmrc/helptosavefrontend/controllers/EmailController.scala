@@ -198,9 +198,9 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   def giveEmailSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-    def handleForm(eligible: Eligible, userInfo: UserInfo, bankDetails: Option[BankDetails], backLink: String): Future[Result] =
+    def handleForm(eligible: Eligible, userInfo: UserInfo, bankDetails: Option[BankDetails], backLink: Option[String]): Future[Result] =
         GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
-          withErrors ⇒ Ok(views.html.email.give_email(withErrors, backLink)),
+          withErrors ⇒ Ok(views.html.email.give_email(withErrors, backLink.getOrElse(eligibilityPage))),
           form ⇒
             updateSessionAndReturnResult(HTSSession(Some(Right(EligibleWithUserInfo(eligible, userInfo))), None, Some(form.email), None, None, bankDetails),
                                          SeeOther(routes.EmailController.verifyEmail().url)
@@ -209,12 +209,10 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession ({
           case (s, eligibleWithEmail) ⇒
-            val backLink = s.backLink.getOrElse(eligibilityPage)
-            handleForm(eligibleWithEmail.eligible, eligibleWithEmail.userInfo, eligibleWithEmail.bankDetails, backLink)
+            handleForm(eligibleWithEmail.eligible, eligibleWithEmail.userInfo, eligibleWithEmail.bankDetails, s.backLink)
         }, {
           case (s, eligibleWithNoEmail) ⇒
-            val backLink = s.backLink.getOrElse(eligibilityPage)
-            handleForm(eligibleWithNoEmail.eligible, eligibleWithNoEmail.userInfo, eligibleWithNoEmail.bankDetails, backLink)
+            handleForm(eligibleWithNoEmail.eligible, eligibleWithNoEmail.userInfo, eligibleWithNoEmail.bankDetails, s.backLink)
         })(session)
 
       def ifDE = {
