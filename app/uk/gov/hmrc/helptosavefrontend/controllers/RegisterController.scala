@@ -60,8 +60,6 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
 
-  private lazy val bankDetailsPage: String = routes.BankAccountController.getBankDetailsPage().url
-
   def getCreateAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
@@ -133,12 +131,19 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   def checkDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
-        updateSessionWithBackLink(eligibleWithInfo.session.copy(backLink = Some(routes.RegisterController.checkDetails().url)))(
-          eligibleWithInfo.session.bankDetails match {
-            case Some(bankDetails) ⇒
-              Ok(views.html.register.check_your_details(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, bankDetails))
-            case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
-          })
+        sessionCacheConnector.put(eligibleWithInfo.session.copy(backLink = Some(routes.RegisterController.checkDetails().url)))
+          .fold(
+            error ⇒ {
+              logger.warn(s"Could not update session with back link in keystore: $error", htsContext.nino)
+              internalServerError()
+            },
+            _ ⇒
+              eligibleWithInfo.session.bankDetails match {
+                case Some(bankDetails) ⇒
+                  Ok(views.html.register.check_your_details(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, bankDetails))
+                case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+              }
+          )
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.checkDetails().url)

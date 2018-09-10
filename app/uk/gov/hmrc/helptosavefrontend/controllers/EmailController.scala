@@ -64,7 +64,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
 
-  private lazy val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
+  private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
   def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒

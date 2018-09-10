@@ -48,7 +48,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
 
-  private lazy val selectEmailPage = routes.EmailController.getSelectEmailPage().url
+  private val selectEmailPage = routes.EmailController.getSelectEmailPage().url
 
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {

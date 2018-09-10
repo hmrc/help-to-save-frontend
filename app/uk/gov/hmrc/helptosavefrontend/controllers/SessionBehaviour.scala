@@ -46,19 +46,6 @@ trait SessionBehaviour {
           logger.warn(s"Could not read sessions data from keystore: $e", htsContext.nino)
           internalServerError()
       }.merge
-
-  def updateSessionWithBackLink(session: HTSSession)(redirectAfterUpdate: ⇒ Result)(implicit htsContext: HtsContextWithNINO,
-                                                                                    hc:          HeaderCarrier,
-                                                                                    request:     Request[_],
-                                                                                    transformer: NINOLogMessageTransformer): Future[Result] = {
-    sessionCacheConnector.put(session)
-      .semiflatMap(_ ⇒ toFuture(redirectAfterUpdate))
-      .leftMap {
-        e ⇒
-          logger.warn(s"Could not update session data in keystore: $e", htsContext.nino)
-          internalServerError()
-      }.merge
-  }
 }
 
 object SessionBehaviour {
