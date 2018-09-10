@@ -29,11 +29,17 @@ object BankAccountDetailsPage extends Page {
   override val expectedPageTitle: Option[String] = Some("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
 
   def enterValidDetails()(implicit driver: WebDriver): Unit = {
+    // Redo!!!!!!!!!!!!!!!!!!!
     Browser.telField("sortCode").value = BankDetails.sortCode
     Browser.telField("accountNumber").value = BankDetails.accountNumber
     Browser.textField("accountName").value = BankDetails.name
     continue()
   }
+
+  def enterAccountNumber(accountNumber: String)(implicit driver: WebDriver) = Browser.telField("accountNumber").value = accountNumber
+  def enterSortCode(sortCode: String)(implicit driver: WebDriver) = Browser.telField("sortCode").value = sortCode
+  def enterAccountName(accountName: String)(implicit driver: WebDriver) = Browser.telField("accountName").value = accountName
+  def enterRollNumber(rollNumber: String)(implicit driver: WebDriver) = Browser.telField("rollNumber").value = rollNumber
 
   def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("bankDetailsSubmit")
 

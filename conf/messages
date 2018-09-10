@@ -273,7 +273,7 @@ hts.register.bank-details.rollNumber.label=Roll number
 hts.register.bank-details.rollNumber.hint=Building societies only
 
 # Eligible
-hts.register.you-are-eligible.title.h1=You’re eligible for a Help to Save account.
+hts.register.you-are-eligible.title.h1=You’re eligible for a Help to Save account
 hts.register.you-are-eligible.p1={0} we’ve checked the details we hold for you and you’re eligible for a Help to Save account.
 hts.register.you-are-eligible.p2=Before you can create an account, start saving and earning bonuses, you’ll need to:
 hts.register.you-are-eligible.li1=give us your email address

@@ -16,16 +16,9 @@
 
 package hts.utils
 
-import java.time.LocalDate
-
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
-
-case class TestUserInfo(forename:    Option[String],
-                        surname:     Option[String],
-                        nino:        Option[String],
-                        dateOfBirth: Option[LocalDate],
-                        email:       Option[String],
-                        address:     Address,
-                        bankDetails: TestBankDetails
+case class TestBankDetails(accountName:   Option[String],
+                           accountNumber: Option[String],
+                           sortCode:      Option[String],
+                           rollNumber:    Option[String]
 )
 
