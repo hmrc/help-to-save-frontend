@@ -31,10 +31,16 @@ class EmailSteps extends Steps {
   And("^they select their GG email and proceed$") {
     Browser.checkCurrentPageIs(SelectEmailPage)
     SelectEmailPage.selectGGEmail()
+
+    Browser.checkCurrentPageIs(BankDetailsPage)
+    BankDetailsPage.enterValidDetails()
+
+    Browser.checkCurrentPageIs(CheckYourDetailsPage)
+    CheckYourDetailsPage.continue()
   }
 
   When("^they start to create an account$") {
-    EligiblePage.clickConfirmAndContinue()
+    EligiblePage.continue()
   }
 
   Then("^they are asked to check their email for a verification email$") {
@@ -43,7 +49,7 @@ class EmailSteps extends Steps {
 
   Given("^they've chosen to enter a new email address during the application process$") {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.currentNINO())
-    EligiblePage.clickConfirmAndContinue()
+    EligiblePage.continue()
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
   }
 

@@ -52,7 +52,7 @@ class VerifyLinksSteps extends Steps {
     ApplyPage.clickStartNow()
 
     checkPage(EligiblePage)
-    EligiblePage.clickConfirmAndContinue()
+    EligiblePage.continue()
 
     checkPage(SelectEmailPage)
     //try to change the email and verify links
@@ -64,6 +64,12 @@ class VerifyLinksSteps extends Steps {
     //go back to original select email page and continue
     Browser.goBack()
     SelectEmailPage.selectGGEmail()
+
+    Browser.checkCurrentPageIs(BankDetailsPage)
+    BankDetailsPage.enterValidDetails()
+
+    Browser.checkCurrentPageIs(CheckYourDetailsPage)
+    CheckYourDetailsPage.continue()
 
     checkPage(CreateAccountPage)
     CreateAccountPage.createAccount()

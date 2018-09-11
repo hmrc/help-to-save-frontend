@@ -20,10 +20,12 @@ import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object CheckDetailsPage extends Page {
+object CheckYourDetailsPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/check-details"
 
   def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("confirm-and-continue")
 
+  def detailsNotCorrect()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("change-details-are-incorrect")
 }

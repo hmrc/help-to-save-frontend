@@ -99,7 +99,6 @@ object AuthorityWizardPage extends Page {
     Browser.find(Browser.name("nino")).foreach { element ⇒
       element.underlying.sendKeys(nino)
       ScenarioContext.currentNINO
-      println("NINO entered on auth wizard: " + nino)
     }
 
   def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =

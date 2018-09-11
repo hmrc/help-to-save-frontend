@@ -1,4 +1,4 @@
-@HTS-371 @HTS-379 @HTS-1183 @wip
+@HTS-371 @HTS-379 @HTS-1183
 Feature: Applicant confirms details
 
   Scenario: Applicant confirms details
@@ -21,6 +21,5 @@ Feature: Applicant confirms details
       | bank sort code                | 80-14-97          |
       | building society roll number  |                   |
 
-#    When an applicant passes the eligibility check
     And has entered their bank details
     Then they see their details

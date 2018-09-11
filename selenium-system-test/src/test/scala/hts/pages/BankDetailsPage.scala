@@ -20,7 +20,7 @@ import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object BankAccountDetailsPage extends Page {
+object BankDetailsPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/enter-uk-bank-details"
 
@@ -29,10 +29,9 @@ object BankAccountDetailsPage extends Page {
   override val expectedPageTitle: Option[String] = Some("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
 
   def enterValidDetails()(implicit driver: WebDriver): Unit = {
-    // Redo!!!!!!!!!!!!!!!!!!!
-    Browser.telField("sortCode").value = BankDetails.sortCode
-    Browser.telField("accountNumber").value = BankDetails.accountNumber
-    Browser.textField("accountName").value = BankDetails.name
+    enterSortCode(ValidBankDetails.sortCode)
+    enterAccountNumber(ValidBankDetails.accountNumber)
+    enterAccountName(ValidBankDetails.name)
     continue()
   }
 
@@ -43,7 +42,7 @@ object BankAccountDetailsPage extends Page {
 
   def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("bankDetailsSubmit")
 
-  object BankDetails {
+  object ValidBankDetails {
     val sortCode: String = "80-14-97"
     val accountNumber: String = "11111111"
     val name: String = "test"

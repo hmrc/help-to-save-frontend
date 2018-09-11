@@ -39,7 +39,6 @@ object ScenarioContext extends NINOGenerator {
     Left("No data table found")
   ){ table ⇒
       val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-      println("Marcus calling def userInfo()")
       val info: TestUserInfo = TestUserInfo(
         table.get("first name"),
         table.get("last name"),
@@ -94,7 +93,6 @@ private[utils] trait NINOGenerator {
 
   def generateEligibleNINO(): String = {
     current = toEligible(generateNINO())
-    println("generateEligibleNINO: " + current)
     current
   }
 

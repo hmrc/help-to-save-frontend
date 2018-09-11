@@ -45,7 +45,7 @@ bodyClasses = None) {
   <p class="lede">@Messages("hts.cya.intro")</p>
 
   @summary_section_head(heading = Messages("hts.cya.your-details"))
-  @summary_section_change(routes.RegisterController.getDetailsAreIncorrect().url, Messages("hts.cya.your-details"))
+  @summary_section_change(routes.RegisterController.getDetailsAreIncorrect().url, Messages("hts.cya.your-details"), "change-details-are-incorrect")
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.cya.your-details.name"), userInfo.forename + " " + userInfo.surname)
     @summary_row(Messages("hts.cya.your-details.dob"), userInfo.dateOfBirth.show)
@@ -53,13 +53,13 @@ bodyClasses = None) {
   </dl>
 
   @summary_section_head(heading = Messages("hts.cya.your-email"))
-  @summary_section_change(routes.EmailController.getSelectEmailPage().url, Messages("hts.cya.your-email"))
+  @summary_section_change(routes.EmailController.getSelectEmailPage().url, Messages("hts.cya.your-email"), "change-email")
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.cya.your-email.email"), email)
   </dl>
 
   @summary_section_head(heading = Messages("hts.cya.your-bank-details"))
-  @summary_section_change(routes.BankAccountController.getBankDetailsPage().url, Messages("hts.cya.your-bank-details"))
+  @summary_section_change(routes.BankAccountController.getBankDetailsPage().url, Messages("hts.cya.your-bank-details"), "change-bank-details")
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.cya.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode))
     @summary_row(Messages("hts.cya.your-bank-details.account-number"), bankDetails.accountNumber)

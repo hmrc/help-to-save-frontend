@@ -36,21 +36,19 @@ class ConfirmDetailsSteps extends Steps {
 
   When("^has entered their bank details$") {
     AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
-    EligiblePage.clickConfirmAndContinue()
+    EligiblePage.continue()
     SelectEmailPage.selectGGEmail()
     val info: TestUserInfo = ScenarioContext.userInfo().getOrElse(sys.error)
-    BankAccountDetailsPage.enterAccountName(info.bankDetails.accountName.getOrElse(sys.error("Could not get bank account name")))
-    BankAccountDetailsPage.enterSortCode(info.bankDetails.sortCode.getOrElse(sys.error("Could not get sort code")))
-    BankAccountDetailsPage.enterAccountNumber(info.bankDetails.accountNumber.getOrElse(sys.error("Could not get bank account number")))
-    BankAccountDetailsPage.enterRollNumber(info.bankDetails.rollNumber.getOrElse(sys.error("Could not get roll number")))
-    BankAccountDetailsPage.continue()
+    BankDetailsPage.enterAccountName(info.bankDetails.accountName.getOrElse(sys.error("Could not get bank account name")))
+    BankDetailsPage.enterSortCode(info.bankDetails.sortCode.getOrElse(sys.error("Could not get sort code")))
+    BankDetailsPage.enterAccountNumber(info.bankDetails.accountNumber.getOrElse(sys.error("Could not get bank account number")))
+    BankDetailsPage.enterRollNumber(info.bankDetails.rollNumber.getOrElse(sys.error("Could not get roll number")))
+    BankDetailsPage.continue()
   }
 
   Then("^they see their details$") { () ⇒
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-    println("Marcus just about to call ScenarioContext.currentNINO. Nino is: " + ScenarioContext.currentNINO)
     val nino = ScenarioContext.currentNINO
-    println("Marcus just called ScenarioContext.currentNINO. Nino is: " + ScenarioContext.currentNINO)
     val info: TestUserInfo = ScenarioContext.userInfo().getOrElse(sys.error)
     val forename = info.forename.getOrElse(sys.error("Could not get forename"))
     val surname = info.surname.getOrElse(sys.error("Could not get surname"))
@@ -63,10 +61,9 @@ class ConfirmDetailsSteps extends Steps {
     val rollNumber = info.bankDetails.rollNumber.getOrElse(sys.error("Could not get roll number"))
     val accountName = info.bankDetails.accountName.getOrElse(sys.error("Could not get account name"))
 
-    Browser.checkCurrentPageIs(CheckDetailsPage)
-    CheckDetailsPage.checkForOldQuotes()
+    Browser.checkCurrentPageIs(CheckYourDetailsPage)
+    CheckYourDetailsPage.checkForOldQuotes()
     Browser.isTextOnPage(fullName) shouldBe Right(Set(fullName))
-    Thread.sleep(10000000)
     Browser.isTextOnPage(displayedNino) shouldBe Right(Set(displayedNino))
     Browser.isTextOnPage(date) shouldBe Right(Set(date))
     Browser.isTextOnPage(email) shouldBe Right(Set(email))

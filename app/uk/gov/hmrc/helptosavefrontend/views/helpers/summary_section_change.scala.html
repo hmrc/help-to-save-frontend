@@ -14,6 +14,6 @@
  * limitations under the License.
  *@
 
-@(href: String, helperText: String)(implicit messages: Messages)
+@(href: String, helperText: String, id: String)(implicit messages: Messages)
 
-<a href="@href" style="float: right">@Messages("hts.cya.change") <span class="visuallyhidden">@helperText</span></a>
+<a id="@id" href="@href" style="float: right">@Messages("hts.cya.change") <span class="visuallyhidden">@helperText</span></a>
