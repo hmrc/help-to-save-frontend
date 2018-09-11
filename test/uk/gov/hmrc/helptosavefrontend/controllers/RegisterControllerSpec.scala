@@ -152,6 +152,7 @@ class RegisterControllerSpec
         val result = controller.getDetailsAreIncorrect(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include("We need your correct details")
+        contentAsString(result) should include("""<a href=/help-to-save/check-details class="link-back">Back</a>""")
       }
     }
 
@@ -176,6 +177,7 @@ class RegisterControllerSpec
         val result = doRequest()
         status(result) shouldBe OK
         contentAsString(result) should include("Accept and create account")
+        contentAsString(result) should include("""<a href=/help-to-save/check-details class="link-back">Back</a>""")
       }
 
       "show an error page if the eligibility reason cannot be parsed" in {
@@ -368,10 +370,12 @@ class RegisterControllerSpec
       checkRedirectIfNoEmailInSession(doRequest())
 
       "show the details page for valid users" in {
+        val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some("valid@email.com"), None, None, None, Some(bankDetails)))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, Some("valid@email.com"), None, None, None, Some(bankDetails)))))
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, Some("valid@email.com"), None, None, None, Some(bankDetails), Some("/help-to-save/check-details")))(Right(()))
         }
         val result = doRequest()
 
@@ -392,10 +396,12 @@ class RegisterControllerSpec
       }
 
       "handle the case when there are no bank details stored in the session" in {
+        val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some("valid@email.com"), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, Some("valid@email.com"), None))))
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, Some("valid@email.com"), None, None, None, None, Some("/help-to-save/check-details")))(Right(()))
         }
         val result = doRequest()
 
