@@ -26,18 +26,18 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleWithEmailAndBankInfo
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, EmailValidation}
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleWithInfo
+import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIPayload, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -62,9 +62,9 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 
   def getCreateAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
-      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-        EligibilityReason.fromEligible(eligibleWithEmail.eligible).fold {
-          logger.warn(s"Could not parse eligiblity reason: ${eligibleWithEmail.eligible}", eligibleWithEmail.userInfo.nino)
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        EligibilityReason.fromEligible(eligibleWithInfo.userInfo.eligible).fold {
+          logger.warn(s"Could not parse eligiblity reason: ${eligibleWithInfo.userInfo.eligible}", eligibleWithInfo.userInfo.userInfo.nino)
           internalServerError()
         } { reason ⇒
           Ok(views.html.register.create_account(reason))
@@ -92,14 +92,14 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   def createAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
-      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-        eligibleWithEmail.bankDetails match {
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        eligibleWithInfo.session.bankDetails match {
           case Some(bankDetails) ⇒
             val payload =
-              NSIPayload(eligibleWithEmail.userInfo, eligibleWithEmail.confirmedEmail, frontendAppConfig.version, frontendAppConfig.systemId)
+              NSIPayload(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, frontendAppConfig.version, frontendAppConfig.systemId)
                 .copy(nbaDetails = Some(bankDetails))
 
-            val createAccountRequest = CreateAccountRequest(payload, eligibleWithEmail.eligible.value.reasonCode)
+            val createAccountRequest = CreateAccountRequest(payload, eligibleWithInfo.userInfo.eligible.value.reasonCode)
             helpToSaveService.createAccount(createAccountRequest).fold[Result]({ e ⇒
               logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
               SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
@@ -130,12 +130,20 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 
   def checkDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
-      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-        eligibleWithEmail.bankDetails match {
-          case Some(bankDetails) ⇒
-            Ok(views.html.register.check_your_details(eligibleWithEmail.userInfo, eligibleWithEmail.confirmedEmail, bankDetails))
-          case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
-        }
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        sessionCacheConnector.put(eligibleWithInfo.session.copy(backLink = Some(routes.RegisterController.checkDetails().url)))
+          .fold(
+            error ⇒ {
+              logger.warn(s"Could not update session with back link in keystore: $error", htsContext.nino)
+              internalServerError()
+            },
+            _ ⇒
+              eligibleWithInfo.session.bankDetails match {
+                case Some(bankDetails) ⇒
+                  Ok(views.html.register.check_your_details(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, bankDetails))
+                case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+              }
+          )
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.checkDetails().url)
@@ -147,7 +155,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
    * given action if the the session data indicates that they are eligible
    */
   private def checkIfDoneEligibilityChecks(
-      ifEligibleWithEmailAndBankInfo: EligibleWithEmailAndBankInfo ⇒ Future[Result])(
+      ifEligibleWithInfo: EligibleWithInfo ⇒ Future[Result])(
       implicit
       htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] =
     checkSession {
@@ -165,7 +173,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
               session.confirmedEmail
                 .fold(
                   toFuture(SeeOther(routes.EmailController.getSelectEmailPage().url))
-                )(email ⇒ ifEligibleWithEmailAndBankInfo(EligibleWithEmailAndBankInfo(userInfo.userInfo, email, userInfo.eligible, session.bankDetails))
+                )(email ⇒ ifEligibleWithInfo(EligibleWithInfo(userInfo, email, session))
                   )
           ))
     }
@@ -175,5 +183,5 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 }
 
 object RegisterController {
-  case class EligibleWithEmailAndBankInfo(userInfo: UserInfo, confirmedEmail: Email, eligible: Eligible, bankDetails: Option[BankDetails])
+  case class EligibleWithInfo(userInfo: EligibleWithUserInfo, email: String, session: HTSSession)
 }

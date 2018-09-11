@@ -169,6 +169,20 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
       }
 
+      "use correct back link for digital applicants when they come from check details page" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, Some("/help-to-save/check-details")))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = getSelectEmailPage()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
+        contentAsString(result) should include("/help-to-save/check-details")
+      }
+
       "handle DE users with an existing valid email from GG" in {
 
         inSequence {
@@ -177,6 +191,21 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, None, Some("tyrion_lannister@gmail.com"), None, None))(Right(None))
+        }
+
+        val result = getSelectEmailPage()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
+      }
+
+      "DE users should not contain any Back link" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(None, None, Some("tyrion_lannister@gmail.com")))(Right(None))
         }
 
         val result = getSelectEmailPage()
@@ -452,6 +481,20 @@ class EmailControllerSpec
         contentAsString(result) should include("Which email address do you want to use for Help to Save?")
       }
 
+      "use correct back link for digital applicants when they come from check details page" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None, None, None, None, Some("/help-to-save/check-details")))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = getGiveEmailPage()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Which email address do you want to use for Help to Save?")
+        contentAsString(result) should include("/help-to-save/check-details")
+      }
+
       "handle existing digital account holders and redirect them to nsi" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -459,6 +502,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email")))
         }
+
         val result = getGiveEmailPage()
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("https://nsandi.com")
@@ -477,6 +521,21 @@ class EmailControllerSpec
         val result = getGiveEmailPage()
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+      }
+
+      "DE users should not contain any Back link" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(None, None, None))(Right(None))
+        }
+
+        val result = getGiveEmailPage()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Which email address do you want to use for Help to Save?")
       }
 
       "handle DE users with an existing INVALID email from GG" in {

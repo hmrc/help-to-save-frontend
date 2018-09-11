@@ -37,7 +37,8 @@ case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, Eligible
                       pendingEmail:           Option[Email],
                       ivURL:                  Option[String]                                   = None,
                       ivSuccessURL:           Option[String]                                   = None,
-                      bankDetails:            Option[BankDetails]                              = None
+                      bankDetails:            Option[BankDetails]                              = None,
+                      backLink:               Option[String]                                   = None
 )
 
 object HTSSession {
