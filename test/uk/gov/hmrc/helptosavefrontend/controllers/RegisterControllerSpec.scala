@@ -142,7 +142,7 @@ class RegisterControllerSpec
         val result = controller.getDetailsAreIncorrect(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include("We need your correct details")
-        contentAsString(result) should include("""<a href="/help-to-save/check-details" class="link-back">Back</a>""")
+        contentAsString(result) should include("""<a href=/help-to-save/check-details class="link-back">Back</a>""")
       }
     }
 
@@ -167,7 +167,7 @@ class RegisterControllerSpec
         val result = doRequest()
         status(result) shouldBe OK
         contentAsString(result) should include("Accept and create account")
-        contentAsString(result) should include("""<a href="/help-to-save/check-details" class="link-back">Back</a>""")
+        contentAsString(result) should include("""<a href=/help-to-save/check-details class="link-back">Back</a>""")
       }
 
       "show an error page if the eligibility reason cannot be parsed" in {

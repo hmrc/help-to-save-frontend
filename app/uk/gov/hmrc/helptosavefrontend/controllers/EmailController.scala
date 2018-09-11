@@ -73,7 +73,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           withEligibleSession (
             {
               case (s, eligibleWithEmail) ⇒
-                Ok(views.html.email.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm, s.backLink.getOrElse(eligibilityPage)))
+                Ok(views.html.email.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm, s.backLink.orElse(Some(eligibilityPage))))
             },
             { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url) }
           )(session)
@@ -110,7 +110,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
   def selectEmailSubmit(): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
-      def handleForm(email: String, eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]], bankDetails: Option[BankDetails], backLink: String): Future[Result] =
+      def handleForm(email: String, eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]], bankDetails: Option[BankDetails], backLink: Option[String]): Future[Result] =
           SelectEmailForm.selectEmailForm.bindFromRequest().fold(
             withErrors ⇒ Ok(views.html.email.select_email(email, withErrors, backLink)),
             _.newEmail.fold[Future[Result]](
@@ -127,7 +127,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
         def ifDigitalNewApplicant = { session: Option[HTSSession] ⇒
           withEligibleSession({
             case (session, eligibleWithEmail) ⇒
-              val backLink = session.backLink.getOrElse(eligibilityPage)
+              val backLink = session.backLink.orElse(Some(eligibilityPage))
               handleForm(eligibleWithEmail.email, Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), eligibleWithEmail.bankDetails, backLink)
           }, {
             case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
@@ -142,7 +142,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                 logger.warn("Could not find pending email for select email submit")
                 internalServerError()
               }{
-                email ⇒ handleForm(email, None, None, "")
+                email ⇒ handleForm(email, None, None, None)
               }
             }
         }
@@ -159,7 +159,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             case _ ⇒ SeeOther(routes.EmailController.getSelectEmailPage().url)
           }, {
             case (s, _) ⇒
-              Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm, s.backLink.getOrElse(eligibilityPage)))
+              Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm, s.backLink.orElse(Some(eligibilityPage))))
           })(session)
         }
 
@@ -200,7 +200,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     def handleForm(eligible: Eligible, userInfo: UserInfo, bankDetails: Option[BankDetails], backLink: Option[String]): Future[Result] =
         GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
-          withErrors ⇒ Ok(views.html.email.give_email(withErrors, backLink.getOrElse(eligibilityPage))),
+          withErrors ⇒ Ok(views.html.email.give_email(withErrors, backLink.orElse(Some(eligibilityPage)))),
           form ⇒
             updateSessionAndReturnResult(HTSSession(Some(Right(EligibleWithUserInfo(eligible, userInfo))), None, Some(form.email), None, None, bankDetails),
                                          SeeOther(routes.EmailController.verifyEmail().url)

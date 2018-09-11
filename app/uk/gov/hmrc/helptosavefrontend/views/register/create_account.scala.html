@@ -44,7 +44,7 @@
   title = Messages("hts.global.title", title, "", Messages("hts.global.title-suffix")),
   bodyClasses = None) {
 
-  @navigate_back(routes.RegisterController.checkDetails().url)
+  @navigate_back(Some(routes.RegisterController.checkDetails().url))
 
   <h1 class="heading-large">
     @title

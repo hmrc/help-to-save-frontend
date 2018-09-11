@@ -211,7 +211,6 @@ class EmailControllerSpec
         val result = getSelectEmailPage()
         status(result) shouldBe 200
         contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
-        contentAsString(result) should include("""<a href="" class="link-back">Back</a>""")
       }
 
       "handle DE users with an existing INVALID email from GG" in {
@@ -537,7 +536,6 @@ class EmailControllerSpec
         val result = getGiveEmailPage()
         status(result) shouldBe 200
         contentAsString(result) should include("Which email address do you want to use for Help to Save?")
-        contentAsString(result) should include("""<a href="" class="link-back">Back</a>""")
       }
 
       "handle DE users with an existing INVALID email from GG" in {

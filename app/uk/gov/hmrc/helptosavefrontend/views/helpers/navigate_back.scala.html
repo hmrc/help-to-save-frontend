@@ -14,5 +14,8 @@
  * limitations under the License.
  *@
 
-@(url: String)(implicit messages: Messages)
-<a href="@url" class="link-back">@Messages("hts.global.link.back")</a>
+@(url: Option[String])(implicit messages: Messages)
+
+@if(url.isDefined) {
+  <a href=@url.getOrElse(Html("")) class="link-back">@Messages("hts.global.link.back")</a>
+}

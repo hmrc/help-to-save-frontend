@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
-@(email: String, form: Form[SelectEmail], backLink: String = "")(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(email: String, form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
   @uk.gov.hmrc.helptosavefrontend.views.html.main_template(

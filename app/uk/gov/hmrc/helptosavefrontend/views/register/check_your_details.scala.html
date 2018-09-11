@@ -38,7 +38,7 @@ title = Messages("hts.global.title", title, "", Messages("hts.global.title-suffi
 sidebarLinks = None,
 bodyClasses = None) {
 
-@navigate_back(routes.BankAccountController.getBankDetailsPage().url)
+@navigate_back(Some(routes.BankAccountController.getBankDetailsPage().url))
 
   <h1>@title</h1>
 
