@@ -23,7 +23,7 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(form: Form[BankDetails])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[BankDetails], backLink: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{messages("hts.register.bank-details.title.h1")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -31,7 +31,7 @@
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.global.title", pageTitle, "", Messages("hts.global.title-suffix")), bodyClasses = None) {
 
-  @browser_back()
+  @navigate_back(Some(backLink))
 
   @if(hasErrors) {
     @error_summary(form.errors)
