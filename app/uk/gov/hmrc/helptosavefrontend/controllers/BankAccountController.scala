@@ -53,7 +53,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
       s ⇒
-        val backLink = s.backLink.orElse(Some(selectEmailPage))
+        val backLink = s.backLink.getOrElse(selectEmailPage)
         s.bankDetails.fold(
           Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), backLink))
         )(bankDetails ⇒
@@ -64,7 +64,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
   def submitBankDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     BankDetails.giveBankDetailsForm().bindFromRequest().fold(
-      withErrors ⇒ Ok(views.html.register.bank_account_details(withErrors, Some(selectEmailPage))),
+      withErrors ⇒ Ok(views.html.register.bank_account_details(withErrors, selectEmailPage)),
       { bankDetails ⇒
         checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
           session ⇒
