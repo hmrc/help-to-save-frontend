@@ -271,10 +271,9 @@ hts.register.you-are-eligible.dob=Date of birth
 # Register - missing information
 hts.register.missinguserinfo.title.h1=We’re missing some important details
 hts.register.missinguserinfo.p1=We cannot create your account until we have your:
-hts.register.missinguserinfo.title2=What happens next?
-hts.register.missinguserinfo.next.step1=You&rsquo;ll need to <a href={0} target="_blank">fill in the form (it will open in a new window)</a> on the HM Revenue & Customs website.
-hts.register.missinguserinfo.next.step2=You&rsquo;ll need to wait until we&rsquo;ve updated your details in our system.
-hts.register.missinguserinfo.next.step3=You can apply for a Help to Save account again.
+hts.register.missinguserinfo.title2=What you need to do
+hts.register.missinguserinfo.next.step1=<a href={0}>Tell HMRC about a change to your personal details</a>.
+hts.register.missinguserinfo.next.step2=When we have updated your details, apply for a Help to Save account.
 hts.register.missinguserinfo.firstName=first name
 hts.register.missinguserinfo.lastName=last name
 hts.register.missinguserinfo.dateOfBirth=date of birth
