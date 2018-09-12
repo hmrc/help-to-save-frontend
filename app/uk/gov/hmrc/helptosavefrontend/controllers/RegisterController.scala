@@ -40,6 +40,7 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
@@ -128,6 +129,11 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+
+  def getCannotCheckDetailsPage: Action[AnyContent] = ActionWithMdc { implicit request ⇒
+    implicit val htsContext: HtsContext = HtsContext(authorised = false)
+    Ok(views.html.cannot_check_details())
+  }
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility

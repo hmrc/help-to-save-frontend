@@ -110,6 +110,16 @@ class RegisterControllerSpec
 
   "The RegisterController" when {
 
+    "handling getCannotCheckDetailsPage" must {
+
+      "return the cannot check details page" in {
+        val result = controller.getCannotCheckDetailsPage(FakeRequest())
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("This is because you cannot use the Government Gateway account you signed into to apply for a Help to Save account")
+      }
+
+    }
+
     "handling getDailyCapReachedPage" must {
 
       "return the daily cap reached page" in {
