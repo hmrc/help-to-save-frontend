@@ -17,14 +17,13 @@
 package uk.gov.hmrc.helptosavefrontend.forms
 
 import cats.syntax.either._
-import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.ErrorMessages
 
-class BankDetailsValidationSpec extends TestSupport {
+class BankDetailsValidaitonSpec extends TestSupport {
 
   val bankValidationConfig = Configuration(
     "bank-details-validation.sort-code.length" → 6,

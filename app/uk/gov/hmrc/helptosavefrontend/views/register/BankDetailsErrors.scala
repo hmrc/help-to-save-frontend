@@ -25,15 +25,15 @@ object BankDetailsErrors {
 
   def getErrorMessage(form: Form[_], key: String)(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
     if (form.sortCodeIncorrectFormat(key)) {
-      Some(messages("hts.sort-code.incorrect-format", appConfig.BankDetailsValidation.sortCodeLength))
+      Some(messages("hts.sort-code.incorrect-format", appConfig.BankDetailsConfig.sortCodeLength))
     } else if (form.accountNumberIncorrectFormat(key)) {
-      Some(messages("hts.account-number.incorrect-format", appConfig.BankDetailsValidation.accountNumberLength))
+      Some(messages("hts.account-number.incorrect-format", appConfig.BankDetailsConfig.accountNumberLength))
     } else if (form.rollNumberTooShort(key) || form.rollNumberTooLong(key)) {
-      Some(messages("hts.roll-number.invalid", appConfig.BankDetailsValidation.rollNumberMinLength, appConfig.BankDetailsValidation.rollNumberMaxLength))
+      Some(messages("hts.roll-number.invalid", appConfig.BankDetailsConfig.rollNumberMinLength, appConfig.BankDetailsConfig.rollNumberMaxLength))
     } else if (form.accountNameTooShort(key)) {
-      Some(messages("hts.account-name.too-short", appConfig.BankDetailsValidation.accountNameMinLength))
+      Some(messages("hts.account-name.too-short", appConfig.BankDetailsConfig.accountNameMinLength))
     } else if (form.accountNameTooLong(key)) {
-      Some(messages("hts.account-name.too-long", appConfig.BankDetailsValidation.accountNameMaxLength))
+      Some(messages("hts.account-name.too-long", appConfig.BankDetailsConfig.accountNameMaxLength))
     } else {
       None
     }

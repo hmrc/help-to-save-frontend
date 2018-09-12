@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.{ErrorMessages
 
 class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
-  import configuration.BankDetailsValidation._
+  import configuration.BankDetailsConfig._
 
   val sortCodeFormatter: Formatter[String] = new Formatter[String] {
 
@@ -123,17 +123,17 @@ object BankDetailsValidation {
 
   private[forms] object ErrorMessages {
 
-    val sortCodeIncorrectFormat = "sort-code-incorrect-format"
+    val sortCodeIncorrectFormat = "sort_code_incorrect-_format"
 
-    val accountNumberIncorrectFormat = "account-number-incorrect-format"
+    val accountNumberIncorrectFormat = "account_number_incorrect_format"
 
-    val rollNumberTooShort = "roll-number-too-short"
+    val rollNumberTooShort = "roll_number_too_short"
 
-    val rollNumberTooLong = "roll-number-too-long"
+    val rollNumberTooLong = "roll_number_too_long"
 
-    val accountNameTooShort = "account-name-too-short"
+    val accountNameTooShort = "account_name_too_short"
 
-    val accountNameTooLong = "account-name-too-long"
+    val accountNameTooLong = "account_name_too_long"
 
   }
 
