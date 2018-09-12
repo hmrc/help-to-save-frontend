@@ -28,33 +28,41 @@ import scala.util.Random
 
 object ScenarioContext extends NINOGenerator {
 
-  private var dataTable: Option[DataTable] = None
+  private var dataTable: Option[Map[String, String]] = None
 
-  def setDataTable(table: DataTable): Unit = dataTable = Some(table)
+  def setDataTable(table: DataTable, nino: String): Unit = {
+    val data = table.asMap(classOf[String], classOf[String]).asScala.updated("NINO", nino)
+    dataTable = Some(Map(data.toList: _*))
+  }
 
   def userInfo(): Either[String, TestUserInfo] = dataTable.fold[Either[String, TestUserInfo]](
     Left("No data table found")
   ){ table ⇒
       val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-
       val info: TestUserInfo = TestUserInfo(
-        getField(table)("first name"),
-        getField(table)("last name"),
-        getField(table)("NINO"),
-        getField(table)("date of birth").map(s ⇒ LocalDate.parse(s, dateFormatter)),
-        getField(table)("email address"),
+        table.get("first name"),
+        table.get("last name"),
+        table.get("NINO"),
+        table.get("date of birth").map(s ⇒ LocalDate.parse(s, dateFormatter)),
+        table.get("email address"),
         Address(
           List(
-            getField(table)("address line 1"),
-            getField(table)("address line 2"),
-            getField(table)("address line 3"),
-            getField(table)("address line 4"),
-            getField(table)("address line 5")
+            table.get("address line 1"),
+            table.get("address line 2"),
+            table.get("address line 3"),
+            table.get("address line 4"),
+            table.get("address line 5")
           ).collect{ case Some(s) ⇒ s },
-          getField(table)("postcode"),
-          getField(table)("country code")
-        ))
-
+          table.get("postcode"),
+          table.get("country code")
+        ),
+        TestBankDetails(
+          table.get("bank account name"),
+          table.get("bank account number"),
+          table.get("bank sort code"),
+          table.get("building society roll number")
+        )
+      )
       Right(info)
     }
 
@@ -63,15 +71,6 @@ object ScenarioContext extends NINOGenerator {
     dataTable = None
   }
 
-  private def getField(table: DataTable)(name: String): Option[String] = {
-    val data = table.asMap(classOf[String], classOf[String]).asScala
-    val value = data.get(name) match {
-      case Some(f) if f.equals("<eligible>") ⇒ generateEligibleNINO
-      case Some(x)                           ⇒ x
-      case None                              ⇒ ""
-    }
-    Some(value)
-  }
 }
 
 private[utils] trait NINOGenerator {

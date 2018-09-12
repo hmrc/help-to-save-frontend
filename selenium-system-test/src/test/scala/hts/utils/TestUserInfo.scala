@@ -25,6 +25,7 @@ case class TestUserInfo(forename:    Option[String],
                         nino:        Option[String],
                         dateOfBirth: Option[LocalDate],
                         email:       Option[String],
-                        address:     Address
+                        address:     Address,
+                        bankDetails: TestBankDetails
 )
 

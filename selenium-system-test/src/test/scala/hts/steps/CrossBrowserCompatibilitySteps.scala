@@ -20,7 +20,7 @@ import hts.browser.Browser
 import hts.pages._
 import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
-import hts.utils.{Configuration, ScenarioContext}
+import hts.utils.{Configuration, ScenarioContext, TestBankDetails}
 import org.openqa.selenium.By
 
 class CrossBrowserCompatibilitySteps extends Steps {
@@ -64,20 +64,22 @@ class CrossBrowserCompatibilitySteps extends Steps {
     Browser.goTo(s"${Configuration.host}/help-to-save/check-eligibility")
 
     Browser.checkHeader(EligiblePage)
-    EligiblePage.detailsNotCorrect()
 
-    Browser.checkCurrentPageIs(IncorrectDetailsPage)
-    IncorrectDetailsPage.clickBack
-
-    Browser.checkHeader(EligiblePage)
     Browser.scrollToElement("start-creating-account", By.id)
-    EligiblePage.clickConfirmAndContinue()
+    EligiblePage.continue()
 
     SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
     Browser.checkCurrentPageIs(VerifyYourEmailPage)
 
     Browser.goBack()
     SelectEmailPage.selectGGEmail()
+
+    Browser.checkCurrentPageIs(BankDetailsPage)
+    BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
+
+    Browser.checkCurrentPageIs(CheckYourDetailsPage)
+    CheckYourDetailsPage.continue()
+
     CreateAccountPage.createAccount()
 
     Browser.checkHeader(NsiManageAccountPage)

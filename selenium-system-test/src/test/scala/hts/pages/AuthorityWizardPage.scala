@@ -19,7 +19,7 @@ package hts.pages
 import java.time.format.DateTimeFormatter
 
 import hts.browser.Browser
-import hts.utils.{Configuration, TestUserInfo}
+import hts.utils.{Configuration, ScenarioContext, TestUserInfo}
 import org.openqa.selenium.{By, WebDriver}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
 
@@ -98,7 +98,6 @@ object AuthorityWizardPage extends Page {
   def setNino(nino: String)(implicit driver: WebDriver): Unit =
     Browser.find(Browser.name("nino")).foreach { element ⇒
       element.underlying.sendKeys(nino)
-      println("NINO entered on auth wizard: " + nino)
     }
 
   def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =
