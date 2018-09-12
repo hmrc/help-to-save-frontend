@@ -20,7 +20,7 @@ import hts.browser.Browser
 import hts.pages._
 import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
 import hts.pages.registrationPages._
-import hts.utils.ScenarioContext
+import hts.utils.{ScenarioContext, TestBankDetails}
 
 class VerifyLinksSteps extends Steps {
 
@@ -52,7 +52,7 @@ class VerifyLinksSteps extends Steps {
     ApplyPage.clickStartNow()
 
     checkPage(EligiblePage)
-    EligiblePage.clickConfirmAndContinue()
+    EligiblePage.continue()
 
     checkPage(SelectEmailPage)
     //try to change the email and verify links
@@ -64,6 +64,12 @@ class VerifyLinksSteps extends Steps {
     //go back to original select email page and continue
     Browser.goBack()
     SelectEmailPage.selectGGEmail()
+
+    Browser.checkCurrentPageIs(BankDetailsPage)
+    BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
+
+    Browser.checkCurrentPageIs(CheckYourDetailsPage)
+    CheckYourDetailsPage.continue()
 
     checkPage(CreateAccountPage)
     CreateAccountPage.createAccount()

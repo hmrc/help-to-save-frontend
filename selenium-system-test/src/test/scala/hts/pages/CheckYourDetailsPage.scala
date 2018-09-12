@@ -20,16 +20,12 @@ import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object IncorrectDetailsPage extends Page {
+object CheckYourDetailsPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/incorrect-details"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/check-details"
 
-  override val expectedPageTitle: Option[String] = Some("We need your correct details")
+  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("confirm-and-continue")
 
-  override val expectedPageHeader: Option[String] = Some("We need your correct details")
-
-  def clickBack(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Back")
-
-  def openForm()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("fill in the form (it will open in a new window)")
-
+  def detailsNotCorrect()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("change-details-are-incorrect")
 }

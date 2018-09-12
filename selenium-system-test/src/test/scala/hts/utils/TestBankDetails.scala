@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,8 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@(href: String, helperText: String, id: String)(implicit messages: Messages)
+package hts.utils
 
-<a id="@id" href="@href" style="float: right">@Messages("hts.cya.change") <span class="visuallyhidden">@helperText</span></a>
+case class TestBankDetails(accountName:   Option[String],
+                           accountNumber: Option[String],
+                           sortCode:      Option[String],
+                           rollNumber:    Option[String]
+)
+
+object TestBankDetails {
+  val ValidBankDetails: TestBankDetails = TestBankDetails(
+    Some("testName"),
+    Some("11111111"),
+    Some("80-14-97"),
+    None
+  )
+}
+
