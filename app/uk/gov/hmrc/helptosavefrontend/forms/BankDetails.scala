@@ -21,11 +21,11 @@ import play.api.data.Forms._
 import play.api.libs.json.{Format, Json}
 
 object BankDetails {
-  def giveBankDetailsForm(): Form[BankDetails] = Form(
-    mapping("sortCode" -> nonEmptyText,
-      "accountNumber" -> nonEmptyText,
-      "rollNumber" -> optional(text),
-      "accountName" -> nonEmptyText
+  def giveBankDetailsForm()(implicit validation: BankDetailsValidation): Form[BankDetails] = Form(
+    mapping("sortCode" -> of(validation.sortCodeFormatter),
+      "accountNumber" -> of(validation.accountNumberFormatter),
+      "rollNumber" -> of(validation.rollNumberFormatter),
+      "accountName" -> of(validation.accountNameFormatter)
     )(BankDetails.apply)(BankDetails.unapply)
   )
 

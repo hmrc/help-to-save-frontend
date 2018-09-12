@@ -25,7 +25,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
-import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
@@ -44,7 +44,8 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
                                                                            val transformer:       NINOLogMessageTransformer,
                                                                            val frontendAppConfig: FrontendAppConfig,
                                                                            val config:            Configuration,
-                                                                           val env:               Environment)
+                                                                           val env:               Environment,
+                                                                           bankDetailsValidation: BankDetailsValidation)
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
 
@@ -64,7 +65,8 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
   def submitBankDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     BankDetails.giveBankDetailsForm().bindFromRequest().fold(
-      withErrors ⇒ Ok(views.html.register.bank_account_details(withErrors, selectEmailPage)),
+      withErrors ⇒
+        Ok(views.html.register.bank_account_details(withErrors, selectEmailPage)),
       { bankDetails ⇒
         checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
           session ⇒
