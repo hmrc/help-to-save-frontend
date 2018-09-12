@@ -20,7 +20,7 @@ import hts.browser.Browser
 import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.EitherOps._
-import hts.utils.ScenarioContext
+import hts.utils.{ScenarioContext, TestBankDetails}
 
 class CreateAccountSteps extends Steps {
 
@@ -70,7 +70,7 @@ class CreateAccountSteps extends Steps {
     SelectEmailPage.selectGGEmail()
 
     Browser.checkCurrentPageIs(BankDetailsPage)
-    BankDetailsPage.enterValidDetails()
+    BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
 
     Browser.checkCurrentPageIs(CheckYourDetailsPage)
     CheckYourDetailsPage.detailsNotCorrect()

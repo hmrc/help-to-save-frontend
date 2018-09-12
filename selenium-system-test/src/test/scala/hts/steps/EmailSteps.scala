@@ -20,7 +20,7 @@ import com.typesafe.config.ConfigFactory
 import hts.browser.Browser
 import hts.pages._
 import hts.pages.accountHomePages.{AccountHolderEmailVerifiedPage, ChangeEmailPage}
-import hts.utils.ScenarioContext
+import hts.utils.{ScenarioContext, TestBankDetails}
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, CryptoImpl, EmailVerificationParams}
 
@@ -33,7 +33,7 @@ class EmailSteps extends Steps {
     SelectEmailPage.selectGGEmail()
 
     Browser.checkCurrentPageIs(BankDetailsPage)
-    BankDetailsPage.enterValidDetails()
+    BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
 
     Browser.checkCurrentPageIs(CheckYourDetailsPage)
     CheckYourDetailsPage.continue()

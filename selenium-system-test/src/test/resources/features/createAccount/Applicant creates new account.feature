@@ -23,7 +23,7 @@ Feature: Applicant creates new account
     When they proceed to create an account using their GG email
     Then they see that the account is created
 
-  @VerifyHeaderAndFooter @HTS-1183 @wip
+  @VerifyHeaderAndFooter @HTS-1183
   Scenario: An authenticated eligible user wishes to create account but sees their details are incorrect
     Given they apply for Help to Save
     When they see their details are incorrect and report it

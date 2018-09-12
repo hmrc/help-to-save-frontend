@@ -17,7 +17,7 @@
 package hts.pages
 
 import hts.browser.Browser
-import hts.utils.Configuration
+import hts.utils.{Configuration, TestBankDetails}
 import org.openqa.selenium.WebDriver
 
 object BankDetailsPage extends Page {
@@ -28,10 +28,11 @@ object BankDetailsPage extends Page {
 
   override val expectedPageTitle: Option[String] = Some("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
 
-  def enterValidDetails()(implicit driver: WebDriver): Unit = {
-    enterSortCode(ValidBankDetails.sortCode)
-    enterAccountNumber(ValidBankDetails.accountNumber)
-    enterAccountName(ValidBankDetails.name)
+  def enterDetails(bankDetails: TestBankDetails)(implicit driver: WebDriver): Unit = {
+    bankDetails.sortCode.foreach(enterSortCode)
+    bankDetails.accountNumber.foreach(enterAccountNumber)
+    bankDetails.accountName.foreach(enterAccountName)
+    bankDetails.rollNumber.foreach(enterRollNumber)
     continue()
   }
 
@@ -42,9 +43,4 @@ object BankDetailsPage extends Page {
 
   def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("bankDetailsSubmit")
 
-  object ValidBankDetails {
-    val sortCode: String = "80-14-97"
-    val accountNumber: String = "11111111"
-    val name: String = "test"
-  }
 }
