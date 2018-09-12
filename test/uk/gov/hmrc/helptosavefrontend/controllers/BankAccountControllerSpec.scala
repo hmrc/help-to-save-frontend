@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
@@ -31,6 +31,8 @@ class BankAccountControllerSpec extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionCacheBehaviourSupport {
+
+  implicit lazy val bankDetailsValidation: BankDetailsValidation = new BankDetailsValidation(appConfig)
 
   val controller = new BankAccountController(
     mockHelpToSaveService,
@@ -100,7 +102,11 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should (include("Which UK bank account do you want us to pay your bonuses and withdrawals into?") and include("sortCode") and include("accountNumber") and include("accountName"))
+        contentAsString(result) should (
+          include("Which UK bank account do you want us to pay your bonuses and withdrawals into?") and
+          include("sortCode") and
+          include("accountNumber") and
+          include("accountName"))
 
       }
     }
@@ -121,11 +127,12 @@ class BankAccountControllerSpec extends AuthSupport
 
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
 
-        val result = controller.submitBankDetails()(fakeRequestWithCSRFToken)
+        val result = controller.submitBankDetails()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("rollNumber" → "a"))
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Sort code must be entered")
-        contentAsString(result) should include("Account number must be entered")
-        contentAsString(result) should include("Account name must be entered")
+        contentAsString(result) should include("Your sort code needs to be 6 numbers")
+        contentAsString(result) should include("Your account number needs to be 8 numbers")
+        contentAsString(result) should include("Your account name needs to be 2 characters or more")
+        contentAsString(result) should include("Your roll number needs to be between 4 and 18 characters")
       }
 
       doCommonChecks(doRequest)

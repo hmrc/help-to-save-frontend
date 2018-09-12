@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import cats.data.Validated.{Invalid, Valid}
-import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import cats.data.{NonEmptyList, Validated}
 import cats.instances.char._
 import cats.instances.string._
 import cats.syntax.apply._
@@ -29,6 +28,7 @@ import play.api.data.Forms.text
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation._
+import uk.gov.hmrc.helptosavefrontend.util.Validation._
 
 import scala.annotation.tailrec
 
@@ -40,11 +40,6 @@ class EmailValidation @Inject() (configuration: Configuration) {
   private val emailMaxLocalLength: Int = configuration.underlying.getInt("email-validation.max-local-length")
 
   private val emailMaxDomainLength: Int = configuration.underlying.getInt("email-validation.max-domain-length")
-
-  private def invalid[A](message: String): ValidatedNel[String, A] = Invalid(NonEmptyList.one(message))
-
-  private def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
-    if (predicate(a)) Valid(a) else invalid(ifFalse)
 
   private def charactersBeforeAndAfterChar(c: Char)(s: String): Option[(Int, Int)] = {
       @tailrec
@@ -59,8 +54,6 @@ class EmailValidation @Inject() (configuration: Configuration) {
 
     loop(s.toList, 0)
   }
-
-  private type ValidOrErrorStrings[A] = ValidatedNel[String, A]
 
   def validate(email: String): Validated[NonEmptyList[String], String] = {
 

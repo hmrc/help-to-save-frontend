@@ -105,4 +105,13 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val govUkURL: String = getString("gov-uk.urls.base")
   val govUkEligibilityInfoUrl: String = getString("gov-uk.urls.eligibility-info")
   val startPageRedirectionEnabled: Boolean = getBoolean("gov-uk.start-page-redirection.enabled")
+
+  object BankDetailsConfig {
+    val sortCodeLength: Int = getInt("bank-details-validation.sort-code.length")
+    val accountNumberLength: Int = getInt("bank-details-validation.account-number.length")
+    val rollNumberMinLength: Int = getInt("bank-details-validation.roll-number.min-length")
+    val rollNumberMaxLength: Int = getInt("bank-details-validation.roll-number.max-length")
+    val accountNameMinLength: Int = getInt("bank-details-validation.account-name.min-length")
+    val accountNameMaxLength: Int = getInt("bank-details-validation.account-name.max-length")
+  }
 }
