@@ -98,7 +98,6 @@ object AuthorityWizardPage extends Page {
   def setNino(nino: String)(implicit driver: WebDriver): Unit =
     Browser.find(Browser.name("nino")).foreach { element ⇒
       element.underlying.sendKeys(nino)
-      ScenarioContext.currentNINO
     }
 
   def setCredentialStrength(strength: String)(implicit driver: WebDriver): Unit =

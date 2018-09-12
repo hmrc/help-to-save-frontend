@@ -35,10 +35,10 @@ object BankDetailsPage extends Page {
     continue()
   }
 
-  def enterAccountNumber(accountNumber: String)(implicit driver: WebDriver) = Browser.telField("accountNumber").value = accountNumber
   def enterSortCode(sortCode: String)(implicit driver: WebDriver) = Browser.telField("sortCode").value = sortCode
-  def enterAccountName(accountName: String)(implicit driver: WebDriver) = Browser.telField("accountName").value = accountName
+  def enterAccountNumber(accountNumber: String)(implicit driver: WebDriver) = Browser.telField("accountNumber").value = accountNumber
   def enterRollNumber(rollNumber: String)(implicit driver: WebDriver) = Browser.telField("rollNumber").value = rollNumber
+  def enterAccountName(accountName: String)(implicit driver: WebDriver) = Browser.telField("accountName").value = accountName
 
   def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("bankDetailsSubmit")
 
