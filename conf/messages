@@ -427,9 +427,8 @@ hts.email.error.no-text-after-dot-symbol=Your email address must have characters
 hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the &lsquo;dot&rsquo;
 
 # Select email
-hts.select-email.title.h1=Which email address do you want us to use for your Help to Save account?
-hts.select-email.title.p1=I want to:
-hts.select-email.select-new-address=enter a new email address
+hts.select-email.title.h1=Which email address do you want to use for your Help to Save account?
+hts.select-email.select-new-address=a new email address
 hts.select-email.enter-new-address-body-text=The email addresses you use for other government services will not change.
 hts.select-email.enter-new-address-label=Enter the new email address
 hts.select-email.enter-new-address-hint=For example, myname&#64;sample.com

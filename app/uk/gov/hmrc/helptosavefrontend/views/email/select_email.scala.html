@@ -48,22 +48,22 @@
   </div>
   }
 
-@navigate_back(backLink)
-
-  <h1 class="heading-large">@messages("hts.select-email.title.h1")</h1>
-
-  <p>@messages("hts.select-email.title.p1")</p>
+  @navigate_back(backLink)
 
   <form method="post" action=@routes.EmailController.selectEmailSubmit>
     @CSRF.formField(request)
 
     <div class="@{"form-group" + {if(hasNotSelected) " form-group-error" else "" }}" id="select-one-option">
       <fieldset>
+        <legend>
+          <h1 class="heading-large">@messages("hts.select-email.title.h1")</h1>
+        </legend>
+
         @{if(hasNotSelected) <span class="error-message">{messages("hts.select-email.select-an-option")}</span> }
 
         <div class="multiple-choice">
           <input id="registered-email" type="radio" name="email" value="Yes">
-          <label for="registered-email">use @email</label>
+          <label for="registered-email">@email</label>
         </div>
 
         <div class="multiple-choice" data-target="collect-new-email">
@@ -85,7 +85,7 @@
     </div>
 
     <div class="form-field form-field--submit">
-      <button class="button " type="submit" class=="getSelectedEmail" onclick="ga('send', 'event', 'button', 'Applicant selected email', 'Applicant select email address page'););">
+      <button id="confirm-selected-email" class="button " type="submit" class=="getSelectedEmail" onclick="ga('send', 'event', 'button', 'Applicant selected email', 'Applicant select email address page'););">
         @messages("hts.global.continue-button")
       </button>
     </div>
