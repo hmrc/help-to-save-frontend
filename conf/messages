@@ -12,7 +12,7 @@ hts.global.title.section.email=- Manage your email address
 hts.global.exit.to.gov.uk=Exit to GOV.UK
 hts.global.link.back=Back
 
-hts.global.error-summary.title=There are errors on the page
+hts.global.error-summary.title=There is a problem
 
 hts.nav.title=Help to Save
 hts.nav.next=Next
@@ -264,13 +264,15 @@ hts.core.not-eligible.sidebar.p=Working Tax Credit
 hts.register.bank-details.title.h1=Which UK bank account do you want us to pay your bonuses and withdrawals into?
 hts.register.bank-details.sort-code.label=Sort code
 hts.register.bank-details.sort-code.hint=For example, 02 03 04
-hts.sortCode.error=Sort code must be entered
 hts.register.bank-details.accountNumber.label=Account number
-hts.accountNumber.error=Account number must be entered
 hts.register.bank-details.accountName.label=Account name
-hts.accountName.error=Account name must be entered
 hts.register.bank-details.rollNumber.label=Roll number
 hts.register.bank-details.rollNumber.hint=Building societies only
+hts.sort-code.incorrect-format=Your sort code needs to be {0} numbers
+hts.account-number.incorrect-format=Your account number needs to be {0} numbers
+hts.roll-number.invalid=Your roll number needs to be between {0} and {1} characters
+hts.account-name.too-short=Your account name needs to be {0} characters or more
+hts.account-name.too-long=Your account name cannot be more than {0} characters
 
 # Eligible
 hts.register.you-are-eligible.title.h1=You’re eligible for a Help to Save account.
