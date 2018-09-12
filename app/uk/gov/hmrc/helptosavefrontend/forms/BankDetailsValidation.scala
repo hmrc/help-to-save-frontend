@@ -123,7 +123,7 @@ object BankDetailsValidation {
 
   private[forms] object ErrorMessages {
 
-    val sortCodeIncorrectFormat = "sort_code_incorrect-_format"
+    val sortCodeIncorrectFormat = "sort_code_incorrect_format"
 
     val accountNumberIncorrectFormat = "account_number_incorrect_format"
 
