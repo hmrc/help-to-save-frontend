@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, t
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
@@ -131,22 +131,46 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   def checkDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
-        sessionCacheConnector.put(eligibleWithInfo.session.copy(backLink = Some(routes.RegisterController.checkDetails().url)))
-          .fold(
-            error ⇒ {
-              logger.warn(s"Could not update session with back link in keystore: $error", htsContext.nino)
-              internalServerError()
-            },
-            _ ⇒
-              eligibleWithInfo.session.bankDetails match {
-                case Some(bankDetails) ⇒
-                  Ok(views.html.register.check_your_details(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, bankDetails))
-                case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
-              }
-          )
+        sessionCacheConnector.put(eligibleWithInfo.session.copy(changingDetails = false)).fold({ e ⇒
+          logger.warn(s"Could not write to session cache: $e")
+          internalServerError()
+        }, { _ ⇒
+          eligibleWithInfo.session.bankDetails match {
+            case Some(bankDetails) ⇒
+              Ok(views.html.register.check_your_details(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, bankDetails))
+
+            case None ⇒
+              SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+          }
+        })
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.checkDetails().url)
+
+  def changeEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { () ⇒
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.EmailController.getSelectEmailPage().url)
+
+      }
+    }
+  }(redirectOnLoginURL = routes.RegisterController.changeEmail().url)
+
+  def changeBankDetails: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { () ⇒
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.BankAccountController.getBankDetailsPage().url)
+      }
+    }
+  }(redirectOnLoginURL = routes.RegisterController.changeBankDetails().url)
+
+  private def startChangingDetailsAndRedirect(session: HTSSession, redirectTo: String)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] =
+    sessionCacheConnector.put(session.copy(changingDetails = true)).fold({ e ⇒
+      logger.warn(s"Could not write to session cache: $e")
+      internalServerError()
+    },
+      _ ⇒ SeeOther(redirectTo)
+    )
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility

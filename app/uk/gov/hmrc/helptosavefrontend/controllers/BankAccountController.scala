@@ -54,7 +54,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
       s ⇒
-        val backLink = s.backLink.getOrElse(selectEmailPage)
+        val backLink = if (s.changingDetails) { routes.RegisterController.checkDetails().url } else { selectEmailPage }
         s.bankDetails.fold(
           Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), backLink))
         )(bankDetails ⇒

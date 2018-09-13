@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import cats.Eq
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
@@ -38,7 +39,7 @@ case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, Eligible
                       ivURL:                  Option[String]                                   = None,
                       ivSuccessURL:           Option[String]                                   = None,
                       bankDetails:            Option[BankDetails]                              = None,
-                      backLink:               Option[String]                                   = None
+                      changingDetails:        Boolean                                          = false
 )
 
 object HTSSession {
@@ -63,4 +64,7 @@ object HTSSession {
     }
 
   implicit val htsSessionFormat: Format[HTSSession] = Json.format[HTSSession]
+
+  implicit val eq: Eq[HTSSession] = Eq.fromUniversalEquals[HTSSession]
+
 }
