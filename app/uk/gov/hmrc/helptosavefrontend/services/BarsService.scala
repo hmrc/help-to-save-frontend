@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
+import java.util.UUID
+
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status
 import uk.gov.hmrc.helptosavefrontend.connectors.BarsConnector
@@ -41,7 +43,8 @@ class BarsServiceImpl @Inject() (barsConnector: BarsConnector,
 
   override def validate(bankDetails: BankDetails)(implicit hc: HeaderCarrier, ec: ExecutionContext): BarsResponseType = {
     val timerContext = metrics.barsTimer.time()
-    barsConnector.validate(bankDetails).map[Either[String, Boolean]] {
+    val trackingId = UUID.randomUUID()
+    barsConnector.validate(bankDetails, trackingId).map[Either[String, Boolean]] {
       response ⇒
         val _ = timerContext.stop()
         response.status match {
@@ -49,19 +52,19 @@ class BarsServiceImpl @Inject() (barsConnector: BarsConnector,
             (response.json \ "accountNumberWithSortCodeIsValid").asOpt[Boolean] match {
               case Some(result) ⇒ Right(result)
               case None ⇒
-                logger.warn(s"error parsing the response from bars check, body = ${response.body}")
+                logger.warn(s"error parsing the response from bars check, trackingId = $trackingId,  body = ${response.body}")
                 Left(s"error parsing the response json from bars check")
             }
           case other: Int ⇒
             //Do we need pager duty alert here ?
             metrics.barsErrorCounter.inc()
-            logger.warn(s"unexpected status from bars check, status=$other, body = ${response.body}")
+            logger.warn(s"unexpected status from bars check, trackingId = $trackingId, status=$other, body = ${response.body}")
             Left("unexpected status from bars check")
         }
     }.recover {
       case e ⇒
         metrics.barsErrorCounter.inc()
-        logger.warn(s"unexpected error from bars check, error=${e.getMessage}")
+        logger.warn(s"unexpected error from bars check, trackingId = $trackingId, error=${e.getMessage}")
         Left("unexpected error from bars check")
     }
   }

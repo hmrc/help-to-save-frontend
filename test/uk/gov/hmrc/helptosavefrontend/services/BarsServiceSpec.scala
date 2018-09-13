@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
-import org.scalamock.handlers.CallHandler3
+import java.util.UUID
+
+import org.scalamock.handlers.CallHandler4
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.BarsConnector
@@ -30,8 +32,8 @@ class BarsServiceSpec extends UnitSpec with TestSupport {
 
   private val mockBarsConnector: BarsConnector = mock[BarsConnector]
 
-  def mockBarsConnector(bankDetails: BankDetails)(response: Option[HttpResponse]): CallHandler3[BankDetails, HeaderCarrier, ExecutionContext, Future[HttpResponse]] =
-    (mockBarsConnector.validate(_: BankDetails)(_: HeaderCarrier, _: ExecutionContext)).expects(bankDetails, *, *)
+  def mockBarsConnector(bankDetails: BankDetails)(response: Option[HttpResponse]): CallHandler4[BankDetails, UUID, HeaderCarrier, ExecutionContext, Future[HttpResponse]] =
+    (mockBarsConnector.validate(_: BankDetails, _: UUID)(_: HeaderCarrier, _: ExecutionContext)).expects(bankDetails, *, *, *)
       .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("")))(r ⇒ Future.successful(r)))
 
   val service = new BarsServiceImpl(mockBarsConnector, mockMetrics)

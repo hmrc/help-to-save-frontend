@@ -35,8 +35,8 @@ class BarsConnectorSpec extends UnitSpec with TestSupport with HttpSupport {
     "validating bank details" must {
 
       "set headers and request body as expected and return http response to the caller" in {
-        val sessionId = UUID.randomUUID().toString
-        val headers = Map("User-Agent" -> "help-to-save-frontend", "Content-Type" -> "application/json", "X-Tracking-Id" -> sessionId)
+        val trackingId = UUID.randomUUID()
+        val headers = Map("User-Agent" -> "help-to-save-frontend", "Content-Type" -> "application/json", "X-Tracking-Id" -> trackingId.toString)
         val body = Json.parse(
           s"""{
              | "account": {
@@ -58,7 +58,7 @@ class BarsConnectorSpec extends UnitSpec with TestSupport with HttpSupport {
             |}""".stripMargin
 
         mockPost("http://localhost:9871/validateBankDetails", headers, body)(Some(HttpResponse(Status.OK, Some(Json.parse(response)))))
-        val result = await(connector.validate(BankDetails("sortCode", "accountNumber", Some("rollNo"), "accountName"))(headerCarrier.copy(sessionId = Some(SessionId(sessionId))), ec))
+        val result = await(connector.validate(BankDetails("sortCode", "accountNumber", Some("rollNo"), "accountName"), trackingId))
 
         result.status shouldBe 200
         result.json shouldBe Json.parse(response)

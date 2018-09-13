@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BarsConnectorImpl])
 trait BarsConnector {
 
-  def validate(bankDetails: BankDetails)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
+  def validate(bankDetails: BankDetails, trackingId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse]
 }
 
 @Singleton
@@ -42,11 +42,8 @@ class BarsConnectorImpl @Inject() (http: HttpClient)(implicit appConfig: Fronten
 
   private val headers = Map("User-Agent" -> "help-to-save-frontend", "Content-Type" -> "application/json")
 
-  override def validate(bankDetails: BankDetails)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    http.post(barsEndpoint, bodyJson(bankDetails), headers.+("X-Tracking-Id" -> trackingId))
-
-  private def trackingId(implicit hc: HeaderCarrier): String =
-    hc.sessionId.map(_.value).getOrElse(UUID.randomUUID().toString)
+  override def validate(bankDetails: BankDetails, trackingId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
+    http.post(barsEndpoint, bodyJson(bankDetails), headers.+("X-Tracking-Id" -> trackingId.toString))
 
   private def bodyJson(details: BankDetails) = {
 
