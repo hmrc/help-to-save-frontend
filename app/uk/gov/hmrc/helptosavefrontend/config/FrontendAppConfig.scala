@@ -60,7 +60,7 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   }
 
   val ggUserUrl: String =
-    s"${getUrlFor("gg-registration-fe")}/government-gateway-registration-frontend?accountType=individual&continue=%2Fhelp-to-save%2Fcheck-eligibility&origin=help-to-save-frontend&registerForSa=skip"
+    s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?accountType=individual&continue=%2Fhelp-to-save%2Fcheck-eligibility&origin=help-to-save-frontend&registerForSa=skip"
 
   def ivJourneyResultUrl(journeyId: JourneyId): String = new URI(s"$ivJourneyResultUrl/${journeyId.Id}").toString
 
