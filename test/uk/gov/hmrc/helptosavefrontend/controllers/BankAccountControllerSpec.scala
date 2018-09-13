@@ -157,7 +157,7 @@ class BankAccountControllerSpec extends AuthSupport
           mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails("123456", "12345678", None, "test user name"))))(Right(()))
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails("12-34-56", "12345678", None, "test user name"))))(Right(()))
         }
 
         val result = doRequest()
@@ -174,7 +174,7 @@ class BankAccountControllerSpec extends AuthSupport
           mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails("123456", "12345678", None, "test user name"))))(Left(("error")))
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails("12-34-56", "12345678", None, "test user name"))))(Left(("error")))
         }
 
         val result = doRequest()

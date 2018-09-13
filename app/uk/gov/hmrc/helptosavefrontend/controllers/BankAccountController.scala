@@ -73,7 +73,8 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
           case Right(true) ⇒
             checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
               session ⇒
-                sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails)))
+                val sortCodeWithHyphens = bankDetails.sortCode.grouped(2).mkString("-")
+                sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails.copy(sortCode = sortCodeWithHyphens))))
                   .fold(
                     error ⇒ {
                       logger.warn(s"Could not update session with bank details: $error")
