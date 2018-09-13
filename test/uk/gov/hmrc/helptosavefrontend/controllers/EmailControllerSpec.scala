@@ -825,8 +825,8 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None, changingDetails = true))))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None, changingDetails = true))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
           mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
@@ -1379,7 +1379,7 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
       }
 
-      "handle Digital users and redirect to the checkDetailsPage if bank details are already in session" in {
+      "handle Digital users and redirect to the checkDetailsPage if the user is in the process of changing details" in {
 
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
