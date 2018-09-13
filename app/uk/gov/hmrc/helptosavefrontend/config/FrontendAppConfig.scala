@@ -59,6 +59,9 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
     ).toString
   }
 
+  val ggUserUrl: String =
+    s"${getUrlFor("gg-registration-fe")}/government-gateway-registration-frontend?accountType=individual&continue=%2Fhelp-to-save%2Fcheck-eligibility&origin=help-to-save-frontend&registerForSa=skip"
+
   def ivJourneyResultUrl(journeyId: JourneyId): String = new URI(s"$ivJourneyResultUrl/${journeyId.Id}").toString
 
   val verifyEmailURL: String = s"${baseUrl("email-verification")}/email-verification/verification-requests"
