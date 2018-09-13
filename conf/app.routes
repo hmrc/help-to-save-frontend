@@ -73,3 +73,5 @@ GET        /enter-uk-bank-details                           @uk.gov.hmrc.helptos
 POST       /enter-uk-bank-details                           @uk.gov.hmrc.helptosavefrontend.controllers.BankAccountController.submitBankDetails
 
 GET        /check-details                                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.checkDetails
+GET        /change-bank-details                             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeBankDetails
+GET        /change-email-address                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeEmail

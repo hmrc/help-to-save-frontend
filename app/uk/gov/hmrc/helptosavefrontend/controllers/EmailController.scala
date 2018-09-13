@@ -66,6 +66,9 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
+  private def backLinkFromSession(session: HTSSession): String =
+    if (session.changingDetails) { routes.RegisterController.checkDetails().url } else { eligibilityPage }
+
   def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
@@ -73,7 +76,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           withEligibleSession (
             {
               case (s, eligibleWithEmail) ⇒
-                Ok(views.html.email.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm, s.backLink.orElse(Some(eligibilityPage))))
+                Ok(views.html.email.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm, Some(backLinkFromSession(s))))
             },
             { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url) }
           )(session)
@@ -107,49 +110,57 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     }(redirectOnLoginURL = routes.EmailController.getSelectEmailPage().url)
 
-  def selectEmailSubmit(): Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+  def selectEmailSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
-      def handleForm(email: String, eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]], bankDetails: Option[BankDetails], backLink: Option[String]): Future[Result] =
-          SelectEmailForm.selectEmailForm.bindFromRequest().fold(
-            withErrors ⇒ Ok(views.html.email.select_email(email, withErrors, backLink)),
-            _.newEmail.fold[Future[Result]](
+    def handleForm(email:    String,
+                   backLink: Option[String],
+                   session:  HTSSession
+      ): Future[Result] =
+        SelectEmailForm.selectEmailForm.bindFromRequest().fold(
+          withErrors ⇒ Ok(views.html.email.select_email(email, withErrors, backLink)),
+          _.newEmail.fold[Future[Result]]{
+            SeeOther(routes.EmailController.confirmEmail(crypto.encrypt(email)).url)
+          } { newEmail ⇒
+            val updatedSession = session.copy(pendingEmail   = Some(newEmail), confirmedEmail = None)
 
-              SeeOther(routes.EmailController.confirmEmail(crypto.encrypt(email)).url))(
-                newEmail ⇒ {
-                  updateSessionAndReturnResult(HTSSession(eligibilityCheckResult, None, Some(newEmail), None, None, bankDetails),
-                                               SeeOther(routes.EmailController.verifyEmail().url)
-                  )
-                }
-              )
-          )
-
-        def ifDigitalNewApplicant = { session: Option[HTSSession] ⇒
-          withEligibleSession({
-            case (session, eligibleWithEmail) ⇒
-              val backLink = session.backLink.orElse(Some(eligibilityPage))
-              handleForm(eligibleWithEmail.email, Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), eligibleWithEmail.bankDetails, backLink)
-          }, {
-            case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
-          })(session)
-        }
-
-        def ifDE = { htsSession: Option[HTSSession] ⇒
-          htsSession.fold[Future[Result]](
-            SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-          ){
-              _.pendingEmail.fold[Future[Result]]{
-                logger.warn("Could not find pending email for select email submit")
-                internalServerError()
-              }{
-                email ⇒ handleForm(email, None, None, None)
-              }
+            if (updatedSession =!= session) {
+              updateSessionAndReturnResult(updatedSession,
+                                           SeeOther(routes.EmailController.verifyEmail().url))
+            } else {
+              SeeOther(routes.EmailController.verifyEmail().url)
             }
-        }
+          }
+        )
 
-      checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
+      def ifDigitalNewApplicant = { maybeSession: Option[HTSSession] ⇒
+        withEligibleSession({
+          case (session, eligibleWithEmail) ⇒
+            val backLink = backLinkFromSession(session)
+            handleForm(eligibleWithEmail.email,
+                       Some(backLink),
+                       session
+            )
+        }, {
+          case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
+        })(maybeSession)
+      }
 
-    }(redirectOnLoginURL = routes.EmailController.selectEmailSubmit().url)
+      def ifDE = { maybeSession: Option[HTSSession] ⇒
+        maybeSession.fold[Future[Result]](
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        ){ session ⇒
+            session.pendingEmail.fold[Future[Result]]{
+              logger.warn("Could not find pending email for select email submit")
+              internalServerError()
+            }{
+              email ⇒ handleForm(email, None, session)
+            }
+          }
+      }
+
+    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
+
+  }(redirectOnLoginURL = routes.EmailController.selectEmailSubmit().url)
 
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -159,37 +170,28 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             case _ ⇒ SeeOther(routes.EmailController.getSelectEmailPage().url)
           }, {
             case (s, _) ⇒
-              Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm, s.backLink.orElse(Some(eligibilityPage))))
+              Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm, Some(backLinkFromSession(s))))
           })(session)
         }
 
         def ifDE = { _: Option[HTSSession] ⇒
-          htsContext.userDetails.fold(
-            _ ⇒ {
-              updateSessionAndReturnResult(HTSSession(None, None, None),
-                                           Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
-              )
-            },
-            userInfo ⇒ userInfo.email.fold[Future[Result]]({
-              updateSessionAndReturnResult(HTSSession(None, None, None),
-                                           Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
-              )
-            }
-            )(
-              email ⇒
-                emailValidation.validate(email).toEither match {
-                  case Right(validEmail) ⇒
-                    updateSessionAndReturnResult(HTSSession(None, None, Some(validEmail)),
-                                                 SeeOther(routes.EmailController.getSelectEmailPage().url)
-                    )
+          htsContext.userDetails.toOption.flatMap(_.email).fold{
+            updateSessionAndReturnResult(HTSSession(None, None, None),
+                                         Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm)))
+          } {
+            email ⇒
+              emailValidation.validate(email).toEither match {
+                case Right(validEmail) ⇒
+                  updateSessionAndReturnResult(HTSSession(None, None, Some(validEmail)),
+                                               SeeOther(routes.EmailController.getSelectEmailPage().url)
+                  )
 
-                  case Left(_) ⇒
-                    updateSessionAndReturnResult(HTSSession(None, None, None),
-                                                 Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
-                    )
-                }
-            )
-          )
+                case Left(_) ⇒
+                  updateSessionAndReturnResult(HTSSession(None, None, None),
+                                               Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
+                  )
+              }
+          }
         }
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
@@ -198,21 +200,24 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   def giveEmailSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-    def handleForm(eligible: Eligible, userInfo: UserInfo, bankDetails: Option[BankDetails], backLink: Option[String]): Future[Result] =
+    def handleForm(session: HTSSession): Future[Result] =
         GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
-          withErrors ⇒ Ok(views.html.email.give_email(withErrors, backLink.orElse(Some(eligibilityPage)))),
-          form ⇒
-            updateSessionAndReturnResult(HTSSession(Some(Right(EligibleWithUserInfo(eligible, userInfo))), None, Some(form.email), None, None, bankDetails),
-                                         SeeOther(routes.EmailController.verifyEmail().url)
-            ))
+          withErrors ⇒ Ok(views.html.email.give_email(withErrors, Some(backLinkFromSession(session)))),
+          form ⇒ {
+            val updatedSession = session.copy(confirmedEmail = None, pendingEmail = Some(form.email))
+            if (session =!= updatedSession) {
+              updateSessionAndReturnResult(updatedSession,
+                                           SeeOther(routes.EmailController.verifyEmail().url))
+            } else {
+              SeeOther(routes.EmailController.verifyEmail().url)
+            }
+          })
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession ({
-          case (s, eligibleWithEmail) ⇒
-            handleForm(eligibleWithEmail.eligible, eligibleWithEmail.userInfo, eligibleWithEmail.bankDetails, s.backLink)
+          case (s, _) ⇒ handleForm(s)
         }, {
-          case (s, eligibleWithNoEmail) ⇒
-            handleForm(eligibleWithNoEmail.eligible, eligibleWithNoEmail.userInfo, eligibleWithNoEmail.bankDetails, s.backLink)
+          case (s, _) ⇒ handleForm(s)
         })(session)
 
       def ifDE = {
@@ -258,13 +263,14 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession(
           {
-            case (_, eligibleWithEmail) ⇒
-              doUpdate(HTSSession(Some(Right(EligibleWithUserInfo(eligibleWithEmail.eligible, eligibleWithEmail.userInfo))), None, None, None, None, eligibleWithEmail.bankDetails)) {
-                //once email is confirmed and bank details are already in session, then we should redirect user to check_details page
-                val redirectUrl = eligibleWithEmail.bankDetails.fold(SeeOther(routes.BankAccountController.getBankDetailsPage().url))(
-                  _ ⇒ SeeOther(routes.RegisterController.checkDetails().url)
-                )
-                toFuture(redirectUrl)
+            case (session, _) ⇒
+              doUpdate(session.copy(confirmedEmail = None, pendingEmail = None)){
+                //once email is confirmed and , if we were in the process of changing details then we should redirect user to check_details page
+                if (session.changingDetails) {
+                  SeeOther(routes.RegisterController.checkDetails().url)
+                } else {
+                  SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                }
               }
           },
           { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url) }
@@ -636,11 +642,13 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
   def emailUpdatedSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkSessionAndEnrolmentStatus(
       mayBeSession ⇒ {
-        //once email is verified and bank details are already in session, then we should redirect user to check_details page
         mayBeSession.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(
-          session ⇒ session.bankDetails.fold(SeeOther(routes.BankAccountController.getBankDetailsPage().url))(
-            _ ⇒ SeeOther(routes.RegisterController.checkDetails().url)
-          )
+          session ⇒
+            if (session.changingDetails) {
+              SeeOther(routes.RegisterController.checkDetails().url)
+            } else {
+              SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+            }
         )
       },
       _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
