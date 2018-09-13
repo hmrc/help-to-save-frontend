@@ -427,7 +427,8 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
         } else {
           val newInfo = eligibleWithUserInfo.userInfo.updateEmail(params.email)
           val newSession = HTSSession(Some(Right(eligibleWithUserInfo.copy(userInfo = newInfo))),
-                                      Some(params.email), session.flatMap(_.pendingEmail), None, None, session.flatMap(_.bankDetails))
+                                      Some(params.email), session.flatMap(_.pendingEmail), None, None,
+                                      session.flatMap(_.bankDetails), session.exists(_.changingDetails))
           for {
             _ ← sessionCacheConnector.put(newSession)
             _ ← helpToSaveService.storeConfirmedEmail(params.email)
