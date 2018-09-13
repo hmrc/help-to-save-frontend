@@ -67,7 +67,7 @@ class BankDetailsValidationSpec extends TestSupport {
           testSortCode(Some("12 3 45 6"))(Right("123456"))
         }
 
-        "separated by dashes" in {
+        "separated by hyphens" in {
           testSortCode(Some("12-3-45-6"))(Right("123456"))
         }
 
@@ -75,8 +75,8 @@ class BankDetailsValidationSpec extends TestSupport {
           testSortCode(Some("12_3_45_6"))(Right("123456"))
         }
 
-        "separated by forward slashes" in {
-          testSortCode(Some("12/3/45/6"))(Right("123456"))
+        "separated by dashes" in {
+          testSortCode(Some("12–3–45–6"))(Right("123456"))
         }
 
         "containing with trailing and leading spaces" in {
@@ -108,7 +108,7 @@ class BankDetailsValidationSpec extends TestSupport {
         }
 
         "have numbers separated by non-supported characters" in {
-          List(',', '.', '&', '*', '\\').foreach{ c ⇒
+          List(',', '.', '&', '*', '/').foreach{ c ⇒
             withClue(s"For char $c: "){
               testSortCode(Some(s"12${c}34${c}56"))(Left(Set(ErrorMessages.sortCodeIncorrectFormat)))
             }
