@@ -160,6 +160,16 @@ class HelpToSaveAuthSpec extends AuthSupport {
       redirectTo should include("continueURL")
     }
 
+    "handle UnsupportedAuthProvider exceptions and redirect user to the correct page" in {
+
+      mockAuthWith("UnsupportedAuthProvider")
+
+      val result = actionWithEnrols(FakeRequest())
+      status(result) shouldBe Status.SEE_OTHER
+      val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
+      redirectTo should include("/help-to-save/cannot-check-details")
+    }
+
     "handle any other AuthorisationException and display access denied to user" in {
 
       mockAuthWith("UnsupportedCredentialRole")

@@ -577,6 +577,11 @@ hts.close-account.p3=10am to 6pm, Monday to Friday
 hts.close-account.p4=Closed weekends and bank holidays.
 hts.close-account.back=Back
 
+# Cannot Check Details
+hts.we-cannot-check-details.title.h1=We cannot check your details
+hts.we-cannot-check-details.title.p1=This is because you cannot use the Government Gateway account you signed into to apply for a Help to Save account.
+hts.we-cannot-check-details.title.p2=You&rsquo;ll need to &lsquo;Continue&rsquo; and create a new Government Gateway account for Help to Save. You can then apply for a Help to Save account.
+
 hts.close-account.positive-balance.positive-bonus.warning=If you close your account now you will not get your &pound;{0} first bonus payment or a final bonus. You will not be able to open another Help to Save account.
 hts.close-account.positive-balance.positive-bonus.withdraw.p1=You can
 hts.close-account.positive-balance.positive-bonus.withdraw.p2=withdraw all of your money

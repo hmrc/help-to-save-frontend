@@ -26,7 +26,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
+import uk.gov.hmrc.helptosavefrontend.controllers.{BaseController, routes}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200, UserInfoRetrievals}
@@ -174,6 +174,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
       SeeOther(appConfig.ivUrl(redirectOnLoginURL))
+
+    case _: UnsupportedAuthProvider ⇒
+      SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)
 
     case ex: AuthorisationException ⇒
       logger.warn(s"could not authenticate user due to: $ex ${timeString(time)}")
