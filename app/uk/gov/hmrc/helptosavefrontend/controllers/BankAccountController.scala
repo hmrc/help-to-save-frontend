@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.services.{BarsService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views
@@ -40,12 +40,13 @@ import scala.concurrent.Future
 class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveService,
                                        val sessionCacheConnector: SessionCacheConnector,
                                        val authConnector:         AuthConnector,
-                                       val metrics:               Metrics)(implicit override val messagesApi: MessagesApi,
-                                                                           val transformer:       NINOLogMessageTransformer,
-                                                                           val frontendAppConfig: FrontendAppConfig,
-                                                                           val config:            Configuration,
-                                                                           val env:               Environment,
-                                                                           bankDetailsValidation: BankDetailsValidation)
+                                       val metrics:               Metrics,
+                                       val barsService:           BarsService)(implicit override val messagesApi: MessagesApi,
+                                                                               val transformer:       NINOLogMessageTransformer,
+                                                                               val frontendAppConfig: FrontendAppConfig,
+                                                                               val config:            Configuration,
+                                                                               val env:               Environment,
+                                                                               bankDetailsValidation: BankDetailsValidation)
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
 
@@ -68,17 +69,29 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
       withErrors ⇒
         Ok(views.html.register.bank_account_details(withErrors, selectEmailPage)),
       { bankDetails ⇒
-        checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
-          session ⇒
-            sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails)))
-              .fold(
-                error ⇒ {
-                  logger.warn(s"Could not update session with bank details: $error")
-                  internalServerError()
-                },
-                _ ⇒ SeeOther(routes.RegisterController.checkDetails().url)
-              )
-        }
+        barsService.validate(bankDetails).map[Future[Result]] {
+          case Right(true) ⇒
+            checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
+              session ⇒
+                sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails)))
+                  .fold(
+                    error ⇒ {
+                      logger.warn(s"Could not update session with bank details: $error")
+                      internalServerError()
+                    },
+                    _ ⇒ SeeOther(routes.RegisterController.checkDetails().url)
+                  )
+            }
+
+          case Right(false) ⇒
+            val formWithErrors = BankDetails.giveBankDetailsForm().fill(bankDetails)
+              .withError("sortCode", "check_your_sortcode_is_correct")
+              .withError("accountNumber", "check_your_account_number_is_correct")
+
+            toFuture(Ok(views.html.register.bank_account_details(formWithErrors, selectEmailPage)))
+
+          case Left(e) ⇒ toFuture(internalServerError())
+        }.flatMap(identity)
       }
     )
 
