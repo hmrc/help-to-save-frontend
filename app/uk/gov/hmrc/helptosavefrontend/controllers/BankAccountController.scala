@@ -86,8 +86,8 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
           case Right(false) ⇒
             val formWithErrors = BankDetails.giveBankDetailsForm().fill(bankDetails)
-              .withError("sortCode", "check_your_sortcode_is_correct")
-              .withError("accountNumber", "check_your_account_number_is_correct")
+              .withError("sortCodeBars", "check_your_sortcode_is_correct")
+              .withError("accountNumberBars", "check_your_account_number_is_correct")
 
             toFuture(Ok(views.html.register.bank_account_details(formWithErrors, selectEmailPage)))
 

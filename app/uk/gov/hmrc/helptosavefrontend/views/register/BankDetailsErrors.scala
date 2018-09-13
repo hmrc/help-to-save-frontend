@@ -38,4 +38,8 @@ object BankDetailsErrors {
       None
     }
   }
+
+  def getBarsErrorMessage(form: Form[_], key: String)(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
+    form.error(key).map(_.message).map(m ⇒ messages("hts.bank_details." + m))
+  }
 }
