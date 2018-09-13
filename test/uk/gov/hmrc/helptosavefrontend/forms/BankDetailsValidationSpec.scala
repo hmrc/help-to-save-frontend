@@ -23,7 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.ErrorMessages
 
-class BankDetailsValidaitonSpec extends TestSupport {
+class BankDetailsValidationSpec extends TestSupport {
 
   val bankValidationConfig = Configuration(
     "bank-details-validation.sort-code.length" → 6,
@@ -75,6 +75,10 @@ class BankDetailsValidaitonSpec extends TestSupport {
           testSortCode(Some("12_3_45_6"))(Right("123456"))
         }
 
+        "separated by forward slashes" in {
+          testSortCode(Some("12/3/45/6"))(Right("123456"))
+        }
+
         "containing with trailing and leading spaces" in {
           testSortCode(Some("   123456 "))(Right("123456"))
         }
@@ -104,7 +108,7 @@ class BankDetailsValidaitonSpec extends TestSupport {
         }
 
         "have numbers separated by non-supported characters" in {
-          List(',', '.', '&', '*', '/').foreach{ c ⇒
+          List(',', '.', '&', '*', '\\').foreach{ c ⇒
             withClue(s"For char $c: "){
               testSortCode(Some(s"12${c}34${c}56"))(Left(Set(ErrorMessages.sortCodeIncorrectFormat)))
             }
