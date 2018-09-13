@@ -124,7 +124,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             val updatedSession = session.copy(pendingEmail   = Some(newEmail), confirmedEmail = None)
 
             if (updatedSession =!= session) {
-              updateSessionAndReturnResult(session.copy(pendingEmail   = Some(newEmail), confirmedEmail = None),
+              updateSessionAndReturnResult(updatedSession,
                                            SeeOther(routes.EmailController.verifyEmail().url))
             } else {
               SeeOther(routes.EmailController.verifyEmail().url)
