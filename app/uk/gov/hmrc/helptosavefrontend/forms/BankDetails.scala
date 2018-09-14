@@ -46,7 +46,7 @@ object SortCode {
     case _                                       ⇒ None
   }
 
-  implicit val writes: Writes[SortCode] = Json.writes[SortCode]
+  implicit val writes: Writes[SortCode] = Writes[SortCode](s ⇒ JsString(s.toString))
 
   implicit val reads: Reads[SortCode] = Reads[SortCode](s ⇒ {
     Try(s.as[String].map(_.asDigit)).toOption.flatMap(SortCode(_)) match {
