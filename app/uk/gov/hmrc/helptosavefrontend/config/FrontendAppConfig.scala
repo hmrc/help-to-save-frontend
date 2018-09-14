@@ -114,4 +114,6 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
     val accountNameMinLength: Int = getInt("bank-details-validation.account-name.min-length")
     val accountNameMaxLength: Int = getInt("bank-details-validation.account-name.max-length")
   }
+
+  val barsUrl: String = baseUrl("bank-account-reputation")
 }

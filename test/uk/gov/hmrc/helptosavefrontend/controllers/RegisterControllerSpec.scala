@@ -25,7 +25,7 @@ import play.api.mvc.{Result ⇒ PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
@@ -232,7 +232,7 @@ class RegisterControllerSpec
 
     "creating an account" must {
       val confirmedEmail = "confirmed"
-      val bankDetails = BankDetails("1", "1", None, "name")
+      val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")
       val userInfo = randomEligibleWithUserInfo(validUserInfo)
       val payload = validNSIPayload.updateEmail(confirmedEmail)
         .copy(nbaDetails = Some(bankDetails))
@@ -361,7 +361,7 @@ class RegisterControllerSpec
 
     "handling checkYourDetails page" must {
 
-      val bankDetails = BankDetails("123456", "12345678", None, "test user name")
+      val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name")
 
         def doRequest(): Future[PlayResult] = controller.checkDetails()(FakeRequest())
 

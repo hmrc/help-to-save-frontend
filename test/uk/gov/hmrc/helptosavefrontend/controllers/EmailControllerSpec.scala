@@ -27,7 +27,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailControllerSpec.EligibleWithUserInfoOps
-import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -327,7 +327,7 @@ class EmailControllerSpec
       "handle Digital(new applicant) who submitted form with new-email" in {
 
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        val session = HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails("1", "1", None, "name")))
+        val session = HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")))
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -641,9 +641,9 @@ class EmailControllerSpec
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails("1", "1", None, "name"))))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(email), None, None, Some(BankDetails("1", "1", None, "name"))))(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(email), None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))(Right(None))
         }
 
         val result = giveEmailSubmit(email)
@@ -748,9 +748,9 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails("1", "1", Some("1"), "a")), true))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None, None, None, Some(BankDetails("1", "1", Some("1"), "a")), true))(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
         }
 
@@ -1383,7 +1383,7 @@ class EmailControllerSpec
 
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None, None, None, Some(BankDetails("1", "1", None, "name")),
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")),
                                                              changingDetails = true))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
