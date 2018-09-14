@@ -318,14 +318,9 @@ hts.register.service-unavailable.p1=You&rsquo;ll be able to use the Help to Save
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
 # Create account
-hts.register.create_account.title.h1=Agree with conditions to create a Help to Save account
-hts.register.create_account.p1=Before opening an account, you’ll need to confirm you accept these conditions.
-hts.register.create_account.p2=You agree that:
+hts.register.create_account.accept-label=Accept and create account
 hts.register.create_account.condition-wtc=you will tell us each time you leave the UK for 8 weeks or more
 hts.register.create_account.condition-uc=you will tell us each time you leave the UK for 4 weeks or more
-hts.register.create_account.generic-condition=you are creating a Help to Save account for the first time
-hts.register.create_account.accept-label=Accept and create account
-hts.register.create_account.cancel-label=Cancel and go to GOV.UK
 
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=If you think you’re eligible for a Help to Save account
@@ -563,8 +558,8 @@ hts.incorrect-details.exit-button=Back
 
 # Check your details page
 hts.cya.change=Change
-hts.cya.title=Check your details
-hts.cya.intro=You’ll need to check and confirm your details are correct before you can create an account.
+hts.cya.title=Create a Help to Save account
+hts.cya.intro=You&rsquo;ll need to make sure your details are correct and agree to the terms and conditions before you can create a Help to Save account.
 hts.cya.your-details=Your details
 hts.cya.your-details.name=Name
 hts.cya.your-details.dob=Date of birth
@@ -576,7 +571,12 @@ hts.cya.your-bank-details.sort-code=Sort code
 hts.cya.your-bank-details.account-number=Account number
 hts.cya.your-bank-details.roll-number=Roll number
 hts.cya.your-bank-details.account-name=Account name
-hts.cya.by-continuing=By continuing you confirm your details are correct.
+hts.cya.tandc-title=Terms and conditions
+hts.cya.tandc-p1=Before you create a Help to Save account you must agree that:
+hts.cya.tandc-ul1-li1=your details, email address and bank details are correct
+hts.cya.tandc-ul1-li2=you have read and understood the <a href={0}>eligibility criteria</a> on GOV.UK and are eligible for a Help to Save account
+hts.cya.tandc-ul1-li4=you are creating a Help to Save account for the first time
+hts.cya.agree-continue=Agree and continue
 
 # Privacy page
 hts.privacy.title.h1=Help to Save privacy statement

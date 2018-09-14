@@ -142,13 +142,15 @@ class RegisterControllerSpec
         val result = controller.getDetailsAreIncorrect(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include("We need your correct details")
-        contentAsString(result) should include("""<a href=/help-to-save/check-details class="link-back">Back</a>""")
+        contentAsString(result) should include("""<a href=/help-to-save/create-account class="link-back">Back</a>""")
       }
     }
 
     "handling a getCreateAccountPage" must {
 
       val email = "email"
+
+      val bankDetails = BankDetails("123456", "12345678", None, "test user name")
 
         def doRequest(): Future[PlayResult] =
           controller.getCreateAccountPage()(fakeRequestWithCSRFToken)
@@ -161,13 +163,13 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(email), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(email), None, None, None, Some(bankDetails)))))
         }
 
         val result = doRequest()
         status(result) shouldBe OK
         contentAsString(result) should include("Accept and create account")
-        contentAsString(result) should include("""<a href=/help-to-save/check-details class="link-back">Back</a>""")
+        contentAsString(result) should include("""<a href=/help-to-save/enter-uk-bank-details class="link-back">Back</a>""")
       }
 
       "show an error page if the eligibility reason cannot be parsed" in {
@@ -186,7 +188,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6))), Some(email), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6))), Some(email), None, None, None, Some(bankDetails)))))
         }
 
         val result = doRequest()
@@ -198,7 +200,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 7))), Some(email), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 7))), Some(email), None, None, None, Some(bankDetails)))))
         }
 
         val result = doRequest()
@@ -210,12 +212,37 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 8))), Some(email), None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 8))), Some(email), None, None, None, Some(bankDetails)))))
         }
 
         val result = doRequest()
         status(result) shouldBe OK
         contentAsString(result) should include("you will tell us each time you leave the UK for 4 weeks or more")
+      }
+
+      "show user not eligible page if the user is not eligible" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None, Some(bankDetails)))))
+        }
+        val result = doRequest()
+
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+      }
+
+      "handle the case when there are no bank details stored in the session" in {
+        val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, Some("valid@email.com"), None))))
+        }
+        val result = doRequest()
+
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
       }
 
     }
@@ -349,6 +376,7 @@ class RegisterControllerSpec
       }
     }
 
+<<<<<<< HEAD
     "handling checkYourDetails page" must {
 
       val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name")
@@ -451,5 +479,7 @@ class RegisterControllerSpec
 
     }
 
+=======
+>>>>>>> hts-1313 combine declaration and confirm details screens
   }
 }

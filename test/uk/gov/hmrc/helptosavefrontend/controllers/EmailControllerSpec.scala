@@ -756,7 +756,7 @@ class EmailControllerSpec
 
         val result = confirmEmail(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.checkDetails().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
       }
 
       "handle Digital(new applicant) users with an existing INVALID email from GG and already gone through eligibility checks" in {
@@ -1390,7 +1390,7 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.checkDetails().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
       }
 
       "handle Digital users and redirect to the eligibilityCheck if session doesnt contain eligibility result" in {

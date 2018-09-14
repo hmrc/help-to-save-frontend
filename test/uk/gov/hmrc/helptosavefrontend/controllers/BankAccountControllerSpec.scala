@@ -162,7 +162,7 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.checkDetails().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
       }
 
       "handle keystore errors during storing bank details in session" in {

@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, t
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
@@ -67,7 +67,12 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
           logger.warn(s"Could not parse eligiblity reason: ${eligibleWithInfo.userInfo.eligible}", eligibleWithInfo.userInfo.userInfo.nino)
           internalServerError()
         } { reason ⇒
-          Ok(views.html.register.create_account(reason))
+          eligibleWithInfo.session.bankDetails match {
+            case Some(bankDetails) ⇒
+              Ok(views.html.register.create_account(eligibleWithInfo.userInfo, eligibleWithInfo.email, bankDetails))
+            case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+          }
+
         }
       }
     }
@@ -127,25 +132,6 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
-
-  def checkDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { () ⇒
-      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
-        sessionCacheConnector.put(eligibleWithInfo.session.copy(changingDetails = false)).fold({ e ⇒
-          logger.warn(s"Could not write to session cache: $e")
-          internalServerError()
-        }, { _ ⇒
-          eligibleWithInfo.session.bankDetails match {
-            case Some(bankDetails) ⇒
-              Ok(views.html.register.check_your_details(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, bankDetails))
-
-            case None ⇒
-              SeeOther(routes.BankAccountController.getBankDetailsPage().url)
-          }
-        })
-      }
-    }
-  }(redirectOnLoginURL = routes.RegisterController.checkDetails().url)
 
   def changeEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒

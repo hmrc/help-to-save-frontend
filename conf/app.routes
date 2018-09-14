@@ -36,8 +36,8 @@ GET        /email-updated                                   @uk.gov.hmrc.helptos
 POST       /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailUpdatedSubmit
 GET        /link-expired                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getLinkExpiredPage
 
-GET        /agree-conditions-to-create-account              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountPage
-POST       /account-created                                 @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccount
+GET        /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountPage
+POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccount
 GET        /error-no-account                                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
 GET        /try-again-tomorrow                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /try-again-later-in-year                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
@@ -72,6 +72,6 @@ GET        /account-home/close-account-are-you-sure         @uk.gov.hmrc.helptos
 GET        /enter-uk-bank-details                           @uk.gov.hmrc.helptosavefrontend.controllers.BankAccountController.getBankDetailsPage
 POST       /enter-uk-bank-details                           @uk.gov.hmrc.helptosavefrontend.controllers.BankAccountController.submitBankDetails
 
-GET        /check-details                                   @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.checkDetails
 GET        /change-bank-details                             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeBankDetails
 GET        /change-email-address                            @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeEmail
+POST       /enter-uk-bank-details                           @uk.gov.hmrc.helptosavefrontend.controllers.BankAccountController.submitBankDetails
