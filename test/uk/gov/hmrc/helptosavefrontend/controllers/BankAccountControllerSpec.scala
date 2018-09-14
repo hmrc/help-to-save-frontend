@@ -16,16 +16,19 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import org.scalamock.handlers.CallHandler3
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
+import uk.gov.hmrc.helptosavefrontend.services.BarsService
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class BankAccountControllerSpec extends AuthSupport
   with CSRFSupport
@@ -34,11 +37,19 @@ class BankAccountControllerSpec extends AuthSupport
 
   implicit lazy val bankDetailsValidation: BankDetailsValidation = new BankDetailsValidation(appConfig)
 
+  val mockBarsService = mock[BarsService]
+
+  def mockBarsService(bankDetails: BankDetails)(response: Either[String, Boolean]): CallHandler3[BankDetails, HeaderCarrier, ExecutionContext, Future[Either[String, Boolean]]] =
+    (mockBarsService.validate(_: BankDetails)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(bankDetails, *, *)
+      .returning(Future.successful(response))
+
   val controller = new BankAccountController(
     mockHelpToSaveService,
     mockSessionCacheConnector,
     mockAuthConnector,
-    mockMetrics)
+    mockMetrics,
+    mockBarsService)
 
   "The BankAccountController" when {
 
@@ -97,7 +108,7 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, Some(BankDetails("sortCode", "accountNumber", Some(""), "accountName"))))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some(""), "accountName"))))))
         }
 
         val result = doRequest()
@@ -145,7 +156,8 @@ class BankAccountControllerSpec extends AuthSupport
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails("123456", "12345678", None, "test user name"))))(Right(()))
+          mockBarsService(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))(Right(true))
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Right(()))
         }
 
         val result = doRequest()
@@ -161,7 +173,8 @@ class BankAccountControllerSpec extends AuthSupport
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails("123456", "12345678", None, "test user name"))))(Left(("error")))
+          mockBarsService(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))(Right(true))
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Left(("error")))
         }
 
         val result = doRequest()
