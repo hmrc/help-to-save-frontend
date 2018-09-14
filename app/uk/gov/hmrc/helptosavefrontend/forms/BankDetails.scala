@@ -20,6 +20,8 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json._
 
+import scala.util.Try
+
 object BankDetails {
   def giveBankDetailsForm()(implicit validation: BankDetailsValidation): Form[BankDetails] = Form(
     mapping("sortCode" -> of(validation.sortCodeFormatter),
@@ -47,7 +49,7 @@ object SortCode {
   implicit val writes: Writes[SortCode] = Json.writes[SortCode]
 
   implicit val reads: Reads[SortCode] = Reads[SortCode](s ⇒ {
-    SortCode(s.as[String].map(_.asDigit)) match {
+    Try(s.as[String].map(_.asDigit)).toOption.flatMap(SortCode(_)) match {
       case Some(p) ⇒ JsSuccess(p)
       case None    ⇒ JsError(s"couldn't read SortCode out of the json: $s")
     }
