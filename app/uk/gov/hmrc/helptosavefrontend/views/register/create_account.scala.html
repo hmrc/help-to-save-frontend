@@ -54,13 +54,13 @@ bodyClasses = None) {
   </dl>
 
   @summary_section_head(heading = Messages("hts.register.create_account.your-email"))
-  @summary_section_change(routes.EmailController.getSelectEmailPage().url, Messages("hts.register.create_account.your-email"), "change-email")
+  @summary_section_change(routes.RegisterController.changeEmail().url, Messages("hts.register.create_account.your-email"), "change-email")
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.register.create_account.your-email.email"), email)
   </dl>
 
   @summary_section_head(heading = Messages("hts.register.create_account.your-bank-details"))
-  @summary_section_change(routes.BankAccountController.getBankDetailsPage().url, Messages("hts.register.create_account.your-bank-details"), "change-bank-details")
+  @summary_section_change(routes.RegisterController.changeBankDetails().url, Messages("hts.register.create_account.your-bank-details"), "change-bank-details")
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.register.create_account.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode.toString()))
     @summary_row(Messages("hts.register.create_account.your-bank-details.account-number"), bankDetails.accountNumber)
