@@ -69,12 +69,16 @@ class BankDetailsValidationSpec extends TestSupport {
           testSortCode(Some("12 3 45 6"))(Right(sortCode))
         }
 
-        "separated by long dashes" in {
-          testSortCode(Some("12—3—45—6"))(Right(sortCode))
-        }
-
         "separated by hyphens" in {
           testSortCode(Some("12-3-45-6"))(Right(sortCode))
+        }
+
+        "separated by dashes" in {
+          testSortCode(Some("12–3–45–6"))(Right(sortCode))
+        }
+
+        "separated by long dashes" in {
+          testSortCode(Some("12—3—45—6"))(Right(sortCode))
         }
 
         "containing with trailing and leading spaces" in {
