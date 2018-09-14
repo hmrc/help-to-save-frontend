@@ -73,8 +73,8 @@ class BankDetailsValidationSpec extends TestSupport {
           testSortCode(Some("12—3—45—6"))(Right(sortCode))
         }
 
-        "separated by underscores" in {
-          testSortCode(Some("12_3_45_6"))(Right(sortCode))
+        "separated by hyphens" in {
+          testSortCode(Some("12-3-45-6"))(Right(sortCode))
         }
 
         "containing with trailing and leading spaces" in {
