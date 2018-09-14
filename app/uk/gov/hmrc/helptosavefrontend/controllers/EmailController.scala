@@ -67,7 +67,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
   private def backLinkFromSession(session: HTSSession): String =
-    if (session.changingDetails) { routes.RegisterController.checkDetails().url } else { eligibilityPage }
+    if (session.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else { eligibilityPage }
 
   def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -267,7 +267,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
               doUpdate(session.copy(confirmedEmail = None, pendingEmail = None)){
                 //once email is confirmed and , if we were in the process of changing details then we should redirect user to check_details page
                 if (session.changingDetails) {
-                  SeeOther(routes.RegisterController.checkDetails().url)
+                  SeeOther(routes.RegisterController.getCreateAccountPage().url)
                 } else {
                   SeeOther(routes.BankAccountController.getBankDetailsPage().url)
                 }
@@ -646,7 +646,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
         mayBeSession.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(
           session ⇒
             if (session.changingDetails) {
-              SeeOther(routes.RegisterController.checkDetails().url)
+              SeeOther(routes.RegisterController.getCreateAccountPage().url)
             } else {
               SeeOther(routes.BankAccountController.getBankDetailsPage().url)
             }

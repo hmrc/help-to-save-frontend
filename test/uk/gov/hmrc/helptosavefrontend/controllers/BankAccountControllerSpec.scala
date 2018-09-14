@@ -99,7 +99,7 @@ class BankAccountControllerSpec extends AuthSupport
         val result = doRequest()
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
-        contentAsString(result) should include("/help-to-save/check-details")
+        contentAsString(result) should include("/help-to-save/create-account")
 
       }
 
@@ -162,7 +162,7 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.checkDetails().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
       }
 
       "handle keystore errors during storing bank details in session" in {

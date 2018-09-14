@@ -55,7 +55,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
       s ⇒
-        val backLink = if (s.changingDetails) { routes.RegisterController.checkDetails().url } else { selectEmailPage }
+        val backLink = if (s.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else { selectEmailPage }
         s.bankDetails.fold(
           Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), backLink))
         )(bankDetails ⇒
@@ -79,7 +79,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
                       logger.warn(s"Could not update session with bank details: $error")
                       internalServerError()
                     },
-                    _ ⇒ SeeOther(routes.RegisterController.checkDetails().url)
+                    _ ⇒ SeeOther(routes.RegisterController.getCreateAccountPage().url)
                   )
 
               case Right(false) ⇒
@@ -90,6 +90,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
                 toFuture(Ok(views.html.register.bank_account_details(formWithErrors, selectEmailPage)))
 
               case Left(e) ⇒ toFuture(internalServerError())
+
             }.flatMap(identity)
         }
       }

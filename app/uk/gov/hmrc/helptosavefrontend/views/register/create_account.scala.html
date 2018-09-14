@@ -14,54 +14,82 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import cats.syntax.eq._
+@import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.form
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.ga_submit_button
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
-@import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
+@import cats.syntax.show._
+@import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo.localDateShow
 
-@(eligibilityReason: EligibilityReason)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(eligibleWithUserInfo: EligibleWithUserInfo, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.register.create_account.title.h1")
-}
+@title = @{Messages("hts.register.create_account.title")}
 
-@conditionsFromReason = {
-  @eligibilityReason match {
-    case UCClaimantAndIncomeSufficient | EntitledToWTC(true) => {
-        <li>@{Messages("hts.register.create_account.condition-uc")}</li>
-    }
-    case EntitledToWTC(false) => {
-        <li>@{Messages("hts.register.create_account.condition-wtc")}</li>
-    }
-  }
+@display2CharFormat(str: String) = @{
+  str.filterNot((x: Char) => x.isWhitespace || x.toString.matches("-")).grouped(2).mkString(" ")
 }
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-  title = Messages("hts.global.title", title, "", Messages("hts.global.title-suffix")),
-  bodyClasses = None) {
+title = Messages("hts.global.title", title, "", Messages("hts.global.title-suffix")),
+sidebarLinks = None,
+bodyClasses = None) {
 
-  @navigate_back(Some(routes.RegisterController.checkDetails().url))
+@navigate_back(Some(routes.BankAccountController.getBankDetailsPage().url))
 
-  <h1 class="heading-large">
-    @title
-  </h1>
+  <h1>@title</h1>
 
-  <p class="lede">
-    @Messages("hts.register.create_account.p1")
-  <p>
+  <p class="lede">@Html(Messages("hts.register.create_account.intro"))</p>
 
-  <p>
-    @Messages("hts.register.create_account.p2")
-  <p>
+  @summary_section_head(heading = Messages("hts.register.create_account.your-details"))
+  @summary_section_change(routes.RegisterController.getDetailsAreIncorrect().url, Messages("hts.register.create_account.your-details"), "change-details-are-incorrect")
+  <dl class="govuk-check-your-answers cya-questions-long">
+    @summary_row(Messages("hts.register.create_account.your-details.name"), eligibleWithUserInfo.userInfo.forename + " " + eligibleWithUserInfo.userInfo.surname)
+    @summary_row(Messages("hts.register.create_account.your-details.dob"), eligibleWithUserInfo.userInfo.dateOfBirth.show)
+    @summary_row(Messages("hts.register.create_account.your-details.nino"), display2CharFormat(eligibleWithUserInfo.userInfo.nino))
+  </dl>
 
+  @summary_section_head(heading = Messages("hts.register.create_account.your-email"))
+  @summary_section_change(routes.EmailController.getSelectEmailPage().url, Messages("hts.register.create_account.your-email"), "change-email")
+  <dl class="govuk-check-your-answers cya-questions-long">
+    @summary_row(Messages("hts.register.create_account.your-email.email"), email)
+  </dl>
+
+  @summary_section_head(heading = Messages("hts.register.create_account.your-bank-details"))
+  @summary_section_change(routes.BankAccountController.getBankDetailsPage().url, Messages("hts.register.create_account.your-bank-details"), "change-bank-details")
+  <dl class="govuk-check-your-answers cya-questions-long">
+    @summary_row(Messages("hts.register.create_account.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode.toString()))
+    @summary_row(Messages("hts.register.create_account.your-bank-details.account-number"), bankDetails.accountNumber)
+    @if(bankDetails.rollNumber.nonEmpty) {
+      @summary_row(Messages("hts.register.create_account.your-bank-details.roll-number"), bankDetails.rollNumber.getOrElse(""))
+    }
+    @summary_row(Messages("hts.register.create_account.your-bank-details.account-name"), bankDetails.accountName)
+  </dl>
+
+  <h2 class="heading-medium">@Messages("hts.register.create_account.tandc-title")</h2>
+  <p>@Html(Messages("hts.register.create_account.tandc-p1"))</p>
   <ul class="list list-bullet">
-    @conditionsFromReason
-    <li>@Messages("hts.register.create_account.generic-condition")</li>
+    <li>@Messages("hts.register.create_account.tandc-ul1-li1")</li>
+    <li>@Html(Messages("hts.register.create_account.tandc-ul1-li2", appConfig.govUkEligibilityInfoUrl))</li>
+    @eligibleWithUserInfo.eligible.value.reasonCode match {
+      case 7 => {
+        <li>@{Messages("hts.register.create_account.condition-wtc")}</li>
+      }
+      case _ => {
+        <li>@{Messages("hts.register.create_account.condition-uc")}</li>
+      }
+    }
+    <li>@Messages("hts.register.create_account.tandc-ul1-li4")</li>
+
+
+
   </ul>
+
+
 
   @form(routes.RegisterController.createAccount){
     @ga_submit_button(
@@ -71,4 +99,5 @@
       Messages("hts.register.create_account.accept-label")
     )
   }
+
 }
