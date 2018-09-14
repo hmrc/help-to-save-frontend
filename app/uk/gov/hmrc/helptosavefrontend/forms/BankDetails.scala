@@ -20,6 +20,8 @@ import play.api.data.Form
 import play.api.data.Forms._
 import play.api.libs.json._
 
+import scala.util.{Failure, Success, Try}
+
 object BankDetails {
   def giveBankDetailsForm()(implicit validation: BankDetailsValidation): Form[BankDetails] = Form(
     mapping("sortCode" -> of(validation.sortCodeFormatter),
@@ -39,10 +41,19 @@ case class SortCode(digit1: Int, digit2: Int, digit3: Int, digit4: Int, digit5: 
 }
 
 object SortCode {
-  def apply(digits: Seq[Int]): SortCode =
-    new SortCode(digits(0), digits(1), digits(2), digits(3), digits(4), digits(5))
+  def apply(digits: Seq[Int]): Option[SortCode] = digits.toList match {
+    case d1 :: d2 :: d3 :: d4 :: d5 :: d6 :: Nil ⇒ Some(SortCode(d1, d2, d3, d4, d5, d6))
+    case _                                       ⇒ None
+  }
 
-  implicit val format: Format[SortCode] = Format(reads, writes)
-  def reads: Reads[SortCode] = Reads[SortCode](s ⇒ JsSuccess(SortCode(s.as[String].map(_.asDigit))))
-  def writes: Writes[SortCode] = Writes[SortCode](s ⇒ JsString(s.toString()))
+  implicit val writes: Writes[SortCode] = Json.writes[SortCode]
+
+  implicit val reads: Reads[SortCode] = Reads[SortCode](s ⇒ {
+    Try {
+      s.as[String].map(_.asDigit)
+    } match {
+      case Success(p) ⇒ JsSuccess(SortCode(p(0), p(1), p(2), p(3), p(4), p(5)))
+      case Failure(e) ⇒ JsError(e.getMessage)
+    }
+  })
 }

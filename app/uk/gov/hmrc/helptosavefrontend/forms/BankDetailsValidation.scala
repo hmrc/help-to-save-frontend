@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import cats.data.Validated.Valid
+import cats.data.Validated.{Invalid, Valid}
 import cats.instances.int._
 import cats.instances.string._
 import cats.syntax.either._
@@ -44,7 +44,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
           .fold(invalid[SortCode](ErrorMessages.sortCodeIncorrectFormat)){ s ⇒
             val p = s.filterNot(allowedSeparators.contains)
             if (p.length === sortCodeLength && p.forall(_.isDigit)) {
-              Valid(SortCode(p.map(_.asDigit)))
+              SortCode(p.map(_.asDigit)).fold[ValidOrErrorStrings[SortCode]](invalid(ErrorMessages.sortCodeIncorrectFormat))(Valid(_))
             } else {
               invalid(ErrorMessages.sortCodeIncorrectFormat)
             }
