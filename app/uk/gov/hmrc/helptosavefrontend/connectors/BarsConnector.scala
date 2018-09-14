@@ -48,13 +48,7 @@ class BarsConnectorImpl @Inject() (http: HttpClient)(implicit appConfig: Fronten
   private def bodyJson(details: BankDetails) = {
 
     Json.parse(
-      s"""{
-         | "account": {
-         |    "sortCode": "${details.sortCode}",
-         |    "accountNumber": "${details.accountNumber}"
-         |  }
-         |}
-    """.stripMargin
+      s"""{"account":{"sortCode":"${details.sortCode}","accountNumber":"${details.accountNumber}"}}"""
     )
   }
 }

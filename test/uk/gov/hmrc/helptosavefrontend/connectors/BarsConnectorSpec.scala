@@ -21,9 +21,8 @@ import java.util.UUID
 import play.api.http.Status
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
-import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.play.test.UnitSpec
 
 class BarsConnectorSpec extends UnitSpec with TestSupport with HttpSupport {
@@ -40,7 +39,7 @@ class BarsConnectorSpec extends UnitSpec with TestSupport with HttpSupport {
         val body = Json.parse(
           s"""{
              | "account": {
-             |    "sortCode": "sortCode",
+             |    "sortCode": "123456",
              |    "accountNumber": "accountNumber"
              |  }
              |}""".stripMargin
@@ -58,7 +57,7 @@ class BarsConnectorSpec extends UnitSpec with TestSupport with HttpSupport {
             |}""".stripMargin
 
         mockPost("http://localhost:9871/validateBankDetails", headers, body)(Some(HttpResponse(Status.OK, Some(Json.parse(response)))))
-        val result = await(connector.validate(BankDetails("sortCode", "accountNumber", Some("rollNo"), "accountName"), trackingId))
+        val result = await(connector.validate(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some("rollNo"), "accountName"), trackingId))
 
         result.status shouldBe 200
         result.json shouldBe Json.parse(response)

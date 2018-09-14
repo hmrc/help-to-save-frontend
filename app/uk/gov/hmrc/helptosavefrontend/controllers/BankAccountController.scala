@@ -69,12 +69,11 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
       withErrors ⇒
         Ok(views.html.register.bank_account_details(withErrors, selectEmailPage)),
       { bankDetails ⇒
-        barsService.validate(bankDetails).map[Future[Result]] {
-          case Right(true) ⇒
-            checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
-              session ⇒
-                val sortCodeWithHyphens = bankDetails.sortCode.grouped(2).mkString("-")
-                sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails.copy(sortCode = sortCodeWithHyphens))))
+        checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
+          session ⇒
+            barsService.validate(bankDetails).map[Future[Result]] {
+              case Right(true) ⇒
+                sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails)))
                   .fold(
                     error ⇒ {
                       logger.warn(s"Could not update session with bank details: $error")
@@ -82,17 +81,17 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
                     },
                     _ ⇒ SeeOther(routes.RegisterController.checkDetails().url)
                   )
-            }
 
-          case Right(false) ⇒
-            val formWithErrors = BankDetails.giveBankDetailsForm().fill(bankDetails)
-              .withError("sortCodeBars", "check_your_sortcode_is_correct")
-              .withError("accountNumberBars", "check_your_account_number_is_correct")
+              case Right(false) ⇒
+                val formWithErrors = BankDetails.giveBankDetailsForm().fill(bankDetails)
+                  .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBarsInvalid)
+                  .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBarsInvalid)
 
-            toFuture(Ok(views.html.register.bank_account_details(formWithErrors, selectEmailPage)))
+                toFuture(Ok(views.html.register.bank_account_details(formWithErrors, selectEmailPage)))
 
-          case Left(e) ⇒ toFuture(internalServerError())
-        }.flatMap(identity)
+              case Left(e) ⇒ toFuture(internalServerError())
+            }.flatMap(identity)
+        }
       }
     )
 

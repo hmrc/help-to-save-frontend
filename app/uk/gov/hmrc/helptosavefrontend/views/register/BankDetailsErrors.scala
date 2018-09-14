@@ -40,6 +40,13 @@ object BankDetailsErrors {
   }
 
   def getBarsErrorMessage(form: Form[_], key: String)(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
-    form.error(key).map(_.message).map(m ⇒ messages("hts.bank_details." + m))
+
+    if (form.sortCodeBarsInvalid(key)) {
+      Some(messages("hts.bank_details.check_your_sortcode_is_correct"))
+    } else if (form.accountNumberBarsInvalid(key)) {
+      Some(messages("hts.bank_details.check_your_account_number_is_correct"))
+    } else {
+      None
+    }
   }
 }

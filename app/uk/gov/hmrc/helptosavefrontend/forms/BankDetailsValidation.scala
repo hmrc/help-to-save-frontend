@@ -33,24 +33,29 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
   import configuration.BankDetailsConfig._
 
-  val sortCodeFormatter: Formatter[String] = new Formatter[String] {
+  val sortCodeFormatter: Formatter[SortCode] = new Formatter[SortCode] {
 
     val allowedSeparators = Set(' ', '-', '–', '—')
 
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
-      val validation: ValidOrErrorStrings[String] =
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], SortCode] = {
+      val validation: ValidOrErrorStrings[SortCode] =
         data.get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
-          .fold(invalid[String](ErrorMessages.sortCodeIncorrectFormat)){ s ⇒
-            validatedFromBoolean(s.filterNot(allowedSeparators.contains))(
-              s ⇒ s.length === sortCodeLength && s.forall(_.isDigit), ErrorMessages.sortCodeIncorrectFormat)
+          .fold(invalid[SortCode](ErrorMessages.sortCodeIncorrectFormat)){ s ⇒
+            val p = s.filterNot(allowedSeparators.contains)
+            if (p.length === sortCodeLength && p.forall(_.isDigit)) {
+              Valid(SortCode(p.map(_.asDigit)))
+            } else {
+              invalid(ErrorMessages.sortCodeIncorrectFormat)
+            }
           }
 
-      validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
+      validation.toEither
+        .leftMap(_.map(e ⇒ FormError(key, e)).toList)
     }
 
-    override def unbind(key: String, value: String): Map[String, String] =
-      text.withPrefix(key).unbind(value)
+    override def unbind(key: String, value: SortCode): Map[String, String] =
+      text.withPrefix(key).unbind(value.toString)
   }
 
   val accountNumberFormatter: Formatter[String] = new Formatter[String] {
@@ -121,7 +126,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
 object BankDetailsValidation {
 
-  private[forms] object ErrorMessages {
+  object ErrorMessages {
 
     val sortCodeIncorrectFormat = "sort_code_incorrect_format"
 
@@ -135,6 +140,9 @@ object BankDetailsValidation {
 
     val accountNameTooLong = "account_name_too_long"
 
+    val sortCodeBarsInvalid = "check_your_sortcode_is_correct"
+
+    val accountNumberBarsInvalid = "check_your_account_number_is_correct"
   }
 
   implicit class FormOps[A](val form: Form[A]) extends AnyVal {
@@ -159,6 +167,12 @@ object BankDetailsValidation {
 
     def accountNameTooLong(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.accountNameTooLong)
+
+    def sortCodeBarsInvalid(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.sortCodeBarsInvalid)
+
+    def accountNumberBarsInvalid(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.accountNumberBarsInvalid)
 
   }
 

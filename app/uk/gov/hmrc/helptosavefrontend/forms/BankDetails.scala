@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.forms
 
 import play.api.data.Form
 import play.api.data.Forms._
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json._
 
 object BankDetails {
   def giveBankDetailsForm()(implicit validation: BankDetailsValidation): Form[BankDetails] = Form(
@@ -32,4 +32,17 @@ object BankDetails {
   implicit val bankDetailsFormat: Format[BankDetails] = Json.format[BankDetails]
 }
 
-case class BankDetails(sortCode: String, accountNumber: String, rollNumber: Option[String], accountName: String)
+case class BankDetails(sortCode: SortCode, accountNumber: String, rollNumber: Option[String], accountName: String)
+
+case class SortCode(digit1: Int, digit2: Int, digit3: Int, digit4: Int, digit5: Int, digit6: Int) {
+  override def toString: String = s"$digit1$digit2$digit3$digit4$digit5$digit6"
+}
+
+object SortCode {
+  def apply(digits: Seq[Int]): SortCode =
+    new SortCode(digits(0), digits(1), digits(2), digits(3), digits(4), digits(5))
+
+  implicit val format: Format[SortCode] = Format(reads, writes)
+  def reads: Reads[SortCode] = Reads[SortCode](s ⇒ JsSuccess(SortCode(s.as[String].map(_.asDigit))))
+  def writes: Writes[SortCode] = Writes[SortCode](s ⇒ JsString(s.toString()))
+}

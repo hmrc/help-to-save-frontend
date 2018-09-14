@@ -40,9 +40,9 @@ class BankDetailsValidationSpec extends TestSupport {
 
   type Key = String
 
-  def test[A](f:      (String, Map[String, String]) ⇒ Either[Seq[FormError], A],
-              insert: (Key, Option[A]) ⇒ Map[String, String]
-  )(value: Option[A])(expectedResult: Either[Set[String], A]): Unit = {
+  def test[A, B](f:      (String, Map[String, String]) ⇒ Either[Seq[FormError], A],
+                 insert: (Key, Option[B]) ⇒ Map[String, String]
+  )(value: Option[B])(expectedResult: Either[Set[String], A]): Unit = {
     val result: Either[Seq[FormError], A] = f("key", insert("key", value))
     result.leftMap(_.toSet) shouldBe expectedResult.leftMap(_.map(s ⇒ FormError("key", s)))
   }
@@ -54,37 +54,35 @@ class BankDetailsValidationSpec extends TestSupport {
 
     "sort codes" must {
 
-        def testSortCode(value: Option[String])(expectedResult: Either[Set[String], String]): Unit =
-          test[String](validation.sortCodeFormatter.bind, insertString)(value)(expectedResult)
+      val sortCode = SortCode(1, 2, 3, 4, 5, 6)
+
+        def testSortCode(value: Option[String])(expectedResult: Either[Set[String], SortCode]): Unit =
+          test[SortCode, String](validation.sortCodeFormatter.bind, insertString)(value)(expectedResult)
 
       "allow inputs with the configured numbered digits" when {
 
         "separated by nothing" in {
-          testSortCode(Some("123456"))(Right("123456"))
+          testSortCode(Some("123456"))(Right(sortCode))
         }
 
         "separated by spaces" in {
-          testSortCode(Some("12 3 45 6"))(Right("123456"))
-        }
-
-        "separated by hyphens" in {
-          testSortCode(Some("12-3-45-6"))(Right("123456"))
-        }
-
-        "separated by dashes" in {
-          testSortCode(Some("12–3–45–6"))(Right("123456"))
+          testSortCode(Some("12 3 45 6"))(Right(sortCode))
         }
 
         "separated by long dashes" in {
-          testSortCode(Some("12—3—45—6"))(Right("123456"))
+          testSortCode(Some("12—3—45—6"))(Right(sortCode))
+        }
+
+        "separated by underscores" in {
+          testSortCode(Some("12_3_45_6"))(Right(sortCode))
         }
 
         "containing with trailing and leading spaces" in {
-          testSortCode(Some("   123456 "))(Right("123456"))
+          testSortCode(Some("   123456 "))(Right(sortCode))
         }
 
         "containing control characters" in {
-          testSortCode(Some("12\t34\r56\n"))(Right("123456"))
+          testSortCode(Some("12\t34\r56\n"))(Right(sortCode))
         }
 
       }
@@ -166,7 +164,7 @@ class BankDetailsValidationSpec extends TestSupport {
     "roll numbers" must {
 
         def testRollNumber(value: Option[String])(expectedResult: Either[Set[String], Option[String]]): Unit =
-          test[Option[String]](validation.rollNumberFormatter.bind, { case (k, o) ⇒ insertString(k, o.flatten) })(Some(value))(expectedResult)
+          test[Option[String], Option[String]](validation.rollNumberFormatter.bind, { case (k, o) ⇒ insertString(k, o.flatten) })(Some(value))(expectedResult)
 
       "allow inputs" which {
 

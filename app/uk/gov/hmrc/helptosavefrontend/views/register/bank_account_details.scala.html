@@ -34,8 +34,8 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
 
-@sortCodeBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "sortCodeBars")}
-@accountNumberBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "accountNumberBars")}
+@sortCodeBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "sortCode")}
+@accountNumberBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "accountNumber")}
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.global.title", pageTitle, "", Messages("hts.global.title-suffix")), bodyClasses = None) {
 

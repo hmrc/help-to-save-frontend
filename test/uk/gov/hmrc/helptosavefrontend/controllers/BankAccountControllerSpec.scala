@@ -20,13 +20,13 @@ import org.scalamock.handlers.CallHandler3
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsString, _}
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
-import uk.gov.hmrc.helptosavefrontend.services.{BarsService, BarsServiceImpl}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.helptosavefrontend.services.BarsService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -108,7 +108,7 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, Some(BankDetails("sortCode", "accountNumber", Some(""), "accountName"))))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some(""), "accountName"))))))
         }
 
         val result = doRequest()
@@ -146,7 +146,7 @@ class BankAccountControllerSpec extends AuthSupport
         contentAsString(result) should include("Your roll number needs to be between 4 and 18 characters")
       }
 
-      doCommonChecks(doRequest, true)
+      doCommonChecks(doRequest)
 
       "update the session with bank details when all other checks are passed" in {
 
@@ -154,10 +154,10 @@ class BankAccountControllerSpec extends AuthSupport
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails("12-34-56", "12345678", None, "test user name"))))(Right(()))
+          mockBarsService(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))(Right(true))
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Right(()))
         }
 
         val result = doRequest()
@@ -171,10 +171,10 @@ class BankAccountControllerSpec extends AuthSupport
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails("12-34-56", "12345678", None, "test user name"))))(Left(("error")))
+          mockBarsService(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))(Right(true))
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Left(("error")))
         }
 
         val result = doRequest()
@@ -184,7 +184,6 @@ class BankAccountControllerSpec extends AuthSupport
       "handle the case when the request comes from already enrolled user" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 
@@ -194,13 +193,10 @@ class BankAccountControllerSpec extends AuthSupport
     }
   }
 
-  private def doCommonChecks(doRequest: () ⇒ Future[Result], dobarsCheck: Boolean = false): Unit = {
+  private def doCommonChecks(doRequest: () ⇒ Future[Result]): Unit = {
     "redirect user to eligibility checks if there is no session found" in {
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        if (dobarsCheck) {
-          mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
-        }
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(None))
       }
@@ -213,9 +209,6 @@ class BankAccountControllerSpec extends AuthSupport
     "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        if (dobarsCheck) {
-          mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
-        }
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
       }
@@ -229,9 +222,6 @@ class BankAccountControllerSpec extends AuthSupport
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        if (dobarsCheck) {
-          mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
-        }
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
       }
@@ -245,9 +235,6 @@ class BankAccountControllerSpec extends AuthSupport
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        if (dobarsCheck) {
-          mockBarsService(BankDetails("123456", "12345678", None, "test user name"))(Right(true))
-        }
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value = randomIneligibility().value.copy(reasonCode = 999)))), None, None))))
       }

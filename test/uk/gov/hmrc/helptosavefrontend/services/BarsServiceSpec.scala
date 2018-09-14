@@ -22,13 +22,14 @@ import org.scalamock.handlers.CallHandler4
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.BarsConnector
-import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
+import uk.gov.hmrc.helptosavefrontend.util.MockPagerDuty
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BarsServiceSpec extends UnitSpec with TestSupport {
+class BarsServiceSpec extends UnitSpec with TestSupport with MockPagerDuty {
 
   private val mockBarsConnector: BarsConnector = mock[BarsConnector]
 
@@ -36,13 +37,13 @@ class BarsServiceSpec extends UnitSpec with TestSupport {
     (mockBarsConnector.validate(_: BankDetails, _: UUID)(_: HeaderCarrier, _: ExecutionContext)).expects(bankDetails, *, *, *)
       .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("")))(r ⇒ Future.successful(r)))
 
-  val service = new BarsServiceImpl(mockBarsConnector, mockMetrics)
+  val service = new BarsServiceImpl(mockBarsConnector, mockMetrics, mockPagerDuty)
 
   "The BarsService" when {
 
     "validating bank details" must {
 
-      val bankDetails = BankDetails("sortCode", "accountNumber", None, "accountName")
+      val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", None, "accountName")
 
       val response =
         """{
@@ -73,18 +74,21 @@ class BarsServiceSpec extends UnitSpec with TestSupport {
             |}""".stripMargin
 
         mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
+        mockPagerDutyAlert("error parsing the response json from bars check")
         val result = await(service.validate(bankDetails))
         result shouldBe Left("error parsing the response json from bars check")
       }
 
       "handle unsuccessful response from bars check" in {
         mockBarsConnector(bankDetails)(Some(HttpResponse(400)))
+        mockPagerDutyAlert("unexpected status from bars check")
         val result = await(service.validate(bankDetails))
         result shouldBe Left("unexpected status from bars check")
       }
 
       "recover from unexpected errors" in {
         mockBarsConnector(bankDetails)(None)
+        mockPagerDutyAlert("unexpected error from bars check")
         val result = await(service.validate(bankDetails))
         result shouldBe Left("unexpected error from bars check")
       }

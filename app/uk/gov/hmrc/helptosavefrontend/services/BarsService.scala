@@ -23,7 +23,7 @@ import play.api.http.Status
 import uk.gov.hmrc.helptosavefrontend.connectors.BarsConnector
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, PagerDutyAlerting}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,7 +39,8 @@ trait BarsService {
 
 @Singleton
 class BarsServiceImpl @Inject() (barsConnector: BarsConnector,
-                                 metrics:       Metrics)(implicit transformer: NINOLogMessageTransformer) extends BarsService with Logging {
+                                 metrics:       Metrics,
+                                 alerting:      PagerDutyAlerting)(implicit transformer: NINOLogMessageTransformer) extends BarsService with Logging {
 
   override def validate(bankDetails: BankDetails)(implicit hc: HeaderCarrier, ec: ExecutionContext): BarsResponseType = {
     val timerContext = metrics.barsTimer.time()
@@ -53,18 +54,20 @@ class BarsServiceImpl @Inject() (barsConnector: BarsConnector,
               case Some(result) ⇒ Right(result)
               case None ⇒
                 logger.warn(s"error parsing the response from bars check, trackingId = $trackingId,  body = ${response.body}")
+                alerting.alert("error parsing the response json from bars check")
                 Left(s"error parsing the response json from bars check")
             }
           case other: Int ⇒
-            //Do we need pager duty alert here ?
             metrics.barsErrorCounter.inc()
             logger.warn(s"unexpected status from bars check, trackingId = $trackingId, status=$other, body = ${response.body}")
+            alerting.alert("unexpected status from bars check")
             Left("unexpected status from bars check")
         }
     }.recover {
       case e ⇒
         metrics.barsErrorCounter.inc()
         logger.warn(s"unexpected error from bars check, trackingId = $trackingId, error=${e.getMessage}")
+        alerting.alert("unexpected error from bars check")
         Left("unexpected error from bars check")
     }
   }
