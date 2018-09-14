@@ -150,7 +150,7 @@ class RegisterControllerSpec
 
       val email = "email"
 
-      val bankDetails = BankDetails("123456", "12345678", None, "test user name")
+      val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name")
 
         def doRequest(): Future[PlayResult] =
           controller.getCreateAccountPage()(fakeRequestWithCSRFToken)
@@ -376,12 +376,11 @@ class RegisterControllerSpec
       }
     }
 
-<<<<<<< HEAD
     "handling checkYourDetails page" must {
 
       val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name")
 
-        def doRequest(): Future[PlayResult] = controller.checkDetails()(FakeRequest())
+        def doRequest(): Future[PlayResult] = controller.getCreateAccountPage()(fakeRequestWithCSRFToken)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
@@ -394,12 +393,11 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(session)))
-          mockSessionCacheConnectorPut(session.copy(changingDetails = false))(Right(()))
         }
         val result = doRequest()
 
         status(result) shouldBe 200
-        contentAsString(result) should include("Check your details")
+        contentAsString(result) should include("Create a Help to Save account")
       }
 
       "show user not eligible page if the user is not eligible" in {
@@ -424,7 +422,6 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(session)))
-          mockSessionCacheConnectorPut(session.copy(changingDetails = false))(Right(()))
         }
         val result = doRequest()
 
@@ -478,8 +475,5 @@ class RegisterControllerSpec
       }
 
     }
-
-=======
->>>>>>> hts-1313 combine declaration and confirm details screens
   }
 }

@@ -62,7 +62,7 @@ bodyClasses = None) {
   @summary_section_head(heading = Messages("hts.cya.your-bank-details"))
   @summary_section_change(routes.BankAccountController.getBankDetailsPage().url, Messages("hts.cya.your-bank-details"), "change-bank-details")
   <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.cya.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode))
+    @summary_row(Messages("hts.cya.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode.toString()))
     @summary_row(Messages("hts.cya.your-bank-details.account-number"), bankDetails.accountNumber)
     @if(bankDetails.rollNumber.nonEmpty) {
       @summary_row(Messages("hts.cya.your-bank-details.roll-number"), bankDetails.rollNumber.getOrElse(""))
