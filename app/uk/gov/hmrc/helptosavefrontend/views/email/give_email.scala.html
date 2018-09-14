@@ -17,11 +17,11 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.GiveEmail
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
-@(form: Form[GiveEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[GiveEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @defining(form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))){ errorMessage =>
 
@@ -39,6 +39,8 @@
             </ul>
         </div>
         }
+
+        @navigate_back(backLink)
 
         <h1 class="heading-large">@messages("hts.give-email.title.h1")</h1>
 

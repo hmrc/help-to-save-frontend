@@ -20,30 +20,29 @@ import cats.instances.future._
 import com.google.inject.Inject
 import javax.inject.Singleton
 import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleWithInfo
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIUserInfo, UserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 @Singleton
 class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
@@ -64,18 +63,18 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 
   def getCreateAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
-      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-        eligibleWithEmail.confirmedEmail.fold[Future[Result]](
-          SeeOther(routes.EmailController.getSelectEmailPage().url))(
-            _ ⇒
-              EligibilityReason.fromEligible(eligibleWithEmail.eligible).fold {
-                logger.warn(s"Could not parse eligiblity reason: ${eligibleWithEmail.eligible}", eligibleWithEmail.userInfo.nino)
-                internalServerError()
-              } { reason ⇒
-                Ok(views.html.register.create_account(reason))
-              })
-      } { _ ⇒
-        SeeOther(routes.EmailController.getGiveEmailPage().url)
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        EligibilityReason.fromEligible(eligibleWithInfo.userInfo.eligible).fold {
+          logger.warn(s"Could not parse eligiblity reason: ${eligibleWithInfo.userInfo.eligible}", eligibleWithInfo.userInfo.userInfo.nino)
+          internalServerError()
+        } { reason ⇒
+          eligibleWithInfo.session.bankDetails match {
+            case Some(bankDetails) ⇒
+              Ok(views.html.register.create_account(eligibleWithInfo.userInfo, eligibleWithInfo.email, bankDetails))
+            case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+          }
+
+        }
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
@@ -99,41 +98,71 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   def createAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
     checkIfAlreadyEnrolled { () ⇒
-      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-        eligibleWithEmail.confirmedEmail.fold[Future[Result]](
-          toFuture(SeeOther(routes.EmailController.getSelectEmailPage().url))
-        ) { confirmedEmail ⇒
-            val userInfo = NSIUserInfo(eligibleWithEmail.userInfo, confirmedEmail)
-            val createAccountRequest = CreateAccountRequest(userInfo, eligibleWithEmail.eligible.value.reasonCode)
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        eligibleWithInfo.session.bankDetails match {
+          case Some(bankDetails) ⇒
+            val payload =
+              NSIPayload(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, frontendAppConfig.version, frontendAppConfig.systemId)
+                .copy(nbaDetails = Some(bankDetails))
+
+            val createAccountRequest = CreateAccountRequest(payload, eligibleWithInfo.userInfo.eligible.value.reasonCode)
             helpToSaveService.createAccount(createAccountRequest).fold[Result]({ e ⇒
               logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
               SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
             },
-              _ ⇒ SeeOther(frontendAppConfig.nsiManageAccountUrl)
+              submissionSuccess ⇒ submissionSuccess.accountNumber.fold(
+                SeeOther(frontendAppConfig.nsiManageAccountUrl)
+              ) {
+                  acNumber ⇒
+                    Ok(views.html.register.account_created(acNumber.accountNumber))
+                }
             )
-          }
-      } { _ ⇒
-        SeeOther(routes.EmailController.getGiveEmailPage().url)
+
+          case None ⇒
+            logger.warn("no bank details found in session, redirect user to bank_details page")
+            SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+        }
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.createAccount().url)
 
   def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
-      checkIfDoneEligibilityChecks { eligibleWithEmail ⇒
-        eligibleWithEmail.confirmedEmail.fold[Future[Result]](
-          SeeOther(routes.EmailController.getSelectEmailPage().url))(
-            _ ⇒ Ok(views.html.register.create_account_error()))
-      } { _ ⇒
-        SeeOther(routes.EmailController.getGiveEmailPage().url)
+      checkIfDoneEligibilityChecks {
+        _ ⇒ Ok(views.html.register.create_account_error())
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+
+  def changeEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { () ⇒
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.EmailController.getSelectEmailPage().url)
+
+      }
+    }
+  }(redirectOnLoginURL = routes.RegisterController.changeEmail().url)
+
+  def changeBankDetails: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { () ⇒
+      checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+        startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.BankAccountController.getBankDetailsPage().url)
+      }
+    }
+  }(redirectOnLoginURL = routes.RegisterController.changeBankDetails().url)
 
   def getCannotCheckDetailsPage: Action[AnyContent] = ActionWithMdc { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
     Ok(views.html.cannot_check_details())
   }
+
+  private def startChangingDetailsAndRedirect(session: HTSSession, redirectTo: String)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] =
+    sessionCacheConnector.put(session.copy(changingDetails = true)).fold({ e ⇒
+      logger.warn(s"Could not write to session cache: $e")
+      internalServerError()
+    },
+      _ ⇒ SeeOther(redirectTo)
+    )
 
   /**
    * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
@@ -142,8 +171,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
    * given action if the the session data indicates that they are eligible
    */
   private def checkIfDoneEligibilityChecks(
-      ifEligibleWithEmail: EligibleWithEmail ⇒ Future[Result])(
-      ifEligibleWithoutEmail: EligibleWithNoEmail ⇒ Future[Result])(
+      ifEligibleWithInfo: EligibleWithInfo ⇒ Future[Result])(
       implicit
       htsContext: HtsContextWithNINO, hc: HeaderCarrier, request: Request[_]): Future[Result] =
     checkSession {
@@ -157,13 +185,12 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
             // user has gone through journey already this sessions and were found to be ineligible
             _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
             userInfo ⇒
-              // user has gone through journey already this sessions and were found to be eligible
-              userInfo.userInfo.email.fold(ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible)))(email ⇒
-                emailValidation.validate(email).toEither match {
-                  case Right(validEmail) ⇒ ifEligibleWithEmail(EligibleWithEmail(userInfo.userInfo, validEmail, session.confirmedEmail, userInfo.eligible))
-                  case Left(_)           ⇒ ifEligibleWithoutEmail(EligibleWithNoEmail(userInfo.userInfo, userInfo.eligible))
-                }
-              )
+              //by this time user should have gone through email journey and have verified/confirmed email stored in the session
+              session.confirmedEmail
+                .fold(
+                  toFuture(SeeOther(routes.EmailController.getSelectEmailPage().url))
+                )(email ⇒ ifEligibleWithInfo(EligibleWithInfo(userInfo, email, session))
+                  )
           ))
     }
 
@@ -172,15 +199,5 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 }
 
 object RegisterController {
-
-  sealed trait EligibleInfo
-
-  object EligibleInfo {
-
-    case class EligibleWithEmail(userInfo: UserInfo, email: Email, confirmedEmail: Option[Email], eligible: Eligible) extends EligibleInfo
-
-    case class EligibleWithNoEmail(userInfo: UserInfo, eligible: Eligible) extends EligibleInfo
-
-  }
-
+  case class EligibleWithInfo(userInfo: EligibleWithUserInfo, email: String, session: HTSSession)
 }

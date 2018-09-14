@@ -35,7 +35,7 @@ class EligibilitySteps extends Steps {
   }
 
   When("^they confirm their details and continue to create an account$") {
-    EligiblePage.clickConfirmAndContinue()
+    EligiblePage.continue()
   }
 
   Given("^DES is down$") {

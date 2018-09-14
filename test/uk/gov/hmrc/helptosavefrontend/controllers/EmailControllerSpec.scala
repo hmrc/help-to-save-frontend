@@ -27,6 +27,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailControllerSpec.EligibleWithUserInfoOps
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -35,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -104,9 +105,9 @@ class EmailControllerSpec
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockUpdateEmail(nSIUserInfo: NSIUserInfo)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.updateEmail(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nSIUserInfo, *, *)
+  def mockUpdateEmail(nsiPayload: NSIPayload)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveService.updateEmail(_: NSIPayload)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nsiPayload, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEncrypt(p: String)(result: String): Unit =
@@ -116,6 +117,9 @@ class EmailControllerSpec
     (crypto.decrypt(_: String)).expects(p).returning(Try(result))
 
   "The EmailController" when {
+
+    val version = appConfig.version
+    val systemId = appConfig.systemId
 
     val testEmail = "email@gmail.com"
 
@@ -146,7 +150,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 200
-        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
+        contentAsString(result) should include("Which email address do you want to use for your Help to Save account?")
       }
 
       "handle Digital(new applicant) users with an existing INVALID email from GG and should display giveEmailPage" in {
@@ -162,6 +166,20 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
       }
 
+      "use correct back link for digital applicants when they come from check details page" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = getSelectEmailPage()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Which email address do you want to use for your Help to Save account?")
+        contentAsString(result) should include("/help-to-save/create-account")
+      }
+
       "handle DE users with an existing valid email from GG" in {
 
         inSequence {
@@ -174,7 +192,22 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 200
-        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
+        contentAsString(result) should include("Which email address do you want to use for your Help to Save account?")
+      }
+
+      "DE users should not contain any Back link" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(None, None, Some("tyrion_lannister@gmail.com")))(Right(None))
+        }
+
+        val result = getSelectEmailPage()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Which email address do you want to use for your Help to Save account?")
       }
 
       "handle DE users with an existing INVALID email from GG" in {
@@ -278,10 +311,10 @@ class EmailControllerSpec
       }
 
       "handle Digital(new applicant) who submitted form with no new-email but with checked existing email" in {
-
+        val session = HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(NotEnrolled))
           mockEncrypt(emailStr)(encryptedEmail)
         }
@@ -294,11 +327,13 @@ class EmailControllerSpec
       "handle Digital(new applicant) who submitted form with new-email" in {
 
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
+        val session = HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")))
+
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))(Right(None))
+          mockSessionCacheConnectorPut(session.copy(pendingEmail = Some(testEmail)))(Right(None))
         }
 
         val result = selectEmailSubmit(Some(testEmail))
@@ -347,9 +382,10 @@ class EmailControllerSpec
       }
 
       "handle DE users who submitted form with no new-email but with checked existing email" in {
+        val session = HTSSession(None, None, Some(testEmail))
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
+          mockSessionCacheConnectorGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
           mockEncrypt("email@gmail.com")(encryptedEmail)
@@ -361,14 +397,13 @@ class EmailControllerSpec
       }
 
       "handle DE user who submitted form with new-email" in {
-
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
+        val session = HTSSession(Some(Right(userInfo)), None, Some(testEmail))
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))))
+          mockSessionCacheConnectorGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, Some(testEmail)))(Right(None))
         }
 
         val result = selectEmailSubmit(Some(testEmail))
@@ -386,7 +421,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(Some("invalidEmail"))
         status(result) shouldBe 200
-        contentAsString(result) should include("Which email address do you want us to use for your Help to Save account?")
+        contentAsString(result) should include("Which email address do you want to use for your Help to Save account?")
       }
 
       "handle an existing account holder who submitted form with no new-email but with checked existing email" in {
@@ -445,6 +480,20 @@ class EmailControllerSpec
         contentAsString(result) should include("Which email address do you want to use for Help to Save?")
       }
 
+      "use correct back link for digital applicants when they come from check details page" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None, None, None, None, true))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = getGiveEmailPage()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Which email address do you want to use for Help to Save?")
+        contentAsString(result) should include("/help-to-save/create-account")
+      }
+
       "handle existing digital account holders and redirect them to nsi" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -452,6 +501,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email")))
         }
+
         val result = getGiveEmailPage()
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("https://nsandi.com")
@@ -470,6 +520,21 @@ class EmailControllerSpec
         val result = getGiveEmailPage()
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+      }
+
+      "DE users should not contain any Back link" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(None, None, None))(Right(None))
+        }
+
+        val result = getGiveEmailPage()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Which email address do you want to use for Help to Save?")
       }
 
       "handle DE users with an existing INVALID email from GG" in {
@@ -576,27 +641,12 @@ class EmailControllerSpec
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(email)))(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(email), None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))(Right(None))
         }
 
         val result = giveEmailSubmit(email)
-        status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
-      }
-
-      "handle Digital(new applicant) who submitted form with new-email" in {
-
-        val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
-          mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))(Right(None))
-        }
-
-        val result = giveEmailSubmit(testEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
       }
@@ -628,14 +678,12 @@ class EmailControllerSpec
       }
 
       "handle DE user who submitted form with new-email" in {
-
-        val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, Some(email)))(Right(None))
+          mockSessionCacheConnectorPut(HTSSession(None, None, Some(email)))(Right(()))
         }
 
         val result = giveEmailSubmit(email)
@@ -679,7 +727,7 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
-      "handle Digital(new applicant) users with an existing valid email from GG and already gone through eligibility checks" in {
+      "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks and no bank details in session" in {
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -687,6 +735,22 @@ class EmailControllerSpec
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
           mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None))(Right(None))
+          mockStoreConfirmedEmail("decrypted")(Right(None))
+        }
+
+        val result = confirmEmail(encryptedEmail)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+      }
+
+      "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks but bank details are already in session" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockDecrypt("encrypted")("decrypted")
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
         }
 
@@ -733,7 +797,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, Some("decrypted"), None))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
-          mockUpdateEmail(NSIUserInfo(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted"))(Right(None))
+          mockUpdateEmail(NSIPayload(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted", version, systemId))(Right(None))
           mockAudit(EmailChanged(nino, "", "decrypted", false, routes.EmailController.confirmEmail(encryptedEmail).url))
         }
 
@@ -761,8 +825,8 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None, changingDetails = true))))
+          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None, changingDetails = true))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
           mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
@@ -881,12 +945,12 @@ class EmailControllerSpec
 
       "handle DE users and update email successfully with NS&I" in {
 
-        val updatedNSIUserInfo = NSIUserInfo(validUserInfo.copy(email = Some(email)), email)
+        val updatedNSIPayload = NSIPayload(validUserInfo.copy(email = Some(email)), email, version, systemId)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockDecrypt("encrypted")(s"WM123456C#$email")
-          mockUpdateEmail(updatedNSIUserInfo)(Right(None))
+          mockUpdateEmail(updatedNSIPayload)(Right(None))
           mockStoreConfirmedEmail(email)(Right(None))
           mockSessionCacheConnectorPut(HTSSession(None, Some(email), None))(Right(None))
           mockAudit(EmailChanged(nino, "", email, false, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
@@ -900,7 +964,7 @@ class EmailControllerSpec
 
       "handle DE users and handle errors during updating email with NS&I" in {
 
-        val updatedNSIUserInfo = NSIUserInfo(validUserInfo.copy(email = Some(email)), email)
+        val updatedNSIUserInfo = NSIPayload(validUserInfo.copy(email = Some(email)), email, version, systemId)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
@@ -1302,7 +1366,7 @@ class EmailControllerSpec
 
     "handling emailUpdatedSubmit" must {
 
-      "handle Digital users and redirect to the create account page" in {
+      "handle Digital users and redirect to the getBankDetailsPage if bank details are not already in session" in {
 
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -1312,7 +1376,34 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+      }
+
+      "handle Digital users and redirect to the checkDetailsPage if the user is in the process of changing details" in {
+
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")),
+                                                             changingDetails = true))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = controller.emailUpdatedSubmit()(FakeRequest())
+        status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
+      }
+
+      "handle Digital users and redirect to the eligibilityCheck if session doesnt contain eligibility result" in {
+
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockSessionCacheConnectorGet(Right(None))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = controller.emailUpdatedSubmit()(FakeRequest())
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
       "handle existing digital account holders and redirect them to NSI" in {

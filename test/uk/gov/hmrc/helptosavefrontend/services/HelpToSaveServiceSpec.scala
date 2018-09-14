@@ -21,15 +21,15 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.libs.json.{JsObject, Json}
+import play.api.libs.json.{JsObject, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
-import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -127,26 +127,30 @@ class HelpToSaveServiceSpec extends TestSupport {
 
     "createAccount" must {
 
-      val createAccountRequest = CreateAccountRequest(validNSIUserInfo, 7)
+      val createAccountRequest = CreateAccountRequest(validNSIPayload, 7)
 
         def mockCreateAccount(response: Option[HttpResponse]) = {
           (htsConnector.createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext)).expects(createAccountRequest, *, *)
             .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r ⇒ Future.successful(r)))
         }
 
-      "return a successful response" in {
-        List(201, 409).foreach { status ⇒
-          mockCreateAccount(Some(HttpResponse(status)))
-          val result = htsService.createAccount(createAccountRequest)
-          List(result.value.futureValue) should contain oneOf (Right(SubmissionSuccess(false)), Right(SubmissionSuccess(true)))
-        }
+      "return a CREATED response along with the account number when a new account has been created" in {
+        mockCreateAccount(Some(HttpResponse(201, Some(Json.parse("""{"accountNumber" : "1234567890123"}""")))))
+        val result = htsService.createAccount(createAccountRequest)
+        result.value.futureValue shouldBe Right(SubmissionSuccess(Some(AccountNumber("1234567890123"))))
 
+      }
+
+      "return a CONFLICT response with no Json when an account has already been created" in {
+        mockCreateAccount(Some(HttpResponse(409, None)))
+        val result = htsService.createAccount(createAccountRequest)
+        result.value.futureValue shouldBe Right(SubmissionSuccess(None))
       }
 
       "should handle a failure result" in {
 
         val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-        mockCreateAccount(Some(HttpResponse(400, Some(JsObject(Seq("error" → Json.toJson(submissionFailure)))))))
+        mockCreateAccount(Some(HttpResponse(400, Some(Json.toJson(submissionFailure)))))
 
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue should be(Left(submissionFailure))
@@ -162,10 +166,10 @@ class HelpToSaveServiceSpec extends TestSupport {
 
     "update email" must {
 
-      val nsiUserInfo = validNSIUserInfo
+      val nsiPayload = validNSIPayload
 
         def mockUpdateEmail(response: Option[HttpResponse]) = {
-          (htsConnector.updateEmail(_: NSIUserInfo)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiUserInfo, *, *)
+          (htsConnector.updateEmail(_: NSIPayload)(_: HeaderCarrier, _: ExecutionContext)).expects(nsiPayload, *, *)
             .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r ⇒ Future.successful(r)))
         }
 
@@ -173,7 +177,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         mockUpdateEmail(Some(HttpResponse(200)))
 
-        val result = htsService.updateEmail(nsiUserInfo)
+        val result = htsService.updateEmail(nsiPayload)
         result.value.futureValue shouldBe Right(())
 
       }
@@ -181,14 +185,14 @@ class HelpToSaveServiceSpec extends TestSupport {
       "handle failure response" in {
         mockUpdateEmail(Some(HttpResponse(400)))
 
-        val result = htsService.updateEmail(nsiUserInfo)
+        val result = htsService.updateEmail(nsiPayload)
         result.value.futureValue shouldBe Left("Received unexpected status 400 from NS&I proxy while trying to update email. Body was null")
       }
 
       "recover from unexpected errors" in {
         mockUpdateEmail(None)
 
-        val result = htsService.updateEmail(nsiUserInfo)
+        val result = htsService.updateEmail(nsiPayload)
         result.value.futureValue should be(Left("Encountered error while trying to update email: oh no!"))
       }
     }

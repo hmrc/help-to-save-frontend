@@ -10,6 +10,9 @@ hts.global.error.prefix=Error:
 hts.global.title={0} {1} - {2} - GOV.UK
 hts.global.title.section.email=- Manage your email address
 hts.global.exit.to.gov.uk=Exit to GOV.UK
+hts.global.link.back=Back
+
+hts.global.error-summary.title=There is a problem
 
 hts.nav.title=Help to Save
 hts.nav.next=Next
@@ -258,15 +261,29 @@ hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 hts.core.not-eligible.sidebar.h2=Elsewhere on GOV.UK
 hts.core.not-eligible.sidebar.p=Working Tax Credit
 
+hts.register.bank-details.title.h1=Which UK bank account do you want us to pay your bonuses and withdrawals into?
+hts.register.bank-details.sort-code.label=Sort code
+hts.register.bank-details.sort-code.hint=For example, 02 03 04
+hts.register.bank-details.accountNumber.label=Account number
+hts.register.bank-details.accountName.label=Account name
+hts.register.bank-details.rollNumber.label=Roll number
+hts.register.bank-details.rollNumber.hint=Building societies only
+hts.bank_details.check_your_sortcode_is_correct=Check your sort code is correct
+hts.bank_details.check_your_account_number_is_correct=Check your account number is correct
+hts.sort-code.incorrect-format=Your sort code needs to be {0} numbers
+hts.account-number.incorrect-format=Your account number needs to be {0} numbers
+hts.roll-number.invalid=Your roll number needs to be between {0} and {1} characters
+hts.account-name.too-short=Your account name needs to be {0} characters or more
+hts.account-name.too-long=Your account name cannot be more than {0} characters
+
 # Eligible
-hts.register.you-are-eligible.title.h1=We’ve checked the details we hold for you
-hts.register.you-are-eligible.p-1=You&rsquo;re eligible for a Help to Save account.
-hts.register.you-are-eligible.p-3=By continuing you are confirming you are eligible for a Help to Save account, and that these are your details and they are correct.
-hts.register.you-are-eligible.button-1=Confirm and continue
-hts.register.you-are-eligible.button-2=These details are not correct
-hts.register.you-are-eligible.name=Name
-hts.register.you-are-eligible.nino=National Insurance number
-hts.register.you-are-eligible.dob=Date of birth
+hts.register.you-are-eligible.title.h1=You’re eligible for a Help to Save account
+hts.register.you-are-eligible.p1={0} we’ve checked the details we hold for you and you’re eligible for a Help to Save account.
+hts.register.you-are-eligible.p2=Before you can create an account, start saving and earning bonuses, you’ll need to:
+hts.register.you-are-eligible.li1=give us your email address
+hts.register.you-are-eligible.li2=enter your UK bank details
+hts.register.you-are-eligible.li3=check your details
+hts.register.you-are-eligible.li4=accept the terms and conditions
 
 # Register - missing information
 hts.register.missinguserinfo.title.h1=We’re missing some important details
@@ -299,17 +316,6 @@ hts.register.total-cap-reached.exit.gov.uk=Exit to GOV.UK
 hts.register.service-unavailable.title.h1=Service unavailable
 hts.register.service-unavailable.p1=You&rsquo;ll be able to use the Help to Save service later.
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
-
-# Create account
-hts.register.create_account_help_to_save.title.h1=You’re about to create a Help to Save account
-hts.register.create_account_help_to_save.par-1=Before opening an account, you&rsquo;ll need to confirm you accept these conditions.
-hts.register.create_account_help_to_save.par-2=You must:
-hts.register.create_account_help_to_save.bullet-1-wtc=inform us each time you leave the UK for a period of 8 weeks or more
-hts.register.create_account_help_to_save.bullet-1-uc=inform us each time you leave the UK for a period of 4 weeks or more
-hts.register.create_account_help_to_save.bullet-2=be opening a Help to Save account for the first time
-hts.register.create_account_help_to_save.par-3=If you create a Help to Save account, it will last for 4 years. This time will start as soon as you create your account. You&rsquo;ll need to enter your UK bank account details before you can use your account, start saving and earning a bonus.
-hts.register.create_account_help_to_save.accept-label=Accept and create account
-hts.register.create_account_help_to_save.cancel-label=Cancel and go to GOV.UK
 
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=If you think you’re eligible for a Help to Save account
@@ -412,9 +418,8 @@ hts.email.error.no-text-after-dot-symbol=Your email address must have characters
 hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the &lsquo;dot&rsquo;
 
 # Select email
-hts.select-email.title.h1=Which email address do you want us to use for your Help to Save account?
-hts.select-email.title.p1=I want to:
-hts.select-email.select-new-address=enter a new email address
+hts.select-email.title.h1=Which email address do you want to use for your Help to Save account?
+hts.select-email.select-new-address=a new email address
 hts.select-email.enter-new-address-body-text=The email addresses you use for other government services will not change.
 hts.select-email.enter-new-address-label=Enter the new email address
 hts.select-email.enter-new-address-hint=For example, myname&#64;sample.com
@@ -526,6 +531,14 @@ hts.account-creation-error.p3=Or you can come back later and try again.
 hts.account-creation-error.button.try-again=Try again
 hts.account-creation-error.exit-button=Exit to GOV.UK
 
+# Account created
+hts.account-created.title.h1=Help to Save account created
+hts.account-created.title.p1=Your account number is
+hts.account-created.h2=What you need to do next
+hts.account-created.p1=Now your Help to Save account has been created, you can start saving and earning bonuses.
+hts.account-created.p2=You can save up to £50 each calendar month.
+hts.account-created.continue-button=Continue to your account
+
 # Incorrect details
 hts.incorrect-details.title.h1=We need your correct details
 hts.incorrect-details.p1=We cannot create your account until we have your:
@@ -537,6 +550,32 @@ hts.incorrect-details.h2=What you need to do
 hts.incorrect-details.listTwo1=<a href={0}>Tell HMRC about a change to your personal details</a>.
 hts.incorrect-details.listTwo2=When we have updated your details, apply for a Help to Save account.
 hts.incorrect-details.exit-button=Back
+
+# Create account
+hts.register.create_account.accept-label=Accept and create account
+hts.register.create_account.condition-wtc=you will tell us each time you leave the UK for 8 weeks or more
+hts.register.create_account.condition-uc=you will tell us each time you leave the UK for 4 weeks or more
+
+hts.register.create_account.change=Change
+hts.register.create_account.title=Create a Help to Save account
+hts.register.create_account.intro=You&rsquo;ll need to make sure your details are correct and agree to the terms and conditions before you can create a Help to Save account.
+hts.register.create_account.your-details=Your details
+hts.register.create_account.your-details.name=Name
+hts.register.create_account.your-details.dob=Date of birth
+hts.register.create_account.your-details.nino=National Insurance number
+hts.register.create_account.your-email=Your email address
+hts.register.create_account.your-email.email=Email address
+hts.register.create_account.your-bank-details=Your bank details
+hts.register.create_account.your-bank-details.sort-code=Sort code
+hts.register.create_account.your-bank-details.account-number=Account number
+hts.register.create_account.your-bank-details.roll-number=Roll number
+hts.register.create_account.your-bank-details.account-name=Account name
+hts.register.create_account.tandc-title=Terms and conditions
+hts.register.create_account.tandc-p1=Before you create a Help to Save account you must agree that:
+hts.register.create_account.tandc-ul1-li1=your details, email address and bank details are correct
+hts.register.create_account.tandc-ul1-li2=you have read and understood the <a href={0}>eligibility criteria</a> on GOV.UK and are eligible for a Help to Save account
+hts.register.create_account.tandc-ul1-li4=you are creating a Help to Save account for the first time
+hts.register.create_account.agree-continue=Agree and continue
 
 # Privacy page
 hts.privacy.title.h1=Help to Save privacy statement

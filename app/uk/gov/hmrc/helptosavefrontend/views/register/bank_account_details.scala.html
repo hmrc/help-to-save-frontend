@@ -1,0 +1,117 @@
+@*
+ * Copyright 2018 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
+@import uk.gov.hmrc.helptosavefrontend.views.register.BankDetailsErrors
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+
+@(form: Form[BankDetails], backLink: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+
+@title = @{messages("hts.register.bank-details.title.h1")}
+@sortCodeErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "sortCode")}
+@accountNumberErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "accountNumber")}
+@rollNumberErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "rollNumber")}
+@accountNameErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "accountName")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
+
+@sortCodeBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "sortCode")}
+@accountNumberBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "accountNumber")}
+
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.global.title", pageTitle, "", Messages("hts.global.title-suffix")), bodyClasses = None) {
+
+  @navigate_back(Some(backLink))
+
+  @if(hasErrors) {
+      @defining(List(
+          "sortCode" → sortCodeErrorMessage,
+          "sortCode" → sortCodeBarsErrorMessage,
+          "accountNumber" → accountNumberErrorMessage,
+          "accountNumber" → accountNumberBarsErrorMessage,
+          "rollNumber" → rollNumberErrorMessage,
+          "accountName" → accountNameErrorMessage
+      ).collect{ case (name, Some(s)) ⇒ name → s }
+      ){ errors =>
+          <div
+          class="error-summary"
+          id="error-summary-display"
+          role="alert"
+          aria-labelledby="error-summary-heading"
+          tabindex="-1">
+              <h2 id="error-summary-heading" class="heading-medium error-summary-heading">@Messages("hts.global.error-summary.title")</h2>
+              <ul class="error-summary-list">
+              @for(error <- errors) {
+                  <li><a href="#@error._1" data-focuses="@error._1">@error._2</a></li>
+              }
+              </ul>
+          </div>
+      }
+  }
+
+  <h1>@title</h1>
+
+  @helpers.form(routes.BankAccountController.submitBankDetails(), 'id -> "bankDetailsForm") {
+
+    @input_text(
+      id = "sortCode",
+      label = messages("hts.register.bank-details.sort-code.label"),
+      inputClass = Some("input--small"),
+      value = form.data.getOrElse("sortCode", ""),
+      hint = Some(messages("hts.register.bank-details.sort-code.hint")),
+      name = "sortCode",
+      errorMessage = sortCodeErrorMessage.orElse(sortCodeBarsErrorMessage).map(Html(_))
+    )
+
+    @input_text(
+      id = "accountNumber",
+      label = messages("hts.register.bank-details.accountNumber.label"),
+      value = form.data.getOrElse("accountNumber", ""),
+      name = "accountNumber",
+      errorMessage = accountNumberErrorMessage.orElse(accountNumberBarsErrorMessage).map(Html(_))
+    )
+
+    @input_text(
+      id = "rollNumber",
+      label = messages("hts.register.bank-details.rollNumber.label"),
+      value = form.data.getOrElse("rollNumber", ""),
+      hint = Some(messages("hts.register.bank-details.rollNumber.hint")),
+      name = "rollNumber",
+      errorMessage = rollNumberErrorMessage.map(Html(_))
+    )
+
+    @input_text(
+      id = "accountName",
+      label = messages("hts.register.bank-details.accountName.label"),
+      value = form.data.getOrElse("accountName", ""),
+      name = "accountName",
+      errorMessage = accountNameErrorMessage.map(Html(_))
+    )
+
+    @ga_submit_button(
+      id = "bankDetailsSubmit",
+      action = "Applicant submitted bank account details",
+      label = title,
+      message = messages("hts.global.continue-button")
+    )
+
+  }
+}

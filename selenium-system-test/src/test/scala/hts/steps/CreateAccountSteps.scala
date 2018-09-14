@@ -20,7 +20,7 @@ import hts.browser.Browser
 import hts.pages._
 import hts.pages.registrationPages._
 import hts.utils.EitherOps._
-import hts.utils.ScenarioContext
+import hts.utils.{ScenarioContext, TestBankDetails}
 
 class CreateAccountSteps extends Steps {
 
@@ -61,15 +61,26 @@ class CreateAccountSteps extends Steps {
   }
 
   When("^they see their details are incorrect and report it$") {
-    EligiblePage.detailsNotCorrect()
+    EligiblePage.continue()
+
+    SelectEmailPage.setAndVerifyNewEmail("newemail@mail.com")
+    Browser.checkCurrentPageIs(VerifyYourEmailPage)
+
+    Browser.goBack()
+    SelectEmailPage.selectGGEmail()
+
+    Browser.checkCurrentPageIs(BankDetailsPage)
+    BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
+
+    Browser.checkCurrentPageIs(CheckYourDetailsPage)
+    CheckYourDetailsPage.detailsNotCorrect()
 
     Browser.checkCurrentPageIs(IncorrectDetailsPage)
     IncorrectDetailsPage.checkForOldQuotes()
     Browser.checkForLinksThatExistOnEveryPage(IncorrectDetailsPage)
     IncorrectDetailsPage.clickBack
 
-    Browser.checkHeader(EligiblePage)
-    EligiblePage.detailsNotCorrect()
+    CheckYourDetailsPage.detailsNotCorrect()
 
     Browser.checkHeader(IncorrectDetailsPage)
   }
@@ -77,15 +88,6 @@ class CreateAccountSteps extends Steps {
   Then("^they see the HMRC change of details page$") {
     Browser.clickLinkTextOnceClickable("Tell HMRC about a change to your personal details")
     Browser.checkExternalPageIs(HMRCChangeOfDetailsPage)
-  }
-
-  When("^an applicant cancels their application just before creating an account$") {
-    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
-    EligiblePage.clickConfirmAndContinue()
-    Browser.checkCurrentPageIs(SelectEmailPage)
-    SelectEmailPage.checkForOldQuotes()
-    SelectEmailPage.selectGGEmail()
-    CreateAccountPage.exitWithoutCreatingAccount()
   }
 
   When("^they proceed to create an account using their GG email$") {
@@ -133,11 +135,6 @@ class CreateAccountSteps extends Steps {
   Then("^they are informed they don't have an account$") {
     Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
     Browser.checkForLinksThatExistOnEveryPage(YouDoNotHaveAnAccountPage)
-  }
-
-  Then("^they see the Help to Save About page$") {
-    Browser.checkHeader(AboutPage)
-    AboutPage.checkForOldQuotes()
   }
 
   Then("^they see that the account is created$|^they will be on the account home page$") {
