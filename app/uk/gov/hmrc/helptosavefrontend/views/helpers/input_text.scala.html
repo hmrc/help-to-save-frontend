@@ -21,6 +21,7 @@ secondaryLabel: Option[String] = None,
 inputClass: Option[String] = None,
 hint: Option[String] = None,
 name: String = "value",
+inputType: String = "text",
 labelClass: Option[String] = None,
 errorMessage: Option[Html] = None
 )(implicit messages: Messages)
@@ -37,7 +38,7 @@ errorMessage: Option[Html] = None
     <div class="form-control-wrapper" data-type="@secondaryLabel">
         <input
           class="form-control @inputClass @if(errorMessage.isDefined){form-control-error}"
-          type="text"
+          type="@inputType"
           id="@id"
           name="@name"
           value="@value"
