@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
 @(email: String, form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
-@defining(form.error("email").isDefined → form.error("new-email").isDefined){ case (hasNotSelected, hasInvalidEmail) =>
+@defining((form.error("email").isDefined, form.error("new-email").isDefined, form.data.get("new-email"))){ case (hasNotSelected, hasInvalidEmail, newEmail) =>
   @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
       title = errorPrefix(form) + Messages("hts.global.title", Messages("hts.select-email.title.h1"), "", Messages("hts.global.title-suffix")),
       bodyClasses = None,
@@ -62,12 +62,12 @@
         @{if(hasNotSelected) <span class="error-message">{messages("hts.select-email.select-an-option")}</span> }
 
         <div class="multiple-choice">
-          <input id="registered-email" type="radio" name="email" value="Yes">
+          <input id="registered-email" type="radio" name="email" value="Yes" @if(newEmail.isDefined && newEmail.exists(_.isEmpty)){ checked }>
           <label for="registered-email">@email</label>
         </div>
 
         <div class="multiple-choice" data-target="collect-new-email">
-          <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail){ checked }>
+          <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail || (newEmail.isDefined && newEmail.exists(_.nonEmpty))){ checked }>
           <label for="add-new-email">@messages("hts.select-email.select-new-address")</label>
         </div>
         

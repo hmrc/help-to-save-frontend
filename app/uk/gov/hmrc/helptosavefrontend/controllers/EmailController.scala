@@ -20,6 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.either._
+import cats.instances.boolean._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
@@ -66,8 +67,13 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
-  private def backLinkFromSession(session: HTSSession): String =
-    if (session.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else { eligibilityPage }
+  private def backLinkFromSession(session: HTSSession): Option[String] = {
+    if (session.changingDetails) {
+      Some(routes.RegisterController.getCreateAccountPage().url)
+    } else {
+      None
+    }
+  }
 
   def getSelectEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -76,11 +82,15 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           withEligibleSession (
             {
               case (s, eligibleWithEmail) ⇒
-                Ok(views.html.email.select_email(eligibleWithEmail.email, SelectEmailForm.selectEmailForm, Some(backLinkFromSession(s))))
+                val emailFormWithData = if (s.changingDetails === true) {
+                  SelectEmailForm.selectEmailForm.copy(data = Map("new-email" → ""))
+                } else {
+                  SelectEmailForm.selectEmailForm.copy(data = Map("new-email" → s.pendingEmail.getOrElse("")))
+                }
+                Ok(views.html.email.select_email(eligibleWithEmail.email, emailFormWithData, backLinkFromSession(s)))
             },
             { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url) }
           )(session)
-
         }
 
         def ifDE = { _: Option[HTSSession] ⇒
@@ -137,7 +147,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           case (session, eligibleWithEmail) ⇒
             val backLink = backLinkFromSession(session)
             handleForm(eligibleWithEmail.email,
-                       Some(backLink),
+                       backLink,
                        session
             )
         }, {
@@ -170,7 +180,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             case _ ⇒ SeeOther(routes.EmailController.getSelectEmailPage().url)
           }, {
             case (s, _) ⇒
-              Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm, Some(backLinkFromSession(s))))
+              Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm, backLinkFromSession(s)))
           })(session)
         }
 
@@ -202,7 +212,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     def handleForm(session: HTSSession): Future[Result] =
         GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
-          withErrors ⇒ Ok(views.html.email.give_email(withErrors, Some(backLinkFromSession(session)))),
+          withErrors ⇒ Ok(views.html.email.give_email(withErrors, backLinkFromSession(session))),
           form ⇒ {
             val updatedSession = session.copy(confirmedEmail = None, pendingEmail = Some(form.email))
             if (session =!= updatedSession) {
