@@ -37,7 +37,7 @@ class BarsConnectorSpec extends UnitSpec with TestSupport with HttpSupport {
         val trackingId = UUID.randomUUID()
         val headers = Map("User-Agent" -> "help-to-save-frontend", "Content-Type" -> "application/json", "X-Tracking-Id" -> trackingId.toString)
         val body = Json.parse(
-          s"""{
+          """{
              | "account": {
              |    "sortCode": "123456",
              |    "accountNumber": "accountNumber"

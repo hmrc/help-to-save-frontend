@@ -72,7 +72,8 @@ class SessionCacheConnectorImpl @Inject() (val http: HttpClient,
             ivURL                  = newSession.ivURL.orElse(existing.ivURL),
             ivSuccessURL           = newSession.ivSuccessURL.orElse(existing.ivSuccessURL),
             bankDetails            = newSession.bankDetails,
-            changingDetails        = newSession.changingDetails
+            changingDetails        = newSession.changingDetails,
+            accountNumber          = newSession.accountNumber
           )
         )
 
