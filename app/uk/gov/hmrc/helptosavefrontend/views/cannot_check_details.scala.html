@@ -24,6 +24,14 @@ title = Messages("hts.global.title", Messages("hts.we-cannot-check-details.title
 bodyClasses = None) {
   <h1 class="heading-large">@Messages("hts.we-cannot-check-details.title.h1")</h1>
   <p>@Html(Messages("hts.we-cannot-check-details.title.p1"))</p>
+  <ul class="list list-bullet">
+    <li>@Messages("hts.we-cannot-check-details.ul1-li1")</li>
+    <li>@Messages("hts.we-cannot-check-details.ul1-li2")</li>
+  </ul>
+  <h2 class="heading-medium">@Messages("hts.we-cannot-check-details.h2")</h2>
   <p>@Html(Messages("hts.we-cannot-check-details.title.p2"))</p>
-  <a class="button" role="button" href=@appConfig.ggUserUrl>@Messages("hts.global.continue-button")</a>
+  <a href=@appConfig.ggUserUrl>@Messages("hts.we-cannot-check-details.create-gg-account")</a>
+  <h2 class="heading-medium">@Messages("hts.we-cannot-check-details.h3")</h2>
+  <p>@Html(Messages("hts.we-cannot-check-details.title.p3"))</p>
+  <a href=@appConfig.ggLoginUrl>@Messages("hts.sign-in")</a>
 }
