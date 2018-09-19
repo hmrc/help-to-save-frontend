@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.option._
+import cats.syntax.traverse._
 import com.google.inject.Inject
 import javax.inject.Singleton
 import play.api.i18n.MessagesApi
@@ -38,8 +41,9 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.helptosavefrontend.{util, views}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
 import scala.concurrent.Future
@@ -67,7 +71,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
         EligibilityReason.fromEligible(eligibleWithInfo.userInfo.eligible).fold {
           logger.warn(s"Could not parse eligiblity reason: ${eligibleWithInfo.userInfo.eligible}", eligibleWithInfo.userInfo.userInfo.nino)
           internalServerError()
-        } { reason ⇒
+        } { _ ⇒
           eligibleWithInfo.session.bankDetails match {
             case Some(bankDetails) ⇒
               Ok(views.html.register.create_account(eligibleWithInfo.userInfo, eligibleWithInfo.email, bankDetails))
@@ -106,17 +110,25 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
                 .copy(nbaDetails = Some(bankDetails))
 
             val createAccountRequest = CreateAccountRequest(payload, eligibleWithInfo.userInfo.eligible.value.reasonCode)
-            helpToSaveService.createAccount(createAccountRequest).fold[Result]({ e ⇒
-              logger.warn(s"Error while trying to create account: ${submissionFailureToString(e)}", nino)
-              SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
-            },
-              submissionSuccess ⇒ submissionSuccess.accountNumber.fold(
+
+            val result = for {
+              submissionSuccess ← helpToSaveService.createAccount(createAccountRequest).leftMap(submissionFailureToString)
+              _ ← {
+                val update = submissionSuccess.accountNumber.map(a ⇒
+                  sessionCacheConnector.put(eligibleWithInfo.session.copy(accountNumber = Some(a.accountNumber))))
+                update.traverse[util.Result, CacheMap](identity)
+              }
+            } yield submissionSuccess.accountNumber
+
+            result.fold[Result]({
+              e ⇒
+                logger.warn(s"Error while trying to create account: $e", nino)
+                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
+            }, {
+              _.fold(
                 SeeOther(frontendAppConfig.nsiManageAccountUrl)
-              ) {
-                  acNumber ⇒
-                    Ok(views.html.register.account_created(acNumber.accountNumber))
-                }
-            )
+              )(_ ⇒ SeeOther(routes.RegisterController.getAccountCreatedPage().url))
+            })
 
           case None ⇒
             logger.warn("no bank details found in session, redirect user to bank_details page")
@@ -125,6 +137,23 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.createAccount().url)
+
+  def getAccountCreatedPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    val result = for {
+      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
+      session ← enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ ⇒ sessionCacheConnector.get })
+    } yield session
+
+    result.fold({ e ⇒
+      logger.warn(s"Could not get enrolment status or session: $e")
+      internalServerError()
+    }, {
+      _.flatMap(_.accountNumber).fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)){
+        accountNumber ⇒
+          Ok(views.html.register.account_created(accountNumber))
+      }
+    })
+  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
 
   def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
