@@ -619,8 +619,14 @@ hts.close-account.back=Back
 
 # Cannot Check Details
 hts.we-cannot-check-details.title.h1=We cannot check your details
-hts.we-cannot-check-details.title.p1=This is because you cannot use the Government Gateway account you signed into to apply for a Help to Save account.
-hts.we-cannot-check-details.title.p2=You&rsquo;ll need to &lsquo;Continue&rsquo; and create a new Government Gateway account for Help to Save. You can then apply for a Help to Save account.
+hts.we-cannot-check-details.title.p1=This is because you cannot use the Government Gateway account you signed into:
+hts.we-cannot-check-details.ul1-li1=to apply for a Help to Save account
+hts.we-cannot-check-details.ul1-li2=to sign in to your Help to Save account if you already have one
+hts.we-cannot-check-details.h2=If you want to apply for a Help to Save account
+hts.we-cannot-check-details.title.p2=You&rsquo;ll need to create a new Government Gateway account for Help to Save. You can then apply for a Help to Save account.
+hts.we-cannot-check-details.create-gg-account=Create a new Government Gateway account
+hts.we-cannot-check-details.h3=If you already have a Help to Save account
+hts.we-cannot-check-details.title.p3=To sign in, enter the &lsquo;user ID&rsquo; and &lsquo;password&rsquo; for the Government Gateway account you used to create your Help to Save account.
 
 hts.close-account.positive-balance.positive-bonus.warning=If you close your account now you will not get your &pound;{0} first bonus payment or a final bonus. You will not be able to open another Help to Save account.
 hts.close-account.positive-balance.positive-bonus.withdraw.p1=You can
