@@ -1,6 +1,6 @@
 Feature: more ZAP tests to hit the rest of the URLS
 
-  @zap @BrowserStack @sophie
+  @zap @BrowserStack
   Scenario: Hit URIs for ZAP testing
     Given the user logs in and passes IV on a PC, phone or tablet
     Then if they visit the URIs below they see a valid response
