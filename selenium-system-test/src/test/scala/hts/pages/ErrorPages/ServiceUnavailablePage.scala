@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.ErrorPages
 
-object NsiManageAccountPage extends Page {
+import hts.pages.Page
+import hts.utils.Configuration
 
-  val expectedURL: String = "https://www.nsandi.com/"
+object ServiceUnavailablePage extends Page {
 
-  override val expectedPageTitle: Option[String] = Some("Our Products")
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/service-unavailable"
+
+  override val expectedPageHeader: Option[String] = Some("Service unavailable")
+
+  override val expectedPageTitle: Option[String] = Some("Service unavailable")
 }

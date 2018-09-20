@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.registrationPages
 
-object GovUKPage extends Page {
+object NotEligibleReason5Page extends NotEligiblePage {
 
-  val expectedURL: String = "https://www.gov.uk/"
-
+  override val notEligibleText =
+    List("This is because your household income - in your last monthly assessment period - was less than £542.88. Your Universal Credit payments are not considered to be income.",
+      "If your situation changes, you can apply for a Help to Save account again.")
 }

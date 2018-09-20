@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.InformationPages
 
+import hts.pages.Page
 import hts.utils.Configuration
 
-object MissingInfoPage extends Page {
+object DailyCapReachedPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/missing-details"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/try-again-tomorrow"
 
-  override val expectedPageHeader: Option[String] = Some("We’re missing some important details")
+  override val expectedPageHeader: Option[String] = Some("You’ll need to try again tomorrow")
 
-  override val expectedPageTitle: Option[String] = Some("We’re missing some important details")
+  override val expectedPageTitle: Option[String] = Some("You’ll need to try again tomorrow")
 }

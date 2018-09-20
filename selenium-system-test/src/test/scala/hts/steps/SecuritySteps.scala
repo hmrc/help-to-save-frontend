@@ -18,7 +18,8 @@ package hts.steps
 
 import hts.browser.Browser
 import hts.pages._
-import hts.utils.{Configuration, ScenarioContext}
+import hts.pages.registrationPages.{CheckDetailsCreateAccountPage, EligiblePage, NotEligibleReason3Page}
+import hts.utils.ScenarioContext
 
 import scala.collection.JavaConverters._
 
@@ -42,7 +43,7 @@ class SecuritySteps extends Steps {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
-  When("^they try to view their details without having logged in GG$") {
+  When("^they try to view their details without having logged in to GG$") {
     EligiblePage.navigate()
   }
 

@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.accountHomePages
 
-import hts.utils.Configuration
+import hts.pages.Page
 
-object CannotChangeEmailPageTryLater extends Page {
+object NsiManageAccountPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/cannot-change-email-try-later"
+  val expectedURL: String = "https://www.nsandi.com/"
+
+  override val expectedPageTitle: Option[String] = Some("Our Products")
 }

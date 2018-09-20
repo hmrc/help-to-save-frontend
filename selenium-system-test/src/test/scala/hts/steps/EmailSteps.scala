@@ -18,8 +18,10 @@ package hts.steps
 
 import com.typesafe.config.ConfigFactory
 import hts.browser.Browser
+import hts.pages.EmailPages.{EnterEmailPage, SelectEmailPage, VerifyYourEmailPage}
 import hts.pages._
 import hts.pages.accountHomePages.{AccountHolderEmailVerifiedPage, ChangeEmailPage}
+import hts.pages.registrationPages.{ApplicantEmailVerifiedPage, BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.{ScenarioContext, TestBankDetails}
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, CryptoImpl, EmailVerificationParams}

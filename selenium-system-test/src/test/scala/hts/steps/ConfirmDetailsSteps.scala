@@ -20,18 +20,16 @@ import java.time.format.DateTimeFormatter
 
 import cucumber.api.DataTable
 import hts.browser.Browser
-import hts.utils.EitherOps._
+import hts.pages.EmailPages.SelectEmailPage
 import hts.pages._
+import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
+import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestUserInfo}
 
 class ConfirmDetailsSteps extends Steps {
 
   Given("^an applicant has the following details:$") { (applicantDetails: DataTable) ⇒
     ScenarioContext.setDataTable(applicantDetails, ScenarioContext.generateEligibleNINO())
-  }
-
-  When("^an applicant passes the eligibility check$") {
-    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
   }
 
   When("^has entered their bank details$") {

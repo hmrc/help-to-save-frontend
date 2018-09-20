@@ -14,14 +14,12 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.registrationPages
 
-import hts.utils.Configuration
+object NotEligibleReason4And9Page extends NotEligiblePage {
 
-object ApplicantEmailVerifiedPage extends Page {
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/email-verified"
-
-  override val expectedPageHeader: Option[String] = Some("Email address verified")
-
-  override val expectedPageTitle: Option[String] = Some("Email address verified")
+  override val notEligibleText =
+    List("entitled to Working Tax Credit and receiving payments for Working Tax Credit or Child Tax Credit",
+      "claiming Universal Credit and your household income - in your last monthly assessment period - was £542.88 or more",
+      "Payments from Universal Credit are not considered to be income.")
 }

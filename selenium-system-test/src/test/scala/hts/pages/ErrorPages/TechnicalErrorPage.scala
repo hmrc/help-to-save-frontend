@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.ErrorPages
 
+import hts.pages.Page
 import hts.utils.Configuration
 
-object CloseAccountPage extends Page {
+object TechnicalErrorPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/close-account-are-you-sure"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/check-eligibility"
 
-  override val expectedPageHeader: Option[String] = Some("Are you sure you want to close your account?")
+  override val expectedPageTitle: Option[String] = Some("Sorry, we’re experiencing technical difficulties")
+
+  override val expectedPageHeader: Option[String] = Some("Sorry, we’re experiencing technical difficulties")
+
 }

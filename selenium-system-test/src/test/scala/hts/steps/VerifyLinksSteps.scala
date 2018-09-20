@@ -17,8 +17,11 @@
 package hts.steps
 
 import hts.browser.Browser
+import hts.pages.EmailPages.{CannotChangeEmailPageTryLater, SelectEmailPage, VerifyYourEmailPage}
+import hts.pages.ErrorPages.{MissingInfoPage, ServiceUnavailablePage, TotalCapReachedPage}
+import hts.pages.InformationPages.DailyCapReachedPage
 import hts.pages._
-import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
+import hts.pages.accountHomePages._
 import hts.pages.registrationPages._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
@@ -32,7 +35,7 @@ class VerifyLinksSteps extends Steps {
   }
 
   Then("^they create an account and can access all header and footer links$") {
-    Browser.navigateTo("check-eligibility")
+    CheckEligibilityLink.navigate()
 
     checkPage(EligiblePage)
     EligiblePage.continue()
@@ -70,16 +73,6 @@ class VerifyLinksSteps extends Steps {
 
     Browser.checkHeader(NsiManageAccountPage)
   }
-
-  private def verifyGovUKLink(): Unit = {
-    Browser.clickButtonByIdOnceClickable("logo")
-    Browser.checkHeader(GovUKPage)
-    Browser.goBack()
-  }
-
-  When("^the user is not logged in$") {
-  }
-
   Then("^they can access the cannot change email try later page$") {
     CannotChangeEmailPageTryLater.navigate()
     Browser.checkCurrentPageIs(CannotChangeEmailPageTryLater)
@@ -105,19 +98,6 @@ class VerifyLinksSteps extends Steps {
     ServiceUnavailablePage.checkForOldQuotes()
   }
 
-  Then("^they see the cannot change email page$") {
-    CannotChangeEmailPage.navigate()
-    Browser.checkCurrentPageIs(CannotChangeEmailPage)
-    CannotChangeEmailPage.checkForOldQuotes()
-    Browser.checkForBadContent(CannotChangeEmailPage)
-  }
-
-  Then("^they see the cannot change email try later page$") {
-    CannotChangeEmailPageTryLater.navigate()
-    Browser.checkCurrentPageIs(CannotChangeEmailPageTryLater)
-    Browser.checkForBadContent(CannotChangeEmailPageTryLater)
-  }
-
   Then("^they navigate to and see the close account are you sure page$") {
     CloseAccountPage.navigate()
     Browser.checkCurrentPageIs(CloseAccountPage)
@@ -138,20 +118,6 @@ class VerifyLinksSteps extends Steps {
     Browser.checkCurrentPageIs(MissingInfoPage)
     MissingInfoPage.checkForOldQuotes()
     Browser.checkForBadContent(MissingInfoPage)
-  }
-
-  Then("^they see the your link has expired page$") {
-    LinkExpiredPage.navigate()
-    Browser.checkCurrentPageIs(LinkExpiredPage)
-    LinkExpiredPage.checkForOldQuotes()
-    Browser.checkForBadContent(LinkExpiredPage)
-  }
-
-  Then("^they see the create account error page$") {
-    CreateAccountErrorPage.navigate()
-    CreateAccountErrorPage.checkForOldQuotes()
-    Browser.checkCurrentPageIs(CreateAccountErrorPage)
-    Browser.checkForBadContent(CreateAccountErrorPage)
   }
 
 }

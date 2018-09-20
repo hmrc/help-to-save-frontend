@@ -17,7 +17,7 @@
 package hts.steps
 
 import hts.browser.Browser
-import hts.pages.{CannotChangeEmailPage, LinkExpiredPage, NoAccountPage, Page}
+import hts.pages.ErrorPages.{LinkExpiredPage, NoAccountPage}
 import hts.pages.registrationPages.CreateAccountErrorPage
 
 class AccessibilitySteps extends Steps {
@@ -25,11 +25,6 @@ class AccessibilitySteps extends Steps {
   When("^a user views the create account error page$"){
     CreateAccountErrorPage.navigate()
     Browser.checkCurrentPageIs(CreateAccountErrorPage)
-  }
-
-  When("^a user views the cannot change email page$"){
-    CannotChangeEmailPage.navigate()
-    Browser.checkCurrentPageIs(CannotChangeEmailPage)
   }
 
   When("^a user views the link expired page$"){
@@ -44,10 +39,6 @@ class AccessibilitySteps extends Steps {
 
   Then("^they see that the create account error page has only smart quotes$"){
     CreateAccountErrorPage.checkForOldQuotes()
-  }
-
-  Then("^they see that the cannot change email page has only smart quotes$"){
-    CannotChangeEmailPage.checkForOldQuotes()
   }
 
   Then("^they see that the link expired page has only smart quotes$"){

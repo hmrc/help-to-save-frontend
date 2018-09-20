@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.ErrorPages
 
+import hts.pages.Page
 import hts.utils.Configuration
 
-object AccountCreatedPage extends Page {
+object NoAccountPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-created"
-  override val expectedPageHeader: Option[String] = Some("Help to Save account created")
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/no-account"
+
+  override val expectedPageHeader: Option[String] = Some("You do not have a Help to Save account")
+
+  override val expectedPageTitle: Option[String] = Some("You do not have a Help to Save account")
+
 }

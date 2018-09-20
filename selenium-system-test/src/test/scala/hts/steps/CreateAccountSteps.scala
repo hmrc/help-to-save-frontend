@@ -17,14 +17,18 @@
 package hts.steps
 
 import hts.browser.Browser
+import hts.pages.EmailPages.{SelectEmailPage, VerifyYourEmailPage}
+import hts.pages.ErrorPages.{IncorrectDetailsPage, NoAccountPage}
+import hts.pages.InformationPages.HMRCChangeOfDetailsPage
 import hts.pages._
+import hts.pages.accountHomePages.AccessAccountLink
 import hts.pages.registrationPages._
 import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
 class CreateAccountSteps extends Steps {
-  When("^they try to sign in without being logged in GG$") {
-    Browser.navigateTo("access-account")
+  When("^they try to sign in without being logged in to GG$") {
+    AccessAccountLink.navigate()
   }
 
   Given("^the authenticated user tries to sign in$|^they log in$") {
@@ -32,12 +36,7 @@ class CreateAccountSteps extends Steps {
   }
 
   Given("^they try to start creating an account$") {
-    Browser.navigateTo("check-eligibility")
-  }
-
-  Given("^a user has previously created an account$") {
-    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
-    createAccountUsingGGEmail()
+    CheckEligibilityLink.navigate()
   }
 
   When("^they log in and proceed to create an account using their GG email$") {
@@ -90,26 +89,12 @@ class CreateAccountSteps extends Steps {
     createAccountError()
   }
 
-  When("^they click on accept and create an account$") {
-    CheckDetailsCreateAccountPage.createAccount()
-    Browser.checkCurrentPageIs(NsiManageAccountPage)
-  }
-
-  When("^the user continues$") {
-    YouDoNotHaveAnAccountPage.clickContinue()
-    Browser.checkHeader(EligiblePage)
-  }
-
-  When("^they log in again$") {
-    AuthorityWizardPage.authenticateEligibleUser(AccessAccountLink.expectedURL, ScenarioContext.currentNINO())
-  }
-
   Then("^they are informed they don't have an account$") {
-    Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
-    Browser.checkForLinksThatExistOnEveryPage(YouDoNotHaveAnAccountPage)
+    Browser.checkCurrentPageIs(NoAccountPage)
+    Browser.checkForLinksThatExistOnEveryPage(NoAccountPage)
   }
 
-  Then("^they see that the account is created$|^they will be on the account home page$") {
+  Then("^they see that the account is created$") {
     Browser.checkHeader(AccountCreatedPage)
   }
 

@@ -17,10 +17,13 @@
 package hts.steps
 
 import hts.browser.Browser
+import hts.pages.EmailPages.{SelectEmailPage, VerifyYourEmailPage}
+import hts.pages.ErrorPages.NoAccountPage
+import hts.pages.InformationPages.PrivacyPolicyPage
 import hts.pages._
-import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
+import hts.pages.accountHomePages.{AccessAccountLink, ChangeEmailPage, NsiManageAccountPage, VerifyEmailPage}
 import hts.pages.registrationPages._
-import hts.utils.{Configuration, ScenarioContext, TestBankDetails}
+import hts.utils.{ScenarioContext, TestBankDetails}
 import org.openqa.selenium.By
 
 class CrossBrowserCompatibilitySteps extends Steps {
@@ -30,17 +33,17 @@ class CrossBrowserCompatibilitySteps extends Steps {
   }
 
   Then("^they go through the happy path$") {
-    Browser.navigateTo("check-eligibility")
+    CheckEligibilityLink.navigate()
 
     Browser.checkHeader(EligiblePage)
     checkPrivacyPolicyPage(EligiblePage)
 
     Browser.goBack()
-    Browser.navigateTo("access-account")
+    AccessAccountLink.navigate()
 
-    Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
-    YouDoNotHaveAnAccountPage.checkForOldQuotes()
-    Browser.navigateTo("check-eligibility")
+    Browser.checkCurrentPageIs(NoAccountPage)
+    NoAccountPage.checkForOldQuotes()
+    CheckEligibilityLink.navigate()
     Browser.checkHeader(EligiblePage)
 
     Browser.scrollToElement("start-creating-account", By.id)
@@ -79,12 +82,6 @@ class CrossBrowserCompatibilitySteps extends Steps {
     Browser.openAndCheckPageInNewWindowUsingLinkText("Privacy policy", PrivacyPolicyPage)
     currentPage.navigate()
     Browser.checkCurrentPageIs(currentPage)
-  }
-
-  private def verifyGovUKLink(): Unit = {
-    Browser.clickButtonByIdOnceClickable("logo")
-    Browser.checkCurrentPageIs(GovUKPage)
-    Browser.goBack()
   }
 
 }

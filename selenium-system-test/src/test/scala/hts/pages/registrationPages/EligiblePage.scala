@@ -16,14 +16,20 @@
 
 package hts.pages.registrationPages
 
+import hts.browser.Browser
 import hts.pages.Page
 import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
-object ServiceUnavailablePage extends Page {
+object EligiblePage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/service-unavailable"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/eligible"
 
-  override val expectedPageHeader: Option[String] = Some("Service unavailable")
+  override val expectedPageTitle: Option[String] = Some("You’re eligible for a Help to Save account")
 
-  override val expectedPageTitle: Option[String] = Some("Service unavailable")
+  override val expectedPageHeader: Option[String] = Some("You’re eligible for a Help to Save account")
+
+  def continue()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("start-creating-account")
+
 }

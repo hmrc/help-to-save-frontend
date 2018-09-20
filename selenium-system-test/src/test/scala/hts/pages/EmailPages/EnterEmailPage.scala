@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.EmailPages
 
 import hts.browser.Browser
+import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object EligiblePage extends Page {
+object EnterEmailPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/eligible"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
 
-  override val expectedPageTitle: Option[String] = Some("You’re eligible for a Help to Save account")
+  override val expectedPageHeader: Option[String] = Some("Which email address do you want to use for Help to Save?")
 
-  override val expectedPageHeader: Option[String] = Some("You’re eligible for a Help to Save account")
+  override val expectedPageTitle: Option[String] = Some("Which email address do you want to use for Help to Save?")
 
-  def continue()(implicit driver: WebDriver): Unit =
-    Browser.clickButtonByIdOnceClickable("start-creating-account")
-
+  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 }

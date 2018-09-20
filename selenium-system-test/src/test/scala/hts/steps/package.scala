@@ -16,7 +16,8 @@
 
 package hts
 
-import hts.pages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage, SelectEmailPage}
+import hts.pages.EmailPages.SelectEmailPage
+import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.TestBankDetails
 import org.openqa.selenium.WebDriver
 

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.ErrorPages
 
+import hts.pages.Page
 import hts.utils.Configuration
 
-object TechnicalErrorPage extends Page {
+object MissingInfoPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/check-eligibility"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/missing-details"
 
-  override val expectedPageTitle: Option[String] = Some("Sorry, we’re experiencing technical difficulties")
+  override val expectedPageHeader: Option[String] = Some("We’re missing some important details")
 
-  override val expectedPageHeader: Option[String] = Some("Sorry, we’re experiencing technical difficulties")
-
+  override val expectedPageTitle: Option[String] = Some("We’re missing some important details")
 }

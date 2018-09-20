@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.registrationPages
 
-object HMRCChangeOfDetailsPage extends Page {
+import hts.pages.Page
+import hts.utils.Configuration
 
-  val expectedURL: String = "https://www.gov.uk/tell-hmrc-change-of-details"
+object AccountCreatedPage extends Page {
 
-  override val expectedPageTitle: Option[String] = Some("Tell HMRC about a change to your personal details")
-
-  override val expectedPageHeader: Option[String] = Some("Tell HMRC about a change to your personal details")
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-created"
+  override val expectedPageHeader: Option[String] = Some("Help to Save account created")
 }

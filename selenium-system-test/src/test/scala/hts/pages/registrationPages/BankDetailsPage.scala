@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.registrationPages
 
 import hts.browser.Browser
+import hts.pages.Page
 import hts.utils.{Configuration, TestBankDetails}
 import org.openqa.selenium.WebDriver
 

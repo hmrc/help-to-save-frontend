@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.ErrorPages
 
+import hts.pages.Page
 import hts.utils.Configuration
 
-object PrivacyPolicyPage extends Page {
+object TotalCapReachedPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/privacy-statement"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/try-again-later-in-year"
 
-  override val expectedPageTitle: Option[String] = Some("Help to Save privacy statement")
+  override val expectedPageHeader: Option[String] = Some("You cannot open an account yet")
 
-  override val expectedPageHeader: Option[String] = Some("Help to Save privacy statement")
-
+  override val expectedPageTitle: Option[String] = Some("You cannot open an account yet")
 }

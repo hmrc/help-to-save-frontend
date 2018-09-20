@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.registrationPages
 
+import hts.pages.Page
 import hts.utils.Configuration
 
-object LinkExpiredPage extends Page {
+object ApplicantEmailVerifiedPage extends Page {
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/email-verified"
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/link-expired"
+  override val expectedPageHeader: Option[String] = Some("Email address verified")
 
-  override val expectedPageHeader: Option[String] = Some("This link has expired")
-
-  override val expectedPageTitle: Option[String] = Some("This link has expired")
+  override val expectedPageTitle: Option[String] = Some("Email address verified")
 }

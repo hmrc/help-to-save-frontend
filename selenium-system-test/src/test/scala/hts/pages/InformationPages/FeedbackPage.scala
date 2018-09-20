@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.InformationPages
 
-object NotEligibleReason5Page extends NotEligiblePage {
+import hts.pages.Page
+import hts.utils.Configuration
 
-  override val notEligibleText =
-    List("This is because your household income - in your last monthly assessment period - was less than £542.88. Your Universal Credit payments are not considered to be income.",
-      "If your situation changes, you can apply for a Help to Save account again.")
+object FeedbackPage extends Page {
+
+  val expectedURL: String = s"${Configuration.feedbackHost}/contact/beta-feedback-unauthenticated?service=HTS"
+
 }

@@ -19,7 +19,7 @@ package hts.steps
 import hts.browser.Browser
 import hts.pages._
 import hts.pages.identityPages._
-import hts.pages.registrationPages.CheckEligibilityLink
+import hts.pages.registrationPages.{CheckEligibilityLink, EligiblePage}
 import hts.utils.ScenarioContext
 
 class IVJourneySteps extends Steps {

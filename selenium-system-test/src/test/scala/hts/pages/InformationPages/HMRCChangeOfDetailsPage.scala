@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.InformationPages
 
-object NotEligibleReason3Page extends NotEligiblePage {
+import hts.pages.Page
 
-  override val notEligibleText =
-    List("You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.",
-      "You should wait until you’ve received a letter from HM Revenue and Customs confirming that you’re entitled to Working Tax Credit. Once you’ve received this you can apply for a Help to Save account again.")
+object HMRCChangeOfDetailsPage extends Page {
+
+  val expectedURL: String = "https://www.gov.uk/tell-hmrc-change-of-details"
+
+  override val expectedPageTitle: Option[String] = Some("Tell HMRC about a change to your personal details")
+
+  override val expectedPageHeader: Option[String] = Some("Tell HMRC about a change to your personal details")
 }

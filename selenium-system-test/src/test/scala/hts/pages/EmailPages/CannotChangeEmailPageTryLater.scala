@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.EmailPages
 
-import hts.browser.Browser
+import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
-trait NotEligiblePage extends Page {
+object CannotChangeEmailPageTryLater extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/not-eligible"
-
-  override val expectedPageTitle: Option[String] = Some("You’re not eligible for a Help to Save account")
-
-  override val expectedPageHeader: Option[String] = Some("You’re not eligible for a Help to Save account")
-
-  val notEligibleText: List[String]
-
-  def thinkYouAreEligible()(implicit driver: WebDriver): Unit =
-    Browser.clickLinkTextOnceClickable("think you’re eligible")
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/cannot-change-email-try-later"
 }

@@ -19,6 +19,7 @@ package hts.pages
 import java.time.format.DateTimeFormatter
 
 import hts.browser.Browser
+import hts.pages.registrationPages.EligiblePage
 import hts.utils.{Configuration, ScenarioContext, TestUserInfo}
 import org.openqa.selenium.{By, WebDriver}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address

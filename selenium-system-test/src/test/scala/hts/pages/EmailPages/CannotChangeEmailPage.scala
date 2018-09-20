@@ -14,12 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages
+package hts.pages.EmailPages
 
+import hts.pages.Page
 import hts.utils.Configuration
 
-object AccessAccountLink {
+object CannotChangeEmailPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/access-account"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/cannot-change-email"
 
+  override val expectedPageHeader: Option[String] = Some("What do you want to do?")
+
+  override val expectedPageTitle: Option[String] = Some("Something went wrong")
 }
