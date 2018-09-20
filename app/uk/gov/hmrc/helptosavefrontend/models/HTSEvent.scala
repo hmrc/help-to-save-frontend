@@ -16,23 +16,24 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import play.api.libs.json.{Format, JsObject, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
-import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 trait HTSEvent {
-  val value: DataEvent
+  val value: ExtendedDataEvent
 }
 
 object HTSEvent {
   def apply(appName:         String,
             auditType:       String,
-            detail:          Map[String, String],
+            detail:          JsValue,
             transactionName: String,
-            path:            String)(implicit hc: HeaderCarrier): DataEvent =
-    DataEvent(appName, auditType = auditType, detail = detail, tags = hc.toAuditTags(transactionName, path))
+            path:            String)(implicit hc: HeaderCarrier): ExtendedDataEvent =
+    ExtendedDataEvent(appName, auditType = auditType, detail = detail, tags = hc.toAuditTags(transactionName, path))
 
 }
 
@@ -42,26 +43,45 @@ case class EmailChanged(nino:                      NINO,
                         duringRegistrationJourney: Boolean,
                         path:                      String
 )(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
-  val value: DataEvent = HTSEvent(
+  val value: ExtendedDataEvent = HTSEvent(
     appConfig.appName,
-    "EmailChanged",
-    Map[String, String](
-      "nino" → nino,
-      "originalEmail" → oldEmail,
-      "newEmail" → newEmail,
-      "duringRegistrationJourney" → duringRegistrationJourney.toString
-    ),
+    "emailChanged",
+    Json.toJson(EmailChanged.Details(nino, oldEmail, newEmail, duringRegistrationJourney)),
     "email-changed",
     path
   )
 }
 
+object EmailChanged {
+
+  private case class Details(nino: String, originalEmail: String, newEmail: String, duringRegistrationJourney: Boolean)
+
+  private implicit val detailsFormat: Format[Details] = Json.format[Details]
+
+}
+
 case class SuspiciousActivity(nino: Option[NINO], activity: String, path: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
-  val value: DataEvent = {
-    val details = nino match {
-      case Some(p) ⇒ Map[String, String]("nino" → p, "reason" → activity)
-      case None    ⇒ Map[String, String]("reason" → activity)
-    }
-    HTSEvent(appConfig.appName, "SuspiciousActivity", details, "suspicious-activity", path)
-  }
+  val value: ExtendedDataEvent =
+    HTSEvent(appConfig.appName, "suspiciousActivity", Json.toJson(SuspiciousActivity.Details(nino, activity)), "suspicious-activity", path)
+
+}
+
+object SuspiciousActivity {
+
+  private case class Details(nino: Option[String], reason: String)
+
+  private implicit val detailsFormat: Format[Details] = Json.format[Details]
+}
+
+case class BARSCheck(nino: NINO, accountNumber: String, sortCode: String, response: JsValue, path: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
+  val value: ExtendedDataEvent =
+    HTSEvent(appConfig.appName, "barsCheck",
+             Json.toJson(BARSCheck.Details(nino, accountNumber, sortCode, response)), "bars-check", path)
+
+}
+
+object BARSCheck {
+  private case class Details(nino: String, accountNumber: String, sortCode: String, response: JsValue)
+
+  private implicit val detailsFormat: Format[Details] = Json.format[Details]
 }

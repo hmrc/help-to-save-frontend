@@ -21,9 +21,11 @@ import java.util.UUID
 import org.scalamock.handlers.CallHandler4
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.BarsConnector
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
-import uk.gov.hmrc.helptosavefrontend.util.MockPagerDuty
+import uk.gov.hmrc.helptosavefrontend.models.{BARSCheck, HTSEvent}
+import uk.gov.hmrc.helptosavefrontend.util.{MockPagerDuty, NINO}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -33,17 +35,26 @@ class BarsServiceSpec extends UnitSpec with TestSupport with MockPagerDuty {
 
   private val mockBarsConnector: BarsConnector = mock[BarsConnector]
 
+  val mockAuditor = mock[HTSAuditor]
+
   def mockBarsConnector(bankDetails: BankDetails)(response: Option[HttpResponse]): CallHandler4[BankDetails, UUID, HeaderCarrier, ExecutionContext, Future[HttpResponse]] =
     (mockBarsConnector.validate(_: BankDetails, _: UUID)(_: HeaderCarrier, _: ExecutionContext)).expects(bankDetails, *, *, *)
       .returning(response.fold[Future[HttpResponse]](Future.failed(new Exception("")))(r ⇒ Future.successful(r)))
 
-  val service = new BarsServiceImpl(mockBarsConnector, mockMetrics, mockPagerDuty)
+  def mockAuditBarsEvent(expectedEvent: BARSCheck, nino: NINO)() =
+    (mockAuditor.sendEvent(_: HTSEvent, _: NINO)(_: ExecutionContext))
+      .expects(expectedEvent, nino, *)
+      .returning(())
+
+  val service = new BarsServiceImpl(mockBarsConnector, mockMetrics, mockPagerDuty, mockAuditor)
 
   "The BarsService" when {
 
     "validating bank details" must {
 
+      val nino = "NINO"
       val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", None, "accountName")
+      val path = "path"
 
       val response =
         """{
@@ -57,8 +68,11 @@ class BarsServiceSpec extends UnitSpec with TestSupport with MockPagerDuty {
           |}""".stripMargin
 
       "handle success response from bars as expected" in {
-        mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
-        val result = await(service.validate(bankDetails))
+        inSequence{
+          mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
+          mockAuditBarsEvent(BARSCheck(nino, "accountNumber", "123456", Json.parse(response), path), nino)
+        }
+        val result = await(service.validate(nino, bankDetails, path))
         result shouldBe Right(true)
       }
 
@@ -73,23 +87,27 @@ class BarsServiceSpec extends UnitSpec with TestSupport with MockPagerDuty {
             |  "directDebitInstructionsDisallowed": "yes"
             |}""".stripMargin
 
-        mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
+        inSequence {
+          mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
+          mockAuditBarsEvent(BARSCheck(nino, "accountNumber", "123456", Json.parse(response), path), nino)
+
+        }
         mockPagerDutyAlert("error parsing the response json from bars check")
-        val result = await(service.validate(bankDetails))
+        val result = await(service.validate(nino, bankDetails, path))
         result shouldBe Left("error parsing the response json from bars check")
       }
 
       "handle unsuccessful response from bars check" in {
         mockBarsConnector(bankDetails)(Some(HttpResponse(400)))
         mockPagerDutyAlert("unexpected status from bars check")
-        val result = await(service.validate(bankDetails))
+        val result = await(service.validate(nino, bankDetails, path))
         result shouldBe Left("unexpected status from bars check")
       }
 
       "recover from unexpected errors" in {
         mockBarsConnector(bankDetails)(None)
         mockPagerDutyAlert("unexpected error from bars check")
-        val result = await(service.validate(bankDetails))
+        val result = await(service.validate(nino, bankDetails, path))
         result shouldBe Left("unexpected error from bars check")
       }
 

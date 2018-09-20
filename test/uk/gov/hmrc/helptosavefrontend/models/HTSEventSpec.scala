@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 
@@ -27,28 +28,68 @@ class HTSEventSpec extends TestSupport {
     "be created with the appropriate auditSource and auditDetails" in {
       val event = EmailChanged(validNSIPayload.nino, "old-email@test.com", "new-email@test.com", true, "path")
       event.value.auditSource shouldBe appName
-      event.value.auditType shouldBe "EmailChanged"
-      event.value.detail shouldBe Map[String, String](
-        "nino" → validNSIPayload.nino, "originalEmail" → "old-email@test.com", "newEmail" → "new-email@test.com", "duringRegistrationJourney" → "true")
+      event.value.auditType shouldBe "emailChanged"
+      event.value.detail shouldBe Json.parse(
+        s"""{
+          | "nino": "${validNSIPayload.nino}",
+          | "originalEmail": "old-email@test.com",
+          | "newEmail": "new-email@test.com",
+          | "duringRegistrationJourney": true
+          | }
+        """.stripMargin
+      )
       event.value.tags.get("path") shouldBe Some("path")
     }
   }
 
   "SuspiciousActivity" must {
-    "be created with the appropriate auditSource and auditDetails incase of nino_mismatch" in {
+    "be created with the appropriate auditSource and auditDetails in case of nino_mismatch" in {
       val event = SuspiciousActivity(None, "nino_mismatch, expected foo, received bar", "path")
       event.value.auditSource shouldBe appName
-      event.value.auditType shouldBe "SuspiciousActivity"
-      event.value.detail shouldBe Map[String, String]("reason" → "nino_mismatch, expected foo, received bar")
+      event.value.auditType shouldBe "suspiciousActivity"
+      event.value.detail shouldBe Json.parse(
+        """{
+          |"reason": "nino_mismatch, expected foo, received bar"
+          |}
+        """.stripMargin
+      )
       event.value.tags.get("path") shouldBe Some("path")
     }
 
     "be created with the appropriate auditSource and auditDetails incase of missing_email_record" in {
       val event = SuspiciousActivity(Some(validNSIPayload.nino), "missing_email_record", "path")
       event.value.auditSource shouldBe appName
-      event.value.auditType shouldBe "SuspiciousActivity"
-      event.value.detail shouldBe Map[String, String]("nino" → validNSIPayload.nino, "reason" → "missing_email_record")
+      event.value.auditType shouldBe "suspiciousActivity"
+      event.value.detail shouldBe Json.parse(
+        s"""{
+          | "nino": "${validNSIPayload.nino}",
+          | "reason" : "missing_email_record"
+          | }
+        """.stripMargin
+      )
       event.value.tags.get("path") shouldBe Some("path")
     }
   }
+
+  "BARSCheck" must {
+
+    "be created correctly" in {
+      val response = Json.parse("""{ "a" : "b" }""")
+      val event = BARSCheck("nino", "number", "code", response, "path")
+      event.value.auditSource shouldBe appName
+      event.value.auditType shouldBe "barsCheck"
+      event.value.detail shouldBe Json.parse(
+        s"""{
+           | "nino": "nino",
+           | "accountNumber" : "number",
+           | "sortCode": "code",
+           | "response" : ${response.toString}
+           | }
+        """.stripMargin
+      )
+      event.value.tags.get("path") shouldBe Some("path")
+    }
+
+  }
+
 }

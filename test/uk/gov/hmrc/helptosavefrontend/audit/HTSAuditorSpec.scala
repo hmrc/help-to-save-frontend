@@ -17,11 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend.audit
 
 import org.joda.time.DateTime
+import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.audit.model.DataEvent
+import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -36,14 +37,14 @@ class HTSAuditorSpec extends TestSupport {
     "sending an event" must {
 
       "use the audit connector to send an event" in {
-        val dataEvent: DataEvent =
-          DataEvent("source", "type", "id", Map("tag" → "value"), Map("detail" → "value"), DateTime.now())
+        val dataEvent: ExtendedDataEvent =
+          ExtendedDataEvent("source", "type", "id", Map("tag" → "value"), Json.parse("""{ "detail": "value" }"""), DateTime.now())
 
         val htsEvent: HTSEvent = new HTSEvent {
           override val value = dataEvent
         }
 
-        (mockAuditConnector.sendEvent(_: DataEvent)(_: HeaderCarrier, _: ExecutionContext))
+        (mockAuditConnector.sendExtendedEvent(_: ExtendedDataEvent)(_: HeaderCarrier, _: ExecutionContext))
           .expects(dataEvent, *, *)
           .returning(Future.failed(new Exception))
 
