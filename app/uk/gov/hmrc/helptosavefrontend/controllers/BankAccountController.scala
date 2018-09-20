@@ -71,7 +71,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
       { bankDetails ⇒
         checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
           session ⇒
-            barsService.validate(bankDetails).map[Future[Result]] {
+            barsService.validate(htsContext.nino, bankDetails, routes.BankAccountController.submitBankDetails().url).map[Future[Result]] {
               case Right(true) ⇒
                 sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails)))
                   .fold(

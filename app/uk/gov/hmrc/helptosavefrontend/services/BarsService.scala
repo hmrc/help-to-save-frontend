@@ -20,10 +20,13 @@ import java.util.UUID
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.BarsConnector
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, PagerDutyAlerting}
+import uk.gov.hmrc.helptosavefrontend.models.BARSCheck
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, PagerDutyAlerting}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,16 +36,17 @@ trait BarsService {
 
   type BarsResponseType = Future[Either[String, Boolean]]
 
-  def validate(bankDetails: BankDetails)(implicit hc: HeaderCarrier, ec: ExecutionContext): BarsResponseType
+  def validate(nino: NINO, bankDetails: BankDetails, path: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): BarsResponseType
 
 }
 
 @Singleton
 class BarsServiceImpl @Inject() (barsConnector: BarsConnector,
                                  metrics:       Metrics,
-                                 alerting:      PagerDutyAlerting)(implicit transformer: NINOLogMessageTransformer) extends BarsService with Logging {
+                                 alerting:      PagerDutyAlerting,
+                                 auditor:       HTSAuditor)(implicit transformer: NINOLogMessageTransformer, appConfig: FrontendAppConfig) extends BarsService with Logging {
 
-  override def validate(bankDetails: BankDetails)(implicit hc: HeaderCarrier, ec: ExecutionContext): BarsResponseType = {
+  override def validate(nino: NINO, bankDetails: BankDetails, path: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): BarsResponseType = {
     val timerContext = metrics.barsTimer.time()
     val trackingId = UUID.randomUUID()
     barsConnector.validate(bankDetails, trackingId).map[Either[String, Boolean]] {
@@ -50,6 +54,8 @@ class BarsServiceImpl @Inject() (barsConnector: BarsConnector,
         val _ = timerContext.stop()
         response.status match {
           case Status.OK ⇒
+            auditor.sendEvent(BARSCheck(nino, bankDetails.accountNumber, bankDetails.sortCode.toString, response.json, path), nino)
+
             (response.json \ "accountNumberWithSortCodeIsValid").asOpt[Boolean] match {
               case Some(result) ⇒ Right(result)
               case None ⇒
