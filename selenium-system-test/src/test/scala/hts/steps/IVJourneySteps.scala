@@ -19,17 +19,13 @@ package hts.steps
 import hts.browser.Browser
 import hts.pages._
 import hts.pages.identityPages._
-import hts.pages.registrationPages._
+import hts.pages.registrationPages.CheckEligibilityLink
 import hts.utils.ScenarioContext
 
 class IVJourneySteps extends Steps {
 
   Given("^an applicant who hasn't been through IV applies$") {
-    AuthorityWizardPage.authenticateIneligibleUser(ApplyPage.expectedURL, ScenarioContext.generateEligibleNINO())
-    ApplyPage.navigate()
-
-    Browser.checkHeader(ApplyPage)
-    ApplyPage.clickStartNow()
+    AuthorityWizardPage.authenticateIneligibleUser(CheckEligibilityLink.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
   When("^they successfully go through the IV journey$") {
@@ -42,9 +38,6 @@ class IVJourneySteps extends Steps {
 
   Then("^they see that they have passed the eligibility check$") {
     Browser.checkHeader(EligiblePage)
-
-    AboutPage.navigate()
-    Browser.checkHeader(AboutPage)
   }
 
   When("^they go through the IV journey and fail because of (.+)$") { reason: String ⇒

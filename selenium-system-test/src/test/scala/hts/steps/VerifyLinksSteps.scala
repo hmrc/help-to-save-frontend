@@ -31,25 +31,8 @@ class VerifyLinksSteps extends Steps {
     Browser.checkForLinksThatExistOnEveryPage(page)
   }
 
-  Then("^they go through the happy path they can see and access all header and footer links$") {
-    AboutPage.navigate()
-    checkPage(AboutPage)
-    Browser.nextPage()
-
-    checkPage(EligibilityInfoPage)
-    EligibilityInfoPage.checkForOldQuotes()
-    Browser.nextPage()
-
-    checkPage(HowTheAccountWorksPage)
-    Browser.nextPage()
-
-    checkPage(HowWeCalculateBonusesPage)
-    HowWeCalculateBonusesPage.checkForOldQuotes()
-    verifyGovUKLink()
-    Browser.nextPage()
-
-    checkPage(ApplyPage)
-    ApplyPage.clickStartNow()
+  Then("^they create an account and can access all header and footer links$") {
+    Browser.navigateTo("check-eligibility")
 
     checkPage(EligiblePage)
     EligiblePage.continue()
@@ -68,14 +51,13 @@ class VerifyLinksSteps extends Steps {
     Browser.checkCurrentPageIs(BankDetailsPage)
     BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
 
-    Browser.checkCurrentPageIs(CheckYourDetailsPage)
-    CheckYourDetailsPage.continue()
+    Browser.checkCurrentPageIs(CheckDetailsCreateAccountPage)
+    CheckDetailsCreateAccountPage.createAccount()
 
-    checkPage(CreateAccountPage)
-    CreateAccountPage.createAccount()
+    Browser.checkHeader(AccountCreatedPage)
+  }
 
-    Browser.checkHeader(NsiManageAccountPage)
-
+  Then("^they manage their account and can access all header and footer links$") {
     ChangeEmailPage.navigate()
     checkPage(ChangeEmailPage)
     ChangeEmailPage.setNewEmailAddress("anotheremail@mail.com")
@@ -103,12 +85,6 @@ class VerifyLinksSteps extends Steps {
     Browser.checkCurrentPageIs(CannotChangeEmailPageTryLater)
     CannotChangeEmailPageTryLater.checkForOldQuotes()
     Browser.checkForBadContent(CannotChangeEmailPageTryLater)
-  }
-
-  Then("^they access the sign in page$") {
-    HTSSignInPage.navigate()
-    Browser.checkCurrentPageIs(HTSSignInPage)
-    HTSSignInPage.checkForOldQuotes()
   }
 
   Then("^they see the daily cap reached page$") {
@@ -150,11 +126,11 @@ class VerifyLinksSteps extends Steps {
   }
 
   When("^an eligible applicant logs into gg$") {
-    AuthorityWizardPage.authenticateEligibleUser(ApplyPage.expectedURL, ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUser(AccessAccountLink.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
   When("^an applicant logs into gg with missing details$") {
-    AuthorityWizardPage.authenticateMissingDetailsUser(ApplyPage.expectedURL, ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateMissingDetailsUser(AccessAccountLink.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
   Then("^they see a page showing which details are missing$") {

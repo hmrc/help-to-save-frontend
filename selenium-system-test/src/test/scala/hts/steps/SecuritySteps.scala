@@ -47,7 +47,7 @@ class SecuritySteps extends Steps {
   }
 
   When("^they try to view the create-an-account page$") {
-    CreateAccountPage.navigate()
+    CheckDetailsCreateAccountPage.navigate()
   }
 
   Then("^they are prompted to log into GG$") {

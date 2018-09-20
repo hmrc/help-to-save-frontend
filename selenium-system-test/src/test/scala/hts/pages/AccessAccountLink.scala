@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package hts.pages.registrationPages
+package hts.pages
 
-import hts.pages.Page
 import hts.utils.Configuration
 
-object HowTheAccountWorksPage extends Page {
+object AccessAccountLink {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/how-the-account-works"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/access-account"
 
 }

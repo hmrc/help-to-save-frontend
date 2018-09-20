@@ -17,8 +17,8 @@ Feature: Applicant confirms details
       | postcode                      | BN43 5QP          |
       | country code                  | GB-ENG            |
       | bank account name             | Test AccountName  |
-      | bank account number           | 11111111          |
-      | bank sort code                | 80-14-97          |
+      | bank account number           | 52173018          |
+      | bank sort code                | 00-00-00          |
       | building society roll number  |                   |
 
     And has entered their bank details

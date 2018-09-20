@@ -34,9 +34,6 @@ class EmailSteps extends Steps {
 
     Browser.checkCurrentPageIs(BankDetailsPage)
     BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
-
-    Browser.checkCurrentPageIs(CheckYourDetailsPage)
-    CheckYourDetailsPage.continue()
   }
 
   When("^they start to create an account$") {
@@ -78,8 +75,8 @@ class EmailSteps extends Steps {
   }
 
   Then("^they see the final Create Account page$") {
-    Browser.checkCurrentPageIs(CreateAccountPage)
-    CreateAccountPage.checkForOldQuotes()
+    Browser.checkCurrentPageIs(CheckDetailsCreateAccountPage)
+    CheckDetailsCreateAccountPage.checkForOldQuotes()
   }
 
   Given("^the account holder has chosen to enter a new email address$"){ () ⇒

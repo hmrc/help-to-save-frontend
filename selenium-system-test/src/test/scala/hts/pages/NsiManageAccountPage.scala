@@ -20,4 +20,5 @@ object NsiManageAccountPage extends Page {
 
   val expectedURL: String = "https://www.nsandi.com/"
 
+  override val expectedPageTitle: Option[String] = Some("Our Products")
 }

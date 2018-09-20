@@ -23,26 +23,16 @@ import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
 class CreateAccountSteps extends Steps {
-
-  Given("^an applicant is on the home page$") {
-    AboutPage.navigate()
+  When("^they try to sign in without being logged in GG$") {
+    Browser.navigateTo("access-account")
   }
 
-  When("^they try to sign in through the Apply page without being logged in GG$") {
-    ApplyPage.navigate()
-    ApplyPage.checkForOldQuotes()
-    driver.manage().deleteAllCookies()
-    ApplyPage.clickSignInLink()
+  Given("^the authenticated user tries to sign in$|^they log in$") {
+    AuthorityWizardPage.authenticateEligibleUser(AccessAccountLink.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
-  Given("^the authenticated user tries to sign in through the Apply page$|^they log in$") {
-    AuthorityWizardPage.authenticateEligibleUser(ApplyPage.expectedURL, ScenarioContext.generateEligibleNINO())
-    ApplyPage.clickSignInLink()
-  }
-
-  Given("^they try to start creating an account from the Apply page$") {
-    ApplyPage.navigate()
-    ApplyPage.clickStartNow()
+  Given("^they try to start creating an account$") {
+    Browser.navigateTo("check-eligibility")
   }
 
   Given("^a user has previously created an account$") {
@@ -72,15 +62,15 @@ class CreateAccountSteps extends Steps {
     Browser.checkCurrentPageIs(BankDetailsPage)
     BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
 
-    Browser.checkCurrentPageIs(CheckYourDetailsPage)
-    CheckYourDetailsPage.detailsNotCorrect()
+    Browser.checkCurrentPageIs(CheckDetailsCreateAccountPage)
+    CheckDetailsCreateAccountPage.detailsNotCorrect()
 
     Browser.checkCurrentPageIs(IncorrectDetailsPage)
     IncorrectDetailsPage.checkForOldQuotes()
     Browser.checkForLinksThatExistOnEveryPage(IncorrectDetailsPage)
     IncorrectDetailsPage.clickBack
 
-    CheckYourDetailsPage.detailsNotCorrect()
+    CheckDetailsCreateAccountPage.detailsNotCorrect()
 
     Browser.checkHeader(IncorrectDetailsPage)
   }
@@ -100,25 +90,8 @@ class CreateAccountSteps extends Steps {
     createAccountError()
   }
 
-  When("^they proceed to the Apply page and click on the Start now button$") {
-    Browser.checkCurrentPageIs(AboutPage)
-    Browser.nextPage()
-
-    Browser.checkCurrentPageIs(EligibilityInfoPage)
-    Browser.nextPage()
-
-    Browser.checkCurrentPageIs(HowTheAccountWorksPage)
-    Browser.nextPage()
-
-    Browser.checkCurrentPageIs(HowWeCalculateBonusesPage)
-    Browser.nextPage()
-
-    Browser.checkCurrentPageIs(ApplyPage)
-    ApplyPage.clickStartNow()
-  }
-
   When("^they click on accept and create an account$") {
-    CreateAccountPage.createAccount()
+    CheckDetailsCreateAccountPage.createAccount()
     Browser.checkCurrentPageIs(NsiManageAccountPage)
   }
 
@@ -128,8 +101,7 @@ class CreateAccountSteps extends Steps {
   }
 
   When("^they log in again$") {
-    AuthorityWizardPage.authenticateEligibleUser(ApplyPage.expectedURL, ScenarioContext.currentNINO())
-    ApplyPage.clickSignInLink()
+    AuthorityWizardPage.authenticateEligibleUser(AccessAccountLink.expectedURL, ScenarioContext.currentNINO())
   }
 
   Then("^they are informed they don't have an account$") {
@@ -138,7 +110,7 @@ class CreateAccountSteps extends Steps {
   }
 
   Then("^they see that the account is created$|^they will be on the account home page$") {
-    Browser.checkHeader(NsiManageAccountPage)
+    Browser.checkHeader(AccountCreatedPage)
   }
 
 }

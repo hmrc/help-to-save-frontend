@@ -14,19 +14,12 @@
  * limitations under the License.
  */
 
-package hts.pages.registrationPages
+package hts.pages
 
-import hts.browser.Browser
-import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
-object ApplyPage extends Page {
+object AccountCreatedPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/apply"
-
-  def clickStartNow()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("apply-button")
-
-  def clickSignInLink()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Sign in to your Help to Save account")
-
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-created"
+  override val expectedPageHeader: Option[String] = Some("Help to Save account created")
 }

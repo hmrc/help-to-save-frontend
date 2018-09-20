@@ -19,7 +19,7 @@ Feature: more ZAP tests to hit the rest of the URLS
       | cannot-change-email                  |
       | cannot-change-email-try-later        |
       | email-updated                        |
-      | agree-conditions-to-create-account   |
+      | create-account                       |
       | account-home/change-email            |
       | account-home/email-verified          |
       | account-home/email-verified-callback |

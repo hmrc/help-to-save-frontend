@@ -3,17 +3,13 @@ Feature: Verifying header and footer links on every page
   @HTS-668 @VerifyHeaderAndFooter @HTS-1183
   Scenario: when users navigate through the HTS pages they see feedback, get-help and privacy links are working
     When the user has logged in and passed IV
-    Then they go through the happy path they can see and access all header and footer links
+    Then they create an account and can access all header and footer links
+    And they manage their account and can access all header and footer links
 
   @VerifyHeaderAndFooter @HTS-1183
   Scenario: checking the Header and Footer links of the cannot change email try later page
     When the user has logged in and passed IV
     Then they can access the cannot change email try later page
-
-  @VerifyHeaderAndFooter @HTS-1183
-  Scenario: checking the Header and Footer links of the sign in page
-    When the user is not logged in
-    Then they access the sign in page
 
   @VerifyHeaderAndFooter @HTS-1183
   Scenario: checking the Header and Footer links of the service unavailable/daily cap/total cap pages

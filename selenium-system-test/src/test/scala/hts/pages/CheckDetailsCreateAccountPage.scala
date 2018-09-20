@@ -20,12 +20,23 @@ import hts.browser.Browser
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object CheckYourDetailsPage extends Page {
+object CheckDetailsCreateAccountPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/check-details"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/create-account"
 
-  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("confirm-and-continue")
+  override val expectedPageHeader: Option[String] = Some("Create a Help to Save account")
+
+  override val expectedPageTitle: Option[String] = Some("Create a Help to Save account")
 
   def detailsNotCorrect()(implicit driver: WebDriver): Unit =
     Browser.clickButtonByIdOnceClickable("change-details-are-incorrect")
+
+  def emailNotCorrect()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("change-email")
+
+  def bankDetailsNotCorrect()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("change-bank-details")
+
+  def createAccount()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("accept-and-create-account")
 }

@@ -61,8 +61,8 @@ class ConfirmDetailsSteps extends Steps {
     val rollNumber = info.bankDetails.rollNumber.getOrElse(sys.error("Could not get roll number"))
     val accountName = info.bankDetails.accountName.getOrElse(sys.error("Could not get account name"))
 
-    Browser.checkCurrentPageIs(CheckYourDetailsPage)
-    CheckYourDetailsPage.checkForOldQuotes()
+    Browser.checkCurrentPageIs(CheckDetailsCreateAccountPage)
+    CheckDetailsCreateAccountPage.checkForOldQuotes()
     Browser.isTextOnPage(fullName) shouldBe Right(Set(fullName))
     Browser.isTextOnPage(displayedNino) shouldBe Right(Set(displayedNino))
     Browser.isTextOnPage(date) shouldBe Right(Set(date))
