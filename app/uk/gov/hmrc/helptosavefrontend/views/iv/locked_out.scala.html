@@ -20,11 +20,15 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@title = @{
+  Messages("hts.iv.locked_out.title.h1")
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-  title = Messages("hts.global.title", Messages("hts.iv.locked_out.title.h1"), "", Messages("hts.global.title-suffix"))
+  title = title
 ) {
 
-  <h1 class="heading-large">@Messages("hts.iv.locked_out.title.h1")</h1>
+  <h1 class="heading-large">@title</h1>
   <p>@Messages("hts.iv.locked_out.p1")</p>
   <p>@Html(Messages("hts.iv.locked_out.p2"))</p>
   <section class="subsection--wide">

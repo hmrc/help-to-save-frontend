@@ -31,9 +31,14 @@
   </div>
 }
 
+@title = @{
+  Messages("hts.email-verification.title.h1")
+}
+
 @defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
+
     @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-        title = errorPrefix(form) + Messages("hts.global.title", Messages("hts.email-verification.title.h1"), Messages("hts.global.title.section.email"), Messages("hts.global.title-suffix")),
+        title = title + " " + Messages("hts.global.title.section.email"),
         sidebarLinks = None,
         bodyClasses = None,
         isErrorPage = errorMessage.isDefined,
@@ -48,7 +53,7 @@
         </div>
         }
 
-        <h1 class="heading-large">@messages("hts.email-verification.title.h1")</h1>
+        <h1 class="heading-large">@title</h1>
         <p class="lede">@Html(Messages("hts.email-verification.intro"))</p>
         @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit(), 'class -> "group subsection--wide") {
             @helpers.input_text(

@@ -19,11 +19,15 @@
 
 @(continueUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@title = @{
+  Messages("hts.iv.we_ve_confirmed_your_identity.title.h1")
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-  title = Messages("hts.global.title", Messages("hts.iv.we_ve_confirmed_your_identity.title.h1"), "", Messages("hts.global.title-suffix"))
+  title = title
 ) {
 
-  <h1 class="heading-large">@Html(Messages("hts.iv.we_ve_confirmed_your_identity.title.h1"))</h1>
+  <h1 class="heading-large">@Html(title)</h1>
   <p class="lede">@Messages("hts.iv.we_ve_confirmed_your_identity.p1")</p>
   <h2>@Messages("hts.iv.you_now_access_hts_account")</h2>
   <p class="subsection--wide push--top">@Html(Messages("hts.iv.we_ve_confirmed_your_identity.p2"))</p>

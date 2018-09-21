@@ -23,13 +23,17 @@
 
 @(userInfo: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@title = @{
+  Messages("hts.register.you-are-eligible.title.h1")
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = Messages("hts.global.title", Messages("hts.register.you-are-eligible.title.h1"), "", Messages("hts.global.title-suffix")),
+    title = title,
     sidebarLinks = None,
     bodyClasses = None) {
 
     <h1 class="heading-large">
-      @Messages("hts.register.you-are-eligible.title.h1")
+      @title
     </h1>
 
     <p class="lede">

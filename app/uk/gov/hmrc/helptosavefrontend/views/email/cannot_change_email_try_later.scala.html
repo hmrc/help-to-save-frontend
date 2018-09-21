@@ -22,15 +22,19 @@
 
 @(returningUser: Boolean, accountEmail: Option[Email])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@title = @{
+  Messages("hts.cannot-change-email-try-later.title.h1")
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-title = Messages("hts.global.title", Messages("hts.cannot-change-email-try-later.title.h1"), "", Messages("hts.global.title-suffix")),
+title = title,
 sidebarLinks = None,
 bodyClasses = None) {
   @if(returningUser){
 
     @accountEmail match {
         case None => {
-            <h1 class="heading-large">@Messages("hts.cannot-change-email-try-later.title.h1")</h1>
+            <h1 class="heading-large">@title</h1>
             <p class="lede">@Html(Messages("hts.cannot-change-email-try-later.p1"))</p>
             <a href=@routes.EmailController.getGiveEmailPage class="button" role="button">@messages("hts.cannot-change-email-try-later.try_later_button")</a>
 
@@ -41,7 +45,7 @@ bodyClasses = None) {
         }
 
         case _ => {
-            <h1 class="heading-large">@Messages("hts.cannot-change-email-try-later.title.h1")</h1>
+            <h1 class="heading-large">@title</h1>
             <p class="lede">@Messages("hts.cannot-change-email-try-later.returning.p1")</p>
             <p>@Html(Messages("hts.cannot-change-email-try-later.returning.p2"))</p>
             <p class="subsection--wide"><a href=@{appConfig.nsiManageAccountUrl}>@Messages("hts.cannot-change-email-try-later.returning.button")</a></p>
@@ -49,7 +53,7 @@ bodyClasses = None) {
     }
 
   } else {
-    <h1 class="heading-large">@Messages("hts.cannot-change-email-try-later.title.h1")</h1>
+    <h1 class="heading-large">@title</h1>
     <p class="lede">@Html(Messages("hts.cannot-change-email-try-later.p1"))</p>
     <a href=@routes.EmailController.getGiveEmailPage class="button" role="button">@messages("hts.cannot-change-email-try-later.try_later_button")</a>
 
