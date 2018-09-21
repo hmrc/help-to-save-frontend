@@ -35,7 +35,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
   val sortCodeFormatter: Formatter[SortCode] = new Formatter[SortCode] {
 
-    val allowedSeparators = Set(' ', '-', '–', '—')
+    val allowedSeparators = Set(' ', '-', '–', '−', '—')
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], SortCode] = {
       val validation: ValidOrErrorStrings[SortCode] =
