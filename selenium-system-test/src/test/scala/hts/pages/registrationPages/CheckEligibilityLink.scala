@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package hts.utils
+package hts.pages.registrationPages
 
-case class TestBankDetails(accountName:   Option[String],
-                           accountNumber: Option[String],
-                           sortCode:      Option[String],
-                           rollNumber:    Option[String]
-)
+import hts.pages.Page
+import hts.utils.Configuration
 
-object TestBankDetails {
-  val ValidBankDetails: TestBankDetails = TestBankDetails(
-    //For use with BARS stub
-    Some("testName"),
-    Some("52173018"),
-    Some("00-00-00"),
-    None
-  )
+object CheckEligibilityLink extends Page {
+
+  val expectedURL: String = s"${Configuration.host}/help-to-save/check-eligibility"
 }
-

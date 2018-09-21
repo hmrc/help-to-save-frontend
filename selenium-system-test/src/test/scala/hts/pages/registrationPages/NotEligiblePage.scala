@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package hts
+package hts.pages.registrationPages
 
-import hts.pages.EmailPages.SelectEmailPage
-import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
-import hts.utils.TestBankDetails
+import hts.browser.Browser
+import hts.pages.Page
+import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-package object steps {
-  def createAccountUsingGGEmail()(implicit driver: WebDriver): Unit = {
-    EligiblePage.continue()
-    SelectEmailPage.selectGGEmail()
-    BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
-    CheckDetailsCreateAccountPage.createAccount()
-  }
+trait NotEligiblePage extends Page {
 
-  def createAccountError()(implicit driver: WebDriver): Unit = {
-    EligiblePage.continue()
-    SelectEmailPage.selectGGEmail()
-  }
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/not-eligible"
+
+  override val expectedPageTitle: Option[String] = Some("You’re not eligible for a Help to Save account")
+
+  override val expectedPageHeader: Option[String] = Some("You’re not eligible for a Help to Save account")
+
+  val notEligibleText: List[String]
+
+  def thinkYouAreEligible()(implicit driver: WebDriver): Unit =
+    Browser.clickLinkTextOnceClickable("think you’re eligible")
 }

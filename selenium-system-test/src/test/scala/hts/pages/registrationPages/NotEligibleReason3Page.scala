@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package hts.utils
+package hts.pages.registrationPages
 
-case class TestBankDetails(accountName:   Option[String],
-                           accountNumber: Option[String],
-                           sortCode:      Option[String],
-                           rollNumber:    Option[String]
-)
+object NotEligibleReason3Page extends NotEligiblePage {
 
-object TestBankDetails {
-  val ValidBankDetails: TestBankDetails = TestBankDetails(
-    //For use with BARS stub
-    Some("testName"),
-    Some("52173018"),
-    Some("00-00-00"),
-    None
-  )
+  override val notEligibleText =
+    List("You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.",
+      "You should wait until you’ve received a letter from HM Revenue and Customs confirming that you’re entitled to Working Tax Credit. Once you’ve received this you can apply for a Help to Save account again.")
 }
-

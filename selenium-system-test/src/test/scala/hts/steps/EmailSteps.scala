@@ -18,8 +18,10 @@ package hts.steps
 
 import com.typesafe.config.ConfigFactory
 import hts.browser.Browser
+import hts.pages.EmailPages.{EnterEmailPage, SelectEmailPage, VerifyYourEmailPage}
 import hts.pages._
 import hts.pages.accountHomePages.{AccountHolderEmailVerifiedPage, ChangeEmailPage}
+import hts.pages.registrationPages.{ApplicantEmailVerifiedPage, BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.{ScenarioContext, TestBankDetails}
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, CryptoImpl, EmailVerificationParams}
@@ -34,9 +36,6 @@ class EmailSteps extends Steps {
 
     Browser.checkCurrentPageIs(BankDetailsPage)
     BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
-
-    Browser.checkCurrentPageIs(CheckYourDetailsPage)
-    CheckYourDetailsPage.continue()
   }
 
   When("^they start to create an account$") {
@@ -78,8 +77,8 @@ class EmailSteps extends Steps {
   }
 
   Then("^they see the final Create Account page$") {
-    Browser.checkCurrentPageIs(CreateAccountPage)
-    CreateAccountPage.checkForOldQuotes()
+    Browser.checkCurrentPageIs(CheckDetailsCreateAccountPage)
+    CheckDetailsCreateAccountPage.checkForOldQuotes()
   }
 
   Given("^the account holder has chosen to enter a new email address$"){ () ⇒

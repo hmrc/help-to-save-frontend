@@ -17,7 +17,10 @@
 package hts.steps
 
 import hts.browser.Browser
+import hts.pages.ErrorPages.TechnicalErrorPage
+import hts.pages.InformationPages.ThinkYouAreEligiblePage
 import hts.pages._
+import hts.pages.registrationPages.{EligiblePage, NotEligibleReason3Page, NotEligibleReason4And9Page, NotEligibleReason5Page}
 import hts.utils.ScenarioContext
 
 class EligibilitySteps extends Steps {

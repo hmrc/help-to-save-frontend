@@ -14,21 +14,11 @@
  * limitations under the License.
  */
 
-package hts.utils
+package hts.pages.registrationPages
 
-case class TestBankDetails(accountName:   Option[String],
-                           accountNumber: Option[String],
-                           sortCode:      Option[String],
-                           rollNumber:    Option[String]
-)
+object NotEligibleReason5Page extends NotEligiblePage {
 
-object TestBankDetails {
-  val ValidBankDetails: TestBankDetails = TestBankDetails(
-    //For use with BARS stub
-    Some("testName"),
-    Some("52173018"),
-    Some("00-00-00"),
-    None
-  )
+  override val notEligibleText =
+    List("This is because your household income - in your last monthly assessment period - was less than £542.88. Your Universal Credit payments are not considered to be income.",
+      "If your situation changes, you can apply for a Help to Save account again.")
 }
-

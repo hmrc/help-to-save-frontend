@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package hts.utils
+package hts.pages.registrationPages
 
-case class TestBankDetails(accountName:   Option[String],
-                           accountNumber: Option[String],
-                           sortCode:      Option[String],
-                           rollNumber:    Option[String]
-)
+import hts.browser.Browser
+import hts.pages.Page
+import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
-object TestBankDetails {
-  val ValidBankDetails: TestBankDetails = TestBankDetails(
-    //For use with BARS stub
-    Some("testName"),
-    Some("52173018"),
-    Some("00-00-00"),
-    None
-  )
+object EligiblePage extends Page {
+
+  val expectedURL: String = s"${Configuration.host}/help-to-save/eligible"
+
+  override val expectedPageTitle: Option[String] = Some("You’re eligible for a Help to Save account")
+
+  override val expectedPageHeader: Option[String] = Some("You’re eligible for a Help to Save account")
+
+  def continue()(implicit driver: WebDriver): Unit =
+    Browser.clickButtonByIdOnceClickable("start-creating-account")
+
 }
-

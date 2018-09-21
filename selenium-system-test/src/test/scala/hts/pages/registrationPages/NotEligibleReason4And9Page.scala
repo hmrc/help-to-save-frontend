@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
-package hts.utils
+package hts.pages.registrationPages
 
-case class TestBankDetails(accountName:   Option[String],
-                           accountNumber: Option[String],
-                           sortCode:      Option[String],
-                           rollNumber:    Option[String]
-)
+object NotEligibleReason4And9Page extends NotEligiblePage {
 
-object TestBankDetails {
-  val ValidBankDetails: TestBankDetails = TestBankDetails(
-    //For use with BARS stub
-    Some("testName"),
-    Some("52173018"),
-    Some("00-00-00"),
-    None
-  )
+  override val notEligibleText =
+    List("entitled to Working Tax Credit and receiving payments for Working Tax Credit or Child Tax Credit",
+      "claiming Universal Credit and your household income - in your last monthly assessment period - was £542.88 or more",
+      "Payments from Universal Credit are not considered to be income.")
 }
-

@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package hts.utils
+package hts.pages.accountHomePages
 
-case class TestBankDetails(accountName:   Option[String],
-                           accountNumber: Option[String],
-                           sortCode:      Option[String],
-                           rollNumber:    Option[String]
-)
+import hts.pages.Page
 
-object TestBankDetails {
-  val ValidBankDetails: TestBankDetails = TestBankDetails(
-    //For use with BARS stub
-    Some("testName"),
-    Some("52173018"),
-    Some("00-00-00"),
-    None
-  )
+object NsiManageAccountPage extends Page {
+
+  val expectedURL: String = "https://www.nsandi.com/"
+
+  override val expectedPageTitle: Option[String] = Some("Our Products")
 }
-

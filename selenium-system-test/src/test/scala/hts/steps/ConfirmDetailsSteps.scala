@@ -20,18 +20,16 @@ import java.time.format.DateTimeFormatter
 
 import cucumber.api.DataTable
 import hts.browser.Browser
-import hts.utils.EitherOps._
+import hts.pages.EmailPages.SelectEmailPage
 import hts.pages._
+import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
+import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestUserInfo}
 
 class ConfirmDetailsSteps extends Steps {
 
   Given("^an applicant has the following details:$") { (applicantDetails: DataTable) ⇒
     ScenarioContext.setDataTable(applicantDetails, ScenarioContext.generateEligibleNINO())
-  }
-
-  When("^an applicant passes the eligibility check$") {
-    AuthorityWizardPage.enterUserDetails(200, "Strong", ScenarioContext.userInfo().getOrElse(sys.error))
   }
 
   When("^has entered their bank details$") {
@@ -61,8 +59,8 @@ class ConfirmDetailsSteps extends Steps {
     val rollNumber = info.bankDetails.rollNumber.getOrElse(sys.error("Could not get roll number"))
     val accountName = info.bankDetails.accountName.getOrElse(sys.error("Could not get account name"))
 
-    Browser.checkCurrentPageIs(CheckYourDetailsPage)
-    CheckYourDetailsPage.checkForOldQuotes()
+    Browser.checkCurrentPageIs(CheckDetailsCreateAccountPage)
+    CheckDetailsCreateAccountPage.checkForOldQuotes()
     Browser.isTextOnPage(fullName) shouldBe Right(Set(fullName))
     Browser.isTextOnPage(displayedNino) shouldBe Right(Set(displayedNino))
     Browser.isTextOnPage(date) shouldBe Right(Set(date))

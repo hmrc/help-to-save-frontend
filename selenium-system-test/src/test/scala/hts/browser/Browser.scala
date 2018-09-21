@@ -18,7 +18,8 @@ package hts.browser
 
 import java.util.function.Function
 
-import hts.pages.{FeedbackPage, Page, PrivacyPolicyPage}
+import hts.pages.InformationPages.{FeedbackPage, PrivacyPolicyPage}
+import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium._
 import org.openqa.selenium.support.ui._

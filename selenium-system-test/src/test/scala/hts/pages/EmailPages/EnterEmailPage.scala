@@ -14,21 +14,20 @@
  * limitations under the License.
  */
 
-package hts.utils
+package hts.pages.EmailPages
 
-case class TestBankDetails(accountName:   Option[String],
-                           accountNumber: Option[String],
-                           sortCode:      Option[String],
-                           rollNumber:    Option[String]
-)
+import hts.browser.Browser
+import hts.pages.Page
+import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
-object TestBankDetails {
-  val ValidBankDetails: TestBankDetails = TestBankDetails(
-    //For use with BARS stub
-    Some("testName"),
-    Some("52173018"),
-    Some("00-00-00"),
-    None
-  )
+object EnterEmailPage extends Page {
+
+  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
+
+  override val expectedPageHeader: Option[String] = Some("Which email address do you want to use for Help to Save?")
+
+  override val expectedPageTitle: Option[String] = Some("Which email address do you want to use for Help to Save?")
+
+  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 }
-

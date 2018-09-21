@@ -17,52 +17,33 @@
 package hts.steps
 
 import hts.browser.Browser
+import hts.pages.EmailPages.{SelectEmailPage, VerifyYourEmailPage}
+import hts.pages.ErrorPages.NoAccountPage
+import hts.pages.InformationPages.PrivacyPolicyPage
 import hts.pages._
-import hts.pages.accountHomePages.{ChangeEmailPage, VerifyEmailPage}
+import hts.pages.accountHomePages.{AccessAccountLink, ChangeEmailPage, NsiManageAccountPage, VerifyEmailPage}
 import hts.pages.registrationPages._
-import hts.utils.{Configuration, ScenarioContext, TestBankDetails}
+import hts.utils.{ScenarioContext, TestBankDetails}
 import org.openqa.selenium.By
 
 class CrossBrowserCompatibilitySteps extends Steps {
 
   When("^the user logs in and passes IV on a PC, phone or tablet$") {
-    AuthorityWizardPage.authenticateEligibleUserOnAnyDevice(AboutPage.expectedURL, ScenarioContext.generateEligibleNINO())
+    AuthorityWizardPage.authenticateEligibleUserOnAnyDevice(CheckEligibilityLink.expectedURL, ScenarioContext.generateEligibleNINO())
   }
 
   Then("^they go through the happy path$") {
-    Browser.checkHeader(AboutPage)
-    Browser.clickButtonByIdOnceClickable("feedback-link")
-    Browser.checkHeader(FeedbackPage)
-
-    Browser.goBack()
-    Browser.clickButtonByIdOnceClickable("get-help-action")
-    Browser.isElementByIdVisible("report-error-partial-form") shouldBe true
-
-    checkPrivacyPolicyPage(AboutPage)
-    Browser.nextPage()
-
-    Browser.checkHeader(EligibilityInfoPage)
-    Browser.nextPage()
-
-    Browser.checkHeader(HowTheAccountWorksPage)
-    HowTheAccountWorksPage.checkForOldQuotes()
-    Browser.nextPage()
-
-    Browser.checkHeader(HowWeCalculateBonusesPage)
-    verifyGovUKLink()
-    Browser.nextPage()
-
-    Browser.checkHeader(ApplyPage)
-    ApplyPage.clickStartNow()
+    CheckEligibilityLink.navigate()
 
     Browser.checkHeader(EligiblePage)
+    checkPrivacyPolicyPage(EligiblePage)
+
     Browser.goBack()
-    ApplyPage.clickSignInLink()
+    AccessAccountLink.navigate()
 
-    Browser.checkCurrentPageIs(YouDoNotHaveAnAccountPage)
-    YouDoNotHaveAnAccountPage.checkForOldQuotes()
-    Browser.goTo(s"${Configuration.host}/help-to-save/check-eligibility")
-
+    Browser.checkCurrentPageIs(NoAccountPage)
+    NoAccountPage.checkForOldQuotes()
+    CheckEligibilityLink.navigate()
     Browser.checkHeader(EligiblePage)
 
     Browser.scrollToElement("start-creating-account", By.id)
@@ -77,10 +58,8 @@ class CrossBrowserCompatibilitySteps extends Steps {
     Browser.checkCurrentPageIs(BankDetailsPage)
     BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
 
-    Browser.checkCurrentPageIs(CheckYourDetailsPage)
-    CheckYourDetailsPage.continue()
-
-    CreateAccountPage.createAccount()
+    Browser.checkCurrentPageIs(CheckDetailsCreateAccountPage)
+    CheckDetailsCreateAccountPage.createAccount()
 
     Browser.checkHeader(NsiManageAccountPage)
 
@@ -103,12 +82,6 @@ class CrossBrowserCompatibilitySteps extends Steps {
     Browser.openAndCheckPageInNewWindowUsingLinkText("Privacy policy", PrivacyPolicyPage)
     currentPage.navigate()
     Browser.checkCurrentPageIs(currentPage)
-  }
-
-  private def verifyGovUKLink(): Unit = {
-    Browser.clickButtonByIdOnceClickable("logo")
-    Browser.checkCurrentPageIs(GovUKPage)
-    Browser.goBack()
   }
 
 }

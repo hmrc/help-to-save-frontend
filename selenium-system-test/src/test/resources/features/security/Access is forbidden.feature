@@ -3,7 +3,7 @@ Feature: Applicant CANNOT proceed without going through security
 
   @HTS-23
   Scenario: Applicant CANNOT view the user details page without logging in to Government Gateway
-    When they try to view their details without having logged in GG
+    When they try to view their details without having logged in to GG
     Then they are prompted to log into GG
 
   @HTS-23
@@ -30,7 +30,7 @@ Feature: Applicant CANNOT proceed without going through security
   @HTS-25
   Scenario Outline: Applicant CANNOT view user details if they have NOT passed IV
     Given they have logged into Government Gateway with a confidence level of <level>
-    When they try to view their details without having logged in GG
+    When they try to view their details without having logged in to GG
     Then they are forced into going through IV before being able to proceed with their HtS application
 
     Examples:
