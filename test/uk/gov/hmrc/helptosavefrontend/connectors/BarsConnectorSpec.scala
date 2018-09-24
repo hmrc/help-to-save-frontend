@@ -56,7 +56,7 @@ class BarsConnectorSpec extends UnitSpec with TestSupport with HttpSupport {
             |  "directDebitInstructionsDisallowed": "yes"
             |}""".stripMargin
 
-        mockPost("http://localhost:9871/validateBankDetails", headers, body)(Some(HttpResponse(Status.OK, Some(Json.parse(response)))))
+        mockPost("http://localhost:7002/validateBankDetails", headers, body)(Some(HttpResponse(Status.OK, Some(Json.parse(response)))))
         val result = await(connector.validate(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some("rollNo"), "accountName"), trackingId))
 
         result.status shouldBe 200
