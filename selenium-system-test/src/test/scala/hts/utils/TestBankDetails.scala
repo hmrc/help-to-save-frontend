@@ -26,8 +26,8 @@ object TestBankDetails {
   val ValidBankDetails: TestBankDetails = TestBankDetails(
     //For use with BARS stub
     Some("testName"),
-    Some("52173018"),
-    Some("00-00-00"),
+    Some("11111111"),
+    Some("80-14-97"),
     None
   )
 }
