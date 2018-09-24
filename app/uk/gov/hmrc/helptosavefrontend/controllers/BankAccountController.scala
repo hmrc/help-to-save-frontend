@@ -50,10 +50,14 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
 
-  private val selectEmailPage = routes.EmailController.getSelectEmailPage().url
-
   private def backLinkFromSession(session: HTSSession): String =
-    if (session.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else { selectEmailPage }
+    if (session.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else {
+      if (session.pendingEmail.isDefined) {
+        routes.EmailController.getEmailVerified().url
+      } else {
+        routes.EmailController.getSelectEmailPage().url
+      }
+    }
 
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
