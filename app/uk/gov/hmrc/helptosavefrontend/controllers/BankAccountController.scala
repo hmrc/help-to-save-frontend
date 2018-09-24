@@ -52,21 +52,16 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
   private val selectEmailPage = routes.EmailController.getSelectEmailPage().url
 
-  private def backLinkFromSession(session: HTSSession): Option[String] =
-    if (session.changingDetails) {
-      Some(routes.RegisterController.getCreateAccountPage().url)
-    } else {
-      None
-    }
+  private def backLinkFromSession(session: HTSSession): String =
+    if (session.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else { selectEmailPage }
 
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
       s ⇒
-        val backLink = backLinkFromSession(s)
         s.bankDetails.fold(
-          Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), backLink))
+          Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), backLinkFromSession(s)))
         )(bankDetails ⇒
-            Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm().fill(bankDetails), backLink))
+            Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
           )
     }
   }(redirectOnLoginURL = routes.BankAccountController.getBankDetailsPage().url)
@@ -94,9 +89,11 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
                   .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBarsInvalid)
                   .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBarsInvalid)
 
-                toFuture(Ok(views.html.register.bank_account_details(formWithErrors, Some(selectEmailPage))))
+                toFuture(Ok(views.html.register.bank_account_details(formWithErrors, backLinkFromSession(session))))
 
-              case Left(e) ⇒ toFuture(internalServerError())
+              case Left(e) ⇒
+                logger.warn(s"Could not validate bank details with BARS service: $e")
+                toFuture(internalServerError())
 
             }.flatMap(identity)
           }
