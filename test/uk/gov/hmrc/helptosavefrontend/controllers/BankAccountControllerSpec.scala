@@ -85,7 +85,7 @@ class BankAccountControllerSpec extends AuthSupport
         val result = doRequest()
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
-        contentAsString(result) should include("window.history.back();return false;")
+        contentAsString(result) should include("/help-to-save/select-email")
 
       }
 

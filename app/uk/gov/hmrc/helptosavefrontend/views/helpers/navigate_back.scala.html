@@ -15,9 +15,6 @@
  *@
 
 @(url: Option[String])(implicit messages: Messages)
-
 @if(url.isDefined) {
-  <a href=@url.getOrElse(Html("")) class="link-back">@Messages("hts.global.link.back")</a>
-} else {
-  <a onclick="window.history.back();return false;" class="link-back">@Messages("hts.global.link.back")</a>
+  <a href=@url class="link-back">@Messages("hts.global.link.back")</a>
 }
