@@ -20,7 +20,6 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.either._
-import cats.instances.boolean._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
@@ -82,7 +81,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           withEligibleSession (
             {
               case (s, eligibleWithEmail) ⇒
-                val emailFormWithData = if (s.changingDetails === true) {
+                val emailFormWithData = if (s.changingDetails) {
                   SelectEmailForm.selectEmailForm.copy(data = Map("new-email" → ""))
                 } else {
                   SelectEmailForm.selectEmailForm.copy(data = Map("new-email" → s.pendingEmail.getOrElse("")))
