@@ -24,7 +24,6 @@ case class TestBankDetails(accountName:   Option[String],
 
 object TestBankDetails {
   val ValidBankDetails: TestBankDetails = TestBankDetails(
-    //For use with BARS stub
     Some("testName"),
     Some("11111111"),
     Some("80-14-97"),
