@@ -86,7 +86,20 @@ class BankAccountControllerSpec extends AuthSupport
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
         contentAsString(result) should include("/help-to-save/select-email")
+      }
 
+      "display the page with correct Back link when they came from emailVerified page" in {
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, Some("pendingEmail")))))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+        contentAsString(result) should include("/help-to-save/email-verified")
       }
 
       "display the page with correct Back link when they came from check details page" in {
