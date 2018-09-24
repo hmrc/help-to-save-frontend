@@ -40,8 +40,8 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.{util, views}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
@@ -61,24 +61,28 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
                                                                             val config:               Configuration,
                                                                             val env:                  Environment)
 
-  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
+  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with Logging {
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
 
   def getCreateAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
-        EligibilityReason.fromEligible(eligibleWithInfo.userInfo.eligible).fold {
-          logger.warn(s"Could not parse eligiblity reason: ${eligibleWithInfo.userInfo.eligible}", eligibleWithInfo.userInfo.userInfo.nino)
+        sessionCacheConnector.put(eligibleWithInfo.session.copy(changingDetails = false)).fold({ e ⇒
+          logger.warn(s"Could not write to session cache: $e")
           internalServerError()
-        } { _ ⇒
-          eligibleWithInfo.session.bankDetails match {
-            case Some(bankDetails) ⇒
-              Ok(views.html.register.create_account(eligibleWithInfo.userInfo, eligibleWithInfo.email, bankDetails))
-            case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+        }, { _ ⇒
+          EligibilityReason.fromEligible(eligibleWithInfo.userInfo.eligible).fold {
+            logger.warn(s"Could not parse eligibility reason: ${eligibleWithInfo.userInfo.eligible}", eligibleWithInfo.userInfo.userInfo.nino)
+            internalServerError()
+          } { reason ⇒
+            eligibleWithInfo.session.bankDetails match {
+              case Some(bankDetails) ⇒
+                Ok(views.html.register.create_account(eligibleWithInfo.userInfo, eligibleWithInfo.email, bankDetails))
+              case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+            }
           }
-
-        }
+        })
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
@@ -167,7 +171,6 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
         startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.EmailController.getSelectEmailPage().url)
-
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.changeEmail().url)

@@ -52,10 +52,17 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
   private val selectEmailPage = routes.EmailController.getSelectEmailPage().url
 
+  private def backLinkFromSession(session: HTSSession): Option[String] =
+    if (session.changingDetails) {
+      Some(routes.RegisterController.getCreateAccountPage().url)
+    } else {
+      None
+    }
+
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
       s ⇒
-        val backLink = if (s.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else { selectEmailPage }
+        val backLink = backLinkFromSession(s)
         s.bankDetails.fold(
           Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), backLink))
         )(bankDetails ⇒
@@ -65,12 +72,12 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
   }(redirectOnLoginURL = routes.BankAccountController.getBankDetailsPage().url)
 
   def submitBankDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    BankDetails.giveBankDetailsForm().bindFromRequest().fold(
-      withErrors ⇒
-        Ok(views.html.register.bank_account_details(withErrors, selectEmailPage)),
-      { bankDetails ⇒
-        checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
-          session ⇒
+    checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
+      session ⇒
+        BankDetails.giveBankDetailsForm().bindFromRequest().fold(
+          withErrors ⇒
+            Ok(views.html.register.bank_account_details(withErrors, backLinkFromSession(session))),
+          { bankDetails ⇒
             barsService.validate(htsContext.nino, bankDetails, routes.BankAccountController.submitBankDetails().url).map[Future[Result]] {
               case Right(true) ⇒
                 sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails)))
@@ -87,14 +94,14 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
                   .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBarsInvalid)
                   .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBarsInvalid)
 
-                toFuture(Ok(views.html.register.bank_account_details(formWithErrors, selectEmailPage)))
+                toFuture(Ok(views.html.register.bank_account_details(formWithErrors, Some(selectEmailPage))))
 
               case Left(e) ⇒ toFuture(internalServerError())
 
             }.flatMap(identity)
-        }
-      }
-    )
+          }
+        )
+    }
 
   }(redirectOnLoginURL = routes.BankAccountController.submitBankDetails().url)
 

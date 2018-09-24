@@ -85,7 +85,7 @@ class BankAccountControllerSpec extends AuthSupport
         val result = doRequest()
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
-        contentAsString(result) should include("/help-to-save/select-email")
+        contentAsString(result) should include("window.history.back();return false;")
 
       }
 
@@ -136,8 +136,13 @@ class BankAccountControllerSpec extends AuthSupport
         def doRequest() = controller.submitBankDetails()(submitBankDetailsRequest)
 
       "handle form errors during submit" in {
+        val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
 
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
+        }
 
         val result = controller.submitBankDetails()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("rollNumber" → "a"))
         status(result) shouldBe Status.OK
