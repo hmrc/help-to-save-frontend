@@ -56,24 +56,59 @@ class BarsServiceSpec extends UnitSpec with TestSupport with MockPagerDuty {
       val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", None, "accountName")
       val path = "path"
 
-      val response =
-        """{
-          |  "accountNumberWithSortCodeIsValid": true,
+        def newResponse(accountNumberWithSortCodeIsValid: Boolean, sortCodeIsPresentOnEISCD: String): String =
+          s"""{
+          |  "accountNumberWithSortCodeIsValid": $accountNumberWithSortCodeIsValid,
           |  "nonStandardAccountDetailsRequiredForBacs": "no",
-          |  "sortCodeIsPresentOnEISCD":"yes",
+          |  "sortCodeIsPresentOnEISCD":"$sortCodeIsPresentOnEISCD",
           |  "supportsBACS":"yes",
           |  "ddiVoucherFlag":"no",
           |  "directDebitsDisallowed": "yes",
           |  "directDebitInstructionsDisallowed": "yes"
           |}""".stripMargin
 
-      "handle success response from bars as expected" in {
+      "handle the case when the bank details are valid and the sort code exists" in {
+        val response = newResponse(true, "yes")
+
         inSequence{
           mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
           mockAuditBarsEvent(BARSCheck(nino, "accountNumber", "123456", Json.parse(response), path), nino)
         }
         val result = await(service.validate(nino, bankDetails, path))
         result shouldBe Right(true)
+      }
+
+      "handle the case when the bank details are not valid" in {
+        val response = newResponse(false, "blah")
+
+        inSequence{
+          mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
+          mockAuditBarsEvent(BARSCheck(nino, "accountNumber", "123456", Json.parse(response), path), nino)
+        }
+        val result = await(service.validate(nino, bankDetails, path))
+        result shouldBe Right(false)
+      }
+
+      "handle the case when the bank details are valid but the sort code does not exist" in {
+        val response = newResponse(true, "no")
+
+        inSequence{
+          mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
+          mockAuditBarsEvent(BARSCheck(nino, "accountNumber", "123456", Json.parse(response), path), nino)
+        }
+        val result = await(service.validate(nino, bankDetails, path))
+        result shouldBe Right(false)
+      }
+
+      "handle the case when the bank details are valid but the sort code response cannot be parsed" in {
+        val response = newResponse(true, "blah")
+
+        inSequence{
+          mockBarsConnector(bankDetails)(Some(HttpResponse(200, Some(Json.parse(response)))))
+          mockAuditBarsEvent(BARSCheck(nino, "accountNumber", "123456", Json.parse(response), path), nino)
+        }
+        val result = await(service.validate(nino, bankDetails, path))
+        result.isLeft shouldBe true
       }
 
       "handle 200 response but missing json field (accountNumberWithSortCodeIsValid)" in {

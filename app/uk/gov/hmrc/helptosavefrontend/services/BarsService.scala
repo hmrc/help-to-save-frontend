@@ -18,6 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.services
 
 import java.util.UUID
 
+import cats.syntax.eq._
+import cats.instances.string._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -27,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.BARSCheck
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, PagerDutyAlerting}
+import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -56,13 +59,28 @@ class BarsServiceImpl @Inject() (barsConnector: BarsConnector,
           case Status.OK ⇒
             auditor.sendEvent(BARSCheck(nino, bankDetails.accountNumber, bankDetails.sortCode.toString, response.json, path), nino)
 
-            (response.json \ "accountNumberWithSortCodeIsValid").asOpt[Boolean] match {
-              case Some(result) ⇒ Right(result)
-              case None ⇒
-                logger.warn(s"error parsing the response from bars check, trackingId = $trackingId,  body = ${response.body}")
-                alerting.alert("error parsing the response json from bars check")
-                Left(s"error parsing the response json from bars check")
-            }
+            (response.json \ "accountNumberWithSortCodeIsValid").asOpt[Boolean] →
+              (response.json \ "sortCodeIsPresentOnEISCD").asOpt[String].map(_.toLowerCase.trim) match {
+                case (Some(accountNumberWithSortCodeIsValid), Some(sortCodeIsPresentOnEISCD)) ⇒
+                  if (accountNumberWithSortCodeIsValid) {
+                    if (sortCodeIsPresentOnEISCD === "yes") {
+                      Right(true)
+                    } else if (sortCodeIsPresentOnEISCD === "no") {
+                      logger.info("BARS response: bank details were valid but sort code was not present on EISCD", nino)
+                      Right(false)
+                    } else {
+                      Left(s"Could not parse value for 'sortCodeIsPresentOnEISCD': $sortCodeIsPresentOnEISCD")
+                    }
+                  } else {
+                    logger.info("BARS response: bank details were invalid", nino)
+                    Right(false)
+                  }
+
+                case _ ⇒
+                  logger.warn(s"error parsing the response from bars check, trackingId = $trackingId,  body = ${response.body}")
+                  alerting.alert("error parsing the response json from bars check")
+                  Left(s"error parsing the response json from bars check")
+              }
           case other: Int ⇒
             metrics.barsErrorCounter.inc()
             logger.warn(s"unexpected status from bars check, trackingId = $trackingId, status=$other, body = ${response.body}")
