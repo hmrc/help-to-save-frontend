@@ -28,7 +28,7 @@ class HTSEventSpec extends TestSupport {
     "be created with the appropriate auditSource and auditDetails" in {
       val event = EmailChanged(validNSIPayload.nino, "old-email@test.com", "new-email@test.com", true, "path")
       event.value.auditSource shouldBe appName
-      event.value.auditType shouldBe "emailChanged"
+      event.value.auditType shouldBe "EmailChanged"
       event.value.detail shouldBe Json.parse(
         s"""{
           | "nino": "${validNSIPayload.nino}",
@@ -46,7 +46,7 @@ class HTSEventSpec extends TestSupport {
     "be created with the appropriate auditSource and auditDetails in case of nino_mismatch" in {
       val event = SuspiciousActivity(None, "nino_mismatch, expected foo, received bar", "path")
       event.value.auditSource shouldBe appName
-      event.value.auditType shouldBe "suspiciousActivity"
+      event.value.auditType shouldBe "SuspiciousActivity"
       event.value.detail shouldBe Json.parse(
         """{
           |"reason": "nino_mismatch, expected foo, received bar"
@@ -59,7 +59,7 @@ class HTSEventSpec extends TestSupport {
     "be created with the appropriate auditSource and auditDetails incase of missing_email_record" in {
       val event = SuspiciousActivity(Some(validNSIPayload.nino), "missing_email_record", "path")
       event.value.auditSource shouldBe appName
-      event.value.auditType shouldBe "suspiciousActivity"
+      event.value.auditType shouldBe "SuspiciousActivity"
       event.value.detail shouldBe Json.parse(
         s"""{
           | "nino": "${validNSIPayload.nino}",
@@ -77,7 +77,7 @@ class HTSEventSpec extends TestSupport {
       val response = Json.parse("""{ "a" : "b" }""")
       val event = BARSCheck("nino", "number", "code", response, "path")
       event.value.auditSource shouldBe appName
-      event.value.auditType shouldBe "barsCheck"
+      event.value.auditType shouldBe "BARSCheck"
       event.value.detail shouldBe Json.parse(
         s"""{
            | "nino": "nino",
