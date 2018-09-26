@@ -45,7 +45,7 @@ case class EmailChanged(nino:                      NINO,
 )(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
   val value: ExtendedDataEvent = HTSEvent(
     appConfig.appName,
-    "emailChanged",
+    "EmailChanged",
     Json.toJson(EmailChanged.Details(nino, oldEmail, newEmail, duringRegistrationJourney)),
     "email-changed",
     path
@@ -62,7 +62,7 @@ object EmailChanged {
 
 case class SuspiciousActivity(nino: Option[NINO], activity: String, path: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
   val value: ExtendedDataEvent =
-    HTSEvent(appConfig.appName, "suspiciousActivity", Json.toJson(SuspiciousActivity.Details(nino, activity)), "suspicious-activity", path)
+    HTSEvent(appConfig.appName, "SuspiciousActivity", Json.toJson(SuspiciousActivity.Details(nino, activity)), "suspicious-activity", path)
 
 }
 
@@ -75,7 +75,7 @@ object SuspiciousActivity {
 
 case class BARSCheck(nino: NINO, accountNumber: String, sortCode: String, response: JsValue, path: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
   val value: ExtendedDataEvent =
-    HTSEvent(appConfig.appName, "barsCheck",
+    HTSEvent(appConfig.appName, "BARSCheck",
              Json.toJson(BARSCheck.Details(nino, accountNumber, sortCode, response)), "bars-check", path)
 
 }
