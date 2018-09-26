@@ -29,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.BARSCheck
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer, PagerDutyAlerting}
+import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -65,11 +66,13 @@ class BarsServiceImpl @Inject() (barsConnector: BarsConnector,
                     if (sortCodeIsPresentOnEISCD === "yes") {
                       Right(true)
                     } else if (sortCodeIsPresentOnEISCD === "no") {
+                      logger.info("BARS response: bank details were valid but sort code was not present on EISCD", nino)
                       Right(false)
                     } else {
-                      Left(s"Could not parse value for 'sortCodeIsPresentOnEISCD': ${sortCodeIsPresentOnEISCD}")
+                      Left(s"Could not parse value for 'sortCodeIsPresentOnEISCD': $sortCodeIsPresentOnEISCD")
                     }
                   } else {
+                    logger.info("BARS response: bank details were invalid", nino)
                     Right(false)
                   }
 
