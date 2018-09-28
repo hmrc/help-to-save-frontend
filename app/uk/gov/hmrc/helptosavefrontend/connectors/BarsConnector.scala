@@ -22,9 +22,10 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
-import uk.gov.hmrc.helptosavefrontend.http.HttpClient
+import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
