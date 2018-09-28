@@ -79,7 +79,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                 val emailFormWithData = if (s.changingDetails) {
                   SelectEmailForm.selectEmailForm.copy(data = Map("new-email" → ""))
                 } else {
-                  SelectEmailForm.selectEmailForm.copy(data = Map("new-email" → s.pendingEmail.getOrElse("")))
+                  SelectEmailForm.selectEmailForm.copy(data = s.pendingEmail.fold(Map.empty[String, String])(e ⇒ Map("new-email" → e)))
                 }
                 Ok(views.html.email.select_email(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
             },
