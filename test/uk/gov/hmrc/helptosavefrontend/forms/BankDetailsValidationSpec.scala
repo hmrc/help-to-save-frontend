@@ -181,8 +181,9 @@ class BankDetailsValidationSpec extends TestSupport {
           testRollNumber(Some("ab12"))(Right(Some("ab12")))
         }
 
-        "contains trailing and leading spaces" in {
+        "contains trailing and leading spaces but preserve internal spaces" in {
           testRollNumber(Some("  ab1   "))(Right(Some("ab1")))
+          testRollNumber(Some(" ab  c "))(Right(Some("ab c")))
         }
 
         "contains control characters" in {
