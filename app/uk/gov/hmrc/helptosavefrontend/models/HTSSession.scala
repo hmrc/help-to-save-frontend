@@ -40,7 +40,8 @@ case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, Eligible
                       ivSuccessURL:           Option[String]                                   = None,
                       bankDetails:            Option[BankDetails]                              = None,
                       changingDetails:        Boolean                                          = false,
-                      accountNumber:          Option[String]                                   = None
+                      accountNumber:          Option[String]                                   = None,
+                      hasSelectedEmail:       Boolean                                          = false
 )
 
 object HTSSession {

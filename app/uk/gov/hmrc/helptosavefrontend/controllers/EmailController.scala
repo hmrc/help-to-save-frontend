@@ -79,7 +79,12 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                 val emailFormWithData = if (s.changingDetails) {
                   SelectEmailForm.selectEmailForm.copy(data = Map("new-email" → ""))
                 } else {
-                  SelectEmailForm.selectEmailForm.copy(data = s.pendingEmail.fold(Map.empty[String, String])(e ⇒ Map("new-email" → e)))
+                  if (!s.hasSelectedEmail) {
+                    SelectEmailForm.selectEmailForm
+                  } else {
+                    SelectEmailForm.selectEmailForm.copy(data =
+                      s.pendingEmail.fold(Map("new-email" → ""))(e ⇒ Map("new-email" → e)))
+                  }
                 }
                 Ok(views.html.email.select_email(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
             },
@@ -122,16 +127,19 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       ): Future[Result] =
         SelectEmailForm.selectEmailForm.bindFromRequest().fold(
           withErrors ⇒ Ok(views.html.email.select_email(email, withErrors, backLink)),
-          _.newEmail.fold[Future[Result]]{
-            SeeOther(routes.EmailController.confirmEmail(crypto.encrypt(email)).url)
-          } { newEmail ⇒
-            val updatedSession = session.copy(pendingEmail   = Some(newEmail), confirmedEmail = None)
+          { form ⇒
+            val (updatedSession, result) = form.newEmail.fold{
+              session.copy(hasSelectedEmail = true) →
+                SeeOther(routes.EmailController.confirmEmail(crypto.encrypt(email)).url)
+            }{ newEmail ⇒
+              session.copy(pendingEmail     = Some(newEmail), confirmedEmail = None, hasSelectedEmail = true) →
+                SeeOther(routes.EmailController.verifyEmail().url)
+            }
 
             if (updatedSession =!= session) {
-              updateSessionAndReturnResult(updatedSession,
-                                           SeeOther(routes.EmailController.verifyEmail().url))
+              updateSessionAndReturnResult(updatedSession, result)
             } else {
-              SeeOther(routes.EmailController.verifyEmail().url)
+              result
             }
           }
         )

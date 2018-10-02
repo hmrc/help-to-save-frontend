@@ -528,7 +528,7 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(session)))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, Some("valid@email.com"), None, None, None, Some(bankDetails), accountNumber = None))(Right())
+          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, Some("valid@email.com"), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
         }
         val result = doRequest()
 

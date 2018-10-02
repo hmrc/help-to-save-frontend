@@ -317,6 +317,7 @@ class EmailControllerSpec
           mockSessionCacheConnectorGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(NotEnrolled))
           mockEncrypt(emailStr)(encryptedEmail)
+          mockSessionCacheConnectorPut(session.copy(hasSelectedEmail = true))(Right(()))
         }
 
         val result = selectEmailSubmit(None)
@@ -333,7 +334,7 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockSessionCacheConnectorGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(session.copy(pendingEmail = Some(testEmail)))(Right(None))
+          mockSessionCacheConnectorPut(session.copy(pendingEmail     = Some(testEmail), hasSelectedEmail = true))(Right(None))
         }
 
         val result = selectEmailSubmit(Some(testEmail))
@@ -389,6 +390,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
           mockEncrypt("email@gmail.com")(encryptedEmail)
+          mockSessionCacheConnectorPut(session.copy(hasSelectedEmail = true))(Right(()))
         }
 
         val result = selectEmailSubmit(None)
@@ -404,6 +406,7 @@ class EmailControllerSpec
           mockSessionCacheConnectorGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
+          mockSessionCacheConnectorPut(session.copy(hasSelectedEmail = true))(Right(()))
         }
 
         val result = selectEmailSubmit(Some(testEmail))
