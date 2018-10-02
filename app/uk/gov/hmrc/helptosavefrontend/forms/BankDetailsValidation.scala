@@ -80,7 +80,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] = {
       val validation: ValidOrErrorStrings[Option[String]] =
         data.get(key)
-          .map(_.cleanupSpecialCharacters)
+          .map(_.cleanupSpecialCharacters.removeAllSpaces)
           .filter(_.nonEmpty)
           .fold[ValidOrErrorStrings[Option[String]]](Valid(None)){ s ⇒
             if (s.length < rollNumberMinLength) {
