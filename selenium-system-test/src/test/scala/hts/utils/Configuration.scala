@@ -48,8 +48,8 @@ object Configuration {
 
   val (host: String, authHost: String, ggHost: String, feedbackHost: String) = {
     environment match {
-      case Environment.Local ⇒ ("http://localhost:7000", "http://localhost:9949", "http://localhost:9025", "http://localhost:9250")
-      case Environment.Dev | Environment.Qa | Environment.Staging | Environment.Esit ⇒
+      case Environment.Local | Environment.Dev ⇒ ("http://localhost:7000", "http://localhost:9949", "http://localhost:9025", "http://localhost:9250")
+      case Environment.Qa | Environment.Staging | Environment.Esit ⇒
         val rootUrl = Option(System.getProperty("rootUrl")).getOrElse(sys.error("no rootUrl supplied")).toLowerCase
         List.fill(4)(rootUrl) // scalastyle:ignore magic.number
       case _ ⇒ sys.error(s"Environment '$environment' not known")
