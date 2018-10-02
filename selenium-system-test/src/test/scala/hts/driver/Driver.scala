@@ -22,8 +22,11 @@ import java.util.concurrent.TimeUnit
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
+import hts.utils.Configuration.environment
+import hts.utils.Environment.Local
 import org.openqa.selenium.WebDriver
 import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
+import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 
 object Driver extends Driver
@@ -39,16 +42,23 @@ class Driver {
 
   def newWebDriver(): Either[String, WebDriver] = {
     val selectedDriver: Either[String, WebDriver] = Option(systemProperties.getProperty("browser")).map(_.toLowerCase) match {
-      case Some("chrome")        ⇒ Right(createChromeDriver(false))
-      case Some("zap-chrome")    ⇒ Right(createZapChromeDriver())
-      case Some("headless")      ⇒ Right(createChromeDriver(true))
-      case Some("browserstack")  ⇒ Right(createBrowserStackDriver)
-      case Some("browserstack1") ⇒ Right(createBrowserStackDriverOne)
-      case Some("browserstack2") ⇒ Right(createBrowserStackDriverTwo)
-      case Some("browserstack3") ⇒ Right(createBrowserStackDriverThree)
-      case Some("browserstack4") ⇒ Right(createBrowserStackDriverFour)
-      case Some(other)           ⇒ Left(s"Unrecognised browser: $other")
-      case None                  ⇒ Left("No browser set")
+      case Some("firefox") ⇒ Right(new FirefoxDriver())
+      case Some("chrome") ⇒
+        environment match {
+          case Local ⇒
+            Right(createChromeDriver(false))
+          case _ ⇒ Right(new ChromeDriver())
+        }
+      case Some("remote-chrome")  ⇒ Right(createRemoteChrome)
+      case Some("remote-firefox") ⇒ Right(createRemoteFirefox)
+      case Some("zap-chrome")     ⇒ Right(createZapChromeDriver())
+      case Some("browserstack")   ⇒ Right(createBrowserStackDriver)
+      case Some("browserstack1")  ⇒ Right(createBrowserStackDriverOne)
+      case Some("browserstack2")  ⇒ Right(createBrowserStackDriverTwo)
+      case Some("browserstack3")  ⇒ Right(createBrowserStackDriverThree)
+      case Some("browserstack4")  ⇒ Right(createBrowserStackDriverFour)
+      case Some(other)            ⇒ Left(s"Unrecognised browser: $other")
+      case None                   ⇒ Left("No browser set")
     }
 
     selectedDriver.foreach { driver ⇒
@@ -57,6 +67,14 @@ class Driver {
       )
     }
     selectedDriver
+  }
+
+  def createRemoteChrome: WebDriver = {
+    new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), new ChromeOptions())
+  }
+
+  def createRemoteFirefox: WebDriver = {
+    new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), new FirefoxOptions())
   }
 
   private val os: String =
