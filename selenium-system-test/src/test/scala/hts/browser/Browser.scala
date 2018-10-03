@@ -123,21 +123,21 @@ trait Assertions {
   }
 
   def checkCurrentPageIs(page: Page)(implicit driver: WebDriver): Unit = {
-      def isActualUrlExpectedUrl(expectedUrl: String)(implicit driver: WebDriver): Boolean = {
-        try {
-          val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
-          val expectedCondition = new Function[WebDriver, Boolean]() {
-            override def apply(t: WebDriver): Boolean = {
-              ExpectedConditions.or(
-                ExpectedConditions.urlContains(expectedUrl)).apply(driver)
-            }
+    def isActualUrlExpectedUrl(expectedUrl: String)(implicit driver: WebDriver): Boolean = {
+      try {
+        val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
+        val expectedCondition = new Function[WebDriver, Boolean]() {
+          override def apply(t: WebDriver): Boolean = {
+            ExpectedConditions.or(
+              ExpectedConditions.urlContains(expectedUrl)).apply(driver)
           }
-          wait.until(expectedCondition)
-          true
-        } catch {
-          case NonFatal(_) ⇒ false
         }
+        wait.until(expectedCondition)
+        true
+      } catch {
+        case NonFatal(_) ⇒ false
       }
+    }
 
     val urlMatches =
       Either.cond(isActualUrlExpectedUrl(page.expectedURL),

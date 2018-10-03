@@ -19,10 +19,14 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@title = @{
+  Messages("hts.we-cannot-check-details.title.h1")
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-title = Messages("hts.global.title", Messages("hts.we-cannot-check-details.title.h1"), "", Messages("hts.global.title-suffix")),
-bodyClasses = None) {
-  <h1 class="heading-large">@Messages("hts.we-cannot-check-details.title.h1")</h1>
+  title = title,
+  bodyClasses = None){
+  <h1 class="heading-large">@title</h1>
   <p>@Html(Messages("hts.we-cannot-check-details.title.p1"))</p>
   <ul class="list list-bullet">
     <li>@Messages("hts.we-cannot-check-details.ul1-li1")</li>

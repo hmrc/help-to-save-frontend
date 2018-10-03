@@ -37,14 +37,17 @@
     </div>
 }
 
+@title = @{
+  Messages("hts.close-account.title.h1")
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = Messages("hts.global.title", Messages("hts.close-account.title.h1"), Messages("hts.close-account.section.title"), Messages("hts.global.title-suffix")
-    ),
+    title = title + " " + Messages("hts.close-account.section.title"),
     sidebarLinks = None,
     bodyClasses = None,
     serviceInfoContent = serviceInfoContent) {
 
-    <h1>@messages("hts.close-account.title.h1")</h1>
+    <h1>@title</h1>
 
     @{
       maybeAccount -> maybeAccount.flatMap(_.currentBonusTerm.map(_.bonusEstimate)) match {

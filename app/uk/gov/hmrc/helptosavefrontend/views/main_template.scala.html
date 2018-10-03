@@ -29,6 +29,13 @@
 
 @import uk.gov.hmrc.play.views.html.layouts
 
+@titleTemplate = @{
+  Messages("hts.global.title", title, "", Messages("hts.global.title-suffix"))
+}
+
+@pageTitle = @{
+  if(isErrorPage) Messages("hts.global.error.prefix") + " " + titleTemplate else titleTemplate
+}
 
 @sidebar = {
   @if(sidebarLinks.isDefined) {
@@ -37,7 +44,7 @@
 }
 
 @govuk_wrapper(appConfig = frontendAppConfig,
-  title,
+  pageTitle,
   mainClass = mainClass,
   bodyClasses = bodyClasses,
   sidebar = sidebar,

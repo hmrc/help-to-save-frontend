@@ -37,7 +37,9 @@
 @sortCodeBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "sortCode")}
 @accountNumberBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "accountNumber")}
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(title = Messages("hts.global.title", pageTitle, "", Messages("hts.global.title-suffix")), bodyClasses = None) {
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+  title = pageTitle,
+  bodyClasses = None) {
 
   @navigate_back(Some(backLink))
 

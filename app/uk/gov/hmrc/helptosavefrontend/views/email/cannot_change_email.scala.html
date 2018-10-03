@@ -24,48 +24,48 @@
 
 @(backupEmail: String, form: Form[Continue], duringRegistrationJourney: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-    @defining(form.error("radio-inline-group").isDefined){ hasErrors =>
+  @title = @{
+    Messages("hts.cannot-change-email.title.h1")
+  }
 
-        @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-            title = errorPrefix(form) + Messages("hts.global.title", Messages("hts.cannot-change-email.title.h1"), "", Messages("hts.global.title-suffix")),
-            sidebarLinks = None,
-            bodyClasses = None,
-            isErrorPage = hasErrors) {
+  @hasErrors = @{form.error("radio-inline-group")isDefined}
 
-        @{if(hasErrors)
-        <div class="error-summary" role="alert" aria-labelledby="error-summary-select-one-option" tabindex="-1">
-            <h2 class="heading-medium error-summary-heading" id="error-summary-select-one-option">{Messages("hts.cannot-change-email.error-summary.title")}</h2>
-            <ul class="error-summary-list">
-                <li><a href="#select-email">{Messages("hts.cannot-change-email.error-summary.descriptive-link")}</a></li>
-            </ul>
-        </div>
-        }
+  @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+    title = title,
+    sidebarLinks = None,
+    bodyClasses = None,
+    isErrorPage = hasErrors) {
 
-        <h1 class="heading-large">@Messages("hts.cannot-change-email.title.h1")</h1>
-        <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
+    @{if(hasErrors)
+      <div class="error-summary" role="alert" aria-labelledby="error-summary-select-one-option" tabindex="-1">
+        <h2 class="heading-medium error-summary-heading" id="error-summary-select-one-option">{Messages("hts.cannot-change-email.error-summary.title")}</h2>
+        <ul class="error-summary-list">
+          <li><a href="#select-email">{Messages("hts.cannot-change-email.error-summary.descriptive-link")}</a></li>
+        </ul>
+      </div>
+    }
 
-        @if(duringRegistrationJourney){
-            <p>@Html(Messages("hts.cannot-change-email.registration.p2"))</p>
-            <p>@Messages("hts.cannot-change-email.registration.p3")</p>
-        } else {
-            <p>@Html(Messages("hts.cannot-change-email.de.to.digital.p2"))</p>
-            <p>@Messages("hts.cannot-change-email.de.to.digital.p3")</p>
-        }
+    <h1 class="heading-large">@title</h1>
+    <p class="lede">@Messages("hts.cannot-change-email.p1")</p>
 
-
-
+    @if(duringRegistrationJourney){
+      <p>@Html(Messages("hts.cannot-change-email.registration.p2"))</p>
+      <p>@Messages("hts.cannot-change-email.registration.p3")</p>
+    } else {
+      <p>@Html(Messages("hts.cannot-change-email.de.to.digital.p2"))</p>
+      <p>@Messages("hts.cannot-change-email.de.to.digital.p3")</p>
+    }
 
     @helpers.form(routes.EmailController.verifyEmailErrorSubmit){
-        @CSRF.formField(request)
+      @CSRF.formField(request)
 
-        <fieldset>
-            <legend>
-                <h2 class="heading-medium">@Messages("hts.cannot-change-email.header1")</h2>
-                <span class="body-text">@Messages("hts.cannot-change-email.p4")</span>
-            </legend>
+      <fieldset>
+        <legend>
+          <h2 class="heading-medium">@Messages("hts.cannot-change-email.header1")</h2>
+          <span class="body-text">@Messages("hts.cannot-change-email.p4")</span>
+        </legend>
 
-            <div class="@{"form-group" + { if(hasErrors) " form-group-error" else "" }}" id="select-email">
-
+        <div class="@{"form-group" + { if(hasErrors) " form-group-error" else "" }}" id="select-email">
                 @{if(hasErrors) <span class="error-message">{Messages("hts.cannot-change-email.select-option")}</span> }
 
                 <div class="multiple-choice">
@@ -88,7 +88,7 @@
 
 
         @helpers.submit('_buttonClass -> "", 'id → "email-error-continue"){ @Messages("hts.cannot-change-email.continue-button") }
-    }
+
     }
 
 }
