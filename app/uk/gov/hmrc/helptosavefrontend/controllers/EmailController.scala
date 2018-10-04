@@ -126,7 +126,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                    session:  HTSSession
       ): Future[Result] =
         SelectEmailForm.selectEmailForm.bindFromRequest().fold(
-          withErrors ⇒ Ok(views.html.email.select_email(email, withErrors, backLink)),
+          withErrors ⇒ Ok(views.html.email.select_email(email, withErrors.copy(data = Map.empty[String, String]), backLink)),
           { form ⇒
             val (updatedSession, result) = form.newEmail.fold{
               session.copy(hasSelectedEmail = true) →
