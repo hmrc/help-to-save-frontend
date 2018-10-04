@@ -401,7 +401,16 @@ hts.iv.we_ve_confirmed_your_identity.p2=We&rsquo;ll check if you&rsquo;re eligib
 
 # IV Precondition Failed
 hts.iv.precondition_failed.title.h1=You’re not able to use this service
-hts.iv.precondition_failed.message=We&rsquo;ve checked the details in your Government Gateway account and you do not meet the criteria to use this service.
+hts.iv.precondition_failed.p1=We&rsquo;ve checked the details in your Government Gateway account and you do not meet the criteria to use this service.
+hts.iv.precondition_failed.p2=This could be for several different reasons. For example, it could be because:
+hts.iv.precondition_failed.ul1-li1=you used the Government Gateway account that is linked to your business tax account to apply for a Help to Save account
+hts.iv.precondition_failed.ul1-li2=you do not have a National Insurance number
+hts.iv.precondition_failed.ul1-li3=you do not have a passport
+hts.iv.precondition_failed.ul1-li4=we could not verify your address
+hts.iv.precondition_failed.h2=How to apply again
+hts.iv.precondition_failed.p3=If you want to try to apply for a Help to Save account again you&rsquo;ll need to create a new Government Gateway account. This will need to be for a personal tax account.
+hts.iv.precondition_failed.create-new-gg-account=Create a new Government Gateway account
+
 hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
 
