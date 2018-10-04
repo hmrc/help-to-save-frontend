@@ -65,7 +65,26 @@ object HTSSession {
         )
     }
 
-  implicit val htsSessionFormat: Format[HTSSession] = Json.format[HTSSession]
+  implicit val htsSessionReads: Reads[HTSSession] = new Reads[HTSSession] {
+    override def reads(json: JsValue): JsResult[HTSSession] =
+      for {
+        eligibilityCheckResult ← (json \ "eligibilityCheckResult").validateOpt[Either[Ineligible, EligibleWithUserInfo]]
+        confirmedEmail ← (json \ "confirmedEmail").validateOpt[Email]
+        pendingEmail ← (json \ "pendingEmail").validateOpt[Email]
+        ivURL ← (json \ "ivURL").validateOpt[String]
+        ivSuccessURL ← (json \ "ivSuccessURL").validateOpt[String]
+        bankDetails ← (json \ "bankDetails").validateOpt[BankDetails]
+        changingDetails ← (json \ "changingDetails").validateOpt[Boolean]
+        accountNumber ← (json \ "accountNumber").validateOpt[String]
+        hasSelectedEmail ← (json \ "hasSelectedEmail").validateOpt[Boolean]
+
+      } yield HTSSession(
+        eligibilityCheckResult, confirmedEmail, pendingEmail, ivURL, ivSuccessURL, bankDetails,
+        changingDetails.getOrElse(false), accountNumber, hasSelectedEmail.getOrElse(false))
+
+  }
+
+  implicit val htsSessionWrites: Writes[HTSSession] = Json.writes[HTSSession]
 
   implicit val eq: Eq[HTSSession] = Eq.fromUniversalEquals[HTSSession]
 
