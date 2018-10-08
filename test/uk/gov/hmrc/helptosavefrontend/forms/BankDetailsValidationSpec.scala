@@ -28,8 +28,8 @@ class BankDetailsValidationSpec extends TestSupport {
   val bankValidationConfig = Configuration(
     "bank-details-validation.sort-code.length" → 6,
     "bank-details-validation.account-number.length" → 8,
-    "bank-details-validation.roll-number.min-length" → 3,
-    "bank-details-validation.roll-number.max-length" → 4,
+    "bank-details-validation.roll-number.min-length" → 4,
+    "bank-details-validation.roll-number.max-length" → 18,
     "bank-details-validation.account-name.min-length" → 3,
     "bank-details-validation.account-name.max-length" → 4
   )
@@ -177,16 +177,12 @@ class BankDetailsValidationSpec extends TestSupport {
       "allow inputs" which {
 
         "have a length within the configured limits" in {
-          testRollNumber(Some("ab1"))(Right(Some("ab1")))
           testRollNumber(Some("ab12"))(Right(Some("ab12")))
+          testRollNumber(Some("length18stringonly"))(Right(Some("length18stringonly")))
         }
 
-        "contains trailing and leading spaces" in {
-          testRollNumber(Some("  ab1   "))(Right(Some("ab1")))
-        }
-
-        "contains control characters" in {
-          testRollNumber(Some("ab1\n\r\t"))(Right(Some("ab1")))
+        "which contain only dots, hyphens and forward slashes" in {
+          testRollNumber(Some("ab1.cd3-ef/123"))(Right(Some("ab1.cd3-ef/123")))
         }
 
         "is null" in {
@@ -201,14 +197,25 @@ class BankDetailsValidationSpec extends TestSupport {
 
       "not allow inputs" when {
 
+        "containing spaces in them" in {
+          testRollNumber(Some(" a b "))(Left(Set(ErrorMessages.rollNumberInvalid)))
+        }
+
+        "containing control characters" in {
+          testRollNumber(Some("ab1\n\r\t"))(Left(Set(ErrorMessages.rollNumberInvalid)))
+        }
+
         "the length is less than the configured length" in {
-          testRollNumber(Some("ab"))(Left(Set(ErrorMessages.rollNumberTooShort)))
+          testRollNumber(Some("ab"))(Left(Set(ErrorMessages.rollNumberInvalid)))
         }
 
         "the length is greater than the configured length" in {
-          testRollNumber(Some("ab123"))(Left(Set(ErrorMessages.rollNumberTooLong)))
+          testRollNumber(Some("abcdefghij123456789"))(Left(Set(ErrorMessages.rollNumberInvalid)))
         }
 
+        "containing characters not allowed as per regex" in {
+          testRollNumber(Some("a_b$c%&^@!"))(Left(Set(ErrorMessages.rollNumberInvalid)))
+        }
       }
 
     }
@@ -276,12 +283,12 @@ class BankDetailsValidationSpec extends TestSupport {
         }
 
         "the roll number is too short" in {
-          test(_.rollNumberTooShort, ErrorMessages.rollNumberTooShort)
+          test(_.rollNumberInvalid, ErrorMessages.rollNumberInvalid)
 
         }
 
         "the roll number is too long" in {
-          test(_.rollNumberTooLong, ErrorMessages.rollNumberTooLong)
+          test(_.rollNumberInvalid, ErrorMessages.rollNumberInvalid)
         }
 
         "the account name is too short" in {

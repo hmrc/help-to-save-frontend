@@ -16,22 +16,26 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import cats.data.Validated.{Invalid, Valid}
+import java.util.regex.Matcher
+
+import cats.data.Validated.Valid
 import cats.instances.int._
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
-import play.api.data.{Form, FormError}
 import play.api.data.Forms.{optional, text}
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.util.Validation.{ValidOrErrorStrings, invalid, validatedFromBoolean}
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.{ErrorMessages, StringOps}
+import uk.gov.hmrc.helptosavefrontend.util.Validation.{ValidOrErrorStrings, invalid, validatedFromBoolean}
 
 class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
   import configuration.BankDetailsConfig._
+
+  private val rollNoRegex: String ⇒ Matcher = (s"^([0-9a-zA-Z\\\\/\\\\.-]{$rollNumberMinLength,$rollNumberMaxLength})" + "$").r.pattern.matcher _
 
   val sortCodeFormatter: Formatter[SortCode] = new Formatter[SortCode] {
 
@@ -41,7 +45,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
       val validation: ValidOrErrorStrings[SortCode] =
         data.get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
-          .fold(invalid[SortCode](ErrorMessages.sortCodeIncorrectFormat)){ s ⇒
+          .fold(invalid[SortCode](ErrorMessages.sortCodeIncorrectFormat)) { s ⇒
             val p = s.filterNot(allowedSeparators.contains)
             if (p.length === sortCodeLength && p.forall(_.isDigit)) {
               SortCode(p.map(_.asDigit)).fold[ValidOrErrorStrings[SortCode]](invalid(ErrorMessages.sortCodeIncorrectFormat))(Valid(_))
@@ -64,7 +68,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
       val validation: ValidOrErrorStrings[String] =
         data.get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
-          .fold(invalid[String](ErrorMessages.accountNumberIncorrectFormat)){ s ⇒
+          .fold(invalid[String](ErrorMessages.accountNumberIncorrectFormat)) { s ⇒
             validatedFromBoolean(s)(s ⇒ s.length === accountNumberLength && s.forall(_.isDigit), ErrorMessages.accountNumberIncorrectFormat)
           }
 
@@ -80,18 +84,14 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] = {
       val validation: ValidOrErrorStrings[Option[String]] =
         data.get(key)
-          .map(_.cleanupSpecialCharacters.removeAllSpaces)
           .filter(_.nonEmpty)
-          .fold[ValidOrErrorStrings[Option[String]]](Valid(None)){ s ⇒
-            if (s.length < rollNumberMinLength) {
-              invalid(ErrorMessages.rollNumberTooShort)
-            } else if (s.length > rollNumberMaxLength) {
-              invalid(ErrorMessages.rollNumberTooLong)
-            } else {
+          .fold[ValidOrErrorStrings[Option[String]]](Valid(None)) { s ⇒
+            if (rollNoRegex(s).matches()) {
               Valid(Some(s))
+            } else {
+              invalid(ErrorMessages.rollNumberInvalid)
             }
           }
-
       validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
     }
 
@@ -105,7 +105,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
       val validation: ValidOrErrorStrings[String] =
         data.get(key)
           .map(_.cleanupSpecialCharacters.trim)
-          .fold(invalid[String](ErrorMessages.accountNameTooShort)){ s ⇒
+          .fold(invalid[String](ErrorMessages.accountNameTooShort)) { s ⇒
             if (s.length < accountNameMinLength) {
               invalid(ErrorMessages.accountNameTooShort)
             } else if (s.length > accountNameMaxLength) {
@@ -132,9 +132,7 @@ object BankDetailsValidation {
 
     val accountNumberIncorrectFormat = "account_number_incorrect_format"
 
-    val rollNumberTooShort = "roll_number_too_short"
-
-    val rollNumberTooLong = "roll_number_too_long"
+    val rollNumberInvalid = "roll_number_invalid"
 
     val accountNameTooShort = "account_name_too_short"
 
@@ -156,11 +154,8 @@ object BankDetailsValidation {
     def accountNumberIncorrectFormat(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.accountNumberIncorrectFormat)
 
-    def rollNumberTooShort(key: String): Boolean =
-      hasErrorMessage(key, ErrorMessages.rollNumberTooShort)
-
-    def rollNumberTooLong(key: String): Boolean =
-      hasErrorMessage(key, ErrorMessages.rollNumberTooLong)
+    def rollNumberInvalid(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.rollNumberInvalid)
 
     def accountNameTooShort(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.accountNameTooShort)
