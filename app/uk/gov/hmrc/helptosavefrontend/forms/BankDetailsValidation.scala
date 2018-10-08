@@ -35,7 +35,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
   import configuration.BankDetailsConfig._
 
-  private val rollNoRegex: String ⇒ Matcher = (s"^([0-9a-zA-Z\\\\/\\\\.-]{$rollNumberMinLength,$rollNumberMaxLength})" + "$").r.pattern.matcher _
+  private val rollNoRegex: String ⇒ Matcher = (s"^([0-9a-zA-Z\\/.-]{$rollNumberMinLength,$rollNumberMaxLength})" + "$").r.pattern.matcher _
 
   val sortCodeFormatter: Formatter[SortCode] = new Formatter[SortCode] {
 
