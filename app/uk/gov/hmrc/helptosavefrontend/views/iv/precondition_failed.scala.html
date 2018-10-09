@@ -30,9 +30,21 @@
 
   <h1 class="heading-large">@Html(title)</h1>
 
-  <p>@Html(Messages("hts.iv.precondition_failed.message"))</p>
+  <p>@Html(Messages("hts.iv.precondition_failed.p1"))</p>
+  <p>@Html(Messages("hts.iv.precondition_failed.p2"))</p>
+
+  <ul class="list list-bullet">
+    <li>@Html(Messages("hts.iv.precondition_failed.ul1-li1"))</li>
+    <li>@Html(Messages("hts.iv.precondition_failed.ul1-li2"))</li>
+    <li>@Html(Messages("hts.iv.precondition_failed.ul1-li3"))</li>
+    <li>@Html(Messages("hts.iv.precondition_failed.ul1-li4"))</li>
+  </ul>
+
+  <h2 class="heading-medium">@Html(Messages("hts.iv.precondition_failed.h2"))</h2>
+  <p>@Html(Messages("hts.iv.precondition_failed.p3"))</p>
+
   <section class="subsection--wide">
-    <p><a href="@appConfig.govUkURL">@Messages("hts.global.exit.to.gov.uk")</a></p>
+    <p><a href="@appConfig.ggUserUrl">@Html(Messages("hts.iv.precondition_failed.create-new-gg-account"))</a></p>
   </section>
 
 }
