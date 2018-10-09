@@ -52,7 +52,11 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
 
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else {
-      routes.RegisterController.changeEmail().url
+      if (session.pendingEmail.isDefined) {
+        routes.EmailController.getEmailVerified().url
+      } else {
+        routes.EmailController.getSelectEmailPage().url
+      }
     }
 
   def getBankDetailsPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
