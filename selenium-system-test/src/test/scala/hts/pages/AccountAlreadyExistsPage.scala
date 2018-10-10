@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package hts.pages.accountHomePages
+package hts.pages
 
-import hts.pages.Page
 import hts.utils.Configuration
 
-object AccessAccountLink extends Page {
+object AccountAlreadyExistsPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/access-account"
+  override val expectedURL = s"${Configuration.host}/help-to-save/hmrc-internal/customer-already-has-account"
 
+  override val expectedPageTitle: Option[String] = Some("Customer already has an account")
+  override val expectedPageHeader: Option[String] = Some("Customer already has an account")
 }

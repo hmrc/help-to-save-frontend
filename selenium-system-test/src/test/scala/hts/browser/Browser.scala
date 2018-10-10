@@ -18,9 +18,7 @@ package hts.browser
 
 import java.util.function.Function
 
-import hts.pages.InformationPages.{FeedbackPage, PrivacyPolicyPage}
 import hts.pages.Page
-import hts.utils.Configuration
 import org.openqa.selenium._
 import org.openqa.selenium.support.ui._
 import org.scalatest.Matchers
@@ -29,31 +27,17 @@ import org.scalatest.selenium.WebBrowser
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
-object Browser extends WebBrowser with Navigation with Retrievals with Assertions with Matchers {
-  def checkForLinksThatExistOnEveryPage(page: Page)(implicit driver: WebDriver): Unit = {
-    checkCurrentPageIs(page)
-    clickButtonByIdOnceClickable("feedback-link")
-    checkCurrentPageIs(FeedbackPage)
-
-    goBack()
-    clickButtonByIdOnceClickable("get-help-action")
-    isElementByIdVisible("report-error-partial-form") shouldBe true
-    openAndCheckPageInNewWindowUsingLinkText("Privacy policy", PrivacyPolicyPage)
-
-    page.navigate()
-    checkCurrentPageIs(page)
-  }
-}
+object Browser extends WebBrowser with Navigation with Retrievals with Assertions with Matchers
 
 trait Navigation {
   this: WebBrowser ⇒
 
   def navigateTo(uri: String)(implicit driver: WebDriver): Unit =
-    go to s"${Configuration.host}/help-to-save/$uri"
+    go to uri
 
   def nextPage()(implicit driver: WebDriver): Unit = {
     driver.findElement(By.id("next")).sendKeys(Keys.chord(Keys.CONTROL, Keys.END))
-    find(id("next")).foreach(click.on)
+    find(CssSelectorQuery(".page-nav__link.page-nav__link--next")).foreach(click.on)
   }
 
   def clickButtonByIdOnceClickable(id: String)(implicit driver: WebDriver): Unit =
@@ -70,7 +54,7 @@ trait Navigation {
     driver match {
       case executor: JavascriptExecutor ⇒
         val diff = {
-          val d = elementLocation.getY - executor.executeScript("return window.pageYOffset;").toString.toFloat.toInt
+          val d = elementLocation.getY - executor.executeScript("return window.pageYOffset;").toString.toInt
           if (d < 0) {
             d - 200 // done to avoid any bars or popups blocking elements on mobile devices
           } else {
@@ -98,8 +82,7 @@ trait Navigation {
 
 }
 
-trait Retrievals {
-  this: WebBrowser ⇒
+trait Retrievals { this: WebBrowser ⇒
 
   def getCurrentUrl(implicit driver: WebDriver): String = driver.getCurrentUrl
 
@@ -110,15 +93,14 @@ trait Retrievals {
 
 }
 
-trait Assertions {
-  this: WebBrowser with Retrievals with Matchers ⇒
+trait Assertions { this: WebBrowser with Retrievals with Matchers ⇒
 
-  def isTextOnPage(regex: String)(implicit driver: WebDriver): Either[String, Set[String]] = {
-    val textPresent = regex.r.findAllIn(Browser.getPageContent)
-    if (textPresent.isEmpty) {
+  def isTextOnPage(regex: String)(implicit driver: WebDriver): Either[String, Unit] = {
+    val textPresent = regex.r.findAllIn(Browser.getPageContent).nonEmpty
+    if (!textPresent) {
       Left(s"Text not found: $regex")
     } else {
-      Right(textPresent.toSet)
+      Right(())
     }
   }
 
@@ -128,10 +110,10 @@ trait Assertions {
           val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
           val expectedCondition = new Function[WebDriver, Boolean]() {
             override def apply(t: WebDriver): Boolean = {
-              ExpectedConditions.or(
-                ExpectedConditions.urlContains(expectedUrl)).apply(driver)
+              ExpectedConditions.urlContains(expectedUrl).apply(driver)
             }
           }
+
           wait.until(expectedCondition)
           true
         } catch {
@@ -139,33 +121,13 @@ trait Assertions {
         }
       }
 
-    val urlMatches =
-      Either.cond(isActualUrlExpectedUrl(page.expectedURL),
-        (),
-        s"Expected URL was ${page.expectedURL}, but actual URL was " + driver.getCurrentUrl()
-      )
+    val urlMatches = isActualUrlExpectedUrl(page.expectedURL)
+    val result: Either[String, Unit] = if (urlMatches) Right(()) else Left(s"Expected URL was ${page.expectedURL}, but actual URL was " + driver.getCurrentUrl())
 
-    urlMatches shouldBe Right(())
-    page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
+    result shouldBe Right(())
+    page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - HMRC")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
   }
-
-  def checkExternalPageIs(page: Page)(implicit driver: WebDriver) {
-    page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - GOV.UK")
-    page.expectedPageHeader.foreach(getPageHeading shouldBe _)
-  }
-
-  def checkForBadContent(page: Page)(implicit driver: WebDriver): Unit = {
-    checkCurrentPageIs(page)
-    // check for unmapped message keys on the page
-    isTextOnPage("hts(\\..+)+").fold(
-      _ ⇒ (),
-      s ⇒ fail(s"Found unescaped message keys on page: [${s.mkString("; ")}]")
-    )
-  }
-
-  def checkHeader(page: Page)(implicit driver: WebDriver): Unit =
-    page.expectedPageHeader.foreach(getPageHeading shouldBe _)
 
   def scrollDown()(implicit driver: WebDriver): AnyRef = driver match {
     case executor: JavascriptExecutor ⇒
@@ -180,6 +142,7 @@ trait Assertions {
         ExpectedConditions.jsReturnsValue("return document.readyState === 'complete';").apply(driver)
       }
     }
+
     wait.until(expectedCondition)
   }
 
@@ -199,5 +162,4 @@ trait Assertions {
   def isElementByIdVisible(id: String)(implicit driver: WebDriver): Boolean = {
     driver.findElement(By.id(id)).isDisplayed
   }
-
 }

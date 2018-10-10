@@ -16,21 +16,6 @@
 
 package hts
 
-import hts.pages.EmailPages.SelectEmailPage
-import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
-import hts.utils.TestBankDetails
-import org.openqa.selenium.WebDriver
-
 package object steps {
-  def createAccountUsingGGEmail()(implicit driver: WebDriver): Unit = {
-    EligiblePage.continue()
-    SelectEmailPage.selectGGEmail()
-    BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
-    CheckDetailsCreateAccountPage.createAccount()
-  }
 
-  def createAccountError()(implicit driver: WebDriver): Unit = {
-    EligiblePage.continue()
-    SelectEmailPage.selectGGEmail()
-  }
 }

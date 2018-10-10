@@ -14,13 +14,19 @@
  * limitations under the License.
  */
 
-package hts.pages.InformationPages
+package hts.pages
 
-import hts.pages.Page
 import hts.utils.Configuration
+import org.openqa.selenium.WebDriver
 
-object FeedbackPage extends Page {
+object CreateAccountPage extends Page {
+  override val expectedURL = s"${Configuration.host}/help-to-save/hmrc-internal/create-account"
 
-  val expectedURL: String = s"${Configuration.feedbackHost}/contact/beta-feedback-unauthenticated?service=HTS"
+  override val expectedPageTitle: Option[String] = Some("Create an account")
+  override val expectedPageHeader: Option[String] = Some("Create an account")
 
+  def createAccount()(implicit driver: WebDriver): Unit = {
+    navigate()
+    clickSubmit()
+  }
 }

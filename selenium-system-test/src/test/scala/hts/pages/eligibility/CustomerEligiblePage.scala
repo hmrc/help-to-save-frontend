@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package hts.pages.ErrorPages
+package hts.pages.eligibility
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.{CreateAccountPage, Page}
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object IncorrectDetailsPage extends Page {
+object CustomerEligiblePage extends Page {
+  override val expectedURL = s"${Configuration.host}/help-to-save/hmrc-internal/customer-eligible"
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/incorrect-details"
+  override val expectedPageTitle: Option[String] = Some("Customer is eligible for a Help to Save account")
+  override val expectedPageHeader: Option[String] = Some("Customer is eligible for a Help to Save account")
 
-  override val expectedPageTitle: Option[String] = Some("We need your correct details")
-
-  override val expectedPageHeader: Option[String] = Some("We need your correct details")
-
-  def clickBack(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Back")
-
-  def openForm()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("fill in the form (it will open in a new window)")
+  def continue()(implicit driver: WebDriver): Unit = {
+    navigate()
+    clickSubmit()
+    Browser.checkCurrentPageIs(CreateAccountPage)
+  }
 
 }

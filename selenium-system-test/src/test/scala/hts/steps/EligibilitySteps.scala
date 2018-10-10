@@ -17,72 +17,15 @@
 package hts.steps
 
 import hts.browser.Browser
-import hts.pages.ErrorPages.TechnicalErrorPage
-import hts.pages.InformationPages.ThinkYouAreEligiblePage
-import hts.pages._
-import hts.pages.registrationPages.{EligiblePage, NotEligibleReason3Page, NotEligibleReason4And9Page, NotEligibleReason5Page}
-import hts.utils.ScenarioContext
+import hts.pages.IntroductionHelpToSavePage
+import hts.pages.eligibility._
+import hts.utils.NINOGenerator
 
-class EligibilitySteps extends Steps {
+class EligibilitySteps extends Steps with NINOGenerator {
 
-  Given("^a user is in receipt of WTC$") {
-    val _ = ScenarioContext.generateEligibleNINO()
+  Given("^an applicant is eligible$") {
+    IntroductionHelpToSavePage.checkEligibility(generateEligibleNINO())
+    Browser.checkCurrentPageIs(CustomerEligiblePage)
   }
 
-  When("^they apply for Help to Save$") {
-    AuthorityWizardPage.authenticateEligibleUserOnAnyDevice(EligiblePage.expectedURL, ScenarioContext.currentNINO())
-  }
-
-  Then("^they see that they are eligible for Help to Save$") {
-    Browser.checkHeader(EligiblePage)
-  }
-
-  When("^they confirm their details and continue to create an account$") {
-    EligiblePage.continue()
-  }
-
-  Given("^DES is down$") {
-    val _ = ScenarioContext.generateHTTPErrorCodeNINO(500)
-  }
-
-  Then("^they see a technical error page$") {
-    Browser.checkHeader(TechnicalErrorPage)
-    TechnicalErrorPage.checkForOldQuotes()
-  }
-
-  When("^they then click on still think you're eligible link$") {
-    NotEligibleReason3Page.thinkYouAreEligible()
-  }
-
-  Then("^they see appeals and tax tribunal page$") {
-    Browser.checkHeader(ThinkYouAreEligiblePage)
-    ThinkYouAreEligiblePage.checkForOldQuotes()
-  }
-
-  Given("^a user has NINO (.*)$") { (nino: String) ⇒
-    ScenarioContext.defineNINO(nino)
-  }
-
-  Then("^they see that they are NOT eligible for Help to Save with reason code (.+)$") { (reason: Int) ⇒
-    reason match {
-      case 3 ⇒
-        Browser.checkHeader(NotEligibleReason3Page)
-        NotEligibleReason3Page.checkForOldQuotes()
-        val notEligibleTextItems = NotEligibleReason3Page.notEligibleText
-        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
-        )
-      case 5 ⇒
-        Browser.checkHeader(NotEligibleReason5Page)
-        NotEligibleReason5Page.checkForOldQuotes()
-        val notEligibleTextItems = NotEligibleReason5Page.notEligibleText
-        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
-        )
-      case 4 | 9 ⇒
-        Browser.checkHeader(NotEligibleReason4And9Page)
-        NotEligibleReason4And9Page.checkForOldQuotes()
-        val notEligibleTextItems = NotEligibleReason4And9Page.notEligibleText
-        notEligibleTextItems.foreach(text ⇒ Browser.isTextOnPage(text) shouldBe Right(Set(text))
-        )
-    }
-  }
 }

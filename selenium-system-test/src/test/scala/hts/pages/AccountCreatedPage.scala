@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package hts.pages.accountHomePages
+package hts.pages
 
-import hts.pages.Page
 import hts.utils.Configuration
 
-object AccountHolderEmailVerifiedPage extends Page {
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/email-verified"
+object AccountCreatedPage extends Page {
+  override val expectedURL = s"${Configuration.host}/help-to-save/hmrc-internal/account-created"
 
-  override val expectedPageHeader: Option[String] = Some("Email address verified")
-
-  override val expectedPageTitle: Option[String] = Some("Email address verified - Manage your email address")
+  override val expectedPageTitle: Option[String] = Some("Customer's account has been created")
+  override val expectedPageHeader: Option[String] = Some("Customer's account has been created")
 }

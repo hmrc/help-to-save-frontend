@@ -23,7 +23,6 @@ import cats.syntax.either._
 import cucumber.api.Scenario
 import cucumber.api.scala.{EN, ScalaDsl}
 import hts.driver.Driver
-import hts.utils.ScenarioContext
 import org.openqa.selenium._
 import org.openqa.selenium.support.ui.{ExpectedConditions, WebDriverWait}
 import org.scalatest.Matchers
@@ -37,8 +36,6 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
 
   // create a new driver for each scenario
   Before { _ ⇒
-    ScenarioContext.reset()
-
     if (_driver.isEmpty) {
       val d = Driver.newWebDriver()
         // map the left to Nothing
@@ -53,7 +50,7 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
   After {
     scenario ⇒
       if (scenario.isFailed) {
-        _driver.foreach{
+        _driver.foreach {
           case driver: TakesScreenshot ⇒ takeScreenshot(scenario, driver)
           case _                       ⇒ println("Screenshot will not be taken")
         }
@@ -72,8 +69,7 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
 
       // Try to take screen shot of previous page
       driver.navigate().back()
-
-      val wait = new WebDriverWait(driver, 2) // scalastyle:ignore magic.number
+      val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
       val expectedCondition = new Function[WebDriver, Boolean]() {
         override def apply(t: WebDriver): Boolean = {
           ExpectedConditions.not(ExpectedConditions.urlToBe(failurePageUrl)).apply(driver)
@@ -81,6 +77,7 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
       }
 
       wait.until(expectedCondition)
+
       val screenshotPreviousPage = driver.getScreenshotAs(OutputType.BYTES)
       scenario.embed(screenshotPreviousPage, "image/png")
 
@@ -89,6 +86,7 @@ private[steps] trait Steps extends ScalaDsl with EN with Matchers {
       case e: WebDriverException ⇒ System.err.println(s"Error creating screenshot: ${e.getMessage}")
     }
   }
+
 }
 
 private[steps] object Steps {

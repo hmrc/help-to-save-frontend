@@ -14,19 +14,10 @@
  * limitations under the License.
  */
 
-package hts.pages.identityPages
+package hts.pages
 
-import hts.browser.Browser
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
-object FailedIVPreconditionFailedPage extends IVPage {
-
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/failed-iv-precondition-failed"
-
-  override val expectedPageHeader: Option[String] = Some("You’re not able to use this service")
-
-  override val expectedPageTitle: Option[String] = Some("You’re not able to use this service")
-
-  override def executeIVResultPageAction()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Exit to GOV.UK")
+object StrideAuthRequestPage extends Page {
+  override val expectedURL = s"${Configuration.strideIdpStubHost}/stride-idp-auth/auth-request"
 }
