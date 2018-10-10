@@ -19,6 +19,8 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
+import cats.instances.string._
+import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import javax.inject.Singleton
@@ -29,7 +31,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors._
-import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleWithInfo
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.{CreateAccountError, EligibleWithInfo}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
@@ -116,18 +118,31 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
             val createAccountRequest = CreateAccountRequest(payload, eligibleWithInfo.userInfo.eligible.value.reasonCode)
 
             val result = for {
-              submissionSuccess ← helpToSaveService.createAccount(createAccountRequest).leftMap(submissionFailureToString)
+              submissionSuccess ← helpToSaveService.createAccount(createAccountRequest).leftMap(s ⇒ CreateAccountError(Left(s)))
               _ ← {
                 val update = submissionSuccess.accountNumber.map(a ⇒
                   sessionCacheConnector.put(eligibleWithInfo.session.copy(accountNumber = Some(a.accountNumber))))
-                update.traverse[util.Result, CacheMap](identity)
+                update.traverse[util.Result, CacheMap](identity).leftMap(s ⇒ CreateAccountError(Right(s)))
               }
             } yield submissionSuccess.accountNumber
 
             result.fold[Result]({
-              e ⇒
-                logger.warn(s"Error while trying to create account: $e", nino)
-                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
+              case CreateAccountError(e) ⇒
+                e.fold({ submissionFailure ⇒
+                  logger.warn(s"Error while trying to create account: ${submissionFailureToString(submissionFailure)}", nino)
+                  submissionFailure.errorMessageId.fold(
+                    SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)){ id ⇒
+                      if (id === "ZYRC0703" || id === "ZYRC0707") {
+                        SeeOther(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+                      } else {
+                        SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
+                      }
+                    }
+                }, {
+                  error ⇒
+                    logger.warn(s"Error while trying to create account: $error", nino)
+                    SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
+                })
             }, {
               _.fold(
                 SeeOther(frontendAppConfig.nsiManageAccountUrl)
@@ -166,6 +181,14 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
       }
     }
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+
+  def getCreateAccountErrorBankDetailsPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolled { () ⇒
+      checkIfDoneEligibilityChecks {
+        _ ⇒ Ok(views.html.register.create_account_error_bank_details())
+      }
+    }
+  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
 
   def changeEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -232,4 +255,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 
 object RegisterController {
   case class EligibleWithInfo(userInfo: EligibleWithUserInfo, email: String, session: HTSSession)
+
+  private case class CreateAccountError(error: Either[SubmissionFailure, String])
+
 }

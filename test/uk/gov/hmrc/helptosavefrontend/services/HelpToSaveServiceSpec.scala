@@ -162,6 +162,14 @@ class HelpToSaveServiceSpec extends TestSupport {
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue should be(Left(SubmissionFailure(None, "Encountered error while trying to create account", "oh no!")))
       }
+
+      "create a SubmissionFailure when parsing the error response returns a Left" in {
+        mockCreateAccount(Some(HttpResponse(400, Some(Json.toJson("""{"name":"some_name"}""")))))
+
+        val result = htsService.createAccount(createAccountRequest)
+        result.value.futureValue shouldBe
+          (Left(SubmissionFailure(None, "", """Could not parse http response JSON: /errorDetail: [error.path.missing]; /errorMessage: [error.path.missing]. Response body was "{\"name\":\"some_name\"}"}""")))
+      }
     }
 
     "update email" must {
