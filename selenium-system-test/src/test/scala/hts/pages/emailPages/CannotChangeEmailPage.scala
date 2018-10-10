@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages.ErrorPages
+package hts.pages.emailPages
 
 import hts.pages.Page
 import hts.utils.Configuration
 
-object TotalCapReachedPage extends Page {
+object CannotChangeEmailPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/try-again-later-in-year"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/cannot-change-email"
 
-  override val expectedPageHeader: Option[String] = Some("You cannot open an account yet")
+  override val expectedPageHeader: Option[String] = Some("What do you want to do?")
 
-  override val expectedPageTitle: Option[String] = Some("You cannot open an account yet")
+  override val expectedPageTitle: Option[String] = Some("Something went wrong")
 }

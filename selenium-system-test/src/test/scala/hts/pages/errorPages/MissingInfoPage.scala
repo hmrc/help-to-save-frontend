@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages.EmailPages
+package hts.pages.errorPages
 
 import hts.pages.Page
 import hts.utils.Configuration
 
-object CannotChangeEmailPage extends Page {
+object MissingInfoPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/cannot-change-email"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/missing-details"
 
-  override val expectedPageHeader: Option[String] = Some("What do you want to do?")
+  override val expectedPageHeader: Option[String] = Some("We’re missing some important details")
 
-  override val expectedPageTitle: Option[String] = Some("Something went wrong")
+  override val expectedPageTitle: Option[String] = Some("We’re missing some important details")
 }

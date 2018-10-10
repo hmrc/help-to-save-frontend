@@ -23,7 +23,23 @@ Feature: Verifying header and footer links on every page
     When an applicant logs into gg with missing details
     Then they see a page showing which details are missing
 
-   @VerifyHeaderAndFooter @HTS-1183
-   Scenario: checking the Header and Footer links of the close account are you sure page
+  @VerifyHeaderAndFooter @HTS-1183
+  Scenario: checking the Header and Footer links of the close account are you sure page
     When they log in and proceed to create an account using their GG email
     Then they navigate to and see the close account are you sure page
+
+  @VerifyHeaderAndFooter @HTS-1315
+  Scenario: Checking links to HTS GOV.UK eligibility page
+    Given they have gone through GG/2SV/identity check but they are NOT eligible for Help to Save
+    When they click on eligibility for Help to Save link
+    Then they are directed to the GOV.UK eligibility page
+    When they click on eligibility criteria link
+    Then they are directed to the GOV.UK eligibility page
+
+  @VerifyHeaderAndFooter @HTS-1351
+  Scenario: Checking links to HTS GOV.UK page
+    Given they apply for Help to Save
+    When they click on Exit to GOV.UK link
+    Then they are directed to the GOV.UK How it works page
+    When they click on Cancel and go to GOV.UK link
+    Then they are directed to the GOV.UK How it works page

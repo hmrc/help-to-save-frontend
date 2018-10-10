@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package hts.pages.EmailPages
+package hts.pages.informationPages
 
 import hts.pages.Page
 import hts.utils.Configuration
 
-object CannotChangeEmailPageTryLater extends Page {
+object FeedbackPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/cannot-change-email-try-later"
+  val expectedURL: String = s"${Configuration.feedbackHost}/contact/beta-feedback-unauthenticated?service=HTS"
+
 }

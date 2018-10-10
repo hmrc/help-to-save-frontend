@@ -17,9 +17,9 @@
 package hts.steps
 
 import hts.browser.Browser
-import hts.pages.EmailPages.{SelectEmailPage, VerifyYourEmailPage}
-import hts.pages.ErrorPages.NoAccountPage
-import hts.pages.InformationPages.PrivacyPolicyPage
+import hts.pages.emailPages.{SelectEmailPage, VerifyYourEmailPage}
+import hts.pages.errorPages.NoAccountPage
+import hts.pages.informationPages.PrivacyPolicyPage
 import hts.pages._
 import hts.pages.accountHomePages.{AccessAccountLink, ChangeEmailPage, NsiManageAccountPage, VerifyEmailPage}
 import hts.pages.registrationPages._

@@ -17,7 +17,7 @@
 package hts.steps
 
 import hts.browser.Browser
-import hts.pages.ErrorPages.{LinkExpiredPage, NoAccountPage}
+import hts.pages.errorPages.{LinkExpiredPage, NoAccountPage}
 import hts.pages.registrationPages.CreateAccountErrorPage
 
 class AccessibilitySteps extends Steps {

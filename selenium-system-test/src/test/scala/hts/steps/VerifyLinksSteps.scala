@@ -17,11 +17,12 @@
 package hts.steps
 
 import hts.browser.Browser
-import hts.pages.EmailPages.{CannotChangeEmailPageTryLater, SelectEmailPage, VerifyYourEmailPage}
-import hts.pages.ErrorPages.{MissingInfoPage, ServiceUnavailablePage, TotalCapReachedPage}
-import hts.pages.InformationPages.DailyCapReachedPage
+import hts.pages.emailPages.{CannotChangeEmailPageTryLater, SelectEmailPage, VerifyYourEmailPage}
+import hts.pages.errorPages.{MissingInfoPage, NoAccountPage, ServiceUnavailablePage, TotalCapReachedPage}
+import hts.pages.informationPages.{DailyCapReachedPage, ThinkYouAreEligiblePage}
 import hts.pages._
 import hts.pages.accountHomePages._
+import hts.pages.govPages.{GovUKEligibility, GovUKHowItWorks}
 import hts.pages.registrationPages._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
@@ -120,4 +121,30 @@ class VerifyLinksSteps extends Steps {
     Browser.checkForBadContent(MissingInfoPage)
   }
 
+  When("^they click on eligibility for Help to Save link$") {
+    Browser.clickLinkTextOnceClickable("eligibility for Help to Save")
+  }
+
+  Then("^they are directed to the GOV.UK eligibility page$") {
+    Browser.checkCurrentPageIs(GovUKEligibility, "GOV.UK")
+  }
+
+  When("^they click on eligibility criteria link$") {
+    ThinkYouAreEligiblePage.navigate()
+    Browser.clickLinkTextOnceClickable("eligibility criteria")
+  }
+
+  When("^they click on Exit to GOV.UK link$") {
+    CannotChangeEmailPageTryLater.navigate()
+    Browser.clickLinkTextOnceClickable("Exit to GOV.UK")
+  }
+
+  Then("^they are directed to the GOV.UK How it works page$") {
+    Browser.checkCurrentPageIs(GovUKHowItWorks, "GOV.UK")
+  }
+
+  When("^they click on Cancel and go to GOV.UK link$") {
+    NoAccountPage.navigate()
+    Browser.clickLinkTextOnceClickable("Cancel and go to GOV.UK")
+  }
 }

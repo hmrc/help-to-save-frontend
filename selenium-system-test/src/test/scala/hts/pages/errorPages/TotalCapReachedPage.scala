@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages.InformationPages
+package hts.pages.errorPages
 
 import hts.pages.Page
+import hts.utils.Configuration
 
-object HMRCChangeOfDetailsPage extends Page {
+object TotalCapReachedPage extends Page {
 
-  val expectedURL: String = "https://www.gov.uk/tell-hmrc-change-of-details"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/try-again-later-in-year"
 
-  override val expectedPageTitle: Option[String] = Some("Tell HMRC about a change to your personal details")
+  override val expectedPageHeader: Option[String] = Some("You cannot open an account yet")
 
-  override val expectedPageHeader: Option[String] = Some("Tell HMRC about a change to your personal details")
+  override val expectedPageTitle: Option[String] = Some("You cannot open an account yet")
 }

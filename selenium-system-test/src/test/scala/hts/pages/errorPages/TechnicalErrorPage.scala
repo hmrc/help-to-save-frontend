@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package hts.pages.ErrorPages
+package hts.pages.errorPages
 
-import hts.browser.Browser
 import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
-object IncorrectDetailsPage extends Page {
+object TechnicalErrorPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/incorrect-details"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/check-eligibility"
 
-  override val expectedPageTitle: Option[String] = Some("We need your correct details")
+  override val expectedPageTitle: Option[String] = Some("Sorry, we’re experiencing technical difficulties")
 
-  override val expectedPageHeader: Option[String] = Some("We need your correct details")
-
-  def clickBack(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Back")
-
-  def openForm()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("fill in the form (it will open in a new window)")
+  override val expectedPageHeader: Option[String] = Some("Sorry, we’re experiencing technical difficulties")
 
 }

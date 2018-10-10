@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 
 import cucumber.api.DataTable
 import hts.browser.Browser
-import hts.pages.EmailPages.SelectEmailPage
+import hts.pages.emailPages.SelectEmailPage
 import hts.pages._
 import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.EitherOps._

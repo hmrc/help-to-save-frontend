@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-package hts.pages.ErrorPages
+package hts.pages.emailPages
 
 import hts.pages.Page
 import hts.utils.Configuration
 
-object ServiceUnavailablePage extends Page {
+object CannotChangeEmailPageTryLater extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/service-unavailable"
-
-  override val expectedPageHeader: Option[String] = Some("Service unavailable")
-
-  override val expectedPageTitle: Option[String] = Some("Service unavailable")
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/cannot-change-email-try-later"
 }

@@ -18,7 +18,7 @@ package hts.browser
 
 import java.util.function.Function
 
-import hts.pages.InformationPages.{FeedbackPage, PrivacyPolicyPage}
+import hts.pages.informationPages.{FeedbackPage, PrivacyPolicyPage}
 import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium._
@@ -121,8 +121,8 @@ trait Assertions {
       Right(textPresent.toSet)
     }
   }
-
-  def checkCurrentPageIs(page: Page)(implicit driver: WebDriver): Unit = {
+  //default titleSuffix is for Help to Save pages but can be defined for GOV.UK pages
+  def checkCurrentPageIs(page: Page, titleSuffix: String = "Help to Save - GOV.UK")(implicit driver: WebDriver): Unit = {
       def isActualUrlExpectedUrl(expectedUrl: String)(implicit driver: WebDriver): Boolean = {
         try {
           val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
@@ -146,12 +146,7 @@ trait Assertions {
       )
 
     urlMatches shouldBe Right(())
-    page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - Help to Save - GOV.UK")
-    page.expectedPageHeader.foreach(getPageHeading shouldBe _)
-  }
-
-  def checkExternalPageIs(page: Page)(implicit driver: WebDriver) {
-    page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - GOV.UK")
+    page.expectedPageTitle.foreach(t ⇒ pageTitle shouldBe s"$t - $titleSuffix")
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
   }
 

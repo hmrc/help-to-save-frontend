@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package hts.pages.InformationPages
+package hts.pages.informationPages
 
 import hts.pages.Page
-import hts.utils.Configuration
 
-object PrivacyPolicyPage extends Page {
+object HMRCChangeOfDetailsPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/privacy-statement"
+  val expectedURL: String = "https://www.gov.uk/tell-hmrc-change-of-details"
 
-  override val expectedPageTitle: Option[String] = Some("Help to Save privacy statement")
+  override val expectedPageTitle: Option[String] = Some("Tell HMRC about a change to your personal details")
 
-  override val expectedPageHeader: Option[String] = Some("Help to Save privacy statement")
-
+  override val expectedPageHeader: Option[String] = Some("Tell HMRC about a change to your personal details")
 }

@@ -14,13 +14,17 @@
  * limitations under the License.
  */
 
-package hts.pages.InformationPages
+package hts.pages.errorPages
 
 import hts.pages.Page
 import hts.utils.Configuration
 
-object FeedbackPage extends Page {
+object NoAccountPage extends Page {
 
-  val expectedURL: String = s"${Configuration.feedbackHost}/contact/beta-feedback-unauthenticated?service=HTS"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/no-account"
+
+  override val expectedPageHeader: Option[String] = Some("You do not have a Help to Save account")
+
+  override val expectedPageTitle: Option[String] = Some("You do not have a Help to Save account")
 
 }

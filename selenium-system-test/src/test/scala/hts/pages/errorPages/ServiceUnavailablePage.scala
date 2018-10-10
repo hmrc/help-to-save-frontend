@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package hts.pages.ErrorPages
+package hts.pages.errorPages
 
 import hts.pages.Page
 import hts.utils.Configuration
 
-object LinkExpiredPage extends Page {
+object ServiceUnavailablePage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/link-expired"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/service-unavailable"
 
-  override val expectedPageHeader: Option[String] = Some("This link has expired")
+  override val expectedPageHeader: Option[String] = Some("Service unavailable")
 
-  override val expectedPageTitle: Option[String] = Some("This link has expired")
+  override val expectedPageTitle: Option[String] = Some("Service unavailable")
 }

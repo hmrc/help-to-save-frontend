@@ -17,9 +17,9 @@
 package hts.steps
 
 import hts.browser.Browser
-import hts.pages.EmailPages.{SelectEmailPage, VerifyYourEmailPage}
-import hts.pages.ErrorPages.{IncorrectDetailsPage, NoAccountPage}
-import hts.pages.InformationPages.HMRCChangeOfDetailsPage
+import hts.pages.emailPages.{SelectEmailPage, VerifyYourEmailPage}
+import hts.pages.errorPages.{IncorrectDetailsPage, NoAccountPage}
+import hts.pages.informationPages.HMRCChangeOfDetailsPage
 import hts.pages._
 import hts.pages.accountHomePages.AccessAccountLink
 import hts.pages.registrationPages._
@@ -76,7 +76,7 @@ class CreateAccountSteps extends Steps {
 
   Then("^they see the HMRC change of details page$") {
     Browser.clickLinkTextOnceClickable("Tell HMRC about a change to your personal details")
-    Browser.checkExternalPageIs(HMRCChangeOfDetailsPage)
+    Browser.checkCurrentPageIs(HMRCChangeOfDetailsPage, "GOV.UK")
   }
 
   When("^they proceed to create an account using their GG email$") {

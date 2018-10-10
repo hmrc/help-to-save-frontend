@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-package hts.pages.EmailPages
+package hts.pages.errorPages
 
 import hts.browser.Browser
 import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object EnterEmailPage extends Page {
+object IncorrectDetailsPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/incorrect-details"
 
-  override val expectedPageHeader: Option[String] = Some("Which email address do you want to use for Help to Save?")
+  override val expectedPageTitle: Option[String] = Some("We need your correct details")
 
-  override val expectedPageTitle: Option[String] = Some("Which email address do you want to use for Help to Save?")
+  override val expectedPageHeader: Option[String] = Some("We need your correct details")
 
-  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
+  def clickBack(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Back")
+
+  def openForm()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("fill in the form (it will open in a new window)")
+
 }

@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package hts.pages.EmailPages
+package hts.pages.emailPages
 
 import hts.browser.Browser
 import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object VerifyYourEmailPage extends Page {
+object EnterEmailPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/verify-email"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
 
-  override val expectedPageHeader: Option[String] = Some("You have 30 minutes to verify your email address")
+  override val expectedPageHeader: Option[String] = Some("Which email address do you want to use for Help to Save?")
 
-  override val expectedPageTitle: Option[String] = Some("You have 30 minutes to verify your email address")
+  override val expectedPageTitle: Option[String] = Some("Which email address do you want to use for Help to Save?")
 
-  def resendVerificationEmail()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("resend-verification")
-
-  def changeEmail()(implicit driver: WebDriver): Unit = Browser.clickLinkTextOnceClickable("Change email address")
+  def continue()(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("continue")
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hts.pages.EmailPages
+package hts.pages.emailPages
 
 import hts.browser.Browser
 import hts.pages.Page

@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package hts.pages.ErrorPages
+package hts.pages.govPages
 
 import hts.pages.Page
-import hts.utils.Configuration
 
-object MissingInfoPage extends Page {
+object GovUKHowItWorks extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/missing-details"
+  val expectedURL: String = "https://www.gov.uk/get-help-savings-low-income"
 
-  override val expectedPageHeader: Option[String] = Some("We’re missing some important details")
+  override val expectedPageHeader: Option[String] = Some("Get help with savings if you’re on a low income (Help to Save)")
 
-  override val expectedPageTitle: Option[String] = Some("We’re missing some important details")
+  override val expectedPageTitle: Option[String] = Some("Get help with savings if you’re on a low income (Help to Save)")
 }
