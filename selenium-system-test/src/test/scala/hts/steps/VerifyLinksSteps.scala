@@ -22,7 +22,7 @@ import hts.pages.errorPages.{MissingInfoPage, NoAccountPage, ServiceUnavailableP
 import hts.pages.informationPages.{DailyCapReachedPage, ThinkYouAreEligiblePage}
 import hts.pages._
 import hts.pages.accountHomePages._
-import hts.pages.govPages.{GovUKEligibility, GovUKHowItWorks}
+import hts.pages.govPages.{GovUKEligibilityPage, GovUKHowItWorksPage}
 import hts.pages.registrationPages._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
@@ -126,7 +126,7 @@ class VerifyLinksSteps extends Steps {
   }
 
   Then("^they are directed to the GOV.UK eligibility page$") {
-    Browser.checkCurrentPageIs(GovUKEligibility, "GOV.UK")
+    Browser.checkCurrentPageIs(GovUKEligibilityPage, "GOV.UK")
   }
 
   When("^they click on eligibility criteria link$") {
@@ -140,7 +140,7 @@ class VerifyLinksSteps extends Steps {
   }
 
   Then("^they are directed to the GOV.UK How it works page$") {
-    Browser.checkCurrentPageIs(GovUKHowItWorks, "GOV.UK")
+    Browser.checkCurrentPageIs(GovUKHowItWorksPage, "GOV.UK")
   }
 
   When("^they click on Cancel and go to GOV.UK link$") {
