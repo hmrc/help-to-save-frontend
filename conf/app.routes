@@ -40,6 +40,7 @@ GET        /create-account                                  @uk.gov.hmrc.helptos
 POST       /create-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccount
 GET        /account-created                                 @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getAccountCreatedPage
 GET        /error-no-account                                @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
+GET        /error-bank-details                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorBankDetailsPage
 GET        /try-again-tomorrow                              @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
 GET        /try-again-later-in-year                         @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
 GET        /service-unavailable                             @uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceUnavailablePage

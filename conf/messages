@@ -261,6 +261,7 @@ hts.helpers.sidebar.working-tax-credit=Working Tax Credit
 hts.core.not-eligible.sidebar.h2=Elsewhere on GOV.UK
 hts.core.not-eligible.sidebar.p=Working Tax Credit
 
+# Bank Details
 hts.register.bank-details.title.h1=Which UK bank account do you want us to pay your bonuses and withdrawals into?
 hts.register.bank-details.sort-code.label=Sort code
 hts.register.bank-details.sort-code.hint=For example, 02 03 04
@@ -276,6 +277,17 @@ hts.account-number.incorrect-format=Your account number needs to be {0} numbers
 hts.roll-number.invalid=Your roll number must be between {0} and {1} characters - it can include letters, numbers, hyphens, forward slashes and dots
 hts.account-name.too-short=Your account name needs to be {0} characters or more
 hts.account-name.too-long=Your account name cannot be more than {0} characters
+
+# Bank Details Error
+hts.register.bank-details.error.title.h1=There is a problem with your bank details
+hts.register.bank-details.error.p1=This is because the:
+hts.register.bank-details.error.ul1-li1=sort code you entered is wrong
+hts.register.bank-details.error.ul1-li2=bank details you entered are not for a UK bank account
+hts.register.bank-details.error.ul1-li3=the account number and sort code you entered are not for the same bank account
+hts.register.bank-details.error.p2=You&rsquo;ll need to make sure your:
+hts.register.bank-details.error.ul2-li1=sort code is correct
+hts.register.bank-details.error.ul2-li2=bank details are for a UK bank account
+hts.register.bank-details.error.button.try-again=Try again
 
 # Eligible
 hts.register.you-are-eligible.title.h1=You’re eligible for a Help to Save account

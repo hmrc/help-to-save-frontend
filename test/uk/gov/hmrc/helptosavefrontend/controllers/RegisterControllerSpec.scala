@@ -401,6 +401,34 @@ class RegisterControllerSpec
         }
       }
 
+      "redirect to the create account bank details error page" when {
+        "the errorMessageId received in the response from nsi is ZYRC0703" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+            mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(Some("ZYRC0703"), "Uh oh", "Uh oh")))
+          }
+
+          val result = doCreateAccountRequest()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+        }
+
+        "the errorMessageId received in the response from nsi is ZYRC0707" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+            mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(Some("ZYRC0707"), "Uh oh", "Uh oh")))
+          }
+
+          val result = doCreateAccountRequest()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+        }
+      }
+
     }
 
     "handling getAccountCreatedPage" must {
@@ -506,7 +534,24 @@ class RegisterControllerSpec
 
         val result = doRequest()
         contentAsString(result) should include("We cannot create a Help to Save account for you at the moment")
+      }
+    }
 
+    "handling getCreateAccountErrorBankDetailsPage" must {
+      val confirmedEmail = "confirmed"
+        def doRequest(): Future[PlayResult] = controller.getCreateAccountErrorBankDetailsPage(FakeRequest())
+
+      behave like commonEnrolmentAndSessionBehaviour(doRequest)
+
+      "show the error page" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
+        }
+
+        val result = doRequest()
+        contentAsString(result) should include("There is a problem with your bank details")
       }
     }
 
