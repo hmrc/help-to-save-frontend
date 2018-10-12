@@ -18,7 +18,7 @@ package hts.pages.govPages
 
 import hts.pages.Page
 
-object GovUKHowItWorks extends Page {
+object GovUKHowItWorksPage extends Page {
 
   val expectedURL: String = "https://www.gov.uk/get-help-savings-low-income"
 
