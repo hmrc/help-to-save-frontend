@@ -162,7 +162,7 @@ class BankAccountControllerSpec extends AuthSupport
         contentAsString(result) should include("Your sort code needs to be 6 numbers")
         contentAsString(result) should include("Your account number needs to be 8 numbers")
         contentAsString(result) should include("Your account name needs to be 2 characters or more")
-        contentAsString(result) should include("Your roll number must be between 4 and 18 characters - it can include letters, numbers, hyphens, forward slashes and dots")
+        contentAsString(result) should include("Your roll number must be 4 and 18 characters only - it can include letters, numbers, hyphens, forward slashes and dots")
       }
 
       doCommonChecks(doRequest)
