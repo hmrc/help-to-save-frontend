@@ -3,3 +3,12 @@
 .logo {
   display: none;
 }
+
+#email-updated-address {
+  font-size: 24px;
+  word-wrap: break-word;
+
+  @media (max-width: 640px){
+    font-size: 18px;
+  }
+}
