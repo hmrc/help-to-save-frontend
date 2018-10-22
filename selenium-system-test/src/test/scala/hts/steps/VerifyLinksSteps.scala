@@ -22,7 +22,7 @@ import hts.pages.errorPages.{MissingInfoPage, NoAccountPage, ServiceUnavailableP
 import hts.pages.informationPages.{DailyCapReachedPage, ThinkYouAreEligiblePage}
 import hts.pages._
 import hts.pages.accountHomePages._
-import hts.pages.govPages.{GovUKEligibilityPage, GovUKHowItWorksPage}
+import hts.pages.govPages.{GGRegistrationPage, GovUKEligibilityPage, GovUKHowItWorksPage}
 import hts.pages.registrationPages._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
@@ -146,5 +146,13 @@ class VerifyLinksSteps extends Steps {
   When("^they click on Cancel and go to GOV.UK link$") {
     NoAccountPage.navigate()
     Browser.clickLinkTextOnceClickable("Cancel and go to GOV.UK")
+  }
+
+  When("^they click on Create a new GG account$") {
+    Browser.clickLinkTextOnceClickable("Create a new Government Gateway account")
+  }
+
+  Then("^they are directed to the GG registration page$") {
+    Browser.checkCurrentPageIs(GGRegistrationPage, "Government Gateway")
   }
 }

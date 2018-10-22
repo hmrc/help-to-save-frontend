@@ -43,3 +43,10 @@ Feature: Verifying header and footer links on every page
     Then they are directed to the GOV.UK How it works page
     When they click on Cancel and go to GOV.UK link
     Then they are directed to the GOV.UK How it works page
+
+  @VerifyHeaderAndFooter
+  Scenario: Checking link to GG registration page
+    Given an applicant who hasn't been through IV applies
+    When they go through the IV journey and fail because of Precondition Failed
+    And they click on Create a new GG account
+    Then they are directed to the GG registration page
