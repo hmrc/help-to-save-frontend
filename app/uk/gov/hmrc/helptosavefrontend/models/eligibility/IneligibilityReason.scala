@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.models.eligibility
 
 import cats.Eq
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Ineligible
 
 sealed trait IneligibilityReason
 
@@ -31,7 +31,7 @@ object IneligibilityReason {
 
   case object NotEntitledToWTCAndUCInsufficient extends IneligibilityReason
 
-  def fromIneligible(ineligible: Ineligible): Option[IneligibilityReason] = ineligible.value.reasonCode match {
+  def fromIneligible(ineligible: Ineligible): Option[IneligibilityReason] = ineligible.value.eligibilityCheckResult.reasonCode match {
     case 3 ⇒ Some(EntitledToWTCNoTCAndNoUC) // scalastyle:ignore magic.number
     case 4 ⇒ Some(EntitledToWTCNoTCAndInsufficientUC) // scalastyle:ignore magic.number
     case 5 ⇒ Some(NotEntitledToWTCAndUCInsufficient) // scalastyle:ignore magic.number

@@ -116,12 +116,13 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
           )(_.fold[Future[Result]](
               { ineligibleReason ⇒
                 val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
+                val threshold = ineligibleReason.value.threshold
 
                 ineligibilityType.fold {
                   logger.warn(s"Could not parse ineligibility reason when storing bank details: $ineligibleReason", nino)
                   toFuture(internalServerError())
                 } { i ⇒
-                  toFuture(Ok(views.html.register.not_eligible(i)))
+                  toFuture(Ok(views.html.register.not_eligible(i, threshold)))
                 }
               },
               _ ⇒ ifNotEnrolled(session)

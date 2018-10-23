@@ -32,8 +32,8 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Ineligible}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponseAndThreshold, EligibilityCheckResult, EligibilityCheckResultType}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -60,7 +60,7 @@ class EligibilityCheckControllerSpec
 
   lazy val controller = newController(false)
 
-  def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
+  def mockEligibilityResult()(result: Either[String, EligibilityCheckResultType]): Unit =
     (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
@@ -163,16 +163,73 @@ class EligibilityCheckControllerSpec
       }
 
       "show an error if the ineligibility reason cannot be parsed" in {
+        val eligibilityCheckResult = randomIneligibility().value.eligibilityCheckResult.copy(reasonCode = 999)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value = randomIneligibility().value.copy(reasonCode = 999)))), None, None))))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value =
+            EligibilityCheckResponseAndThreshold(eligibilityCheckResult, randomEligibility().value.threshold)))), None, None))))
         }
 
         val result = getIsNotEligible()
         checkIsTechnicalErrorPage(result)
       }
 
+      "display the uc threshold amount when it can be obtained from DES via the BE when the user is not eligible due to " +
+        "reason: NotEntitledToWTCAndUCInsufficient (code 5)" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficient())), None, None))))
+          }
+
+          val result = getIsNotEligible()
+          status(result) shouldBe OK
+          contentAsString(result) should include("This is because your household income - in your last monthly assessment period - was less than £")
+
+        }
+
+      "not display the uc threshold amount when it cannot be obtained from DES when the user is not eligible due to " +
+        "reason: NotEntitledToWTCAndUCInsufficient (code 5)" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(notEntitledToWTCAndUCInsufficientWithNoThreshold())), None, None))))
+          }
+
+          val result = getIsNotEligible()
+          status(result) shouldBe OK
+          contentAsString(result) should include("This is because your household income in your last monthly assessment period was not enough.")
+
+        }
+
+      "display the uc threshold amount when it can be obtained from DES via the BE when the user is not eligible due to " +
+        "reason: EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC (code 4 | 9)" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(ineligibilityReason4or9())), None, None))))
+          }
+
+          val result = getIsNotEligible()
+          status(result) shouldBe OK
+          contentAsString(result) should include("claiming Universal Credit and your household income - in your last monthly assessment period - was £123.45 or more")
+
+        }
+
+      "not display the uc threshold amount when it cannot be obtained from DES when the user is not eligible due to " +
+        "reason: EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC (code 4 | 9)" in {
+          inSequence {
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(ineligibilityReason4or9WithNoThreshold())), None, None))))
+          }
+
+          val result = getIsNotEligible()
+          status(result) shouldBe OK
+          contentAsString(result) should include("claiming Universal Credit and your household income - in your last monthly assessment period - was above a certain amount")
+
+        }
     }
 
     "displaying the you think you're eligible page" must {
@@ -246,11 +303,11 @@ class EligibilityCheckControllerSpec
 
         "redirect to NS&I if the eligibility check indicates the user already has an account " +
           "and update the ITMP flag if necessary" in {
-            val response = EligibilityCheckResponse("account already exists", 3, "account already opened", 1)
+            val response = EligibilityCheckResult("account already exists", 3, "account already opened", 1)
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Left("Oh no!"))
-              mockEligibilityResult()(Right(AlreadyHasAccount(response)))
+              mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))
               mockWriteITMPFlag(Right(()))
             }
 
@@ -261,7 +318,7 @@ class EligibilityCheckControllerSpec
 
         "redirect to NS&I if the eligibility check indicates the user already has an account " +
           "even if the ITMP flag update is unsuccessful" in {
-            val response = EligibilityCheckResponse("account already exists", 3, "account already opened", 1)
+            val response = EligibilityCheckResult("account already exists", 3, "account already opened", 1)
             List(
               () ⇒ mockWriteITMPFlag(Left("")),
               () ⇒ mockWriteITMPFlag(None)
@@ -269,7 +326,7 @@ class EligibilityCheckControllerSpec
                 inSequence {
                   mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
                   mockEnrolmentCheck()(Left("Oh no!"))
-                  mockEligibilityResult()(Right(AlreadyHasAccount(response)))
+                  mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))
                   mockWriteFailure()
                 }
 
@@ -352,12 +409,12 @@ class EligibilityCheckControllerSpec
           }
 
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
-          val response = EligibilityCheckResponse("account already exists", 3, "account already opened", 1)
+          val response = EligibilityCheckResult("account already exists", 3, "account already opened", 1)
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
-            mockEligibilityResult()(Right(AlreadyHasAccount(response)))
+            mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))
             mockWriteITMPFlag(Right(()))
           }
 
@@ -369,7 +426,7 @@ class EligibilityCheckControllerSpec
         "return user details if the user is eligible for help-to-save and the " +
           "user is not already enrolled and they have no session data" in {
             val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
-            val response = EligibilityCheckResponse("eligible", 1, "wtc", 6)
+            val response = EligibilityCheckResult("eligible", 1, "wtc", 6)
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))

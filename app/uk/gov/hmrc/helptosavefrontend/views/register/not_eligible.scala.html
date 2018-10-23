@@ -22,7 +22,7 @@
 @import cats.syntax.eq._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(ineligibilityReason: IneligibilityReason)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(ineligibilityReason: IneligibilityReason, threshold: Option[Double])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages("hts.core.not-eligible.title.h1")
@@ -38,7 +38,13 @@
     @ineligibilityReason match {
 
         case NotEntitledToWTCAndUCInsufficient => {
-            <p>@messages("hts.core.not-eligible.uc.p-1")</p>
+
+            @threshold match {
+
+                case Some(threshold) => { <p>@messages("hts.core.not-eligible.uc.p-1") @messages("hts.core.not-eligible.uc.p-1-2a")@threshold@messages("hts.core.not-eligible.uc.p-2-2") @messages("hts.core.not-eligible.uc.p-1-3")</p> }
+
+                case None => { <p>@messages("hts.core.not-eligible.uc.p-1b") @messages("hts.core.not-eligible.uc.p-1-2b") @messages("hts.core.not-eligible.uc.p-1-3")</p> }
+            }
 
             <p>@messages("hts.core.not-eligible.uc.p-2")
             <a href=@appConfig.govUkEligibilityInfoUrl
@@ -55,12 +61,19 @@
             <a href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage().url>@Html(Messages("hts.core.not-eligible.uc.link-2"))</a> @Messages("hts.core.not-eligible.uc.p-4-2")</p>
         }
 
-        case EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC=> {
+        case EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC => {
             <p>@messages("hts.core.not-eligible.wtc.uc.p1")</p>
 
             <ul class="list list-bullet">
                 <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li1")</li>
-                <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li2")</li>
+
+                @threshold match {
+
+                    case Some(threshold) => { <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li2-1") @messages("hts.core.not-eligible.wtc.uc.ul1-li2-2a")@threshold @messages("hts.core.not-eligible.wtc.uc.ul1-li2-3")</li> }
+
+                    case None => { <li>@messages("hts.core.not-eligible.wtc.uc.ul1-li2-1") @messages("hts.core.not-eligible.wtc.uc.ul1-li2-2b")</li> }
+
+                }
             </ul>
 
             <p>@messages("hts.core.not-eligible.wtc.uc.p2")</p>

@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
@@ -100,7 +100,7 @@ class EmailControllerSpec
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockEligibilityResult()(result: Either[String, EligibilityCheckResult]): Unit =
+  def mockEligibilityResult()(result: Either[String, EligibilityCheckResultType]): Unit =
     (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
@@ -915,7 +915,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")("WM123456C#test@user.com")
           mockSessionCacheConnectorGet(Right(Some(HTSSession(None, Some(email), None))))
-          mockEligibilityResult()(Right(EligibilityCheckResult.Ineligible(randomEligibilityResponse())))
+          mockEligibilityResult()(Right(EligibilityCheckResultType.Ineligible(randomEligibilityResponse())))
         }
 
         val result = emailVerifiedCallback(encryptedParams)

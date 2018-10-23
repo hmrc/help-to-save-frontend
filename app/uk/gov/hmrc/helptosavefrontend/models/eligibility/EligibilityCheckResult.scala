@@ -18,35 +18,18 @@ package uk.gov.hmrc.helptosavefrontend.models.eligibility
 
 import play.api.libs.json.{Format, Json}
 
-sealed trait EligibilityCheckResult {
-  val value: EligibilityCheckResponse
-}
+case class EligibilityCheckResult(result: String, resultCode: Int, reason: String, reasonCode: Int)
 
 object EligibilityCheckResult {
 
-  case class Eligible(value: EligibilityCheckResponse) extends EligibilityCheckResult
-
-  case class Ineligible(value: EligibilityCheckResponse) extends EligibilityCheckResult
-
-  case class AlreadyHasAccount(value: EligibilityCheckResponse) extends EligibilityCheckResult
-
-  object Eligible {
-    implicit val format: Format[Eligible] = Json.format[Eligible]
-  }
-
-  object Ineligible {
-    implicit val format: Format[Ineligible] = Json.format[Ineligible]
-  }
-
-  implicit class Ops(val result: EligibilityCheckResult) extends AnyVal {
-    def fold[A](ifEligible:          EligibilityCheckResponse ⇒ A,
-                ifIneligible:        EligibilityCheckResponse ⇒ A,
-                ifAlreadyHasAccount: EligibilityCheckResponse ⇒ A): A = result match {
-      case Eligible(reason)          ⇒ ifEligible(reason)
-      case Ineligible(reason)        ⇒ ifIneligible(reason)
-      case AlreadyHasAccount(reason) ⇒ ifAlreadyHasAccount(reason)
-    }
-  }
+  implicit val format: Format[EligibilityCheckResult] = Json.format[EligibilityCheckResult]
 
 }
 
+case class EligibilityCheckResponseAndThreshold(eligibilityCheckResult: EligibilityCheckResult, threshold: Option[Double])
+
+object EligibilityCheckResponseAndThreshold {
+
+  implicit val format: Format[EligibilityCheckResponseAndThreshold] = Json.format[EligibilityCheckResponseAndThreshold]
+
+}

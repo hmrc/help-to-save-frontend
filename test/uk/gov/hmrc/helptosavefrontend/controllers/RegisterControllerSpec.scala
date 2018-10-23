@@ -33,7 +33,8 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Eligible
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponseAndThreshold
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
@@ -191,11 +192,13 @@ class RegisterControllerSpec
 
       "show an error page if the eligibility reason cannot be parsed" in {
         val userInfo = eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 999)
+        val eligibilityCheckResult = randomEligibility().value.eligibilityCheckResult.copy(reasonCode = 999)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo)
-            .copy(eligible = Eligible(randomEligibility.value.copy(reasonCode = 999))))), Some(email), None))))
+            .copy(eligible = Eligible(EligibilityCheckResponseAndThreshold(eligibilityCheckResult, randomEligibility().value.threshold))))),
+                                                             Some(email), None))))
           mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, None, accountNumber = None))(Right(()))
         }
 
@@ -282,7 +285,7 @@ class RegisterControllerSpec
         .copy(version = "V2.0")
         .copy(systemId = "MDTP REGISTRATION")
 
-      val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.reasonCode)
+      val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.eligibilityCheckResult.reasonCode)
 
         def doCreateAccountRequest(): Future[PlayResult] = controller.createAccount(fakeRequestWithCSRFToken)
 

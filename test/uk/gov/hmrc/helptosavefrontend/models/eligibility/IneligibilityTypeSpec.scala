@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models.eligibility
 
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason._
 
 // scalastyle:off magic.number
@@ -27,7 +27,7 @@ class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenP
   "IneligibilityType" must {
 
     "have a method which converts from Ineligible to IneligibilityType" in {
-        def ineligible(reasonCode: Int) = Ineligible(EligibilityCheckResponse("", 0, "", reasonCode))
+        def ineligible(reasonCode: Int) = Ineligible(EligibilityCheckResponseAndThreshold(EligibilityCheckResult("", 0, "", reasonCode), Some(134.45)))
 
       IneligibilityReason.fromIneligible(ineligible(3)) shouldBe Some(EntitledToWTCNoTCAndNoUC)
       IneligibilityReason.fromIneligible(ineligible(4)) shouldBe Some(EntitledToWTCNoTCAndInsufficientUC)

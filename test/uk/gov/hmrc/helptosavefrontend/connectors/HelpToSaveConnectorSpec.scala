@@ -30,8 +30,8 @@ import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmai
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{AlreadyHasAccount, Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponseAndThreshold, EligibilityCheckResult}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
 import uk.gov.hmrc.http.HttpResponse
@@ -88,19 +88,19 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
 
   val ineligibleString = "Ineligible to HtS Account"
 
-  val eligibleResponseGen: Gen[EligibilityCheckResponse] =
+  val eligibleResponseGen: Gen[EligibilityCheckResult] =
     for {
       result ← Gen.alphaStr
       reasonCode ← Gen.choose(6, 8)
       reason ← Gen.alphaStr
-    } yield EligibilityCheckResponse(result, 1, reason, reasonCode)
+    } yield EligibilityCheckResult(result, 1, reason, reasonCode)
 
-  val ineligibleResponseGen: Gen[EligibilityCheckResponse] =
+  val ineligibleResponseGen: Gen[EligibilityCheckResult] =
     for {
       result ← Gen.alphaStr
       reasonCode ← Gen.choose(2, 5)
       reason ← Gen.alphaStr
-    } yield EligibilityCheckResponse(result, 2, reason, reasonCode)
+    } yield EligibilityCheckResult(result, 2, reason, reasonCode)
 
   "The HelpToSaveConnectorImpl" when {
 
@@ -111,15 +111,15 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
       behave like testCommon(
         mockGet(eligibilityURL),
         () ⇒ connector.getEligibility(),
-        EligibilityCheckResponse("eligible!", 1, "???", 6)
+        EligibilityCheckResult("eligible!", 1, "???", 6)
       )
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result " +
         "and a valid reason" in {
           forAll(eligibleResponseGen) { response ⇒
-            val reason = Eligible(response)
+            val reason = Eligible(EligibilityCheckResponseAndThreshold(response, Some(123.45)))
 
-            mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+            mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))))
 
             val result = connector.getEligibility()
             await(result.value) shouldBe Right(reason)
@@ -129,9 +129,9 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
       "return an EligibilityResult if the call comes back with a 200 status with a negative result " +
         "and a valid reason" in {
           forAll(ineligibleResponseGen) { response ⇒
-            val reason = Ineligible(response)
+            val reason = Ineligible(EligibilityCheckResponseAndThreshold(response, Some(123.45)))
 
-            mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+            mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))))
 
             val result = connector.getEligibility()
             await(result.value) shouldBe Right(reason)
@@ -142,19 +142,19 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
         "indicating an account has already been opened" in {
           val reasonString = "already has account"
 
-          val response = EligibilityCheckResponse("HtS account already exists", 3, reasonString, 1)
+          val response = EligibilityCheckResult("HtS account already exists", 3, reasonString, 1)
 
-          mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(response)))))
+          mockGet(eligibilityURL)(Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))))
 
           val result = connector.getEligibility()
-          await(result.value) shouldBe Right(AlreadyHasAccount(response))
+          await(result.value) shouldBe Right(AlreadyHasAccount(EligibilityCheckResponseAndThreshold(response, Some(123.45))))
         }
 
       "return an error" when {
 
           def testError(resultCode: Int): Unit = {
             mockGet(eligibilityURL)(
-              Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse("", resultCode, "", 1))))))
+              Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResult("", resultCode, "", 1))))))
 
             val result = connector.getEligibility()
             await(result.value).isLeft shouldBe true

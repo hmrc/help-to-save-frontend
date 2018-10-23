@@ -32,8 +32,8 @@ import uk.gov.hmrc.helptosavefrontend.controllers.SessionBehaviour.SessionWithEl
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResult, IneligibilityReason}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResultType, IneligibilityReason}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -98,12 +98,12 @@ class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSav
         _.eligibilityResult.fold(
           { ineligibleReason ⇒
             val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
-
+            val threshold = ineligibleReason.value.threshold
             ineligibilityType.fold {
               logger.warn(s"Could not parse ineligibility reason: $ineligibleReason", htsContext.nino)
               internalServerError()
             } { i ⇒
-              Ok(views.html.register.not_eligible(i))
+              Ok(views.html.register.not_eligible(i, threshold))
             }
           },
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
@@ -179,7 +179,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSav
   private def performEligibilityChecks(userInfo: UserInfo)(
       implicit
       hc:         HeaderCarrier,
-      htsContext: HtsContextWithNINOAndUserDetails): EitherT[Future, String, EligibilityCheckResult] =
+      htsContext: HtsContextWithNINOAndUserDetails): EitherT[Future, String, EligibilityCheckResultType] =
     for {
       eligible ← helpToSaveService.checkEligibility()
       session = {
@@ -192,7 +192,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService:     HelpToSav
       _ ← session.map(sessionCacheConnector.put).traverse[Result, CacheMap](identity)
     } yield eligible
 
-  private def handleEligibilityResult(result: EligibilityCheckResult)(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
+  private def handleEligibilityResult(result: EligibilityCheckResultType)(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
     val nino = htsContext.nino
     result.fold(
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url),
