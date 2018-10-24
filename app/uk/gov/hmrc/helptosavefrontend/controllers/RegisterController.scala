@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.TemporalAdjusters
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
@@ -166,13 +170,19 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     result.fold({ e ⇒
       logger.warn(s"Could not get enrolment status or session: $e")
       internalServerError()
-    }, {
-      _.flatMap(_.accountNumber).fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)){
+    }, { session ⇒
+      session.flatMap(_.accountNumber).fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)){
         accountNumber ⇒
-          Ok(views.html.register.account_created(accountNumber))
+          val email = session.flatMap(_.confirmedEmail).fold("")(_.toString)
+          Ok(views.html.register.account_created(accountNumber, email, getEndOfMonthDate))
       }
     })
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+
+  def getEndOfMonthDate: String = {
+    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
+    LocalDate.now().`with`(TemporalAdjusters.lastDayOfMonth()).format(formatter)
+  }
 
   def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
