@@ -166,10 +166,11 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     result.fold({ e ⇒
       logger.warn(s"Could not get enrolment status or session: $e")
       internalServerError()
-    }, {
-      _.flatMap(_.accountNumber).fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)){
+    }, { session ⇒
+      session.flatMap(_.accountNumber).fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)){
         accountNumber ⇒
-          Ok(views.html.register.account_created(accountNumber))
+          val email = session.flatMap(_.confirmedEmail).fold("")(_.toString)
+          Ok(views.html.register.account_created(accountNumber, email))
       }
     })
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)

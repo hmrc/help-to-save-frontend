@@ -556,9 +556,17 @@ hts.account-creation-error.exit-button=Exit to GOV.UK
 # Account created
 hts.account-created.title.h1=Help to Save account created
 hts.account-created.title.p1=Your account number is
-hts.account-created.h2=What you need to do next
-hts.account-created.p1=Now your Help to Save account has been created, you can start saving and earning bonuses.
-hts.account-created.p2=You can save up to £50 each calendar month.
+hts.account-created.p1-1=We&rsquo;ve sent a confirmation email to you at
+hts.account-created.p1-2=.
+hts.account-created.p2=You have 4 years from now to use your Help to Save account to save and earn bonus money up to &pound;1,200.
+hts.account-created.h2=How to start saving
+hts.account-created.p3=You can:
+hts.account-created.ul1-li1=set up a regular payment to make saving easier
+hts.account-created.ul1-li2=save from &pound;1 to &pound;50 each calendar month
+hts.account-created.ul1-li3=miss months if you cannot afford to save
+hts.account-created.ul1-li4=pay in many times in a calendar month
+hts.account-created.ul1-li5=withdraw money if you need to and still earn bonuses
+hts.account-created.p4=You still have until 31 October 2018 to pay in this month.
 hts.account-created.continue-button=Continue to your account
 
 # Incorrect details
