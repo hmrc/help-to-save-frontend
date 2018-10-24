@@ -25,7 +25,8 @@
   scriptElem: Option[Html] = None,
   extraMeta: Option[Html] = None,
   isErrorPage: Boolean = false,
-  serviceInfoContent: Html = HtmlFormat.empty)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
+  serviceInfoContent: Html = HtmlFormat.empty,
+  enableSignOutLink: Boolean = true)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @import uk.gov.hmrc.play.views.html.layouts
 
@@ -52,5 +53,6 @@
   serviceInfoContent = serviceInfoContent,
   mainContent = layouts.article(mainContent),
   scriptElem = scriptElem,
-  extraMeta = extraMeta
+  extraMeta = extraMeta,
+  enableSignOutLink = enableSignOutLink
 )
