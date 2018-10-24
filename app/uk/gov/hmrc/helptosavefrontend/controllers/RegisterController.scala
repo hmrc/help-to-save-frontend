@@ -43,7 +43,7 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.{util, views}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
@@ -166,11 +166,15 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     result.fold({ e ⇒
       logger.warn(s"Could not get enrolment status or session: $e")
       internalServerError()
-    }, {
-      _.flatMap(_.accountNumber).fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)){
-        accountNumber ⇒
-          Ok(views.html.register.account_created(accountNumber))
-      }
+    }, { session ⇒
+      val accountNumberAndEmail: Option[(String, Email)] = for {
+        s ← session
+        a ← s.accountNumber
+        e ← s.confirmedEmail
+      } yield (a, e)
+
+      accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(acNumAndEmail ⇒
+        Ok(views.html.register.account_created(acNumAndEmail._1, acNumAndEmail._2)))
     })
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
 
