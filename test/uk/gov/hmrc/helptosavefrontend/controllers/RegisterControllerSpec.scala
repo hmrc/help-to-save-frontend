@@ -442,7 +442,7 @@ class RegisterControllerSpec
           inSequence{
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, accountNumber = Some(accountNumber)))))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber)))))
           }
 
           val result = getAccountCreatedPage()
@@ -482,6 +482,20 @@ class RegisterControllerSpec
           inSequence{
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          }
+
+          val result = getAccountCreatedPage()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        }
+
+        "there is no email in the session" in {
+          val accountNumber = UUID.randomUUID().toString
+
+          inSequence{
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, accountNumber = Some(accountNumber)))))
           }
 
           val result = getAccountCreatedPage()

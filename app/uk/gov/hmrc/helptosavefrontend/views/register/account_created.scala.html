@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.ga_submit_button
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@(accountNumber: String, email: String, endOfMonthDate: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(accountNumber: String, email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages("hts.account-created.title.h1")
@@ -50,6 +50,7 @@ bodyClasses = None) {
     <li>@Html(Messages("hts.account-created.ul1-li4"))</li>
     <li>@Html(Messages("hts.account-created.ul1-li5"))</li>
   </ul>
+
   <p>@Messages("hts.account-created.p4")</p>
 
   @form(routes.AccessAccountController.accessAccount){
