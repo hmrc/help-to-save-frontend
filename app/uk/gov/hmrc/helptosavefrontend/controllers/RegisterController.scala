@@ -180,7 +180,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
 
   def getEndOfMonthDate: String = {
-    val formatter = DateTimeFormatter.ofPattern("dd-MMMM-yyyy")
+    val formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy")
     LocalDate.now().`with`(TemporalAdjusters.lastDayOfMonth()).format(formatter)
   }
 
