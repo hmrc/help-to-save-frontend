@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.time.{Clock, Instant, ZoneId}
 import java.util.UUID
 
 import cats.data.EitherT
@@ -49,6 +50,8 @@ class RegisterControllerSpec
   with SessionCacheBehaviourSupport
   with GeneratorDrivenPropertyChecks {
 
+  val january1970Clock = Clock.fixed(Instant.ofEpochMilli(0L), ZoneId.of("Z"))
+
   def newController(earlyCapCheck: Boolean)(implicit crypto: Crypto): RegisterController = {
 
     implicit lazy val appConfig: FrontendAppConfig =
@@ -59,7 +62,9 @@ class RegisterControllerSpec
       mockSessionCacheConnector,
       mockAuthConnector,
       mockMetrics,
-      fakeApplication)
+      fakeApplication) {
+      override val clock = january1970Clock
+    }
   }
 
   lazy val controller: RegisterController = newController(earlyCapCheck = false)(crypto)
@@ -435,22 +440,21 @@ class RegisterControllerSpec
 
         def getAccountCreatedPage() = controller.getAccountCreatedPage()(fakeRequestWithCSRFToken)
 
-      "show the page correctly if the person is enrolled to HTS and " +
-        "the session has an account number in it" in {
-          val accountNumber = UUID.randomUUID().toString
+      "show the page correctly if the person is enrolled to HTS and the session has an account number in it" in {
+        val accountNumber = UUID.randomUUID().toString
 
-          inSequence{
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber)))))
-          }
-
-          val result = getAccountCreatedPage()
-          status(result) shouldBe OK
-          contentAsString(result) should include("Account created")
-          contentAsString(result) should include(accountNumber)
-
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber)))))
         }
+
+        val result = getAccountCreatedPage()
+        status(result) shouldBe OK
+        contentAsString(result) should include("Account created")
+        contentAsString(result) should include(accountNumber)
+        contentAsString(result) should include("You still have until 31 January 1970 to pay in this month")
+      }
 
       "redirect to check eligibility" when {
 
