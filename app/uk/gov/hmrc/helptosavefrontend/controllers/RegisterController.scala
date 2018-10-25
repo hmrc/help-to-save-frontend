@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.time.{Clock, LocalDate}
+import java.time.temporal.TemporalAdjusters
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
@@ -66,6 +69,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with Logging {
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
+  val clock: Clock = Clock.systemUTC()
 
   def getCreateAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -173,8 +177,11 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
         e ← s.confirmedEmail
       } yield (a, e)
 
-      accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(acNumAndEmail ⇒
-        Ok(views.html.register.account_created(acNumAndEmail._1, acNumAndEmail._2)))
+      accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)){
+        case (accountNumber, email) ⇒
+          val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
+          Ok(views.html.register.account_created(accountNumber, email, lastDayOfMonth))
+      }
     })
   }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
 
