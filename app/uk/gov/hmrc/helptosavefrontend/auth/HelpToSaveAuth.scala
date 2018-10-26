@@ -25,6 +25,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName ⇒ V2ItmpName, name ⇒ V2Name, nino ⇒ V2Nino}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.{BaseController, routes}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -49,7 +50,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
 
   def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(Retrievals.nino) {
+    authorised(V2Nino) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
           action(request)(HtsContextWithNINO(authorised = true, nino))
@@ -57,15 +58,16 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(Retrievals.name and Retrievals.itmpName and Retrievals.nino) {
+    authorised(V2Name and V2ItmpName and V2Nino) {
       case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
-          action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, maybeItmpName.givenName.orElse(maybeName.name)))
+          val name = maybeItmpName.flatMap(_.givenName).orElse(maybeName.flatMap(_.name))
+          action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, name))
         }(request)
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(UserInfoRetrievals and Retrievals.nino) {
+    authorised(UserInfoRetrievals and V2Nino) {
       case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
           val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
@@ -86,7 +88,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
     }(redirectOnLoginURL)
 
   def authorisedForHtsWithNINOAndNoCL(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
-    authorised(Retrievals.nino, AuthProvider) {
+    authorised(V2Nino, AuthProvider) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
           action(request)(HtsContextWithNINO(authorised = true, nino))
@@ -128,29 +130,35 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
   private type ValidOrMissingUserInfo[A] = ValidatedNel[MissingUserInfo, A]
 
   private def getUserInfo(nino:        String,
-                          name:        Name,
+                          name:        Option[Name],
                           email:       Option[String],
                           dob:         Option[LocalDate],
-                          itmpName:    ItmpName,
+                          itmpName:    Option[ItmpName],
                           itmpDob:     Option[LocalDate],
-                          itmpAddress: ItmpAddress): Either[MissingUserInfos, UserInfo] = {
+                          itmpAddress: Option[ItmpAddress]): Either[MissingUserInfos, UserInfo] = {
 
     val givenNameValidation: ValidOrMissingUserInfo[String] =
-      itmpName.givenName.orElse(name.name).filter(_.nonEmpty)
+      itmpName.flatMap(_.givenName).orElse(name.flatMap(_.name)).filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.GivenName)
 
     val surnameValidation: ValidOrMissingUserInfo[String] =
-      itmpName.familyName.orElse(name.lastName).filter(_.nonEmpty)
+      itmpName.flatMap(_.familyName).orElse(name.flatMap(_.lastName)).filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.Surname)
 
     val dateOfBirthValidation: ValidOrMissingUserInfo[LocalDate] =
       itmpDob.orElse(dob)
         .toValidNel(MissingUserInfo.DateOfBirth)
 
-    val addressValidation: ValidOrMissingUserInfo[ItmpAddress] = {
-      val lineCount = List(itmpAddress.line1, itmpAddress.line2, itmpAddress.line3, itmpAddress.line4, itmpAddress.line5)
-        .map(_.map(_.trim).filter(_.nonEmpty)).collect { case Some(_) ⇒ () }.length
-      if (lineCount < 2 || !itmpAddress.postCode.exists(_.trim.nonEmpty)) {
+    val addressValidation: ValidOrMissingUserInfo[Option[ItmpAddress]] = {
+      val lineCount = List(
+        itmpAddress.flatMap(_.line1),
+        itmpAddress.flatMap(_.line2),
+        itmpAddress.flatMap(_.line3),
+        itmpAddress.flatMap(_.line4),
+        itmpAddress.flatMap(_.line5)
+      ).map(_.map(_.trim)).filter(_.nonEmpty).collect { case Some(_) ⇒ () }.length
+
+      if (lineCount < 2 || !itmpAddress.flatMap(_.postCode).exists(_.trim.nonEmpty)) {
         Invalid(NonEmptyList.of(MissingUserInfo.Contact))
       } else {
         Valid(itmpAddress)
@@ -159,7 +167,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
 
     val validation: ValidOrMissingUserInfo[UserInfo] =
       (givenNameValidation, surnameValidation, dateOfBirthValidation, addressValidation).mapN {
-        case (givenName, surname, jodaDob, address) ⇒
+        case (givenName, surname, jodaDob, Some(address)) ⇒
           UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email.filter(_.nonEmpty), Address(address))
       }
 

@@ -546,7 +546,7 @@ class EligibilityCheckControllerSpec
                                        surname: Option[String],
                                        dob:     Option[org.joda.time.LocalDate],
                                        address: ItmpAddress) =
-            new ~(Name(name, surname), email) and dob and ItmpName(name, None, surname) and dob and address and mockedNINORetrieval
+            new ~(Some(Name(name, surname)), email) and dob and Some(ItmpName(name, None, surname)) and dob and Some(address) and mockedNINORetrieval
 
           def isAddressInvalid(address: ItmpAddress): Boolean = !(address.line1.nonEmpty && address.line2.nonEmpty) || address.postCode.isEmpty
           def isNameInvalid(name: Option[String]): Boolean = name.forall(_.isEmpty)

@@ -70,11 +70,11 @@ class Driver {
   }
 
   def createRemoteChrome: WebDriver = {
-    new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), new ChromeOptions())
+    new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), new ChromeOptions())
   }
 
   def createRemoteFirefox: WebDriver = {
-    new RemoteWebDriver(new URL(s"http://localhost:4444/wd/hub"), new FirefoxOptions())
+    new RemoteWebDriver(new URL("http://localhost:4444/wd/hub"), new FirefoxOptions())
   }
 
   private val os: String =
