@@ -86,7 +86,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
     }
 
     "filter out empty emails" in {
-      val retrieval = new ~(name, Option("")) and Option(dob) and itmpName and itmpDob and itmpAddress and mockedNINORetrieval
+      val retrieval = new ~(Some(name), Option("")) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
 
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval)
 
@@ -104,7 +104,7 @@ class HelpToSaveAuthSpec extends AuthSupport {
 
     "handle when address info is missing" in {
         def retrieval(address: ItmpAddress) =
-          new ~(Name(None, None), email) and Option(dob) and ItmpName(None, None, None) and itmpDob and address and mockedNINORetrieval
+          new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(None, None, None)) and itmpDob and Some(address) and mockedNINORetrieval
 
       List(
         ItmpAddress(None, None, None, None, None, Some("postcode"), None, None),

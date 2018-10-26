@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import org.scalamock.handlers.{CallHandler3, CallHandler5}
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsString, _}
