@@ -150,13 +150,10 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
         .toValidNel(MissingUserInfo.DateOfBirth)
 
     val addressValidation: ValidOrMissingUserInfo[Option[ItmpAddress]] = {
-      val lineCount = List(
-        itmpAddress.flatMap(_.line1),
-        itmpAddress.flatMap(_.line2),
-        itmpAddress.flatMap(_.line3),
-        itmpAddress.flatMap(_.line4),
-        itmpAddress.flatMap(_.line5)
-      ).map(_.map(_.trim)).filter(_.nonEmpty).collect { case Some(_) ⇒ () }.length
+
+      val lineCount = itmpAddress.fold(0) { a: ItmpAddress ⇒
+        List(a.line1, a.line2, a.line3, a.line4, a.line5).map(_.map(_.trim)).filter(_.nonEmpty).collect { case Some(_) ⇒ () }.length
+      }
 
       if (lineCount < 2 || !itmpAddress.flatMap(_.postCode).exists(_.trim.nonEmpty)) {
         Invalid(NonEmptyList.of(MissingUserInfo.Contact))
