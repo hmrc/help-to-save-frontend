@@ -23,7 +23,7 @@ import play.api.libs.json.{JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.Ineligible
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Ineligible
 import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.http.HttpResponse
 

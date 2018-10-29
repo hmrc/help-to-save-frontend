@@ -75,7 +75,7 @@ bodyClasses = None) {
   <ul class="list list-bullet">
     <li>@Messages("hts.register.create_account.tandc-ul1-li1")</li>
     <li>@Html(Messages("hts.register.create_account.tandc-ul1-li2", appConfig.govUkEligibilityInfoUrl))</li>
-    @eligibleWithUserInfo.eligible.value.reasonCode match {
+    @eligibleWithUserInfo.eligible.value.eligibilityCheckResult.reasonCode match {
       case 7 => {
         <li>@{Messages("hts.register.create_account.condition-wtc")}</li>
       }

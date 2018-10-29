@@ -229,7 +229,12 @@ hts.core.not-eligible.wtc.p-4-1=Find out what to do if you have checked the elig
 hts.core.not-eligible.wtc.p-4-link-text=think you&rsquo;re eligible
 hts.core.not-eligible.wtc.p-4-2=for a Help to Save account.
 
-hts.core.not-eligible.uc.p-1=This is because your household income - in your last monthly assessment period - was less than £542.88. Your Universal Credit payments are not considered to be income.
+hts.core.not-eligible.uc.p-1=This is because your household income - in your last monthly assessment period
+hts.core.not-eligible.uc.p-1b=This is because your household income in your last monthly assessment period
+hts.core.not-eligible.uc.p-1-2a=- was less than £
+hts.core.not-eligible.uc.p-1-2b=was not enough.
+
+hts.core.not-eligible.uc.p-1-3=Your Universal Credit payments are not considered to be income.
 hts.core.not-eligible.uc.p-2=Go to GOV.UK to find out about
 hts.core.not-eligible.uc.link-1=eligibility for Help to Save
 hts.core.not-eligible.uc.p-2-2=.
@@ -241,7 +246,10 @@ hts.core.not-eligible.uc.p-4-2=for a Help to Save account.
 
 hts.core.not-eligible.wtc.uc.p1=You can only open a Help to Save account if one of the following applies to you. You are:
 hts.core.not-eligible.wtc.uc.ul1-li1=entitled to Working Tax Credit and receiving payments for Working Tax Credit or Child Tax Credit
-hts.core.not-eligible.wtc.uc.ul1-li2=claiming Universal Credit and your household income - in your last monthly assessment period - was £542.88 or more
+hts.core.not-eligible.wtc.uc.ul1-li2-1=claiming Universal Credit and your household income - in your last monthly assessment period - was
+hts.core.not-eligible.wtc.uc.ul1-li2-2a=£
+hts.core.not-eligible.wtc.uc.ul1-li2-2b=above a certain amount
+hts.core.not-eligible.wtc.uc.ul1-li2-3=or more
 hts.core.not-eligible.wtc.uc.p2=Payments from Universal Credit are not considered to be income.
 hts.core.not-eligible.wtc.uc.p3=Go to GOV.UK to find out about
 hts.core.not-eligible.wtc.uc.p3-link=eligibility for Help to Save

@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResultType}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIPayload}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
@@ -41,7 +41,7 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[HelpToSaveConnectorImpl])
 trait HelpToSaveConnector {
 
-  def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResult]
+  def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResultType]
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus]
 
@@ -100,7 +100,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
 
   private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
 
-  def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResult] =
+  def getEligibility()(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, String, EligibilityCheckResultType] =
     handleGet(
       eligibilityURL,
       emptyQueryParameters,
@@ -154,12 +154,13 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   }
 
   // scalastyle:off magic.number
-  private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResult] =
-    response.resultCode match {
-      case 1     ⇒ Right(EligibilityCheckResult.Eligible(response))
-      case 2     ⇒ Right(EligibilityCheckResult.Ineligible(response))
-      case 3     ⇒ Right(EligibilityCheckResult.AlreadyHasAccount(response))
-      case 4     ⇒ Left(s"Error while checking eligibility. Received result code 4 ${response.result}) with reason code ${response.reasonCode} (${response.reason})")
+  private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResultType] =
+    response.eligibilityCheckResult.resultCode match {
+      case 1 ⇒ Right(EligibilityCheckResultType.Eligible(response))
+      case 2 ⇒ Right(EligibilityCheckResultType.Ineligible(response))
+      case 3 ⇒ Right(EligibilityCheckResultType.AlreadyHasAccount(response))
+      case 4 ⇒ Left(s"Error while checking eligibility. Received result code 4 ${response.eligibilityCheckResult.result}) " +
+        s"with reason code ${response.eligibilityCheckResult.reasonCode} (${response.eligibilityCheckResult.reason})")
       case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
     }
 

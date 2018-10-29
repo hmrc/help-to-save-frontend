@@ -20,7 +20,7 @@ import cats.Eq
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResult.{Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.util.Email
 

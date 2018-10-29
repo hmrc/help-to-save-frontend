@@ -21,8 +21,9 @@ import play.api.mvc.Result
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibleWithUserInfo, randomIneligibility}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.BarsService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
@@ -250,11 +251,12 @@ class BankAccountControllerSpec extends AuthSupport
     }
 
     "show user an error page if the session is found but user is not eligible and in-eligibility reason can't be parsed" in {
-
+      val eligibilityCheckResult = randomIneligibility().value.eligibilityCheckResult.copy(reasonCode = 999)
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value = randomIneligibility().value.copy(reasonCode = 999)))), None, None))))
+        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value =
+          EligibilityCheckResponse(eligibilityCheckResult, randomEligibility().value.threshold)))), None, None))))
       }
 
       val result = doRequest()

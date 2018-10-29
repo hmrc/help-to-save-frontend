@@ -119,7 +119,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
               NSIPayload(eligibleWithInfo.userInfo.userInfo, eligibleWithInfo.email, frontendAppConfig.version, frontendAppConfig.systemId)
                 .copy(nbaDetails = Some(bankDetails))
 
-            val createAccountRequest = CreateAccountRequest(payload, eligibleWithInfo.userInfo.eligible.value.reasonCode)
+            val createAccountRequest = CreateAccountRequest(payload, eligibleWithInfo.userInfo.eligible.value.eligibilityCheckResult.reasonCode)
 
             val result = for {
               submissionSuccess ← helpToSaveService.createAccount(createAccountRequest).leftMap(s ⇒ CreateAccountError(Left(s)))
