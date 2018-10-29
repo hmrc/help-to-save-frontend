@@ -27,7 +27,7 @@ class EligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenPro
   "EligibilityType" must {
 
     "have a method which converts from Eligible to EligibilityType" in {
-        def eligible(reasonCode: Int) = Eligible(EligibilityCheckResponseAndThreshold(EligibilityCheckResult("", 0, "", reasonCode), Some(134.45)))
+        def eligible(reasonCode: Int) = Eligible(EligibilityCheckResponse(EligibilityCheckResult("", 0, "", reasonCode), Some(134.45)))
 
       EligibilityReason.fromEligible(eligible(6)) shouldBe Some(UCClaimantAndIncomeSufficient)
       EligibilityReason.fromEligible(eligible(7)) shouldBe Some(EntitledToWTC(false))

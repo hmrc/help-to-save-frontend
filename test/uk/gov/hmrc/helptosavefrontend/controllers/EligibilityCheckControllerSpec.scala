@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Ineligible}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponseAndThreshold, EligibilityCheckResult, EligibilityCheckResultType}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult, EligibilityCheckResultType}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
@@ -168,7 +168,7 @@ class EligibilityCheckControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value =
-            EligibilityCheckResponseAndThreshold(eligibilityCheckResult, randomEligibility().value.threshold)))), None, None))))
+            EligibilityCheckResponse(eligibilityCheckResult, randomEligibility().value.threshold)))), None, None))))
         }
 
         val result = getIsNotEligible()
@@ -307,7 +307,7 @@ class EligibilityCheckControllerSpec
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockEnrolmentCheck()(Left("Oh no!"))
-              mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))
+              mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponse(response, Some(123.45)))))
               mockWriteITMPFlag(Right(()))
             }
 
@@ -326,7 +326,7 @@ class EligibilityCheckControllerSpec
                 inSequence {
                   mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
                   mockEnrolmentCheck()(Left("Oh no!"))
-                  mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))
+                  mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponse(response, Some(123.45)))))
                   mockWriteFailure()
                 }
 
@@ -414,7 +414,7 @@ class EligibilityCheckControllerSpec
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionCacheConnectorGet(Right(None))
-            mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponseAndThreshold(response, Some(123.45)))))
+            mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponse(response, Some(123.45)))))
             mockWriteITMPFlag(Right(()))
           }
 

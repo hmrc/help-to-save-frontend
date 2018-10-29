@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponseAndThreshold, EligibilityCheckResultType}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResultType}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIPayload}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
@@ -104,7 +104,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
     handleGet(
       eligibilityURL,
       emptyQueryParameters,
-      _.parseJSON[EligibilityCheckResponseAndThreshold]().flatMap(toEligibilityCheckResult),
+      _.parseJSON[EligibilityCheckResponse]().flatMap(toEligibilityCheckResult),
       "check eligibility",
       identity
     )
@@ -154,7 +154,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   }
 
   // scalastyle:off magic.number
-  private def toEligibilityCheckResult(response: EligibilityCheckResponseAndThreshold): Either[String, EligibilityCheckResultType] =
+  private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResultType] =
     response.eligibilityCheckResult.resultCode match {
       case 1 ⇒ Right(EligibilityCheckResultType.Eligible(response))
       case 2 ⇒ Right(EligibilityCheckResultType.Ineligible(response))

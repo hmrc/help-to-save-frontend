@@ -26,10 +26,10 @@ object EligibilityCheckResult {
 
 }
 
-case class EligibilityCheckResponseAndThreshold(eligibilityCheckResult: EligibilityCheckResult, threshold: Option[Double])
+case class EligibilityCheckResponse(eligibilityCheckResult: EligibilityCheckResult, threshold: Option[Double])
 
-object EligibilityCheckResponseAndThreshold {
+object EligibilityCheckResponse {
 
-  implicit val format: Format[EligibilityCheckResponseAndThreshold] = Json.format[EligibilityCheckResponseAndThreshold]
+  implicit val format: Format[EligibilityCheckResponse] = Json.format[EligibilityCheckResponse]
 
 }

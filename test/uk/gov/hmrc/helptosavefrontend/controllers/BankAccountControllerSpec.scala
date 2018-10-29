@@ -24,7 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation,
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponseAndThreshold
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.BarsService
 import uk.gov.hmrc.helptosavefrontend.util.NINO
@@ -257,7 +257,7 @@ class BankAccountControllerSpec extends AuthSupport
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value =
-          EligibilityCheckResponseAndThreshold(eligibilityCheckResult, randomEligibility().value.threshold)))), None, None))))
+          EligibilityCheckResponse(eligibilityCheckResult, randomEligibility().value.threshold)))), None, None))))
       }
 
       val result = doRequest()

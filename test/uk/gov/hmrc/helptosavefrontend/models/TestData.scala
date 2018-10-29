@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import org.scalacheck.Gen
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponseAndThreshold, EligibilityCheckResult}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
@@ -31,29 +31,29 @@ object TestData {
 
   object Eligibility {
 
-    implicit val eligibilityCheckResponseGen: Gen[EligibilityCheckResponseAndThreshold] =
+    implicit val eligibilityCheckResponseGen: Gen[EligibilityCheckResponse] =
       for {
         result ← AutoGen[EligibilityCheckResult]
         threshold ← Gen.option(Gen.posNum[Double])
-      } yield EligibilityCheckResponseAndThreshold(result, threshold)
+      } yield EligibilityCheckResponse(result, threshold)
 
     implicit val eligibilityGen: Gen[Eligible] = for {
       reasonCode ← Gen.oneOf(6, 7, 8)
-    } yield Eligible(EligibilityCheckResponseAndThreshold(EligibilityCheckResult("", 1, "", reasonCode), Some(134.45)))
+    } yield Eligible(EligibilityCheckResponse(EligibilityCheckResult("", 1, "", reasonCode), Some(134.45)))
 
     implicit val ineligibilityGen: Gen[Ineligible] = for {
       reasonCode ← Gen.oneOf(3, 4, 5, 9)
-    } yield Ineligible(EligibilityCheckResponseAndThreshold(EligibilityCheckResult("", 2, "", reasonCode), Some(134.45)))
+    } yield Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", reasonCode), Some(134.45)))
 
     implicit val ineligibilityReason5: Ineligible =
-      Ineligible(EligibilityCheckResponseAndThreshold(EligibilityCheckResult("", 2, "", 5), Some(134.45)))
+      Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", 5), Some(134.45)))
 
     implicit val ineligibilityReason5WithNoThreshold: Ineligible =
-      Ineligible(EligibilityCheckResponseAndThreshold(EligibilityCheckResult("", 2, "", 5), None))
+      Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", 5), None))
 
     implicit def ineligibilityReason4or9Gen(threshold: Option[Double]): Gen[Ineligible] = for {
       reasonCode ← Gen.oneOf(4, 9)
-    } yield Ineligible(EligibilityCheckResponseAndThreshold(EligibilityCheckResult("", 2, "", reasonCode), threshold))
+    } yield Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", reasonCode), threshold))
 
     def randomEligibilityResponse() = sample(eligibilityCheckResponseGen)
 
@@ -72,7 +72,7 @@ object TestData {
     def randomEligibleWithUserInfo(userInfo: UserInfo) = EligibleWithUserInfo(randomEligibility(), userInfo)
 
     def eligibleSpecificReasonCodeWithUserInfo(userInfo: UserInfo, reasonCode: Int) =
-      EligibleWithUserInfo(Eligible(EligibilityCheckResponseAndThreshold(EligibilityCheckResult("", 1, "", reasonCode), Some(134.45))), userInfo)
+      EligibleWithUserInfo(Eligible(EligibilityCheckResponse(EligibilityCheckResult("", 1, "", reasonCode), Some(134.45))), userInfo)
   }
 
   object UserData {

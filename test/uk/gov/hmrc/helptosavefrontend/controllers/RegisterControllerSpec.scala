@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponseAndThreshold
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
@@ -197,7 +197,7 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo)
-            .copy(eligible = Eligible(EligibilityCheckResponseAndThreshold(eligibilityCheckResult, randomEligibility().value.threshold))))),
+            .copy(eligible = Eligible(EligibilityCheckResponse(eligibilityCheckResult, randomEligibility().value.threshold))))),
                                                              Some(email), None))))
           mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, None, accountNumber = None))(Right(()))
         }

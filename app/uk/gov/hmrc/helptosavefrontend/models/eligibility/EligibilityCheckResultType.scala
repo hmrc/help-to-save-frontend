@@ -19,16 +19,16 @@ package uk.gov.hmrc.helptosavefrontend.models.eligibility
 import play.api.libs.json.{Format, Json}
 
 sealed trait EligibilityCheckResultType {
-  val value: EligibilityCheckResponseAndThreshold
+  val value: EligibilityCheckResponse
 }
 
 object EligibilityCheckResultType {
 
-  case class Eligible(value: EligibilityCheckResponseAndThreshold) extends EligibilityCheckResultType
+  case class Eligible(value: EligibilityCheckResponse) extends EligibilityCheckResultType
 
-  case class Ineligible(value: EligibilityCheckResponseAndThreshold) extends EligibilityCheckResultType
+  case class Ineligible(value: EligibilityCheckResponse) extends EligibilityCheckResultType
 
-  case class AlreadyHasAccount(value: EligibilityCheckResponseAndThreshold) extends EligibilityCheckResultType
+  case class AlreadyHasAccount(value: EligibilityCheckResponse) extends EligibilityCheckResultType
 
   object Eligible {
     implicit val format: Format[Eligible] = Json.format[Eligible]
@@ -39,9 +39,9 @@ object EligibilityCheckResultType {
   }
 
   implicit class Ops(val result: EligibilityCheckResultType) extends AnyVal {
-    def fold[A](ifEligible:          EligibilityCheckResponseAndThreshold ⇒ A,
-                ifIneligible:        EligibilityCheckResponseAndThreshold ⇒ A,
-                ifAlreadyHasAccount: EligibilityCheckResponseAndThreshold ⇒ A): A = result match {
+    def fold[A](ifEligible:          EligibilityCheckResponse ⇒ A,
+                ifIneligible:        EligibilityCheckResponse ⇒ A,
+                ifAlreadyHasAccount: EligibilityCheckResponse ⇒ A): A = result match {
       case Eligible(reason)          ⇒ ifEligible(reason)
       case Ineligible(reason)        ⇒ ifIneligible(reason)
       case AlreadyHasAccount(reason) ⇒ ifAlreadyHasAccount(reason)
