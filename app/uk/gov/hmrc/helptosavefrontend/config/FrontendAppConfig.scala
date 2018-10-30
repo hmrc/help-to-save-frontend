@@ -102,9 +102,8 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
 
-  val govUkURL: String = getString("gov-uk.urls.base")
-  val govUkEligibilityInfoUrl: String = getString("gov-uk.urls.eligibility-info")
-  val startPageRedirectionEnabled: Boolean = getBoolean("gov-uk.start-page-redirection.enabled")
+  val govUkURL: String = getString("gov-uk.url.base")
+  val govUkEligibilityInfoUrl: String = s"$govUkURL/eligibility"
 
   object BankDetailsConfig {
     val sortCodeLength: Int = getInt("bank-details-validation.sort-code.length")

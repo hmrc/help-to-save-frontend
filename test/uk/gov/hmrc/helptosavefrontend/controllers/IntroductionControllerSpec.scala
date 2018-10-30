@@ -75,12 +75,5 @@ class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income/how-to-apply")
     }
-
-    "applySubmit return 303" in {
-      val result = helpToSave.applySubmit(fakeRequest)
-      status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
-    }
-
   }
 }

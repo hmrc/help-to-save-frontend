@@ -39,11 +39,7 @@ class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveServic
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour {
 
   def getSignInPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    if (appConfig.startPageRedirectionEnabled) {
-      SeeOther("https://www.gov.uk/sign-in-help-to-save")
-    } else {
-      Ok(views.html.sign_in())
-    }
+    SeeOther("https://www.gov.uk/sign-in-help-to-save")
   }
 
   def accessAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
