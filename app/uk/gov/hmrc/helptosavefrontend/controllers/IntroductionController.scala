@@ -21,14 +21,12 @@ import javax.inject.Singleton
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.{Configuration, Environment}
-import play.twirl.api.{Html, HtmlFormat}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
-import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
 @Singleton
 class IntroductionController @Inject() (val authConnector: AuthConnector,
@@ -41,48 +39,26 @@ class IntroductionController @Inject() (val authConnector: AuthConnector,
   extends BaseController with HelpToSaveAuth {
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    handleIntroductionPage(
-      views.html.introduction.about_help_to_save(),
-      "https://www.gov.uk/get-help-savings-low-income"
-    )
+    SeeOther("https://www.gov.uk/get-help-savings-low-income")
   }
 
   def getEligibility: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    handleIntroductionPage(
-      views.html.introduction.eligibility(),
-      "https://www.gov.uk/get-help-savings-low-income/eligibility"
-    )
+    SeeOther("https://www.gov.uk/get-help-savings-low-income/eligibility")
   }
 
   def getHowTheAccountWorks: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    handleIntroductionPage(
-      views.html.introduction.how_the_account_works(),
-      "https://www.gov.uk/get-help-savings-low-income"
-    )
+    SeeOther("https://www.gov.uk/get-help-savings-low-income")
   }
 
   def getHowWeCalculateBonuses: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    handleIntroductionPage(
-      views.html.introduction.how_the_account_works(),
-      "https://www.gov.uk/get-help-savings-low-income/what-youll-get"
-    )
+    SeeOther("https://www.gov.uk/get-help-savings-low-income/what-youll-get")
   }
 
   def getApply: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    handleIntroductionPage(
-      views.html.introduction.apply(),
-      "https://www.gov.uk/get-help-savings-low-income/how-to-apply"
-    )
-  }
-
-  def applySubmit: Action[AnyContent] = ActionWithMdc { _ ⇒
-    SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+    SeeOther("https://www.gov.uk/get-help-savings-low-income/how-to-apply")
   }
 
   def showPrivacyPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.core.privacy())
   }
-
-  private def handleIntroductionPage(mdtpPage: Html, govUkPage: String): Result =
-    if (appConfig.startPageRedirectionEnabled) { SeeOther(govUkPage) } else { Ok(mdtpPage) }
 }
