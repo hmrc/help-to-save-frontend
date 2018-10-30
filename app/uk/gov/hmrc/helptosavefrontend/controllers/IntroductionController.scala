@@ -38,24 +38,26 @@ class IntroductionController @Inject() (val authConnector: AuthConnector,
 
   extends BaseController with HelpToSaveAuth {
 
+  private val baseUrl: String = frontendAppConfig.govUkURL
+
   def getAboutHelpToSave: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    SeeOther("https://www.gov.uk/get-help-savings-low-income")
+    SeeOther(baseUrl)
   }
 
   def getEligibility: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    SeeOther("https://www.gov.uk/get-help-savings-low-income/eligibility")
+    SeeOther(s"$baseUrl/eligibility")
   }
 
   def getHowTheAccountWorks: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    SeeOther("https://www.gov.uk/get-help-savings-low-income")
+    SeeOther(baseUrl)
   }
 
   def getHowWeCalculateBonuses: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    SeeOther("https://www.gov.uk/get-help-savings-low-income/what-youll-get")
+    SeeOther(s"$baseUrl/what-youll-get")
   }
 
   def getApply: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
-    SeeOther("https://www.gov.uk/get-help-savings-low-income/how-to-apply")
+    SeeOther(s"$baseUrl/how-to-apply")
   }
 
   def showPrivacyPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
