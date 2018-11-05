@@ -26,27 +26,20 @@
 }
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-    title = title,
-    sidebarLinks = None,
-    bodyClasses = None) {
+  title = title,
+  sidebarLinks = None,
+  bodyClasses = None) {
 
-    <h1 class="heading-large">@title</h1>
-    <p class="lede">@Html(messages("hts.email-verification.check-your-email.we-have-sent-mail")) @email</p>
-    @defining(
+  <h1 class="heading-large">@title</h1>
+  
+  @defining(
     oldEmail.fold(routes.EmailController.getGiveEmailPage)(_ => routes.EmailController.getSelectEmailPage)
-    ){ call =>
-        <p><a href=@call>@messages("hts.email-verification.check-your-email.change-email-address")</a></p>
-    }
-    <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.what-next")</h2>
-    <p class="content">@Html(messages("hts.email-verification.check-your-email.content1"))</p>
-    <p class="content">@messages("hts.email-verification.check-your-email.content2")</p>
-    <p class="content">@Html(Messages("hts.email-verification.check-your-email.content3"))</p>
-    <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.where-used-heading")</h2>
-    <p class="content">@Html(Messages("hts.email-verification.check-your-email.where-used"))</p>
+  ){ call =>
+    <p class="lede">@Html(Messages("hts.email-verification.check-your-email.we-have-sent-mail", email, call))</p>
+  }
 
-    @helpers.form(routes.EmailController.verifyEmail){
-    <div class="form-group subsection--wide">
-        <button id="resend-verification" class="button subsection--wide" type="submit">@messages("hts.email-verification.check-your-email.resend-email")</button>
-    </div>
-    }
+  <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.what-next")</h2>
+  <p class="content">@Html(messages("hts.email-verification.check-your-email.content1"))</p>
+  <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.where-used-heading")</h2>
+  <p class="content">@Html(Messages("hts.email-verification.check-your-email.where-used", routes.EmailController.verifyEmail().url))</p>
 }

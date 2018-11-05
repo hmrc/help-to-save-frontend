@@ -25,7 +25,7 @@ POST       /select-email                                    @uk.gov.hmrc.helptos
 GET        /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getGiveEmailPage
 POST       /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.giveEmailSubmit
 GET        /confirm-email/:email                            @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmail(email)
-GET        /verify-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmail
+GET        /confirm-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmail
 GET        /email-verified-callback                         @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailVerifiedCallback(p: String)
 GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailVerified
 GET        /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmailError

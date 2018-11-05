@@ -1011,7 +1011,7 @@ class EmailControllerSpec
         val result = verifyEmail
         status(result) shouldBe 200
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title.h1")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content2")) shouldBe true
+        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content1")) shouldBe true
       }
 
       "handle Digital users who have not gone through eligibility checks" in {
@@ -1069,7 +1069,7 @@ class EmailControllerSpec
         val result = verifyEmail
         status(result) shouldBe 200
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title.h1")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content2")) shouldBe true
+        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content1")) shouldBe true
       }
 
       "handle DE users with missing user info from GG" in {
