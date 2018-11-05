@@ -48,11 +48,15 @@
   <script src='@routes.Assets.versioned("javascripts/gaTracking.js")'></script>
 }
 
+@headScripts = {
+  <script src="https://cdn.optimizely.com/js/10428983306.js"></script>
+}
+
 
 @head = {
 @uiLayouts.head(
     linkElem = Some(linkElement),
-    headScripts = None)
+    headScripts = Some(headScripts))
     <meta name="format-detection" content="telephone=no" />
     @(extraMeta.getOrElse(Html("")))
 }
