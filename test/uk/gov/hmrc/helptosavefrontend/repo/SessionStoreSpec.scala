@@ -93,27 +93,6 @@ class SessionStoreSpec extends TestSupport with MongoSupport with ScalaFutures w
 
       }
     }
-
-    //Commenting this test intentionally
-    //Enable this locally if you want to test the expiry of sessions after TTL period is passed
-    //time taking unit test due to Eventually
-    //    "be able to delete entries automatically after TTL period is expired" in new TestApparatus {
-    //
-    //      htsSessionGen.sample.foreach { htsSession ⇒
-    //
-    //        val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
-    //        val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
-    //
-    //        result.value.futureValue should be(Right(()))
-    //
-    //        eventually {
-    //          val getResult = sessionStore.get(htsSessionReads, hc)
-    //          getResult.value.futureValue should be(Right(None))
-    //        }
-    //
-    //      }
-    //    }
-
   }
 
 }
