@@ -606,7 +606,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                   _ ⇒ routes.EmailController.verifyEmailError().url
                 )
               toFuture(SeeOther(url))
-            }(email ⇒ toFuture(Ok(views.html.email.email_updated(email, duringRegistrationJourney = true))))
+            }(_ ⇒ Ok(views.html.email.email_updated()))
         }(session)
 
       def ifDE = SeeOther(routes.EmailController.getGiveEmailPage().url)
@@ -617,7 +617,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             _.confirmedEmail.fold[Future[Result]] {
               logger.warn("Could not find confirmed email in the session for DE user", htsContext.nino)
               internalServerError()
-            }(email ⇒ toFuture(Ok(views.html.email.email_updated(email, duringRegistrationJourney = false)))
+            }(_ ⇒ Ok(views.html.email.email_updated())
             )
           }
       }
@@ -631,7 +631,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
     def handle(email: Option[String], duringRegistrationJourney: Boolean) =
         email.fold[Future[Result]](
           SeeOther(routes.EmailController.getGiveEmailPage().url))(
-            email ⇒ Ok(views.html.email.email_updated(email, duringRegistrationJourney)))
+            _ ⇒ Ok(views.html.email.email_updated()))
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession {
