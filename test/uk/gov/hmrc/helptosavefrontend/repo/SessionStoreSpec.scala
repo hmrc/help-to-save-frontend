@@ -72,6 +72,17 @@ class SessionStoreSpec extends TestSupport with MongoSupport with ScalaFutures w
       }
     }
 
+    "handle the case where there is no sessionId in the HeaderCarrier" in new TestApparatus {
+
+      htsSessionGen.sample.foreach { htsSession ⇒
+        val hc: HeaderCarrier = HeaderCarrier(sessionId = None)
+        val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
+
+        result.value.futureValue should be(Left("can't query mongo dueto no sessionId in the HeaderCarrier"))
+
+      }
+    }
+
     "be able to update an existing HTSSession against the same user sessionId" in new TestApparatus {
 
       forAll(htsSessionGen) { htsSession ⇒

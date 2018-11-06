@@ -75,7 +75,7 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
         }
 
       case None ⇒
-        Left("can't query mongo due to no sessionId found in the HeaderCarrier")
+        Left("can't query mongo dueto no sessionId in the HeaderCarrier")
     })
   }
 
@@ -117,7 +117,7 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
               }
 
           case None ⇒
-            Left("can't store HTSSession in mongo due to no sessionId found in the HeaderCarrier")
+            Left("can't store HTSSession in mongo dueto no sessionId in the HeaderCarrier")
         }
       }
 
