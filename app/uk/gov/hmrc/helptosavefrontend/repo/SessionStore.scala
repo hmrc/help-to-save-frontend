@@ -115,7 +115,7 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
               }.recover {
                 case e ⇒
                   val _ = timerContext.stop()
-                  metrics.sessionStoreErrorCounter.inc()
+                  metrics.sessionStoreWriteErrorCounter.inc()
                   Left(e.getMessage)
               }
 

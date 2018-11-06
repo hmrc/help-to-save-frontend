@@ -79,7 +79,7 @@ class SessionStoreSpec extends TestSupport with MongoSupport with ScalaFutures w
         val ivSuccessUrl = "/some/iv/successUrl"
 
         val existingSession = HTSSession(None, None, None, ivURL = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl))
-        val expectedSessionToStore = htsSession.copy(ivURL        = None, ivSuccessURL = None)
+        val expectedSessionToStore = htsSession.copy(ivURL = None, ivSuccessURL = None)
 
         val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
         val result1 = sessionStore.store(existingSession)(htsSessionWrites, hc)
@@ -89,28 +89,30 @@ class SessionStoreSpec extends TestSupport with MongoSupport with ScalaFutures w
         result2.value.futureValue should be(Right(()))
 
         val getResult = sessionStore.get(htsSessionReads, hc)
-        getResult.value.futureValue should be(Right(Some(htsSession.copy(ivURL        = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl)))))
+        getResult.value.futureValue should be(Right(Some(htsSession.copy(ivURL = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl)))))
 
       }
     }
 
+    //Commenting this test intentionally
+    //Enable this locally if you want to test the expiry of sessions after TTL period is passed
     //time taking unit test due to Eventually
-    "be able to delete entries automatically after TTL period is expired" in new TestApparatus {
-
-      htsSessionGen.sample.foreach { htsSession ⇒
-
-        val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
-        val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
-
-        result.value.futureValue should be(Right(()))
-
-        eventually {
-          val getResult = sessionStore.get(htsSessionReads, hc)
-          getResult.value.futureValue should be(Right(None))
-        }
-
-      }
-    }
+    //    "be able to delete entries automatically after TTL period is expired" in new TestApparatus {
+    //
+    //      htsSessionGen.sample.foreach { htsSession ⇒
+    //
+    //        val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
+    //        val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
+    //
+    //        result.value.futureValue should be(Right(()))
+    //
+    //        eventually {
+    //          val getResult = sessionStore.get(htsSessionReads, hc)
+    //          getResult.value.futureValue should be(Right(None))
+    //        }
+    //
+    //      }
+    //    }
 
   }
 
