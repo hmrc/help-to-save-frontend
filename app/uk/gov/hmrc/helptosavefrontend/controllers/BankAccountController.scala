@@ -54,7 +54,7 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
       routes.RegisterController.getCreateAccountPage().url
     } else {
       if (session.pendingEmail.isDefined) {
-        routes.EmailController.getEmailVerified().url
+        routes.EmailController.getEmailConfirmed().url
       } else {
         routes.EmailController.getSelectEmailPage().url
       }

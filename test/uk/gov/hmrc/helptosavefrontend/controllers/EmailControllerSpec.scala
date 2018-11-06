@@ -339,7 +339,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(Some(testEmail))
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
       }
 
       "handle existing digital account holders and redirect them to nsi" in {
@@ -411,7 +411,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(Some(testEmail))
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
       }
 
       "handle DE user who submitted form with errors" in {
@@ -651,7 +651,7 @@ class EmailControllerSpec
 
         val result = giveEmailSubmit(email)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
       }
 
       "handle existing digital account holders and redirect them to nsi" in {
@@ -691,7 +691,7 @@ class EmailControllerSpec
 
         val result = giveEmailSubmit(email)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
       }
 
       "handle DE user who submitted form with errors" in {
@@ -708,13 +708,13 @@ class EmailControllerSpec
       }
     }
 
-    "handling confirmEmail requests" must {
+    "handling emailConfirmed requests" must {
 
       val email = "test@user.com"
       val userInfo = randomEligibleWithUserInfo(validUserInfo)
       val userInfoWithInvalidEmail = randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail"))
 
-        def confirmEmail(encryptedEmail: String): Future[Result] = controller.confirmEmail(encryptedEmail)(fakeRequestWithCSRFToken)
+        def emailConfirmed(encryptedEmail: String): Future[Result] = controller.emailConfirmed(encryptedEmail)(fakeRequestWithCSRFToken)
 
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
@@ -725,7 +725,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
-        val result = confirmEmail(encryptedEmail)
+        val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
@@ -741,7 +741,7 @@ class EmailControllerSpec
           mockStoreConfirmedEmail("decrypted")(Right(None))
         }
 
-        val result = confirmEmail(encryptedEmail)
+        val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
       }
@@ -757,7 +757,7 @@ class EmailControllerSpec
           mockStoreConfirmedEmail("decrypted")(Right(None))
         }
 
-        val result = confirmEmail(encryptedEmail)
+        val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
       }
@@ -771,7 +771,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
-        val result = confirmEmail(encryptedEmail)
+        val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
       }
@@ -786,7 +786,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
 
-        val result = confirmEmail(encryptedEmail)
+        val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("https://nsandi.com")
       }
@@ -801,19 +801,19 @@ class EmailControllerSpec
           mockSessionStorePut(HTSSession(None, Some("decrypted"), None))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
           mockUpdateEmail(NSIPayload(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted", version, systemId))(Right(None))
-          mockAudit(EmailChanged(nino, "", "decrypted", false, routes.EmailController.confirmEmail(encryptedEmail).url))
+          mockAudit(EmailChanged(nino, "", "decrypted", false, routes.EmailController.emailConfirmed(encryptedEmail).url))
         }
 
-        val result = confirmEmail(encryptedEmail)
+        val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("https://nsandi.com")
       }
     }
 
-    "handling emailVerifiedCallback requests" must {
+    "handling emailConfirmedCallback requests" must {
 
-        def emailVerifiedCallback(emailVerificationParams: String): Future[Result] =
-          controller.emailVerifiedCallback(emailVerificationParams)(fakeRequestWithCSRFToken)
+        def emailConfirmedCallback(emailVerificationParams: String): Future[Result] =
+          controller.emailConfirmedCallback(emailVerificationParams)(fakeRequestWithCSRFToken)
 
       val email = "test@user.com"
 
@@ -831,13 +831,13 @@ class EmailControllerSpec
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None, changingDetails = true))))
           mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None, changingDetails = true))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
+          mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailVerified().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed().url)
 
       }
 
@@ -851,13 +851,13 @@ class EmailControllerSpec
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), None, None))))
           mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, "", newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
+          mockAudit(EmailChanged(nino, "", newEmail, true, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailVerified().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed().url)
 
       }
 
@@ -870,7 +870,7 @@ class EmailControllerSpec
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 500
       }
@@ -879,13 +879,13 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect", routes.EmailController.emailVerifiedCallback("blah blah").url))
+          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect", routes.EmailController.emailConfirmedCallback("blah blah").url))
         }
 
-        val result = emailVerifiedCallback("blah blah")
+        val result = emailConfirmedCallback("blah blah")
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
       }
 
       "handle Digital users who have not gone through eligibility checks and are eligible" in {
@@ -900,13 +900,13 @@ class EmailControllerSpec
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibilityResult)), Some(email), None))))
           mockSessionStorePut(HTSSession(Some(Right(eligibilityResult.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
+          mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailVerified().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed().url)
       }
 
       "handle Digital users who have not gone through eligibility checks and not eligible" in {
@@ -918,7 +918,7 @@ class EmailControllerSpec
           mockEligibilityResult()(Right(EligibilityCheckResultType.Ineligible(randomEligibilityResponse())))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
@@ -930,7 +930,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Left("error"))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 500
       }
@@ -941,7 +941,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 500
       }
@@ -956,13 +956,13 @@ class EmailControllerSpec
           mockUpdateEmail(updatedNSIPayload)(Right(None))
           mockStoreConfirmedEmail(email)(Right(None))
           mockSessionStorePut(HTSSession(None, Some(email), None))(Right(None))
-          mockAudit(EmailChanged(nino, "", email, false, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
+          mockAudit(EmailChanged(nino, "", email, false, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailVerified().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed().url)
       }
 
       "handle DE users and handle errors during updating email with NS&I" in {
@@ -975,7 +975,7 @@ class EmailControllerSpec
           mockUpdateEmail(updatedNSIUserInfo)(Left("error"))
         }
 
-        val result = emailVerifiedCallback(encryptedParams)
+        val result = emailConfirmedCallback(encryptedParams)
         status(result) shouldBe 500
       }
 
@@ -983,20 +983,20 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect", routes.EmailController.emailVerifiedCallback("blah blah").url))
+          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect", routes.EmailController.emailConfirmedCallback("blah blah").url))
         }
 
-        val result = emailVerifiedCallback("blah blah")
+        val result = emailConfirmedCallback("blah blah")
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
       }
 
     }
 
-    "handling verifyEmail requests" must {
-        def verifyEmail: Future[Result] =
-          controller.verifyEmail(fakeRequestWithCSRFToken)
+    "handling confirmEmail requests" must {
+        def confirmEmail: Future[Result] =
+          controller.confirmEmail(fakeRequestWithCSRFToken)
 
       "handle Digital users and return the check your email page with a status of Ok" in {
 
@@ -1008,7 +1008,7 @@ class EmailControllerSpec
           mockEmailVerification(nino, newEmail, firstName)(Right(()))
         }
 
-        val result = verifyEmail
+        val result = confirmEmail
         status(result) shouldBe 200
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title.h1")) shouldBe true
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content1")) shouldBe true
@@ -1022,7 +1022,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = verifyEmail
+        val result = confirmEmail
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
@@ -1037,9 +1037,9 @@ class EmailControllerSpec
           mockEncrypt("WM123456C#email@hmrc.com")("decrypted")
         }
 
-        val result = verifyEmail
+        val result = confirmEmail
         status(result) shouldBe 303
-        redirectLocation(result).getOrElse("") should include("/help-to-save/email-verified-callback")
+        redirectLocation(result).getOrElse("") should include("/help-to-save/email-confirmed-callback")
       }
 
       "handle existing digital account holders and redirect them to nsi" in {
@@ -1051,7 +1051,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
 
-        val result = verifyEmail
+        val result = confirmEmail
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("https://nsandi.com")
       }
@@ -1066,7 +1066,7 @@ class EmailControllerSpec
           mockEmailVerification(nino, newEmail, firstName)(Right(()))
         }
 
-        val result = verifyEmail
+        val result = confirmEmail
         status(result) shouldBe 200
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title.h1")) shouldBe true
         contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content1")) shouldBe true
@@ -1081,7 +1081,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
         }
 
-        val result = verifyEmail
+        val result = confirmEmail
         status(result) shouldBe 500
       }
 
@@ -1093,15 +1093,15 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
         }
 
-        val result = verifyEmail
+        val result = confirmEmail
         status(result) shouldBe 500
       }
     }
 
-    "handling verifyEmailError requests" must {
+    "handling confirmEmailError requests" must {
 
-        def verifyEmailError: Future[Result] =
-          controller.verifyEmailError(fakeRequestWithCSRFToken)
+        def confirmEmailError: Future[Result] =
+          controller.confirmEmailError(fakeRequestWithCSRFToken)
 
       "handle Digital users who are already gone through eligibility checks" in {
         val newEmail = "email@hmrc.com"
@@ -1111,7 +1111,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = verifyEmailError
+        val result = confirmEmailError
         status(result) shouldBe 200
         contentAsString(result) should include("We cannot change your email address at the moment")
       }
@@ -1125,7 +1125,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
 
-        val result = verifyEmailError
+        val result = confirmEmailError
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("https://nsandi.com")
       }
@@ -1139,16 +1139,16 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
         }
 
-        val result = verifyEmailError
+        val result = confirmEmailError
         status(result) shouldBe 200
         contentAsString(result) should include("We cannot change your email address at the moment")
       }
 
     }
 
-    "handling verifyEmailErrorTryLater requests" must {
-        def verifyEmailErrorTryLater: Future[Result] =
-          controller.verifyEmailErrorTryLater(fakeRequestWithCSRFToken)
+    "handling confirmEmailErrorTryLater requests" must {
+        def confirmEmailErrorTryLater: Future[Result] =
+          controller.confirmEmailErrorTryLater(fakeRequestWithCSRFToken)
 
       "handle Digital users who are already gone through eligibility checks" in {
         inSequence {
@@ -1157,7 +1157,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = verifyEmailErrorTryLater
+        val result = confirmEmailErrorTryLater
         status(result) shouldBe 200
         contentAsString(result) should include("We cannot change your email")
       }
@@ -1170,16 +1170,16 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
         }
 
-        val result = verifyEmailErrorTryLater
+        val result = confirmEmailErrorTryLater
         status(result) shouldBe 200
         contentAsString(result) should include("We cannot change your email address at the moment")
       }
     }
 
-    "handling verifyEmailErrorSubmit requests" must {
+    "handling confirmEmailErrorSubmit requests" must {
 
-        def verifyEmailErrorSubmit(continue: Boolean): Future[Result] =
-          controller.verifyEmailErrorSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("radio-inline-group" → continue.toString))
+        def confirmEmailErrorSubmit(continue: Boolean): Future[Result] =
+          controller.confirmEmailErrorSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("radio-inline-group" → continue.toString))
 
       "handle Digital users and redirect to the email verify error page try later if there is no email for the user" in {
         inSequence {
@@ -1188,12 +1188,12 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = verifyEmailErrorSubmit(true)
+        val result = confirmEmailErrorSubmit(true)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
       }
 
-      "handle Digital users and redirect to the confirmEmail endpoint if there is an email for the user and the user selects to continue" in {
+      "handle Digital users and redirect to the emailConfirmed endpoint if there is an email for the user and the user selects to continue" in {
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -1202,10 +1202,10 @@ class EmailControllerSpec
           mockEncrypt(emailStr)(encryptedEmail)
         }
 
-        val result = verifyEmailErrorSubmit(true)
+        val result = confirmEmailErrorSubmit(true)
         status(result) shouldBe 303
 
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail(encryptedEmail).url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.emailConfirmed(encryptedEmail).url)
       }
 
       "handle Digital users and redirect to the info endpoint if there is an email for the user and the user selects not to continue" in {
@@ -1215,7 +1215,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = verifyEmailErrorSubmit(false)
+        val result = confirmEmailErrorSubmit(false)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.IntroductionController.getAboutHelpToSave().url)
       }
@@ -1227,7 +1227,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = controller.verifyEmailErrorSubmit()(fakeRequestWithCSRFToken)
+        val result = controller.confirmEmailErrorSubmit()(fakeRequestWithCSRFToken)
         status(result) shouldBe 200
         contentAsString(result) should include("We cannot change your email address at the moment")
       }
@@ -1240,12 +1240,12 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
 
-        val result = controller.verifyEmailErrorSubmit()(fakeRequestWithCSRFToken)
+        val result = controller.confirmEmailErrorSubmit()(fakeRequestWithCSRFToken)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some("https://nsandi.com")
       }
 
-      "handle DE users and redirect to the confirmEmail endpoint if there is an email for the user and the user selects to continue" in {
+      "handle DE users and redirect to the emailConfirmed endpoint if there is an email for the user and the user selects to continue" in {
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -1255,17 +1255,17 @@ class EmailControllerSpec
           mockEncrypt(emailStr)(encryptedEmail)
         }
 
-        val result = verifyEmailErrorSubmit(true)
+        val result = confirmEmailErrorSubmit(true)
         status(result) shouldBe 303
 
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail(encryptedEmail).url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.emailConfirmed(encryptedEmail).url)
 
       }
     }
 
-    "handling getEmailVerified" must {
+    "handling getEmailConfirmed" must {
 
-        def getEmailVerified = controller.getEmailVerified(fakeRequestWithCSRFToken)
+        def getEmailConfirmed = controller.getEmailConfirmed(fakeRequestWithCSRFToken)
 
       "handle Digital users and return the email verified page" in {
         inSequence {
@@ -1274,9 +1274,9 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = getEmailVerified
+        val result = getEmailConfirmed
         status(result) shouldBe OK
-        contentAsString(result) should include("Email address verified")
+        contentAsString(result) should include("You have confirmed the email address")
       }
 
       "handle Digital users and redirect to check eligibility" when {
@@ -1288,7 +1288,7 @@ class EmailControllerSpec
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           }
 
-          val result = getEmailVerified
+          val result = getEmailConfirmed
           status(result) shouldBe 303
           redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
         }
@@ -1304,9 +1304,9 @@ class EmailControllerSpec
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           }
 
-          val result = getEmailVerified
+          val result = getEmailConfirmed
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailError().url)
+          redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailError().url)
         }
 
         "there is no confirmed email in the session when there is no email for the user" in {
@@ -1316,9 +1316,9 @@ class EmailControllerSpec
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           }
 
-          val result = getEmailVerified
+          val result = getEmailConfirmed
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmailErrorTryLater().url)
+          redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
         }
 
         "the call to session cache fails" in {
@@ -1327,7 +1327,7 @@ class EmailControllerSpec
             mockSessionStoreGet(Left(""))
           }
 
-          val result = getEmailVerified
+          val result = getEmailConfirmed
           checkIsTechnicalErrorPage(result)
         }
       }
@@ -1340,7 +1340,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
         }
 
-        val result = getEmailVerified
+        val result = getEmailConfirmed
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some("/help-to-save/enter-email")
       }
@@ -1361,7 +1361,7 @@ class EmailControllerSpec
 
         val result = getEmailUpdated()
         status(result) shouldBe OK
-        contentAsString(result) should include("Email address verified")
+        contentAsString(result) should include("You have confirmed the email address")
 
       }
 

@@ -24,13 +24,13 @@ GET        /select-email                                    @uk.gov.hmrc.helptos
 POST       /select-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.selectEmailSubmit
 GET        /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getGiveEmailPage
 POST       /enter-email                                     @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.giveEmailSubmit
-GET        /confirm-email/:email                            @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmail(email)
-GET        /confirm-email                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmail
-GET        /email-verified-callback                         @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailVerifiedCallback(p: String)
-GET        /email-verified                                  @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailVerified
-GET        /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmailError
-POST       /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmailErrorSubmit
-GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.verifyEmailErrorTryLater
+GET        /confirm-email/:email                            @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailConfirmed(email)
+GET        /confirm-email                                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmail
+GET        /email-confirmed-callback                        @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailConfirmedCallback(p: String)
+GET        /email-confirmed                                 @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailConfirmed
+GET        /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmailError
+POST       /cannot-change-email                             @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmailErrorSubmit
+GET        /cannot-change-email-try-later                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmailErrorTryLater
 GET        /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailUpdated()
 POST       /email-updated                                   @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailUpdatedSubmit
 GET        /link-expired                                    @uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getLinkExpiredPage

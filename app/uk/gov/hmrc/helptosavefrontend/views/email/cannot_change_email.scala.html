@@ -56,7 +56,7 @@
       <p>@Messages("hts.cannot-change-email.de.to.digital.p3")</p>
     }
 
-    @helpers.form(routes.EmailController.verifyEmailErrorSubmit){
+    @helpers.form(routes.EmailController.confirmEmailErrorSubmit){
       @CSRF.formField(request)
 
       <fieldset>
