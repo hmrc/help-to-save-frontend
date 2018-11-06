@@ -79,7 +79,7 @@ class SessionStoreSpec extends TestSupport with MongoSupport with ScalaFutures w
         val ivSuccessUrl = "/some/iv/successUrl"
 
         val existingSession = HTSSession(None, None, None, ivURL = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl))
-        val expectedSessionToStore = htsSession.copy(ivURL = None, ivSuccessURL = None)
+        val expectedSessionToStore = htsSession.copy(ivURL        = None, ivSuccessURL = None)
 
         val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
         val result1 = sessionStore.store(existingSession)(htsSessionWrites, hc)
@@ -89,7 +89,7 @@ class SessionStoreSpec extends TestSupport with MongoSupport with ScalaFutures w
         result2.value.futureValue should be(Right(()))
 
         val getResult = sessionStore.get(htsSessionReads, hc)
-        getResult.value.futureValue should be(Right(Some(htsSession.copy(ivURL = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl)))))
+        getResult.value.futureValue should be(Right(Some(htsSession.copy(ivURL        = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl)))))
 
       }
     }

@@ -21,7 +21,7 @@ import cats.instances.either._
 import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.{JsValue, Json, Reads, Writes}
+import play.api.libs.json.{Json, Reads, Writes}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.cache.model.Id
 import uk.gov.hmrc.cache.repository.CacheMongoRepository
@@ -46,17 +46,16 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
 
   private val expireAfterSeconds = appConfig.mongoSessionExpireAfter.toSeconds
 
-  private lazy val cacheRepository = new CacheMongoRepository("sessions", expireAfterSeconds)(mongo.mongoConnector.db, ec)
+  private val cacheRepository = new CacheMongoRepository("sessions", expireAfterSeconds)(mongo.mongoConnector.db, ec)
 
   private type EitherStringOr[A] = Either[String, A]
 
   override def get(implicit reads: Reads[HTSSession], hc: HeaderCarrier): Result[Option[HTSSession]] = {
 
-    val timerContext = metrics.sessionReadTimer.time()
-
     EitherT(hc.sessionId.map(_.value) match {
       case Some(sessionId) ⇒
-        doFindById(Id(sessionId)).map { maybeCache ⇒
+        val timerContext = metrics.sessionReadTimer.time()
+        cacheRepository.findById(Id(sessionId)).map { maybeCache ⇒
           val response: OptionT[EitherStringOr, HTSSession] = for {
             cache ← OptionT.fromOption[EitherStringOr](maybeCache)
             data ← OptionT.fromOption[EitherStringOr](cache.data)
@@ -76,18 +75,16 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
         }
 
       case None ⇒
-        // is this correct to return None if no session found in the HeaderCarrier ? or should this be an Left(error) ?
-        Right(None)
+        Left("can't query mongo due to no sessionId found in the HeaderCarrier")
     })
   }
 
   override def store(newSession: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier): Result[Unit] = {
 
       def doUpdate(newSession: HTSSession, oldSession: Option[HTSSession]): Future[Either[String, Unit]] = {
-        val timerContext = metrics.sessionStoreWriteTimer.time()
         hc.sessionId.map(_.value) match {
           case Some(sessionId) ⇒
-
+            val timerContext = metrics.sessionStoreWriteTimer.time()
             val sessionToStore = oldSession.fold(
               newSession
             )(existing ⇒
@@ -104,7 +101,7 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
               )
             )
 
-            doCreateOrUpdate(Id(sessionId), "htsSession", Json.toJson(sessionToStore))
+            cacheRepository.createOrUpdate(Id(sessionId), "htsSession", Json.toJson(sessionToStore))
               .map[Either[String, Unit]] { dbUpdate ⇒
                 if (dbUpdate.writeResult.inError) {
                   Left(dbUpdate.writeResult.errMsg.getOrElse("unknown error during inserting session data in mongo"))
@@ -130,10 +127,4 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
     } yield result
 
   }
-
-  private[repo] def doFindById(id: Id) =
-    cacheRepository.findById(id)
-
-  private[repo] def doCreateOrUpdate(id: Id, key: String, toCache: JsValue) =
-    cacheRepository.createOrUpdate(id, key, toCache)
 }
