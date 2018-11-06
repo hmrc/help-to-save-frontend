@@ -13,7 +13,7 @@ Feature: more ZAP tests to hit the rest of the URLS
       | select-email                            |
       | enter-email                             |
       | confirm-email/user@test.com             |
-      | verify-email                            |
+      | confirm-email                           |
       | email-verified-callback                 |
       | email-verified                          |
       | cannot-change-email                     |
