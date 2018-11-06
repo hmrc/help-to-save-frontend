@@ -1,5 +1,6 @@
 @HTS-37 @creating-account
 Feature: Applicant creates new account
+  @check-test
   Scenario: An unauthenticated user creates new account
     Given they try to start creating an account
     And they are prompted to log into GG
