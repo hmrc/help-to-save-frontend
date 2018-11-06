@@ -34,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class BankAccountControllerSpec extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
-  with SessionCacheBehaviourSupport {
+  with SessionStoreBehaviourSupport {
 
   implicit lazy val bankDetailsValidation: BankDetailsValidation = new BankDetailsValidation(appConfig)
 
@@ -47,7 +47,7 @@ class BankAccountControllerSpec extends AuthSupport
 
   val controller = new BankAccountController(
     mockHelpToSaveService,
-    mockSessionCacheConnector,
+    mockSessionStore,
     mockAuthConnector,
     mockMetrics,
     mockBarsService)
@@ -65,7 +65,7 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
         }
 
         val result = doRequest()
@@ -79,7 +79,7 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
         }
 
         val result = doRequest()
@@ -93,7 +93,7 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, Some("pendingEmail")))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, Some("pendingEmail")))))
         }
 
         val result = doRequest()
@@ -107,7 +107,7 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true))))
         }
 
         val result = doRequest()
@@ -122,7 +122,7 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some(""), "accountName"))))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some(""), "accountName"))))))
         }
 
         val result = doRequest()
@@ -154,7 +154,7 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
         }
 
         val result = controller.submitBankDetails()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("rollNumber" → "a"))
@@ -174,9 +174,9 @@ class BankAccountControllerSpec extends AuthSupport
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
           mockValidateBankDetails(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"), validUserInfo.nino, routes.BankAccountController.submitBankDetails().url)(Right(true))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Right(()))
+          mockSessionStorePut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Right(()))
         }
 
         val result = doRequest()
@@ -184,16 +184,16 @@ class BankAccountControllerSpec extends AuthSupport
         redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
       }
 
-      "handle keystore errors during storing bank details in session" in {
+      "handle mongo session errors during storing bank details in session" in {
 
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
           mockValidateBankDetails(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"), validUserInfo.nino, routes.BankAccountController.submitBankDetails().url)(Right(true))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Left(("error")))
+          mockSessionStorePut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Left(("error")))
         }
 
         val result = doRequest()
@@ -217,7 +217,7 @@ class BankAccountControllerSpec extends AuthSupport
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(None))
+        mockSessionStoreGet(Right(None))
       }
 
       val result = doRequest()
@@ -229,7 +229,7 @@ class BankAccountControllerSpec extends AuthSupport
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+        mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
       }
 
       val result = doRequest()
@@ -242,7 +242,7 @@ class BankAccountControllerSpec extends AuthSupport
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
+        mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
       }
 
       val result = doRequest()
@@ -255,7 +255,7 @@ class BankAccountControllerSpec extends AuthSupport
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value =
+        mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value =
           EligibilityCheckResponse(eligibilityCheckResult, randomEligibility().value.threshold)))), None, None))))
       }
 

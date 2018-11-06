@@ -24,11 +24,11 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
+import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{BarsService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util._
@@ -37,21 +37,23 @@ import uk.gov.hmrc.helptosavefrontend.views
 import scala.concurrent.Future
 
 @Singleton
-class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveService,
-                                       val sessionCacheConnector: SessionCacheConnector,
-                                       val authConnector:         AuthConnector,
-                                       val metrics:               Metrics,
-                                       val barsService:           BarsService)(implicit override val messagesApi: MessagesApi,
-                                                                               val transformer:       NINOLogMessageTransformer,
-                                                                               val frontendAppConfig: FrontendAppConfig,
-                                                                               val config:            Configuration,
-                                                                               val env:               Environment,
-                                                                               bankDetailsValidation: BankDetailsValidation)
+class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
+                                       val sessionStore:      SessionStore,
+                                       val authConnector:     AuthConnector,
+                                       val metrics:           Metrics,
+                                       val barsService:       BarsService)(implicit override val messagesApi: MessagesApi,
+                                                                           val transformer:       NINOLogMessageTransformer,
+                                                                           val frontendAppConfig: FrontendAppConfig,
+                                                                           val config:            Configuration,
+                                                                           val env:               Environment,
+                                                                           bankDetailsValidation: BankDetailsValidation)
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
 
   private def backLinkFromSession(session: HTSSession): String =
-    if (session.changingDetails) { routes.RegisterController.getCreateAccountPage().url } else {
+    if (session.changingDetails) {
+      routes.RegisterController.getCreateAccountPage().url
+    } else {
       if (session.pendingEmail.isDefined) {
         routes.EmailController.getEmailVerified().url
       } else {
@@ -79,7 +81,7 @@ class BankAccountController @Inject() (val helpToSaveService:     HelpToSaveServ
           { bankDetails ⇒
             barsService.validate(htsContext.nino, bankDetails, routes.BankAccountController.submitBankDetails().url).map[Future[Result]] {
               case Right(true) ⇒
-                sessionCacheConnector.put(session.copy(bankDetails = Some(bankDetails)))
+                sessionStore.store(session.copy(bankDetails = Some(bankDetails)))
                   .fold(
                     error ⇒ {
                       logger.warn(s"Could not update session with bank details: $error")

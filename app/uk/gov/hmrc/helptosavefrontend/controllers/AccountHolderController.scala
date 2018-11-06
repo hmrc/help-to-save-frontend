@@ -30,11 +30,12 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
+import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture}
@@ -48,14 +49,14 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
                                          val emailVerificationConnector: EmailVerificationConnector,
                                          val metrics:                    Metrics,
                                          val auditor:                    HTSAuditor,
-                                         sessionCacheConnector:          SessionCacheConnector)(implicit app: Application,
-                                                                                                crypto:                   Crypto,
-                                                                                                emailValidation:          EmailValidation,
-                                                                                                override val messagesApi: MessagesApi,
-                                                                                                val transformer:          NINOLogMessageTransformer,
-                                                                                                val frontendAppConfig:    FrontendAppConfig,
-                                                                                                val config:               Configuration,
-                                                                                                val env:                  Environment)
+                                         val sessionStore:               SessionStore)(implicit app: Application,
+                                                                                       crypto:                   Crypto,
+                                                                                       emailValidation:          EmailValidation,
+                                                                                       override val messagesApi: MessagesApi,
+                                                                                       val transformer:          NINOLogMessageTransformer,
+                                                                                       val frontendAppConfig:    FrontendAppConfig,
+                                                                                       val config:               Configuration,
+                                                                                       val env:                  Environment)
   extends BaseController with HelpToSaveAuth with VerifyEmailBehaviour with EnrolmentCheckBehaviour {
 
   import AccountHolderController._
@@ -79,7 +80,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
             (details: UpdateEmail) ⇒
               emailValidation.validate(details.email).toEither match {
                 case Right(validEmail) ⇒
-                  sessionCacheConnector.put(HTSSession(None, None, Some(validEmail)))
+                  sessionStore.store(HTSSession(None, None, Some(validEmail)))
                     .semiflatMap(_ ⇒
                       sendEmailVerificationRequest(
                         validEmail,
@@ -104,7 +105,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
 
   def getCheckYourEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val result: EitherT[Future, String, Email] = for {
-      maybeSession ← sessionCacheConnector.get
+      maybeSession ← sessionStore.get
       pendingEmail ← EitherT.fromEither[Future](getEmailFromSession(maybeSession)(_.pendingEmail, "pending email"))
     } yield pendingEmail
 
@@ -136,7 +137,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
 
   def getEmailVerified: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
     val result: EitherT[Future, String, String] = for {
-      session ← sessionCacheConnector.get
+      session ← sessionStore.get
       email ← EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
     } yield email
 
@@ -199,7 +200,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
             _ ← helpToSaveService.updateEmail(NSIPayload(userInfo, emailVerificationParams.email, frontendAppConfig.version, frontendAppConfig.systemId)).leftMap(UpdateEmailError.NSIError)
             _ ← helpToSaveService.storeConfirmedEmail(emailVerificationParams.email).leftMap(UpdateEmailError.EmailMongoError)
-            _ ← sessionCacheConnector.put(HTSSession(None, Some(emailVerificationParams.email), None))
+            _ ← sessionStore.store(HTSSession(None, Some(emailVerificationParams.email), None))
               .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
           } yield ()
 

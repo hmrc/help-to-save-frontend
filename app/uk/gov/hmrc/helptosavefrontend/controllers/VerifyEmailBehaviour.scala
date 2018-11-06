@@ -23,7 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO, HtsContextWithNINOAndUserDetails, SuspiciousActivity}
+import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, HtsContextWithNINOAndUserDetails, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util._
 

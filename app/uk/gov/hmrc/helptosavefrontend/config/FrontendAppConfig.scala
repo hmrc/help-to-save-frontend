@@ -25,6 +25,8 @@ import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.util.urlEncode
 import uk.gov.hmrc.play.config.ServicesConfig
 
+import scala.concurrent.duration.Duration
+
 @Singleton
 class FrontendAppConfig @Inject() (override val runModeConfiguration: Configuration, val environment: Environment) extends ServicesConfig {
 
@@ -78,12 +80,6 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
 
-  val sessionCacheKey: String = getString("microservice.services.keystore.session-key")
-
-  val keyStoreUrl: String = baseUrl("keystore")
-
-  val keyStoreDomain: String = getString("microservice.services.keystore.domain")
-
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
   val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
@@ -113,6 +109,8 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
     val accountNameMinLength: Int = getInt("bank-details-validation.account-name.min-length")
     val accountNameMaxLength: Int = getInt("bank-details-validation.account-name.max-length")
   }
+
+  val mongoSessionExpireAfter: Duration = getDuration("mongodb.session.expireAfter")
 
   val barsUrl: String = baseUrl("bank-account-reputation")
 }
