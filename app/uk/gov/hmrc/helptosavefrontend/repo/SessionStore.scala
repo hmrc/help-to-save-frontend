@@ -84,7 +84,7 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
   override def store(newSession: HTSSession)(implicit writes: Writes[HTSSession], hc: HeaderCarrier): Result[Unit] = {
 
       def doUpdate(newSession: HTSSession, oldSession: Option[HTSSession]): Future[Either[String, Unit]] = {
-        val timerContext = metrics.sessionStoreTimer.time()
+        val timerContext = metrics.sessionStoreWriteTimer.time()
         hc.sessionId.map(_.value) match {
           case Some(sessionId) ⇒
 
