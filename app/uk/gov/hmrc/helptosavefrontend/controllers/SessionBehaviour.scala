@@ -18,10 +18,10 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
 import play.api.mvc.{Request, Result}
-import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Ineligible
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
+import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -31,7 +31,7 @@ import scala.concurrent.Future
 trait SessionBehaviour {
   this: BaseController ⇒
 
-  val sessionCacheConnector: SessionCacheConnector
+  val sessionStore: SessionStore
 
   def checkSession(noSession: ⇒ Future[Result])(whenSession: HTSSession ⇒ Future[Result])(
       implicit
@@ -39,11 +39,11 @@ trait SessionBehaviour {
       hc:          HeaderCarrier,
       request:     Request[_],
       transformer: NINOLogMessageTransformer): Future[Result] =
-    sessionCacheConnector.get
+    sessionStore.get
       .semiflatMap(_.fold(noSession)(whenSession))
       .leftMap {
         e ⇒
-          logger.warn(s"Could not read sessions data from keystore: $e", htsContext.nino)
+          logger.warn(s"Could not read sessions data from mongo due to : $e", htsContext.nino)
           internalServerError()
       }.merge
 }

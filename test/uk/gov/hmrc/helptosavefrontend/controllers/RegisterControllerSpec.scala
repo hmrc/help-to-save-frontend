@@ -48,7 +48,7 @@ class RegisterControllerSpec
   extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
-  with SessionCacheBehaviourSupport
+  with SessionStoreBehaviourSupport
   with GeneratorDrivenPropertyChecks {
 
   val january1970Clock = Clock.fixed(Instant.ofEpochMilli(0L), ZoneId.of("Z"))
@@ -60,7 +60,7 @@ class RegisterControllerSpec
 
     new RegisterController(
       mockHelpToSaveService,
-      mockSessionCacheConnector,
+      mockSessionStore,
       mockAuthConnector,
       mockMetrics,
       fakeApplication) {
@@ -97,7 +97,7 @@ class RegisterControllerSpec
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+        mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
       }
 
       val result = doRequest
@@ -185,8 +185,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6))), Some(email), None, None, None, Some(bankDetails)))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6))), Some(email), None, None, None, Some(bankDetails)))))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
         }
 
         val result = doRequest()
@@ -201,10 +201,10 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo)
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo)
             .copy(eligible = Eligible(EligibilityCheckResponse(eligibilityCheckResult, randomEligibility().value.threshold))))),
-                                                             Some(email), None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, None, accountNumber = None))(Right(()))
+                                                    Some(email), None))))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, None, accountNumber = None))(Right(()))
         }
 
         val result = doRequest()
@@ -215,8 +215,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6))), Some(email), None, None, None, Some(bankDetails)))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6))), Some(email), None, None, None, Some(bankDetails)))))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
         }
 
         val result = doRequest()
@@ -229,8 +229,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 7))), Some(email), None, None, None, Some(bankDetails)))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 7))), Some(email), None, None, None, Some(bankDetails)))))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
         }
 
         val result = doRequest()
@@ -243,8 +243,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 8))), Some(email), None, None, None, Some(bankDetails)))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 8))), Some(email), None, None, None, Some(bankDetails)))))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
         }
 
         val result = doRequest()
@@ -256,7 +256,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None, Some(bankDetails)))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None, None, None, Some(bankDetails)))))
         }
         val result = doRequest()
 
@@ -270,8 +270,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(eligibilityResult, Some(email), None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, None, accountNumber = None))(Right(()))
+          mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, Some(email), None))))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(email), None, None, None, None, accountNumber = None))(Right(()))
         }
         val result = doRequest()
 
@@ -304,9 +304,9 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
             mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(Some(AccountNumber(accountNumber)))))
-            mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Right(()))
+            mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Right(()))
           }
 
           val result = doCreateAccountRequest()
@@ -319,9 +319,9 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
             mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(Some(AccountNumber(accountNumber)))))
-            mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Right(()))
+            mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Right(()))
           }
 
           val result = doCreateAccountRequest()
@@ -333,7 +333,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
           mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
         }
 
@@ -346,7 +346,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
           mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
         }
 
@@ -360,7 +360,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
         }
 
         val result = doCreateAccountRequest()
@@ -372,7 +372,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None))))
         }
 
         val result = doCreateAccountRequest()
@@ -385,7 +385,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
             mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(None, "Uh oh", "Uh oh")))
           }
 
@@ -398,9 +398,9 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
             mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(Some(AccountNumber(accountNumber)))))
-            mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Left(""))
+            mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Left(""))
           }
 
           val result = doCreateAccountRequest()
@@ -414,7 +414,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
             mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(Some("ZYRC0703"), "Uh oh", "Uh oh")))
           }
 
@@ -427,7 +427,7 @@ class RegisterControllerSpec
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
+            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
             mockCreateAccount(createAccountRequest)(Left(SubmissionFailure(Some("ZYRC0707"), "Uh oh", "Uh oh")))
           }
 
@@ -449,7 +449,7 @@ class RegisterControllerSpec
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber)))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber)))))
         }
 
         val result = getAccountCreatedPage()
@@ -465,7 +465,7 @@ class RegisterControllerSpec
           inSequence{
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-            mockSessionCacheConnectorGet(Right(None))
+            mockSessionStoreGet(Right(None))
           }
 
           val result = getAccountCreatedPage()
@@ -477,7 +477,7 @@ class RegisterControllerSpec
           inSequence{
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, accountNumber = None))))
+            mockSessionStoreGet(Right(Some(HTSSession(None, None, None, accountNumber = None))))
           }
 
           val result = getAccountCreatedPage()
@@ -502,7 +502,7 @@ class RegisterControllerSpec
           inSequence{
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None, accountNumber = Some(accountNumber)))))
+            mockSessionStoreGet(Right(Some(HTSSession(None, None, None, accountNumber = Some(accountNumber)))))
           }
 
           val result = getAccountCreatedPage()
@@ -529,7 +529,7 @@ class RegisterControllerSpec
           inSequence{
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-            mockSessionCacheConnectorGet(Left(""))
+            mockSessionStoreGet(Left(""))
           }
 
           val result = getAccountCreatedPage()
@@ -550,7 +550,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
         }
 
         val result = doRequest()
@@ -568,7 +568,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), Some(confirmedEmail), None))))
         }
 
         val result = doRequest()
@@ -593,8 +593,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(session)))
-          mockSessionCacheConnectorPut(HTSSession(eligibilityResult, Some("valid@email.com"), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
+          mockSessionStoreGet(Right(Some(session)))
+          mockSessionStorePut(HTSSession(eligibilityResult, Some("valid@email.com"), None, None, None, Some(bankDetails), accountNumber = None))(Right(()))
         }
         val result = doRequest()
 
@@ -608,7 +608,7 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(session)))
+          mockSessionStoreGet(Right(Some(session)))
         }
         val result = doRequest()
 
@@ -623,8 +623,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(session)))
-          mockSessionCacheConnectorPut(session)(Right(()))
+          mockSessionStoreGet(Right(Some(session)))
+          mockSessionStorePut(session)(Right(()))
         }
         val result = doRequest()
 
@@ -645,8 +645,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(session)))
-          mockSessionCacheConnectorPut(session.copy(changingDetails = true))(Right(()))
+          mockSessionStoreGet(Right(Some(session)))
+          mockSessionStorePut(session.copy(changingDetails = true))(Right(()))
         }
         val result = doRequest()
 
@@ -668,8 +668,8 @@ class RegisterControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(session)))
-          mockSessionCacheConnectorPut(session.copy(changingDetails = true))(Right(()))
+          mockSessionStoreGet(Right(Some(session)))
+          mockSessionStorePut(session.copy(changingDetails = true))(Right(()))
         }
         val result = doRequest()
 

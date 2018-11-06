@@ -17,7 +17,7 @@ lazy val appDependencies: Seq[ModuleID] = dependencies ++ testDependencies() ++ 
 val dependencies = Seq(
   ws,
   "uk.gov.hmrc" %% "govuk-template" % "5.22.0",
-  "uk.gov.hmrc" %% "http-caching-client" % "7.1.0",
+  "uk.gov.hmrc" %% "mongo-caching" % "5.5.0",
   "org.typelevel" %% "cats-core" % "1.1.0",
   "uk.gov.hmrc" %% "auth-client" % "2.17.0-play-25",
   "com.github.kxbmap" %% "configs" % "0.4.4",
@@ -41,7 +41,8 @@ def testDependencies(scope: String = "test") = Seq(
   "org.seleniumhq.selenium" % "selenium-firefox-driver" % "3.13.0" % scope,
   "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.52.0" % scope,
   "uk.gov.hmrc" %% "zap-automation" % "0.17.0" % scope,
-  "com.google.guava" % "guava" % "25.1-jre" % scope
+  "com.google.guava" % "guava" % "25.1-jre" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "3.1.0" % scope
 )
 
 lazy val plugins: Seq[Plugins] = Seq.empty

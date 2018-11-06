@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EnrolmentAndEligibilityCheckBehaviour {
-  this: AuthSupport with SessionCacheBehaviourSupport ⇒
+  this: AuthSupport with SessionStoreBehaviourSupport ⇒
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
@@ -103,7 +103,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         inSequence {
           mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
         }
 
         val result = getResult()
@@ -117,7 +117,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         inSequence {
           mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
         }
 
         val result = getResult()
@@ -148,7 +148,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         inSequence {
           mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionCacheConnectorGet(Left(""))
+          mockSessionStoreGet(Left(""))
         }
 
         checkIsTechnicalErrorPage(getResult())

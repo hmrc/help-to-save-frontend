@@ -52,6 +52,7 @@ trait TestSupport extends UnitSpec with MockFactory with BeforeAndAfterAll with 
           """
             | metrics.enabled       = false
             | play.modules.disabled = [ "uk.gov.hmrc.helptosavefrontend.config.HealthCheckModule" ]
+            | mongodb.session.expireAfter = 5 seconds
           """.stripMargin)
       ) ++ additionalConfig)
       .build()

@@ -20,26 +20,25 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
 import org.scalamock.scalatest.MockFactory
-import play.api.libs.json.{JsValue, Reads, Writes}
-import uk.gov.hmrc.helptosavefrontend.connectors.SessionCacheConnector
+import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
+import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-trait SessionCacheBehaviourSupport { this: MockFactory ⇒
+trait SessionStoreBehaviourSupport { this: MockFactory ⇒
 
-  val mockSessionCacheConnector: SessionCacheConnector = mock[SessionCacheConnector]
+  val mockSessionStore: SessionStore = mock[SessionStore]
 
-  def mockSessionCacheConnectorPut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
-    (mockSessionCacheConnector.put(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier, _: ExecutionContext))
-      .expects(expectedSession, *, *, *)
-      .returning(EitherT.fromEither[Future](result.map(_ ⇒ CacheMap("1", Map.empty[String, JsValue]))))
+  def mockSessionStorePut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
+    (mockSessionStore.store(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
+      .expects(expectedSession, *, *)
+      .returning(EitherT.fromEither[Future](result.map(_ ⇒ ())))
 
-  def mockSessionCacheConnectorGet(result: Either[String, Option[HTSSession]]): Unit =
-    (mockSessionCacheConnector.get(_: Reads[HTSSession], _: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *, *)
+  def mockSessionStoreGet(result: Either[String, Option[HTSSession]]): Unit =
+    (mockSessionStore.get(_: Reads[HTSSession], _: HeaderCarrier))
+      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 }

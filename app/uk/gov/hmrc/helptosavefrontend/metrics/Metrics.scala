@@ -30,13 +30,13 @@ class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
 
   def counter(name: String): Counter = metrics.defaultRegistry.counter(name)
 
-  val keystoreWriteTimer: Timer = timer("frontend.keystore-write-time")
+  val sessionStoreWriteTimer: Timer = timer("frontend.sessionstore-write-time")
 
-  val keystoreWriteErrorCounter: Counter = counter("frontend.keystore-write-error.count")
+  val sessionStoreWriteErrorCounter: Counter = counter("frontend.sessionstore-write-error.count")
 
-  val keystoreReadTimer: Timer = timer("frontend.keystore-read-time")
+  val sessionReadTimer: Timer = timer("frontend.sessionstore-read-time")
 
-  val keystoreReadErrorCounter: Counter = counter("frontend.keystore-read-error.count")
+  val sessionReadErrorCounter: Counter = counter("frontend.sessionstore-read-error.count")
 
   val emailVerificationTimer: Timer = timer("frontend.email-verification-timer")
 

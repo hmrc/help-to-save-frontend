@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.time.{Clock, LocalDate}
 import java.time.temporal.TemporalAdjusters
+import java.time.{Clock, LocalDate}
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -33,7 +33,6 @@ import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors._
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.{CreateAccountError, EligibleWithInfo}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -42,29 +41,29 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
+import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.{util, views}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.{util, views}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.cache.client.CacheMap
 import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
 import scala.concurrent.Future
 
 @Singleton
-class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService,
-                                    val sessionCacheConnector: SessionCacheConnector,
-                                    val authConnector:         AuthConnector,
-                                    val metrics:               Metrics,
-                                    app:                       Application)(implicit val crypto: Crypto,
-                                                                            emailValidation:          EmailValidation,
-                                                                            override val messagesApi: MessagesApi,
-                                                                            val transformer:          NINOLogMessageTransformer,
-                                                                            val frontendAppConfig:    FrontendAppConfig,
-                                                                            val config:               Configuration,
-                                                                            val env:                  Environment)
+class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
+                                    val sessionStore:      SessionStore,
+                                    val authConnector:     AuthConnector,
+                                    val metrics:           Metrics,
+                                    app:                   Application)(implicit val crypto: Crypto,
+                                                                        emailValidation:          EmailValidation,
+                                                                        override val messagesApi: MessagesApi,
+                                                                        val transformer:          NINOLogMessageTransformer,
+                                                                        val frontendAppConfig:    FrontendAppConfig,
+                                                                        val config:               Configuration,
+                                                                        val env:                  Environment)
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with Logging {
 
@@ -74,7 +73,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   def getCreateAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
-        sessionCacheConnector.put(eligibleWithInfo.session.copy(changingDetails = false)).fold({ e ⇒
+        sessionStore.store(eligibleWithInfo.session.copy(changingDetails = false)).fold({ e ⇒
           logger.warn(s"Could not write to session cache: $e")
           internalServerError()
         }, { _ ⇒
@@ -125,8 +124,8 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
               submissionSuccess ← helpToSaveService.createAccount(createAccountRequest).leftMap(s ⇒ CreateAccountError(Left(s)))
               _ ← {
                 val update = submissionSuccess.accountNumber.map(a ⇒
-                  sessionCacheConnector.put(eligibleWithInfo.session.copy(accountNumber = Some(a.accountNumber))))
-                update.traverse[util.Result, CacheMap](identity).leftMap(s ⇒ CreateAccountError(Right(s)))
+                  sessionStore.store(eligibleWithInfo.session.copy(accountNumber = Some(a.accountNumber))))
+                update.traverse[util.Result, Unit](identity).leftMap(s ⇒ CreateAccountError(Right(s)))
               }
             } yield submissionSuccess.accountNumber
 
@@ -135,7 +134,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
                 e.fold({ submissionFailure ⇒
                   logger.warn(s"Error while trying to create account: ${submissionFailureToString(submissionFailure)}", nino)
                   submissionFailure.errorMessageId.fold(
-                    SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)){ id ⇒
+                    SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)) { id ⇒
                       if (id === "ZYRC0703" || id === "ZYRC0707") {
                         SeeOther(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
                       } else {
@@ -164,7 +163,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   def getAccountCreatedPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val result = for {
       enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
-      session ← enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ ⇒ sessionCacheConnector.get })
+      session ← enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ ⇒ sessionStore.get })
     } yield session
 
     result.fold({ e ⇒
@@ -177,7 +176,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
         e ← s.confirmedEmail
       } yield (a, e)
 
-      accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)){
+      accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)) {
         case (accountNumber, email) ⇒
           val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
           Ok(views.html.register.account_created(accountNumber, email, lastDayOfMonth))
@@ -223,7 +222,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
   }
 
   private def startChangingDetailsAndRedirect(session: HTSSession, redirectTo: String)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] =
-    sessionCacheConnector.put(session.copy(changingDetails = true)).fold({ e ⇒
+    sessionStore.store(session.copy(changingDetails = true)).fold({ e ⇒
       logger.warn(s"Could not write to session cache: $e")
       internalServerError()
     },
@@ -231,7 +230,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
     )
 
   /**
-   * Checks the HTSSession data from keystore - if the is no session the user has not done the eligibility
+   * Checks the HTSSession data from mongo - if the is no session the user has not done the eligibility
    * checks yet this session and they are redirected to the 'apply now' page. If the session data indicates
    * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
    * given action if the the session data indicates that they are eligible
@@ -265,6 +264,7 @@ class RegisterController @Inject() (val helpToSaveService:     HelpToSaveService
 }
 
 object RegisterController {
+
   case class EligibleWithInfo(userInfo: EligibleWithUserInfo, email: String, session: HTSSession)
 
   private case class CreateAccountError(error: Either[SubmissionFailure, String])

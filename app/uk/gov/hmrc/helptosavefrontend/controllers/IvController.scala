@@ -24,11 +24,12 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.{IvConnector, SessionCacheConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
+import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,14 +37,14 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.Future
 
 @Singleton
-class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
-                              ivConnector:               IvConnector,
-                              val authConnector:         AuthConnector,
-                              val metrics:               Metrics)(implicit override val messagesApi: MessagesApi,
-                                                                  val transformer:       NINOLogMessageTransformer,
-                                                                  val frontendAppConfig: FrontendAppConfig,
-                                                                  val config:            Configuration,
-                                                                  val env:               Environment)
+class IvController @Inject() (val sessionStore:  SessionStore,
+                              ivConnector:       IvConnector,
+                              val authConnector: AuthConnector,
+                              val metrics:       Metrics)(implicit override val messagesApi: MessagesApi,
+                                                          val transformer:       NINOLogMessageTransformer,
+                                                          val frontendAppConfig: FrontendAppConfig,
+                                                          val config:            Configuration,
+                                                          val env:               Environment)
   extends BaseController with HelpToSaveAuth {
 
   val eligibilityUrl: String = routes.EligibilityCheckController.getCheckEligibility().url
@@ -176,7 +177,7 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
       request: Request[_],
       hc:      HeaderCarrier
   ): Future[Result] =
-    sessionCacheConnector.put(session) fold ({
+    sessionStore.store(session) fold ({
       e ⇒
         logger.warn(s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e")
         internalServerError()
@@ -189,18 +190,18 @@ class IvController @Inject() (val sessionCacheConnector: SessionCacheConnector,
       request: Request[_],
       hc:      HeaderCarrier
   ): Future[Result] =
-    sessionCacheConnector.get.fold({
+    sessionStore.get.fold({
       e ⇒
         logger.warn(s"Could not retrieve data from session cache: $e")
         internalServerError()
     }, {
       mayBeSession ⇒
         mayBeSession.fold {
-          logger.warn(s"no session found for user in the keystore, redirecting to $defaultUrl")
+          logger.warn(s"no session found for user in mongo, redirecting to $defaultUrl")
           f(defaultUrl)
         } { session ⇒
           url(session).fold {
-            logger.warn("session exists in the keystore but required information is not found")
+            logger.warn("session exists in mongo but required information is not found")
             internalServerError()
           }(
             f

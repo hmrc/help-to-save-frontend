@@ -49,7 +49,7 @@ class EmailControllerSpec
   extends AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
-  with SessionCacheBehaviourSupport {
+  with SessionStoreBehaviourSupport {
 
   lazy val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
 
@@ -65,7 +65,7 @@ class EmailControllerSpec
   def newController()(implicit crypto: Crypto) =
     new EmailController(
       mockHelpToSaveService,
-      mockSessionCacheConnector,
+      mockSessionStore,
       mockEmailVerificationConnector,
       mockAuthConnector,
       mockMetrics,
@@ -131,7 +131,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -144,7 +144,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -157,7 +157,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -170,7 +170,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -184,10 +184,10 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, Some("tyrion_lannister@gmail.com"), None, None))(Right(None))
+          mockSessionStorePut(HTSSession(None, None, Some("tyrion_lannister@gmail.com"), None, None))(Right(None))
         }
 
         val result = getSelectEmailPage()
@@ -199,10 +199,10 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, Some("tyrion_lannister@gmail.com")))(Right(None))
+          mockSessionStorePut(HTSSession(None, None, Some("tyrion_lannister@gmail.com")))(Right(None))
         }
 
         val result = getSelectEmailPage()
@@ -214,10 +214,10 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(Some("invalidEmail")))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, None, None, None))(Right(None))
+          mockSessionStorePut(HTSSession(None, None, None, None, None))(Right(None))
         }
 
         val result = getSelectEmailPage()
@@ -228,7 +228,7 @@ class EmailControllerSpec
       "handle DE users with NO email from GG" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -241,7 +241,7 @@ class EmailControllerSpec
       "handle DE users with an Missing UserInfo from Auth" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -254,7 +254,7 @@ class EmailControllerSpec
       "handle unexpected errors during enrolment check" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Left("unexpected error"))
         }
 
@@ -265,7 +265,7 @@ class EmailControllerSpec
       "redirect to NS&I if request comes from already enrolled Digital users with valid email in mongo" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some(testEmail)))
         }
@@ -286,11 +286,11 @@ class EmailControllerSpec
             }
         }
 
-      "handle Digital(new applicant) users with no valid session in keystore" in {
+      "handle Digital(new applicant) users with no valid session in mongo" in {
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -299,11 +299,11 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
-      "handle errors during session cache lookup in keystore" in {
+      "handle errors during session cache lookup in mongo" in {
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Left("unexpected error"))
+          mockSessionStoreGet(Left("unexpected error"))
         }
 
         val result = selectEmailSubmit(None)
@@ -314,10 +314,10 @@ class EmailControllerSpec
         val session = HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(session)))
+          mockSessionStoreGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(NotEnrolled))
           mockEncrypt(emailStr)(encryptedEmail)
-          mockSessionCacheConnectorPut(session.copy(hasSelectedEmail = true))(Right(()))
+          mockSessionStorePut(session.copy(hasSelectedEmail = true))(Right(()))
         }
 
         val result = selectEmailSubmit(None)
@@ -332,9 +332,9 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(session)))
+          mockSessionStoreGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(session.copy(pendingEmail     = Some(testEmail), hasSelectedEmail = true))(Right(None))
+          mockSessionStorePut(session.copy(pendingEmail     = Some(testEmail), hasSelectedEmail = true))(Right(None))
         }
 
         val result = selectEmailSubmit(Some(testEmail))
@@ -346,7 +346,7 @@ class EmailControllerSpec
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), Some("email"), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some("email"), None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email")))
         }
@@ -359,7 +359,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -373,7 +373,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -386,11 +386,11 @@ class EmailControllerSpec
         val session = HTSSession(None, None, Some(testEmail))
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
-          mockSessionCacheConnectorGet(Right(Some(session)))
+          mockSessionStoreGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
           mockEncrypt("email@gmail.com")(encryptedEmail)
-          mockSessionCacheConnectorPut(session.copy(hasSelectedEmail = true))(Right(()))
+          mockSessionStorePut(session.copy(hasSelectedEmail = true))(Right(()))
         }
 
         val result = selectEmailSubmit(None)
@@ -403,10 +403,10 @@ class EmailControllerSpec
         val session = HTSSession(Some(Right(userInfo)), None, Some(testEmail))
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(session)))
+          mockSessionStoreGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(session.copy(hasSelectedEmail = true))(Right(()))
+          mockSessionStorePut(session.copy(hasSelectedEmail = true))(Right(()))
         }
 
         val result = selectEmailSubmit(Some(testEmail))
@@ -417,7 +417,7 @@ class EmailControllerSpec
       "handle DE user who submitted form with errors" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -430,7 +430,7 @@ class EmailControllerSpec
       "handle an existing account holder who submitted form with no new-email but with checked existing email" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some(testEmail)))
         }
@@ -448,7 +448,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -461,7 +461,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -474,7 +474,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -487,7 +487,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None, None, None, None, true))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None, None, None, None, true))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -500,7 +500,7 @@ class EmailControllerSpec
       "handle existing digital account holders and redirect them to nsi" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email")))
         }
@@ -514,10 +514,10 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, Some("tyrion_lannister@gmail.com"), None, None))(Right(None))
+          mockSessionStorePut(HTSSession(None, None, Some("tyrion_lannister@gmail.com"), None, None))(Right(None))
         }
 
         val result = getGiveEmailPage()
@@ -529,10 +529,10 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, None))(Right(None))
+          mockSessionStorePut(HTSSession(None, None, None))(Right(None))
         }
 
         val result = getGiveEmailPage()
@@ -544,10 +544,10 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(Some("invalidEmail")))
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, None, None, None))(Right(None))
+          mockSessionStorePut(HTSSession(None, None, None, None, None))(Right(None))
         }
 
         val result = getGiveEmailPage()
@@ -558,10 +558,10 @@ class EmailControllerSpec
       "handle DE users with NO email from GG" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, None, None, None))(Right(None))
+          mockSessionStorePut(HTSSession(None, None, None, None, None))(Right(None))
         }
 
         val result = getGiveEmailPage()
@@ -572,10 +572,10 @@ class EmailControllerSpec
       "handle DE users with an Missing UserInfo from Auth" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, None, None, None))(Right(None))
+          mockSessionStorePut(HTSSession(None, None, None, None, None))(Right(None))
         }
 
         val result = getGiveEmailPage()
@@ -586,7 +586,7 @@ class EmailControllerSpec
       "handle unexpected errors during enrolment check" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Left("unexpected error"))
         }
 
@@ -597,7 +597,7 @@ class EmailControllerSpec
       "redirect to NS&I if request comes from already enrolled Digital users with valid email in mongo" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some(testEmail)))
         }
@@ -616,11 +616,11 @@ class EmailControllerSpec
         def giveEmailSubmit(email: String): Future[Result] = controller.giveEmailSubmit()(
           fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → email))
 
-      "handle Digital(new applicant) users with no valid session in keystore" in {
+      "handle Digital(new applicant) users with no valid session in mongo" in {
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -629,11 +629,11 @@ class EmailControllerSpec
         redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
-      "handle errors during session cache lookup in keystore" in {
+      "handle errors during session cache lookup in mongo" in {
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Left("unexpected error"))
+          mockSessionStoreGet(Left("unexpected error"))
         }
 
         val result = giveEmailSubmit(email)
@@ -644,9 +644,9 @@ class EmailControllerSpec
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), None, Some(email), None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))(Right(None))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), None, Some(email), None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))(Right(None))
         }
 
         val result = giveEmailSubmit(email)
@@ -658,7 +658,7 @@ class EmailControllerSpec
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(testEmail)))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email")))
         }
@@ -670,7 +670,7 @@ class EmailControllerSpec
       "handle DE users - redirect to check eligibility if no existing session found" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -683,10 +683,10 @@ class EmailControllerSpec
       "handle DE user who submitted form with new-email" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, None, Some(email)))(Right(()))
+          mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
         }
 
         val result = giveEmailSubmit(email)
@@ -697,7 +697,7 @@ class EmailControllerSpec
       "handle DE user who submitted form with errors" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -721,7 +721,7 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -735,9 +735,9 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None))(Right(None))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
         }
 
@@ -751,9 +751,9 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))(Right(None))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
         }
 
@@ -767,7 +767,7 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfoWithInvalidEmail)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfoWithInvalidEmail)), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -781,7 +781,7 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
@@ -795,10 +795,10 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(email)))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, Some(email)))))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, Some("decrypted"), None))(Right(None))
+          mockSessionStorePut(HTSSession(None, Some("decrypted"), None))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
           mockUpdateEmail(NSIPayload(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted", version, systemId))(Right(None))
           mockAudit(EmailChanged(nino, "", "decrypted", false, routes.EmailController.confirmEmail(encryptedEmail).url))
@@ -828,8 +828,8 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None, changingDetails = true))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None, changingDetails = true))(Right(None))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None, changingDetails = true))))
+          mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None, changingDetails = true))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
           mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
@@ -848,8 +848,8 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), None, None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), None, None))))
+          mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
           mockAudit(EmailChanged(nino, "", newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
@@ -867,7 +867,7 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")("AE123456C#test@user.com")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))))
         }
 
         val result = emailVerifiedCallback(encryptedParams)
@@ -897,8 +897,8 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibilityResult)), Some(email), None))))
-          mockSessionCacheConnectorPut(HTSSession(Some(Right(eligibilityResult.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibilityResult)), Some(email), None))))
+          mockSessionStorePut(HTSSession(Some(Right(eligibilityResult.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
           mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
@@ -914,7 +914,7 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")("WM123456C#test@user.com")
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, Some(email), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, Some(email), None))))
           mockEligibilityResult()(Right(EligibilityCheckResultType.Ineligible(randomEligibilityResponse())))
         }
 
@@ -955,7 +955,7 @@ class EmailControllerSpec
           mockDecrypt("encrypted")(s"WM123456C#$email")
           mockUpdateEmail(updatedNSIPayload)(Right(None))
           mockStoreConfirmedEmail(email)(Right(None))
-          mockSessionCacheConnectorPut(HTSSession(None, Some(email), None))(Right(None))
+          mockSessionStorePut(HTSSession(None, Some(email), None))(Right(None))
           mockAudit(EmailChanged(nino, "", email, false, routes.EmailController.emailVerifiedCallback(encryptedParams).url))
         }
 
@@ -1003,7 +1003,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, Some(newEmail)))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, Some(newEmail)))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockEmailVerification(nino, newEmail, firstName)(Right(()))
         }
@@ -1018,7 +1018,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, Some(newEmail)))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(newEmail)))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1031,7 +1031,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, Some(newEmail)))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, Some(newEmail)))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockEmailVerification(nino, newEmail, firstName)(Left(AlreadyVerified))
           mockEncrypt("WM123456C#email@hmrc.com")("decrypted")
@@ -1046,7 +1046,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
@@ -1060,7 +1060,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, Some(newEmail)))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, Some(newEmail)))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
           mockEmailVerification(nino, newEmail, firstName)(Right(()))
@@ -1076,7 +1076,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -1088,7 +1088,7 @@ class EmailControllerSpec
       "handle DE users with NO stored pending email in the session" in {
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -1107,7 +1107,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1120,7 +1120,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
@@ -1134,7 +1134,7 @@ class EmailControllerSpec
         val newEmail = "email@hmrc.com"
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some(newEmail), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -1153,7 +1153,7 @@ class EmailControllerSpec
       "handle Digital users who are already gone through eligibility checks" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1165,7 +1165,7 @@ class EmailControllerSpec
       "handle DE users" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -1184,7 +1184,7 @@ class EmailControllerSpec
       "handle Digital users and redirect to the email verify error page try later if there is no email for the user" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1197,7 +1197,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockEncrypt(emailStr)(encryptedEmail)
         }
@@ -1211,7 +1211,7 @@ class EmailControllerSpec
       "handle Digital users and redirect to the info endpoint if there is an email for the user and the user selects not to continue" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1223,7 +1223,7 @@ class EmailControllerSpec
       "handle Digital users and show the verify email error page again if there is an error in the form" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1235,7 +1235,7 @@ class EmailControllerSpec
       "handle existing digital account holders and redirect them to nsi" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
@@ -1249,7 +1249,7 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(None, Some(emailStr), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(None, Some(emailStr), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
           mockEncrypt(emailStr)(encryptedEmail)
@@ -1270,7 +1270,7 @@ class EmailControllerSpec
       "handle Digital users and return the email verified page" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1284,7 +1284,7 @@ class EmailControllerSpec
         "there is no session" in {
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionCacheConnectorGet(Right(None))
+            mockSessionStoreGet(Right(None))
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           }
 
@@ -1300,7 +1300,7 @@ class EmailControllerSpec
         "there is no confirmed email in the session" in {
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
+            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           }
 
@@ -1312,7 +1312,7 @@ class EmailControllerSpec
         "there is no confirmed email in the session when there is no email for the user" in {
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo.copy(userInfo = validUserInfo.copy(email = None)))), None, None))))
+            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo.copy(userInfo = validUserInfo.copy(email = None)))), None, None))))
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           }
 
@@ -1324,7 +1324,7 @@ class EmailControllerSpec
         "the call to session cache fails" in {
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionCacheConnectorGet(Left(""))
+            mockSessionStoreGet(Left(""))
           }
 
           val result = getEmailVerified
@@ -1335,7 +1335,7 @@ class EmailControllerSpec
       "handle DE users and return the give email page" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
@@ -1355,7 +1355,7 @@ class EmailControllerSpec
       "show the email updated page otherwise" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1373,7 +1373,7 @@ class EmailControllerSpec
 
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -1386,8 +1386,8 @@ class EmailControllerSpec
 
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")),
-                                                             changingDetails = true))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")),
+                                                    changingDetails = true))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -1400,7 +1400,7 @@ class EmailControllerSpec
 
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(None))
+          mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -1412,7 +1412,7 @@ class EmailControllerSpec
       "handle existing digital account holders and redirect them to NSI" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), Some("email"), None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(Some("email")))
         }
@@ -1425,7 +1425,7 @@ class EmailControllerSpec
       "handle DE users and redirect to the give email page" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionCacheConnectorGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockGetConfirmedEmail()(Right(None))
         }
