@@ -1039,7 +1039,7 @@ class EmailControllerSpec
 
         val result = verifyEmail
         status(result) shouldBe 303
-        redirectLocation(result).getOrElse("") should include("/help-to-save/email-verified-callback")
+        redirectLocation(result).getOrElse("") should include("/help-to-save/email-confirmed-callback")
       }
 
       "handle existing digital account holders and redirect them to nsi" in {
@@ -1276,7 +1276,7 @@ class EmailControllerSpec
 
         val result = getEmailVerified
         status(result) shouldBe OK
-        contentAsString(result) should include("Email address verified")
+        contentAsString(result) should include("You have confirmed the email address")
       }
 
       "handle Digital users and redirect to check eligibility" when {
@@ -1361,7 +1361,7 @@ class EmailControllerSpec
 
         val result = getEmailUpdated()
         status(result) shouldBe OK
-        contentAsString(result) should include("Email address verified")
+        contentAsString(result) should include("You have confirmed the email address")
 
       }
 
