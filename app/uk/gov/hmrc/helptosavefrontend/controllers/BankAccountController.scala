@@ -93,8 +93,8 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
                     )
                 } else {
                   val formWithErrors = BankDetails.giveBankDetailsForm().fill(bankDetails)
-                    .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBarsInvalid)
-                    .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBarsInvalid)
+                    .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
+                    .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBackendInvalid)
 
                   Ok(views.html.register.bank_account_details(formWithErrors, backLinkFromSession(session)))
                 }
