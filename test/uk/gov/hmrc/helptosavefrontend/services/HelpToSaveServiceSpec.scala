@@ -21,7 +21,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
@@ -226,6 +226,30 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val result = htsService.getAccount(nino, correlationId)
         result.value.futureValue should be(Right(account))
+      }
+    }
+
+    "validateBankDetails" must {
+      val barsRequest = BarsRequest("AE123456C", "123456", "01023456")
+
+        def mockBarsCheck(barsRequest: BarsRequest)(response: HttpResponse) = {
+          (htsConnector.validateBankDetails(_: BarsRequest)(_: HeaderCarrier, _: ExecutionContext))
+            .expects(barsRequest, *, *)
+            .returning(Future.successful(response))
+        }
+
+      "return a successful response" in {
+        mockBarsCheck(barsRequest)(HttpResponse(200, Some(Json.parse("""{"isValid":true}"""))))
+
+        val result = htsService.validateBankDetails(barsRequest)
+        result.value.futureValue should be(Right(true))
+      }
+
+      "handle failure response" in {
+        mockBarsCheck(barsRequest)(HttpResponse(500))
+
+        val result = htsService.validateBankDetails(barsRequest)
+        result.value.futureValue.isLeft shouldBe true
       }
     }
   }

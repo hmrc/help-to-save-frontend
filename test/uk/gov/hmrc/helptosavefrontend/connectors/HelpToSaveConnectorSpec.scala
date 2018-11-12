@@ -75,6 +75,9 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
   private val updateEmailURL =
     s"$helpToSaveUrl/help-to-save/update-email"
 
+  private val validateBankDetailsURL =
+    s"$helpToSaveUrl/help-to-save/validate-bank-details"
+
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
 
@@ -354,6 +357,15 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
         val response = HttpResponse(200, Some(Json.toJson(())))
         mockPut(updateEmailURL, validNSIPayload)(Some(response))
         await(connector.updateEmail(validNSIPayload)) shouldBe response
+      }
+    }
+
+    "validating bank details" must {
+
+      "return http response as it is to the caller" in {
+        val response = HttpResponse(200, Some(Json.parse("""{"isValid":true}""")))
+        mockPost(validateBankDetailsURL, Map.empty, BarsRequest(nino, "123456", "02012345"))(Some(response))
+        await(connector.validateBankDetails(BarsRequest(nino, "123456", "02012345"))) shouldBe response
       }
     }
 

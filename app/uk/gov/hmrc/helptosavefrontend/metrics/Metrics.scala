@@ -63,10 +63,6 @@ class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
   val ivTimeoutCounter: Counter = counter("frontend.iv.timeout.count")
 
   val authTimer: Timer = timer("frontend.auth-timer")
-
-  val barsTimer: Timer = timer("frontend.bars-timer")
-
-  val barsErrorCounter: Counter = counter("frontend.bars-error.count")
 }
 
 object Metrics {
