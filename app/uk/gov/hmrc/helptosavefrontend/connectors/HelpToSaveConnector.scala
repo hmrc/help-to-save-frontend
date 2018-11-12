@@ -59,7 +59,7 @@ trait HelpToSaveConnector {
 
   def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
 
-  def validateBankDetails(barsRequest: BarsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
+  def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
 
 }
 
@@ -175,8 +175,8 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   override def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     http.put(updateEmailURL, userInfo)
 
-  override def validateBankDetails(barsRequest: BarsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] =
-    http.post(validateBankDetailsURL, barsRequest)
+  override def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] =
+    http.post(validateBankDetailsURL, request)
 }
 
 object HelpToSaveConnectorImpl {

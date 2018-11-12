@@ -18,8 +18,8 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.{Format, Json}
 
-case class BarsRequest(nino: String, sortCode: String, accountNumber: String)
+case class ValidateBankDetailsRequest(nino: String, sortCode: String, accountNumber: String)
 
-object BarsRequest {
-  implicit val barsRequestFormat: Format[BarsRequest] = Json.format[BarsRequest]
+object ValidateBankDetailsRequest {
+  implicit val validateBankDetailsRequestFormat: Format[ValidateBankDetailsRequest] = Json.format[ValidateBankDetailsRequest]
 }

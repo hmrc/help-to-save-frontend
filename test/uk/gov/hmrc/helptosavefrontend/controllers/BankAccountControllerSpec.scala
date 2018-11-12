@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
-import uk.gov.hmrc.helptosavefrontend.models.{BarsRequest, EnrolmentStatus, HTSSession}
+import uk.gov.hmrc.helptosavefrontend.models.{ValidateBankDetailsRequest, EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,9 +38,9 @@ class BankAccountControllerSpec extends AuthSupport
 
   implicit lazy val bankDetailsValidation: BankDetailsValidation = new BankDetailsValidation(appConfig)
 
-  def mockValidateBankDetails(barsRequest: BarsRequest)(response: Either[String, Boolean]) =
-    (mockHelpToSaveService.validateBankDetails(_: BarsRequest)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(barsRequest, *, *)
+  def mockValidateBankDetails(request: ValidateBankDetailsRequest)(response: Either[String, Boolean]) =
+    (mockHelpToSaveService.validateBankDetails(_: ValidateBankDetailsRequest)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(request, *, *)
       .returning(EitherT.fromEither[Future](response))
 
   val controller = new BankAccountController(
@@ -172,7 +172,7 @@ class BankAccountControllerSpec extends AuthSupport
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockValidateBankDetails(BarsRequest(nino, "123456", "12345678"))(Right(true))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(true))
           mockSessionStorePut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Right(()))
         }
 
@@ -189,7 +189,7 @@ class BankAccountControllerSpec extends AuthSupport
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockValidateBankDetails(BarsRequest(nino, "123456", "12345678"))(Right(true))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(true))
           mockSessionStorePut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Left("error"))
         }
 

@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
-import uk.gov.hmrc.helptosavefrontend.models.{BarsRequest, HTSSession, HtsContextWithNINO}
+import uk.gov.hmrc.helptosavefrontend.models.{ValidateBankDetailsRequest, HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -77,9 +77,9 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
         BankDetails.giveBankDetailsForm().bindFromRequest().fold(
           withErrors ⇒
             Ok(views.html.register.bank_account_details(withErrors, backLinkFromSession(session))), { bankDetails ⇒
-            helpToSaveService.validateBankDetails(BarsRequest(htsContext.nino, bankDetails.sortCode.toString, bankDetails.accountNumber)).fold[Future[Result]](
+            helpToSaveService.validateBankDetails(ValidateBankDetailsRequest(htsContext.nino, bankDetails.sortCode.toString, bankDetails.accountNumber)).fold[Future[Result]](
               error ⇒ {
-                logger.warn(s"Could not validate bank details with BARS service due to : $error")
+                logger.warn(s"Could not validate bank details due to : $error")
                 internalServerError()
               }, { isValid ⇒
                 if (isValid) {

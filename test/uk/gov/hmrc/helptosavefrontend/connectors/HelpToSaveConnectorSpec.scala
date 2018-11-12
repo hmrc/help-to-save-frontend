@@ -364,8 +364,8 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
 
       "return http response as it is to the caller" in {
         val response = HttpResponse(200, Some(Json.parse("""{"isValid":true}""")))
-        mockPost(validateBankDetailsURL, Map.empty, BarsRequest(nino, "123456", "02012345"))(Some(response))
-        await(connector.validateBankDetails(BarsRequest(nino, "123456", "02012345"))) shouldBe response
+        mockPost(validateBankDetailsURL, Map.empty, ValidateBankDetailsRequest(nino, "123456", "02012345"))(Some(response))
+        await(connector.validateBankDetails(ValidateBankDetailsRequest(nino, "123456", "02012345"))) shouldBe response
       }
     }
 
