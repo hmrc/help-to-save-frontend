@@ -111,6 +111,4 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   }
 
   val mongoSessionExpireAfter: Duration = getDuration("mongodb.session.expireAfter")
-
-  val barsUrl: String = baseUrl("bank-account-reputation")
 }

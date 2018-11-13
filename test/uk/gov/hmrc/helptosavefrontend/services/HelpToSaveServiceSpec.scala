@@ -21,7 +21,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.libs.json.{JsObject, JsValue, Json}
+import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
@@ -168,7 +168,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue shouldBe
-          (Left(SubmissionFailure(None, "", """Could not parse http response JSON: /errorDetail: [error.path.missing]; /errorMessage: [error.path.missing]. Response body was "{\"name\":\"some_name\"}"}""")))
+          Left(SubmissionFailure(None, "", """Could not parse http response JSON: /errorDetail: [error.path.missing]; /errorMessage: [error.path.missing]. Response body was "{\"name\":\"some_name\"}"}"""))
       }
     }
 
@@ -226,6 +226,30 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val result = htsService.getAccount(nino, correlationId)
         result.value.futureValue should be(Right(account))
+      }
+    }
+
+    "validateBankDetails" must {
+      val request = ValidateBankDetailsRequest("AE123456C", "123456", "01023456")
+
+        def mockValidateBankDetails(request: ValidateBankDetailsRequest)(response: HttpResponse) = {
+          (htsConnector.validateBankDetails(_: ValidateBankDetailsRequest)(_: HeaderCarrier, _: ExecutionContext))
+            .expects(request, *, *)
+            .returning(Future.successful(response))
+        }
+
+      "return a successful response" in {
+        mockValidateBankDetails(request)(HttpResponse(200, Some(Json.parse("""{"isValid":true}"""))))
+
+        val result = htsService.validateBankDetails(request)
+        result.value.futureValue should be(Right(true))
+      }
+
+      "handle failure response" in {
+        mockValidateBankDetails(request)(HttpResponse(500))
+
+        val result = htsService.validateBankDetails(request)
+        result.value.futureValue.isLeft shouldBe true
       }
     }
   }

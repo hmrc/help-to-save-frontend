@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import play.api.libs.json.{Format, JsObject, JsValue, Json}
+import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
@@ -69,19 +69,6 @@ case class SuspiciousActivity(nino: Option[NINO], activity: String, path: String
 object SuspiciousActivity {
 
   private case class Details(nino: Option[String], reason: String)
-
-  private implicit val detailsFormat: Format[Details] = Json.format[Details]
-}
-
-case class BARSCheck(nino: NINO, accountNumber: String, sortCode: String, response: JsValue, path: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
-  val value: ExtendedDataEvent =
-    HTSEvent(appConfig.appName, "BARSCheck",
-             Json.toJson(BARSCheck.Details(nino, accountNumber, sortCode, response)), "bars-check", path)
-
-}
-
-object BARSCheck {
-  private case class Details(nino: String, accountNumber: String, sortCode: String, response: JsValue)
 
   private implicit val detailsFormat: Format[Details] = Json.format[Details]
 }
