@@ -35,7 +35,7 @@
   @defining(
     oldEmail.fold(routes.EmailController.getGiveEmailPage)(_ => routes.EmailController.getSelectEmailPage)
   ){ call =>
-    <p class="lede">@Html(Messages("hts.email-verification.check-your-email.we-have-sent-mail", email, call))</p>
+    <p>@Html(Messages("hts.email-verification.check-your-email.we-have-sent-mail", email, call))</p>
   }
 
   <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.what-next")</h2>

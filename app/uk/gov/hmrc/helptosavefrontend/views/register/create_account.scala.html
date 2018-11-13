@@ -43,7 +43,7 @@ bodyClasses = None) {
 
   <h1>@title</h1>
 
-  <p class="lede">@Html(Messages("hts.register.create_account.intro"))</p>
+  <p>@Html(Messages("hts.register.create_account.intro"))</p>
 
   @summary_section_head(heading = Messages("hts.register.create_account.your-details"))
   @summary_section_change(routes.RegisterController.getDetailsAreIncorrect().url, Messages("hts.register.create_account.your-details"), "change-details-are-incorrect")
