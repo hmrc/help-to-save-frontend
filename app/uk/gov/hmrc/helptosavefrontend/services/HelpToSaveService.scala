@@ -35,7 +35,6 @@ import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[HelpToSaveServiceImpl])
 trait HelpToSaveService {
@@ -59,8 +58,6 @@ trait HelpToSaveService {
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account]
 
   def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
-
-  def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Boolean]
 
 }
 
@@ -125,21 +122,6 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
     }.recover {
       case e ⇒
         Left(s"Encountered error while trying to update email: ${e.getMessage}")
-    }
-    )
-
-  override def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Boolean] =
-    EitherT(helpToSaveConnector.validateBankDetails(request).map[Either[String, Boolean]] { response ⇒
-      response.status match {
-        case Status.OK ⇒
-          Try((response.json \ "isValid").as[Boolean]) match {
-            case Success(isvalid) ⇒ Right(isvalid)
-            case Failure(error)   ⇒ Left(s"couldn't parse /validate-bank-details response from BE, error=${error.getMessage}. Body was ${maskNino(response.body)}")
-          }
-
-        case other ⇒
-          Left(s"Received unexpected status $other from /validate-bank-details. Body was ${maskNino(response.body)}")
-      }
     }
     )
 

@@ -34,8 +34,8 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
 
-@sortCodeBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "sortCode")}
-@accountNumberBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "accountNumber")}
+@sortCodeBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "sortCode")}
+@accountNumberBarsErrorMessage = @{BankDetailsErrors.getBarsErrorMessage(form, "accountNumber")}
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
   title = pageTitle,
@@ -46,9 +46,9 @@
   @if(hasErrors) {
       @defining(List(
           "sortCode" → sortCodeErrorMessage,
-          "sortCode" → sortCodeBackendErrorMessage,
+          "sortCode" → sortCodeBarsErrorMessage,
           "accountNumber" → accountNumberErrorMessage,
-          "accountNumber" → accountNumberBackendErrorMessage,
+          "accountNumber" → accountNumberBarsErrorMessage,
           "rollNumber" → rollNumberErrorMessage,
           "accountName" → accountNameErrorMessage
       ).collect{ case (name, Some(s)) ⇒ name → s }
@@ -81,7 +81,7 @@
       value = form.data.getOrElse("sortCode", ""),
       hint = Some(messages("hts.register.bank-details.sort-code.hint")),
       name = "sortCode",
-      errorMessage = sortCodeErrorMessage.orElse(sortCodeBackendErrorMessage).map(Html(_))
+      errorMessage = sortCodeErrorMessage.orElse(sortCodeBarsErrorMessage).map(Html(_))
     )
 
     @input_text(
@@ -90,7 +90,7 @@
       value = form.data.getOrElse("accountNumber", ""),
       hint = Some(messages("hts.register.bank-details.accountNumber.hint")),
       name = "accountNumber",
-      errorMessage = accountNumberErrorMessage.orElse(accountNumberBackendErrorMessage).map(Html(_))
+      errorMessage = accountNumberErrorMessage.orElse(accountNumberBarsErrorMessage).map(Html(_))
     )
 
     @input_text(

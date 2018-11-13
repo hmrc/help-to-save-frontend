@@ -138,9 +138,9 @@ object BankDetailsValidation {
 
     val accountNameTooLong = "account_name_too_long"
 
-    val sortCodeBackendInvalid = "check_your_sortcode_is_correct"
+    val sortCodeBarsInvalid = "check_your_sortcode_is_correct"
 
-    val accountNumberBackendInvalid = "check_your_account_number_is_correct"
+    val accountNumberBarsInvalid = "check_your_account_number_is_correct"
   }
 
   implicit class FormOps[A](val form: Form[A]) extends AnyVal {
@@ -163,11 +163,11 @@ object BankDetailsValidation {
     def accountNameTooLong(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.accountNameTooLong)
 
-    def sortCodeBackendInvalid(key: String): Boolean =
-      hasErrorMessage(key, ErrorMessages.sortCodeBackendInvalid)
+    def sortCodeBarsInvalid(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.sortCodeBarsInvalid)
 
-    def accountNumberBackendInvalid(key: String): Boolean =
-      hasErrorMessage(key, ErrorMessages.accountNumberBackendInvalid)
+    def accountNumberBarsInvalid(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.accountNumberBarsInvalid)
 
   }
 

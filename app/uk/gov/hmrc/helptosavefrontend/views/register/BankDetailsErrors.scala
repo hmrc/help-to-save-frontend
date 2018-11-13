@@ -39,11 +39,11 @@ object BankDetailsErrors {
     }
   }
 
-  def getBankDetailsBackendErrorMessage(form: Form[_], key: String)(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
+  def getBarsErrorMessage(form: Form[_], key: String)(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
 
-    if (form.sortCodeBackendInvalid(key)) {
+    if (form.sortCodeBarsInvalid(key)) {
       Some(messages("hts.bank_details.check_your_sortcode_is_correct"))
-    } else if (form.accountNumberBackendInvalid(key)) {
+    } else if (form.accountNumberBarsInvalid(key)) {
       Some(messages("hts.bank_details.check_your_account_number_is_correct"))
     } else {
       None
