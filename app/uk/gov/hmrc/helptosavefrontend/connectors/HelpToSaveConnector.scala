@@ -59,6 +59,8 @@ trait HelpToSaveConnector {
 
   def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
 
+  def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
+
 }
 
 @Singleton
@@ -92,6 +94,9 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
 
   private val updateEmailURL =
     s"$helpToSaveUrl/help-to-save/update-email"
+
+  private val validateBankDetailsURL =
+    s"$helpToSaveUrl/help-to-save/validate-bank-details"
 
   private def getAccountUrl(nino: String) = s"$helpToSaveUrl/help-to-save/$nino/account"
 
@@ -169,6 +174,9 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
 
   override def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
     http.put(updateEmailURL, userInfo)
+
+  override def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse] =
+    http.post(validateBankDetailsURL, request)
 }
 
 object HelpToSaveConnectorImpl {
