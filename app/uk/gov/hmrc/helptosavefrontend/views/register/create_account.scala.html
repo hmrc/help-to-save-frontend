@@ -46,28 +46,73 @@ bodyClasses = None) {
   <p>@Html(Messages("hts.register.create_account.intro"))</p>
 
   @summary_section_head(heading = Messages("hts.register.create_account.your-details"))
-  @summary_section_change(routes.RegisterController.getDetailsAreIncorrect().url, Messages("hts.register.create_account.your-details"), "change-details-are-incorrect")
   <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.register.create_account.your-details.name"), eligibleWithUserInfo.userInfo.forename + " " + eligibleWithUserInfo.userInfo.surname)
-    @summary_row(Messages("hts.register.create_account.your-details.dob"), eligibleWithUserInfo.userInfo.dateOfBirth.show)
-    @summary_row(Messages("hts.register.create_account.your-details.nino"), display2CharFormat(eligibleWithUserInfo.userInfo.nino))
+    @summary_row(Messages("hts.register.create_account.your-details.name"), eligibleWithUserInfo.userInfo.forename + " " + eligibleWithUserInfo.userInfo.surname,
+      summary_section_change(
+        routes.RegisterController.getDetailsAreIncorrect().url,
+        Messages("hts.register.create_account.change-your-name"),
+        "change-details-are-incorrect"
+      )
+    )
+    @summary_row(Messages("hts.register.create_account.your-details.dob"), eligibleWithUserInfo.userInfo.dateOfBirth.show,
+      summary_section_change(
+        routes.RegisterController.getDetailsAreIncorrect().url,
+        Messages("hts.register.create_account.change-your-dob"),
+        "change-details-are-incorrect"
+      )
+    )
+    @summary_row(Messages("hts.register.create_account.your-details.nino"), display2CharFormat(eligibleWithUserInfo.userInfo.nino),
+      summary_section_change(
+        routes.RegisterController.getDetailsAreIncorrect().url,
+        Messages("hts.register.create_account.change-your-nino"),
+        "change-details-are-incorrect"
+      )
+    )
   </dl>
 
   @summary_section_head(heading = Messages("hts.register.create_account.your-email"))
-  @summary_section_change(routes.RegisterController.changeEmail().url, Messages("hts.register.create_account.your-email"), "change-email")
   <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.register.create_account.your-email.email"), email)
+    @summary_row(Messages("hts.register.create_account.your-email.email"), email,
+      summary_section_change(
+        routes.RegisterController.changeEmail().url,
+        (Messages("hts.register.create_account.change") + " " + Messages("hts.register.create_account.your-email")),
+        "change-email"
+      )
+    )
   </dl>
 
   @summary_section_head(heading = Messages("hts.register.create_account.your-bank-details"))
-  @summary_section_change(routes.RegisterController.changeBankDetails().url, Messages("hts.register.create_account.your-bank-details"), "change-bank-details")
   <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.register.create_account.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode.toString()))
-    @summary_row(Messages("hts.register.create_account.your-bank-details.account-number"), bankDetails.accountNumber)
+    @summary_row(Messages("hts.register.create_account.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode.toString()),
+      summary_section_change(
+        (routes.RegisterController.changeBankDetails().url + "#sortCode"),
+        Messages("hts.register.create_account.change-your-sort-code"),
+        "change-bank-details"
+      )
+    )
+    @summary_row(Messages("hts.register.create_account.your-bank-details.account-number"), bankDetails.accountNumber,
+      summary_section_change(
+        (routes.RegisterController.changeBankDetails().url + "#accountNumber"),
+        Messages("hts.register.create_account.change-your-account-number"),
+        "change-bank-details"
+      )
+    )
     @if(bankDetails.rollNumber.nonEmpty) {
-      @summary_row(Messages("hts.register.create_account.your-bank-details.roll-number"), bankDetails.rollNumber.getOrElse(""))
+      @summary_row(Messages("hts.register.create_account.your-bank-details.roll-number"), bankDetails.rollNumber.getOrElse(""),
+        summary_section_change(
+          (routes.RegisterController.changeBankDetails().url + "#rollNumber"),
+          Messages("hts.register.create_account.change-your-roll-number"),
+          "change-bank-details"
+        )
+      )
     }
-    @summary_row(Messages("hts.register.create_account.your-bank-details.account-name"), bankDetails.accountName)
+    @summary_row(Messages("hts.register.create_account.your-bank-details.account-name"), bankDetails.accountName,
+      summary_section_change(
+        (routes.RegisterController.changeBankDetails().url + "#accountName"),
+        Messages("hts.register.create_account.change-your-account-name"),
+        "change-bank-details"
+      )
+    )
   </dl>
 
   <h2 class="heading-medium">@Messages("hts.register.create_account.tandc-title")</h2>

@@ -16,4 +16,9 @@
 
 @(href: String, helperText: String, id: String)(implicit messages: Messages)
 
-<a id="@id" href="@href" style="float: right">@Messages("hts.register.create_account.change") <span class="visuallyhidden">@helperText</span></a>
+@*<a id="@id" href="@href" style="float: right">@Messages("hts.register.create_account.change") <span class="visuallyhidden">@helperText</span></a>*@
+
+<a id="@id" href="@href">
+ <span class="visuallyhidden">@helperText</span>
+ <span aria-hidden="true">@Messages("hts.register.create_account.change")</span>
+</a>
