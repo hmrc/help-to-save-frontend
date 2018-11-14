@@ -149,22 +149,25 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
       itmpDob.orElse(dob)
         .toValidNel(MissingUserInfo.DateOfBirth)
 
-    val addressValidation: ValidOrMissingUserInfo[Option[ItmpAddress]] = {
+    val addressValidation: ValidOrMissingUserInfo[ItmpAddress] = {
+      val missingContactDetails = Invalid(NonEmptyList.of(MissingUserInfo.Contact))
 
-      val lineCount = itmpAddress.fold(0) { a: ItmpAddress ⇒
-        List(a.line1, a.line2, a.line3, a.line4, a.line5).map(_.map(_.trim)).filter(_.nonEmpty).collect { case Some(_) ⇒ () }.length
+      itmpAddress.fold[ValidOrMissingUserInfo[ItmpAddress]](missingContactDetails){ a ⇒
+        val lineCount =
+          List(a.line1, a.line2, a.line3, a.line4, a.line5).map(_.map(_.trim)).filter(_.nonEmpty).collect { case Some(_) ⇒ () }.length
+
+        if (lineCount < 2 || !a.postCode.exists(_.trim.nonEmpty)) {
+          missingContactDetails
+        } else {
+          Valid(a)
+        }
       }
 
-      if (lineCount < 2 || !itmpAddress.flatMap(_.postCode).exists(_.trim.nonEmpty)) {
-        Invalid(NonEmptyList.of(MissingUserInfo.Contact))
-      } else {
-        Valid(itmpAddress)
-      }
     }
 
     val validation: ValidOrMissingUserInfo[UserInfo] =
       (givenNameValidation, surnameValidation, dateOfBirthValidation, addressValidation).mapN {
-        case (givenName, surname, jodaDob, Some(address)) ⇒
+        case (givenName, surname, jodaDob, address) ⇒
           UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email.filter(_.nonEmpty), Address(address))
       }
 

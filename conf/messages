@@ -280,11 +280,16 @@ hts.register.bank-details.rollNumber.label=Roll number
 hts.register.bank-details.rollNumber.hint=This is only for building society accounts
 hts.bank_details.check_your_sortcode_is_correct=Check your sort code is correct
 hts.bank_details.check_your_account_number_is_correct=Check your account number is correct
-hts.sort-code.incorrect-format=Your sort code needs to be {0} numbers
-hts.account-number.incorrect-format=Your account number needs to be {0} numbers
-hts.roll-number.invalid=Your roll number must be {0} to {1} characters only - it can include letters, numbers, hyphens, forward slashes and dots
-hts.account-name.too-short=Your account name needs to be {0} characters or more
-hts.account-name.too-long=Your account name cannot be more than {0} characters
+hts.sort-code.empty=Enter sort code
+hts.sort-code.incorrect-format=Sort code must be {0} numbers
+hts.account-number.empty=Enter account number
+hts.account-number.incorrect-format=Account number must be {0} numbers
+hts.roll-number.too-short=Roll number must be {0} characters or more
+hts.roll-number.too-long=Roll number must be {0} characters or less
+hts.roll-number.invalid=Roll number must only include letters a to z, numbers, hyphens, forward slashes and full stops
+hts.account-name.empty=Enter account name
+hts.account-name.too-short=Your account name must be {0} characters or more
+hts.account-name.too-long=Account name must more than {0} characters or less
 
 # Bank Details Error
 hts.register.bank-details.error.title.h1=There is a problem with your bank details
