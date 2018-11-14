@@ -98,7 +98,11 @@ class BankDetailsValidationSpec extends TestSupport {
       "not allow inputs" which {
 
         "are null" in {
-          testSortCode(None)(Left(Set(ErrorMessages.sortCodeIncorrectFormat)))
+          testSortCode(None)(Left(Set(ErrorMessages.sortCodeEmpty)))
+        }
+
+        "are the empty" in {
+          testSortCode(Some(""))(Left(Set(ErrorMessages.sortCodeEmpty)))
         }
 
         "contain non-digit characters" in {
@@ -149,7 +153,11 @@ class BankDetailsValidationSpec extends TestSupport {
       "not allow inputs" which {
 
         "are null" in {
-          testAccountNumber(None)(Left(Set(ErrorMessages.accountNumberIncorrectFormat)))
+          testAccountNumber(None)(Left(Set(ErrorMessages.accountNumberEmpty)))
+        }
+
+        "are empty" in {
+          testAccountNumber(Some(""))(Left(Set(ErrorMessages.accountNumberEmpty)))
         }
 
         "contain non-digit characters" in {
@@ -198,23 +206,23 @@ class BankDetailsValidationSpec extends TestSupport {
       "not allow inputs" when {
 
         "containing spaces in them" in {
-          testRollNumber(Some(" a b "))(Left(Set(ErrorMessages.rollNumberInvalid)))
+          testRollNumber(Some(" a b "))(Left(Set(ErrorMessages.rollNumberIncorrectFormat)))
         }
 
         "containing control characters" in {
-          testRollNumber(Some("ab1\n\r\t"))(Left(Set(ErrorMessages.rollNumberInvalid)))
+          testRollNumber(Some("ab1\n\r\t"))(Left(Set(ErrorMessages.rollNumberIncorrectFormat)))
         }
 
         "the length is less than the configured length" in {
-          testRollNumber(Some("ab"))(Left(Set(ErrorMessages.rollNumberInvalid)))
+          testRollNumber(Some("ab"))(Left(Set(ErrorMessages.rollNumberTooShort)))
         }
 
         "the length is greater than the configured length" in {
-          testRollNumber(Some("abcdefghij123456789"))(Left(Set(ErrorMessages.rollNumberInvalid)))
+          testRollNumber(Some("abcdefghij123456789"))(Left(Set(ErrorMessages.rollNumberTooLong)))
         }
 
         "containing characters not allowed as per regex" in {
-          testRollNumber(Some("a_b$c%&^@!"))(Left(Set(ErrorMessages.rollNumberInvalid)))
+          testRollNumber(Some("a_b$c%&^@!"))(Left(Set(ErrorMessages.rollNumberIncorrectFormat)))
         }
       }
 
@@ -246,7 +254,11 @@ class BankDetailsValidationSpec extends TestSupport {
       "not allow inputs" which {
 
         "are null" in {
-          testAccountName(None)(Left(Set(ErrorMessages.accountNameTooShort)))
+          testAccountName(None)(Left(Set(ErrorMessages.accountNameEmpty)))
+        }
+
+        "are empty" in {
+          testAccountName(Some(""))(Left(Set(ErrorMessages.accountNameEmpty)))
         }
 
         "have length less than the configured length" in {
@@ -274,26 +286,48 @@ class BankDetailsValidationSpec extends TestSupport {
             formHasError(testFormWithErrorMessage(message))(TestForm.key) shouldBe true
           }
 
+        "the sort code is empty" in {
+          test(_.sortCodeEmpty, ErrorMessages.sortCodeEmpty)
+        }
+
         "the sort code has an incorrect format" in {
           test(_.sortCodeIncorrectFormat, ErrorMessages.sortCodeIncorrectFormat)
+        }
+
+        "the sort code did not pass backend validation" in {
+          test(_.sortCodeBackendInvalid, ErrorMessages.sortCodeBackendInvalid)
+        }
+
+        "the account number is empty" in {
+          test(_.accountNumberEmpty, ErrorMessages.accountNumberEmpty)
         }
 
         "the account number has an incorrect format" in {
           test(_.accountNumberIncorrectFormat, ErrorMessages.accountNumberIncorrectFormat)
         }
 
-        "the roll number is too short" in {
-          test(_.rollNumberInvalid, ErrorMessages.rollNumberInvalid)
+        "the account number did not pass backend validation" in {
+          test(_.accountNumberBackendInvalid, ErrorMessages.accountNumberBackendInvalid)
+        }
 
+        "the roll number is too short" in {
+          test(_.rollNumberTooShort, ErrorMessages.rollNumberTooShort)
         }
 
         "the roll number is too long" in {
-          test(_.rollNumberInvalid, ErrorMessages.rollNumberInvalid)
+          test(_.rollNumberTooLong, ErrorMessages.rollNumberTooLong)
+        }
+
+        "the roll number has incorrect format" in {
+          test(_.rollNumberIncorrectFormat, ErrorMessages.rollNumberIncorrectFormat)
+        }
+
+        "the account name is empty" in {
+          test(_.accountNameEmpty, ErrorMessages.accountNameEmpty)
         }
 
         "the account name is too short" in {
           test(_.accountNameTooShort, ErrorMessages.accountNameTooShort)
-
         }
 
         "the account name is too long" in {

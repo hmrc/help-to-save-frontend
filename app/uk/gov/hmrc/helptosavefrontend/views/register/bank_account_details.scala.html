@@ -86,7 +86,9 @@
 
     @input_text(
       id = "accountNumber",
+      inputType = "tel",
       label = messages("hts.register.bank-details.accountNumber.label"),
+      inputClass = Some("form-control-1-3"),
       value = form.data.getOrElse("accountNumber", ""),
       hint = Some(messages("hts.register.bank-details.accountNumber.hint")),
       name = "accountNumber",

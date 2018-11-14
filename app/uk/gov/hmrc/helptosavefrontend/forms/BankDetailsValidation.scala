@@ -45,10 +45,12 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
       val validation: ValidOrErrorStrings[SortCode] =
         data.get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
-          .fold(invalid[SortCode](ErrorMessages.sortCodeIncorrectFormat)) { s ⇒
+          .fold(invalid[SortCode](ErrorMessages.sortCodeEmpty)) { s ⇒
             val p = s.filterNot(allowedSeparators.contains)
             if (p.length === sortCodeLength && p.forall(_.isDigit)) {
               SortCode(p.map(_.asDigit)).fold[ValidOrErrorStrings[SortCode]](invalid(ErrorMessages.sortCodeIncorrectFormat))(Valid(_))
+            } else if (p.isEmpty) {
+              invalid(ErrorMessages.sortCodeEmpty)
             } else {
               invalid(ErrorMessages.sortCodeIncorrectFormat)
             }
@@ -68,8 +70,14 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
       val validation: ValidOrErrorStrings[String] =
         data.get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
-          .fold(invalid[String](ErrorMessages.accountNumberIncorrectFormat)) { s ⇒
-            validatedFromBoolean(s)(s ⇒ s.length === accountNumberLength && s.forall(_.isDigit), ErrorMessages.accountNumberIncorrectFormat)
+          .fold(invalid[String](ErrorMessages.accountNumberEmpty)) { s ⇒
+            validatedFromBoolean(s)(s ⇒ s.length === accountNumberLength && s.forall(_.isDigit),
+              if (s.isEmpty) {
+                ErrorMessages.accountNumberEmpty
+              } else {
+                ErrorMessages.accountNumberIncorrectFormat
+              }
+            )
           }
 
       validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
@@ -88,8 +96,12 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
           .fold[ValidOrErrorStrings[Option[String]]](Valid(None)) { s ⇒
             if (rollNoRegex(s).matches()) {
               Valid(Some(s))
+            } else if (s.length < rollNumberMinLength) {
+              invalid(ErrorMessages.rollNumberTooShort)
+            } else if (s.length > rollNumberMaxLength) {
+              invalid(ErrorMessages.rollNumberTooLong)
             } else {
-              invalid(ErrorMessages.rollNumberInvalid)
+              invalid(ErrorMessages.rollNumberIncorrectFormat)
             }
           }
       validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
@@ -105,8 +117,10 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
       val validation: ValidOrErrorStrings[String] =
         data.get(key)
           .map(_.cleanupSpecialCharacters.trim)
-          .fold(invalid[String](ErrorMessages.accountNameTooShort)) { s ⇒
-            if (s.length < accountNameMinLength) {
+          .fold(invalid[String](ErrorMessages.accountNameEmpty)) { s ⇒
+            if (s.isEmpty) {
+              invalid(ErrorMessages.accountNameEmpty)
+            } else if (s.length < accountNameMinLength) {
               invalid(ErrorMessages.accountNameTooShort)
             } else if (s.length > accountNameMaxLength) {
               invalid(ErrorMessages.accountNameTooLong)
@@ -128,11 +142,21 @@ object BankDetailsValidation {
 
   object ErrorMessages {
 
+    val sortCodeEmpty = "sort_code_empty"
+
     val sortCodeIncorrectFormat = "sort_code_incorrect_format"
+
+    val accountNumberEmpty = "account_number_empty"
 
     val accountNumberIncorrectFormat = "account_number_incorrect_format"
 
-    val rollNumberInvalid = "roll_number_invalid"
+    val rollNumberTooShort = "roll_number_too_short"
+
+    val rollNumberTooLong = "roll_number_too_long"
+
+    val rollNumberIncorrectFormat = "roll_number_incorrect_format"
+
+    val accountNameEmpty = "account_name_empty"
 
     val accountNameTooShort = "account_name_too_short"
 
@@ -148,14 +172,29 @@ object BankDetailsValidation {
     private def hasErrorMessage(key: String, message: String): Boolean =
       form.error(key).exists(_.message === message)
 
+    def sortCodeEmpty(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.sortCodeEmpty)
+
     def sortCodeIncorrectFormat(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.sortCodeIncorrectFormat)
+
+    def accountNumberEmpty(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.accountNumberEmpty)
 
     def accountNumberIncorrectFormat(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.accountNumberIncorrectFormat)
 
-    def rollNumberInvalid(key: String): Boolean =
-      hasErrorMessage(key, ErrorMessages.rollNumberInvalid)
+    def rollNumberTooShort(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.rollNumberTooShort)
+
+    def rollNumberTooLong(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.rollNumberTooLong)
+
+    def rollNumberIncorrectFormat(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.rollNumberIncorrectFormat)
+
+    def accountNameEmpty(key: String): Boolean =
+      hasErrorMessage(key, ErrorMessages.accountNameEmpty)
 
     def accountNameTooShort(key: String): Boolean =
       hasErrorMessage(key, ErrorMessages.accountNameTooShort)

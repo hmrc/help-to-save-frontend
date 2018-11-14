@@ -23,16 +23,30 @@ import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.FormOps
 
 object BankDetailsErrors {
 
-  def getErrorMessage(form: Form[_], key: String)(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
-    if (form.sortCodeIncorrectFormat(key)) {
+  def getErrorMessage(form: Form[_], // scalastyle:ignore cyclomatic.complexity
+                      key:  String
+  )(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
+      def has(f: Form[_] ⇒ String ⇒ Boolean): Boolean = f(form)(key)
+
+    if (has(_.sortCodeEmpty)) {
+      Some(messages("hts.sort-code.empty"))
+    } else if (has(_.sortCodeIncorrectFormat)) {
       Some(messages("hts.sort-code.incorrect-format", appConfig.BankDetailsConfig.sortCodeLength))
-    } else if (form.accountNumberIncorrectFormat(key)) {
+    } else if (has(_.accountNumberEmpty)) {
+      Some(messages("hts.account-number.empty"))
+    } else if (has(_.accountNumberIncorrectFormat)) {
       Some(messages("hts.account-number.incorrect-format", appConfig.BankDetailsConfig.accountNumberLength))
-    } else if (form.rollNumberInvalid(key)) {
-      Some(messages("hts.roll-number.invalid", appConfig.BankDetailsConfig.rollNumberMinLength, appConfig.BankDetailsConfig.rollNumberMaxLength))
-    } else if (form.accountNameTooShort(key)) {
+    } else if (has(_.rollNumberTooShort)) {
+      Some(messages("hts.roll-number.too-short", appConfig.BankDetailsConfig.rollNumberMinLength))
+    } else if (has(_.rollNumberTooLong)) {
+      Some(messages("hts.roll-number.too-long", appConfig.BankDetailsConfig.rollNumberMaxLength))
+    } else if (has(_.rollNumberIncorrectFormat)) {
+      Some(messages("hts.roll-number.invalid"))
+    } else if (has(_.accountNameEmpty)) {
+      Some(messages("hts.account-name.empty"))
+    } else if (has(_.accountNameTooShort)) {
       Some(messages("hts.account-name.too-short", appConfig.BankDetailsConfig.accountNameMinLength))
-    } else if (form.accountNameTooLong(key)) {
+    } else if (has(_.accountNameTooLong)) {
       Some(messages("hts.account-name.too-long", appConfig.BankDetailsConfig.accountNameMaxLength))
     } else {
       None
