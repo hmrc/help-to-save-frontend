@@ -447,20 +447,19 @@ hts.email.error.local-too-short=Your email address must have one character or mo
 hts.email.error.domain-too-short=Your email address must have one character or more before and after the &lsquo;@&rsquo;
 hts.email.error.total-too-long=Your email address must be 254 characters or less
 hts.email.error.blank=Enter the email address you want to use for your Help to Save account
-hts.email.error.no-at-symbol=Enter an email address with a name, &lsquo;@&rsquo; symbol and a domain name, like yourname@example.com
+hts.email.error.no-at-symbol=Enter an email address in the correct format
 hts.email.error.no-dot-symbol=Your email address must have a &lsquo;dot&rsquo;
 hts.email.error.no-text-after-dot-symbol=Your email address must have characters before and after the &lsquo;dot&rsquo;
 hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the &lsquo;dot&rsquo;
 
 # Select email
 hts.select-email.title.h1=Which email address do you want to use for your Help to Save account?
-hts.select-email.select-new-address=a new email address
+hts.select-email.select-new-address=A new email address
 hts.select-email.enter-new-address-body-text=The email addresses you use for other government services will not change.
-hts.select-email.enter-new-address-label=Enter the new email address
-hts.select-email.enter-new-address-hint=For example, myname&#64;sample.com
-hts.select-email.select-an-option=Select one option
+hts.select-email.enter-new-address-label=Email address
+hts.select-email.enter-new-address-hint=For example, name&#64;example.com
+hts.select-email.select-an-option=Select the email address you want to use for your Help to Save account
 hts.select-email.select-one.error-summary.title=There is a problem
-hts.select-email.select-one.error-summary.link-description=Select one option
 hts.select-email.invalid-email.error-summary.title=There is a problem
 
 # Give email
