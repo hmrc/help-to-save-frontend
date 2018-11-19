@@ -515,13 +515,8 @@ hts.email-verification.link-expired.button=Go to your account
 hts.email-verification.link-expired.p2=Exit to GOV.UK
 
 # Email updated
-hts.email-updated.title.h1=Email address verified
-hts.email-updated.p1=If you create a Help to Save account we&rsquo;ll use this email address to contact you about it.
-hts.email-updated.p2=Your email address has not been updated in other government services.
+hts.email-updated.title.h1=You have confirmed the email address
 hts.email-updated.continue_button=Continue
-
-# Email updated - DE to Digital
-hts.email-updated.de-digital.p1=We&rsquo;ll use this email address to contact you about your Help to Save account.
 
 # Cannot change email
 hts.cannot-change-email.title.h1=Something went wrong

@@ -70,7 +70,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINOAndName { implicit request ⇒ implicit htsContext ⇒
     htsContext.firstName.fold[Future[Result]](
-      SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+      SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
     ) { name ⇒
         checkIfAlreadyEnrolled(_ ⇒
           UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
@@ -87,11 +87,11 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
                         name,
                         SeeOther(routes.AccountHolderController.getCheckYourEmail().url),
                         params ⇒ routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
-                        _ ⇒ SeeOther(routes.EmailController.verifyEmailErrorTryLater().url),
+                        _ ⇒ SeeOther(routes.EmailController.confirmEmailErrorTryLater().url),
                         isNewApplicant = false)
                     ).leftMap { e ⇒
                       logger.warn(s"Could not write pending email to session cache: $e")
-                      SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+                      SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
                     }.merge
                 case Left(e) ⇒
                   logger.warn(s"Given email address failed validation, errors: $e")
@@ -112,7 +112,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
     result.fold(
       { e ⇒
         logger.warn(s"Could not get pending email: $e", htsContext.nino)
-        SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+        SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
       }, { pendingEmail ⇒
         Ok(views.html.email.accountholder.check_your_email(pendingEmail))
       }
@@ -127,7 +127,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
         params ⇒ EitherT.right(checkIfAlreadyEnrolled(oldEmail ⇒
           handleEmailVerified(params, oldEmail, path),
           routes.AccountHolderController.getUpdateYourEmailAddress().url)),
-        EitherT.right(toFuture(SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)))
+        EitherT.right(toFuture(SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)))
       )(path).leftMap { e ⇒
           logger.warn(e)
           internalServerError()
@@ -144,7 +144,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
     result.fold(
       { e ⇒
         logger.warn(s"Could not find confirmed email: $e")
-        SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+        SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
       },
       email ⇒ Ok(views.html.email.we_updated_your_email(email))
     )
@@ -187,14 +187,14 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
     if (emailVerificationParams.nino =!= nino) {
       auditor.sendEvent(SuspiciousActivity(None, s"nino_mismatch, expected=$nino, received=${emailVerificationParams.nino}", path), nino)
       logger.warn(s"SuspiciousActivity: email was verified but nino [${emailVerificationParams.nino}] in URL did not match user's nino", nino)
-      SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+      SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
     } else {
       htsContext.userDetails match {
 
         case Left(missingUserInfos) ⇒
           logger.warn("Email was verified but missing some user info " +
             s"(${missingUserInfos.missingInfo.mkString(",")}", nino)
-          SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+          SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
 
         case Right(userInfo) ⇒
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
@@ -208,14 +208,14 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
           result.fold({
             case UpdateEmailError.NSIError(e) ⇒
               logger.warn(s"Could not update email with NS&I: $e", nino)
-              SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+              SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
 
             case UpdateEmailError.SessionCacheError(e) ⇒
               logger.warn(s"Could not write to session cache: $e", nino)
               auditor.sendEvent(auditEvent, nino)
               // TODO: what is the best course of action here? The email has actually been updated but
               // TODO: we can't display it to them on the next page
-              SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+              SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
 
             case UpdateEmailError.EmailMongoError(e) ⇒
               logger.warn("Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I", nino)
@@ -248,7 +248,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
       .leftMap {
         error ⇒
           logger.warn(s"Could not check enrolment status: $error")
-          SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+          SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
       }
       .semiflatMap {
         case (enrolmentStatus, maybeEmail) ⇒
@@ -259,14 +259,14 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
               // user is not enrolled in this case
               logger.warn("SuspiciousActivity: missing HtS enrolment record for user", nino)
               auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_enrolment", path), nino)
-              SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+              SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
 
             case (EnrolmentStatus.Enrolled(_), None) ⇒
               // this should never happen since we cannot have created an account
               // without a successful write to our email store
               logger.warn("SuspiciousActivity: user is enrolled but the HtS email record does not exist", nino)
               auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_email_record", path), nino)
-              SeeOther(routes.EmailController.verifyEmailErrorTryLater().url)
+              SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
 
             case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
               ifEnrolled(email)

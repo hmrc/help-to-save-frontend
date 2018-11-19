@@ -74,9 +74,9 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val linkTTLMinutes: Int = getInt("microservice.services.email-verification.linkTTLMinutes")
 
-  val newApplicantContinueURL: String = s"$helpToSaveFrontendUrl/email-verified-callback"
+  val newApplicantContinueURL: String = s"$helpToSaveFrontendUrl/email-confirmed-callback"
 
-  val accountHolderContinueURL: String = s"$helpToSaveFrontendUrl/account-home/email-verified-callback"
+  val accountHolderContinueURL: String = s"$helpToSaveFrontendUrl/account-home/email-confirmed-callback"
 
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
 

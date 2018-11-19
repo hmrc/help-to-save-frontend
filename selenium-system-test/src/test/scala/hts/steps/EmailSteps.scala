@@ -54,7 +54,7 @@ class EmailSteps extends Steps {
 
   When("^they click on the email verification link$"){
     val params = EmailVerificationParams(ScenarioContext.currentNINO(), "newemail@mail.com")
-    Browser.navigateTo(s"email-verified-callback?p=${params.encode()}")
+    Browser.navigateTo(s"email-confirmed-callback?p=${params.encode()}")
   }
 
   Then("^they see that their email has been successfully verified$"){

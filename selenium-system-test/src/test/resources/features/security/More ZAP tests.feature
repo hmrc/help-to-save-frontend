@@ -14,8 +14,8 @@ Feature: more ZAP tests to hit the rest of the URLS
       | enter-email                             |
       | confirm-email/user@test.com             |
       | confirm-email                           |
-      | email-verified-callback                 |
-      | email-verified                          |
+      | email-confirmed-callback                 |
+      | email-confirmed                          |
       | cannot-change-email                     |
       | cannot-change-email-try-later           |
       | email-updated                           |
