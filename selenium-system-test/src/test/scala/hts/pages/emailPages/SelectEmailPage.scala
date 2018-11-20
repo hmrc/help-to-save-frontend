@@ -39,7 +39,9 @@ object SelectEmailPage extends Page {
 
   def setAndVerifyNewEmail(email: String)(implicit driver: WebDriver): Unit = {
     Browser.clickButtonByIdOnceClickable("add-new-email")
-    Browser.textField("new-email").value = email
+    Browser.find(Browser.name("new-email")).foreach { element ⇒
+      element.underlying.sendKeys(email)
+    }
     clickContinue()
   }
 
