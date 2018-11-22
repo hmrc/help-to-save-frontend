@@ -7,6 +7,7 @@ import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, s
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import uk.gov.hmrc.versioning.SbtGitVersioning
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.{SbtAutoBuildPlugin, _}
 import wartremover.{Wart, Warts, wartremoverErrors, wartremoverExcluded}
 
@@ -44,6 +45,8 @@ def testDependencies(scope: String = "test") = Seq(
   "com.google.guava" % "guava" % "25.1-jre" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "3.1.0" % scope
 )
+
+lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
 
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
@@ -176,4 +179,14 @@ lazy val microservice = Project(appName, file("."))
     testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
     testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
     testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
+  )
+  .settings(
+    formatMessageQuotes := {
+      import sys.process._
+      val rightQuoteReplace = (List("sed", "-i", s"""s/&rsquo;\\|''/’/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !)
+      val leftQuoteReplace = (List("sed", "-i", s"""s/&lsquo;/‘/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !)
+
+      if(rightQuoteReplace != 0 || leftQuoteReplace != 0){ logger.log(Level.Warn, "WARNING: could not replace quotes with smart quotes") }
+    },
+    compile := ((compile in Compile) dependsOn formatMessageQuotes).value
   )
