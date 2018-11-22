@@ -30,7 +30,6 @@
 }
 
 @defining((form.error("email").isDefined, form.error("new-email").isDefined, form.data.get("new-email"))){ case (hasNotSelected, hasInvalidEmail, newEmail) =>
-
   @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
       title = title,
       bodyClasses = None,
@@ -68,7 +67,7 @@
         @{if(hasNotSelected) <span class="error-message">{messages("hts.select-email.select-an-option")}</span> }
 
         <div class="multiple-choice">
-          <input id="registered-email" type="radio" name="email" value="Yes" @if(newEmail.isDefined && newEmail.exists(_.isEmpty)){ checked }>
+          <input id="registered-email" type="radio" name="email" value="Yes" @if(!hasNotSelected && newEmail.isDefined && newEmail.exists(_.isEmpty)){ checked }>
           <label for="registered-email">@email</label>
         </div>
 
