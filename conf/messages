@@ -356,7 +356,12 @@ hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-header=O
 hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-number=+44 300 322 7093
 hts.register.think_you_are_eligible.contact.service.opening-times.heading=Opening times:
 hts.register.think_you_are_eligible.contact.service.opening-times.open=10am to 6pm, Monday to Friday
-hts.register.think_you_are_eligible.contact.service.opening-times.closed=Closed weekends and bank holidays.
+hts.register.think_you_are_eligible.contact.service.opening-times.closed=Closed weekends and bank holidays
+hts.register.think_you_are_eligible.contact.find-out-about-call-charges=Find out about call charges
+hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-1=Get help
+hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-link-text=dealing with HMRC if you have additional needs
+hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-2=.
+
 hts.register.think_you_are_eligible.h2=If you still think the decision is wrong
 hts.register.think_you_are_eligible.p4=You can ask for the decision to be looked at again, if you’re told you’re not eligible for a Help to Save account and think that decision is wrong.
 hts.register.think_you_are_eligible.p5=You’ll usually need to do this within 30 days of being told you’re not eligible for a Help to Save account.

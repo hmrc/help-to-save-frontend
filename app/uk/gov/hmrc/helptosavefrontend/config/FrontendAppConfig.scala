@@ -100,6 +100,8 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val govUkURL: String = getString("gov-uk.url.base")
   val govUkEligibilityInfoUrl: String = s"$govUkURL/eligibility"
+  val govUkCallChargesUrl: String = getString("gov-uk.url.call-charges")
+  val govUkDealingWithHRMCAdditionalNeedsUrl: String = getString("gov-uk.url.dealing-with-hmrc-additional-needs")
 
   object BankDetailsConfig {
     val sortCodeLength: Int = getInt("bank-details-validation.sort-code.length")
