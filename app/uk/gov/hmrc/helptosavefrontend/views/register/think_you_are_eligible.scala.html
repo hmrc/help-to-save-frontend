@@ -21,58 +21,65 @@
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
-  Messages("hts.register.think_you_are_eligible.title.h1")
+    Messages("hts.register.think_you_are_eligible.title.h1")
 }
 
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
-  title = title,
-  sidebarLinks = None,
-  bodyClasses = None) {
+    title = title,
+    sidebarLinks = None,
+    bodyClasses = None) {
 
-  <h1>@title</h1>
+    <h1>@title</h1>
 
-  <p>@Html(Messages("hts.register.think_you_are_eligible.p1"))
-      <a href="@appConfig.govUkEligibilityInfoUrl">@Messages("hts.register.think_you_are_eligible.p1-link-text")</a>@Messages("hts.register.think_you_are_eligible.p1-2")</p>
-  <p>@Html(Messages("hts.register.think_you_are_eligible.p2"))</p>
-  <p>@Html(Messages("hts.register.think_you_are_eligible.p3"))</p>
+    <p>@Html(Messages("hts.register.think_you_are_eligible.p1"))
+        <a href="@appConfig.govUkEligibilityInfoUrl">@Messages("hts.register.think_you_are_eligible.p1-link-text")</a>@Messages("hts.register.think_you_are_eligible.p1-2")</p>
+    <p>@Html(Messages("hts.register.think_you_are_eligible.p2"))</p>
+    <p>@Html(Messages("hts.register.think_you_are_eligible.p3"))</p>
 
-  <div class="panel">
-      <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.telephone-header")</strong><br />
-      @Messages("hts.register.think_you_are_eligible.contact.service.telephone-number")</p>
-      <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-header")</strong><br />
-      @Messages("hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-number")</p>
-  </div>
-
-  <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.opening-times.heading")</strong><br />
-  @Messages("hts.register.think_you_are_eligible.contact.service.opening-times.open")<br /><br />
-  @Messages("hts.register.think_you_are_eligible.contact.service.opening-times.closed")</p>
-
-  <h2>@Messages("hts.register.think_you_are_eligible.h2")</h2>
-  <p>@Html(Messages("hts.register.think_you_are_eligible.p4"))</p>
-  <p>@Html(Messages("hts.register.think_you_are_eligible.p5"))</p>
-  <p>@Html(Messages("hts.register.think_you_are_eligible.p6"))</p>
-
-  <h3>@Messages("hts.register.think_you_are_eligible.h3")</h3>
-
-  <div class="panel">
-    <p>@Messages("hts.register.think_you_are_eligible.address1")<br />
-    @Messages("hts.register.think_you_are_eligible.address2")<br />
-    @Messages("hts.register.think_you_are_eligible.address3")<br />
-    @Messages("hts.register.think_you_are_eligible.address4")</p>
-  </div>
-
-  <details>
-    <summary><span class="summary">@Html(Messages("hts.register.think_you_are_eligible.review.disagree.heading"))</span></summary>
-    <div class="panel panel-border-narrow">
-      <p>@Messages("hts.register.think_you_are_eligible.review.disagree.p1")</p>
-      <ul class="list list-bullet">
-        <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li1")</li>
-        <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li2")</li>
-        <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li3")</li>
-        <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li4")</li>
-      </ul>
-      <p>@Messages("hts.register.think_you_are_eligible.review.disagree.p2")</p>
-      <p>@Html(Messages("hts.register.think_you_are_eligible.review.disagree.p3", "https://www.gov.uk/tax-tribunal/appeal-to-tribunal"))</p>
+    <div class="panel">
+        <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.telephone-header")</strong><br />
+            @Messages("hts.register.think_you_are_eligible.contact.service.telephone-number")</p>
+        <p><strong class="bold">@Messages("hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-header")</strong><br />
+            @Messages("hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-number")</p>
     </div>
-  </details>
+
+    <p>@Messages("hts.register.think_you_are_eligible.contact.service.opening-times.heading")<br />
+        @Messages("hts.register.think_you_are_eligible.contact.service.opening-times.open")<br />
+        @Messages("hts.register.think_you_are_eligible.contact.service.opening-times.closed")</p>
+
+    <a href="@appConfig.govUkCallChargesUrl">@Messages("hts.register.think_you_are_eligible.contact.find-out-about-call-charges")</a>
+
+    <div class="call-to-action">
+        <p>@Messages("hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-1")
+            <a href="@appConfig.govUkDealingWithHRMCAdditionalNeedsUrl">@Messages("hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-link-text")</a>@Messages("hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-2")</p>
+    </div>
+
+    <h2>@Messages("hts.register.think_you_are_eligible.h2")</h2>
+    <p>@Html(Messages("hts.register.think_you_are_eligible.p4"))</p>
+    <p>@Html(Messages("hts.register.think_you_are_eligible.p5"))</p>
+    <p>@Html(Messages("hts.register.think_you_are_eligible.p6"))</p>
+
+    <h3>@Messages("hts.register.think_you_are_eligible.h3")</h3>
+
+    <div class="panel">
+        <p>@Messages("hts.register.think_you_are_eligible.address1")<br />
+            @Messages("hts.register.think_you_are_eligible.address2")<br />
+            @Messages("hts.register.think_you_are_eligible.address3")<br />
+            @Messages("hts.register.think_you_are_eligible.address4")</p>
+    </div>
+
+    <details>
+        <summary><span class="summary">@Html(Messages("hts.register.think_you_are_eligible.review.disagree.heading"))</span></summary>
+        <div class="panel panel-border-narrow">
+            <p>@Messages("hts.register.think_you_are_eligible.review.disagree.p1")</p>
+            <ul class="list list-bullet">
+                <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li1")</li>
+                <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li2")</li>
+                <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li3")</li>
+                <li>@Messages("hts.register.think_you_are_eligible.review.disagree.ul1-li4")</li>
+            </ul>
+            <p>@Messages("hts.register.think_you_are_eligible.review.disagree.p2")</p>
+            <p>@Html(Messages("hts.register.think_you_are_eligible.review.disagree.p3", "https://www.gov.uk/tax-tribunal/appeal-to-tribunal"))</p>
+        </div>
+    </details>
 }
