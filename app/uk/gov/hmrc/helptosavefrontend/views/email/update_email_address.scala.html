@@ -56,15 +56,19 @@
         <h1 class="heading-large">@title</h1>
         <p>@Html(Messages("hts.email-verification.intro"))</p>
         @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit(), 'class -> "group subsection--wide") {
+            <div class="panel panel-border-wide">
+                <p>@messages("hts.email-verification.note")</p>
+            </div>
             @helpers.input_text(
                 id = "new-email-address",
                 name = "new-email-address",
                 label = messages("hts.email-verification.input.label"),
+                labelClass = Some("form-label-bold"),
+                inputType = "email",
+                hint = Some(messages("hts.email-verification.input.hint")),
                 errorMessage = errorMessage
             )
-            <div class="panel panel-border-wide">
-              <p>@messages("hts.email-verification.note")</p>
-            </div>
+
 
         @helpers.ga_submit_button("apply-button",
             "Account holder confirmed update",

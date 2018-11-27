@@ -476,9 +476,10 @@ hts.give-email.error-link-description=Enter a valid email address
 
 # Existing User Change Email
 hts.email-verification.title.h1=Change your email address
-hts.email-verification.intro=Once you’ve entered a new email address, we’ll send you an email so you can verify it.
+hts.email-verification.intro=Once you’ve entered a new email address, we’ll send you an email so you can confirm it.
 hts.email-verification.note=The email addresses you use for other government services will not change.
-hts.email-verification.input.label=New email address
+hts.email-verification.input.label=Email address
+hts.email-verification.input.hint=For example, name@example.com
 hts.email-verification.submit.text=Verify your email
 
 hts.email-verification.check-your-email.title.h1=You have 30 minutes to confirm the email address
