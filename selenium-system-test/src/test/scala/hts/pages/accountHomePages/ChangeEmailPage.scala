@@ -30,7 +30,7 @@ object ChangeEmailPage extends Page {
   override val expectedPageHeader: Option[String] = Some("Change your email address")
 
   def setNewEmailAddress(email: String)(implicit driver: WebDriver): Unit = {
-    Browser.textField("new-email-address").value = email
+    Browser.emailField("new-email-address").value = email
     Browser.submit()
   }
 
