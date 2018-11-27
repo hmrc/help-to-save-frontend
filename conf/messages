@@ -296,10 +296,7 @@ hts.register.bank-details.error.title.h1=There is a problem with your bank detai
 hts.register.bank-details.error.p1=This could be because the:
 hts.register.bank-details.error.ul1-li1=sort code you entered is wrong
 hts.register.bank-details.error.ul1-li2=bank details you entered are not for a UK bank account
-hts.register.bank-details.error.ul1-li3=the account number and sort code you entered are not for the same bank account
-hts.register.bank-details.error.p2=You’ll need to make sure your:
-hts.register.bank-details.error.ul2-li1=sort code is correct
-hts.register.bank-details.error.ul2-li2=bank details are for a UK bank account
+hts.register.bank-details.error.ul1-li3=account number and sort code you entered are not for the same bank account
 hts.register.bank-details.error.button.try-again=Try again
 
 # Eligible
