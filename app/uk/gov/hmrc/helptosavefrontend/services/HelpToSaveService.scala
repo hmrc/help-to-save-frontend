@@ -60,7 +60,7 @@ trait HelpToSaveService {
 
   def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Boolean]
+  def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult]
 
 }
 
@@ -128,15 +128,11 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
     }
     )
 
-  override def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[Boolean] =
-    EitherT(helpToSaveConnector.validateBankDetails(request).map[Either[String, Boolean]] { response ⇒
+  override def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult] =
+    EitherT(helpToSaveConnector.validateBankDetails(request).map[Either[String, ValidateBankDetailsResult]] { response ⇒
       response.status match {
         case Status.OK ⇒
-          Try((response.json \ "isValid").as[Boolean]) match {
-            case Success(isvalid) ⇒ Right(isvalid)
-            case Failure(error)   ⇒ Left(s"couldn't parse /validate-bank-details response from BE, error=${error.getMessage}. Body was ${maskNino(response.body)}")
-          }
-
+          response.parseJSON[ValidateBankDetailsResult]()
         case other ⇒
           Left(s"Received unexpected status $other from /validate-bank-details. Body was ${maskNino(response.body)}")
       }

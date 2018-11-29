@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
-import uk.gov.hmrc.helptosavefrontend.models.{ValidateBankDetailsRequest, EnrolmentStatus, HTSSession}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, ValidateBankDetailsRequest, ValidateBankDetailsResult}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +38,7 @@ class BankAccountControllerSpec extends AuthSupport
 
   implicit lazy val bankDetailsValidation: BankDetailsValidation = new BankDetailsValidation(appConfig)
 
-  def mockValidateBankDetails(request: ValidateBankDetailsRequest)(response: Either[String, Boolean]) =
+  def mockValidateBankDetails(request: ValidateBankDetailsRequest)(response: Either[String, ValidateBankDetailsResult]) =
     (mockHelpToSaveService.validateBankDetails(_: ValidateBankDetailsRequest)(_: HeaderCarrier, _: ExecutionContext))
       .expects(request, *, *)
       .returning(EitherT.fromEither[Future](response))
@@ -145,6 +145,8 @@ class BankAccountControllerSpec extends AuthSupport
 
         def doRequest() = controller.submitBankDetails()(submitBankDetailsRequest)
 
+      doCommonChecks(doRequest)
+
       "handle form errors during submit" in {
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
 
@@ -162,7 +164,39 @@ class BankAccountControllerSpec extends AuthSupport
         contentAsString(result) should include("Roll number must be 4 characters or more")
       }
 
-      doCommonChecks(doRequest)
+      "handle cases when the backend bank details check mark the details as valid" in {
+        val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(ValidateBankDetailsResult(false, true)))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Check your sort code is correct")
+        contentAsString(result) should include("Check your account number is correct")
+        contentAsString(result) should include("Which UK bank account do you want")
+      }
+
+      "handle cases when the backend bank details check mark the sort code as non-existent" in {
+        val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(ValidateBankDetailsResult(true, false)))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe 200
+        contentAsString(result) should include("Check your sort code is correct")
+        contentAsString(result) should not include ("Check your account number is correct")
+        contentAsString(result) should include("Which UK bank account do you want")
+      }
 
       "update the session with bank details when all other checks are passed" in {
 
@@ -172,7 +206,7 @@ class BankAccountControllerSpec extends AuthSupport
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(true))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(ValidateBankDetailsResult(true, true)))
           mockSessionStorePut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Right(()))
         }
 
@@ -189,7 +223,7 @@ class BankAccountControllerSpec extends AuthSupport
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(true))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(ValidateBankDetailsResult(true, true)))
           mockSessionStorePut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Left("error"))
         }
 
