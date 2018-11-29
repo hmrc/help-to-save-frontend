@@ -81,8 +81,8 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
               error ⇒ {
                 logger.warn(s"Could not validate bank details due to : $error")
                 internalServerError()
-              }, { isValid ⇒
-                if (isValid) {
+              }, { result ⇒
+                if (result.isValid && result.sortCodeExists) {
                   sessionStore.store(session.copy(bankDetails = Some(bankDetails)))
                     .fold(
                       error ⇒ {
@@ -92,9 +92,14 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
                       _ ⇒ SeeOther(routes.RegisterController.getCreateAccountPage().url)
                     )
                 } else {
-                  val formWithErrors = BankDetails.giveBankDetailsForm().fill(bankDetails)
-                    .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
-                    .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBackendInvalid)
+                  val formWithErrors = if (result.isValid && !result.sortCodeExists) {
+                    BankDetails.giveBankDetailsForm().fill(bankDetails)
+                      .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
+                  } else {
+                    BankDetails.giveBankDetailsForm().fill(bankDetails)
+                      .withError("sortCode", BankDetailsValidation.ErrorMessages.sortCodeBackendInvalid)
+                      .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBackendInvalid)
+                  }
 
                   Ok(views.html.register.bank_account_details(formWithErrors, backLinkFromSession(session)))
                 }

@@ -239,10 +239,10 @@ class HelpToSaveServiceSpec extends TestSupport {
         }
 
       "return a successful response" in {
-        mockValidateBankDetails(request)(HttpResponse(200, Some(Json.parse("""{"isValid":true}"""))))
+        mockValidateBankDetails(request)(HttpResponse(200, Some(Json.parse("""{"isValid":true, "sortCodeExists":true}"""))))
 
         val result = htsService.validateBankDetails(request)
-        result.value.futureValue should be(Right(true))
+        result.value.futureValue should be(Right(ValidateBankDetailsResult(true, true)))
       }
 
       "handle failure response" in {
