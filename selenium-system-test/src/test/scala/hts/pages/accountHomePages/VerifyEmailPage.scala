@@ -23,11 +23,11 @@ import org.openqa.selenium.WebDriver
 
 object VerifyEmailPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/verify-email"
+  val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/confirm-email"
 
-  override val expectedPageTitle: Option[String] = Some("You have 30 minutes to verify your email address - Manage your email address")
+  override val expectedPageTitle: Option[String] = Some("You have 30 minutes to confirm the email address - Manage your email address")
 
-  override val expectedPageHeader: Option[String] = Some("You have 30 minutes to verify your email address")
+  override val expectedPageHeader: Option[String] = Some("You have 30 minutes to confirm the email address")
 
   def resendEmail(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("resend-verification")
 
