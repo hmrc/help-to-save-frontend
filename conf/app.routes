@@ -58,8 +58,8 @@ GET        /failed-iv-precondition-failed                   @uk.gov.hmrc.helptos
 
 GET        /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getUpdateYourEmailAddress
 POST       /account-home/change-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.onSubmit
-GET        /account-home/verify-email                       @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getCheckYourEmail
-GET        /account-home/email-verified-callback            @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.emailVerifiedCallback(p: String)
+GET        /account-home/confirm-email                      @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getCheckYourEmail
+GET        /account-home/email-confirmed-callback           @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.emailVerifiedCallback(p: String)
 GET        /account-home/email-verified                     @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getEmailVerified
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden

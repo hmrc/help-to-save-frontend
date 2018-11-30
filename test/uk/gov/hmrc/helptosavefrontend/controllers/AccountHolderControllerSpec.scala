@@ -416,7 +416,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
         val result = controller.getCheckYourEmail(fakeRequestWithCSRFToken)
         status(result) shouldBe OK
-        contentAsString(result) should include("You have 30 minutes to verify your email address")
+        contentAsString(result) should include("You have 30 minutes to confirm the email address")
       }
 
       "return an error" when {

@@ -40,23 +40,27 @@
   serviceInfoContent = serviceInfoContent) {
 
     <h1 class="heading-large">@title</h1>
-    <p>@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail"))<br />@email</p>
+    <p>@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail", email, routes.AccountHolderController.getUpdateYourEmailAddress().url))</p>
+    
     <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.what-next")</h2>
     <p class="content">@Html(Messages("hts.email-verification.existing-user.check-your-email.content1"))</p>
-    <p class="content">@messages("hts.email-verification.existing-user.check-your-email.content2")</p>
-    <p class="content">@Html(Messages("hts.email-verification.check-your-email.content3"))</p>
-    <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.where-used-heading")</h2>
-    <p class="content">@Html(Messages("hts.email-verification.existing-user.check-your-email.where-used"))</p>
+
+    <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.h3")</h2>
+
+    @{
+      helpers.form(routes.AccountHolderController.onSubmit())(
+        Html(
+          s"""
+          |<input type="hidden" name="new-email-address" value="$email">
+          |<p>${Messages("hts.email-verification.existing-user.check-your-email.resend-1")}
+          |${helpers.button('_modifierClass -> "button button--link soft push--right", 'role -> "link", 'id → "resend-verification")(Html(messages("hts.email-verification.existing-user.check-your-email.resend-button-text")))}
+          |${Messages("hts.email-verification.existing-user.check-your-email.resend-2")}</p>
+          |""".stripMargin
+        )
+      )
+    }
+    
     <p class="subsection--wide push--bottom"><a href=@{frontendAppConfig.nsiManageAccountUrl} class="button" role="button">@messages("hts.global.back-to-account")</a></p>
 
-  @{
-    helpers.form(routes.AccountHolderController.onSubmit())(
-      Html(
-          s"""
-        |<input type="hidden" name="new-email-address" value="$email">
-        |${helpers.submit('_buttonClass -> "button button--link soft--sides", 'role -> "link", 'id → "resend-verification")(Html(messages("hts.email-verification.check-your-email.resend-email")))}
-        |""".stripMargin
-      )
-    )
-  }
+  
 }
