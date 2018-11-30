@@ -14,15 +14,15 @@ Feature: more ZAP tests to hit the rest of the URLS
       | enter-email                             |
       | confirm-email/user@test.com             |
       | confirm-email                           |
-      | email-confirmed-callback                 |
-      | email-confirmed                          |
+      | email-confirmed-callback                |
+      | email-confirmed                         |
       | cannot-change-email                     |
       | cannot-change-email-try-later           |
       | email-updated                           |
       | create-account                          |
       | account-home/change-email               |
       | account-home/email-verified             |
-      | account-home/email-verified-callback    |
-      | account-home/verify-email               |
+      | account-home/email-confirmed-callback   |
+      | account-home/confirm-email              |
       | error-no-account                        |
       | account-home/close-account-are-you-sure |
