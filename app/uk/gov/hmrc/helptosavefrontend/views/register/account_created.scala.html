@@ -29,9 +29,17 @@
   Messages("hts.account-created.title.h1")
 }
 
+@extraMeta = @{
+  Some(Html("""
+    <meta name="apple-itunes-app" content="app-id=514561561">
+    <meta name="google-play-app" content="app-id=514561561">
+  """))
+}
+
 @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
 title = title,
-bodyClasses = None) {
+bodyClasses = None,
+extraMeta = extraMeta) {
 
   <div class="govuk-box-highlight">
     <h1 class="heading-xlarge">@title</h1>
