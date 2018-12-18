@@ -25,7 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait EnrolmentCheckBehaviour {
@@ -36,7 +36,7 @@ trait EnrolmentCheckBehaviour {
 
   def checkIfAlreadyEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
                              handleEnrolmentServiceError: String ⇒ Future[Result]
-  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Future[Result] = {
+  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, transformer: NINOLogMessageTransformer, ec: ExecutionContext): Future[Result] = {
     val nino = htsContext.nino
 
     helpToSaveService.getUserEnrolmentStatus()
@@ -67,13 +67,16 @@ trait EnrolmentCheckBehaviour {
       htsContext:  HtsContextWithNINO,
       hc:          HeaderCarrier,
       request:     Request[_],
-      transformer: NINOLogMessageTransformer): Future[Result] =
+      transformer: NINOLogMessageTransformer,
+      ec:          ExecutionContext): Future[Result] =
     checkIfAlreadyEnrolled(ifNotEnrolled, _ ⇒ internalServerError())
 
   def checkIfEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
                       handleEnrolmentServiceError: String ⇒ Future[Result],
                       ifEnrolled:                  () ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO,
-                                                                        hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Future[Result] = {
+                                                                        hc:          HeaderCarrier,
+                                                                        transformer: NINOLogMessageTransformer,
+                                                                        ec:          ExecutionContext): Future[Result] = {
     val nino = htsContext.nino
 
     helpToSaveService.getUserEnrolmentStatus()

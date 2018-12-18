@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.CookieCryptoFilter
 import uk.gov.hmrc.play.bootstrap.filters.frontend.deviceid.DeviceIdFilter
 import uk.gov.hmrc.play.bootstrap.filters.frontend.{FrontendAuditFilter, HeadersFilter, SessionTimeoutFilter}
-import uk.gov.hmrc.play.bootstrap.filters.{CacheControlConfig, CacheControlFilter, FrontendFilters, LoggingFilter}
+import uk.gov.hmrc.play.bootstrap.filters._
 
 class FiltersSpec extends TestSupport {
 
@@ -34,6 +34,8 @@ class FiltersSpec extends TestSupport {
   // construction requires a parameter from the CacheControlConfig. Using scalamock
   // reuslts in a NullPointerException since no CacheControlConfig is there
   val mockCacheControlerFilter = new CacheControlFilter(CacheControlConfig(), mock[Materializer])
+
+  val mockMDCFilter = new MDCFilter(fakeApplication.materializer, fakeApplication.configuration)
 
   class TestableFrontendFilters extends FrontendFilters(
     stub[Configuration],
@@ -46,7 +48,8 @@ class FiltersSpec extends TestSupport {
     stub[CSRFFilter],
     stub[CookieCryptoFilter],
     stub[SessionTimeoutFilter],
-    mockCacheControlerFilter
+    mockCacheControlerFilter,
+    mockMDCFilter
   ) {
     override lazy val enableSecurityHeaderFilter: Boolean = false
     override val filters: Seq[EssentialFilter] = Seq()

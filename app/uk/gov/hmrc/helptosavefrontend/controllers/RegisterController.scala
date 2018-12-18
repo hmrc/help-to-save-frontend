@@ -48,9 +48,8 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.{util, views}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
@@ -63,7 +62,8 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
                                                                         val transformer:          NINOLogMessageTransformer,
                                                                         val frontendAppConfig:    FrontendAppConfig,
                                                                         val config:               Configuration,
-                                                                        val env:                  Environment)
+                                                                        val env:                  Environment,
+                                                                        ec:                       ExecutionContext)
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with Logging {
 
@@ -216,7 +216,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
     }
   }(redirectOnLoginURL = routes.RegisterController.changeBankDetails().url)
 
-  def getCannotCheckDetailsPage: Action[AnyContent] = ActionWithMdc { implicit request ⇒
+  def getCannotCheckDetailsPage: Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
     Ok(views.html.cannot_check_details())
   }

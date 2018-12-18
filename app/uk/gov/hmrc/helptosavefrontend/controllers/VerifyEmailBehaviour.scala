@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{HtsContextWithNINO, HtsContextWith
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util._
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait VerifyEmailBehaviour {
@@ -45,7 +45,8 @@ trait VerifyEmailBehaviour {
                                    isNewApplicant:       Boolean)(implicit request: Request[AnyContent],
                                                                   htsContext: HtsContextWithNINO,
                                                                   crypto:     Crypto,
-                                                                  messages:   Messages): Future[Result] =
+                                                                  messages:   Messages,
+                                                                  ec:         ExecutionContext): Future[Result] =
     emailVerificationConnector.verifyEmail(htsContext.nino, email, firstName, isNewApplicant).map {
       case Right(_)              ⇒ ifSuccess
       case Left(AlreadyVerified) ⇒ SeeOther(ifAlreadyVerifiedURL(EmailVerificationParams(htsContext.nino, email)))
@@ -58,7 +59,8 @@ trait VerifyEmailBehaviour {
                                                                                                                 htsContext:  HtsContextWithNINOAndUserDetails,
                                                                                                                 crypto:      Crypto,
                                                                                                                 messages:    Messages,
-                                                                                                                transformer: NINOLogMessageTransformer
+                                                                                                                transformer: NINOLogMessageTransformer,
+                                                                                                                ec:          ExecutionContext
   ): EitherT[Future, String, Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 

@@ -36,9 +36,8 @@ import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, Ht
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
-import uk.gov.hmrc.play.bootstrap.controller.ActionWithMdc
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
   this: BaseController ⇒
@@ -49,7 +48,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
 
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
 
-  def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
+  def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -57,7 +56,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
         }(request)
     }(redirectOnLoginURL)
 
-  def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(redirectOnLoginURL: String): Action[AnyContent] =
+  def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Name and V2ItmpName and V2Nino) {
       case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -66,7 +65,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
         }(request)
     }(redirectOnLoginURL)
 
-  def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String): Action[AnyContent] =
+  def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(UserInfoRetrievals and V2Nino) {
       case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -81,13 +80,13 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
         }(request)
     }(redirectOnLoginURL)
 
-  def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String): Action[AnyContent] =
+  def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(EmptyRetrieval, AuthProvider) {
       case (_, request, _) ⇒
         action(request)(HtsContext(authorised = true))
     }(redirectOnLoginURL)
 
-  def authorisedForHtsWithNINOAndNoCL(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String): Action[AnyContent] =
+  def authorisedForHtsWithNINOAndNoCL(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino, AuthProvider) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -95,7 +94,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
         }(request)
     }(redirectOnLoginURL)
 
-  def unprotected(action: HtsAction[HtsContext]): Action[AnyContent] =
+  def unprotected(action: HtsAction[HtsContext])(implicit ec: ExecutionContext): Action[AnyContent] =
     Action.async { implicit request ⇒
       authorised() {
         action(request)(HtsContext(authorised = true))
@@ -107,8 +106,8 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
 
   private def authorised[A](retrieval: Retrieval[A],
                             predicate: Predicate    = AuthWithCL200
-  )(toResult: (A, Request[AnyContent], Long) ⇒ Future[Result])(redirectOnLoginURL: ⇒ String): Action[AnyContent] =
-    ActionWithMdc.async { implicit request ⇒
+  )(toResult: (A, Request[AnyContent], Long) ⇒ Future[Result])(redirectOnLoginURL: ⇒ String)(implicit ec: ExecutionContext): Action[AnyContent] =
+    Action.async { implicit request ⇒
       val timer = metrics.authTimer.time()
 
       authorised(predicate).retrieve(retrieval) { a ⇒

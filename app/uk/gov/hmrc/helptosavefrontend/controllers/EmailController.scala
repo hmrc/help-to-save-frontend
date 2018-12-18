@@ -45,7 +45,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationPara
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -61,7 +61,8 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                                                                              val transformer:          NINOLogMessageTransformer,
                                                                              val frontendAppConfig:    FrontendAppConfig,
                                                                              val config:               Configuration,
-                                                                             val env:                  Environment)
+                                                                             val env:                  Environment,
+                                                                             ec:                       ExecutionContext)
 
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
 
@@ -633,7 +634,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   def getEmailUpdated: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-    def handle(email: Option[String], duringRegistrationJourney: Boolean) =
+    def handle(email: Option[String]) =
         email.fold[Future[Result]](
           SeeOther(routes.EmailController.getGiveEmailPage().url))(
             _ ⇒ Ok(views.html.email.email_updated()))
@@ -641,7 +642,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession {
           case (_, eligible) ⇒
-            handle(eligible.userInfo.email, duringRegistrationJourney = true)
+            handle(eligible.userInfo.email)
         }(session)
 
       def ifDE = SeeOther(routes.EmailController.getGiveEmailPage().url)
@@ -649,7 +650,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       def ifDigitalAccountHolder = {
         (session: Option[HTSSession], _: Email) ⇒
           withSession(session) {
-            s ⇒ handle(s.confirmedEmail, duringRegistrationJourney = false)
+            s ⇒ handle(s.confirmedEmail)
           }
       }
 

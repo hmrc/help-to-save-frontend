@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait SessionBehaviour {
   this: BaseController ⇒
@@ -38,7 +38,8 @@ trait SessionBehaviour {
       htsContext:  HtsContextWithNINO,
       hc:          HeaderCarrier,
       request:     Request[_],
-      transformer: NINOLogMessageTransformer): Future[Result] =
+      transformer: NINOLogMessageTransformer,
+      ec:          ExecutionContext): Future[Result] =
     sessionStore.get
       .semiflatMap(_.fold(noSession)(whenSession))
       .leftMap {

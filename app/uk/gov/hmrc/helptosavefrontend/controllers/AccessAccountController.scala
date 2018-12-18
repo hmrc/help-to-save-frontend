@@ -29,13 +29,16 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 
+import scala.concurrent.ExecutionContext
+
 class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveService,
                                          val authConnector:     AuthConnector,
                                          val metrics:           Metrics)(implicit override val messagesApi: MessagesApi,
                                                                          val transformer:       NINOLogMessageTransformer,
                                                                          val frontendAppConfig: FrontendAppConfig,
                                                                          val config:            Configuration,
-                                                                         val env:               Environment)
+                                                                         val env:               Environment,
+                                                                         ec:                    ExecutionContext)
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour {
 
   def getSignInPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
