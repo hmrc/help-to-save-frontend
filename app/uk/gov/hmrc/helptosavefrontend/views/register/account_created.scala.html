@@ -30,9 +30,10 @@
 }
 
 @extraMeta = @{
-  Some(Html("""
+  Some(Html(s"""
     <meta name="apple-itunes-app" content="app-id=514561561">
-    <meta name="google-play-app" content="app-id=514561561">
+    <meta name="google-play-app" content="app-id=uk.gov.hmrc.ptcalc">
+    <link rel="manifest" href="${controllers.routes.Assets.versioned(Assets.Asset("manifest.json"))}" />
   """))
 }
 
