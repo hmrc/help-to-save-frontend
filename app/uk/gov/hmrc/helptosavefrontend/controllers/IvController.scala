@@ -34,7 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class IvController @Inject() (val sessionStore:  SessionStore,
@@ -44,7 +44,8 @@ class IvController @Inject() (val sessionStore:  SessionStore,
                                                           val transformer:       NINOLogMessageTransformer,
                                                           val frontendAppConfig: FrontendAppConfig,
                                                           val config:            Configuration,
-                                                          val env:               Environment)
+                                                          val env:               Environment,
+                                                          ec:                    ExecutionContext)
   extends BaseController with HelpToSaveAuth {
 
   val eligibilityUrl: String = routes.EligibilityCheckController.getCheckEligibility().url

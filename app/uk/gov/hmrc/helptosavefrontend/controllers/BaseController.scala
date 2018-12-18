@@ -18,13 +18,17 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import com.google.inject.Inject
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{Request, RequestHeader, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.util.Logging
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.HeaderCarrierConverter
 
 class BaseController @Inject() (implicit messagesApi: MessagesApi, appConfig: FrontendAppConfig)
-  extends ErrorHandler() with FrontendController with I18nSupport with Logging {
+  extends ErrorHandler() with uk.gov.hmrc.play.bootstrap.controller.BaseController with I18nSupport with Logging {
+
+  override implicit def hc(implicit rh: RequestHeader): HeaderCarrier =
+    HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
 
   def internalServerError()(implicit request: Request[_]): Result =
     InternalServerError(internalServerErrorTemplate(request))

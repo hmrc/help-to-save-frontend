@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, Result, t
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveService,
@@ -51,7 +51,8 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
                                                                             val transformer:       NINOLogMessageTransformer,
                                                                             val frontendAppConfig: FrontendAppConfig,
                                                                             val config:            Configuration,
-                                                                            val env:               Environment)
+                                                                            val env:               Environment,
+                                                                            ec:                    ExecutionContext)
   extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")

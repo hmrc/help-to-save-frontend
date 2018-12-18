@@ -46,7 +46,7 @@ class WhitelistFilter @Inject() (configuration: Configuration, val mat: Material
 
   val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden().url)
 
-  val healthCheckCall: Call = Call("GET", uk.gov.hmrc.play.health.routes.AdminController.ping().url)
+  val healthCheckCall: Call = Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url)
 
   override def apply(f: (RequestHeader) ⇒ Future[Result])(rh: RequestHeader): Future[Result] = {
     rh.headers.get(trueClient).foreach{ ip ⇒

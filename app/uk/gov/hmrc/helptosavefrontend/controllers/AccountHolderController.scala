@@ -42,7 +42,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationPara
 import uk.gov.hmrc.helptosavefrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class AccountHolderController @Inject() (val helpToSaveService:          HelpToSaveService,
                                          val authConnector:              AuthConnector,
@@ -56,7 +56,8 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
                                                                                        val transformer:          NINOLogMessageTransformer,
                                                                                        val frontendAppConfig:    FrontendAppConfig,
                                                                                        val config:               Configuration,
-                                                                                       val env:                  Environment)
+                                                                                       val env:                  Environment,
+                                                                                       ec:                       ExecutionContext)
   extends BaseController with HelpToSaveAuth with VerifyEmailBehaviour with EnrolmentCheckBehaviour {
 
   import AccountHolderController._
