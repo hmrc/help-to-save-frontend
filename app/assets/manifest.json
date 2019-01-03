@@ -1,4 +1,6 @@
 {
+    "short_name": "HMRC",
+    "name": "HMRC",
     "prefer_related_applications": true,
     "related_applications": [
         {
