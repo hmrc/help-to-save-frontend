@@ -63,7 +63,7 @@ while [ "$1" != "" ]; do
        java_opts+=("-Denvironment=$VALUE")
        ;;
    --browser | -b)
-   if [ "$VALUE" != 'chrome' ] && "$VALUE" != 'remote-chrome' ] && [ "$VALUE" != 'firefox' ] && [ "$VALUE" != 'zap-chrome' ] && [ "$VALUE" != 'headless' ] && [ "$VALUE" != 'browserstack' ] && [ "$VALUE" != 'browserstack1' ] && [ "$VALUE" != 'browserstack2' ] && [ "$VALUE" != 'browserstack3' ] && [ "$VALUE" != 'browserstack4' ]
+   if [ "$VALUE" != 'chrome' ] && [ "$VALUE" != 'remote-chrome' ] && [ "$VALUE" != 'firefox' ] && [ "$VALUE" != 'zap-chrome' ] && [ "$VALUE" != 'headless' ] && [ "$VALUE" != 'browserstack' ] && [ "$VALUE" != 'browserstack1' ] && [ "$VALUE" != 'browserstack2' ] && [ "$VALUE" != 'browserstack3' ] && [ "$VALUE" != 'browserstack4' ]
    then
         usage
         exit 1
@@ -134,4 +134,4 @@ echo "JAVA options are: $JAVA_OPTS"
 # Doing `sbt -Doption1=value1 -Doption2="value2 with spaces" selenium:test` works on some
 # environments but doesn't work with others - here we run sbt and add java system properties
 # within the sbt session and then run the tests
-sbt "; set javaOptions in Test ++= Seq($JAVA_OPTS); selenium:test"
+sbt "; project selenium; set javaOptions ++= Seq($JAVA_OPTS); test"
