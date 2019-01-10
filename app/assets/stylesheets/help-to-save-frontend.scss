@@ -13,3 +13,13 @@
     font-size: 18px;
   }
 }
+
+.button.button--link:focus {
+    background-color: #ffbf47;
+    color: #4c2c92;
+    outline: 3px solid #ffbf47;
+}
+
+input:focus, textarea:focus, select:focus, button:focus {
+    outline-offset: 0;
+}
