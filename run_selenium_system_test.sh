@@ -122,16 +122,16 @@ process_java_options() {
   echo $(join_by ',' "${quoted_args_array[@]}")
 }
 
-JAVA_OPTS=$(process_java_options "${java_opts[@]}")
+EXTRA_JAVA_OPTS=$(process_java_options "${java_opts[@]}")
 
 if [ "${tags}" != "" ]
 then
-  JAVA_OPTS+=",\"-Dcucumber.options=--tags ${tags}\""
+  EXTRA_JAVA_OPTS+=",\"-Dcucumber.options=--tags ${tags}\""
 fi
 
-echo "JAVA options are: $JAVA_OPTS"
+echo "JAVA options are: $EXTRA_JAVA_OPTS"
 
 # Doing `sbt -Doption1=value1 -Doption2="value2 with spaces" selenium:test` works on some
 # environments but doesn't work with others - here we run sbt and add java system properties
 # within the sbt session and then run the tests
-sbt "; project selenium; set javaOptions ++= Seq($JAVA_OPTS); test"
+sbt "; project selenium; set javaOptions ++= Seq($EXTRA_JAVA_OPTS); test"
