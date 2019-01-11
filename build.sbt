@@ -34,15 +34,6 @@ def testDependencies(scope: String = "test") = Seq(
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "uk.gov.hmrc" %% "stub-data-generator" % "0.5.3" % scope,
-  // below for selenium tests
-  "info.cukes" % "cucumber-junit" % "1.2.5" % scope,
-  "info.cukes" % "cucumber-picocontainer" % "1.2.5" % scope,
-  "info.cukes" %% "cucumber-scala" % "1.2.5" % scope,
-  "org.seleniumhq.selenium" % "selenium-java" % "3.13.0" % scope,
-  "org.seleniumhq.selenium" % "selenium-firefox-driver" % "3.13.0" % scope,
-  "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.52.0" % scope,
-  "uk.gov.hmrc" %% "zap-automation" % "0.17.0" % scope,
-  "com.google.guava" % "guava" % "25.1-jre" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "3.1.0" % scope
 )
 
@@ -62,16 +53,6 @@ lazy val scoverageSettings = {
     parallelExecution in Test := false
   )
 }
-
-def seleniumTestFilter(name: String): Boolean = name.contains("suites") && !name.contains("Zap")
-
-def zapTestFilter(name: String): Boolean = name.contains("Zap") && !name.contains("suites")
-
-def unitTestFilter(name: String): Boolean = !seleniumTestFilter(name) && !zapTestFilter(name)
-
-lazy val SeleniumTest = config("selenium") extend Test
-
-lazy val ZapTest = config("zap") extend Test
 
 lazy val scalariformSettings = {
   // description of options found here -> https://github.com/scala-ide/scalariform
@@ -104,7 +85,7 @@ lazy val scalariformSettings = {
     .setPreference(SpacesWithinPatternBinders, true)
 }
 
-lazy val wartRemoverSettings = {
+def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File]) = {
   // list of warts here: http://www.wartremover.org/doc/warts.html
   val excludedWarts = Seq(
     Wart.DefaultArguments,
@@ -118,36 +99,44 @@ lazy val wartRemoverSettings = {
     Wart.ToString,
     Wart.Var)
 
-  wartremoverErrors in(Compile, compile) ++= Warts.allBut(excludedWarts: _*)
+  Seq(
+    wartremoverErrors in (Compile, compile) ++= Warts.allBut(excludedWarts: _*),
+    // disable some wart remover checks in tests - (Any, Null, PublicInference) seems to struggle with
+    // scalamock, (Equals) seems to struggle with stub generator AutoGen and (NonUnitStatements) is
+    // imcompatible with a lot of WordSpec
+    wartremoverErrors in (Test, compile) --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference),
+    wartremoverExcluded in (Compile, compile) ++=
+      routes.in(Compile).value ++
+        ignoreFiles(baseDirectory.value) ++
+        (baseDirectory.value ** "*.sc").get ++
+        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
+  )
 }
 
-lazy val microservice = Project(appName, file("."))
-  .settings(addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"))
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
-  .settings(playSettings ++ scoverageSettings: _*)
-  .settings(majorVersion := 2)
-  .settings(scalaSettings: _*)
-  .settings(publishingSettings: _*)
-  .settings(defaultSettings(): _*)
-  .settings(PlayKeys.playDefaultPort := 7000)
-  .settings(scalariformSettings: _*)
-  .settings(wartRemoverSettings)
-  // disable some wart remover checks in tests - (Any, Null, PublicInference) seems to struggle with
-  // scalamock, (Equals) seems to struggle with stub generator AutoGen and (NonUnitStatements) is
-  // imcompatible with a lot of WordSpec
-  .settings(wartremoverErrors in(Test, compile) --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference))
-  .settings(wartremoverExcluded ++=
-    routes.in(Compile).value ++
-      (baseDirectory.value ** "*.sc").get ++
-      (baseDirectory.value ** "HealthCheck.scala").get ++
-      (baseDirectory.value ** "HealthCheckRunner.scala").get ++
-      (baseDirectory.value ** "Lock.scala").get ++
-      Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
+lazy val commonSettings = Seq(
+  addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"),
+  majorVersion := 2,
+  evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
+  resolvers ++= Seq(
+    Resolver.bintrayRepo("hmrc", "releases"),
+    Resolver.jcenterRepo,
+    "emueller-bintray" at "http://dl.bintray.com/emueller/maven" // for play json schema validator
   )
+) ++ scalaSettings ++ publishingSettings ++ defaultSettings() ++ scalariformSettings ++ scoverageSettings ++ playSettings
+
+
+lazy val microservice = Project(appName, file("."))
+  .settings(commonSettings: _*)
+  .settings(wartRemoverSettings( baseDirectory ⇒
+      (baseDirectory ** "HealthCheck.scala").get ++
+      (baseDirectory ** "HealthCheckRunner.scala").get ++
+      (baseDirectory ** "Lock.scala").get
+  ))
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
+  .settings(PlayKeys.playDefaultPort := 7000)
   .settings(
       libraryDependencies ++= appDependencies,
     //retrieveManaged := true,
-    evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
     //testGrouping in Test := oneForkedJvmPerTest((definedTests in Test).value),
     routesGenerator := StaticRoutesGenerator
   )
@@ -158,27 +147,7 @@ lazy val microservice = Project(appName, file("."))
     unmanagedSourceDirectories in IntegrationTest := Seq((baseDirectory in IntegrationTest).value / "it"),
     addTestReportOption(IntegrationTest, "int-test-reports"),
     //testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
-    parallelExecution in IntegrationTest := false)
-  .settings(resolvers ++= Seq(
-    Resolver.bintrayRepo("hmrc", "releases"),
-    Resolver.jcenterRepo,
-    "emueller-bintray" at "http://dl.bintray.com/emueller/maven" // for play json schema validator
-  ))
-  .configs(SeleniumTest)
-  .configs(ZapTest)
-  .settings(
-    inConfig(SeleniumTest)(Defaults.testTasks),
-    inConfig(ZapTest)(Defaults.testTasks),
-    Keys.fork in SeleniumTest := true,
-    unmanagedSourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/scala",
-    unmanagedResourceDirectories in Test += baseDirectory.value / "selenium-system-test/src/test/resources",
-    unmanagedSourceDirectories in Test += baseDirectory.value / "zap/src/test/scala",
-    testOptions in Test := Seq(Tests.Filter(unitTestFilter)),
-    testOptions in SeleniumTest := Seq(Tests.Filter(seleniumTestFilter)),
-    testOptions in ZapTest := Seq(Tests.Filter(zapTestFilter)),
-    testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
-    testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
-    testOptions in SeleniumTest += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
+    parallelExecution in IntegrationTest := false
   )
   .settings(
     formatMessageQuotes := {
@@ -189,4 +158,40 @@ lazy val microservice = Project(appName, file("."))
       if(rightQuoteReplace != 0 || leftQuoteReplace != 0){ logger.log(Level.Warn, "WARNING: could not replace quotes with smart quotes") }
     },
     compile := ((compile in Compile) dependsOn formatMessageQuotes).value
+  )
+
+lazy val selenium = (project in file("selenium-system-test"))
+  .dependsOn(microservice)
+  .settings(commonSettings: _*)
+  .settings(wartRemoverSettings(): _*)
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
+  .settings(
+    libraryDependencies ++= testDependencies() ++ Seq(
+      "info.cukes" % "cucumber-junit" % "1.2.5",
+      "info.cukes" % "cucumber-picocontainer" % "1.2.5",
+      "info.cukes" %% "cucumber-scala" % "1.2.5",
+      "org.seleniumhq.selenium" % "selenium-java" % "3.13.0",
+      "org.seleniumhq.selenium" % "selenium-firefox-driver" % "3.13.0",
+      "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.52.0",
+      "com.google.guava" % "guava" % "25.1-jre"
+    )
+  )
+  .settings(
+    Keys.fork in Test := true,
+    scalaSource in Test := baseDirectory.value / "src" / "test",
+    resourceDirectory in Test := baseDirectory.value / "src" / "test" / "resources",
+    testOptions in Test := Seq(Tests.Filter(name ⇒  name.contains("suites"))),
+    testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
+    testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
+    testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
+  )
+
+lazy val zap = (project in file("zap"))
+  .settings(commonSettings: _*)
+  .settings(wartRemoverSettings(): _*)
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
+  .settings(libraryDependencies += "uk.gov.hmrc" %% "zap-automation" % "1.4.0")
+  .settings(
+    scalaSource in Test := baseDirectory.value / "src" / "test",
+    resourceDirectory in Test := baseDirectory.value / "src" / "test" /  "resources"
   )

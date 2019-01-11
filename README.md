@@ -158,10 +158,18 @@ you can visit the spreadsheet at https://docs.google.com/spreadsheets/d/1xa9h-A7
 ## ZAP (pen testing)
 
 You need to have ZAP installed and running locally via command:
-zap.sh -daemon -config api.disableKey=true -port 11000
+```
+zap.sh -daemon -config api.disablekey=true -port 11000
+```
 from inside your zaproxy folder
 download and install ZAP from here:
 https://github.com/zaproxy/zaproxy/wiki/Downloads
+
+Once zap is up and running, run the script:
+```
+./run_zap_tests_locally.sh
+```
+
 
 ## How to deploy
 
