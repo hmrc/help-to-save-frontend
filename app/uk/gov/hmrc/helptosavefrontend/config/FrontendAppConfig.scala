@@ -50,12 +50,11 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val ivJourneyResultUrl: String = s"${baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
-  def encodedCallbackUrl(redirectOnLoginURL: String): String =
-    urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?continueURL=$redirectOnLoginURL")
-
   val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"
 
   def ivUrl(redirectOnLoginURL: String): String = {
+      def encodedCallbackUrl(redirectOnLoginURL: String): String =
+        urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?continueURL=$redirectOnLoginURL")
 
     new URI(s"$ivUpliftUrl" +
       s"?origin=$appName" +
@@ -65,8 +64,19 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
     ).toString
   }
 
+  val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
+
+  val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
+  val ggContinueUrlPrefix: String = getString("microservice.services.company-auth-frontend.continue-url-prefix")
+
+  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
+
   val ggUserUrl: String =
-    s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?accountType=individual&continue=%2Fhelp-to-save%2Fcheck-eligibility&origin=help-to-save-frontend&registerForSa=skip"
+    s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?" +
+      "accountType=individual&" +
+      s"continue=${urlEncode(ggContinueUrlPrefix)}%2Fhelp-to-save%2Fcheck-eligibility&" +
+      "origin=help-to-save-frontend&" +
+      "registerForSa=skip"
 
   def ivJourneyResultUrl(journeyId: JourneyId): String = new URI(s"$ivJourneyResultUrl/${journeyId.Id}").toString
 
@@ -81,12 +91,6 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
 
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
-
-  val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
-
-  val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
-
-  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
 
   val analyticsToken: String = getString("google-analytics.token")
   val analyticsHost: String = getString("google-analytics.host")

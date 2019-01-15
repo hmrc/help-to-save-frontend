@@ -47,25 +47,26 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
   implicit val transformer: NINOLogMessageTransformer
 
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
+  private type RelativeURL = String
 
-  def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
           action(request)(HtsContextWithNINO(authorised = true, nino))
         }(request)
-    }(redirectOnLoginURL)
+    }(loginContinueURL)
 
-  def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Name and V2ItmpName and V2Nino) {
       case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
           val name = maybeItmpName.flatMap(_.givenName).orElse(maybeName.flatMap(_.name))
           action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, name))
         }(request)
-    }(redirectOnLoginURL)
+    }(loginContinueURL)
 
-  def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(UserInfoRetrievals and V2Nino) {
       case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -78,21 +79,21 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
 
           action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
         }(request)
-    }(redirectOnLoginURL)
+    }(loginContinueURL)
 
-  def authorisedForHts(action: HtsAction[HtsContext])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHts(action: HtsAction[HtsContext])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(EmptyRetrieval, AuthProvider) {
       case (_, request, _) ⇒
         action(request)(HtsContext(authorised = true))
-    }(redirectOnLoginURL)
+    }(loginContinueURL)
 
-  def authorisedForHtsWithNINOAndNoCL(action: HtsAction[HtsContextWithNINO])(redirectOnLoginURL: String)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHtsWithNINOAndNoCL(action: HtsAction[HtsContextWithNINO])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino, AuthProvider) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
           action(request)(HtsContextWithNINO(authorised = true, nino))
         }(request)
-    }(redirectOnLoginURL)
+    }(loginContinueURL)
 
   def unprotected(action: HtsAction[HtsContext])(implicit ec: ExecutionContext): Action[AnyContent] =
     Action.async { implicit request ⇒
@@ -106,7 +107,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
 
   private def authorised[A](retrieval: Retrieval[A],
                             predicate: Predicate    = AuthWithCL200
-  )(toResult: (A, Request[AnyContent], Long) ⇒ Future[Result])(redirectOnLoginURL: ⇒ String)(implicit ec: ExecutionContext): Action[AnyContent] =
+  )(toResult: (A, Request[AnyContent], Long) ⇒ Future[Result])(loginContinueURL: ⇒ RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     Action.async { implicit request ⇒
       val timer = metrics.authTimer.time()
 
@@ -115,7 +116,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
         toResult(a, request, time)
       }.recover {
         val time = timer.stop()
-        handleFailure(redirectOnLoginURL, time)
+        handleFailure(loginContinueURL, time)
       }
     }
 
@@ -175,12 +176,12 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
       .toEither
   }
 
-  def handleFailure(redirectOnLoginURL: String, time: Long)(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
+  def handleFailure(loginContinueURL: RelativeURL, time: Long)(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
-      toGGLogin(redirectOnLoginURL)
+      toGGLogin(loginContinueURL)
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
-      SeeOther(appConfig.ivUrl(redirectOnLoginURL))
+      SeeOther(appConfig.ivUrl(loginContinueURL))
 
     case _: UnsupportedAuthProvider ⇒
       SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)
@@ -190,9 +191,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
       internalServerError()
   }
 
-  override def toGGLogin(redirectOnLoginURL: String): Result =
+  override def toGGLogin(redirectOnLoginURL: RelativeURL): Result =
     Redirect(ggLoginUrl, Map(
-      "continue" -> Seq(redirectOnLoginURL),
+      "continue" -> Seq(appConfig.ggContinueUrlPrefix + redirectOnLoginURL),
       "accountType" -> Seq("individual"),
       "origin" -> Seq(appConfig.appName)
     ))

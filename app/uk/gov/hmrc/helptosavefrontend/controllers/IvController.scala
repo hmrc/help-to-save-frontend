@@ -128,7 +128,7 @@ class IvController @Inject() (val sessionStore:  SessionStore,
           logger.warn("response from identityVerificationFrontendService did not contain token or journeyId param")
           storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
       }
-    }(redirectOnLoginURL = routes.IvController.journeyResult(continueURL, journeyId).url)
+    }(loginContinueURL = routes.IvController.journeyResult(continueURL, journeyId).url)
 
   def getIVSuccessful: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒

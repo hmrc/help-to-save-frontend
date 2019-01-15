@@ -67,7 +67,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
       Ok(views.html.email.update_email_address(UpdateEmailForm.verifyEmailForm)),
       routes.AccountHolderController.getUpdateYourEmailAddress().url
     )
-  }(redirectOnLoginURL = routes.AccountHolderController.getUpdateYourEmailAddress().url)
+  }(loginContinueURL = routes.AccountHolderController.getUpdateYourEmailAddress().url)
 
   def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINOAndName { implicit request ⇒ implicit htsContext ⇒
     htsContext.firstName.fold[Future[Result]](
@@ -102,7 +102,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
           routes.AccountHolderController.getUpdateYourEmailAddress().url
         )
       }
-  }(redirectOnLoginURL = routes.AccountHolderController.onSubmit().url)
+  }(loginContinueURL = routes.AccountHolderController.onSubmit().url)
 
   def getCheckYourEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val result: EitherT[Future, String, Email] = for {
@@ -118,7 +118,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
         Ok(views.html.email.accountholder.check_your_email(pendingEmail))
       }
     )
-  }(redirectOnLoginURL = routes.AccountHolderController.getCheckYourEmail().url)
+  }(loginContinueURL = routes.AccountHolderController.getCheckYourEmail().url)
 
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = {
     val path = routes.AccountHolderController.emailVerifiedCallback(emailVerificationParams).url
@@ -133,7 +133,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
           logger.warn(e)
           internalServerError()
         }.merge
-    }(redirectOnLoginURL = path)
+    }(loginContinueURL = path)
   }
 
   def getEmailVerified: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
@@ -149,7 +149,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
       },
       email ⇒ Ok(views.html.email.we_updated_your_email(email))
     )
-  }(redirectOnLoginURL = routes.AccountHolderController.getEmailVerified.url)
+  }(loginContinueURL = routes.AccountHolderController.getEmailVerified.url)
 
   def getCloseAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfEnrolled(
@@ -176,7 +176,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
             }
           )
     )
-  }(redirectOnLoginURL = routes.AccountHolderController.getCloseAccountPage().url)
+  }(loginContinueURL = routes.AccountHolderController.getCloseAccountPage().url)
 
   private def handleEmailVerified(emailVerificationParams: EmailVerificationParams, oldEmail: String, path: String)(
       implicit
