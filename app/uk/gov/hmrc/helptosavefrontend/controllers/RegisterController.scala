@@ -90,23 +90,23 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
         })
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+  }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
 
   def getDailyCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.daily_cap_reached())
-  }(redirectOnLoginURL = routes.RegisterController.getDailyCapReachedPage().url)
+  }(loginContinueURL = routes.RegisterController.getDailyCapReachedPage().url)
 
   def getTotalCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.total_cap_reached())
-  }(redirectOnLoginURL = routes.RegisterController.getTotalCapReachedPage().url)
+  }(loginContinueURL = routes.RegisterController.getTotalCapReachedPage().url)
 
   def getServiceUnavailablePage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.service_unavailable())
-  }(redirectOnLoginURL = routes.RegisterController.getServiceUnavailablePage().url)
+  }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage().url)
 
   def getDetailsAreIncorrect: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.register.details_are_incorrect())
-  }(redirectOnLoginURL = frontendAppConfig.checkEligibilityUrl)
+  }(loginContinueURL = frontendAppConfig.checkEligibilityUrl)
 
   def createAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
@@ -158,7 +158,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
         }
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.createAccount().url)
+  }(loginContinueURL = routes.RegisterController.createAccount().url)
 
   def getAccountCreatedPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val result = for {
@@ -182,7 +182,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
           Ok(views.html.register.account_created(accountNumber, email, lastDayOfMonth))
       }
     })
-  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+  }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
 
   def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -190,7 +190,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
         _ ⇒ Ok(views.html.register.create_account_error())
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountPage().url)
+  }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
 
   def getCreateAccountErrorBankDetailsPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -198,7 +198,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
         _ ⇒ Ok(views.html.register.create_account_error_bank_details())
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+  }(loginContinueURL = routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
 
   def changeEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -206,7 +206,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
         startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.EmailController.getSelectEmailPage().url)
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.changeEmail().url)
+  }(loginContinueURL = routes.RegisterController.changeEmail().url)
 
   def changeBankDetails: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -214,7 +214,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
         startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.BankAccountController.getBankDetailsPage().url)
       }
     }
-  }(redirectOnLoginURL = routes.RegisterController.changeBankDetails().url)
+  }(loginContinueURL = routes.RegisterController.changeBankDetails().url)
 
   def getCannotCheckDetailsPage: Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)

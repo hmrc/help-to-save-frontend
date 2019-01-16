@@ -70,7 +70,7 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
             Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
           )
     }
-  }(redirectOnLoginURL = routes.BankAccountController.getBankDetailsPage().url)
+  }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
 
   def submitBankDetails(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
@@ -110,7 +110,7 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
         )
     }
 
-  }(redirectOnLoginURL = routes.BankAccountController.submitBankDetails().url)
+  }(loginContinueURL = routes.BankAccountController.submitBankDetails().url)
 
   private def checkIfAlreadyEnrolledAndDoneEligibilityChecks(nino: String)(ifNotEnrolled: HTSSession ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, request: Request[_]) =
     checkIfAlreadyEnrolled { () ⇒

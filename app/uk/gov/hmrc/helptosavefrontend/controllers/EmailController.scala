@@ -123,7 +123,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-    }(redirectOnLoginURL = routes.EmailController.getSelectEmailPage().url)
+    }(loginContinueURL = routes.EmailController.getSelectEmailPage().url)
 
   def selectEmailSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
@@ -178,7 +178,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-  }(redirectOnLoginURL = routes.EmailController.selectEmailSubmit().url)
+  }(loginContinueURL = routes.EmailController.selectEmailSubmit().url)
 
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -214,7 +214,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-    }(redirectOnLoginURL = routes.EmailController.getGiveEmailPage().url)
+    }(loginContinueURL = routes.EmailController.getGiveEmailPage().url)
 
   def giveEmailSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
@@ -255,7 +255,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-  }(redirectOnLoginURL = routes.EmailController.getGiveEmailPage().url)
+  }(loginContinueURL = routes.EmailController.getGiveEmailPage().url)
 
   def emailConfirmed(email: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     val nino = htsContext.nino
@@ -330,7 +330,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-  }(redirectOnLoginURL = routes.EmailController.emailConfirmed(email).url)
+  }(loginContinueURL = routes.EmailController.emailConfirmed(email).url)
 
   def emailConfirmedCallback(emailVerificationParams: String): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     val result: EitherT[Future, String, Result] =
@@ -343,7 +343,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       logger.warn(e)
       internalServerError()
     }.merge
-  }(redirectOnLoginURL = routes.EmailController.emailConfirmedCallback(emailVerificationParams).url)
+  }(loginContinueURL = routes.EmailController.emailConfirmedCallback(emailVerificationParams).url)
 
   private def handleCallback(status: EnrolmentStatus, emailVerificationParams: String, path: String)(
       implicit
@@ -530,7 +530,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       }
 
     checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
-  }(redirectOnLoginURL = routes.EmailController.confirmEmail().url)
+  }(loginContinueURL = routes.EmailController.confirmEmail().url)
 
   def confirmEmailError: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
@@ -554,7 +554,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-  }(redirectOnLoginURL = routes.EmailController.confirmEmailError().url)
+  }(loginContinueURL = routes.EmailController.confirmEmailError().url)
 
   def confirmEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkSessionAndEnrolmentStatus(
@@ -563,7 +563,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       { (_, email) ⇒ Ok(views.html.email.cannot_change_email_try_later(returningUser = true, Some(email))) }
     )
 
-  }(redirectOnLoginURL = routes.EmailController.confirmEmailErrorTryLater().url)
+  }(loginContinueURL = routes.EmailController.confirmEmailErrorTryLater().url)
 
   def confirmEmailErrorSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
@@ -594,11 +594,11 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-  }(redirectOnLoginURL = routes.EmailController.confirmEmailError().url)
+  }(loginContinueURL = routes.EmailController.confirmEmailError().url)
 
   val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.link_expired())
-  }(redirectOnLoginURL = routes.EmailController.getLinkExpiredPage().url)
+  }(loginContinueURL = routes.EmailController.getLinkExpiredPage().url)
 
   def getEmailConfirmed: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
@@ -630,7 +630,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ ⇒ ifDE, ifDigitalAccountHolder)
 
-  }(redirectOnLoginURL = routes.EmailController.getEmailConfirmed().url)
+  }(loginContinueURL = routes.EmailController.getEmailConfirmed().url)
 
   def getEmailUpdated: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
@@ -656,7 +656,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ ⇒ ifDE, ifDigitalAccountHolder)
 
-  }(redirectOnLoginURL = routes.EmailController.getEmailUpdated().url)
+  }(loginContinueURL = routes.EmailController.getEmailUpdated().url)
 
   def emailUpdatedSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkSessionAndEnrolmentStatus(
@@ -672,7 +672,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
       },
       _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
     )
-  }(redirectOnLoginURL = routes.EmailController.emailUpdatedSubmit().url)
+  }(loginContinueURL = routes.EmailController.emailUpdatedSubmit().url)
 
   private def withSession(session: Option[HTSSession])(f: HTSSession ⇒ Future[Result]): Future[Result] =
     session.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(f)

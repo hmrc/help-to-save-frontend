@@ -55,7 +55,7 @@ class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveServic
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     }
     )
-  }(redirectOnLoginURL = frontendAppConfig.accessAccountUrl)
+  }(loginContinueURL = frontendAppConfig.accessAccountUrl)
 
   def getNoAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled({
@@ -64,6 +64,6 @@ class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveServic
       SeeOther(routes.AccessAccountController.accessAccount().url)
     }
     )
-  }(redirectOnLoginURL = routes.AccessAccountController.getNoAccountPage().url)
+  }(loginContinueURL = routes.AccessAccountController.getNoAccountPage().url)
 
 }

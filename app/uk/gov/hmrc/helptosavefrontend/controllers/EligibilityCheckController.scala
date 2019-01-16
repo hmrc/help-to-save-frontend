@@ -88,7 +88,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
           getEligibilityActionResult
         }
       })
-  }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
+  }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -110,7 +110,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
         )
       }
     }
-  }(redirectOnLoginURL = routes.EligibilityCheckController.getIsNotEligible().url)
+  }(loginContinueURL = routes.EligibilityCheckController.getIsNotEligible().url)
 
   val getIsEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -123,7 +123,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
         )
       }
     }
-  }(redirectOnLoginURL = frontendAppConfig.checkEligibilityUrl)
+  }(loginContinueURL = frontendAppConfig.checkEligibilityUrl)
 
   val youAreEligibleSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkHasDoneEligibilityChecks {
@@ -138,14 +138,14 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
           SeeOther(url)
         })
     }
-  }(redirectOnLoginURL = routes.EligibilityCheckController.youAreEligibleSubmit().url)
+  }(loginContinueURL = routes.EligibilityCheckController.youAreEligibleSubmit().url)
 
   val getMissingInfoPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     htsContext.userDetails.fold(
       missingInfo ⇒ Ok(views.html.register.missing_user_info(missingInfo.missingInfo)),
       _ ⇒ SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     )
-  }(redirectOnLoginURL = routes.EligibilityCheckController.getCheckEligibility().url)
+  }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
   val getThinkYouAreEligiblePage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkHasDoneEligibilityChecks {
@@ -156,7 +156,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
         _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
       )
     }
-  }(redirectOnLoginURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
+  }(loginContinueURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
 
   private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
                                            htsContext: HtsContextWithNINOAndUserDetails,
