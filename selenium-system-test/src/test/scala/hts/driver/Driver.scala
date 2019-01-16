@@ -25,7 +25,7 @@ import cats.syntax.eq._
 import hts.utils.Configuration.environment
 import hts.utils.Environment.Local
 import org.openqa.selenium.WebDriver
-import org.openqa.selenium.chrome.{ChromeDriver, ChromeOptions}
+import org.openqa.selenium.chrome.{ChromeDriver, ChromeDriverService, ChromeOptions}
 import org.openqa.selenium.firefox.{FirefoxDriver, FirefoxOptions}
 import org.openqa.selenium.remote.{DesiredCapabilities, RemoteWebDriver}
 
@@ -107,26 +107,25 @@ class Driver {
 
   private def createChromeDriver(headless: Boolean): WebDriver = {
     setChromeDriver()
-
-    val capabilities = DesiredCapabilities.chrome()
+    
     val options = new ChromeOptions()
     options.addArguments("test-type")
     options.addArguments("--disable-gpu")
     if (headless) options.addArguments("--headless")
-    capabilities.setJavascriptEnabled(isJsEnabled)
-    capabilities.setCapability(ChromeOptions.CAPABILITY, options)
-    new ChromeDriver(capabilities)
+
+    val services = ChromeDriverService.createDefaultService()
+    new ChromeDriver(services, options)
   }
 
   private def createZapChromeDriver(): WebDriver = {
     setChromeDriver()
 
-    val capabilities = DesiredCapabilities.chrome()
     val options = new ChromeOptions()
     options.addArguments("test-type")
     options.addArguments("--proxy-server=http://localhost:11000")
-    capabilities.setCapability(ChromeOptions.CAPABILITY, options)
-    val driver = new ChromeDriver(capabilities)
+
+    val services = ChromeDriverService.createDefaultService()
+    val driver = new ChromeDriver(services, options)
     val caps = driver.getCapabilities
     driver
   }
