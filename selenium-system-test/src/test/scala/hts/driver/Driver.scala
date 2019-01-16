@@ -87,8 +87,6 @@ class Driver {
   private val linuxArch: String =
     Option(systemProperties.getProperty("os.arch")).getOrElse(sys.error("Could not read OS arch"))
 
-  private val isJsEnabled: Boolean = true
-
   private val driverDirectory: String = Option(systemProperties.getProperty("drivers")).getOrElse("/usr/local/bin")
 
   private def setChromeDriver() = {
