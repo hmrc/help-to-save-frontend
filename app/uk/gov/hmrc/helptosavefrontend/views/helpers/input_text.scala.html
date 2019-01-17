@@ -23,17 +23,19 @@ hint: Option[String] = None,
 name: String = "value",
 inputType: String = "text",
 labelClass: Option[String] = None,
-errorMessage: Option[Html] = None
+errorMessage: Option[Html] = None,
+describedByHint: Option[String] = None,
+describedByError: Option[String] = None
 )(implicit messages: Messages)
 
 <div class="form-group @if(errorMessage.isDefined){form-group-error}">
-    <label class="form-label @if(labelClass.nonEmpty){@labelClass}" for="@id">
-        @label
-        @if(hint.nonEmpty){
-            <span class="form-hint">@hint</span>
-        }
-        @errorMessage.map(e ⇒ Html(s"""<span class="error-message">$e</span>""")).getOrElse(Html(""))
-    </label>
+    <label class="form-label @if(labelClass.nonEmpty){@labelClass}" for="@id">@label</label>
+
+    @if(hint.nonEmpty){
+        <span class="form-hint" @if(describedByHint.nonEmpty){ id="@describedByHint" }>@hint</span>
+    }
+    
+    @errorMessage.map(e ⇒ Html(s"""<span class="error-message" ${describedByError.fold("")(id => s"""id ="$id"""")}>$e</span>""")).getOrElse(Html(""))
 
     <div class="form-control-wrapper" data-type="@secondaryLabel">
         <input
@@ -42,6 +44,7 @@ errorMessage: Option[Html] = None
           id="@id"
           name="@name"
           value="@value"
+          @if(describedByHint.nonEmpty || errorMessage.nonEmpty){ aria-describedBy="@describedByHint@if(errorMessage.nonEmpty){ @describedByError}"}
         />
     </div>
 </div>
