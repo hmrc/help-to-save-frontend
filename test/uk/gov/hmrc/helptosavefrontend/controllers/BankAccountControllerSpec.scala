@@ -67,7 +67,7 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+        contentAsString(result) should include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
 
       }
 
@@ -81,7 +81,7 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+        contentAsString(result) should include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
         contentAsString(result) should include("/help-to-save/select-email")
       }
 
@@ -95,7 +95,7 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+        contentAsString(result) should include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
         contentAsString(result) should include("/help-to-save/email-confirmed")
       }
 
@@ -109,7 +109,7 @@ class BankAccountControllerSpec extends AuthSupport
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+        contentAsString(result) should include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
         contentAsString(result) should include("/help-to-save/create-account")
 
       }
@@ -125,7 +125,7 @@ class BankAccountControllerSpec extends AuthSupport
         val result = doRequest()
         status(result) shouldBe Status.OK
         contentAsString(result) should (
-          include("Which UK bank account do you want us to pay your bonuses and withdrawals into?") and
+          include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into") and
           include("sortCode") and
           include("accountNumber") and
           include("accountName"))
@@ -178,7 +178,7 @@ class BankAccountControllerSpec extends AuthSupport
         status(result) shouldBe 200
         contentAsString(result) should include("Check your sort code is correct")
         contentAsString(result) should include("Check your account number is correct")
-        contentAsString(result) should include("Which UK bank account do you want")
+        contentAsString(result) should include("Enter the UK bank account details you want")
       }
 
       "handle cases when the backend bank details check mark the sort code as non-existent" in {
@@ -195,7 +195,7 @@ class BankAccountControllerSpec extends AuthSupport
         status(result) shouldBe 200
         contentAsString(result) should include("Check your sort code is correct")
         contentAsString(result) should not include ("Check your account number is correct")
-        contentAsString(result) should include("Which UK bank account do you want")
+        contentAsString(result) should include("Enter the UK bank account details you want")
       }
 
       "update the session with bank details when all other checks are passed" in {

@@ -25,9 +25,9 @@ object BankDetailsPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/enter-uk-bank-details"
 
-  override val expectedPageHeader: Option[String] = Some("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+  override val expectedPageHeader: Option[String] = Some("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
 
-  override val expectedPageTitle: Option[String] = Some("Which UK bank account do you want us to pay your bonuses and withdrawals into?")
+  override val expectedPageTitle: Option[String] = Some("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
 
   def enterDetails(bankDetails: TestBankDetails)(implicit driver: WebDriver): Unit = {
     bankDetails.sortCode.foreach(enterSortCode)
