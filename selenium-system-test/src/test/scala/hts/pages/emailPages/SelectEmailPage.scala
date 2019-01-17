@@ -25,9 +25,9 @@ object SelectEmailPage extends Page {
 
   val expectedURL: String = s"${Configuration.host}/help-to-save/select-email"
 
-  override val expectedPageHeader: Option[String] = Some("Which email address do you want to use for your Help to Save account?")
+  override val expectedPageHeader: Option[String] = Some("Confirm what email address you want to use for your Help to Save account")
 
-  override val expectedPageTitle: Option[String] = Some("Which email address do you want to use for your Help to Save account?")
+  override val expectedPageTitle: Option[String] = Some("Confirm what email address you want to use for your Help to Save account")
 
   def clickContinue()(implicit driver: WebDriver): Unit =
     Browser.find(Browser.className("button")).foreach(_.underlying.click())
