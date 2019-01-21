@@ -105,7 +105,7 @@ class Driver {
 
   private def createChromeDriver(headless: Boolean): WebDriver = {
     setChromeDriver()
-    
+
     val options = new ChromeOptions()
     options.addArguments("test-type")
     options.addArguments("--disable-gpu")
