@@ -69,6 +69,8 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
   val ggContinueUrlPrefix: String = getString("microservice.services.company-auth-frontend.continue-url-prefix")
 
+  val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
+
   val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
 
   val ggUserUrl: String =
@@ -89,8 +91,6 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val accountHolderContinueURL: String = s"$helpToSaveFrontendUrl/account-home/email-confirmed-callback"
 
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
-
-  val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
   val analyticsToken: String = getString("google-analytics.token")
   val analyticsHost: String = getString("google-analytics.host")
