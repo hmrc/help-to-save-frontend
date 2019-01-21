@@ -40,15 +40,9 @@
       @Messages("hts.register.you-are-eligible.p1", userInfo.forename + " " + userInfo.surname)
     </p>
 
-    <p>
-      @Messages("hts.register.you-are-eligible.p2")
-    </p>
-
     <ul class="bullets">
       <li>@Messages("hts.register.you-are-eligible.li1")</li>
       <li>@Messages("hts.register.you-are-eligible.li2")</li>
-      <li>@Messages("hts.register.you-are-eligible.li3")</li>
-      <li>@Messages("hts.register.you-are-eligible.li4")</li>
     </ul>
 
     @form(routes.EligibilityCheckController.youAreEligibleSubmit()) {

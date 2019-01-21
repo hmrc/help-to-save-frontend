@@ -300,12 +300,9 @@ hts.register.bank-details.error.button.try-again=Try again
 
 # Eligible
 hts.register.you-are-eligible.title.h1=You’re eligible for a Help to Save account
-hts.register.you-are-eligible.p1={0} we’ve checked the details we hold for you and you’re eligible for a Help to Save account.
-hts.register.you-are-eligible.p2=Before you can create an account, start saving and earning bonuses, you’ll need to:
+hts.register.you-are-eligible.p1={0}, before you can create an account, start saving and earn bonuses, you’ll need to:
 hts.register.you-are-eligible.li1=give us your email address
 hts.register.you-are-eligible.li2=enter your UK bank details
-hts.register.you-are-eligible.li3=check your details
-hts.register.you-are-eligible.li4=accept the terms and conditions
 
 # Register - missing information
 hts.register.missinguserinfo.title.h1=We’re missing some important details
