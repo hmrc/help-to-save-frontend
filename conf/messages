@@ -454,7 +454,7 @@ hts.email.error.no-text-after-dot-symbol=Your email address must have characters
 hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the ‘dot’
 
 # Select email
-hts.select-email.title.h1=Confirm what email address you want to use for your Help to Save account
+hts.select-email.title.h1=What email address do you want to use for your Help to Save account?
 hts.select-email.select-new-address=A new email address
 hts.select-email.enter-new-address-body-text=The email addresses you use for other government services will not change.
 hts.select-email.enter-new-address-label=Email address
