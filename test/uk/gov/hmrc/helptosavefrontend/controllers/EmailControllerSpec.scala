@@ -150,7 +150,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 200
-        contentAsString(result) should include("Confirm what email address you want to use for your Help to Save account")
+        contentAsString(result) should include("What email address do you want to use for your Help to Save account?")
       }
 
       "handle Digital(new applicant) users with an existing INVALID email from GG and should display giveEmailPage" in {
@@ -176,7 +176,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 200
-        contentAsString(result) should include("Confirm what email address you want to use for your Help to Save account")
+        contentAsString(result) should include("What email address do you want to use for your Help to Save account?")
         contentAsString(result) should include("/help-to-save/create-account")
       }
 
@@ -192,7 +192,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 200
-        contentAsString(result) should include("Confirm what email address you want to use for your Help to Save account")
+        contentAsString(result) should include("What email address do you want to use for your Help to Save account?")
       }
 
       "DE users should not contain any Back link" in {
@@ -207,7 +207,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 200
-        contentAsString(result) should include("Confirm what email address you want to use for your Help to Save account")
+        contentAsString(result) should include("What email address do you want to use for your Help to Save account?")
       }
 
       "handle DE users with an existing INVALID email from GG" in {
@@ -424,7 +424,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(Some("invalidEmail"))
         status(result) shouldBe 200
-        contentAsString(result) should include("Confirm what email address you want to use for your Help to Save account")
+        contentAsString(result) should include("What email address do you want to use for your Help to Save account?")
       }
 
       "handle an existing account holder who submitted form with no new-email but with checked existing email" in {
