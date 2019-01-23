@@ -51,7 +51,7 @@ class SecuritySteps extends Steps {
     CheckDetailsCreateAccountPage.navigate()
   }
 
-  Then("^they are prompted to log into GG$") {
+  Then("^they are prompted to log into GG$") { () ⇒
     Browser.checkCurrentPageIs(GGSignInPage)
   }
 
