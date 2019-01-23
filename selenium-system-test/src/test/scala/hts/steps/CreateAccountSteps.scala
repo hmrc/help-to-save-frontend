@@ -98,4 +98,16 @@ class CreateAccountSteps extends Steps {
     Browser.checkHeader(AccountCreatedPage)
   }
 
+  And("^they are redirected to the account created page$") {
+    Browser.checkCurrentPageIs(AccountCreatedPage)
+  }
+
+  When("^they click on the sign out link$"){
+    AccountCreatedPage.clickSignOut
+  }
+
+  Then("^they are redirected to the survey page$") {
+    Browser.checkCurrentPageIs(SurveyPage)
+  }
+
 }
