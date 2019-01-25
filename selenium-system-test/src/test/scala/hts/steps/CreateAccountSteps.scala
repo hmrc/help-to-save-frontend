@@ -103,6 +103,7 @@ class CreateAccountSteps extends Steps {
   }
 
   When("^they click on the sign out link$"){
+    Thread.sleep(5000)
     AccountCreatedPage.clickSignOut
   }
 

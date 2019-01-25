@@ -1,5 +1,6 @@
+@JONS-TEST
 Feature: Applicant signs out
-  @JFAN-TEST
+
   Scenario: Applicant signs in then proceeds to sign out
     Given they try to start creating an account
     And they are prompted to log into GG
