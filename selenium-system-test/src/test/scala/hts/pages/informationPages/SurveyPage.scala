@@ -21,11 +21,8 @@ import hts.pages.Page
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object AccountCreatedPage extends Page {
+object SurveyPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-created"
-  override val expectedPageHeader: Option[String] = Some("Help to Save account created")
-
-  def clickSignOut(implicit driver: WebDriver): Unit = Browser.clickButtonByIdOnceClickable("nav-sign-out")
-
+  override val expectedURL: String = s"${Configuration.surveyHost}/feedback-survey/ableToDo/HTS"
+  override val expectedPageHeader: Option[String] = Some("Were you able to do what you needed to do today?")
 }
