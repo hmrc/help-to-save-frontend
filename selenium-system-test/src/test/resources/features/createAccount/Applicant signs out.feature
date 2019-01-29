@@ -1,4 +1,3 @@
-@JONS-TEST
 Feature: Applicant signs out
 
   Scenario: Applicant signs in then proceeds to sign out

@@ -103,13 +103,11 @@ class CreateAccountSteps extends Steps {
   }
 
   When("^they click on the sign out link$"){
-    Thread.sleep(2000)
     AccountCreatedPage.clickSignOut
     Browser.checkPageIsLoaded()
   }
 
   Then("^they are redirected to the survey page$") {
-    Thread.sleep(2000)
     Browser.checkCurrentPageIs(SurveyPage)
   }
 
