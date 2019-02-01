@@ -160,7 +160,7 @@ class BankAccountControllerSpec extends AuthSupport
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Enter sort code")
         contentAsString(result) should include("Enter account number")
-        contentAsString(result) should include("Enter account name")
+        contentAsString(result) should include("Enter the name on the account")
         contentAsString(result) should include("Roll number must be 4 characters or more")
       }
 
