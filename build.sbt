@@ -121,7 +121,8 @@ lazy val commonSettings = Seq(
     Resolver.bintrayRepo("hmrc", "releases"),
     Resolver.jcenterRepo,
     "emueller-bintray" at "http://dl.bintray.com/emueller/maven" // for play json schema validator
-  )
+  ),
+  scalacOptions += "-Xcheckinit"
 ) ++ scalaSettings ++ publishingSettings ++ defaultSettings() ++ scalariformSettings ++ scoverageSettings ++ playSettings
 
 
