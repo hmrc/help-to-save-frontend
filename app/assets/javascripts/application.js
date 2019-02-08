@@ -11,6 +11,9 @@ $(document).ready(function () {
   var showHideContent = new GOVUK.ShowHideContent()
   showHideContent.init()
 
+  // <details> polyfill for FF
+  GOVUK.details.init()
+
   function setUpErrorSummary($el) {
     $el.find('a').each(function (i, link) {
       $(link).on('click', function () {
