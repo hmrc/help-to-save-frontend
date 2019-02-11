@@ -52,7 +52,9 @@ class SecuritySteps extends Steps {
   }
 
   Then("^they are prompted to log into GG$") { () ⇒
-    Browser.checkCurrentPageIs(GGSignInPage)
+    // Browser.checkCurrentPageIs(GGSignInPage)  - placeholder for sign in page; doesnt currently work
+    Browser.getCurrentUrl should include ("http://localhost:9721/multi-factor-authentication/journey/")
+    Browser.getCurrentUrl should include ("/registration/prompt?origin=help-to-save-frontend")
   }
 
   Given("^if they visit the URIs below they see a valid response$") { URIs: java.util.List[String] ⇒

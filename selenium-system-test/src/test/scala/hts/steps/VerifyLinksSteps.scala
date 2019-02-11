@@ -153,6 +153,6 @@ class VerifyLinksSteps extends Steps {
   }
 
   Then("^they are directed to the GG registration page$") {
-    Browser.checkCurrentPageIs(GGRegistrationPage, "Government Gateway")
+    Browser.checkCurrentPageIs(GGRegistrationPage, "GOV.UK")
   }
 }
