@@ -19,8 +19,7 @@ package hts.pages.govPages
 import hts.pages.Page
 
 object GGRegistrationPage extends Page {
-  val expectedURL: String = "https://www.tax.service.gov.uk/government-gateway-registration-frontend?accountType=individual" +
-    "&continue=%2Fhelp-to-save%2Fcheck-eligibility&origin=help-to-save-frontend&registerForSa=skip"
-  override val expectedPageHeader: Option[String] = Some("Enter your details")
-  override val expectedPageTitle: Option[String] = Some("Enter your details")
+  val expectedURL: String = "https://www.access.tax.service.gov.uk/registration/email"
+  override val expectedPageHeader: Option[String] = Some("What is your email address?")
+  override val expectedPageTitle: Option[String] = Some("What is your email address?")
 }
