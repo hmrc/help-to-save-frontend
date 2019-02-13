@@ -2,28 +2,12 @@ help-to-save-frontend
 =====================
 
 Frontend microservice which handles requests from the browser in the public digital Help to Save journey.
-  
-To request a Help to Save (‘HtS’) account, customers will access a HtS landing page /help-to-save/about-help-to-save
-fronted by Akamai. Once authenticated via Government Gateway, the customer will access the HtS Service whereby the customer may
-check their HtS Eligibility check via DES API #2A which in turn collates responses from HoD’s NTC (for WTC), ITMP (for WTC)
-and DWP (for UC). The response from DES will confirm whether the customer is eligible to a HtS Account and if so, the customer is
-able to continue the journey and create a Help To Save account from a button which in turn invokes an NS&I /createaccount endpoint,
-secured by mTLS, whereupon they are redirected to NS&I’s Help To Save web portal frontend.  At this time, in parallel, the HtS service
-invokes DES API #4a to “Update HtS Account Status” flag.
-
-Once the customer has created an account and lands at NS&I, they will from then on be redirected on login from either party back to the
-NS&I landing page /homepage.  At this point, NS&I may redirect to other internal NS&I pages depending on the customer’s status.
-
-When at NS&I, the customer will only be redirected back to the MDTP frontend microservice:
-- if the HMRC/MDTP Auth session expires after 4hrs.
-- when they click the “Change Email” link which redirects to the service Change Email endpoint.
-- when they click the “Feedback” link which redirects to HMRC Deskpro HtS team.
-- when they click the “Sign Out” link which redirects to an anonymous HMRC Exit Survey.
 
 Table of Contents
 =================
 
 * [About Help to Save](#about-help-to-save)
+* [The Public Digital Journey](#the-public-digital-journey)
 * [Running and Testing](#running-and-testing)
    * [Running](#running)
    * [Unit tests](#unit-tests)
@@ -46,6 +30,26 @@ Table of Contents
 About Help to Save
 ==================
 Please click [here](https://github.com/hmrc/help-to-save#about-help-to-save) for more information.
+
+
+The Public Digital Journey
+==========================
+To request a HTS account, customers will access a HTS landing page hosted by GOV.UK. Once authenticated via Government Gateway, 
+the customer will access the HTS Service whereby the customer may check their eligibility for HTS via DES API #2A. This collates 
+responses from HoD’s NTC (for WTC), ITMP (for WTC) and DWP (for UC) to work out a person's eligibility for HTS.
+
+If a customer is eligible for HTS they are able to continue the journey and create a Help To Save account by clicking a button. This
+invokes an NS&I API to create a HTS account. Upon account creation the user is redirected to NS&I’s Help To Save web portal frontend.
+At this time, in parallel, the HTS service invokes DES API #4a to set the HTS status flag in ITMP.
+
+Once the customer has created an account and lands at NS&I, they will from then on be redirected on login from either party back to the
+NS&I account home page. At this point, NS&I may redirect to other internal NS&I pages depending on the customer’s status.
+
+When at NS&I, the customer will only be redirected back to the MDTP frontend microservice in the following scenarios:
+- if the HMRC/MDTP Auth session expires after 4hrs.
+- when they click the “Change Email” link which redirects to the service Change Email endpoint.
+- when they click the “Feedback” link which redirects to HMRC Deskpro HtS team.
+- when they click the “Sign Out” link which redirects to an anonymous HMRC Exit Survey.
 
 
 Running and Testing
