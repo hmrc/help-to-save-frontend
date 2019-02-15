@@ -23,3 +23,25 @@
 input:focus, textarea:focus, select:focus, button:focus {
     outline-offset: 0;
 }
+
+.videoWrapper {
+  position:relative;
+  height:298px;
+  width:530px;
+  overflow:hidden;
+  margin-bottom:16px;
+
+  @media (max-width: 640px){
+    padding-bottom:56.25%;
+    height:0;
+    max-width:100%
+  }
+
+  iframe {
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%
+  }
+}

@@ -1,0 +1,143 @@
+@*
+ * Copyright 2019 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation
+
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+
+@title = @{
+  Messages("hts.help.information.title.h1")
+}
+
+@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+  title = title + " " + Messages("hts.global.accountholder.title-suffix")
+){
+  @navigate_back(Some(appConfig.nsiManageAccountUrl))
+
+  <h1 class="heading-large">@title</h1>
+
+  @help_intro_section(heading = Messages("hts.help-information.section.payments.title"))
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.payments.s1.title"),
+    body = payments_how_much()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.payments.s2.title"),
+    body = setup_regular_payment()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.payments.s3.title"),
+    body = when_will_payments_appear()
+  )
+
+  @help_intro_section(heading = Messages("hts.help-information.section.bonuses.title"))
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.bonuses.s1.title"),
+    body = what_bonuses()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.bonuses.s2.title"),
+    body = highest_balance()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.bonuses.s3.title"),
+    body = first_bonus()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.bonuses.s4.title"),
+    body = final_bonus()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.bonuses.s5.title"),
+    body = bonus_examples()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.bonuses.s6.title"),
+    body = bonus_paid()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.bonuses.s7.title"),
+    body = how_withdrawals_affect_bonuses()
+  )
+
+  @help_intro_section(heading = Messages("hts.help-information.section.withdrawals.title"))
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.withdrawals.s1.title"),
+    body = withdrawing_money()
+  )
+
+  @help_intro_section(heading = Messages("hts.help-information.section.how-account-works.title"))
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s1.title"),
+    body = savings_explained()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s2.title"),
+    body = how_sign_in()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s3.title"),
+    body = why_use_app()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s4.title"),
+    body = how_contact_you()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s5.title"),
+    body = leave_uk()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s6.title"),
+    body = stop_claiming_benefits()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s7.title"),
+    body = after_four_years()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s8.title"),
+    body = close_account_early()
+  )
+
+  @help_intro_section_detail(
+    title = Messages("hts.help-information.section.how-account-works.s9.title"),
+    body = death_terminal_illness()
+  )
+}
