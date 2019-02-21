@@ -61,6 +61,7 @@ POST       /account-home/change-email                       @uk.gov.hmrc.helptos
 GET        /account-home/confirm-email                      @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getCheckYourEmail
 GET        /account-home/email-confirmed-callback           @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.emailVerifiedCallback(p: String)
 GET        /account-home/email-verified                     @uk.gov.hmrc.helptosavefrontend.controllers.AccountHolderController.getEmailVerified
+GET        /account-home/help-information                   @uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHelpPage
 
 GET        /forbidden                                       @uk.gov.hmrc.helptosavefrontend.controllers.ForbiddenController.forbidden
 

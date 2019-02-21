@@ -25,21 +25,25 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
 
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class IntroductionController @Inject() (val authConnector: AuthConnector,
-                                        val metrics:       Metrics)(implicit override val messagesApi: MessagesApi,
-                                                                    val transformer:       NINOLogMessageTransformer,
-                                                                    val frontendAppConfig: FrontendAppConfig,
-                                                                    val config:            Configuration,
-                                                                    val env:               Environment,
-                                                                    ec:                    ExecutionContext)
+class IntroductionController @Inject() (val authConnector:     AuthConnector,
+                                        val metrics:           Metrics,
+                                        val helpToSaveService: HelpToSaveService
+)(implicit override val messagesApi: MessagesApi,
+  val transformer:       NINOLogMessageTransformer,
+  val frontendAppConfig: FrontendAppConfig,
+  val config:            Configuration,
+  val env:               Environment,
+  ec:                    ExecutionContext)
 
-  extends BaseController with HelpToSaveAuth {
+  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour {
 
   private val baseUrl: String = frontendAppConfig.govUkURL
 
@@ -66,4 +70,18 @@ class IntroductionController @Inject() (val authConnector: AuthConnector,
   def showPrivacyPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
     Ok(views.html.core.privacy())
   }
+
+  def getHelpPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    checkIfEnrolled({
+      // not enrolled
+      () ⇒ SeeOther(routes.AccessAccountController.getNoAccountPage().url)
+    }, {
+      e ⇒
+        logger.warn(s"Could not check enrolment: $e", htsContext.nino)
+        internalServerError()
+    }, () ⇒
+      Ok(views.html.helpinformation.help_information())
+    )
+
+  }(routes.IntroductionController.getAboutHelpToSave().url)
 }

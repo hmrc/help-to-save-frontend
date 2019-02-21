@@ -106,6 +106,11 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val govUkEligibilityInfoUrl: String = s"$govUkURL/eligibility"
   val govUkCallChargesUrl: String = getString("gov-uk.url.call-charges")
   val govUkDealingWithHRMCAdditionalNeedsUrl: String = getString("gov-uk.url.dealing-with-hmrc-additional-needs")
+  val hmrcAppGuideURL: String = getString("gov-uk.url.hmrc-app-guide")
+
+  val youtubeSavingsExplained: String = getString("youtube-embeds.savings-explained")
+  val youtubeWhatBonuses: String = getString("youtube-embeds.what-bonuses")
+  val youtubeHowWithdrawalsAffectBonuses: String = getString("youtube-embeds.how-withdrawals-affect-bonuses")
 
   object BankDetailsConfig {
     val sortCodeLength: Int = getInt("bank-details-validation.sort-code.length")
