@@ -21,14 +21,16 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
+class IntroductionControllerSpec extends AuthSupport with CSRFSupport with SessionStoreBehaviourSupport with EnrolmentAndEligibilityCheckBehaviour {
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new IntroductionController(mockAuthConnector, mockMetrics)
+  val helpToSave = new IntroductionController(mockAuthConnector, mockMetrics, mockHelpToSaveService)
 
   def mockAuthorise(loggedIn: Boolean) =
     (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
@@ -75,5 +77,44 @@ class IntroductionControllerSpec extends AuthSupport with CSRFSupport {
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income/how-to-apply")
     }
+
+    "getHelpPage" should {
+
+      "show the help page content if the user is logged in and has a HTS account" in {
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+        }
+
+        val result = helpToSave.getHelpPage(FakeRequest())
+        status(result) shouldBe OK
+        val content = contentAsString(result)
+        content should include("Help and information")
+        content should include("A calendar month is a full month from the first day of the month")
+      }
+
+      "show an error page if the user's enrolment status cannot be checked" in {
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+          mockEnrolmentCheck()(Left(""))
+        }
+
+        val result = helpToSave.getHelpPage(FakeRequest())
+        checkIsTechnicalErrorPage(result)
+      }
+
+      "show the no-account page if the user does not have a HTS account" in {
+        inSequence{
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = helpToSave.getHelpPage(FakeRequest())
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
+      }
+
+    }
+
   }
 }
