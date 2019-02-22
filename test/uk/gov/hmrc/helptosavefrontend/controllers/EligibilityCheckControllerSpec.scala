@@ -277,70 +277,19 @@ class EligibilityCheckControllerSpec
         def doCheckEligibilityRequest(): Future[PlayResult] =
           controller.getCheckEligibility(FakeRequest())
 
-      "checking if the user is already enrolled or if they've already done the eligibility " +
-        "check this session" must {
+      val alreadyHasAccountResponse =
+        AlreadyHasAccount(EligibilityCheckResponse(
+          EligibilityCheckResult("account already exists", 3, "account already opened", 1),
+          Some(123.45)))
 
-          behave like commonEnrolmentAndSessionBehaviour(
-            doCheckEligibilityRequest,
-            mockSuccessfulAuth                     = () ⇒ mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals),
-            mockNoNINOAuth                         = () ⇒ mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment),
-            testRedirectOnNoSession                = false,
-            testEnrolmentCheckError                = false,
-            testRedirectOnNoEligibilityCheckResult = false)
-
-        }
-
-      "an error occurs while trying to see if the user is already enrolled" must {
-        "call the get eligibility endpoint of the help to save service" in {
-          inSequence {
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck()(Left("Oh no!"))
-            mockEligibilityResult()(Left(""))
-          }
-
-          await(doCheckEligibilityRequest())
-        }
-
-        "redirect to NS&I if the eligibility check indicates the user already has an account " +
-          "and update the ITMP flag if necessary" in {
-            val response = EligibilityCheckResult("account already exists", 3, "account already opened", 1)
-            inSequence {
-              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck()(Left("Oh no!"))
-              mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponse(response, Some(123.45)))))
-              mockWriteITMPFlag(Right(()))
-            }
-
-            val result = doCheckEligibilityRequest()
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
-          }
-
-        "redirect to NS&I if the eligibility check indicates the user already has an account " +
-          "even if the ITMP flag update is unsuccessful" in {
-            val response = EligibilityCheckResult("account already exists", 3, "account already opened", 1)
-            List(
-              () ⇒ mockWriteITMPFlag(Left("")),
-              () ⇒ mockWriteITMPFlag(None)
-            ).foreach{ mockWriteFailure ⇒
-                inSequence {
-                  mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                  mockEnrolmentCheck()(Left("Oh no!"))
-                  mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponse(response, Some(123.45)))))
-                  mockWriteFailure()
-                }
-
-                val result = doCheckEligibilityRequest()
-                status(result) shouldBe SEE_OTHER
-                redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
-              }
-          }
+      "getting enrolment statuses are failing" must afterWord("perform an eligibility check and") {
 
         "show the you are eligible page if the eligibility check indicates the user is eligible" in {
           val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
 
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockSessionStoreGet(Right(None))
             mockEnrolmentCheck()(Left("Oh no!"))
             mockEligibilityResult()(Right(eligibleWithUserInfo.eligible))
             mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))(Right(()))
@@ -356,6 +305,7 @@ class EligibilityCheckControllerSpec
 
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+            mockSessionStoreGet(Right(None))
             mockEnrolmentCheck()(Left("Oh no!"))
             mockEligibilityResult()(Right(ineligibilityReason))
             mockSessionStorePut(HTSSession(Some(Left(ineligibilityReason)), None, None))(Right(()))
@@ -366,19 +316,106 @@ class EligibilityCheckControllerSpec
           redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
         }
 
-        "return an error" when {
-
-          "the eligibility check call returns with an error" in {
+        "redirect to a previously attempted account page if the session indicates there was" +
+          "such an attempt previously and set the ITMP flag if the person already has an account" in {
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
               mockEnrolmentCheck()(Left("Oh no!"))
-              mockEligibilityResult()(Left(""))
+              mockEligibilityResult()(Right(alreadyHasAccountResponse))
+              mockWriteITMPFlag(Right(()))
             }
 
             val result = doCheckEligibilityRequest()
-            checkIsTechnicalErrorPage(result)
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some("abc")
           }
-        }
+
+        "redirect to a previously attempted account page if the session indicates there was" +
+          "such an attempt previously even if setting the ITMP flag fails if the person already has an account" in {
+            List(
+              () ⇒ mockWriteITMPFlag(Left("")),
+              () ⇒ mockWriteITMPFlag(None)
+            ).foreach { mockWriteFailure ⇒
+                inSequence {
+                  mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+                  mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
+                  mockEnrolmentCheck()(Left("Oh no!"))
+                  mockEligibilityResult()(Right(alreadyHasAccountResponse))
+                  mockWriteFailure()
+                }
+
+                val result = doCheckEligibilityRequest()
+                status(result) shouldBe SEE_OTHER
+                redirectLocation(result) shouldBe Some("abc")
+              }
+          }
+
+        "redirect to the NS&I account homepage by default if there is no session and the person" +
+          "is enrolled to HTS if the person already has an account" in {
+            inSequence {
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockSessionStoreGet(Right(None))
+              mockEnrolmentCheck()(Left("Oh no!"))
+              mockEligibilityResult()(Right(alreadyHasAccountResponse))
+              mockWriteITMPFlag(Right(()))
+            }
+
+            val result = doCheckEligibilityRequest()
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
+          }
+
+      }
+
+      "the user is already enrolled" must {
+
+        "redirect to a previously attempted account page if the session indicates there was" +
+          "such an attempt previously and set the ITMP flag if the person already has an account" in {
+            inSequence {
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
+              mockWriteITMPFlag(Right(()))
+            }
+
+            val result = doCheckEligibilityRequest()
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some("abc")
+          }
+
+        "redirect to a previously attempted account page if the session indicates there was" +
+          "such an attempt previously even if setting the ITMP flag fails if the person already has an account" in {
+            List(
+              () ⇒ mockWriteITMPFlag(Left("")),
+              () ⇒ mockWriteITMPFlag(None)
+            ).foreach { mockWriteFailure ⇒
+                inSequence {
+                  mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+                  mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
+                  mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
+                  mockWriteFailure()
+                }
+
+                val result = doCheckEligibilityRequest()
+                status(result) shouldBe SEE_OTHER
+                redirectLocation(result) shouldBe Some("abc")
+              }
+          }
+
+        "redirect to the NS&I account homepage by default if there is no session and the person" +
+          "is enrolled to HTS if the person already has an account" in {
+            inSequence {
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockSessionStoreGet(Right(None))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+            }
+
+            val result = doCheckEligibilityRequest()
+            status(result) shouldBe SEE_OTHER
+            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
+          }
+
       }
 
       "the user is not already enrolled" must {
@@ -387,8 +424,8 @@ class EligibilityCheckControllerSpec
           "which indicates they are not eligible" in {
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             }
 
             val result = doCheckEligibilityRequest()
@@ -400,8 +437,8 @@ class EligibilityCheckControllerSpec
           "which indicates they are eligible" in {
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             }
             val result = doCheckEligibilityRequest()
             status(result) shouldBe Status.SEE_OTHER
@@ -412,8 +449,8 @@ class EligibilityCheckControllerSpec
           val response = EligibilityCheckResult("account already exists", 3, "account already opened", 1)
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionStoreGet(Right(None))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockEligibilityResult()(Right(AlreadyHasAccount(EligibilityCheckResponse(response, Some(123.45)))))
             mockWriteITMPFlag(Right(()))
           }
@@ -423,14 +460,14 @@ class EligibilityCheckControllerSpec
           redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
         }
 
-        "return user details if the user is eligible for help-to-save and the " +
-          "user is not already enrolled and they have no session data" in {
+        "redirect to the eligible page if there is no session data and the eligibilty check" +
+          "indicates that the person is eligible" in {
             val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
             val response = EligibilityCheckResult("eligible", 1, "wtc", 6)
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionStoreGet(Right(None))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockEligibilityResult()(Right(eligibleWithUserInfo.eligible))
               mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))(Right(()))
             }
@@ -441,13 +478,13 @@ class EligibilityCheckControllerSpec
             redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
           }
 
-        "display a 'Not Eligible' page if the user is not eligible and not already enrolled " +
-          "and they have no session data" in {
+        "redirect to the not eligible page if there is no session data and the eligibilty check" +
+          "indicates that the person is ineligible" in {
             forAll(ineligibilityGen) { ineligibility: Ineligible ⇒
               inSequence {
                 mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                 mockSessionStoreGet(Right(None))
+                mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                 mockEligibilityResult()(Right(ineligibility))
                 mockSessionStorePut(HTSSession(Some(Left(ineligibility)), None, None))(Right(()))
               }
@@ -462,8 +499,8 @@ class EligibilityCheckControllerSpec
         "report missing user info back to the user if they have no session data" in {
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionStoreGet(Right(None))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           }
 
           val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
@@ -477,12 +514,15 @@ class EligibilityCheckControllerSpec
           "and the caps have not been reached" in {
             val controller = newController(true)
             val userCapResponse = new UserCapResponse(false, false, false, false)
+            val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
 
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockSessionStoreGet(Right(None))
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockAccountCreationAllowed(Right(userCapResponse))
-              mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+              mockEligibilityResult()(Right(eligibleWithUserInfo.eligible))
+              mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))(Right(()))
             }
 
             val result = controller.getCheckEligibility(FakeRequest())
@@ -497,6 +537,7 @@ class EligibilityCheckControllerSpec
 
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockSessionStoreGet(Right(None))
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockAccountCreationAllowed(Right(userCapResponse))
             }
@@ -513,6 +554,7 @@ class EligibilityCheckControllerSpec
 
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockSessionStoreGet(Right(None))
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockAccountCreationAllowed(Right(userCapResponse))
             }
@@ -520,21 +562,6 @@ class EligibilityCheckControllerSpec
             val result = controller.getCheckEligibility(FakeRequest())
             status(result) shouldBe Status.SEE_OTHER
             redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
-          }
-
-        "show the IsEligible page when the enable-early-cap-check config is set to false " +
-          "and neither cap has been reached" in {
-            val userCapResponse = new UserCapResponse(false, false, false, false)
-
-            inSequence {
-              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-              mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
-            }
-
-            val result = controller.getCheckEligibility(FakeRequest())
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
           }
 
         "return an error" when {
@@ -560,7 +587,6 @@ class EligibilityCheckControllerSpec
             test(
               inSequence {
                 mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                 mockSessionStoreGet(Left(""))
               }
             )
@@ -571,8 +597,8 @@ class EligibilityCheckControllerSpec
               test(
                 inSequence {
                   mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                  mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                   mockSessionStoreGet(Right(None))
+                  mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
                   mockEligibilityResult()(Left(checkError))
                 }
               )
@@ -583,8 +609,8 @@ class EligibilityCheckControllerSpec
             val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
             test(inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockSessionStoreGet(Right(None))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockEligibilityResult()(Right(eligibleWithUserInfo.eligible))
               mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))(Left("Bang"))
             })

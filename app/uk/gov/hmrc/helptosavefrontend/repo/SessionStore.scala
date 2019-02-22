@@ -89,15 +89,16 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
               newSession
             )(existing ⇒
               HTSSession(
-                eligibilityCheckResult = newSession.eligibilityCheckResult.orElse(existing.eligibilityCheckResult),
-                confirmedEmail         = newSession.confirmedEmail.orElse(existing.confirmedEmail),
-                pendingEmail           = newSession.pendingEmail.orElse(existing.pendingEmail),
-                ivURL                  = newSession.ivURL.orElse(existing.ivURL),
-                ivSuccessURL           = newSession.ivSuccessURL.orElse(existing.ivSuccessURL),
-                bankDetails            = newSession.bankDetails,
-                changingDetails        = newSession.changingDetails,
-                accountNumber          = newSession.accountNumber,
-                hasSelectedEmail       = newSession.hasSelectedEmail
+                eligibilityCheckResult        = newSession.eligibilityCheckResult.orElse(existing.eligibilityCheckResult),
+                confirmedEmail                = newSession.confirmedEmail.orElse(existing.confirmedEmail),
+                pendingEmail                  = newSession.pendingEmail.orElse(existing.pendingEmail),
+                ivURL                         = newSession.ivURL.orElse(existing.ivURL),
+                ivSuccessURL                  = newSession.ivSuccessURL.orElse(existing.ivSuccessURL),
+                bankDetails                   = newSession.bankDetails,
+                changingDetails               = newSession.changingDetails,
+                accountNumber                 = newSession.accountNumber,
+                hasSelectedEmail              = newSession.hasSelectedEmail,
+                attemptedAccountHolderPageURL = newSession.attemptedAccountHolderPageURL.orElse(existing.attemptedAccountHolderPageURL)
               )
             )
 

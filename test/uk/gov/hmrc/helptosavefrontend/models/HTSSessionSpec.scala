@@ -27,7 +27,7 @@ class HTSSessionSpec extends WordSpec with Matchers {
 
       "can correctly determine default values" in {
         val json = Json.parse("""{ }""")
-        HTSSession.htsSessionReads.reads(json) shouldBe JsSuccess(HTSSession(None, None, None, None, None, None, false, None, false))
+        HTSSession.htsSessionReads.reads(json) shouldBe JsSuccess(HTSSession(None, None, None, None, None, None, false, None, false, None))
       }
 
     }

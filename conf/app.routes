@@ -12,6 +12,7 @@ GET        /apply                                           @uk.gov.hmrc.helptos
 
 GET        /sign-in                                         @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getSignInPage
 GET        /access-account                                  @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
+GET        /pay-in                                          @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.payIn
 GET        /no-account                                      @uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getNoAccountPage
 
 GET        /check-eligibility                               @uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getCheckEligibility

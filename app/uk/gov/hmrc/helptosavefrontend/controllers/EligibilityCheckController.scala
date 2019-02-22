@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.traverse._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result ⇒ PlayResult}
 import play.api.{Configuration, Environment}
@@ -44,6 +44,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
+@Singleton
 class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveService,
                                             val sessionStore:      SessionStore,
                                             val authConnector:     AuthConnector,
@@ -57,37 +58,50 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
 
-  def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    def determineEligibility =
-        checkSession {
-          // there is no session yet
-          getEligibilityActionResult()
-        } { session ⇒
-          // there is a session
-          session.eligibilityCheckResult.fold(getEligibilityActionResult()) {
-            _.fold(
-              _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), // user is not eligible
-              _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url) // user is eligible
-            )
-          }
-        }
-
-    checkIfAlreadyEnrolled(
-      () ⇒ if (earlyCapCheckOn) {
-        logger.info("Checking pre-eligibility cap for nino", htsContext.nino)
-        checkIfAccountCreateAllowed(determineEligibility)
-      } else {
-        determineEligibility
-      },
-      { _ ⇒
-        // if there is an error checking the enrolment, do the eligibility checks
+  def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒ // scalastyle:ignore
+    def eligibilityAction(session: Option[HTSSession]): Future[PlayResult] =
         if (earlyCapCheckOn) {
           logger.info("Checking pre-eligibility cap for nino", htsContext.nino)
-          checkIfAccountCreateAllowed(getEligibilityActionResult())
+          checkIfAccountCreateAllowed(getEligibilityActionResult(session))
         } else {
-          getEligibilityActionResult
+          getEligibilityActionResult(session)
         }
-      })
+
+      def handleSessionAndEnrolmentStatus(maybeSession:    Option[HTSSession],
+                                          enrolmentStatus: Option[EnrolmentStatus]): Future[PlayResult] =
+        (maybeSession, enrolmentStatus) match {
+          case (s, Some(EnrolmentStatus.Enrolled(itmpHtSFlag))) ⇒
+            if (!itmpHtSFlag) { setItmpFlag(htsContext.nino) }
+            SeeOther(s.flatMap(_.attemptedAccountHolderPageURL).getOrElse(appConfig.nsiManageAccountUrl))
+
+          case (s, _) ⇒
+            s.flatMap(_.eligibilityCheckResult).fold(eligibilityAction(s)) {
+              _.fold(
+                _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), // user is not eligible
+                _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url) // user is eligible
+              )
+            }
+        }
+
+      def getEnrolmentStatus: Future[Option[EnrolmentStatus]] =
+        helpToSaveService.getUserEnrolmentStatus().bimap(
+          { e ⇒
+            logger.warn(s"Could not check enrolment status: $e")
+            None: Option[EnrolmentStatus]
+          },
+          Some(_)
+        ).merge
+
+    val result = for {
+      session ← sessionStore.get
+      enrolmentStatus ← EitherT.liftF(getEnrolmentStatus)
+      eligibilityResult ← EitherT.liftF[Future, String, PlayResult](handleSessionAndEnrolmentStatus(session, enrolmentStatus))
+    } yield eligibilityResult
+
+    result.leftMap[PlayResult]({ e ⇒
+      logger.warn(s"Could not check eligibility: $e")
+      internalServerError()
+    }).merge
   }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -158,9 +172,9 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
     }
   }(loginContinueURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
 
-  private def getEligibilityActionResult()(implicit hc: HeaderCarrier,
-                                           htsContext: HtsContextWithNINOAndUserDetails,
-                                           request:    Request[AnyContent]): Future[PlayResult] = {
+  private def getEligibilityActionResult(session: Option[HTSSession])(implicit hc: HeaderCarrier,
+                                                                      htsContext: HtsContextWithNINOAndUserDetails,
+                                                                      request:    Request[AnyContent]): Future[PlayResult] = {
     htsContext.userDetails.fold[Future[PlayResult]](
       { missingUserInfo ⇒
         logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
@@ -170,7 +184,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
           { e ⇒
             logger.warn(e, htsContext.nino)
             internalServerError()
-          }, handleEligibilityResult
+          }, handleEligibilityResult(_, session)
         )
       }
     )
@@ -192,7 +206,9 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
       _ ← session.map(sessionStore.store).traverse[Result, Unit](identity)
     } yield eligible
 
-  private def handleEligibilityResult(result: EligibilityCheckResultType)(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
+  private def handleEligibilityResult(result:  EligibilityCheckResultType,
+                                      session: Option[HTSSession]
+  )(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
     val nino = htsContext.nino
     result.fold(
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url),
@@ -204,7 +220,8 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
           case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag and updated mongo for user", nino)
         }
 
-        SeeOther(frontendAppConfig.nsiManageAccountUrl)
+        val redirectTo = session.flatMap(_.attemptedAccountHolderPageURL).getOrElse(frontendAppConfig.nsiManageAccountUrl)
+        SeeOther(redirectTo)
       }
     )
   }

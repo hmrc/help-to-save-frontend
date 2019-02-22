@@ -22,7 +22,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import play.api.{Application, Configuration, Environment}
@@ -44,6 +44,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class AccountHolderController @Inject() (val helpToSaveService:          HelpToSaveService,
                                          val authConnector:              AuthConnector,
                                          val emailVerificationConnector: EmailVerificationConnector,
