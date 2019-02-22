@@ -1,0 +1,145 @@
+/* if not enabled */
+[data-dnt-embed] {
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  border: 0;
+}
+
+/* if enabled */
+.dnt-embed {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  position: relative;
+  font-size: 1rem;
+}
+
+/* styles for when the embed ui is shown, which is removed once iframe is loaded */
+.dnt-embed--active {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+
+  color: #FEFEFE;
+  background-color: #111;
+  position: relative;
+  padding: 1.5em;
+
+  overflow: hidden;
+}
+
+.dnt-embed--active::after {
+  z-index: 1;
+  content: '';
+  opacity: .5;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: #111;
+}
+
+.dnt-embed__thumbnail {
+  z-index: 0;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  bottom: -5px;
+  left: -5px;
+  filter: blur(2.5px);
+  background-size: cover;
+}
+
+.dnt-embed__text,
+.dnt-embed__button {
+  z-index: 2;
+  display: block;
+  position: relative;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.dnt-embed__text {
+  text-align: center;
+  text-shadow: 0 0 10px #111;
+  margin-bottom: 2em;
+  line-height: 1.5;
+}
+
+.dnt-embed__button {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1em;
+  font-size: 1em;
+  font-family: inherit;
+}
+
+/* Used to indicate iframe is loading */
+.dnt-embed__loader {
+  z-index: 3;
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.dnt-embed__loader__pip {
+  width: .8em;
+  height: .8em;
+  margin-right: .3em;
+  margin-left: .3em;
+  background-color: currentColor;
+
+  border-radius: 100%;
+  display: inline-block;
+  animation: dnt-embed__loader__pip 1.4s infinite ease-in-out both;
+}
+
+.dnt-embed__loader__pip:first-child {
+  animation-delay: -0.32s;
+}
+
+.dnt-embed__loader__pip:nth-child(1) {
+  animation-delay: -0.16s;
+}
+
+@keyframes dnt-embed__loader__pip {
+  0%, 80%, 100% {
+    transform: scale(0);
+  } 40% {
+      transform: scale(1.0);
+    }
+}
+
+/* Announcer is only used for assistive technologies, so hide from view */
+.dnt-embed__announcer {
+  position: absolute;
+  left: -9999em;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Dont show outlines for elements used to give context for assistive technologies */
+.dnt-embed [tabindex="-1"]:focus {
+  outline: none !important;
+}
+
+/* Not all browsers hide the 'hidden' attribute */
+.dnt-embed [hidden] {
+  display: none !important;
+}
+
+@media(max-width: 500px) {
+  .dnt-embed {
+    font-size: 4vw;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .dnt-embed__text {
+    margin: 0;
+  }
+}
