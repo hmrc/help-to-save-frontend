@@ -29,35 +29,23 @@ class DifferentNINOSuffixSteps extends Steps {
 
   lazy implicit val crypto: Crypto = new CryptoImpl(Configuration(ConfigFactory.defaultApplication()))
 
-  val ninoForSuffixTest = ScenarioContext.generateEligibleNINO()
-  val ninoWithSuffixC = ninoForSuffixTest.take(8).toString + "C"
-  val ninoWithSuffixD = ninoWithSuffixC.take(8).toString + "D"
   val newEmail = "newemail@mail.com"
 
   Given("^the account holder has enrolled with NINO suffix C$") { () ⇒
-    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ninoWithSuffixC)
+    ScenarioContext.defineNINO(ScenarioContext.generateEligibleNINO().take(8) + "C")
+    AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.currentNINO())
     createAccountUsingGGEmail()
   }
 
   When("^the account holder logs in with suffix D$") { () ⇒
-    AuthorityWizardPage.authenticateEligibleUser(AccessAccountLink.expectedURL, ninoWithSuffixD)
+    AuthorityWizardPage.authenticateEligibleUser(AccessAccountLink.expectedURL, ScenarioContext.currentNINO().take(8) + "D")
   }
 
   And("^successfully updates their email address$") { () ⇒
     ChangeEmailPage.navigate()
     ChangeEmailPage.setNewEmailAddress(newEmail)
-    val params = EmailVerificationParams(ninoWithSuffixD, newEmail)
+    val params = EmailVerificationParams(ScenarioContext.currentNINO().take(8) + "D", newEmail)
     Browser.navigateTo(s"account-home/email-confirmed-callback?p=${params.encode()}")
-  }
-
-  // use these if we connect test to NSI
-  When("^they revisit their account with suffix C$") { () ⇒
-    AuthorityWizardPage.authenticateEligibleUser(AccessAccountLink.expectedURL, ninoWithSuffixC)
-  }
-
-  Then("^the updated email will be visible$") { () ⇒
-    ChangeEmailPage.navigate()
-    Browser.getPageContent should contain(newEmail)
   }
 
 }
