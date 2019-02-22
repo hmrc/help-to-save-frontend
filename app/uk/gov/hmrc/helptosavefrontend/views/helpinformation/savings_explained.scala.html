@@ -19,4 +19,4 @@
 
 @()(implicit messages: play.api.i18n.Messages, appConfig: FrontendAppConfig)
 
-@youtube_embed(appConfig.youtubeSavingsExplained)
+@youtube_embed(appConfig.youtubeSavingsExplained, Some(Messages("hts.help-information.section.how-account-works.s1.title")))
