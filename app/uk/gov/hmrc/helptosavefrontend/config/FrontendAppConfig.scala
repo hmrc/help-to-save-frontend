@@ -91,6 +91,7 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val accountHolderContinueURL: String = s"$helpToSaveFrontendUrl/account-home/email-confirmed-callback"
 
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
+  val nsiPayInUrl: String = getUrlFor("nsi.pay-in")
 
   val analyticsToken: String = getString("google-analytics.token")
   val analyticsHost: String = getString("google-analytics.host")

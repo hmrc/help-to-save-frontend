@@ -33,18 +33,21 @@ import uk.gov.hmrc.helptosavefrontend.util.Email
  * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
  *                               if they haven't
  */
-case class HTSSession(eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]],
-                      confirmedEmail:         Option[Email],
-                      pendingEmail:           Option[Email],
-                      ivURL:                  Option[String]                                   = None,
-                      ivSuccessURL:           Option[String]                                   = None,
-                      bankDetails:            Option[BankDetails]                              = None,
-                      changingDetails:        Boolean                                          = false,
-                      accountNumber:          Option[String]                                   = None,
-                      hasSelectedEmail:       Boolean                                          = false
+case class HTSSession(eligibilityCheckResult:        Option[Either[Ineligible, EligibleWithUserInfo]],
+                      confirmedEmail:                Option[Email],
+                      pendingEmail:                  Option[Email],
+                      ivURL:                         Option[String]                                   = None,
+                      ivSuccessURL:                  Option[String]                                   = None,
+                      bankDetails:                   Option[BankDetails]                              = None,
+                      changingDetails:               Boolean                                          = false,
+                      accountNumber:                 Option[String]                                   = None,
+                      hasSelectedEmail:              Boolean                                          = false,
+                      attemptedAccountHolderPageURL: Option[String]                                   = None
 )
 
 object HTSSession {
+
+  val empty: HTSSession = HTSSession(None, None, None)
 
   case class EligibleWithUserInfo(eligible: Eligible, userInfo: UserInfo)
 
@@ -77,10 +80,11 @@ object HTSSession {
         changingDetails ← (json \ "changingDetails").validateOpt[Boolean]
         accountNumber ← (json \ "accountNumber").validateOpt[String]
         hasSelectedEmail ← (json \ "hasSelectedEmail").validateOpt[Boolean]
+        attemptedAccountHolderPageURL ← (json \ "attemptedAccountHolderPageURL").validateOpt[String]
 
       } yield HTSSession(
         eligibilityCheckResult, confirmedEmail, pendingEmail, ivURL, ivSuccessURL, bankDetails,
-        changingDetails.getOrElse(false), accountNumber, hasSelectedEmail.getOrElse(false))
+        changingDetails.getOrElse(false), accountNumber, hasSelectedEmail.getOrElse(false), attemptedAccountHolderPageURL)
 
   }
 

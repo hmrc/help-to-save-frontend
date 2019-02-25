@@ -22,7 +22,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{NINO, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,13 +46,7 @@ trait EnrolmentCheckBehaviour {
       }
       .semiflatMap{
         case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
-          if (!itmpHtSFlag) {
-            helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
-              case Failure(e)        ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
-              case Success(Left(e))  ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
-              case Success(Right(_)) ⇒ logger.info(s"Process started to set ITMP flag", nino)
-            }
-          }
+          if (!itmpHtSFlag) { setItmpFlag(nino) }
 
           SeeOther(frontendAppConfig.nsiManageAccountUrl)
 
@@ -86,6 +80,7 @@ trait EnrolmentCheckBehaviour {
       }
       .semiflatMap{
         case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
+          if (!itmpHtSFlag) { setItmpFlag(nino) }
           ifEnrolled()
 
         case EnrolmentStatus.NotEnrolled ⇒
@@ -93,5 +88,15 @@ trait EnrolmentCheckBehaviour {
       }
       .merge
   }
+
+  def setItmpFlag(nino: NINO)(implicit ec: ExecutionContext,
+                              hc:          HeaderCarrier,
+                              transformer: NINOLogMessageTransformer
+  ): Unit =
+    helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
+      case Failure(e)        ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
+      case Success(Left(e))  ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
+      case Success(Right(_)) ⇒ logger.info(s"Process started to set ITMP flag", nino)
+    }
 
 }
