@@ -105,7 +105,7 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
             cacheRepository.createOrUpdate(Id(sessionId), "htsSession", Json.toJson(sessionToStore))
               .map[Either[String, Unit]] { dbUpdate ⇒
                 if (dbUpdate.writeResult.inError) {
-                  Left(dbUpdate.writeResult.errMsg.getOrElse("unknown error during inserting session data in mongo"))
+                  Left(dbUpdate.writeResult.errmsg.getOrElse("unknown error during inserting session data in mongo"))
                 } else {
                   val _ = timerContext.stop()
                   Right(())
