@@ -215,8 +215,6 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
             case UpdateEmailError.SessionCacheError(e) ⇒
               logger.warn(s"Could not write to session cache: $e", nino)
               auditor.sendEvent(auditEvent, nino)
-              // TODO: what is the best course of action here? The email has actually been updated but
-              // TODO: we can't display it to them on the next page
               SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
 
             case UpdateEmailError.EmailMongoError(e) ⇒
