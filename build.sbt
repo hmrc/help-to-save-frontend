@@ -18,7 +18,7 @@ lazy val appDependencies: Seq[ModuleID] = dependencies ++ testDependencies() ++ 
 val dependencies = Seq(
   ws,
   "uk.gov.hmrc" %% "govuk-template" % "5.27.0-play-25",
-  "uk.gov.hmrc" %% "mongo-caching" % "5.6.0",
+  "uk.gov.hmrc" %% "mongo-caching" % "5.7.0",
   "org.typelevel" %% "cats-core" % "1.5.0",
   "uk.gov.hmrc" %% "auth-client" % "2.19.0-play-25",
   "com.github.kxbmap" %% "configs" % "0.4.4",
@@ -34,7 +34,7 @@ def testDependencies(scope: String = "test") = Seq(
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "uk.gov.hmrc" %% "stub-data-generator" % "0.5.3" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "3.1.0" % scope
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.8.0" % scope
 )
 
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
