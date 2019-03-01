@@ -34,7 +34,7 @@ def testDependencies(scope: String = "test") = Seq(
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "uk.gov.hmrc" %% "stub-data-generator" % "0.5.3" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.8.0" % scope
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.8.0-play-25" % scope
 )
 
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
