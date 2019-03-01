@@ -14,10 +14,22 @@
  * limitations under the License.
  *@
 
-@(embedCode: String)()
-<div class="videoWrapper">
-    <iframe
-    src="https://www.youtube-nocookie.com/embed/@{embedCode}"
-    frameborder="0"
-    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-</div>
+@(embedCode: String, maybeTitle: Option[String])(implicit messages: play.api.i18n.Messages)
+    <div class="videoWrapper">
+        <iframe
+        data-dnt-embed
+        data-src="https://www.youtube.com/embed/@{embedCode}"
+        data-dnt-paragraph="@Messages("hts.global.dnt.default.patragraph.text")"
+        data-dnt-default-paragraph="@Messages("hts.global.dnt.default.button.text")"
+        data-dnt-default-buttontext-left="@Messages("hts.global.dnt.default.button.with.title.text.left")"
+        data-dnt-default-buttontext-right="@Messages("hts.global.dnt.default.button.with.title.text.right")"
+        @maybeTitle.map{title => title="@title" }
+        frameborder="0"
+        allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <noscript>
+            <iframe
+            src="https://www.youtube.com/embed/@{embedCode}"
+            frameborder="0"
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </noscript>
+    </div>

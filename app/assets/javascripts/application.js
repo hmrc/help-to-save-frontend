@@ -14,6 +14,10 @@ $(document).ready(function () {
   // <details> polyfill for FF
   GOVUK.details.init()
 
+  // init Do Not Track for YouTube embeds
+  var DoNotTrackYouTube = new GOVUK.DoNotTrackYouTube();
+  DoNotTrackYouTube.init()
+
   function setUpErrorSummary($el) {
     $el.find('a').each(function (i, link) {
       $(link).on('click', function () {

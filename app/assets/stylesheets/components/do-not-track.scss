@@ -9,6 +9,7 @@
 /* if enabled */
 .dnt-embed {
   box-sizing: border-box;
+  height: 100%; // TODO: Test this (sb)
   width: 100%;
   max-width: 100%;
   position: relative;
@@ -54,6 +55,7 @@
 
 .dnt-embed__text,
 .dnt-embed__button {
+  font-size: 19px;
   z-index: 2;
   display: block;
   position: relative;
@@ -71,8 +73,6 @@
 .dnt-embed__button {
   margin-left: auto;
   margin-right: auto;
-  padding: 1em;
-  font-size: 1em;
   font-family: inherit;
 }
 
