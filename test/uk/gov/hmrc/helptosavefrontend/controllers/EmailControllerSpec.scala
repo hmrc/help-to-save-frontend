@@ -123,6 +123,8 @@ class EmailControllerSpec
 
     val testEmail = "email@gmail.com"
 
+    val nsiAccountHomeURL = "http://localhost:7007/help-to-save-test-admin-frontend/dummy-pages/account-homepage"
+
     "handling getSelectEmailPage requests" must {
 
         def getSelectEmailPage(): Future[Result] = controller.getSelectEmailPage(fakeRequestWithCSRFToken)
@@ -272,7 +274,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
     }
 
@@ -352,7 +354,7 @@ class EmailControllerSpec
         }
         val result = selectEmailSubmit(Some(testEmail))
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
       "handle DE users - throw server error if no existing session found" in {
@@ -437,7 +439,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(None)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
     }
 
@@ -507,7 +509,7 @@ class EmailControllerSpec
 
         val result = getGiveEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
       "handle DE users with an existing valid email from GG" in {
@@ -604,7 +606,7 @@ class EmailControllerSpec
 
         val result = getGiveEmailPage()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
     }
@@ -664,7 +666,7 @@ class EmailControllerSpec
         }
         val result = giveEmailSubmit(testEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
       "handle DE users - redirect to check eligibility if no existing session found" in {
@@ -788,7 +790,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
       "handle DE users with an existing valid email from GG" in {
@@ -806,7 +808,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
     }
 
@@ -1053,7 +1055,7 @@ class EmailControllerSpec
 
         val result = confirmEmail
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
       "handle DE users with pending email in the session" in {
@@ -1127,7 +1129,7 @@ class EmailControllerSpec
 
         val result = confirmEmailError
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
       "handle DE users" in {
@@ -1242,7 +1244,7 @@ class EmailControllerSpec
 
         val result = controller.confirmEmailErrorSubmit()(fakeRequestWithCSRFToken)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
       "handle DE users and redirect to the emailConfirmed endpoint if there is an email for the user and the user selects to continue" in {
@@ -1419,7 +1421,7 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some("https://nsandi.com")
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
 
       "handle DE users and redirect to the give email page" in {
