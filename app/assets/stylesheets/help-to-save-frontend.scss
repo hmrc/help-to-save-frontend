@@ -46,3 +46,11 @@ input:focus, textarea:focus, select:focus, button:focus {
     height:100%
   }
 }
+
+/*
+* AF 3.9.0 uses inline-block for this which
+* creates double arrows in MS Edge
+*/
+.no-details details summary .arrow-closed {
+    display: none !important;
+} 	}
