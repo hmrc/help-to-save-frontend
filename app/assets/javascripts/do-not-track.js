@@ -220,7 +220,8 @@
       }
 
       // Configure do not track for each embed
-      config.$dntEmbedIframe.forEach(function ($iframe) {
+      var dntEmbedIfr = Array.from(config.$dntEmbedIframe); // To ensure support in IE (forEach unsupported for Node Lists)
+      dntEmbedIfr.forEach(function ($iframe) {
         if (!config.doNotTrackIsEnabled) {
           loadIframe($iframe)
           return
