@@ -1,7 +1,6 @@
 /*
     Do Not Track (IE9+: https://caniuse.com/#search=do%20not%20track)
 */
-
 ;(function (global) {
   'use strict'
 
@@ -220,7 +219,7 @@
       }
 
       // Configure do not track for each embed
-      var dntEmbedIfr = Array.from(config.$dntEmbedIframe); // To ensure support in IE (forEach unsupported for Node Lists)
+      var dntEmbedIfr = Array.prototype.slice.call(config.$dntEmbedIframe); // To ensure support in IE (forEach unsupported for Node Lists)
       dntEmbedIfr.forEach(function ($iframe) {
         if (!config.doNotTrackIsEnabled) {
           loadIframe($iframe)
