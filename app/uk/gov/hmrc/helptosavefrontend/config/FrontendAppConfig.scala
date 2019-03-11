@@ -71,7 +71,7 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
-  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl?origin=HTS"
+  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl/HTS"
 
   val ggUserUrl: String =
     s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?" +
