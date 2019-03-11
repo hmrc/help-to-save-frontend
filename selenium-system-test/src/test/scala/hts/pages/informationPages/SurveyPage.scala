@@ -23,6 +23,6 @@ import org.openqa.selenium.WebDriver
 
 object SurveyPage extends Page {
 
-  override val expectedURL: String = s"${Configuration.surveyHost}/feedback-survey/ableToDo/HTS"
-  override val expectedPageHeader: Option[String] = Some("Were you able to do what you needed to do today?")
+  override val expectedURL: String = s"${Configuration.surveyHost}/feedback/HTS"
+  override val expectedPageHeader: Option[String] = Some("Feedback")
 }
