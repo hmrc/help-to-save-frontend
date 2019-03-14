@@ -59,12 +59,12 @@
     @CSRF.formField(request)
 
     <div class="@{"form-group" + {if(hasNotSelected) " form-group-error" else "" }}" id="select-one-option">
-      <fieldset>
+      <fieldset aria-describedby="select-email-error">
         <legend>
           <h1 class="@{"heading-large" + {if(hasNotSelected) " flush--top" else ""}}">@title</h1>
         </legend>
 
-        @{if(hasNotSelected) <span class="error-message">{messages("hts.select-email.select-an-option")}</span> }
+        @{if(hasNotSelected) <span class="error-message" id="select-email-error">{messages("hts.select-email.select-an-option")}</span> }
 
         <div class="multiple-choice">
           <input id="registered-email" type="radio" name="email" value="Yes" @if(!hasNotSelected && newEmail.isDefined && newEmail.exists(_.isEmpty)){ checked }>
