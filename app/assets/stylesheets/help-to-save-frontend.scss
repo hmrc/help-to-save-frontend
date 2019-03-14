@@ -1,5 +1,6 @@
 @import "components/box-highlight";
 @import "components/call-to-action";
+@import "components/do-not-track";
 
 .logo {
   display: none;
@@ -37,11 +38,19 @@ input:focus, textarea:focus, select:focus, button:focus {
     max-width:100%
   }
 
-  iframe {
+  > * {
     position:absolute;
     top:0;
     left:0;
     width:100%;
     height:100%
   }
+}
+
+/*
+* AF 3.9.0 uses inline-block for this which
+* creates double arrows in MS Edge
+*/
+.no-details details summary .arrow-closed {
+    display: none !important;
 }

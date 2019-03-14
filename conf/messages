@@ -13,6 +13,12 @@ hts.global.title.section.email=- Manage your email address
 hts.global.exit.to.gov.uk=Exit to GOV.UK
 hts.global.link.back=Back
 
+# Do Not track
+hts.global.dnt.default.patragraph.text=This video is from a website that may not respect the ‘Do not track’ setting you enabled in your browser.
+hts.global.dnt.default.button.text=Show the video
+hts.global.dnt.default.button.with.title.text.left=Show the ‘
+hts.global.dnt.default.button.with.title.text.right=’ video
+
 hts.global.error-summary.title=There is a problem
 
 hts.nav.title=Help to Save
@@ -540,6 +546,7 @@ hts.help-information.section.bonuses.s1.ul2-li2=paid after 4 years
 hts.help-information.section.bonuses.s1.p2=Your bonus is calculated using your highest balance.
 hts.help-information.section.bonuses.s1.p3=You can withdraw money and still get any bonus money you’ve earned. You can earn £1,200 in bonuses in total.
 hts.help-information.section.bonuses.s1.p4=If you close your account before it matures after 4 years, you will not get a bonus.
+hts.help-information.section.bonuses.s1.video-title=Help to Save - Bonuses
 
 hts.help-information.section.bonuses.s2.title=What your ‘highest balance’ is
 hts.help-information.section.bonuses.s2.p1=Your ‘highest balance’ is the most amount of money you’ve had in your account.
@@ -575,6 +582,7 @@ hts.help-information.section.bonuses.s7.p4=Withdrawing money could mean you are 
 hts.help-information.section.bonuses.s7.h1=Example
 hts.help-information.section.bonuses.s7.p5=You save in years 1 and 2. Your highest balance in your first 2 years is £300. Your first bonus paid after 2 years is £150, which is 50% of £300.
 hts.help-information.section.bonuses.s7.p6=At the start of the third year, you withdraw all of your savings. In years 3 and 4 you save £100. Your highest balance in years 3 and 4 is £100. You do not get a final bonus. This is because your highest balance in years 3 and 4 is not more than what it was in years 1 and 2.
+hts.help-information.section.bonuses.s7.video-title=Help to Save - Bonuses
 
 # Help/information: Withdrawals
 hts.help-information.section.withdrawals.title=Withdrawals
