@@ -47,7 +47,10 @@ class IneligibilityTypeSpec extends WordSpec with Matchers with GeneratorDrivenP
                                            NotEntitledToWTCAndUCInsufficient, NotEntitledToWTCAndNoUC)
 
       val uniquePairs: List[(IneligibilityReason, IneligibilityReason)] =
-        list.combinations(2).toList.flatMap(_.permutations.toList).map{ case a :: b :: Nil ⇒ a → b }
+        list.combinations(2).toList.flatMap(_.permutations.toList).map{
+          case a :: b :: Nil ⇒ a → b
+          case other         ⇒ sys.error(s"Expected two elements but got $other")
+        }
 
       val samePairs: List[(IneligibilityReason, IneligibilityReason)] =
         list.zip(list)
