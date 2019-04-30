@@ -137,7 +137,7 @@ class HelpToSaveServiceSpec extends TestSupport {
       "return a CREATED response along with the account number when a new account has been created" in {
         mockCreateAccount(Some(HttpResponse(201, Some(Json.parse("""{"accountNumber" : "1234567890123"}""")))))
         val result = htsService.createAccount(createAccountRequest)
-        result.value.futureValue shouldBe Right(SubmissionSuccess(Some(AccountNumber("1234567890123"))))
+        result.value.futureValue shouldBe Right(SubmissionSuccess(Some(AccountNumber(Some("1234567890123")))))
 
       }
 

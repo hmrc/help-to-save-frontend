@@ -35,7 +35,6 @@ import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[HelpToSaveServiceImpl])
 trait HelpToSaveService {
@@ -61,6 +60,8 @@ trait HelpToSaveService {
   def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult]
+
+  def getAccountNumber()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountNumber]
 
 }
 
@@ -138,6 +139,9 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
       }
     }
     )
+
+  def getAccountNumber()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountNumber] =
+    helpToSaveConnector.getAccountNumber()
 
   private def handleError(response: HttpResponse): SubmissionFailure = {
     response.parseJSON[SubmissionFailure]() match {

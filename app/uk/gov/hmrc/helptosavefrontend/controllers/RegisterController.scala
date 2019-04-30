@@ -124,7 +124,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
               submissionSuccess ← helpToSaveService.createAccount(createAccountRequest).leftMap(s ⇒ CreateAccountError(Left(s)))
               _ ← {
                 val update = submissionSuccess.accountNumber.map(a ⇒
-                  sessionStore.store(eligibleWithInfo.session.copy(accountNumber = Some(a.accountNumber))))
+                  sessionStore.store(eligibleWithInfo.session.copy(accountNumber = a.accountNumber)))
                 update.traverse[util.Result, Unit](identity).leftMap(s ⇒ CreateAccountError(Right(s)))
               }
             } yield submissionSuccess.accountNumber

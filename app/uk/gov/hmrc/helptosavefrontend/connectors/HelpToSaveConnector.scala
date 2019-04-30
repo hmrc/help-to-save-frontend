@@ -27,6 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
+import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResultType}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIPayload}
@@ -60,6 +61,8 @@ trait HelpToSaveConnector {
   def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
 
   def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
+
+  def getAccountNumber()(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[AccountNumber]
 
 }
 
@@ -98,6 +101,9 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   private val validateBankDetailsURL =
     s"$helpToSaveUrl/help-to-save/validate-bank-details"
 
+  private val getAccountNumberURL =
+    s"$helpToSaveUrl/help-to-save/get-account-number"
+
   private def getAccountUrl(nino: String) = s"$helpToSaveUrl/help-to-save/$nino/account"
 
   private def getAccountQueryParams(correlationId: UUID): Map[String, String] =
@@ -135,6 +141,9 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
 
   def getAccount(nino: String, correlationId: UUID)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Account] =
     handleGet(getAccountUrl(nino), getAccountQueryParams(correlationId), _.parseJSON[Account](), "get Account", identity)
+
+  def getAccountNumber()(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[AccountNumber] =
+    handleGet(getAccountNumberURL, emptyQueryParameters, _.parseJSON[AccountNumber](), "get account number", identity)
 
   private def handleGet[A, B](url:             String,
                               queryParameters: Map[String, String],

@@ -521,11 +521,16 @@ hts.help-information.section.payments.s2.h1=You’ll need to:
 hts.help-information.section.payments.s2.ol1-li1=Contact your bank or use your online bank account or bank’s app.
 hts.help-information.section.payments.s2.ol1-li2=Enter the sort code: <strong class="bold">60 89 77</strong>.
 hts.help-information.section.payments.s2.ol1-li3=Enter the account number: <strong class="bold">10028471</strong>.
-hts.help-information.section.payments.s2.ol1-li4=Enter the payment reference number: <strong class="bold">1234567890123</strong>. This must be your 13 digit Help to Save account number. You must not enter any other numbers, characters or words. If you make a mistake your payments could go to the wrong account or fail. If you’re asked to fill in an extra field, enter the same number again.
+hts.help-information.section.payments.s2.ol1-li4a=Enter the payment reference number:
+hts.help-information.section.payments.s2.ol1-li4b=. This must be your 13 digit Help to Save account number. You must not enter any other numbers, characters or words. If you make a mistake your payments could go to the wrong account or fail. If you’re asked to fill in an extra field, enter the same number again.
 hts.help-information.section.payments.s2.ol1-li5=Enter the amount. If you try to pay in more than £50 in a calendar month by any method, your payment will fail.
 hts.help-information.section.payments.s2.ol1-li6=Enter when you want to pay in. If you set up your payment to go out before the 26th of each month, it should reach your Help to Save account before the end of that month.
 hts.help-information.section.payments.s2.ol1-li7=Once set up, check the money has reached your account. If not, contact your bank.
 hts.help-information.section.payments.s2.p1=A calendar month is a full month from the first day of the month until the last day of the month. For example, 1 to 31 January.
+
+hts.help-information.section.payments-info-not-available.s2.h1=There is a problem with our system
+hts.help-information.section.payments-info-not-available.s2.p1=The details you'll need to set up a standing order or bank transfer are not available at the moment.
+hts.help-information.section.payments-info-not-available.s2.p2=You'll need to come back later to get these details.
 
 hts.help-information.section.payments.s3.title=When payments will appear in your account
 hts.help-information.section.payments.s3.p1=Debit card payments should appear in your account immediately. You’ll need to wait one working day before you can withdraw money paid in by debit card.

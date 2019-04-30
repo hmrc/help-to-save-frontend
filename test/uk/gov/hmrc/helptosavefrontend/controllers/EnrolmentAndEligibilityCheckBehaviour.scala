@@ -22,7 +22,14 @@ import play.api.mvc.Result
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
+import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibleWithUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,6 +38,20 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   this: AuthSupport with SessionStoreBehaviourSupport ⇒
 
   val mockHelpToSaveService = mock[HelpToSaveService]
+
+  val mockHelpToSaveConnector = mock[HelpToSaveConnector]
+
+  val confirmedEmail = "confirmed"
+  val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")
+  val userInfo = randomEligibleWithUserInfo(validUserInfo)
+  val payload = validNSIPayload.updateEmail(confirmedEmail)
+    .copy(nbaDetails = Some(bankDetails))
+    .copy(version = "V2.0")
+    .copy(systemId = "MDTP REGISTRATION")
+
+  val accountNumber = "1234567890123"
+
+  val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.eligibilityCheckResult.reasonCode)
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
     (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
@@ -44,6 +65,21 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))
+
+  def mockCreateAccount(createAccountRequest: CreateAccountRequest)(response: Either[SubmissionFailure, SubmissionSuccess]): Unit =
+    (mockHelpToSaveService.createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(createAccountRequest, *, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockGetAccountNumber()(result: Either[String, AccountNumber]): Unit =
+    (mockHelpToSaveConnector.getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockGetAccountNumberFromService()(result: Either[String, AccountNumber]): Unit =
+    (mockHelpToSaveService.getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
+      .expects(*, *)
+      .returning(EitherT.fromEither[Future](result))
 
   def commonEnrolmentAndSessionBehaviour(getResult:                              () ⇒ Future[Result], // scalastyle:ignore method.length
                                          mockSuccessfulAuth:                     () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
