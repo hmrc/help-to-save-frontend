@@ -529,8 +529,8 @@ hts.help-information.section.payments.s2.ol1-li7=Once set up, check the money ha
 hts.help-information.section.payments.s2.p1=A calendar month is a full month from the first day of the month until the last day of the month. For example, 1 to 31 January.
 
 hts.help-information.section.payments-info-not-available.s2.h1=There is a problem with our system
-hts.help-information.section.payments-info-not-available.s2.p1=The details you'll need to set up a standing order or bank transfer are not available at the moment.
-hts.help-information.section.payments-info-not-available.s2.p2=You'll need to come back later to get these details.
+hts.help-information.section.payments-info-not-available.s2.p1=The details you’ll need to set up a standing order or bank transfer are not available at the moment.
+hts.help-information.section.payments-info-not-available.s2.p2=You’ll need to come back later to get these details.
 
 hts.help-information.section.payments.s3.title=When payments will appear in your account
 hts.help-information.section.payments.s3.p1=Debit card payments should appear in your account immediately. You’ll need to wait one working day before you can withdraw money paid in by debit card.
