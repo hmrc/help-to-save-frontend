@@ -125,9 +125,14 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
               _ ← {
                 val update = submissionSuccess.accountNumber.map(a ⇒
                   sessionStore.store(eligibleWithInfo.session.copy(accountNumber = a.accountNumber)))
-                update.traverse[util.Result, Unit](identity).leftMap(s ⇒ CreateAccountError(Right(s)))
+                update.map(res => res.leftMap(s ⇒ CreateAccountError(Right(s))))
+                //update.traverse[util.Result, Unit](identity).leftMap(s ⇒ CreateAccountError(Right(s)))
               }
             } yield submissionSuccess.accountNumber
+
+            result.map[Result] {
+
+            }
 
             result.fold[Result]({
               case CreateAccountError(e) ⇒

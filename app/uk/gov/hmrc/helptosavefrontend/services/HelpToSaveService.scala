@@ -91,11 +91,11 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
           case Status.CREATED ⇒
             response.parseJSON[AccountNumber]().fold[Either[SubmissionFailure, SubmissionSuccess]](
               e ⇒ Left(SubmissionFailure(None, "Couldn't parse account number JSON", e)),
-              account ⇒ Right(SubmissionSuccess(Some(account)))
+              account ⇒ Right(SubmissionSuccess(account))
             )
 
           case Status.CONFLICT ⇒
-            Right(SubmissionSuccess(None))
+            Right(SubmissionSuccess(AccountNumber(None)))
 
           case _ ⇒
             Left(handleError(response))
@@ -155,7 +155,7 @@ object HelpToSaveServiceImpl {
 
   sealed trait SubmissionResult
 
-  case class SubmissionSuccess(accountNumber: Option[AccountNumber]) extends SubmissionResult
+  case class SubmissionSuccess(accountNumber: AccountNumber) extends SubmissionResult
 
   implicit val submissionSuccessFormat: Format[SubmissionSuccess] = Json.format[SubmissionSuccess]
 
