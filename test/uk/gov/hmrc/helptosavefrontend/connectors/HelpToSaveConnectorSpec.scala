@@ -345,7 +345,7 @@ class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with Generato
 
       "return http response as it is to the caller" in {
         val request = CreateAccountRequest(validNSIPayload, 7)
-        val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(Some(AccountNumber("1234567890123"))))))
+        val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(AccountNumber(Some("1234567890123"))))))
         mockPost(createAccountURL, Map.empty[String, String], request)(Some(response))
         await(connector.createAccount(request)) shouldBe response
       }

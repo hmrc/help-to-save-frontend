@@ -123,8 +123,8 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
             val result = for {
               submissionSuccess ← helpToSaveService.createAccount(createAccountRequest).leftMap(s ⇒ CreateAccountError(Left(s)))
               _ ← {
-                val update = submissionSuccess.accountNumber.map(a ⇒
-                  sessionStore.store(eligibleWithInfo.session.copy(accountNumber = Some(a.accountNumber))))
+                val update = submissionSuccess.accountNumber.accountNumber.map(a ⇒
+                  sessionStore.store(eligibleWithInfo.session.copy(accountNumber = Some(a))))
                 update.traverse[util.Result, Unit](identity).leftMap(s ⇒ CreateAccountError(Right(s)))
               }
             } yield submissionSuccess.accountNumber
@@ -147,7 +147,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
                     SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
                 })
             }, {
-              _.fold(
+              _.accountNumber.fold(
                 SeeOther(frontendAppConfig.nsiManageAccountUrl)
               )(_ ⇒ SeeOther(routes.RegisterController.getAccountCreatedPage().url))
             })

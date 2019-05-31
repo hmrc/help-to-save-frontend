@@ -14,18 +14,33 @@
  * limitations under the License.
  *@
 
-@()(implicit messages: play.api.i18n.Messages)
+@(accountNumber: Option[String])(implicit messages: play.api.i18n.Messages)
 
-<h3 class="heading-small">@Messages("hts.help-information.section.payments.s2.h1")</h3>
+@accountNumber match {
+    case None => {
+        <h3 class="heading-small">@Messages("hts.help-information.section.payments-info-not-available.s2.h1")</h3>
 
-<ol class="list list-number">
- <li>@Messages("hts.help-information.section.payments.s2.ol1-li1")</li>
- <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li2"))</li>
- <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li3"))</li>
- <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li4"))</li>
- <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li5"))</li>
- <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li6"))</li>
- <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li7"))</li>
-</ol>
+        <p>@Messages("hts.help-information.section.payments-info-not-available.s2.p1")</p>
 
-<p>@Messages("hts.help-information.section.payments.s2.p1")</p>
+        <p>@Messages("hts.help-information.section.payments-info-not-available.s2.p2")</p>
+
+    }
+
+    case Some(acNumber) => {
+
+        <h3 class="heading-small">@Messages("hts.help-information.section.payments.s2.h1")</h3>
+
+        <ol class="list list-number">
+         <li>@Messages("hts.help-information.section.payments.s2.ol1-li1")</li>
+         <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li2"))</li>
+         <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li3"))</li>
+         <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li4a"))<strong class="bold"> @acNumber</strong>@Messages("hts.help-information.section.payments.s2.ol1-li4b")</li>
+         <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li5"))</li>
+         <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li6"))</li>
+         <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li7"))</li>
+        </ol>
+
+        <p>@Messages("hts.help-information.section.payments.s2.p1")</p>
+    }
+}
+

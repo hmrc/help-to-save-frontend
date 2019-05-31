@@ -35,7 +35,6 @@ import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
 
 @ImplementedBy(classOf[HelpToSaveServiceImpl])
 trait HelpToSaveService {
@@ -61,6 +60,8 @@ trait HelpToSaveService {
   def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
   def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult]
+
+  def getAccountNumber()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountNumber]
 
 }
 
@@ -90,11 +91,11 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
           case Status.CREATED ⇒
             response.parseJSON[AccountNumber]().fold[Either[SubmissionFailure, SubmissionSuccess]](
               e ⇒ Left(SubmissionFailure(None, "Couldn't parse account number JSON", e)),
-              account ⇒ Right(SubmissionSuccess(Some(account)))
+              account ⇒ Right(SubmissionSuccess(account))
             )
 
           case Status.CONFLICT ⇒
-            Right(SubmissionSuccess(None))
+            Right(SubmissionSuccess(AccountNumber(None)))
 
           case _ ⇒
             Left(handleError(response))
@@ -139,6 +140,9 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
     }
     )
 
+  def getAccountNumber()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountNumber] =
+    helpToSaveConnector.getAccountNumber()
+
   private def handleError(response: HttpResponse): SubmissionFailure = {
     response.parseJSON[SubmissionFailure]() match {
       case Right(submissionFailure) ⇒ submissionFailure
@@ -151,7 +155,7 @@ object HelpToSaveServiceImpl {
 
   sealed trait SubmissionResult
 
-  case class SubmissionSuccess(accountNumber: Option[AccountNumber]) extends SubmissionResult
+  case class SubmissionSuccess(accountNumber: AccountNumber) extends SubmissionResult
 
   implicit val submissionSuccessFormat: Format[SubmissionSuccess] = Json.format[SubmissionSuccess]
 

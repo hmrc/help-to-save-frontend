@@ -24,6 +24,8 @@ import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -84,6 +86,7 @@ class IntroductionControllerSpec extends AuthSupport with CSRFSupport with Sessi
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetAccountNumberFromService()(Right(AccountNumber(Some(accountNumber))))
         }
 
         val result = helpToSave.getHelpPage(FakeRequest())

@@ -137,14 +137,14 @@ class HelpToSaveServiceSpec extends TestSupport {
       "return a CREATED response along with the account number when a new account has been created" in {
         mockCreateAccount(Some(HttpResponse(201, Some(Json.parse("""{"accountNumber" : "1234567890123"}""")))))
         val result = htsService.createAccount(createAccountRequest)
-        result.value.futureValue shouldBe Right(SubmissionSuccess(Some(AccountNumber("1234567890123"))))
+        result.value.futureValue shouldBe Right(SubmissionSuccess(AccountNumber(Some("1234567890123"))))
 
       }
 
       "return a CONFLICT response with no Json when an account has already been created" in {
         mockCreateAccount(Some(HttpResponse(409, None)))
         val result = htsService.createAccount(createAccountRequest)
-        result.value.futureValue shouldBe Right(SubmissionSuccess(None))
+        result.value.futureValue shouldBe Right(SubmissionSuccess(AccountNumber(None)))
       }
 
       "should handle a failure result" in {

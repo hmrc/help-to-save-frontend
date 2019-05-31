@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import cats.data.EitherT
+import cats.instances.future._
+import cats.instances.string._
 import com.google.inject.Inject
 import javax.inject.Singleton
 import play.api.i18n.MessagesApi
@@ -29,6 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext
 
@@ -80,7 +84,16 @@ class IntroductionController @Inject() (val authConnector:     AuthConnector,
         logger.warn(s"Could not check enrolment: $e", htsContext.nino)
         internalServerError()
     }, () ⇒
-      Ok(views.html.helpinformation.help_information())
+      // get account number
+      helpToSaveService.getAccountNumber().fold(
+        e ⇒ {
+          logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+          Ok(views.html.helpinformation.help_information(None))
+        }, {
+          accountNumber ⇒
+            Ok(views.html.helpinformation.help_information(accountNumber.accountNumber))
+        }
+      )
     )
 
   }(routes.IntroductionController.getAboutHelpToSave().url)

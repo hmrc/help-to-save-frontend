@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models.account
 
 import play.api.libs.json.{Format, Json}
 
-case class AccountNumber(accountNumber: String)
+case class AccountNumber(accountNumber: Option[String])
 
 object AccountNumber {
 
