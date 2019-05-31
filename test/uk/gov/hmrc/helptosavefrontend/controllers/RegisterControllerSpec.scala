@@ -289,7 +289,7 @@ class RegisterControllerSpec
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
-            mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(Some(AccountNumber(Some(accountNumber))))))
+            mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(Some(accountNumber)))))
             mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Right(()))
           }
 
@@ -304,7 +304,7 @@ class RegisterControllerSpec
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
-            mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(Some(AccountNumber(Some(accountNumber))))))
+            mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(Some(accountNumber)))))
             mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Right(()))
           }
 
@@ -318,7 +318,7 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
-          mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
+          mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(None))))
         }
 
         val result = doCreateAccountRequest()
@@ -331,7 +331,7 @@ class RegisterControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
-          mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(None)))
+          mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(None))))
         }
 
         val result = doCreateAccountRequest()
@@ -383,7 +383,7 @@ class RegisterControllerSpec
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
             mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails)))))
-            mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(Some(AccountNumber(Some(accountNumber))))))
+            mockCreateAccount(createAccountRequest)(Right(SubmissionSuccess(AccountNumber(Some(accountNumber)))))
             mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some(confirmedEmail), None, None, None, Some(bankDetails), accountNumber = Some(accountNumber)))(Left(""))
           }
 
