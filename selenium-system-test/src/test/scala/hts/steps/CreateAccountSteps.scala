@@ -26,6 +26,8 @@ import hts.pages.registrationPages._
 import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
+import scala.hts.pages.informationPages.HelpandInformationPage
+
 class CreateAccountSteps extends Steps {
   When("^they try to sign in without being logged in to GG$") {
     AccessAccountLink.navigate()
@@ -33,6 +35,10 @@ class CreateAccountSteps extends Steps {
 
   Given("^the authenticated user tries to sign in$|^they log in$") {
     AuthorityWizardPage.authenticateEligibleUser(AccessAccountLink.expectedURL, ScenarioContext.generateEligibleNINO())
+  }
+
+  When("^the authenticated user tries to sign in for help information$") {
+    AuthorityWizardPage.authenticateEligibleUser(HelpandInformationPage.expectedURL)
   }
 
   Given("^they try to start creating an account$") {
@@ -79,6 +85,14 @@ class CreateAccountSteps extends Steps {
     Browser.checkCurrentPageIs(HMRCChangeOfDetailsPage, "GOV.UK")
   }
 
+  Then("^they see the help information page$") {
+    Browser.checkCurrentPageIs(HelpandInformationPage)
+  }
+
+  Then("^setup regular payment link shows correct account number$") {
+    HelpandInformationPage.setupPaymentValidateHTSAccountNumber()
+  }
+
   When("^they proceed to create an account using their GG email$") {
     EligiblePage.navigate()
     createAccountUsingGGEmail()
@@ -96,6 +110,7 @@ class CreateAccountSteps extends Steps {
 
   Then("^they see that the account is created$") {
     Browser.checkHeader(AccountCreatedPage)
+    AccountCreatedPage.retrieveHTSAccountNumber
   }
 
   And("^they are redirected to the account created page$") {

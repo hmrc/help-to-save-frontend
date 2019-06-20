@@ -23,6 +23,16 @@ Feature: Applicant creates new account
     When they proceed to create an account using their GG email
     Then they see that the account is created
 
+  @DLS-245
+  Scenario: An authenticated eligible user creates HTS account and validates payment setup screen
+    Given the authenticated user tries to sign in
+    And they are informed they don't have an account
+    When they proceed to create an account using their GG email
+    Then they see that the account is created
+    When the authenticated user tries to sign in for help information
+    Then they see the help information page
+    Then setup regular payment link shows correct account number
+
   @VerifyHeaderAndFooter @HTS-1183
   Scenario: An authenticated eligible user wishes to create account but sees their details are incorrect
     Given they apply for Help to Save

@@ -18,8 +18,8 @@ package hts.browser
 
 import java.util.function.Function
 
-import hts.pages.informationPages.{FeedbackPage, PrivacyPolicyPage}
 import hts.pages.Page
+import hts.pages.informationPages.{FeedbackPage, PrivacyPolicyPage}
 import hts.utils.Configuration
 import org.openqa.selenium._
 import org.openqa.selenium.support.ui._
@@ -108,6 +108,8 @@ trait Retrievals {
   def getPageHeading(implicit driver: WebDriver): String =
     Option(driver.findElement(By.tagName("h1")).getText).getOrElse("")
 
+  def getText(query: By)(implicit driver: WebDriver): String =
+    Option(driver.findElement(query).getText).getOrElse("")
 }
 
 trait Assertions {
@@ -121,6 +123,7 @@ trait Assertions {
       Right(textPresent.toSet)
     }
   }
+
   //default titleSuffix is for Help to Save pages but can be defined for GOV.UK pages
   def checkCurrentPageIs(page: Page, titleSuffix: String = "Help to Save - GOV.UK")(implicit driver: WebDriver): Unit = {
       def isActualUrlExpectedUrl(expectedUrl: String)(implicit driver: WebDriver): Boolean = {
