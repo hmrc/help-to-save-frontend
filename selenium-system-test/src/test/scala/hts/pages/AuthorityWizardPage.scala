@@ -36,7 +36,14 @@ object AuthorityWizardPage extends Page {
   }
 
   def authenticateEligibleUser(redirectUrl: String, nino: String)(implicit driver: WebDriver): Unit = {
+    usedNino = nino
     fillInAuthDetails(redirectUrl, 200, "strong", nino)
+    clickSubmit()
+    println(s"NINO Used = $usedNino \n")
+  }
+
+  def authenticateEligibleUser(redirectUrl: String)(implicit driver: WebDriver): Unit = {
+    fillInAuthDetails(redirectUrl, 200, "strong", usedNino)
     clickSubmit()
   }
 
