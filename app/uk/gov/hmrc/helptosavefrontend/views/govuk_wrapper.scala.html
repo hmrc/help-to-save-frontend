@@ -119,7 +119,11 @@
 }
 
 @content = {
-@uiLayouts.main_content(
+  <div class="centered-content">
+    @helpers.language_selection(appConfig.enableLanguageSwitching)
+  </div>
+
+  @uiLayouts.main_content(
     article = mainContent,
     mainClass = mainClass,
     mainDataAttributes = mainDataAttributes,

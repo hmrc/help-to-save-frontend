@@ -20,6 +20,7 @@ import java.net.URI
 
 import javax.inject.{Inject, Singleton}
 import play.api.Mode.Mode
+import play.api.i18n.Lang
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.util.urlEncode
@@ -112,6 +113,12 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val youtubeSavingsExplained: String = getString("youtube-embeds.savings-explained")
   val youtubeWhatBonuses: String = getString("youtube-embeds.what-bonuses")
   val youtubeHowWithdrawalsAffectBonuses: String = getString("youtube-embeds.how-withdrawals-affect-bonuses")
+
+  def getAvailableLanguages: Map[String, Lang] = Map(
+    "english" -> Lang("en"),
+    "cymraeg" -> Lang("cy"))
+
+  val enableLanguageSwitching: Boolean = getBoolean("enableLanguageSwitching")
 
   object BankDetailsConfig {
     val sortCodeLength: Int = getInt("bank-details-validation.sort-code.length")
