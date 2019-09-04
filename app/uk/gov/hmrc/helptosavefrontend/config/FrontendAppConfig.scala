@@ -114,10 +114,6 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
   val youtubeWhatBonuses: String = getString("youtube-embeds.what-bonuses")
   val youtubeHowWithdrawalsAffectBonuses: String = getString("youtube-embeds.how-withdrawals-affect-bonuses")
 
-  def getAvailableLanguages: Map[String, Lang] = Map(
-    "english" -> Lang("en"),
-    "cymraeg" -> Lang("cy"))
-
   val enableLanguageSwitching: Boolean = getBoolean("enableLanguageSwitching")
 
   object BankDetailsConfig {
