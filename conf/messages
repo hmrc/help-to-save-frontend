@@ -636,3 +636,11 @@ hts.help-information.section.how-account-works.s8.p2=If you need to close your a
 
 hts.help-information.section.how-account-works.s9.title=If the account holder dies or is terminally ill
 hts.help-information.section.how-account-works.s9.p1=If someone with a Help to Save account has a terminal illness or dies we will pay them their bonus early. If you are diagnosed as terminally ill by your doctor, and you want to claim your bonus early, call us on: 0300 322 7093.
+
+language-switcher.english.hidden=Change the language to English
+language-switcher.english=English
+language-switcher.english.hover=Use this account in English
+language-switcher.welsh=Cymraeg
+language-switcher.welsh.hidden=Newid yr iaith i’r Gymraeg
+language-switcher.welsh.hover=Defnyddio’r cyfrif hwn yn Cymraeg
+language-switcher.nav=Language switcher
