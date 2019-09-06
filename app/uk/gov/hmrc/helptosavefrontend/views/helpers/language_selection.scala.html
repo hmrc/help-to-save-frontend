@@ -20,7 +20,7 @@
 @(enableLanguageSwitching: Boolean)(implicit messages: Messages)
 
 @if(enableLanguageSwitching) {
-<nav aria-label="@messages("language-switcher.nav")" class="language-switcher">
+<nav aria-label="@messages("language-switcher.nav")" class="language-switcher pull-right">
 <ul>
     <li>
         @if(messages.lang.code === "en") {
