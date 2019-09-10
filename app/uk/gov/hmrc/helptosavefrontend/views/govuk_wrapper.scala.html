@@ -110,6 +110,10 @@
 
 @mainContentHeader = {
   @{uiLayouts.main_content_header(contentHeader = contentHeader.getOrElse(Html("")))}
+
+  <div class="centered-content">
+    @helpers.language_selection(appConfig.enableLanguageSwitching)
+  </div>
 }
 
 @getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
@@ -119,10 +123,6 @@
 }
 
 @content = {
-  <div class="centered-content">
-    @helpers.language_selection(appConfig.enableLanguageSwitching)
-  </div>
-
   @uiLayouts.main_content(
     article = mainContent,
     mainClass = mainClass,
