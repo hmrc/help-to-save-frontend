@@ -7,6 +7,7 @@ $(".ga-track-event").click(function(event) {
     });
   } else {
     ga('send', 'event', $(this).data('ga-event-category'), $(this).data('ga-event-action'), $(this).data('ga-event-label'));
+    ga('govuk_shared.send', 'event', $(this).data('ga-event-category'), $(this).data('ga-event-action'), $(this).data('ga-event-label'));
   }
 });
 
