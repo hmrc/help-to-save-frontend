@@ -95,6 +95,7 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val analyticsToken: String = getString("google-analytics.token")
   val analyticsHost: String = getString("google-analytics.host")
+  val analyticsGovUkToken: String = getString("google-analytics.govuk-token")
 
   val contactFormServiceIdentifier: String = "HTS"
 
