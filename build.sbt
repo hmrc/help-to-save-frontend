@@ -17,7 +17,7 @@ lazy val appDependencies: Seq[ModuleID] = dependencies ++ testDependencies() ++ 
 
 val dependencies = Seq(
   ws,
-  "uk.gov.hmrc" %% "govuk-template" % "5.39.0-play-25",
+  "uk.gov.hmrc" %% "govuk-template" % "5.40.0-play-25",
   "uk.gov.hmrc" %% "mongo-caching" % "6.1.0-play-25",
   "org.typelevel" %% "cats-core" % "1.5.0",
   "uk.gov.hmrc" %% "auth-client" % "2.19.0-play-25",
