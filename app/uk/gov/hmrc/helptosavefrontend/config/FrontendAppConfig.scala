@@ -53,6 +53,8 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
 
   val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"
 
+  val ivFailureUrl: String = getString("gov-uk.url.contact-us")
+
   def ivUrl(redirectOnLoginURL: String): String = {
       def encodedCallbackUrl(redirectOnLoginURL: String): String =
         urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?continueURL=$redirectOnLoginURL")
@@ -60,7 +62,7 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
     new URI(s"$ivUpliftUrl" +
       s"?origin=$appName" +
       s"&completionURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
-      s"&failureURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
+      s"&failureURL=${encodedCallbackUrl(ivFailureUrl)}" +
       "&confidenceLevel=200"
     ).toString
   }
