@@ -52,6 +52,8 @@ class IvController @Inject() (val sessionStore:  SessionStore,
 
   val defaultIVUrl: String = appConfig.ivUrl(eligibilityUrl)
 
+  val ivFailureUrl: String = appConfig.ivFailureUrl
+
   def journeyResult(continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
                     journeyId:   Option[String]): Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
@@ -138,7 +140,7 @@ class IvController @Inject() (val sessionStore:  SessionStore,
 
   def getFailedMatching: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(failed_matching(u)))
+      retrieveURLFromSessionCache(_.ivURL, ivFailureUrl)(u ⇒ Ok(failed_matching(u)))
     }(routes.IvController.getFailedMatching().url)
 
   def getFailedIV: Action[AnyContent] =

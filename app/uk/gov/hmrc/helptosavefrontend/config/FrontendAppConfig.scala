@@ -62,7 +62,7 @@ class FrontendAppConfig @Inject() (override val runModeConfiguration: Configurat
     new URI(s"$ivUpliftUrl" +
       s"?origin=$appName" +
       s"&completionURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
-      s"&failureURL=$ivFailureUrl" +
+      s"&failureURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
       "&confidenceLevel=200"
     ).toString
   }
