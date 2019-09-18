@@ -78,7 +78,8 @@ class IvController @Inject() (val sessionStore:  SessionStore,
             case Some(FailedMatching) ⇒
               metrics.ivFailedMatchingCounter.inc()
               //The user entered details on the Designatory Details page that could not be matched to an appropriate record in CID
-              storeNewIVURLThenRedirectTo(routes.IvController.getFailedMatching().url)
+              //storeNewIVURLThenRedirectTo(routes.IvController.getFailedMatching().url)
+              Redirect(frontendAppConfig.ivFailureUrl)
 
             case Some(FailedIV) ⇒
               metrics.ivFailedIVCounter.inc()
@@ -174,6 +175,10 @@ class IvController @Inject() (val sessionStore:  SessionStore,
   def getPreconditionFailed: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(precondition_failed())
     }(routes.IvController.getPreconditionFailed().url)
+
+//  def failedMatchingContactUs: Action[AnyContent] =
+//    authorisedForHts { implicit r => implicit h => Redirect(frontendAppConfig.ivFailureUrl)
+//    }(routes.IvController.failedMatchingContactUs().url)
 
   private def storeInSessionCacheThenRedirect(session: HTSSession, journeyId: Option[String])(redirectTo: ⇒ String)(
       implicit
