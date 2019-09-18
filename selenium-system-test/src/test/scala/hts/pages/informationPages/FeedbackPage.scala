@@ -21,6 +21,6 @@ import hts.utils.Configuration
 
 object FeedbackPage extends Page {
 
-  val expectedURL: String = s"${Configuration.feedbackHost}/contact/beta-feedback-unauthenticated?service=HTS"
+  override val expectedURL: String = s"${Configuration.feedbackHost}/contact/beta-feedback-unauthenticated?service=HTS"
 
 }

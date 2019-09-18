@@ -20,6 +20,6 @@ import hts.utils.Configuration
 
 object GGSignInPage extends Page {
 
-  val expectedURL: String = s"${Configuration.ggHost}/gg/sign-in"
+  override val expectedURL: String = s"${Configuration.ggHost}/gg/sign-in"
 
 }

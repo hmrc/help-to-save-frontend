@@ -23,7 +23,7 @@ import org.openqa.selenium.WebDriver
 
 object BankDetailsPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-uk-bank-details"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/enter-uk-bank-details"
 
   override val expectedPageHeader: Option[String] = Some("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
 

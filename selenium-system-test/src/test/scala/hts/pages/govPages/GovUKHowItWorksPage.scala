@@ -20,7 +20,7 @@ import hts.pages.Page
 
 object GovUKHowItWorksPage extends Page {
 
-  val expectedURL: String = "https://www.gov.uk/get-help-savings-low-income"
+  override val expectedURL: String = "https://www.gov.uk/get-help-savings-low-income"
 
   override val expectedPageHeader: Option[String] = Some("Get help with savings if you’re on a low income (Help to Save)")
 

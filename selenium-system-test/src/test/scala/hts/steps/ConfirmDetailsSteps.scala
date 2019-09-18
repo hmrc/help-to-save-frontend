@@ -18,17 +18,17 @@ package hts.steps
 
 import java.time.format.DateTimeFormatter
 
-import cucumber.api.DataTable
 import hts.browser.Browser
 import hts.pages.emailPages.SelectEmailPage
 import hts.pages._
 import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestUserInfo}
+import io.cucumber.datatable.DataTable
 
 class ConfirmDetailsSteps extends Steps {
 
-  Given("^an applicant has the following details:$") { (applicantDetails: DataTable) ⇒
+  Given("^an applicant has the following details:$") { applicantDetails: DataTable ⇒
     ScenarioContext.setDataTable(applicantDetails, ScenarioContext.generateEligibleNINO())
   }
 

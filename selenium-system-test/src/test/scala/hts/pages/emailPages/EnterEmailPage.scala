@@ -23,7 +23,7 @@ import org.openqa.selenium.WebDriver
 
 object EnterEmailPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/enter-email"
 
   override val expectedPageHeader: Option[String] = Some("Which email address do you want to use for Help to Save?")
 

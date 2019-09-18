@@ -16,12 +16,13 @@
 
 package hts
 
+import hts.pages.Page
 import hts.pages.emailPages.SelectEmailPage
 import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.TestBankDetails
 import org.openqa.selenium.WebDriver
 
-package object steps {
+package object steps extends Steps with Page {
   def createAccountUsingGGEmail()(implicit driver: WebDriver): Unit = {
     EligiblePage.continue()
     SelectEmailPage.selectGGEmail()

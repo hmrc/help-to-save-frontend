@@ -21,7 +21,7 @@ import hts.utils.Configuration
 
 object PrivacyPolicyPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/privacy-statement"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/privacy-statement"
 
   override val expectedPageTitle: Option[String] = Some("Help to Save privacy statement")
 

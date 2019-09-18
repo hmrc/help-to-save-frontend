@@ -19,7 +19,7 @@ package hts.utils
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-import cucumber.api.DataTable
+import io.cucumber.datatable.DataTable
 import uk.gov.hmrc.domain.Generator
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
 

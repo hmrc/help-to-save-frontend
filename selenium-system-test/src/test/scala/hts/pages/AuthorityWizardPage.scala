@@ -28,7 +28,7 @@ import scala.annotation.tailrec
 
 object AuthorityWizardPage extends Page {
 
-  val expectedURL: String = s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
+  override val expectedURL: String = s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)

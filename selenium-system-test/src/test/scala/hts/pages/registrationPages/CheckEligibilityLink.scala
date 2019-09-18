@@ -21,5 +21,5 @@ import hts.utils.Configuration
 
 object CheckEligibilityLink extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/check-eligibility"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/check-eligibility"
 }

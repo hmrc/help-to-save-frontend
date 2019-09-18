@@ -21,6 +21,6 @@ import hts.utils.Configuration
 
 object AccessAccountLink extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/access-account"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/access-account"
 
 }

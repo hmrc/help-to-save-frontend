@@ -23,7 +23,7 @@ import org.openqa.selenium.WebDriver
 
 object CheckDetailsCreateAccountPage extends Page {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/create-account"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/create-account"
 
   override val expectedPageHeader: Option[String] = Some("Create a Help to Save account")
 
