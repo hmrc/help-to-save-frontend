@@ -263,7 +263,7 @@ class IvControllerSpec extends AuthSupport with SessionStoreBehaviourSupport {
       () ⇒ ivController.getFailedMatching()(FakeRequest()),
       Some(() ⇒ mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
       Some(url),
-      Some(ivController.defaultIVUrl)
+      Some(ivController.ivFailureUrl)
     ) { (maybeUrl, result) ⇒
         status(result) shouldBe OK
         maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
