@@ -19,8 +19,8 @@ package hts.steps
 import java.time.format.DateTimeFormatter
 
 import hts.browser.Browser
-import hts.pages.emailPages.SelectEmailPage
 import hts.pages._
+import hts.pages.emailPages.SelectEmailPage
 import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestUserInfo}

@@ -17,12 +17,12 @@
 package hts.steps
 
 import hts.browser.Browser
-import hts.pages.emailPages.{CannotChangeEmailPageTryLater, SelectEmailPage, VerifyYourEmailPage}
-import hts.pages.errorPages.{MissingInfoPage, NoAccountPage, ServiceUnavailablePage, TotalCapReachedPage}
-import hts.pages.informationPages.{DailyCapReachedPage, ThinkYouAreEligiblePage}
 import hts.pages._
 import hts.pages.accountHomePages._
+import hts.pages.emailPages.{CannotChangeEmailPageTryLater, SelectEmailPage, VerifyYourEmailPage}
+import hts.pages.errorPages.{MissingInfoPage, NoAccountPage, ServiceUnavailablePage, TotalCapReachedPage}
 import hts.pages.govPages.{GGRegistrationPage, GovUKEligibilityPage, GovUKHowItWorksPage}
+import hts.pages.informationPages.{DailyCapReachedPage, ThinkYouAreEligiblePage}
 import hts.pages.registrationPages._
 import hts.utils.{ScenarioContext, TestBankDetails}
 

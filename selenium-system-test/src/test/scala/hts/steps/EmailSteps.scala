@@ -18,9 +18,9 @@ package hts.steps
 
 import com.typesafe.config.ConfigFactory
 import hts.browser.Browser
-import hts.pages.emailPages.{EnterEmailPage, SelectEmailPage, VerifyYourEmailPage}
 import hts.pages._
 import hts.pages.accountHomePages.{AccountHolderEmailVerifiedPage, ChangeEmailPage}
+import hts.pages.emailPages.{EnterEmailPage, SelectEmailPage, VerifyYourEmailPage}
 import hts.pages.registrationPages.{ApplicantEmailVerifiedPage, BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.{ScenarioContext, TestBankDetails}
 import play.api.Configuration

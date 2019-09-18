@@ -17,11 +17,11 @@
 package hts.steps
 
 import hts.browser.Browser
+import hts.pages._
+import hts.pages.accountHomePages.AccessAccountLink
 import hts.pages.emailPages.{SelectEmailPage, VerifyYourEmailPage}
 import hts.pages.errorPages.{IncorrectDetailsPage, NoAccountPage}
 import hts.pages.informationPages.HMRCChangeOfDetailsPage
-import hts.pages._
-import hts.pages.accountHomePages.AccessAccountLink
 import hts.pages.registrationPages._
 import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestBankDetails}

@@ -16,10 +16,8 @@
 
 package hts.pages.registrationPages
 
-import hts.browser.Browser
 import hts.pages.Page
 import hts.utils.Configuration
-import org.openqa.selenium.WebDriver
 
 object SurveyPage extends Page {
 

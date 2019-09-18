@@ -16,13 +16,9 @@
 
 package hts.pages
 
-import java.io.File
-
-import cucumber.api.Scenario
 import hts.browser.Browser
-import org.apache.commons.io.FileUtils
 import org.junit.Assert
-import org.openqa.selenium.{By, OutputType, TakesScreenshot, WebDriver}
+import org.openqa.selenium.{By, WebDriver}
 import uk.gov.hmrc.webdriver.SingletonDriver
 
 trait Page {
@@ -47,18 +43,4 @@ trait Page {
     Assert.assertFalse("Old double quotes were found!", bodyText.contains('"'))
   }
 
-  // To take a screeshot and embed in to the Cucumber report
-  private def takeScreenshot(scenario: Scenario, s: String, dr: WebDriver with TakesScreenshot): Unit = {
-    val name = scenario.getName
-
-    if (!new java.io.File(s"./target/screenshots/$name$s.png").exists) {
-      dr.manage().window().maximize()
-      val scr = dr.getScreenshotAs(OutputType.FILE)
-      FileUtils.copyFile(scr, new File(s"./target/screenshots/$name$s.png"))
-      val byteFile = dr.getScreenshotAs(OutputType.BYTES)
-      scenario.embed(byteFile, "image/png")
-    }
-  }
-
 }
-
