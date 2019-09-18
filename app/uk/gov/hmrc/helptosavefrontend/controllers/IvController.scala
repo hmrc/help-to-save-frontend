@@ -76,7 +76,7 @@ class IvController @Inject() (val sessionStore:  SessionStore,
             case Some(FailedMatching) ⇒
               metrics.ivFailedMatchingCounter.inc()
               //The user entered details on the Designatory Details page that could not be matched to an appropriate record in CID
-              storeNewIVURLThenRedirectTo(routes.IvController.getFailedMatching().url)
+              storeNewIVURLThenRedirectTo(frontendAppConfig.ivFailureUrl)
 
             case Some(FailedIV) ⇒
               metrics.ivFailedIVCounter.inc()
@@ -135,11 +135,6 @@ class IvController @Inject() (val sessionStore:  SessionStore,
       retrieveURLFromSessionCache(_.ivSuccessURL, eligibilityUrl)(u ⇒ Ok(iv_success(u)))
 
     }(routes.IvController.getIVSuccessful().url)
-
-  def getFailedMatching: Action[AnyContent] =
-    authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(failed_matching(u)))
-    }(routes.IvController.getFailedMatching().url)
 
   def getFailedIV: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒

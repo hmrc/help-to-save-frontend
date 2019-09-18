@@ -48,7 +48,6 @@ GET        /incorrect-details                               @uk.gov.hmrc.helptos
 
 GET        /iv/journey-result                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String, journeyId: Option[String])
 GET        /identity-verified                               @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getIVSuccessful
-GET        /failed-iv-matching                              @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getFailedMatching
 GET        /failed-iv                                       @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getFailedIV
 GET        /failed-iv-insufficient-evidence                 @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getInsufficientEvidence
 GET        /failed-iv-locked-out                            @uk.gov.hmrc.helptosavefrontend.controllers.IvController.getLockedOut
