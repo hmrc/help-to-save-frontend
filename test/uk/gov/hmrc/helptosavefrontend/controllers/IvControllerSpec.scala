@@ -132,7 +132,8 @@ class IvControllerSpec extends AuthSupport with SessionStoreBehaviourSupport {
     }
 
     "handling failed matching responses" must {
-      behave like sessionPutIVURLBehaviour(routes.IvController.getFailedMatching().url, "FailedMatching")
+      behave like sessionPutIVURLBehaviour("https://www.gov.uk/government/organisations/hm-revenue-customs/contact/online-services-helpdesk",
+        "FailedMatching")
     }
 
     "handling insufficient evidence responses" must {
