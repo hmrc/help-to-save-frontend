@@ -52,8 +52,6 @@ class IvController @Inject() (val sessionStore:  SessionStore,
 
   val defaultIVUrl: String = appConfig.ivUrl(eligibilityUrl)
 
-  val ivFailureUrl: String = appConfig.ivFailureUrl
-
   def journeyResult(continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
                     journeyId:   Option[String]): Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
