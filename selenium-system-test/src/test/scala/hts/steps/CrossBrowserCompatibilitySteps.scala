@@ -26,7 +26,7 @@ import hts.pages.registrationPages._
 import hts.utils.{ScenarioContext, TestBankDetails}
 import org.openqa.selenium.By
 
-class CrossBrowserCompatibilitySteps extends Steps {
+class CrossBrowserCompatibilitySteps extends BasePage {
 
   When("^the user logs in and passes IV on a PC, phone or tablet$") {
     AuthorityWizardPage.authenticateEligibleUserOnAnyDevice(CheckEligibilityLink.expectedURL, ScenarioContext.generateEligibleNINO())
@@ -78,7 +78,7 @@ class CrossBrowserCompatibilitySteps extends Steps {
     Browser.checkHeader(NsiManageAccountPage)
   }
 
-  private def checkPrivacyPolicyPage(currentPage: Page): Unit = {
+  private def checkPrivacyPolicyPage(currentPage: BasePage): Unit = {
     Browser.openAndCheckPageInNewWindowUsingLinkText("Privacy policy", PrivacyPolicyPage)
     currentPage.navigate()
     Browser.checkCurrentPageIs(currentPage)

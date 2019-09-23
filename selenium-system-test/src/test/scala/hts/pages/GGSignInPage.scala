@@ -18,7 +18,7 @@ package hts.pages
 
 import hts.utils.Configuration
 
-object GGSignInPage extends Page {
+object GGSignInPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.ggHost}/gg/sign-in"
 

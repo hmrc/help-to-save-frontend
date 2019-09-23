@@ -17,10 +17,10 @@
 package hts.pages.identityPages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import org.openqa.selenium.WebDriver
 
-object IdentityVerificationStubPage extends Page {
+object IdentityVerificationStubPage extends BasePage {
 
   override val expectedURL: String = "http://localhost:9948/mdtp/uplift?origin=help-to-save-frontend&completionURL=http%3A%2F%2Flocalhost%3A7000%2Fhelp-to-save%2Fiv%2Fjourney-result%3FcontinueURL%3D%2Fhelp-to-save%2Fcheck-eligibility&failureURL=http%3A%2F%2Flocalhost%3A7000%2Fhelp-to-save%2Fiv%2Fjourney-result%3FcontinueURL%3D%2Fhelp-to-save%2Fcheck-eligibility&confidenceLevel=200"
 

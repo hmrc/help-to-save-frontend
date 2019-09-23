@@ -16,10 +16,10 @@
 
 package hts.pages.registrationPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object CreateAccountErrorPage extends Page {
+object CreateAccountErrorPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/error-no-account"
 

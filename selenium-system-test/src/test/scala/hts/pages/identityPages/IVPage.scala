@@ -16,7 +16,7 @@
 
 package hts.pages.identityPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import org.openqa.selenium.WebDriver
 
 object IVPage {
@@ -36,7 +36,7 @@ object IVPage {
 
 }
 
-trait IVPage extends Page {
+trait IVPage extends BasePage {
 
   def executeIVResultPageAction()(implicit driver: WebDriver): Unit
 

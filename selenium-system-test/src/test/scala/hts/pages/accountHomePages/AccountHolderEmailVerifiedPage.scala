@@ -16,10 +16,10 @@
 
 package hts.pages.accountHomePages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object AccountHolderEmailVerifiedPage extends Page {
+object AccountHolderEmailVerifiedPage extends BasePage {
   override val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/email-verified"
 
   override val expectedPageHeader: Option[String] = Some("Email address verified")

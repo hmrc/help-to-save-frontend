@@ -17,13 +17,13 @@
 package scala.hts.pages.informationPages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.pages.registrationPages.AccountCreatedPage
 import hts.utils.Configuration
 import org.junit.Assert
 import org.openqa.selenium.{By, WebDriver}
 
-object HelpandInformationPage extends Page {
+object HelpandInformationPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/help-information"
   override val expectedPageHeader: Option[String] = Some("Help and information")

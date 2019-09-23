@@ -17,11 +17,11 @@
 package hts.pages.registrationPages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-trait NotEligiblePage extends Page {
+trait NotEligiblePage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/not-eligible"
 

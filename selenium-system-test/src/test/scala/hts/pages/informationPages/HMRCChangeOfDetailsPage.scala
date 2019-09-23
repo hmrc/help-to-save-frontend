@@ -16,9 +16,9 @@
 
 package hts.pages.informationPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 
-object HMRCChangeOfDetailsPage extends Page {
+object HMRCChangeOfDetailsPage extends BasePage {
 
   override val expectedURL: String = "https://www.gov.uk/tell-hmrc-change-of-details"
 

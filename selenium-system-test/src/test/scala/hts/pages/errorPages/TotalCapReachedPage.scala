@@ -16,10 +16,10 @@
 
 package hts.pages.errorPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object TotalCapReachedPage extends Page {
+object TotalCapReachedPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/try-again-later-in-year"
 

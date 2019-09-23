@@ -17,11 +17,12 @@
 package hts.pages.registrationPages
 
 import hts.browser.Browser
-import hts.pages.Page
-import hts.utils.Configuration
+import hts.pages.BasePage
+import hts.pages.emailPages.SelectEmailPage
+import hts.utils.{Configuration, TestBankDetails}
 import org.openqa.selenium.WebDriver
 
-object EligiblePage extends Page {
+object EligiblePage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/eligible"
 
@@ -31,5 +32,17 @@ object EligiblePage extends Page {
 
   def continue()(implicit driver: WebDriver): Unit =
     Browser.clickButtonByIdOnceClickable("start-creating-account")
+
+  def createAccountUsingGGEmail()(implicit driver: WebDriver): Unit = {
+    EligiblePage.continue()
+    SelectEmailPage.selectGGEmail()
+    BankDetailsPage.enterDetails(TestBankDetails.ValidBankDetails)
+    CheckDetailsCreateAccountPage.createAccount()
+  }
+
+  def createAccountError()(implicit driver: WebDriver): Unit = {
+    EligiblePage.continue()
+    SelectEmailPage.selectGGEmail()
+  }
 
 }

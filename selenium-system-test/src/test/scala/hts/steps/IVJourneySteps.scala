@@ -22,7 +22,7 @@ import hts.pages.identityPages._
 import hts.pages.registrationPages.{CheckEligibilityLink, EligiblePage}
 import hts.utils.ScenarioContext
 
-class IVJourneySteps extends Steps {
+class IVJourneySteps extends BasePage {
 
   Given("^an applicant who hasn't been through IV applies$") {
     AuthorityWizardPage.authenticateIneligibleUser(CheckEligibilityLink.expectedURL, ScenarioContext.generateEligibleNINO())

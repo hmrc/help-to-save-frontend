@@ -23,7 +23,7 @@ import hts.pages.informationPages.ThinkYouAreEligiblePage
 import hts.pages.registrationPages.{EligiblePage, NotEligibleReason3Page, NotEligibleReason4And9Page, NotEligibleReason5Page}
 import hts.utils.ScenarioContext
 
-class EligibilitySteps extends Steps {
+class EligibilitySteps extends BasePage {
 
   Given("^a user is in receipt of WTC$") {
     val _ = ScenarioContext.generateEligibleNINO()

@@ -17,10 +17,11 @@
 package hts.steps
 
 import hts.browser.Browser
+import hts.pages.BasePage
 import hts.pages.errorPages.{LinkExpiredPage, NoAccountPage}
 import hts.pages.registrationPages.CreateAccountErrorPage
 
-class AccessibilitySteps extends Steps {
+class AccessibilitySteps extends BasePage {
 
   When("^a user views the create account error page$"){
     CreateAccountErrorPage.navigate()

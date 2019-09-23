@@ -26,9 +26,9 @@ import hts.pages.informationPages.{DailyCapReachedPage, ThinkYouAreEligiblePage}
 import hts.pages.registrationPages._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
-class VerifyLinksSteps extends Steps {
+class VerifyLinksSteps extends BasePage {
 
-  def checkPage(page: Page): Unit = {
+  def checkPage(page: BasePage): Unit = {
     Browser.checkCurrentPageIs(page)
     Browser.checkHeader(page)
     Browser.checkForBadContent(page)

@@ -16,10 +16,10 @@
 
 package hts.pages.accountHomePages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object AccessAccountLink extends Page {
+object AccessAccountLink extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/access-account"
 

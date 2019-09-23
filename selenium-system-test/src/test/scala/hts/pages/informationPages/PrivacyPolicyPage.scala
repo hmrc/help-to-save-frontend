@@ -16,10 +16,10 @@
 
 package hts.pages.informationPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object PrivacyPolicyPage extends Page {
+object PrivacyPolicyPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/privacy-statement"
 

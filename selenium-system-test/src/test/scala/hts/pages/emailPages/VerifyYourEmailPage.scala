@@ -17,11 +17,11 @@
 package hts.pages.emailPages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object VerifyYourEmailPage extends Page {
+object VerifyYourEmailPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/confirm-email"
 

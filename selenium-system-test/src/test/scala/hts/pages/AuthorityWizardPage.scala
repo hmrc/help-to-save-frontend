@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
 
 import scala.annotation.tailrec
 
-object AuthorityWizardPage extends Page {
+object AuthorityWizardPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
