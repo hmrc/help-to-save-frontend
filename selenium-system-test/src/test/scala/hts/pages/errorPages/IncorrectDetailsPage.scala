@@ -17,13 +17,13 @@
 package hts.pages.errorPages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object IncorrectDetailsPage extends Page {
+object IncorrectDetailsPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/incorrect-details"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/incorrect-details"
 
   override val expectedPageTitle: Option[String] = Some("We need your correct details")
 

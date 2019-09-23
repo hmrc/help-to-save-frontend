@@ -17,13 +17,13 @@
 package hts.pages.registrationPages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.{Configuration, TestBankDetails}
 import org.openqa.selenium.WebDriver
 
-object BankDetailsPage extends Page {
+object BankDetailsPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/enter-uk-bank-details"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/enter-uk-bank-details"
 
   override val expectedPageHeader: Option[String] = Some("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
 

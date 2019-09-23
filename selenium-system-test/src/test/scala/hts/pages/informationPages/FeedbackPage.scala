@@ -16,11 +16,11 @@
 
 package hts.pages.informationPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object FeedbackPage extends Page {
+object FeedbackPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.feedbackHost}/contact/beta-feedback-unauthenticated?service=HTS"
+  override val expectedURL: String = s"${Configuration.feedbackHost}/contact/beta-feedback-unauthenticated?service=HTS"
 
 }

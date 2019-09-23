@@ -18,8 +18,8 @@ package hts.pages
 
 import hts.utils.Configuration
 
-object GGSignInPage extends Page {
+object GGSignInPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.ggHost}/gg/sign-in"
+  override val expectedURL: String = s"${Configuration.ggHost}/gg/sign-in"
 
 }

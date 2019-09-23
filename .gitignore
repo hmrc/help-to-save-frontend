@@ -17,6 +17,7 @@ eclipse
 lib
 lib_managed
 log
+*.log
 logs
 modules
 /out

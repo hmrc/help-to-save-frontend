@@ -18,17 +18,17 @@ package hts.steps
 
 import java.time.format.DateTimeFormatter
 
-import cucumber.api.DataTable
 import hts.browser.Browser
-import hts.pages.emailPages.SelectEmailPage
 import hts.pages._
+import hts.pages.emailPages.SelectEmailPage
 import hts.pages.registrationPages.{BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestUserInfo}
+import io.cucumber.datatable.DataTable
 
-class ConfirmDetailsSteps extends Steps {
+class ConfirmDetailsSteps extends BasePage {
 
-  Given("^an applicant has the following details:$") { (applicantDetails: DataTable) ⇒
+  Given("^an applicant has the following details:$") { applicantDetails: DataTable ⇒
     ScenarioContext.setDataTable(applicantDetails, ScenarioContext.generateEligibleNINO())
   }
 
@@ -46,7 +46,7 @@ class ConfirmDetailsSteps extends Steps {
 
   Then("^they see their details$") { () ⇒
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy")
-    val nino = ScenarioContext.currentNINO
+    val nino = ScenarioContext.currentNINO()
     val info: TestUserInfo = ScenarioContext.userInfo().getOrElse(sys.error)
     val forename = info.forename.getOrElse(sys.error("Could not get forename"))
     val surname = info.surname.getOrElse(sys.error("Could not get surname"))

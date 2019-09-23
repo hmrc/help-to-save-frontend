@@ -16,10 +16,10 @@
 
 package hts.pages.emailPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object CannotChangeEmailPage extends Page {
+object CannotChangeEmailPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/cannot-change-email"
 

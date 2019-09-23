@@ -17,13 +17,13 @@
 package hts.pages.emailPages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object SelectEmailPage extends Page {
+object SelectEmailPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/select-email"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/select-email"
 
   override val expectedPageHeader: Option[String] = Some("What email address do you want to use for your Help to Save account?")
 

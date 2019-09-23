@@ -16,10 +16,10 @@
 
 package hts.pages.informationPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object DailyCapReachedPage extends Page {
+object DailyCapReachedPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/try-again-tomorrow"
 

@@ -16,10 +16,10 @@
 
 package hts.pages.govPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 
-object GGRegistrationPage extends Page {
-  val expectedURL: String = "https://www.access.service.gov.uk/registration/email"
+object GGRegistrationPage extends BasePage {
+  override val expectedURL: String = "https://www.access.service.gov.uk/registration/email"
   override val expectedPageHeader: Option[String] = Some("Enter your email address")
   override val expectedPageTitle: Option[String] = Some("Enter your email address")
 }

@@ -16,11 +16,11 @@
 
 package hts.pages.accountHomePages
 
-import hts.pages.Page
+import hts.pages.BasePage
 
-object NsiManageAccountPage extends Page {
+object NsiManageAccountPage extends BasePage {
 
-  val expectedURL: String = "https://www.nsandi.com/"
+  override val expectedURL: String = "https://www.nsandi.com/"
 
   override val expectedPageTitle: Option[String] = Some("Our Products")
 }

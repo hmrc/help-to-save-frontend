@@ -17,13 +17,13 @@
 package hts.pages.accountHomePages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object VerifyEmailPage extends Page {
+object VerifyEmailPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/confirm-email"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/confirm-email"
 
   override val expectedPageTitle: Option[String] = Some("You have 30 minutes to confirm the email address - Manage your email address")
 

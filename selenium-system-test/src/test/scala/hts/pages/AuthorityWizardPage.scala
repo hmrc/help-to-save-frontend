@@ -20,15 +20,15 @@ import java.time.format.DateTimeFormatter
 
 import hts.browser.Browser
 import hts.pages.registrationPages.EligiblePage
-import hts.utils.{Configuration, ScenarioContext, TestUserInfo}
+import hts.utils.{Configuration, TestUserInfo}
 import org.openqa.selenium.{By, WebDriver}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.Address
 
 import scala.annotation.tailrec
 
-object AuthorityWizardPage extends Page {
+object AuthorityWizardPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
+  override val expectedURL: String = s"${Configuration.authHost}/auth-login-stub/gg-sign-in"
 
   def authenticateUser(redirectUrl: String, confidence: Int, credentialStrength: String, nino: String)(implicit driver: WebDriver): Unit = {
     fillInAuthDetails(redirectUrl, confidence, credentialStrength, nino)

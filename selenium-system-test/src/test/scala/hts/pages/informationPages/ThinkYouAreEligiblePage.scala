@@ -16,12 +16,12 @@
 
 package hts.pages.informationPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object ThinkYouAreEligiblePage extends Page {
+object ThinkYouAreEligiblePage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/think-you-are-eligible"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/think-you-are-eligible"
 
   override val expectedPageTitle: Option[String] = Some("If you think you’re eligible for a Help to Save account")
 

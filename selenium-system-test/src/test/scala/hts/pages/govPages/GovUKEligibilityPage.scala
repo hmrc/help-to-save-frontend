@@ -16,11 +16,11 @@
 
 package hts.pages.govPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 
-object GovUKEligibilityPage extends Page {
+object GovUKEligibilityPage extends BasePage {
 
-  val expectedURL: String = "https://www.gov.uk/get-help-savings-low-income/eligibility"
+  override val expectedURL: String = "https://www.gov.uk/get-help-savings-low-income/eligibility"
 
   override val expectedPageHeader: Option[String] = Some("Get help with savings if you’re on a low income (Help to Save)")
 

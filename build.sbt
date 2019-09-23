@@ -169,13 +169,9 @@ lazy val selenium = (project in file("selenium-system-test"))
   .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
   .settings(
     libraryDependencies ++= testDependencies() ++ Seq(
-      "info.cukes" % "cucumber-junit" % "1.2.5",
-      "info.cukes" % "cucumber-picocontainer" % "1.2.5",
-      "info.cukes" %% "cucumber-scala" % "1.2.5",
-      "org.seleniumhq.selenium" % "selenium-java" % "3.13.0",
-      "org.seleniumhq.selenium" % "selenium-firefox-driver" % "3.13.0",
-      "org.seleniumhq.selenium" % "selenium-htmlunit-driver" % "2.52.0",
-      "com.google.guava" % "guava" % "25.1-jre"
+      "io.cucumber"           %% "cucumber-scala"         % "4.7.1",
+      "io.cucumber"           %  "cucumber-junit"         % "4.7.1",
+      "uk.gov.hmrc"           %% "webdriver-factory"      % "0.7.0"   exclude( "org.slf4j","slf4j-simple")
     )
   )
   .settings(
@@ -192,7 +188,7 @@ lazy val zap = (project in file("zap"))
   .settings(commonSettings: _*)
   .settings(wartRemoverSettings(): _*)
   .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
-  .settings(libraryDependencies += "uk.gov.hmrc" %% "zap-automation" % "1.4.0")
+  .settings(libraryDependencies += "uk.gov.hmrc" %% "zap-automation" % "2.1.0")
   .settings(
     scalaSource in Test := baseDirectory.value / "src" / "test",
     resourceDirectory in Test := baseDirectory.value / "src" / "test" /  "resources"

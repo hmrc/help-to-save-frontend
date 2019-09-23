@@ -16,8 +16,7 @@
 
 package hts.suites
 
-import cucumber.api.CucumberOptions
-import cucumber.api.junit.Cucumber
+import io.cucumber.junit.{Cucumber, CucumberOptions}
 import org.junit.runner.RunWith
 
 @RunWith(classOf[Cucumber])
@@ -25,7 +24,7 @@ import org.junit.runner.RunWith
   features = Array("src/test/resources/features"),
   glue     = Array("classpath:hts.steps"),
   plugin   = Array("pretty", "html:target/cucumber", "json:target/cucumber.json"),
-  tags     = Array("~@ignore")
+  tags     = Array("not @ignore")
 )
 class RunnerSeleniumSystemTest {
 

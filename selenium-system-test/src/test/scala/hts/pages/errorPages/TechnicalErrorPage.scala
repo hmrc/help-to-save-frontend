@@ -16,10 +16,10 @@
 
 package hts.pages.errorPages
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 
-object TechnicalErrorPage extends Page {
+object TechnicalErrorPage extends BasePage {
 
   override val expectedURL: String = s"${Configuration.host}/help-to-save/check-eligibility"
 

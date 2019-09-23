@@ -23,7 +23,7 @@ import hts.utils.ScenarioContext
 
 import scala.collection.JavaConverters._
 
-class SecuritySteps extends Steps {
+class SecuritySteps extends BasePage {
 
   def oneOfRegex(options: Set[String]): String = s"(${options.mkString("|")})"
 
@@ -31,7 +31,7 @@ class SecuritySteps extends Steps {
 
   val credentialStrengthsRegex: String = oneOfRegex(Set("weak", "strong", "none"))
 
-  Given("^they have logged into Government Gateway with a confidence level of (.+)") { (level: Int) ⇒
+  Given("^they have logged into Government Gateway with a confidence level of (.+)") { level: Int ⇒
     AuthorityWizardPage.authenticateUser(EligiblePage.expectedURL, level, "Strong", ScenarioContext.generateEligibleNINO())
   }
 

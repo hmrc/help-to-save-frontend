@@ -17,13 +17,13 @@
 package hts.pages.accountHomePages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object ChangeEmailPage extends Page {
+object ChangeEmailPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/change-email"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/account-home/change-email"
 
   override val expectedPageTitle: Option[String] = Some("Change your email address - Manage your email address")
 

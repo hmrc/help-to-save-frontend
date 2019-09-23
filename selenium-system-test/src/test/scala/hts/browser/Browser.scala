@@ -18,7 +18,7 @@ package hts.browser
 
 import java.util.function.Function
 
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.pages.informationPages.{FeedbackPage, PrivacyPolicyPage}
 import hts.utils.Configuration
 import org.openqa.selenium._
@@ -30,7 +30,7 @@ import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
 object Browser extends WebBrowser with Navigation with Retrievals with Assertions with Matchers {
-  def checkForLinksThatExistOnEveryPage(page: Page)(implicit driver: WebDriver): Unit = {
+  def checkForLinksThatExistOnEveryPage(page: BasePage)(implicit driver: WebDriver): Unit = {
     checkCurrentPageIs(page)
     clickButtonByIdOnceClickable("feedback-link")
     checkCurrentPageIs(FeedbackPage)
@@ -125,7 +125,7 @@ trait Assertions {
   }
 
   //default titleSuffix is for Help to Save pages but can be defined for GOV.UK pages
-  def checkCurrentPageIs(page: Page, titleSuffix: String = "Help to Save - GOV.UK")(implicit driver: WebDriver): Unit = {
+  def checkCurrentPageIs(page: BasePage, titleSuffix: String = "Help to Save - GOV.UK")(implicit driver: WebDriver): Unit = {
       def isActualUrlExpectedUrl(expectedUrl: String)(implicit driver: WebDriver): Boolean = {
         try {
           val wait = new WebDriverWait(driver, 20) // scalastyle:ignore magic.number
@@ -153,7 +153,7 @@ trait Assertions {
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
   }
 
-  def checkForBadContent(page: Page)(implicit driver: WebDriver): Unit = {
+  def checkForBadContent(page: BasePage)(implicit driver: WebDriver): Unit = {
     checkCurrentPageIs(page)
     // check for unmapped message keys on the page
     isTextOnPage("hts(\\..+)+").fold(
@@ -162,7 +162,7 @@ trait Assertions {
     )
   }
 
-  def checkHeader(page: Page)(implicit driver: WebDriver): Unit =
+  def checkHeader(page: BasePage)(implicit driver: WebDriver): Unit =
     page.expectedPageHeader.foreach(getPageHeading shouldBe _)
 
   def scrollDown()(implicit driver: WebDriver): AnyRef = driver match {
@@ -181,7 +181,7 @@ trait Assertions {
     wait.until(expectedCondition)
   }
 
-  def openAndCheckPageInNewWindowUsingLinkText(linkText: String, page: Page)(implicit driver: WebDriver): Unit = {
+  def openAndCheckPageInNewWindowUsingLinkText(linkText: String, page: BasePage)(implicit driver: WebDriver): Unit = {
     Browser.clickLinkTextOnceClickable(linkText)
     val tabs = driver.getWindowHandles.asScala.toList
     tabs match {

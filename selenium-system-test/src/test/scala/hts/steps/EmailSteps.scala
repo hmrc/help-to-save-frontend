@@ -18,15 +18,15 @@ package hts.steps
 
 import com.typesafe.config.ConfigFactory
 import hts.browser.Browser
-import hts.pages.emailPages.{EnterEmailPage, SelectEmailPage, VerifyYourEmailPage}
 import hts.pages._
 import hts.pages.accountHomePages.{AccountHolderEmailVerifiedPage, ChangeEmailPage}
+import hts.pages.emailPages.{EnterEmailPage, SelectEmailPage, VerifyYourEmailPage}
 import hts.pages.registrationPages.{ApplicantEmailVerifiedPage, BankDetailsPage, CheckDetailsCreateAccountPage, EligiblePage}
 import hts.utils.{ScenarioContext, TestBankDetails}
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, CryptoImpl, EmailVerificationParams}
 
-class EmailSteps extends Steps {
+class EmailSteps extends BasePage {
 
   lazy implicit val crypto: Crypto = new CryptoImpl(Configuration(ConfigFactory.defaultApplication()))
 
@@ -83,7 +83,7 @@ class EmailSteps extends Steps {
 
   Given("^the account holder has chosen to enter a new email address$"){ () ⇒
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
-    createAccountUsingGGEmail()
+    EligiblePage.createAccountUsingGGEmail()
 
     ChangeEmailPage.navigate()
     ChangeEmailPage.setNewEmailAddress("anotheremail@mail.com")

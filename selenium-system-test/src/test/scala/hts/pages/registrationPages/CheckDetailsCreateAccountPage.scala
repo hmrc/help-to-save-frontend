@@ -17,13 +17,13 @@
 package hts.pages.registrationPages
 
 import hts.browser.Browser
-import hts.pages.Page
+import hts.pages.BasePage
 import hts.utils.Configuration
 import org.openqa.selenium.WebDriver
 
-object CheckDetailsCreateAccountPage extends Page {
+object CheckDetailsCreateAccountPage extends BasePage {
 
-  val expectedURL: String = s"${Configuration.host}/help-to-save/create-account"
+  override val expectedURL: String = s"${Configuration.host}/help-to-save/create-account"
 
   override val expectedPageHeader: Option[String] = Some("Create a Help to Save account")
 

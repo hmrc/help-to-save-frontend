@@ -18,14 +18,14 @@ package hts.steps
 
 import com.typesafe.config.ConfigFactory
 import hts.browser.Browser
-import hts.pages.AuthorityWizardPage
 import hts.pages.accountHomePages.{AccessAccountLink, ChangeEmailPage}
 import hts.pages.registrationPages.EligiblePage
+import hts.pages.{AuthorityWizardPage, BasePage}
 import hts.utils.ScenarioContext
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, CryptoImpl, EmailVerificationParams}
 
-class DifferentNINOSuffixSteps extends Steps {
+class DifferentNINOSuffixSteps extends BasePage {
 
   lazy implicit val crypto: Crypto = new CryptoImpl(Configuration(ConfigFactory.defaultApplication()))
 
@@ -34,7 +34,7 @@ class DifferentNINOSuffixSteps extends Steps {
   Given("^the account holder has enrolled with NINO suffix C$") { () ⇒
     ScenarioContext.defineNINO(ScenarioContext.generateEligibleNINO().take(8) + "C")
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.currentNINO())
-    createAccountUsingGGEmail()
+    EligiblePage.createAccountUsingGGEmail()
   }
 
   When("^the account holder logs in with suffix D$") { () ⇒

@@ -17,18 +17,18 @@
 package hts.steps
 
 import hts.browser.Browser
+import hts.pages._
+import hts.pages.accountHomePages.AccessAccountLink
 import hts.pages.emailPages.{SelectEmailPage, VerifyYourEmailPage}
 import hts.pages.errorPages.{IncorrectDetailsPage, NoAccountPage}
 import hts.pages.informationPages.HMRCChangeOfDetailsPage
-import hts.pages._
-import hts.pages.accountHomePages.AccessAccountLink
 import hts.pages.registrationPages._
 import hts.utils.EitherOps._
 import hts.utils.{ScenarioContext, TestBankDetails}
 
 import scala.hts.pages.informationPages.HelpandInformationPage
 
-class CreateAccountSteps extends Steps {
+class CreateAccountSteps extends BasePage {
   When("^they try to sign in without being logged in to GG$") {
     AccessAccountLink.navigate()
   }
@@ -47,12 +47,12 @@ class CreateAccountSteps extends Steps {
 
   When("^they log in and proceed to create an account using their GG email$") {
     AuthorityWizardPage.authenticateEligibleUser(EligiblePage.expectedURL, ScenarioContext.generateEligibleNINO())
-    createAccountUsingGGEmail()
+    EligiblePage.createAccountUsingGGEmail()
   }
 
   When("^they choose to go ahead with creating an account$") {
     AuthorityWizardPage.enterUserDetails(200, "strong", ScenarioContext.userInfo().getOrElse(sys.error))
-    createAccountUsingGGEmail()
+    EligiblePage.createAccountUsingGGEmail()
   }
 
   When("^they see their details are incorrect and report it$") {
@@ -95,12 +95,12 @@ class CreateAccountSteps extends Steps {
 
   When("^they proceed to create an account using their GG email$") {
     EligiblePage.navigate()
-    createAccountUsingGGEmail()
+    EligiblePage.createAccountUsingGGEmail()
   }
 
   When("^they proceed to create an account$"){
     EligiblePage.navigate()
-    createAccountError()
+    EligiblePage.createAccountError()
   }
 
   Then("^they are informed they don't have an account$") {
