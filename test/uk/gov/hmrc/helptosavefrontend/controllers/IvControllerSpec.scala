@@ -132,7 +132,7 @@ class IvControllerSpec extends AuthSupport with SessionStoreBehaviourSupport {
     }
 
     "handling failed matching responses" must {
-      behave like sessionPutIVURLBehaviour("https://www.gov.uk/government/organisations/hm-revenue-customs/contact/online-services-helpdesk",
+      behave like sessionPutIVURLBehaviour("http://localhost:9250/contact/problem_reports_nonjs?service=HTS",
         "FailedMatching")
     }
 
