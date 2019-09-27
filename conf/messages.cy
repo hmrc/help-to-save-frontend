@@ -41,7 +41,7 @@ hts.core.not-eligible.wtc.p-1=Dim ond os oes gennych hawl i Gredyd Treth Gwaith 
 hts.core.not-eligible.wtc.p-2=Ewch i GOV.UK i gael gwybod am
 hts.core.not-eligible.wtc.link-1=gymhwystra ar gyfer Cymorth i Gynilo
 hts.core.not-eligible.wtc.p-2-2=.
-hts.core.not-eligible.wtc.h2-1=Os ydych chi wedi gwneud cais yn ddiweddar am Gredyd Treth Gwaith
+hts.core.not-eligible.wtc.h2-1=Os ydych wedi gwneud cais yn ddiweddar am Gredyd Treth Gwaith
 hts.core.not-eligible.wtc.p-3=Dylech aros nes eich bod wedi cael llythyr gan Gyllid a Thollau EM yn cadarnhau bod gennych hawl i Gredyd Treth Gwaith. Unwaith eich bod wedi cael y llythyr cewch geisio eto am gyfrif Cymorth i Gynilo.
 hts.core.not-eligible.wtc.h3=Os ydych o’r farn eich bod yn gymwys am gyfrif
 hts.core.not-eligible.wtc.p-4-1=Beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ac yn parhau
@@ -89,7 +89,7 @@ hts.core.not-eligible.sidebar.h2=Mewn mannau eraill ar GOV.UK
 hts.core.not-eligible.sidebar.p=Credyd Treth Gwaith
 
 # Bank Details
-hts.register.bank-details.title.h1=Rhowch fanylion cyfrif banc y DU yr ydych am i ni dalu eich taliadau bonws a thyniadau trosglwyddo i mewn iddo
+hts.register.bank-details.title.h1=Nodwch fanylion cyfrif banc y DU yr ydych am i ni dalu eich taliadau bonws a thyniadau trosglwyddo i mewn iddo
 hts.register.bank-details.sort-code.label=Cod didoli
 hts.register.bank-details.sort-code.hint=Er enghraifft, 02 03 04
 hts.register.bank-details.accountNumber.label=Rhif y cyfrif
@@ -119,8 +119,8 @@ hts.register.bank-details.error.button.try-again=Rhowch gynnig arall arni
 
 # Eligible
 hts.register.you-are-eligible.title.h1=Rydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
-hts.register.you-are-eligible.p1={0}, cyn ichi allu creu cyfrif, dechrau cynilo ac ennill bonws, bydd rhaid ichi:
-hts.register.you-are-eligible.li1=rhoi eich cyfeiriad e-bost inni
+hts.register.you-are-eligible.p1={0}, cyn i chi allu creu cyfrif, dechrau cynilo ac ennill bonws, bydd rhaid i chi:
+hts.register.you-are-eligible.li1=rhoi eich cyfeiriad e-bost ini
 hts.register.you-are-eligible.li2=nodi eich manylion banc
 
 # Register - missing information
@@ -270,7 +270,7 @@ hts.email.error.no-text-after-dot-symbol=Rhaid i’ch cyfeiriad e-bost gynnwys c
 hts.email.error.no-text-after-at-symbol-but-before-dot=Rhaid i’ch cyfeiriad e-bost gynnwys cymeriadau cyn ac ar ôl y ‘dot’
 
 # Select email
-hts.select-email.title.h1=Pa gyfeiriad e-bost rydych chi am ei ddefnyddio ar gyfer eich cyfrif Cymorth i Gynilo?
+hts.select-email.title.h1=Pa gyfeiriad e-bost ydych chi am ei ddefnyddio ar gyfer eich cyfrif Cymorth i Gynilo?
 hts.select-email.select-new-address=Cyfeiriad e-bost newydd
 hts.select-email.enter-new-address-body-text=Ni fydd y cyfeiriadau e-bost a ddefnyddiwch ar gyfer gwasanaethau eraill y llywodraeth yn newid.
 hts.select-email.enter-new-address-label=Cyfeiriad e-bost
@@ -385,7 +385,7 @@ hts.account-created.p2=Mae gennych 4 blynedd yn dechrau nawr i ddefnyddio’ch c
 hts.account-created.h2=Nodweddion allweddol y cyfrif
 hts.account-created.p3=Gallwch wneud y canlynol:
 hts.account-created.ul1-li1=trefnu taliad rheolaidd i wneud cynilo’n haws
-hts.account-created.ul1-li2=cynilo o &pound;1 i &pound;50 bob mis calendr
+hts.account-created.ul1-li2=cynilo rhwng &pound;1 a &pound;50 bob mis calendr
 hts.account-created.ul1-li3=dewis cynilo yn fisol, neu golli misoedd os ydych chi eisiau
 hts.account-created.ul1-li4=talu i mewn nifer o weithiau yn ystod mis calendr
 hts.account-created.ul1-li5=tynnu arian allan a pharhau i ennill bonws
@@ -410,7 +410,7 @@ hts.register.create_account.condition-wtc=byddwch yn rhoi gwybod i ni bob tro y 
 hts.register.create_account.condition-uc=byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 4 wythnos neu fwy
 
 hts.register.create_account.change=Newid
-hts.register.create_account.title=Creu cyfrif Cymorth i Gynilov
+hts.register.create_account.title=Creu cyfrif Cymorth i Gynilo
 hts.register.create_account.intro=Bydd angen i chi sicrhau bod eich manylion yn gywir a’ch bod yn cytuno â’r telerau ac amodau cyn y gallwch greu cyfrif Cymorth i Gynilo.
 hts.register.create_account.your-details=Eich manylion
 hts.register.create_account.change-your-name=Newid eich enw
