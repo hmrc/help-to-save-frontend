@@ -16,20 +16,31 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Request, RequestHeader, Result}
+import play.api.mvc.{MessagesControllerComponents, Request, RequestHeader, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-class BaseController @Inject() (implicit messagesApi: MessagesApi, appConfig: FrontendAppConfig)
-  extends ErrorHandler() with uk.gov.hmrc.play.bootstrap.controller.BaseController with I18nSupport with Logging {
+@Singleton
+class BaseController @Inject() (cpd:          CommonPlayDependencies,
+                                mcc:          MessagesControllerComponents,
+                                errorHandler: ErrorHandler) extends FrontendController(mcc) with I18nSupport {
 
-  override implicit def hc(implicit rh: RequestHeader): HeaderCarrier =
+  override implicit val messagesApi: MessagesApi = cpd.messagesApi
+
+  implicit val appConfig: FrontendAppConfig = cpd.appConfig
+
+  val Messages: MessagesApi = messagesApi
+
+  implicit override def hc(implicit rh: RequestHeader): HeaderCarrier =
     HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
 
   def internalServerError()(implicit request: Request[_]): Result =
-    InternalServerError(internalServerErrorTemplate(request))
+    InternalServerError(errorHandler.internalServerErrorTemplate(request))
 }
+
+class CommonPlayDependencies @Inject() (val appConfig:   FrontendAppConfig,
+                                        val messagesApi: MessagesApi)

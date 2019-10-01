@@ -18,12 +18,12 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
@@ -32,7 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{toFuture, _}
-import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,15 +40,19 @@ import scala.concurrent.{ExecutionContext, Future}
 class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
                                        val sessionStore:      SessionStore,
                                        val authConnector:     AuthConnector,
-                                       val metrics:           Metrics)(implicit override val messagesApi: MessagesApi,
-                                                                       val transformer:       NINOLogMessageTransformer,
-                                                                       val frontendAppConfig: FrontendAppConfig,
-                                                                       val config:            Configuration,
-                                                                       val env:               Environment,
-                                                                       bankDetailsValidation: BankDetailsValidation,
-                                                                       ec:                    ExecutionContext)
+                                       val metrics:           Metrics,
+                                       cpd:                   CommonPlayDependencies,
+                                       mcc:                   MessagesControllerComponents,
+                                       errorHandler:          ErrorHandler,
+                                       bankAccountDetails:    bank_account_details,
+                                       notEligible:           not_eligible)(implicit val transformer: NINOLogMessageTransformer,
+                                                                            val frontendAppConfig: FrontendAppConfig,
+                                                                            val config:            Configuration,
+                                                                            val env:               Environment,
+                                                                            bankDetailsValidation: BankDetailsValidation,
+                                                                            ec:                    ExecutionContext)
 
-  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour {
 
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
@@ -65,9 +69,9 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
     checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
       s ⇒
         s.bankDetails.fold(
-          Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm(), backLinkFromSession(s)))
+          Ok(bankAccountDetails(BankDetails.giveBankDetailsForm(), backLinkFromSession(s)))
         )(bankDetails ⇒
-            Ok(views.html.register.bank_account_details(BankDetails.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
+            Ok(bankAccountDetails(BankDetails.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
           )
     }
   }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
@@ -77,8 +81,8 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
       session ⇒
         BankDetails.giveBankDetailsForm().bindFromRequest().fold(
           withErrors ⇒
-            Ok(views.html.register.bank_account_details(withErrors, backLinkFromSession(session))), { bankDetails ⇒
-            helpToSaveService.validateBankDetails(ValidateBankDetailsRequest(htsContext.nino, bankDetails.sortCode.toString, bankDetails.accountNumber)).fold[Future[Result]](
+            Ok(bankAccountDetails(withErrors, backLinkFromSession(session))), { bankDetails ⇒
+            helpToSaveService.validateBankDetails(ValidateBankDetailsRequest(htsContext.nino, bankDetails.sortCode.toString, bankDetails.accountNumber)).fold[Future[PlayResult]](
               error ⇒ {
                 logger.warn(s"Could not validate bank details due to : $error")
                 internalServerError()
@@ -102,24 +106,24 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
                       .withError("accountNumber", BankDetailsValidation.ErrorMessages.accountNumberBackendInvalid)
                   }
 
-                  Ok(views.html.register.bank_account_details(formWithErrors, backLinkFromSession(session)))
+                  Ok(bankAccountDetails(formWithErrors, backLinkFromSession(session)))
                 }
               }
-            ).flatMap(identity)
+            ).flatMap(identity _)
           }
         )
     }
 
   }(loginContinueURL = routes.BankAccountController.submitBankDetails().url)
 
-  private def checkIfAlreadyEnrolledAndDoneEligibilityChecks(nino: String)(ifNotEnrolled: HTSSession ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, request: Request[_]) =
+  private def checkIfAlreadyEnrolledAndDoneEligibilityChecks(nino: String)(ifNotEnrolled: HTSSession ⇒ Future[PlayResult])(implicit htsContext: HtsContextWithNINO, request: Request[_]) =
     checkIfAlreadyEnrolled { () ⇒
       checkSession(
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       ) { session ⇒
-          session.eligibilityCheckResult.fold[Future[Result]](
+          session.eligibilityCheckResult.fold[Future[PlayResult]](
             SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-          )(_.fold[Future[Result]](
+          )(_.fold[Future[PlayResult]](
               { ineligibleReason ⇒
                 val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
                 val threshold = ineligibleReason.value.threshold
@@ -128,7 +132,7 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
                   logger.warn(s"Could not parse ineligibility reason when storing bank details: $ineligibleReason", nino)
                   toFuture(internalServerError())
                 } { i ⇒
-                  toFuture(Ok(views.html.register.not_eligible(i, threshold)))
+                  toFuture(Ok(notEligible(i, threshold)))
                 }
               },
               _ ⇒ ifNotEnrolled(session)

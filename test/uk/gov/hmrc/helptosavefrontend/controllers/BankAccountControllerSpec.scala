@@ -20,6 +20,7 @@ import cats.data.EitherT
 import play.api.http.Status
 import play.api.mvc.Result
 import cats.instances.future._
+import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -27,12 +28,14 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibi
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, ValidateBankDetailsRequest, ValidateBankDetailsResult}
+import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BankAccountControllerSpec extends AuthSupport
+class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
   with CSRFSupport
+  with AuthSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionStoreBehaviourSupport {
 
@@ -47,13 +50,20 @@ class BankAccountControllerSpec extends AuthSupport
     mockHelpToSaveService,
     mockSessionStore,
     mockAuthConnector,
-    mockMetrics)
+    mockMetrics,
+    testCpd,
+    testMcc,
+    testErrorHandler,
+    injector.instanceOf[bank_account_details],
+    injector.instanceOf[not_eligible])
+
+  private val fakeRequest = FakeRequest("GET", "/")
 
   "The BankAccountController" when {
 
     "handling getBankDetailsPage" must {
 
-        def doRequest() = controller.getBankDetailsPage()(fakeRequestWithCSRFToken)
+        def doRequest() = csrfAddToken(controller.getBankDetailsPage())(fakeRequest)
 
       doCommonChecks(doRequest)
 
@@ -135,7 +145,7 @@ class BankAccountControllerSpec extends AuthSupport
 
     "handling submitBankDetails" must {
 
-      val submitBankDetailsRequest = fakeRequestWithCSRFToken
+      val submitBankDetailsRequest = fakeRequest
         .withFormUrlEncodedBody(
           "sortCode" → "123456",
           "accountNumber" -> "12345678",
@@ -143,7 +153,7 @@ class BankAccountControllerSpec extends AuthSupport
           "accountName" -> "test user name"
         )
 
-        def doRequest() = controller.submitBankDetails()(submitBankDetailsRequest)
+        def doRequest() = csrfAddToken(controller.submitBankDetails())(submitBankDetailsRequest)
 
       doCommonChecks(doRequest)
 
@@ -156,7 +166,7 @@ class BankAccountControllerSpec extends AuthSupport
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
         }
 
-        val result = controller.submitBankDetails()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("rollNumber" → "a"))
+        val result = csrfAddToken(controller.submitBankDetails())(fakeRequest.withFormUrlEncodedBody("rollNumber" → "a"))
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Enter sort code")
         contentAsString(result) should include("Enter account number")

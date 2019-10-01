@@ -20,13 +20,15 @@
 
 @import uk.gov.hmrc.helptosavefrontend.util.Email
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+
 @(returningUser: Boolean, accountEmail: Option[Email])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages("hts.cannot-change-email-try-later.title.h1")
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
 title = title,
 sidebarLinks = None,
 bodyClasses = None) {

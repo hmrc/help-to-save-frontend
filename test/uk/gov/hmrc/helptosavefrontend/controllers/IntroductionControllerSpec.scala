@@ -25,14 +25,23 @@ import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrol
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
+import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
+import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IntroductionControllerSpec extends AuthSupport with CSRFSupport with SessionStoreBehaviourSupport with EnrolmentAndEligibilityCheckBehaviour {
+class IntroductionControllerSpec extends ControllerSpecWithGuiceApp with AuthSupport
+  with CSRFSupport with SessionStoreBehaviourSupport with EnrolmentAndEligibilityCheckBehaviour {
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new IntroductionController(mockAuthConnector, mockMetrics, mockHelpToSaveService)
+  val helpToSave = new IntroductionController(mockAuthConnector,
+                                              mockMetrics,
+                                              mockHelpToSaveService,
+                                              testCpd,
+                                              testMcc,
+                                              testErrorHandler,
+                                              injector.instanceOf[privacy],
+                                              injector.instanceOf[help_information])
 
   def mockAuthorise(loggedIn: Boolean) =
     (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
@@ -75,7 +84,7 @@ class IntroductionControllerSpec extends AuthSupport with CSRFSupport with Sessi
     "the getApply return 200" in {
       mockAuthorise(false)
 
-      val result = helpToSave.getApply(fakeRequestWithCSRFToken)
+      val result = csrfAddToken(helpToSave.getApply)(fakeRequest)
       status(result) shouldBe Status.SEE_OTHER
       redirectLocation(result) shouldBe Some("https://www.gov.uk/get-help-savings-low-income/how-to-apply")
     }

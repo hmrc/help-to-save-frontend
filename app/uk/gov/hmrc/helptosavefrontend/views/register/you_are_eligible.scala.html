@@ -21,13 +21,16 @@
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+
 @(userInfo: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages("hts.register.you-are-eligible.title.h1")
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
   title = title,
   sidebarLinks = None,
   bodyClasses = None) {

@@ -16,6 +16,9 @@
 
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.play.views.html.layouts.MainContent
+
+@this(govukWrapper: uk.gov.hmrc.helptosavefrontend.views.html.govuk_wrapper)
 
 @(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig, htsContext: HtsContext)
 
@@ -27,4 +30,4 @@
     <p>@message</p>
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.govuk_wrapper(appConfig = frontendAppConfig, title = pageTitle, contentHeader = Some(contentHeader), mainContent = mainContent)
+@govukWrapper(appConfig = frontendAppConfig, title = pageTitle, contentHeader = Some(contentHeader), mainContentHtml = mainContent)

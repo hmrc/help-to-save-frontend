@@ -20,13 +20,15 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+
 @(accountNumber: Option[String])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages("hts.help.information.title.h1")
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
   title = title + " " + Messages("hts.global.accountholder.title-suffix")
 ){
   @navigate_back(Some(appConfig.nsiManageAccountUrl))

@@ -26,6 +26,8 @@
 @import cats.syntax.show._
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo.localDateShow
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+
 @(eligibleWithUserInfo: EligibleWithUserInfo, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{Messages("hts.register.create_account.title")}
@@ -34,7 +36,7 @@
   str.filterNot((x: Char) => x.isWhitespace || x.toString.matches("-")).grouped(2).mkString(" ")
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
 title = title,
 sidebarLinks = None,
 bodyClasses = None) {

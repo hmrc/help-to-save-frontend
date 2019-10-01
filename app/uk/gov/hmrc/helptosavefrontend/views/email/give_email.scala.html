@@ -21,6 +21,9 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+
 @(form: Form[GiveEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
@@ -29,7 +32,7 @@
 
 @defining(form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))){ errorMessage =>
 
-    @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+    @main(
         title = title,
         sidebarLinks = None,
         bodyClasses = None,
@@ -60,7 +63,7 @@
             )
 
           <section class="subsection">
-            @helpers.submit('_buttonClass -> "", 'id → "continue", '_onclick -> "ga('send', 'event', 'buttons', 'Confirmed given email', 'Applicant gives email address page');") { @messages("hts.global.continue-button") }
+            @submit('_buttonClass -> "", 'id → "continue", '_onclick -> "ga('send', 'event', 'buttons', 'Confirmed given email', 'Applicant gives email address page');") { @messages("hts.global.continue-button") }
           </section>
         }
 

@@ -21,12 +21,11 @@ import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.traverse._
 import com.google.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result ⇒ PlayResult}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result ⇒ PlayResult}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.controllers.SessionBehaviour.SessionWithEligibilityCheck
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
@@ -38,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, Result, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.helptosavefrontend.views.html.register.{missing_user_info, not_eligible, think_you_are_eligible, you_are_eligible}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,15 +47,21 @@ import scala.util.{Failure, Success}
 class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveService,
                                             val sessionStore:      SessionStore,
                                             val authConnector:     AuthConnector,
-                                            val metrics:           Metrics)(implicit override val messagesApi: MessagesApi,
-                                                                            val transformer:       NINOLogMessageTransformer,
-                                                                            val frontendAppConfig: FrontendAppConfig,
-                                                                            val config:            Configuration,
-                                                                            val env:               Environment,
-                                                                            ec:                    ExecutionContext)
-  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
+                                            val metrics:           Metrics,
+                                            cpd:                   CommonPlayDependencies,
+                                            mcc:                   MessagesControllerComponents,
+                                            errorHandler:          ErrorHandler,
+                                            notEligible:           not_eligible,
+                                            youAreEligible:        you_are_eligible,
+                                            missingUserInfo:       missing_user_info,
+                                            thinkYouAreEligible:   think_you_are_eligible)(implicit val transformer: NINOLogMessageTransformer,
+                                                                                           val frontendAppConfig: FrontendAppConfig,
+                                                                                           val config:            Configuration,
+                                                                                           val env:               Environment,
+                                                                                           ec:                    ExecutionContext)
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
 
-  val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
+  val earlyCapCheckOn: Boolean = frontendAppConfig.earlyCapCheckOn
 
   def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒ // scalastyle:ignore
     def eligibilityAction(session: Option[HTSSession]): Future[PlayResult] =
@@ -117,7 +122,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
               logger.warn(s"Could not parse ineligibility reason: $ineligibleReason", htsContext.nino)
               internalServerError()
             } { i ⇒
-              Ok(views.html.register.not_eligible(i, threshold))
+              Ok(notEligible(i, threshold))
             }
           },
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
@@ -133,7 +138,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
       } {
         _.eligibilityResult.fold(
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-          eligibleWithUserInfo ⇒ Ok(views.html.register.you_are_eligible(eligibleWithUserInfo.userInfo))
+          eligibleWithUserInfo ⇒ Ok(youAreEligible(eligibleWithUserInfo.userInfo))
         )
       }
     }
@@ -156,7 +161,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
 
   val getMissingInfoPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     htsContext.userDetails.fold(
-      missingInfo ⇒ Ok(views.html.register.missing_user_info(missingInfo.missingInfo)),
+      missingInfo ⇒ Ok(missingUserInfo(missingInfo.missingInfo)),
       _ ⇒ SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     )
   }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
@@ -166,7 +171,7 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     } {
       _.eligibilityResult.fold(
-        _ ⇒ Ok(views.html.register.think_you_are_eligible()),
+        _ ⇒ Ok(thinkYouAreEligible()),
         _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
       )
     }

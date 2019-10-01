@@ -20,13 +20,13 @@ import java.util.UUID
 
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
-import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
 import uk.gov.hmrc.http.HttpResponse
 
 // scalastyle:off magic.number
-class IvConnectorSpec extends TestSupport with HttpSupport with ScalaFutures {
+class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with ScalaFutures {
 
   class TestApparatus {
 

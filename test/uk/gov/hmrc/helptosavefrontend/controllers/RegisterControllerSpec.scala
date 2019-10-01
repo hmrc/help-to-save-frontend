@@ -36,16 +36,18 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Eligible
-import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
+import uk.gov.hmrc.helptosavefrontend.views.html.cannot_check_details
+import uk.gov.hmrc.helptosavefrontend.views.html.register._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 class RegisterControllerSpec
-  extends AuthSupport
+  extends ControllerSpecWithGuiceApp
+  with AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionStoreBehaviourSupport
@@ -63,12 +65,26 @@ class RegisterControllerSpec
       mockSessionStore,
       mockAuthConnector,
       mockMetrics,
-      fakeApplication) {
+      testCpd,
+      testMcc,
+      testErrorHandler,
+      injector.instanceOf[create_account],
+      injector.instanceOf[daily_cap_reached],
+      injector.instanceOf[total_cap_reached],
+      injector.instanceOf[service_unavailable],
+      injector.instanceOf[details_are_incorrect],
+      injector.instanceOf[account_created],
+      injector.instanceOf[create_account_error],
+      injector.instanceOf[create_account_error_bank_details],
+      injector.instanceOf[cannot_check_details]
+    ) {
       override val clock = january1970Clock
     }
   }
 
   lazy val controller: RegisterController = newController(earlyCapCheck = false)(crypto)
+
+  private val fakeRequest = FakeRequest("GET", "/")
 
   def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
@@ -168,7 +184,7 @@ class RegisterControllerSpec
       val userInfo = eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6)
 
         def doRequest(): Future[PlayResult] =
-          controller.getCreateAccountPage()(fakeRequestWithCSRFToken)
+          csrfAddToken(controller.getCreateAccountPage())(fakeRequest)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 
@@ -276,7 +292,7 @@ class RegisterControllerSpec
 
     "creating an account" must {
 
-        def doCreateAccountRequest(): Future[PlayResult] = controller.createAccount(fakeRequestWithCSRFToken)
+        def doCreateAccountRequest(): Future[PlayResult] = csrfAddToken(controller.createAccount)(fakeRequest)
 
       behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 
@@ -425,7 +441,7 @@ class RegisterControllerSpec
 
     "handling getAccountCreatedPage" must {
 
-        def getAccountCreatedPage() = controller.getAccountCreatedPage()(fakeRequestWithCSRFToken)
+        def getAccountCreatedPage() = csrfAddToken(controller.getAccountCreatedPage())(fakeRequest)
 
       "show the page correctly if the person is enrolled to HTS and the session has an account number in it" in {
         val accountNumber = UUID.randomUUID().toString
@@ -564,7 +580,7 @@ class RegisterControllerSpec
 
       val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name")
 
-        def doRequest(): Future[PlayResult] = controller.getCreateAccountPage()(fakeRequestWithCSRFToken)
+        def doRequest(): Future[PlayResult] = csrfAddToken(controller.getCreateAccountPage())(fakeRequest)
 
       behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
 

@@ -21,11 +21,11 @@ import java.util.Base64
 import com.typesafe.config.ConfigFactory
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.Configuration
-import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.util.{Random, Success}
 
-class CryptoImplSpec extends TestSupport with GeneratorDrivenPropertyChecks {
+class CryptoImplSpec extends UnitSpec with GeneratorDrivenPropertyChecks {
 
   "The CryptoImpl" must {
 

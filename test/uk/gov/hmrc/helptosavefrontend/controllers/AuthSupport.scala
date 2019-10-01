@@ -17,11 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.joda.time.LocalDate
+import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise._
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserInfoRetrievals
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
@@ -38,7 +38,7 @@ object AuthSupport {
 
 }
 
-trait AuthSupport extends TestSupport {
+trait AuthSupport extends MockFactory {
 
   import AuthSupport._
 

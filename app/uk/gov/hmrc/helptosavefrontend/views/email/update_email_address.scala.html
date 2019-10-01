@@ -21,6 +21,8 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+
 @(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @serviceInfoContent = {
@@ -37,7 +39,7 @@
 
 @defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
 
-    @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+    @main(
         title = title + " " + Messages("hts.global.title.section.email"),
         sidebarLinks = None,
         bodyClasses = None,

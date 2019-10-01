@@ -23,12 +23,11 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import play.api.data.FormError
 import play.api.{Configuration, Logger}
-import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages._
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
 
 // scalastyle:off magic.number
-class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks with TestSupport {
+class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   "EmailValidation" must {
 

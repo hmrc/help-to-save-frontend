@@ -21,7 +21,7 @@ import java.util.UUID
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Ineligible
@@ -30,7 +30,8 @@ import uk.gov.hmrc.http.logging.SessionId
 
 import scala.concurrent.duration._
 
-class SessionStoreSpec extends TestSupport with MongoSupport with ScalaFutures with GeneratorDrivenPropertyChecks with Eventually {
+class SessionStoreSpec extends ControllerSpecWithGuiceApp
+  with MongoSupport with ScalaFutures with GeneratorDrivenPropertyChecks with Eventually {
 
   implicit val config: PatienceConfig = PatienceConfig().copy(timeout = scaled(1.minute))
 

@@ -14,7 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.button
+@this(button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
+
 @(args: (Symbol, String)*)(content: Html)(implicit messages: play.api.i18n.Messages)
 @argsMap = @{
     args.toMap

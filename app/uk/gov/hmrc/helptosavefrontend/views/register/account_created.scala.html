@@ -23,6 +23,8 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.register.dateTimeFormatter
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+
 @(accountNumber: String, email: String, lastPayDateThisMonth: LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
@@ -37,7 +39,7 @@
   """))
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
 title = title,
 bodyClasses = None,
 extraMeta = extraMeta) {

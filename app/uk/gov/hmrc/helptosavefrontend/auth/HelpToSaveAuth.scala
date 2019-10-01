@@ -36,11 +36,12 @@ import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, Ht
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects {
-  this: BaseController ⇒
+trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging {
+  this: FrontendController ⇒
 
   val metrics: Metrics
   val appConfig: FrontendAppConfig

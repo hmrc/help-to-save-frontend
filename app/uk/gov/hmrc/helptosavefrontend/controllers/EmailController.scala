@@ -22,13 +22,12 @@ import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.CannotCreateAccountReason
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
@@ -42,7 +41,8 @@ import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}
-import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.helptosavefrontend.views.html.email._
+import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -54,17 +54,25 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                                  val emailVerificationConnector: EmailVerificationConnector,
                                  val authConnector:              AuthConnector,
                                  val metrics:                    Metrics,
-                                 app:                            Application,
-                                 val auditor:                    HTSAuditor)(implicit val crypto: Crypto,
-                                                                             emailValidation:          EmailValidation,
-                                                                             override val messagesApi: MessagesApi,
-                                                                             val transformer:          NINOLogMessageTransformer,
-                                                                             val frontendAppConfig:    FrontendAppConfig,
-                                                                             val config:               Configuration,
-                                                                             val env:                  Environment,
-                                                                             ec:                       ExecutionContext)
+                                 val auditor:                    HTSAuditor,
+                                 cpd:                            CommonPlayDependencies,
+                                 mcc:                            MessagesControllerComponents,
+                                 errorHandler:                   ErrorHandler,
+                                 selectEmail:                    select_email,
+                                 giveEmail:                      give_email,
+                                 checkYourEmail:                 check_your_email,
+                                 cannotChangeEmail:              cannot_change_email,
+                                 cannotChangeEmailTryLater:      cannot_change_email_try_later,
+                                 linkExpired:                    link_expired,
+                                 emailUpdated:                   email_updated)(implicit val crypto: Crypto,
+                                                                                emailValidation:       EmailValidation,
+                                                                                val transformer:       NINOLogMessageTransformer,
+                                                                                val frontendAppConfig: FrontendAppConfig,
+                                                                                val config:            Configuration,
+                                                                                val env:               Environment,
+                                                                                ec:                    ExecutionContext)
 
-  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with VerifyEmailBehaviour {
 
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
@@ -92,7 +100,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                       s.pendingEmail.fold(Map("new-email" → ""))(e ⇒ Map("new-email" → e)))
                   }
                 }
-                Ok(views.html.email.select_email(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
+                Ok(selectEmail(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
             },
             { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url) }
           )(session)
@@ -109,7 +117,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                     case Right(validEmail) ⇒
                       updateSessionAndReturnResult(
                         HTSSession(None, None, Some(validEmail)),
-                        Ok(views.html.email.select_email(validEmail, SelectEmailForm.selectEmailForm)))
+                        Ok(selectEmail(validEmail, SelectEmailForm.selectEmailForm)))
 
                     case Left(_) ⇒
                       updateSessionAndReturnResult(
@@ -132,7 +140,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                    session:  HTSSession
       ): Future[Result] =
         SelectEmailForm.selectEmailForm.bindFromRequest().fold(
-          withErrors ⇒ Ok(views.html.email.select_email(email, withErrors, backLink)),
+          withErrors ⇒ Ok(selectEmail(email, withErrors, backLink)),
           { form ⇒
             val (updatedSession, result) = form.newEmail.fold {
               session.copy(hasSelectedEmail = true) →
@@ -188,14 +196,14 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             case _ ⇒ SeeOther(routes.EmailController.getSelectEmailPage().url)
           }, {
             case (s, _) ⇒
-              Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm, Some(backLinkFromSession(s))))
+              Ok(giveEmail(GiveEmailForm.giveEmailForm, Some(backLinkFromSession(s))))
           })(session)
         }
 
         def ifDE = { _: Option[HTSSession] ⇒
           htsContext.userDetails.toOption.flatMap(_.email).fold {
             updateSessionAndReturnResult(HTSSession(None, None, None),
-                                         Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm)))
+                                         Ok(giveEmail(GiveEmailForm.giveEmailForm)))
           } {
             email ⇒
               emailValidation.validate(email).toEither match {
@@ -206,7 +214,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
                 case Left(_) ⇒
                   updateSessionAndReturnResult(HTSSession(None, None, None),
-                                               Ok(views.html.email.give_email(GiveEmailForm.giveEmailForm))
+                                               Ok(giveEmail(GiveEmailForm.giveEmailForm))
                   )
               }
           }
@@ -220,7 +228,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
     def handleForm(session: HTSSession): Future[Result] =
         GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
-          withErrors ⇒ Ok(views.html.email.give_email(withErrors, Some(backLinkFromSession(session)))),
+          withErrors ⇒ Ok(giveEmail(withErrors, Some(backLinkFromSession(session)))),
           form ⇒ {
             val updatedSession = session.copy(confirmedEmail = None, pendingEmail = Some(form.email))
             if (session =!= updatedSession) {
@@ -244,7 +252,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
           ) { _ ⇒
               GiveEmailForm.giveEmailForm.bindFromRequest().fold[Future[Result]](
-                withErrors ⇒ Ok(views.html.email.give_email(withErrors)),
+                withErrors ⇒ Ok(giveEmail(withErrors)),
                 form ⇒
                   updateSessionAndReturnResult(HTSSession(None, None, Some(form.email)),
                                                SeeOther(routes.EmailController.confirmEmail().url)
@@ -493,7 +501,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
         sendEmailVerificationRequest(
           pendingEmail,
           userInfo.forename,
-          Ok(views.html.email.check_your_email(pendingEmail, userInfo.email)),
+          Ok(checkYourEmail(pendingEmail, userInfo.email)),
           params ⇒ routes.EmailController.emailConfirmedCallback(params.encode()).url,
           _ ⇒ SeeOther(userInfo.email.fold(
             routes.EmailController.confirmEmailErrorTryLater().url)(
@@ -539,7 +547,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           case (_, eligible) ⇒
             eligible.userInfo.email.fold(
               SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
-            )(email ⇒ Ok(views.html.email.cannot_change_email(email, EmailVerificationErrorContinueForm.continueForm, duringRegistrationJourney = true)))
+            )(email ⇒ Ok(cannotChangeEmail(email, EmailVerificationErrorContinueForm.continueForm, duringRegistrationJourney = true)))
         }(session)
 
       def ifDE = {
@@ -548,7 +556,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             htsContext.userDetails.toOption.flatMap(_.email).fold[Future[Result]](
               SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
             )(email ⇒
-                Ok(views.html.email.cannot_change_email(email, EmailVerificationErrorContinueForm.continueForm, duringRegistrationJourney = false)))
+                Ok(cannotChangeEmail(email, EmailVerificationErrorContinueForm.continueForm, duringRegistrationJourney = false)))
           }
       }
 
@@ -558,9 +566,9 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   def confirmEmailErrorTryLater: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkSessionAndEnrolmentStatus(
-      { _ ⇒ Ok(views.html.email.cannot_change_email_try_later(returningUser = false, None)) },
-      { _ ⇒ Ok(views.html.email.cannot_change_email_try_later(returningUser = true, None)) },
-      { (_, email) ⇒ Ok(views.html.email.cannot_change_email_try_later(returningUser = true, Some(email))) }
+      { _ ⇒ Ok(cannotChangeEmailTryLater(returningUser = false, None)) },
+      { _ ⇒ Ok(cannotChangeEmailTryLater(returningUser = true, None)) },
+      { (_, email) ⇒ Ok(cannotChangeEmailTryLater(returningUser = true, Some(email))) }
     )
 
   }(loginContinueURL = routes.EmailController.confirmEmailErrorTryLater().url)
@@ -572,7 +580,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
           SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
         )(e ⇒
             EmailVerificationErrorContinueForm.continueForm.bindFromRequest().fold(
-              form ⇒ Ok(views.html.email.cannot_change_email(e, form, duringRegistrationJourney)),
+              form ⇒ Ok(cannotChangeEmail(e, form, duringRegistrationJourney)),
               { continue ⇒
                 if (continue.value) {
                   SeeOther(routes.EmailController.emailConfirmed(crypto.encrypt(e)).url)
@@ -597,7 +605,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
   }(loginContinueURL = routes.EmailController.confirmEmailError().url)
 
   val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.link_expired())
+    Ok(linkExpired())
   }(loginContinueURL = routes.EmailController.getLinkExpiredPage().url)
 
   def getEmailConfirmed: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -612,7 +620,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
                   _ ⇒ routes.EmailController.confirmEmailError().url
                 )
               toFuture(SeeOther(url))
-            }(_ ⇒ Ok(views.html.email.email_updated()))
+            }(_ ⇒ Ok(emailUpdated()))
         }(session)
 
       def ifDE = SeeOther(routes.EmailController.getGiveEmailPage().url)
@@ -623,7 +631,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             _.confirmedEmail.fold[Future[Result]] {
               logger.warn("Could not find confirmed email in the session for DE user", htsContext.nino)
               internalServerError()
-            }(_ ⇒ Ok(views.html.email.email_updated())
+            }(_ ⇒ Ok(emailUpdated())
             )
           }
       }
@@ -637,7 +645,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
     def handle(email: Option[String]) =
         email.fold[Future[Result]](
           SeeOther(routes.EmailController.getGiveEmailPage().url))(
-            _ ⇒ Ok(views.html.email.email_updated()))
+            _ ⇒ Ok(emailUpdated()))
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession {

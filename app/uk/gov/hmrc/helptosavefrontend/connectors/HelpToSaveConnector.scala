@@ -69,7 +69,7 @@ trait HelpToSaveConnector {
 @Singleton
 class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppConfig: FrontendAppConfig) extends HelpToSaveConnector {
 
-  private val helpToSaveUrl: String = frontendAppConfig.baseUrl("help-to-save")
+  private val helpToSaveUrl: String = frontendAppConfig.helpToSaveUrl
 
   private val eligibilityURL =
     s"$helpToSaveUrl/help-to-save/eligibility-check"

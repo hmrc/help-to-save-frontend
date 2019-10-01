@@ -18,9 +18,10 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason._
-@import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible_sidebar
 @import cats.syntax.eq._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
 @(ineligibilityReason: IneligibilityReason, threshold: Option[Double])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -28,7 +29,7 @@
   Messages("hts.core.not-eligible.title.h1")
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
   title = title,
   bodyClasses = None
 ) {

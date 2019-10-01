@@ -24,6 +24,8 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+
 @(form: Form[BankDetails], backLink: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{messages("hts.register.bank-details.title.h1")}
@@ -37,7 +39,7 @@
 @sortCodeBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "sortCode")}
 @accountNumberBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "accountNumber")}
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
   title = pageTitle,
   bodyClasses = None) {
 

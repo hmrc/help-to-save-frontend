@@ -18,12 +18,11 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
@@ -37,16 +36,27 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class IvController @Inject() (val sessionStore:  SessionStore,
-                              ivConnector:       IvConnector,
-                              val authConnector: AuthConnector,
-                              val metrics:       Metrics)(implicit override val messagesApi: MessagesApi,
-                                                          val transformer:       NINOLogMessageTransformer,
-                                                          val frontendAppConfig: FrontendAppConfig,
-                                                          val config:            Configuration,
-                                                          val env:               Environment,
-                                                          ec:                    ExecutionContext)
-  extends BaseController with HelpToSaveAuth {
+class IvController @Inject() (val sessionStore:         SessionStore,
+                              ivConnector:              IvConnector,
+                              val authConnector:        AuthConnector,
+                              val metrics:              Metrics,
+                              cpd:                      CommonPlayDependencies,
+                              mcc:                      MessagesControllerComponents,
+                              errorHandler:             ErrorHandler,
+                              ivSuccessView:            iv_success,
+                              failedIVview:             failed_iv,
+                              insufficientEvidenceView: insufficient_evidence,
+                              lockedOutView:            locked_out,
+                              userAbortedView:          user_aborted,
+                              timeOutView:              time_out,
+                              technicalIVissuesView:    technical_iv_issues,
+                              preconditionFailedView:   precondition_failed
+)(implicit val transformer: NINOLogMessageTransformer,
+  val frontendAppConfig: FrontendAppConfig,
+  val config:            Configuration,
+  val env:               Environment,
+  ec:                    ExecutionContext)
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth {
 
   val eligibilityUrl: String = routes.EligibilityCheckController.getCheckEligibility().url
 
@@ -132,40 +142,40 @@ class IvController @Inject() (val sessionStore:  SessionStore,
 
   def getIVSuccessful: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivSuccessURL, eligibilityUrl)(u ⇒ Ok(iv_success(u)))
+      retrieveURLFromSessionCache(_.ivSuccessURL, eligibilityUrl)(u ⇒ Ok(ivSuccessView(u)))
 
     }(routes.IvController.getIVSuccessful().url)
 
   def getFailedIV: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(failed_iv(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(failedIVview(u)))
     }(routes.IvController.getFailedIV().url)
 
   def getInsufficientEvidence: Action[AnyContent] =
-    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(insufficient_evidence())
+    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(insufficientEvidenceView())
     }(routes.IvController.getInsufficientEvidence().url)
 
   def getLockedOut: Action[AnyContent] =
-    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(locked_out())
+    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(lockedOutView())
     }(routes.IvController.getLockedOut().url)
 
   def getUserAborted: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(user_aborted(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(userAbortedView(u)))
     }(routes.IvController.getUserAborted().url)
 
   def getTimedOut: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(time_out(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(timeOutView(u)))
     }(routes.IvController.getTimedOut().url)
 
   def getTechnicalIssue: Action[AnyContent] =
     authorisedForHts { implicit r ⇒ implicit h ⇒
-      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(technical_iv_issues(u)))
+      retrieveURLFromSessionCache(_.ivURL, defaultIVUrl)(u ⇒ Ok(technicalIVissuesView(u)))
     }(routes.IvController.getTechnicalIssue().url)
 
   def getPreconditionFailed: Action[AnyContent] =
-    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(precondition_failed())
+    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(preconditionFailedView())
     }(routes.IvController.getPreconditionFailed().url)
 
   private def storeInSessionCacheThenRedirect(session: HTSSession, journeyId: Option[String])(redirectTo: ⇒ String)(

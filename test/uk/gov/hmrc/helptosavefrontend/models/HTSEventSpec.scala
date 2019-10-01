@@ -17,10 +17,10 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.Json
-import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 
-class HTSEventSpec extends TestSupport {
+class HTSEventSpec extends ControllerSpecWithGuiceApp {
 
   val appName = "help-to-save-frontend"
 
