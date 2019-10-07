@@ -132,8 +132,7 @@ class IvControllerSpec extends AuthSupport with SessionStoreBehaviourSupport {
     }
 
     "handling failed matching responses" must {
-      behave like sessionPutIVURLBehaviour("https://www.gov.uk/government/organisations/hm-revenue-customs/contact/online-services-helpdesk",
-        "FailedMatching")
+      behave like sessionPutIVURLBehaviour(routes.IvController.getFailedMatching().url, "FailedMatching")
     }
 
     "handling insufficient evidence responses" must {
@@ -257,6 +256,18 @@ class IvControllerSpec extends AuthSupport with SessionStoreBehaviourSupport {
         status(result) shouldBe OK
         maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
         contentAsString(result) should include("ve verified your identity")
+      }
+
+    testIndividualPage(
+      "failed matching",
+      () ⇒ ivController.getFailedMatching()(FakeRequest()),
+      Some(() ⇒ mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      Some(url),
+      Some(ivController.defaultIVUrl)
+    ) { (maybeUrl, result) ⇒
+        status(result) shouldBe OK
+        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+        contentAsString(result) should include("need to try again and check you entered your details correctly")
       }
 
     testIndividualPage(
