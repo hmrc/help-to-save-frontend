@@ -289,7 +289,6 @@ Privacy Statement
 | ------------------------------------------------------------| ------ | ------------ |
 |/help-to-save/privacy-statement                              |  GET   | Displays a page to the user showing the privacy statement|
 
-
 License
 =======
 
