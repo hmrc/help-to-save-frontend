@@ -51,4 +51,8 @@ class IVJourneySteps extends BasePage {
     reasonPage.executeIVResultPageAction()
   }
 
-}
+  Then("^they will see generic HTS contact page$") {
+    IdentityVerificationStubPage.checkforHTSGenericPage()
+  }
+
+  }

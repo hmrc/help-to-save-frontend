@@ -52,4 +52,6 @@ object IdentityVerificationStubPage extends BasePage {
     }
   }
 
+  def checkforHTSGenericPage(): Unit = Browser.getCurrentUrl should be(generalHTSContactPage)
+
 }
