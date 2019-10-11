@@ -25,12 +25,13 @@ import hts.utils.{Configuration, ScenarioContext}
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.openqa.selenium.{By, OutputType, TakesScreenshot, WebDriver}
+import org.scalatest.Assertion
 import org.scalatest.Matchers
 import uk.gov.hmrc.webdriver.SingletonDriver
 
 import scala.hts.utils.TestVariables
 
-trait BasePage extends ScalaDsl with EN with Matchers {
+trait BasePage extends ScalaDsl with EN with Matchers with Assertion {
 
   val expectedURL: String = ""
 
@@ -43,6 +44,8 @@ trait BasePage extends ScalaDsl with EN with Matchers {
   val expectedPageHeader: Option[String] = None
 
   implicit val driver: WebDriver = SingletonDriver.getInstance()
+
+  lazy val generalHTSContactPage:String = "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme"
 
   def navigate()(implicit driver: WebDriver): Unit = Browser.go to expectedURL
 
@@ -81,10 +84,10 @@ trait BasePage extends ScalaDsl with EN with Matchers {
         driver match {
           case a: TakesScreenshot ⇒
             takeScreenshot(scenario, "-page-on-failure", a)
-            println(s"Page of failure was: ${driver.getCurrentUrl}")
+            println(s"Page of failure was: ${Browser.getCurrentUrl}")
             a.navigate().back()
             takeScreenshot(scenario, "-previous-page", a)
-            println(s"Previous page was: ${driver.getCurrentUrl}")
+            println(s"Previous page was: ${Browser.getCurrentUrl}")
         }
       }
     }

@@ -22,3 +22,7 @@ Feature: Applicant goes through Identity Verification (IV) journey
       | Technical Issue       |
       | User Aborted          |
       | Timed Out             |
+
+  Scenario: An eligible applicant does not pass IV with "Failed Matching"
+    When they go through the IV journey and fail because of Failed Matching
+    Then they will see generic HTS contact page
