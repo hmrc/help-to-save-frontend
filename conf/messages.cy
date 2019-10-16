@@ -120,7 +120,7 @@ hts.register.bank-details.error.button.try-again=Rhowch gynnig arall arni
 # Eligible
 hts.register.you-are-eligible.title.h1=Rydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
 hts.register.you-are-eligible.p1={0}, cyn i chi allu creu cyfrif, dechrau cynilo ac ennill bonws, bydd rhaid i chi:
-hts.register.you-are-eligible.li1=rhoi eich cyfeiriad e-bost ini
+hts.register.you-are-eligible.li1=rhoi eich cyfeiriad e-bost i ni
 hts.register.you-are-eligible.li2=nodi eich manylion banc
 
 # Register - missing information
