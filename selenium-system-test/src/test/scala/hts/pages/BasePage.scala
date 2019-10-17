@@ -45,7 +45,7 @@ trait BasePage extends ScalaDsl with EN with Matchers with Assertion {
 
   implicit val driver: WebDriver = SingletonDriver.getInstance()
 
-  lazy val generalHTSContactPage:String = "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme"
+  lazy val generalHTSContactPage: String = "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme"
 
   def navigate()(implicit driver: WebDriver): Unit = Browser.go to expectedURL
 
