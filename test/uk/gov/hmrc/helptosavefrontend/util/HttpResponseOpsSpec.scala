@@ -17,10 +17,10 @@
 package uk.gov.hmrc.helptosavefrontend.util
 
 import play.api.libs.json.{Format, JsValue, Json}
-import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.play.test.UnitSpec
 
-class HttpResponseOpsSpec extends TestSupport {
+class HttpResponseOpsSpec extends UnitSpec {
 
   case class Test1(a: Int)
 

@@ -20,7 +20,6 @@ import java.util.Base64
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.i18n.Messages
 import play.api.mvc.{AnyContentAsEmpty, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -39,6 +38,8 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerif
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
+import uk.gov.hmrc.helptosavefrontend.views.html.email._
+import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -46,14 +47,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class EmailControllerSpec
-  extends AuthSupport
+  extends ControllerSpecWithGuiceApp
+  with AuthSupport
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionStoreBehaviourSupport {
-
-  lazy val request: FakeRequest[AnyContentAsEmpty.type] = FakeRequest()
-
-  lazy val messages: Messages = messagesApi.preferred(request)
 
   val mockEmailVerificationConnector: EmailVerificationConnector = mock[EmailVerificationConnector]
 
@@ -62,6 +60,8 @@ class EmailControllerSpec
   override implicit val crypto: Crypto = mock[Crypto]
   val encryptedEmail = "encrypted"
 
+  private val fakeRequest = FakeRequest("GET", "/")
+
   def newController()(implicit crypto: Crypto) =
     new EmailController(
       mockHelpToSaveService,
@@ -69,8 +69,17 @@ class EmailControllerSpec
       mockEmailVerificationConnector,
       mockAuthConnector,
       mockMetrics,
-      fakeApplication,
-      mockAuditor
+      mockAuditor,
+      testCpd,
+      testMcc,
+      testErrorHandler,
+      injector.instanceOf[select_email],
+      injector.instanceOf[give_email],
+      injector.instanceOf[check_your_email],
+      injector.instanceOf[cannot_change_email],
+      injector.instanceOf[cannot_change_email_try_later],
+      injector.instanceOf[link_expired],
+      injector.instanceOf[email_updated]
     ) {
       override val authConnector = mockAuthConnector
     }
@@ -127,7 +136,7 @@ class EmailControllerSpec
 
     "handling getSelectEmailPage requests" must {
 
-        def getSelectEmailPage(): Future[Result] = controller.getSelectEmailPage(fakeRequestWithCSRFToken)
+        def getSelectEmailPage(): Future[Result] = csrfAddToken(controller.getSelectEmailPage)(fakeRequest)
 
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
@@ -282,9 +291,9 @@ class EmailControllerSpec
 
         def selectEmailSubmit(newEmail: Option[String]): Future[Result] = {
           newEmail.fold(
-            controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "Yes"))
+            csrfAddToken(controller.selectEmailSubmit())(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
           ) { e ⇒
-              controller.selectEmailSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → "No", "new-email" → e))
+              csrfAddToken(controller.selectEmailSubmit())(fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e))
             }
         }
 
@@ -444,7 +453,7 @@ class EmailControllerSpec
     }
 
     "handling getGiveEmailPage requests" must {
-        def getGiveEmailPage(): Future[Result] = controller.getGiveEmailPage(fakeRequestWithCSRFToken)
+        def getGiveEmailPage(): Future[Result] = csrfAddToken(controller.getGiveEmailPage)(fakeRequest)
 
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
@@ -615,8 +624,8 @@ class EmailControllerSpec
 
       val email = "email@test.com"
 
-        def giveEmailSubmit(email: String): Future[Result] = controller.giveEmailSubmit()(
-          fakeRequestWithCSRFToken.withFormUrlEncodedBody("email" → email))
+        def giveEmailSubmit(email: String): Future[Result] = csrfAddToken(controller.giveEmailSubmit())(
+          fakeRequest.withFormUrlEncodedBody("email" → email))
 
       "handle Digital(new applicant) users with no valid session in mongo" in {
 
@@ -716,7 +725,7 @@ class EmailControllerSpec
       val userInfo = randomEligibleWithUserInfo(validUserInfo)
       val userInfoWithInvalidEmail = randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail"))
 
-        def emailConfirmed(encryptedEmail: String): Future[Result] = controller.emailConfirmed(encryptedEmail)(fakeRequestWithCSRFToken)
+        def emailConfirmed(encryptedEmail: String): Future[Result] = csrfAddToken(controller.emailConfirmed(encryptedEmail))(fakeRequest)
 
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
@@ -815,7 +824,7 @@ class EmailControllerSpec
     "handling emailConfirmedCallback requests" must {
 
         def emailConfirmedCallback(emailVerificationParams: String): Future[Result] =
-          controller.emailConfirmedCallback(emailVerificationParams)(fakeRequestWithCSRFToken)
+          csrfAddToken(controller.emailConfirmedCallback(emailVerificationParams))(fakeRequest)
 
       val email = "test@user.com"
 
@@ -998,7 +1007,7 @@ class EmailControllerSpec
 
     "handling confirmEmail requests" must {
         def confirmEmail: Future[Result] =
-          controller.confirmEmail(fakeRequestWithCSRFToken)
+          csrfAddToken(controller.confirmEmail)(fakeRequest)
 
       "handle Digital users and return the check your email page with a status of Ok" in {
 
@@ -1012,8 +1021,8 @@ class EmailControllerSpec
 
         val result = confirmEmail
         status(result) shouldBe 200
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title.h1")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content1")) shouldBe true
+        contentAsString(result).contains(messages("hts.email-verification.check-your-email.title.h1")) shouldBe true
+        contentAsString(result).contains(messages("hts.email-verification.check-your-email.content1")) shouldBe true
       }
 
       "handle Digital users who have not gone through eligibility checks" in {
@@ -1070,8 +1079,8 @@ class EmailControllerSpec
 
         val result = confirmEmail
         status(result) shouldBe 200
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.title.h1")) shouldBe true
-        contentAsString(result).contains(messagesApi("hts.email-verification.check-your-email.content1")) shouldBe true
+        contentAsString(result).contains(messages("hts.email-verification.check-your-email.title.h1")) shouldBe true
+        contentAsString(result).contains(messages("hts.email-verification.check-your-email.content1")) shouldBe true
       }
 
       "handle DE users with missing user info from GG" in {
@@ -1103,7 +1112,7 @@ class EmailControllerSpec
     "handling confirmEmailError requests" must {
 
         def confirmEmailError: Future[Result] =
-          controller.confirmEmailError(fakeRequestWithCSRFToken)
+          csrfAddToken(controller.confirmEmailError)(fakeRequest)
 
       "handle Digital users who are already gone through eligibility checks" in {
         val newEmail = "email@hmrc.com"
@@ -1150,7 +1159,7 @@ class EmailControllerSpec
 
     "handling confirmEmailErrorTryLater requests" must {
         def confirmEmailErrorTryLater: Future[Result] =
-          controller.confirmEmailErrorTryLater(fakeRequestWithCSRFToken)
+          csrfAddToken(controller.confirmEmailErrorTryLater)(fakeRequest)
 
       "handle Digital users who are already gone through eligibility checks" in {
         inSequence {
@@ -1181,7 +1190,7 @@ class EmailControllerSpec
     "handling confirmEmailErrorSubmit requests" must {
 
         def confirmEmailErrorSubmit(continue: Boolean): Future[Result] =
-          controller.confirmEmailErrorSubmit()(fakeRequestWithCSRFToken.withFormUrlEncodedBody("radio-inline-group" → continue.toString))
+          csrfAddToken(controller.confirmEmailErrorSubmit())(fakeRequest.withFormUrlEncodedBody("radio-inline-group" → continue.toString))
 
       "handle Digital users and redirect to the email verify error page try later if there is no email for the user" in {
         inSequence {
@@ -1229,7 +1238,7 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = controller.confirmEmailErrorSubmit()(fakeRequestWithCSRFToken)
+        val result = csrfAddToken(controller.confirmEmailErrorSubmit())(fakeRequest)
         status(result) shouldBe 200
         contentAsString(result) should include("We cannot change your email address at the moment")
       }
@@ -1242,7 +1251,7 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(Some("email@email.com")))
         }
 
-        val result = controller.confirmEmailErrorSubmit()(fakeRequestWithCSRFToken)
+        val result = csrfAddToken(controller.confirmEmailErrorSubmit())(fakeRequest)
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
       }
@@ -1267,7 +1276,7 @@ class EmailControllerSpec
 
     "handling getEmailConfirmed" must {
 
-        def getEmailConfirmed = controller.getEmailConfirmed(fakeRequestWithCSRFToken)
+        def getEmailConfirmed = csrfAddToken(controller.getEmailConfirmed)(fakeRequest)
 
       "handle Digital users and return the email verified page" in {
         inSequence {
@@ -1352,7 +1361,7 @@ class EmailControllerSpec
     "handling getEmailUpdated" must {
 
         def getEmailUpdated(): Future[Result] =
-          controller.getEmailUpdated()(fakeRequestWithCSRFToken)
+          csrfAddToken(controller.getEmailUpdated())(fakeRequest)
 
       "show the email updated page otherwise" in {
         inSequence {

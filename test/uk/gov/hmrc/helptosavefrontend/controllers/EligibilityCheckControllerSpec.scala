@@ -34,14 +34,16 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult, EligibilityCheckResultType}
+import uk.gov.hmrc.helptosavefrontend.views.html.register.{missing_user_info, not_eligible, think_you_are_eligible, you_are_eligible}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 class EligibilityCheckControllerSpec
-  extends AuthSupport
+  extends ControllerSpecWithGuiceApp
   with CSRFSupport
+  with AuthSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionStoreBehaviourSupport
   with GeneratorDrivenPropertyChecks {
@@ -55,10 +57,19 @@ class EligibilityCheckControllerSpec
       mockHelpToSaveService,
       mockSessionStore,
       mockAuthConnector,
-      mockMetrics)
+      mockMetrics,
+      testCpd,
+      testMcc,
+      testErrorHandler,
+      injector.instanceOf[not_eligible],
+      injector.instanceOf[you_are_eligible],
+      injector.instanceOf[missing_user_info],
+      injector.instanceOf[think_you_are_eligible])
   }
 
   lazy val controller = newController(false)
+
+  private val fakeRequest = FakeRequest("GET", "/")
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResultType]): Unit =
     (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
@@ -74,7 +85,7 @@ class EligibilityCheckControllerSpec
 
     "displaying the you are eligible page" must {
 
-        def getIsEligible(): Future[PlayResult] = controller.getIsEligible(fakeRequestWithCSRFToken)
+        def getIsEligible(): Future[PlayResult] = csrfAddToken(controller.getIsEligible)(fakeRequest)
 
       behave like commonEnrolmentAndSessionBehaviour(getIsEligible)
 

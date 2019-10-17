@@ -23,13 +23,12 @@ import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -38,8 +37,10 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
+import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
+import uk.gov.hmrc.helptosavefrontend.views.html.email.{update_email_address, we_updated_your_email}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -50,22 +51,28 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
                                          val emailVerificationConnector: EmailVerificationConnector,
                                          val metrics:                    Metrics,
                                          val auditor:                    HTSAuditor,
-                                         val sessionStore:               SessionStore)(implicit app: Application,
-                                                                                       crypto:                   Crypto,
-                                                                                       emailValidation:          EmailValidation,
-                                                                                       override val messagesApi: MessagesApi,
-                                                                                       val transformer:          NINOLogMessageTransformer,
-                                                                                       val frontendAppConfig:    FrontendAppConfig,
-                                                                                       val config:               Configuration,
-                                                                                       val env:                  Environment,
-                                                                                       ec:                       ExecutionContext)
-  extends BaseController with HelpToSaveAuth with VerifyEmailBehaviour with EnrolmentCheckBehaviour {
+                                         val sessionStore:               SessionStore,
+                                         cpd:                            CommonPlayDependencies,
+                                         mcc:                            MessagesControllerComponents,
+                                         errorHandler:                   ErrorHandler,
+                                         updateEmailAddress:             update_email_address,
+                                         checkYourEmail:                 check_your_email,
+                                         weUpdatedYourEmail:             we_updated_your_email,
+                                         closeAccountAreYouSure:         close_account_are_you_sure
+)(implicit crypto: Crypto,
+  emailValidation:       EmailValidation,
+  val transformer:       NINOLogMessageTransformer,
+  val frontendAppConfig: FrontendAppConfig,
+  val config:            Configuration,
+  val env:               Environment,
+  ec:                    ExecutionContext)
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with VerifyEmailBehaviour with EnrolmentCheckBehaviour with Logging {
 
   import AccountHolderController._
 
   def getUpdateYourEmailAddress(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled(_ ⇒
-      Ok(views.html.email.update_email_address(UpdateEmailForm.verifyEmailForm)),
+      Ok(updateEmailAddress(UpdateEmailForm.verifyEmailForm)),
       routes.AccountHolderController.getUpdateYourEmailAddress().url
     )
   }(loginContinueURL = routes.AccountHolderController.getUpdateYourEmailAddress().url)
@@ -77,7 +84,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
         checkIfAlreadyEnrolled(_ ⇒
           UpdateEmailForm.verifyEmailForm.bindFromRequest().fold(
             formWithErrors ⇒ {
-              BadRequest(views.html.email.update_email_address(formWithErrors))
+              BadRequest(updateEmailAddress(formWithErrors))
             },
             (details: UpdateEmail) ⇒
               emailValidation.validate(details.email).toEither match {
@@ -116,7 +123,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
         logger.warn(s"Could not get pending email: $e", htsContext.nino)
         SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
       }, { pendingEmail ⇒
-        Ok(views.html.email.accountholder.check_your_email(pendingEmail))
+        Ok(checkYourEmail(pendingEmail))
       }
     )
   }(loginContinueURL = routes.AccountHolderController.getCheckYourEmail().url)
@@ -148,7 +155,7 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
         logger.warn(s"Could not find confirmed email: $e")
         SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
       },
-      email ⇒ Ok(views.html.email.we_updated_your_email(email))
+      email ⇒ Ok(weUpdatedYourEmail(email))
     )
   }(loginContinueURL = routes.AccountHolderController.getEmailVerified.url)
 
@@ -166,13 +173,13 @@ class AccountHolderController @Inject() (val helpToSaveService:          HelpToS
           .fold(
             e ⇒ {
               logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-              Ok(views.html.closeaccount.close_account_are_you_sure(None))
+              Ok(closeAccountAreYouSure(None))
             },
             { account ⇒
               if (account.isClosed) {
                 SeeOther(appConfig.nsiManageAccountUrl)
               } else {
-                Ok(views.html.closeaccount.close_account_are_you_sure(Some(account)))
+                Ok(closeAccountAreYouSure(Some(account)))
               }
             }
           )

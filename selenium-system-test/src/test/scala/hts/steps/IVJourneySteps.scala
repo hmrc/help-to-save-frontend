@@ -55,4 +55,4 @@ class IVJourneySteps extends BasePage {
     IdentityVerificationStubPage.checkforHTSGenericPage()
   }
 
-  }
+}

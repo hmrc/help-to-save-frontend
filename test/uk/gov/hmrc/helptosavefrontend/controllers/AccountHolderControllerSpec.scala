@@ -22,6 +22,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -37,6 +38,9 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVeri
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
+import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
+import uk.gov.hmrc.helptosavefrontend.views.html.email.{update_email_address, we_updated_your_email}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
@@ -44,7 +48,9 @@ import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with SessionStoreBehaviourSupport {
+class AccountHolderControllerSpec extends ControllerSpecWithGuiceApp with CSRFSupport with SessionStoreBehaviourSupport with AuthSupport {
+
+  private val fakeRequest = FakeRequest("GET", "/")
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
@@ -88,7 +94,14 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
     mockEmailVerificationConnector,
     mockMetrics,
     mockAuditor,
-    mockSessionStore
+    mockSessionStore,
+    testCpd,
+    testMcc,
+    testErrorHandler,
+    injector.instanceOf[update_email_address],
+    injector.instanceOf[check_your_email],
+    injector.instanceOf[we_updated_your_email],
+    injector.instanceOf[close_account_are_you_sure]
   ) {
     override val authConnector = mockAuthConnector
   }
@@ -113,7 +126,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
     "handling requests to update email addresses" must {
 
         def getUpdateYourEmailAddress(): Future[Result] =
-          controller.getUpdateYourEmailAddress()(fakeRequestWithCSRFToken)
+          csrfAddToken(controller.getUpdateYourEmailAddress())(fakeRequest)
 
       behave like commonEnrolmentBehaviour(
         () ⇒ getUpdateYourEmailAddress(),
@@ -140,7 +153,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
 
       val email = "email@test.com"
 
-      val fakePostRequest = fakeRequestWithCSRFToken.withFormUrlEncodedBody("new-email-address" → email)
+      val fakePostRequest = fakeRequest.withFormUrlEncodedBody("new-email-address" → email)
 
         def submit(email: String): Future[Result] =
           controller.onSubmit()(FakeRequest().withFormUrlEncodedBody("new-email-address" → email))
@@ -159,7 +172,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
           mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
           mockEmailVerificationConn(nino, email, firstName)(Right(()))
         }
-        val result = await(controller.onSubmit()(fakePostRequest))
+        val result = await(csrfAddToken(controller.onSubmit())(fakePostRequest))
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.AccountHolderController.getCheckYourEmail().url)
       }
@@ -173,7 +186,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
             mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
             mockEmailVerificationConn(nino, email, firstName)(Left(AlreadyVerified))
           }
-          val result = await(controller.onSubmit()(fakePostRequest))(20.seconds)
+          val result = await(csrfAddToken(controller.onSubmit())(fakePostRequest))(20.seconds)
           status(result) shouldBe Status.SEE_OTHER
 
           val redirectURL = redirectLocation(result)
@@ -204,7 +217,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
           mockEmailGet()(Right(Some("email")))
           mockSessionStorePut(HTSSession(None, None, Some(email)))(Left(""))
         }
-        val result = controller.onSubmit()(fakePostRequest)
+        val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
       }
@@ -218,7 +231,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
           mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
           mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
         }
-        val result = controller.onSubmit()(fakePostRequest)
+        val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
       }
@@ -226,7 +239,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
       "redirect to the error page if the name retrieval fails" in {
         mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrievalMissingName)
 
-        val result = controller.onSubmit()(fakePostRequest)
+        val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
       }
@@ -414,7 +427,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
           mockSessionStoreGet(Right(Some(HTSSession(None, None, Some("email")))))
         }
 
-        val result = controller.getCheckYourEmail(fakeRequestWithCSRFToken)
+        val result = csrfAddToken(controller.getCheckYourEmail)(fakeRequest)
         status(result) shouldBe OK
         contentAsString(result) should include("You have 30 minutes to confirm the email address")
       }
@@ -467,7 +480,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
         mockGetAccount(nino)(Right(account))
       }
 
-      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+      val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 200
       contentAsString(result) should include("Are you sure you want to close your account?")
     }
@@ -479,7 +492,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
         mockGetAccount(nino)(Right(account.copy(isClosed = true)))
       }
 
-      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+      val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
     }
@@ -491,7 +504,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
         mockGetAccount(nino)(Left("unknown error"))
       }
 
-      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+      val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 200
       contentAsString(result) should include("If you close your account now you will not get any bonus payments. You will not be able to open another Help to Save account.")
     }
@@ -502,7 +515,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
         mockEnrolmentCheck()(Right(NotEnrolled))
       }
 
-      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+      val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 303
       redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
     }
@@ -513,7 +526,7 @@ class AccountHolderControllerSpec extends AuthSupport with CSRFSupport with Sess
         mockEnrolmentCheck()(Left("An error occurred"))
       }
 
-      val result = controller.getCloseAccountPage(fakeRequestWithCSRFToken)
+      val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 500
     }
 

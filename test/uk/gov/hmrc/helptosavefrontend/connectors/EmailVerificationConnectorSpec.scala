@@ -18,14 +18,13 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.http.Status
-import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.OtherError
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.play.test.UnitSpec
 
-class EmailVerificationConnectorSpec extends UnitSpec with TestSupport with HttpSupport with GeneratorDrivenPropertyChecks {
+class EmailVerificationConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with GeneratorDrivenPropertyChecks {
 
   val nino: NINO = "AE123XXXX"
   val name: String = "first-name"

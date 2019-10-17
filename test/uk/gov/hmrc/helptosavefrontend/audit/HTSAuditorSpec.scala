@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.audit
 
 import org.joda.time.DateTime
 import play.api.libs.json.Json
-import uk.gov.hmrc.helptosavefrontend.TestSupport
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class HTSAuditorSpec extends TestSupport {
+class HTSAuditorSpec extends ControllerSpecWithGuiceApp {
 
   val mockAuditConnector: AuditConnector = mock[AuditConnector]
 

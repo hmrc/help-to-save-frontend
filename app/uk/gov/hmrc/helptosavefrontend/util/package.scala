@@ -24,6 +24,7 @@ import org.joda.time.LocalDate
 
 import scala.concurrent.Future
 import scala.util.matching.Regex
+import scala.language.implicitConversions
 
 package object util {
 

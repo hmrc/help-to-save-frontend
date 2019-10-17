@@ -19,12 +19,12 @@ package uk.gov.hmrc.helptosavefrontend.util
 import java.nio.charset.Charset
 import java.util.Base64
 
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import uk.gov.hmrc.helptosavefrontend.TestSupport
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.util.{Failure, Success, Try}
 
-class EmailVerificationParamsSpec extends TestSupport with GeneratorDrivenPropertyChecks {
+class EmailVerificationParamsSpec extends UnitSpec with ScalaCheckDrivenPropertyChecks {
 
   val nino: NINO = "AE1234XXX"
   val email: Email = "email@gmail.com"

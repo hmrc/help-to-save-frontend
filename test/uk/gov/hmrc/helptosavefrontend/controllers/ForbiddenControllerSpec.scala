@@ -19,13 +19,12 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.TestSupport
 
-class ForbiddenControllerSpec extends TestSupport {
+class ForbiddenControllerSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
   "The ForbiddenController" must {
 
-    val controller = new ForbiddenController
+    val controller = new ForbiddenController(testCpd, testMcc, testErrorHandler)
 
     "return a forbidden status" in {
       val result = controller.forbidden(FakeRequest())

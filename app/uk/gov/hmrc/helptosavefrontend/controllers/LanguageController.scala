@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import uk.gov.hmrc.helptosavefrontend.controllers.LanguageController._
 import javax.inject.Inject
 import play.api.Logger
-import play.api.i18n.{I18nSupport, Lang, MessagesApi}
-import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import play.api.i18n.{I18nSupport, Lang}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.controllers.LanguageController._
 import uk.gov.hmrc.play.language.LanguageUtils
 
-class LanguageController @Inject() (override val messagesApi: MessagesApi)(
+class LanguageController @Inject() (cpd:          CommonPlayDependencies,
+                                    mcc:          MessagesControllerComponents,
+                                    errorHandler: ErrorHandler)(
     implicit
-    val frontendAppConfig: FrontendAppConfig) extends FrontendController with I18nSupport {
+    val frontendAppConfig: FrontendAppConfig) extends BaseController(cpd, mcc, errorHandler) with I18nSupport {
 
   def switchToEnglish: Action[AnyContent] = switchToLang(english)
 

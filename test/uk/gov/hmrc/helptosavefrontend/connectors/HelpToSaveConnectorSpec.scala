@@ -25,8 +25,8 @@ import cats.syntax.eq._
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
@@ -39,7 +39,7 @@ import uk.gov.hmrc.http.HttpResponse
 import scala.concurrent.Future
 
 // scalastyle:off magic.number
-class HelpToSaveConnectorSpec extends TestSupport with HttpSupport with GeneratorDrivenPropertyChecks {
+class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with GeneratorDrivenPropertyChecks {
 
   lazy val connector: HelpToSaveConnector = new HelpToSaveConnectorImpl(mockHttp)
 

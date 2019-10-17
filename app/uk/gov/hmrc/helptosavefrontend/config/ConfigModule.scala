@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+package uk.gov.hmrc.helptosavefrontend.config
 
-import play.api.test.FakeRequest
-import play.api.test.CSRFTokenHelper._
+import com.google.inject.Provider
+import javax.inject.Inject
+import play.api.{Configuration, Environment}
+import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
-trait CSRFSupport {
+class ConfigModule @Inject() (val runMode: RunMode, configuration: Configuration, environment: Environment) extends Provider[ServicesConfig] {
 
-  lazy val fakeRequestWithCSRFToken = FakeRequest("GET", "/").withCSRFToken
-
+  override def get(): ServicesConfig = new ServicesConfig(configuration, runMode)
 }

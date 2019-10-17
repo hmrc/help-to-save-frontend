@@ -19,13 +19,16 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages("hts.no-account.title.h1")
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
   title = title
 ) {
   <h1 class="heading-large">@title</h1>

@@ -16,6 +16,23 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.play.views.html.layouts.{Head, HeaderNav, Footer, ServiceInfo, MainContentHeader, MainContent, Sidebar, Article, FooterLinks, BetaBanner}
+@import play.twirl.api.HtmlFormat
+@import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
+
+@this(
+  head: Head,
+  headerNav: HeaderNav,
+  serviceInfo: ServiceInfo,
+  sidebar: Sidebar,
+  article: Article,
+  mainContentHeader: MainContentHeader,
+  mainContent: MainContent,
+  footer: Footer,
+  layoutsFooterLinks: FooterLinks,
+  reportAProblemLink: ReportAProblemLink,
+  layoutBetaBanner: BetaBanner,
+  govUkTemplate: views.html.layouts.GovUkTemplate)
 
 @(appConfig: FrontendAppConfig,
         title: String,
@@ -24,14 +41,11 @@
         bodyClasses: Option[String] = None,
         sidebar: Html = HtmlFormat.empty,
         contentHeader: Option[Html] = None,
-        mainContent: Html = HtmlFormat.empty,
+        mainContentHtml: Html = HtmlFormat.empty,
         serviceInfoContent: Html = HtmlFormat.empty,
         scriptElem: Option[Html] = None,
         extraMeta: Option[Html] = None,
         enableSignOutLink: Boolean = true)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
-
-@import layouts.{govuk_template ⇒ hmrcGovUkTemplate}
-@import uk.gov.hmrc.play.views.html.{helpers ⇒ uiHelpers, layouts ⇒ uiLayouts}
 
 
 @linkElement = {
@@ -70,8 +84,8 @@
 }
 
 
-@head = {
-@uiLayouts.head(
+@headHtml = {
+  @head(
     linkElem = Some(linkElement),
     headScripts = Some(headScripts))
     <meta name="format-detection" content="telephone=no" />
@@ -93,7 +107,7 @@
 }
 
 @insideHeader = {
-@uiLayouts.header_nav(
+  @headerNav(
     navTitle = Some(messages("hts.nav.title")),
     navTitleLink = None,
     showBetaLink = false,
@@ -105,7 +119,7 @@
 }
 
 @bodyEnd = {
-@uiLayouts.footer(
+  @footer(
     analyticsToken = Some(appConfig.analyticsToken),
     analyticsHost = appConfig.analyticsHost,
     ssoUrl = None,
@@ -116,37 +130,37 @@
 @footerTop = {}
 @footerLinks = {}
 
-@serviceInfo = {
-  @uiLayouts.serviceInfo(
+@serviceInfoHtml = {
+  @serviceInfo(
     betaBanner = betaBanner,
     includeGridWrapper = false,
     serviceInfoContent = Some(serviceInfoContent)
   )
 }
 
-@mainContentHeader = {
-  @{uiLayouts.main_content_header(contentHeader = contentHeader.getOrElse(Html("")))}
+@mainContentHeaderHtml = {
+  @{mainContentHeader(contentHeader = contentHeader.getOrElse(Html("")))}
 
   <div class="centered-content">
     @helpers.language_selection(appConfig.enableLanguageSwitching)
   </div>
 }
 
-@getHelpForm = @{uiHelpers.reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
+@getHelpForm = @{reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
 
 @betaBanner = {
-  @uiLayouts.betaBanner(false, appConfig.betaFeedbackUrlNoAuth, appConfig.betaFeedbackUrlNoAuth, true, false)
+  @layoutBetaBanner(false, appConfig.betaFeedbackUrlNoAuth, appConfig.betaFeedbackUrlNoAuth, true, false)
 }
 
 @content = {
-  @uiLayouts.main_content(
-    article = mainContent,
+  @mainContent(
+    article = mainContentHtml,
     mainClass = mainClass,
     mainDataAttributes = mainDataAttributes,
-    mainContentHeader = mainContentHeader,
-    serviceInfo = serviceInfo,
+    mainContentHeader = mainContentHeaderHtml,
+    serviceInfo = serviceInfoHtml,
     getHelpForm = getHelpForm,
     sidebar = sidebar)
 }
 
-@hmrcGovUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiLayouts.footer_links()), true)(content)
+@govUkTemplate(Some(title), bodyClasses)(headHtml, bodyEnd, insideHeader, afterHeader, footerTop, Some(layoutsFooterLinks()), true)(content)

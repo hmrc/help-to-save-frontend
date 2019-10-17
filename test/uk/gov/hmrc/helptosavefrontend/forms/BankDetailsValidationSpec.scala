@@ -19,11 +19,12 @@ package uk.gov.hmrc.helptosavefrontend.forms
 import cats.syntax.either._
 import play.api.Configuration
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.ErrorMessages
+import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
-class BankDetailsValidationSpec extends TestSupport {
+class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
   val bankValidationConfig = Configuration(
     "bank-details-validation.sort-code.length" → 6,
@@ -34,9 +35,8 @@ class BankDetailsValidationSpec extends TestSupport {
     "bank-details-validation.account-name.max-length" → 4
   )
 
-  lazy val validation = new BankDetailsValidation(
-    new FrontendAppConfig(fakeApplication.configuration ++ bankValidationConfig, appConfig.environment)
-  )
+  lazy val validation = new BankDetailsValidation(new FrontendAppConfig(new ServicesConfig(fakeApplication.configuration ++ bankValidationConfig,
+    injector.instanceOf[RunMode])))
 
   type Key = String
 
@@ -277,8 +277,8 @@ class BankDetailsValidationSpec extends TestSupport {
 
       "have method to inform of form errors" when {
 
-        import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.FormOps
         import TestForm._
+        import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.FormOps
 
           def test(formHasError: Form[TestData] ⇒ String ⇒ Boolean, message: String): Unit = {
             formHasError(testForm)(TestForm.key) shouldBe false

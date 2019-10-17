@@ -27,12 +27,11 @@ import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import javax.inject.Singleton
-import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.{Application, Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.{CreateAccountError, EligibleWithInfo}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -44,30 +43,41 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
+import uk.gov.hmrc.helptosavefrontend.util
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.{util, views}
+import uk.gov.hmrc.helptosavefrontend.views.html.cannot_check_details
+import uk.gov.hmrc.helptosavefrontend.views.html.register._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
-                                    val sessionStore:      SessionStore,
-                                    val authConnector:     AuthConnector,
-                                    val metrics:           Metrics,
-                                    app:                   Application)(implicit val crypto: Crypto,
-                                                                        emailValidation:          EmailValidation,
-                                                                        override val messagesApi: MessagesApi,
-                                                                        val transformer:          NINOLogMessageTransformer,
-                                                                        val frontendAppConfig:    FrontendAppConfig,
-                                                                        val config:               Configuration,
-                                                                        val env:                  Environment,
-                                                                        ec:                       ExecutionContext)
+class RegisterController @Inject() (val helpToSaveService:             HelpToSaveService,
+                                    val sessionStore:                  SessionStore,
+                                    val authConnector:                 AuthConnector,
+                                    val metrics:                       Metrics,
+                                    cpd:                               CommonPlayDependencies,
+                                    mcc:                               MessagesControllerComponents,
+                                    errorHandler:                      ErrorHandler,
+                                    createAccountView:                 create_account,
+                                    dailyCapReachedView:               daily_cap_reached,
+                                    totalCapReachedView:               total_cap_reached,
+                                    serviceUnavailableView:            service_unavailable,
+                                    detailsAreIncorrectView:           details_are_incorrect,
+                                    accountCreatedView:                account_created,
+                                    createAccountErrorView:            create_account_error,
+                                    createAccountErrorBankDetailsView: create_account_error_bank_details,
+                                    cannotCheckDetailsView:            cannot_check_details)(implicit val crypto: Crypto,
+                                                                                             emailValidation:       EmailValidation,
+                                                                                             val transformer:       NINOLogMessageTransformer,
+                                                                                             val frontendAppConfig: FrontendAppConfig,
+                                                                                             val config:            Configuration,
+                                                                                             val env:               Environment,
+                                                                                             ec:                    ExecutionContext)
 
-  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with Logging {
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour with Logging {
 
-  val earlyCapCheckOn: Boolean = frontendAppConfig.getBoolean("enable-early-cap-check")
   val clock: Clock = Clock.systemUTC()
 
   def getCreateAccountPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -83,7 +93,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
           } { reason ⇒
             eligibleWithInfo.session.bankDetails match {
               case Some(bankDetails) ⇒
-                Ok(views.html.register.create_account(eligibleWithInfo.userInfo, eligibleWithInfo.email, bankDetails))
+                Ok(createAccountView(eligibleWithInfo.userInfo, eligibleWithInfo.email, bankDetails))
               case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
             }
           }
@@ -93,19 +103,19 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
   }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
 
   def getDailyCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.daily_cap_reached())
+    Ok(dailyCapReachedView())
   }(loginContinueURL = routes.RegisterController.getDailyCapReachedPage().url)
 
   def getTotalCapReachedPage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.total_cap_reached())
+    Ok(totalCapReachedView())
   }(loginContinueURL = routes.RegisterController.getTotalCapReachedPage().url)
 
   def getServiceUnavailablePage: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.service_unavailable())
+    Ok(serviceUnavailableView())
   }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage().url)
 
   def getDetailsAreIncorrect: Action[AnyContent] = authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Ok(views.html.register.details_are_incorrect())
+    Ok(detailsAreIncorrectView())
   }(loginContinueURL = frontendAppConfig.checkEligibilityUrl)
 
   def createAccount: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -179,7 +189,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
       accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)) {
         case (accountNumber, email) ⇒
           val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
-          Ok(views.html.register.account_created(accountNumber, email, lastDayOfMonth))
+          Ok(accountCreatedView(accountNumber, email, lastDayOfMonth))
       }
     })
   }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
@@ -187,7 +197,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
   def getCreateAccountErrorPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
-        _ ⇒ Ok(views.html.register.create_account_error())
+        _ ⇒ Ok(createAccountErrorView())
       }
     }
   }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
@@ -195,7 +205,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
   def getCreateAccountErrorBankDetailsPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
       checkIfDoneEligibilityChecks {
-        _ ⇒ Ok(views.html.register.create_account_error_bank_details())
+        _ ⇒ Ok(createAccountErrorBankDetailsView())
       }
     }
   }(loginContinueURL = routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
@@ -218,7 +228,7 @@ class RegisterController @Inject() (val helpToSaveService: HelpToSaveService,
 
   def getCannotCheckDetailsPage: Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
-    Ok(views.html.cannot_check_details())
+    Ok(cannotCheckDetailsView())
   }
 
   private def startChangingDetailsAndRedirect(session: HTSSession, redirectTo: String)(implicit request: Request[_], hc: HeaderCarrier): Future[Result] =

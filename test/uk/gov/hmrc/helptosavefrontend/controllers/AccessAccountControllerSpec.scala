@@ -23,18 +23,24 @@ import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibilityCheckBehaviour with SessionStoreBehaviourSupport
-  with CSRFSupport {
+class AccessAccountControllerSpec extends ControllerSpecWithGuiceApp with EnrolmentAndEligibilityCheckBehaviour with SessionStoreBehaviourSupport
+  with CSRFSupport with AuthSupport {
 
   lazy val controller = new AccessAccountController(
     mockHelpToSaveService,
     mockAuthConnector,
     mockMetrics,
-    mockSessionStore)
+    mockSessionStore,
+    testCpd,
+    testMcc,
+    testErrorHandler,
+    injector.instanceOf[confirm_check_eligibility],
+    injector.instanceOf[error_template])
 
   "The AccessAccountController" when {
 
@@ -79,7 +85,7 @@ class AccessAccountControllerSpec extends AuthSupport with EnrolmentAndEligibili
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
-        val result = await(controller.getNoAccountPage(fakeRequestWithCSRFToken))
+        val result = csrfAddToken(controller.getNoAccountPage)(FakeRequest())
         status(result) shouldBe 200
         contentAsString(result) should include("You do not have a Help to Save account")
       }

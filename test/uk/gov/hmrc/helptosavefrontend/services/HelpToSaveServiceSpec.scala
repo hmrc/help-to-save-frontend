@@ -21,9 +21,10 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
-import uk.gov.hmrc.helptosavefrontend.TestSupport
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
+import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -36,7 +37,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.{ExecutionContext, Future}
 
 // scalastyle:off magic.number
-class HelpToSaveServiceSpec extends TestSupport {
+class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures {
 
   val htsConnector = mock[HelpToSaveConnector]
 
@@ -168,7 +169,7 @@ class HelpToSaveServiceSpec extends TestSupport {
 
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue shouldBe
-          Left(SubmissionFailure(None, "", """Could not parse http response JSON: /errorDetail: [error.path.missing]; /errorMessage: [error.path.missing]. Response body was "{\"name\":\"some_name\"}"}"""))
+          Left(SubmissionFailure(None, "", """Could not parse http response JSON: : [error.expected.jsobject]. Response body was "{\"name\":\"some_name\"}"}"""))
       }
     }
 

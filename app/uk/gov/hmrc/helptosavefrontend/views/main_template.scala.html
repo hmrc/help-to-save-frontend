@@ -16,6 +16,13 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import play.twirl.api.HtmlFormat
+@import uk.gov.hmrc.play.views.html.layouts.{Sidebar, MainContentHeader, Article}
+
+@this(govukWrapper: govuk_wrapper,
+      sidebar: Sidebar,
+      mainContentHeader: MainContentHeader,
+      article: Article)
 
 @(title: String,
   sidebarLinks: Option[Html] = None,
@@ -28,8 +35,6 @@
   serviceInfoContent: Html = HtmlFormat.empty,
   enableSignOutLink: Boolean = true)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
-@import uk.gov.hmrc.play.views.html.layouts
-
 @titleTemplate = @{
   Messages("hts.global.title", title, "", Messages("hts.global.title-suffix"))
 }
@@ -38,20 +43,20 @@
   if(isErrorPage) Messages("hts.global.error.prefix") + " " + titleTemplate else titleTemplate
 }
 
-@sidebar = {
+@sidebarHtml = {
   @if(sidebarLinks.isDefined) {
-    @layouts.sidebar(sidebarLinks.getOrElse(Html("")), Some("sidebar"))
+    @sidebar(sidebarLinks.getOrElse(Html("")), Some("sidebar"))
   }
 }
 
-@govuk_wrapper(appConfig = frontendAppConfig,
+@govukWrapper(appConfig = frontendAppConfig,
   pageTitle,
   mainClass = mainClass,
   bodyClasses = bodyClasses,
-  sidebar = sidebar,
+  sidebar = sidebarHtml,
   contentHeader = contentHeader,
   serviceInfoContent = serviceInfoContent,
-  mainContent = layouts.article(mainContent),
+  mainContentHtml = article(mainContent),
   scriptElem = scriptElem,
   extraMeta = extraMeta,
   enableSignOutLink = enableSignOutLink

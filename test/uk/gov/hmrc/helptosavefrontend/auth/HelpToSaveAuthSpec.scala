@@ -27,7 +27,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
-import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, BaseController}
+import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, BaseController, ControllerSpecWithGuiceApp}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, UserInfo}
@@ -36,9 +36,9 @@ import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toJavaDat
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
-class HelpToSaveAuthSpec extends AuthSupport {
+class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
-  class HtsAuth extends BaseController with HelpToSaveAuth {
+  class HtsAuth extends BaseController(testCpd, testMcc, testErrorHandler) with HelpToSaveAuth {
     override implicit val metrics: Metrics = mockMetrics
     override implicit val transformer: NINOLogMessageTransformer = ninoLogMessageTransformer
 

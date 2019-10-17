@@ -17,9 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
-import play.api.i18n.Messages
 import play.api.mvc.{AnyContent, Request, Result}
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-trait VerifyEmailBehaviour {
+trait VerifyEmailBehaviour extends Logging {
   this: BaseController ⇒
 
   val emailVerificationConnector: EmailVerificationConnector
@@ -45,7 +45,6 @@ trait VerifyEmailBehaviour {
                                    isNewApplicant:       Boolean)(implicit request: Request[AnyContent],
                                                                   htsContext: HtsContextWithNINO,
                                                                   crypto:     Crypto,
-                                                                  messages:   Messages,
                                                                   ec:         ExecutionContext): Future[Result] =
     emailVerificationConnector.verifyEmail(htsContext.nino, email, firstName, isNewApplicant).map {
       case Right(_)              ⇒ ifSuccess
@@ -58,7 +57,7 @@ trait VerifyEmailBehaviour {
                                       ifInvalid:               ⇒ EitherT[Future, String, Result])(path: String)(implicit request: Request[AnyContent],
                                                                                                                 htsContext:  HtsContextWithNINOAndUserDetails,
                                                                                                                 crypto:      Crypto,
-                                                                                                                messages:    Messages,
+                                                                                                                appConfig:   FrontendAppConfig,
                                                                                                                 transformer: NINOLogMessageTransformer,
                                                                                                                 ec:          ExecutionContext
   ): EitherT[Future, String, Result] =

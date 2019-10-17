@@ -22,6 +22,12 @@
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+      zeroBalanceZeroBonus: zero_balance_zero_bonus,
+      positiveBalancePositiveBonus: positive_balance_positive_bonus,
+      zeroBalancePositiveBonus: zero_balance_positive_bonus,
+      balanceUnknown: balance_unknown)
+
 @(maybeAccount: Option[Account])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @serviceInfoContent = {
@@ -41,7 +47,7 @@
   Messages("hts.close-account.title.h1")
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
     title = title + " " + Messages("hts.global.accountholder.title-suffix"),
     sidebarLinks = None,
     bodyClasses = None,
@@ -53,20 +59,20 @@
       maybeAccount -> maybeAccount.flatMap(_.currentBonusTerm.map(_.bonusEstimate)) match {
         case (Some(account), Some(bd)) ⇒ {
           if(bd === BigDecimal(0.0) && account.balance === BigDecimal(0.0)) {
-            {zero_balance_zero_bonus()}
+            {zeroBalanceZeroBonus()}
           } else {
               if(bd > BigDecimal(0.0) && account.balance > BigDecimal(0.0)) {
-                {positive_balance_positive_bonus(bd)}
+                {positiveBalancePositiveBonus(bd)}
               } else {
                 if(bd > BigDecimal(0.0) && account.balance === BigDecimal(0.0)) {
-                  {zero_balance_positive_bonus(bd)}
+                  {zeroBalancePositiveBonus(bd)}
                 }
               }
           }
         }
 
         case _ => {
-          {balance_unknown()}
+          {balanceUnknown()}
         }
       }
     }

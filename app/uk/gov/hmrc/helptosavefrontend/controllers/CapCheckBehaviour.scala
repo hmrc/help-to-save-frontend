@@ -20,11 +20,12 @@ import play.api.mvc.Result
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait CapCheckBehaviour {
-  this: BaseController with Logging ⇒
+  this: FrontendController with Logging ⇒
 
   val helpToSaveService: HelpToSaveService
 

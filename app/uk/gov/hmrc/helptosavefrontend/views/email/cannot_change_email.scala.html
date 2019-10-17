@@ -22,15 +22,18 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+
 @(backupEmail: String, form: Form[Continue], duringRegistrationJourney: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
   @title = @{
     Messages("hts.cannot-change-email.title.h1")
   }
 
-  @hasErrors = @{form.error("radio-inline-group")isDefined}
+  @hasErrors = @{form.error("radio-inline-group").isDefined}
 
-  @uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+  @main(
     title = title,
     sidebarLinks = None,
     bodyClasses = None,
@@ -87,7 +90,7 @@
 
 
 
-        @helpers.submit('_buttonClass -> "", 'id → "email-error-continue"){ @Messages("hts.cannot-change-email.continue-button") }
+        @submit('_buttonClass -> "", 'id → "email-error-continue"){ @Messages("hts.cannot-change-email.continue-button") }
 
     }
 

@@ -26,11 +26,12 @@ import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
+import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IvControllerSpec extends AuthSupport with SessionStoreBehaviourSupport {
+class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehaviourSupport with AuthSupport {
 
   val ivConnector: IvConnector = mock[IvConnector]
 
@@ -39,7 +40,19 @@ class IvControllerSpec extends AuthSupport with SessionStoreBehaviourSupport {
   lazy val ivController = new IvController(mockSessionStore,
                                            ivConnector,
                                            mockAuthConnector,
-                                           mockMetrics)
+                                           mockMetrics,
+                                           testCpd,
+                                           testMcc,
+                                           testErrorHandler,
+                                           injector.instanceOf[iv_success],
+                                           injector.instanceOf[failed_iv],
+                                           injector.instanceOf[insufficient_evidence],
+                                           injector.instanceOf[locked_out],
+                                           injector.instanceOf[user_aborted],
+                                           injector.instanceOf[time_out],
+                                           injector.instanceOf[technical_iv_issues],
+                                           injector.instanceOf[precondition_failed])
+
   val continueURL = "continue-here"
 
   lazy val mockPutContinueURLInSessionCache =

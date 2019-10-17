@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import play.api.test.FakeRequest
-import play.api.test.CSRFTokenHelper._
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import uk.gov.hmrc.helptosavefrontend.MockActions
+import uk.gov.hmrc.play.test.UnitSpec
 
-trait CSRFSupport {
-
-  lazy val fakeRequestWithCSRFToken = FakeRequest("GET", "/").withCSRFToken
+trait ControllerSpecBase extends UnitSpec with MockActions with BeforeAndAfterAll with BeforeAndAfterEach {
 
 }

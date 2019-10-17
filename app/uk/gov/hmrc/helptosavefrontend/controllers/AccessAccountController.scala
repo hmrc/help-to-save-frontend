@@ -17,34 +17,38 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
-import play.api.mvc.{Action, AnyContent, Request, Result}
+import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveService,
-                                         val authConnector:     AuthConnector,
-                                         val metrics:           Metrics,
-                                         sessionStore:          SessionStore)(implicit override val messagesApi: MessagesApi,
-                                                                              val transformer:       NINOLogMessageTransformer,
-                                                                              val frontendAppConfig: FrontendAppConfig,
-                                                                              val config:            Configuration,
-                                                                              val env:               Environment,
-                                                                              ec:                    ExecutionContext)
-  extends BaseController with HelpToSaveAuth with EnrolmentCheckBehaviour {
+class AccessAccountController @Inject() (val helpToSaveService:   HelpToSaveService,
+                                         val authConnector:       AuthConnector,
+                                         val metrics:             Metrics,
+                                         sessionStore:            SessionStore,
+                                         cpd:                     CommonPlayDependencies,
+                                         mcc:                     MessagesControllerComponents,
+                                         errorHandler:            ErrorHandler,
+                                         confirmCheckEligibility: confirm_check_eligibility,
+                                         errorTemplate:           error_template
+)(implicit val transformer: NINOLogMessageTransformer,
+  val frontendAppConfig: FrontendAppConfig,
+  val config:            Configuration,
+  val env:               Environment,
+  ec:                    ExecutionContext)
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour with Logging {
 
   def getSignInPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
     SeeOther("https://www.gov.uk/sign-in-help-to-save")
@@ -65,7 +69,7 @@ class AccessAccountController @Inject() (val helpToSaveService: HelpToSaveServic
         internalServerError()
       }, { session ⇒
         checkIfEnrolled({
-          () ⇒ Ok(views.html.core.confirm_check_eligibility())
+          () ⇒ Ok(confirmCheckEligibility())
         }, { _ ⇒
           SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
         },

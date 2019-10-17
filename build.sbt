@@ -17,25 +17,26 @@ lazy val appDependencies: Seq[ModuleID] = dependencies ++ testDependencies() ++ 
 
 val dependencies = Seq(
   ws,
-  "uk.gov.hmrc" %% "govuk-template" % "5.40.0-play-25",
-  "uk.gov.hmrc" %% "mongo-caching" % "6.1.0-play-25",
+  "uk.gov.hmrc" %% "govuk-template" % "5.40.0-play-26",
+  "uk.gov.hmrc" %% "mongo-caching" % "6.6.0-play-26",
   "org.typelevel" %% "cats-core" % "1.5.0",
-  "uk.gov.hmrc" %% "auth-client" % "2.19.0-play-25",
+  "uk.gov.hmrc" %% "auth-client" % "2.29.0-play-26",
   "com.github.kxbmap" %% "configs" % "0.4.4",
   "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "4.11.0",
-  "uk.gov.hmrc" %% "play-ui" % "7.31.0-play-25",
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.0.0",
+  "uk.gov.hmrc" %% "play-ui" % "8.1.0-play-26",
   "uk.gov.hmrc" %% "play-language" % "3.4.0"
 )
 
 def testDependencies(scope: String = "test") = Seq(
-  "uk.gov.hmrc" %% "hmrctest" % "3.4.0-play-25" % scope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
   "uk.gov.hmrc" %% "domain" % "5.3.0" % scope,
-  "org.scalatest" %% "scalatest" % "3.0.5" % scope,
+  "org.scalatest" %% "scalatest" % "3.0.8" % scope,
   "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
   "uk.gov.hmrc" %% "stub-data-generator" % "0.5.3" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.8.0-play-25" % scope
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.15.0-play-26" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % scope
 )
 
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
@@ -48,7 +49,7 @@ lazy val scoverageSettings = {
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*(config|views.*);.*(AuthService|BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimum := 92,
+    ScoverageKeys.coverageMinimum := 91,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     parallelExecution in Test := false
@@ -110,7 +111,8 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
       routes.in(Compile).value ++
         ignoreFiles(baseDirectory.value) ++
         (baseDirectory.value ** "*.sc").get ++
-        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
+        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala") ++
+        (baseDirectory.value / "app" / "uk" / "gov" / "hmrc" / "helptosavefrontend" / "config").get
   )
 }
 
@@ -123,7 +125,7 @@ lazy val commonSettings = Seq(
     Resolver.jcenterRepo,
     "emueller-bintray" at "http://dl.bintray.com/emueller/maven" // for play json schema validator
   ),
-  scalacOptions += "-Xcheckinit"
+  scalacOptions ++= Seq("-Xcheckinit", "-feature")
 ) ++ scalaSettings ++ publishingSettings ++ defaultSettings() ++ scalariformSettings ++ scoverageSettings ++ playSettings
 
 
@@ -137,10 +139,10 @@ lazy val microservice = Project(appName, file("."))
   .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
   .settings(PlayKeys.playDefaultPort := 7000)
   .settings(
-      libraryDependencies ++= appDependencies,
+      libraryDependencies ++= appDependencies
     //retrieveManaged := true,
     //testGrouping in Test := oneForkedJvmPerTest((definedTests in Test).value),
-    routesGenerator := StaticRoutesGenerator
+
   )
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)

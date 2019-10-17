@@ -19,6 +19,9 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+      button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
+
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @serviceInfoContent = {
@@ -33,7 +36,7 @@
   Messages("hts.email-verification.existing-user.check-your-email.title.h1")
 }
 
-@uk.gov.hmrc.helptosavefrontend.views.html.main_template(
+@main(
   title = title  + " " + Messages("hts.global.title.section.email"),
   sidebarLinks = None,
   bodyClasses = None,
@@ -53,7 +56,7 @@
           s"""
           |<input type="hidden" name="new-email-address" value="$email">
           |<p>${Messages("hts.email-verification.existing-user.check-your-email.resend-1")}
-          |${helpers.button('_modifierClass -> "button button--link soft push--right", 'role -> "link", 'id → "resend-verification")(Html(messages("hts.email-verification.existing-user.check-your-email.resend-button-text")))}
+          |${button('_modifierClass -> "button button--link soft push--right", 'role -> "link", 'id → "resend-verification")(Html(messages("hts.email-verification.existing-user.check-your-email.resend-button-text")))}
           |${Messages("hts.email-verification.existing-user.check-your-email.resend-2")}</p>
           |""".stripMargin
         )

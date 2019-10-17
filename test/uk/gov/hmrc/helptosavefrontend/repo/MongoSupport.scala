@@ -21,6 +21,7 @@ import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.FailoverStrategy
 import reactivemongo.core.actors.Exceptions.PrimaryUnavailableException
 import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait MongoSupport extends MongoSpecSupport with BeforeAndAfterEach with BeforeAndAfterAll { this: Suite ⇒

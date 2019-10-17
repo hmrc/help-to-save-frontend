@@ -35,7 +35,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EnrolmentAndEligibilityCheckBehaviour {
-  this: AuthSupport with SessionStoreBehaviourSupport ⇒
+  this: ControllerSpecWithGuiceApp with AuthSupport with SessionStoreBehaviourSupport ⇒
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
