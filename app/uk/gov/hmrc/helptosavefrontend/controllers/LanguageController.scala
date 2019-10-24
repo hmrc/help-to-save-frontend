@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import javax.inject.Inject
 import play.api.Logger
 import play.api.i18n.{I18nSupport, Lang}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, Cookie, MessagesControllerComponents}
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.controllers.LanguageController._
 import uk.gov.hmrc.play.language.LanguageUtils
@@ -41,11 +41,11 @@ class LanguageController @Inject() (cpd:          CommonPlayDependencies,
 
     request.headers.get(REFERER) match {
       case Some(referrer) ⇒ {
-        Redirect(referrer).withLang(newLang).flashing(LanguageUtils.FlashWithSwitchIndicator)
+        Redirect(referrer).withLang(newLang).flashing(LanguageUtils.FlashWithSwitchIndicator).withCookies(Cookie("LANG", newLang.language))
       }
       case None ⇒
         Logger.warn("Unable to get the referrer, so sending them to the start.")
-        Redirect(frontendAppConfig.checkEligibilityUrl).withLang(newLang)
+        Redirect(frontendAppConfig.checkEligibilityUrl).withLang(newLang).withCookies(Cookie("LANG", newLang.language))
     }
   }
 
