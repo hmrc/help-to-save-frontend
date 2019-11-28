@@ -17,7 +17,7 @@ import uk.gov.hmrc.ExternalService
 val appName = "help-to-save-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = dependencies ++ testDependencies() ++ testDependencies("it")
-lazy val externalServices = List(ExternalService("AUTH"), ExternalService("INDIVIDUALS_MATCHING_API"), ExternalService("DES"))
+lazy val externalServices = List()
 
 val dependencies = Seq(
   ws,
