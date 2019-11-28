@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.util
 
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.http.HttpResponse
-import uk.gov.hmrc.play.test.UnitSpec
 
 class HttpResponseOpsSpec extends UnitSpec {
 
@@ -50,10 +49,13 @@ class HttpResponseOpsSpec extends UnitSpec {
       HttpResponse(status).parseJSON[Test1]().isLeft shouldBe true
 
       // test when the JSON isn't the right format
-      HttpResponse(status, Some(Json.toJson(data))).parseJSON[Test2]().isLeft shouldBe true
+      HttpResponse(status, Some(Json.toJson(data)))
+        .parseJSON[Test2]()
+        .isLeft shouldBe true
 
       // test when everything is ok
-      HttpResponse(status, Some(Json.toJson(data))).parseJSON[Test1]() shouldBe Right(data)
+      HttpResponse(status, Some(Json.toJson(data)))
+        .parseJSON[Test1]() shouldBe Right(data)
     }
   }
 }

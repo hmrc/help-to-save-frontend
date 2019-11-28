@@ -28,3 +28,6 @@ addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.2")
 
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.3.7")
 
+addSbtPlugin("uk.gov.hmrc" % "sbt-service-manager" % "0.4.0")
+
+

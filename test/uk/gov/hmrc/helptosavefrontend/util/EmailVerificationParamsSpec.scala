@@ -20,11 +20,12 @@ import java.nio.charset.Charset
 import java.util.Base64
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.util.{Failure, Success, Try}
 
-class EmailVerificationParamsSpec extends UnitSpec with ScalaCheckDrivenPropertyChecks {
+class EmailVerificationParamsSpec
+  extends UnitSpec
+  with ScalaCheckDrivenPropertyChecks {
 
   val nino: NINO = "AE1234XXX"
   val email: Email = "email@gmail.com"
@@ -40,7 +41,9 @@ class EmailVerificationParamsSpec extends UnitSpec with ScalaCheckDrivenProperty
 
     "have a decode method that is the inverse of the encode method" in {
       implicit val crypto: Crypto = successfulCrypto()
-      val result = EmailVerificationParams.decode(params.encode).getOrElse(fail("Could not decode email verification params"))
+      val result = EmailVerificationParams
+        .decode(params.encode)
+        .getOrElse(fail("Could not decode email verification params"))
       result.email shouldBe email
       result.nino shouldBe nino
     }
@@ -59,7 +62,8 @@ class EmailVerificationParamsSpec extends UnitSpec with ScalaCheckDrivenProperty
       "the parameters do not contain a hash symbol" in {
         implicit val crypto: Crypto = successfulCrypto()
 
-        val s = new String(Base64.getEncoder.encode("wibble".getBytes()), Charset.forName("UTF-8"))
+        val s = new String(Base64.getEncoder.encode("wibble".getBytes()),
+                           Charset.forName("UTF-8"))
         EmailVerificationParams.decode(s).isFailure shouldBe true
       }
 

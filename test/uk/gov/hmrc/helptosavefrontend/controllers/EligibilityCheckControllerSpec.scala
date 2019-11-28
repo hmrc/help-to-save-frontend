@@ -486,7 +486,7 @@ class EligibilityCheckControllerSpec
             val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
             val result = Await.result(responseFuture, 5.seconds)
             status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+            redirectLocation(responseFuture) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
           }
 
         "redirect to the not eligible page if there is no session data and the eligibilty check" +
@@ -518,7 +518,7 @@ class EligibilityCheckControllerSpec
 
           val result = Await.result(responseFuture, 5.seconds)
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getMissingInfoPage().url)
+          redirectLocation(responseFuture) shouldBe Some(routes.EligibilityCheckController.getMissingInfoPage().url)
         }
 
         "do the eligibility checks when the enable-early-cap-check config is set to true " +
@@ -690,7 +690,7 @@ class EligibilityCheckControllerSpec
 
         val result = Await.result(response, 5.seconds)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(response) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
     }
