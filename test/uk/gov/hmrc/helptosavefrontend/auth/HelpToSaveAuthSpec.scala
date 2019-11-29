@@ -27,20 +27,31 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
-import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, BaseController, ControllerSpecWithGuiceApp}
+import uk.gov.hmrc.helptosavefrontend.controllers.{
+  AuthSupport,
+  BaseController,
+  ControllerSpecWithGuiceApp
+}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toJavaDate, urlEncode}
+import uk.gov.hmrc.helptosavefrontend.util.{
+  NINOLogMessageTransformer,
+  toJavaDate,
+  urlEncode
+}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
-  class HtsAuth extends BaseController(testCpd, testMcc, testErrorHandler) with HelpToSaveAuth {
+  class HtsAuth
+    extends BaseController(testCpd, testMcc, testErrorHandler)
+    with HelpToSaveAuth {
     override implicit val metrics: Metrics = mockMetrics
-    override implicit val transformer: NINOLogMessageTransformer = ninoLogMessageTransformer
+    override implicit val transformer: NINOLogMessageTransformer =
+      ninoLogMessageTransformer
 
     override def authConnector: AuthConnector = mockAuthConnector
 
@@ -51,16 +62,18 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
   val htsAuth = new HtsAuth
 
-  private def actionWithNoEnrols = htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-    Future.successful(Ok(""))
-  }(appConfig.checkEligibilityUrl)
+  private def actionWithNoEnrols =
+    htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+      Future.successful(Ok(""))
+    }(appConfig.checkEligibilityUrl)
 
-  private def actionWithEnrols = htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    htsContext.userDetails match {
-      case Left(_)         ⇒ Future.successful(InternalServerError(""))
-      case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
-    }
-  }(appConfig.checkEligibilityUrl)
+  private def actionWithEnrols =
+    htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+      htsContext.userDetails match {
+        case Left(_)         ⇒ Future.successful(InternalServerError(""))
+        case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
+      }
+    }(appConfig.checkEligibilityUrl)
 
   private def mockAuthWith(error: String) =
     mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString(error))
@@ -73,8 +86,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       nino,
       toJavaDate(dob),
       Some(emailStr),
-      Address(List(line1, line2, line3), Some(postCode), Some(countryCode)
-      )
+      Address(List(line1, line2, line3), Some(postCode), Some(countryCode))
     )
 
     "return UserInfo after successful authentication" in {
@@ -82,21 +94,24 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.OK
-      contentAsJson(result) shouldBe Json.toJson(userInfo)
+      contentAsJson(Future.successful(result)) shouldBe Json.toJson(userInfo)
     }
 
     "filter out empty emails" in {
-      val retrieval = new ~(Some(name), Option("")) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
+      val retrieval = new ~(Some(name), Option("")) and Option(dob) and Some(
+        itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
 
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval)
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.OK
-      contentAsJson(result) shouldBe Json.toJson(userInfo.copy(email = None))
+      contentAsJson(Future.successful(result)) shouldBe Json.toJson(
+        userInfo.copy(email = None))
     }
 
     "handle when some user info is missing" in {
-      mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+      mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+        mockedRetrievalsMissingUserInfo)
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
@@ -104,12 +119,29 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
     "handle when address info is missing" in {
         def retrieval(address: ItmpAddress) =
-          new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(None, None, None)) and itmpDob and Some(address) and mockedNINORetrieval
+          new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(
+            None,
+            None,
+            None)) and itmpDob and Some(address) and mockedNINORetrieval
 
       List(
         ItmpAddress(None, None, None, None, None, Some("postcode"), None, None),
-        ItmpAddress(Some("l1"), None, None, None, None, Some("postcode"), None, None),
-        ItmpAddress(Some("l1"), Some("l2"), None, None, None, Some(""), None, None),
+        ItmpAddress(Some("l1"),
+                    None,
+                    None,
+                    None,
+                    None,
+                    Some("postcode"),
+                    None,
+                    None),
+        ItmpAddress(Some("l1"),
+                    Some("l2"),
+                    None,
+                    None,
+                    None,
+                    Some(""),
+                    None,
+                    None),
         ItmpAddress(Some("l1"), Some("l2"), None, None, None, None, None, None)
       ).foreach { address ⇒
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval(address))
@@ -122,8 +154,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
     "handle NoActiveSession exception and redirect user to GG login page" in {
 
-      val exceptions = List(
-        "BearerTokenExpired",
+      val exceptions = List("BearerTokenExpired",
         "MissingBearerToken",
         "InvalidBearerToken",
         "SessionRecordNotFound")
@@ -132,7 +163,8 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
         mockAuthResultWithFail(fromString(error))
         val result = actionWithNoEnrols(FakeRequest())
         status(result) shouldBe Status.SEE_OTHER
-        val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
+        val redirectTo =
+          redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
         redirectTo should include(urlEncode(appConfig.checkEligibilityUrl))
@@ -145,7 +177,8 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
       val result = actionWithEnrols(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
+      val redirectTo =
+        redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
       redirectTo should include("/mdtp/uplift")
     }
 
@@ -155,7 +188,8 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
       val result = actionWithEnrols(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
+      val redirectTo =
+        redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
       redirectTo should include("/mdtp/uplift")
       redirectTo should include("continueURL")
     }
@@ -166,7 +200,8 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
       val result = actionWithEnrols(FakeRequest())
       status(result) shouldBe Status.SEE_OTHER
-      val redirectTo = redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
+      val redirectTo =
+        redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
       redirectTo should include("/help-to-save/cannot-check-details")
     }
 

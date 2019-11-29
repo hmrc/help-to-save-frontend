@@ -18,8 +18,10 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import uk.gov.hmrc.helptosavefrontend.MockActions
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.helptosavefrontend.util.UnitSpec
 
-trait ControllerSpecBase extends UnitSpec with MockActions with BeforeAndAfterAll with BeforeAndAfterEach {
-
-}
+trait ControllerSpecBase
+  extends UnitSpec
+  with MockActions
+  with BeforeAndAfterAll
+  with BeforeAndAfterEach {}

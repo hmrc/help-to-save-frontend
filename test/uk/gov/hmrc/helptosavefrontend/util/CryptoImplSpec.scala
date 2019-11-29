@@ -21,7 +21,6 @@ import java.util.Base64
 import com.typesafe.config.ConfigFactory
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import play.api.Configuration
-import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.util.{Random, Success}
 
@@ -36,8 +35,7 @@ class CryptoImplSpec extends UnitSpec with GeneratorDrivenPropertyChecks {
       new String(Base64.getEncoder.encode(bytes))
     }
 
-    val encrypter = new CryptoImpl(Configuration(ConfigFactory.parseString(
-      s"""
+    val encrypter = new CryptoImpl(Configuration(ConfigFactory.parseString(s"""
          | crypto.encryption-key = "$key"
       """.stripMargin)))
 
@@ -56,7 +54,8 @@ class CryptoImplSpec extends UnitSpec with GeneratorDrivenPropertyChecks {
 
     "correctly encrypt and decrypt the data when there are special characters" in {
 
-      val original = "Dörte@Sören!#$%&'*+-/=?^_`उपयोगकर्ता@उदाहरण.कॉम.{|}~@example.com"
+      val original =
+        "Dörte@Sören!#$%&'*+-/=?^_`उपयोगकर्ता@उदाहरण.कॉम.{|}~@example.com"
 
       val encoded = encrypter.encrypt(original)
 
@@ -68,8 +67,8 @@ class CryptoImplSpec extends UnitSpec with GeneratorDrivenPropertyChecks {
     }
 
     "return an error when there are errors decrypting" in {
-      forAll{ s: String ⇒
-        whenever(s.nonEmpty){
+      forAll { s: String ⇒
+        whenever(s.nonEmpty) {
           encrypter.decrypt(s).isFailure shouldBe true
         }
       }
