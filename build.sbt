@@ -11,40 +11,38 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.{SbtAutoBuildPlugin, _}
 import wartremover.{Wart, Warts, wartremoverErrors, wartremoverExcluded}
 import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
-import uk.gov.hmrc.ExternalService
-
 
 val appName = "help-to-save-frontend"
+lazy val hmrc = "uk.gov.hmrc"
 
 lazy val appDependencies: Seq[ModuleID] = dependencies ++ testDependencies() ++ testDependencies("it")
 lazy val externalServices = List()
 
 val dependencies = Seq(
   ws,
-  "uk.gov.hmrc" %% "govuk-template" % "5.40.0-play-26",
-  "uk.gov.hmrc" %% "mongo-caching" % "6.6.0-play-26",
-  "org.typelevel" %% "cats-core" % "1.5.0",
-  "uk.gov.hmrc" %% "auth-client" % "2.29.0-play-26",
+  hmrc %% "govuk-template" % "5.45.0-play-26",
+  hmrc %% "mongo-caching" % "6.6.0-play-26",
+  hmrc %% "auth-client" % "2.31.0-play-26",
+  hmrc %% "play-whitelist-filter" % "3.1.0-play-26",
+  hmrc %% "bootstrap-play-26" % "1.3.0",
+  hmrc %% "play-ui" % "8.3.0-play-26",
+  hmrc %% "play-language" % "4.2.0-play-26",
   "com.github.kxbmap" %% "configs" % "0.4.4",
-  "uk.gov.hmrc" %% "play-whitelist-filter" % "2.0.0",
-  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.0.0",
-  "uk.gov.hmrc" %% "play-ui" % "8.1.0-play-26",
-  "uk.gov.hmrc" %% "play-language" % "3.4.0"
+  "org.typelevel" %% "cats-core" % "2.0.0"
 )
 
 def testDependencies(scope: String = "test") = Seq(
-  "uk.gov.hmrc" %% "service-integration-test" % "0.9.0-play-26" % scope,
-  "uk.gov.hmrc" %% "domain" % "5.3.0" % scope,
+  hmrc %% "service-integration-test" % "0.9.0-play-26" % scope,
+  hmrc %% "domain" % "5.6.0-play-26" % scope,
+  hmrc %% "stub-data-generator" % "0.5.3" % scope,
+  hmrc %% "reactivemongo-test" % "4.15.0-play-26" % scope,
   "org.scalatest" %% "scalatest" % "3.0.8" % scope,
-  "com.typesafe.play" %% "play-test" % PlayVersion.current % scope,
   "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
-  "uk.gov.hmrc" %% "stub-data-generator" % "0.5.3" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.15.0-play-26" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % scope
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % scope,
+  "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
 )
 
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
-
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
@@ -161,8 +159,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     formatMessageQuotes := {
       import sys.process._
-      val rightQuoteReplace = (List("sed", "-i", s"""s/&rsquo;\\|''/’/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !)
-      val leftQuoteReplace = (List("sed", "-i", s"""s/&lsquo;/‘/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !)
+      val rightQuoteReplace = List("sed", "-i", s"""s/&rsquo;\\|''/’/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !
+      val leftQuoteReplace = List("sed", "-i", s"""s/&lsquo;/‘/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !
 
       if(rightQuoteReplace != 0 || leftQuoteReplace != 0){ logger.log(Level.Warn, "WARNING: could not replace quotes with smart quotes") }
     },
@@ -195,7 +193,7 @@ lazy val zap = (project in file("zap"))
   .settings(commonSettings: _*)
   .settings(wartRemoverSettings(): _*)
   .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
-  .settings(libraryDependencies += "uk.gov.hmrc" %% "zap-automation" % "2.1.0")
+  .settings(libraryDependencies += "uk.gov.hmrc" %% "zap-automation" % "2.4.0")
   .settings(
     scalaSource in Test := baseDirectory.value / "src" / "test",
     resourceDirectory in Test := baseDirectory.value / "src" / "test" /  "resources"

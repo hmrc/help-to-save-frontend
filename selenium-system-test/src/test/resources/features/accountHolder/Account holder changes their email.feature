@@ -6,7 +6,7 @@ Feature: Account holder changes their email
     When the account holder clicks on the email verification link
     Then the account holder sees that their email has been successfully verified
 
-  @HTS-1614
+  @HTS-1614 @zap
   Scenario: Account holder with different NINO suffix updates email address
     Given the account holder has enrolled with NINO suffix C
     When the account holder logs in with suffix D

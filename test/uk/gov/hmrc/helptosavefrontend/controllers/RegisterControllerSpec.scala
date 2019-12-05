@@ -21,7 +21,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
 import play.api.mvc.{Result ⇒ PlayResult}
@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
-import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
@@ -51,7 +51,7 @@ class RegisterControllerSpec
   with CSRFSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionStoreBehaviourSupport
-  with GeneratorDrivenPropertyChecks {
+  with ScalaCheckDrivenPropertyChecks {
 
   val january1970Clock = Clock.fixed(Instant.ofEpochMilli(0L), ZoneId.of("Z"))
 

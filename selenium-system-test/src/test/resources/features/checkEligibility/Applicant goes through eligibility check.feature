@@ -1,12 +1,12 @@
 @HTS-90
 Feature: Applicant goes through eligibility check
-  @BrowserStack
+  @BrowserStack @zap
   Scenario: User is in receipt of WTC and so is eligible
     Given a user is in receipt of WTC
     When they apply for Help to Save
     Then they see that they are eligible for Help to Save
 
-  @BrowserStack @VerifyHeaderAndFooter
+  @BrowserStack @VerifyHeaderAndFooter @zap
   Scenario: User is entitled to WTC but NOT in receipt of WTC and NOT in receipt of UC and so is NOT eligible
     Given a user has NINO ZX368514A
     When they apply for Help to Save
@@ -14,7 +14,7 @@ Feature: Applicant goes through eligibility check
     When they then click on still think you're eligible link
     Then they see appeals and tax tribunal page
 
-  @HTS-1183
+  @HTS-1183 @zap
   Scenario: User is entitled to WTC but NOT in receipt of WTC and in receipt of UC but income is insufficient and so is NOT eligible
     Given a user has NINO EK978215B
     When they apply for Help to Save
@@ -36,7 +36,7 @@ Feature: Applicant goes through eligibility check
     When they then click on still think you're eligible link
     Then they see appeals and tax tribunal page
 
-  @HTS-859 @HTS-1183
+  @HTS-859 @HTS-1183 @zap
   Scenario: User experiences a technical error
     Given DES is down
     When they apply for Help to Save

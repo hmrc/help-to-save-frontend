@@ -23,7 +23,7 @@ import cats.data.EitherT
 import cats.instances.int._
 import cats.syntax.eq._
 import org.scalacheck.Gen
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl.GetEmailResponse
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
@@ -53,7 +53,7 @@ import scala.concurrent.Future
 class HelpToSaveConnectorSpec
   extends ControllerSpecWithGuiceApp
   with HttpSupport
-  with GeneratorDrivenPropertyChecks {
+  with ScalaCheckDrivenPropertyChecks {
 
   lazy val connector: HelpToSaveConnector = new HelpToSaveConnectorImpl(
     mockHttp)

@@ -28,7 +28,7 @@ Feature: Verifying header and footer links on every page
     When they log in and proceed to create an account using their GG email
     Then they navigate to and see the close account are you sure page
 
-  @VerifyHeaderAndFooter
+  @VerifyHeaderAndFooter @zap
   Scenario: Checking links to HTS GOV.UK eligibility page
     Given they have gone through GG/2SV/identity check but they are NOT eligible for Help to Save
     When they click on eligibility for Help to Save link

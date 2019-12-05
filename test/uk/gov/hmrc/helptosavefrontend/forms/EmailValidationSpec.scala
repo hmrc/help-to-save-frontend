@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.forms
 import cats.data.Validated.Valid
 import cats.syntax.either._
 import org.scalacheck.Gen
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import play.api.data.FormError
 import play.api.{Configuration, Logger}
@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages._
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
 
 // scalastyle:off magic.number
-class EmailValidationSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
+class EmailValidationSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   "EmailValidation" must {
 

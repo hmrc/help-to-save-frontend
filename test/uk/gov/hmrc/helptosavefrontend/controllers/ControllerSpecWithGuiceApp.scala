@@ -38,6 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, TestNINOLogMessageTransformer}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
+import scala.language.postfixOps
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}

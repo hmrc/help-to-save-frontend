@@ -52,7 +52,7 @@ class SecuritySteps extends BasePage {
   }
 
   Then("^they are prompted to log into GG$") { () ⇒
-    Browser.getCurrentUrl should include ("http://localhost:9597/bas-stub/login")
+    Browser.getCurrentUrl should include ("http://localhost:9553/bas-gateway/sign-in")
   }
 
   Given("^if they visit the URIs below they see a valid response$") { URIs: java.util.List[String] ⇒

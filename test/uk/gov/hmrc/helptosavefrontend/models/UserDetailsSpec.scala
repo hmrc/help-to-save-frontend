@@ -17,13 +17,13 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import org.scalacheck.Arbitrary
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.userInfoGen
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 
-class UserDetailsSpec extends WordSpec with Matchers with GeneratorDrivenPropertyChecks {
+class UserDetailsSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   "UserDetails" must {
     "have a JSON Format instance" in {

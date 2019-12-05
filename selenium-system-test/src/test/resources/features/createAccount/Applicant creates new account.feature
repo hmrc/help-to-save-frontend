@@ -1,6 +1,6 @@
 @HTS-37 @creating-account
 Feature: Applicant creates new account
-  @check-test
+  @check-test @zap
   Scenario: An unauthenticated user creates new account
     Given they try to start creating an account
     And they are prompted to log into GG
@@ -23,7 +23,7 @@ Feature: Applicant creates new account
     When they proceed to create an account using their GG email
     Then they see that the account is created
 
-  @DLS-245
+  @DLS-245 @zap
   Scenario: An authenticated eligible user creates HTS account and validates payment setup screen
     Given the authenticated user tries to sign in
     And they are informed they don't have an account

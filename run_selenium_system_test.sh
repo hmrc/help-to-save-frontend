@@ -50,12 +50,12 @@ java_opts=()
 extra_java_opts=""
 tags=""
 
-while [ "$1" != "" ]; do
+while [[ "$1" != "" ]]; do
  PARAM=$(echo $1 | awk -F= '{print $1}')
  VALUE=$(echo $1 | awk -F= '{for (i=2; i<NF; i++) printf $i "="; print $NF}')
- case $PARAM in
+ case ${PARAM} in
    --environment | -e)
-   if [ "$VALUE" != 'dev' ] && [ "$VALUE" != 'qa' ] && [ "$VALUE" != 'local' ]&& [ "$VALUE" != 'esit' ]
+   if [[ "$VALUE" != 'dev' ]] && [[ "$VALUE" != 'qa' ]] && [[ "$VALUE" != 'local' ]]&& [[ "$VALUE" != 'esit' ]]
    then
      usage
      exit 1
@@ -63,7 +63,7 @@ while [ "$1" != "" ]; do
        java_opts+=("-Denvironment=$VALUE")
        ;;
    --browser | -b)
-   if [ "$VALUE" != 'chrome' ] && [ "$VALUE" != 'remote-chrome' ] && [ "$VALUE" != 'firefox' ] && [ "$VALUE" != 'zap-chrome' ] && [ "$VALUE" != 'headless' ] && [ "$VALUE" != 'browserstack' ] && [ "$VALUE" != 'browserstack1' ] && [ "$VALUE" != 'browserstack2' ] && [ "$VALUE" != 'browserstack3' ] && [ "$VALUE" != 'browserstack4' ]
+   if [[ "$VALUE" != 'chrome' ]] && [[ "$VALUE" != 'remote-chrome' ]] && [[ "$VALUE" != 'firefox' ]] && [[ "$VALUE" != 'zap-chrome' ]]  && [[ "$VALUE" != 'headless' ]] && [[ "$VALUE" != 'browserstack' ]] && [[ "$VALUE" != 'browserstack1' ]] && [[ "$VALUE" != 'browserstack2' ]] && [[ "$VALUE" != 'browserstack3' ]] && [[ "$VALUE" != 'browserstack4' ]]
    then
         usage
         exit 1
@@ -75,6 +75,9 @@ while [ "$1" != "" ]; do
         ;;
    --rootUrl | -r)
         java_opts+=("-DrootUrl=$VALUE")
+        ;;
+   --zap.proxy | -p)
+        java_opts+=("-Dzap.proxy=$VALUE")
         ;;
    --with-java-flags | -j)
         extra_java_opts="$VALUE"
@@ -94,7 +97,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-if [ $? != 0 ]
+if [[ $? != 0 ]]
 then
   exit 1
 fi
@@ -106,9 +109,9 @@ process_java_options() {
   # add extra java args to array
   local java_opts_string=$(join_by ',' "${options[@]}")
 
-  if [ "$extra_java_opts" != "" ]
+  if [[ "$extra_java_opts" != "" ]]
   then
-    java_opts_string+=","$extra_java_opts
+    java_opts_string+=","${extra_java_opts}
   fi
 
   IFS=',' read -r -a unquoted_args_array <<< "${java_opts_string[@]}"
@@ -124,7 +127,7 @@ process_java_options() {
 
 EXTRA_JAVA_OPTS=$(process_java_options "${java_opts[@]}")
 
-if [ "${tags}" != "" ]
+if [[ "${tags}" != "" ]]
 then
   EXTRA_JAVA_OPTS+=",\"-Dcucumber.options=--tags ${tags}\""
 fi
@@ -134,4 +137,5 @@ echo "JAVA options are: $EXTRA_JAVA_OPTS"
 # Doing `sbt -Doption1=value1 -Doption2="value2 with spaces" selenium:test` works on some
 # environments but doesn't work with others - here we run sbt and add java system properties
 # within the sbt session and then run the tests
+
 sbt "; project selenium; set javaOptions ++= Seq($EXTRA_JAVA_OPTS); test"

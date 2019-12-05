@@ -26,6 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.testutil._
 import uk.gov.hmrc.smartstub.{AutoGen, _}
+import scala.language.implicitConversions
 
 object TestData {
 
