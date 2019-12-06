@@ -190,7 +190,10 @@ trait Assertions {
         Browser.checkCurrentPageIs(page)
         driver.close()
         driver.switchTo.window(tab1) //switch back to original page
-      case ts ⇒ fail(s"Unexpected number of tabs: ${ts.length}")
+      case ts ⇒
+        Browser.checkCurrentPageIs(page)
+        Browser.goBack()
+      //        fail(s"Unexpected number of tabs: ${ts.length}")
     }
   }
 
