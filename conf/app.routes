@@ -78,5 +78,5 @@ POST       /enter-uk-bank-details                           uk.gov.hmrc.helptosa
 GET        /change-bank-details                             uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeBankDetails
 GET        /change-email-address                            uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeEmail
 
-GET        /switch-to-welsh                                 uk.gov.hmrc.helptosavefrontend.controllers.LanguageController.switchToWelsh
-GET        /switch-to-english                               uk.gov.hmrc.helptosavefrontend.controllers.LanguageController.switchToEnglish
+GET        /switch-to-welsh                                 uk.gov.hmrc.helptosavefrontend.controllers.CustomLanguageController.switchToWelsh
+GET        /switch-to-english                               uk.gov.hmrc.helptosavefrontend.controllers.CustomLanguageController.switchToEnglish

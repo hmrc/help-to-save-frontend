@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
 import play.api.mvc.{Result ⇒ PlayResult}
@@ -46,7 +46,7 @@ class EligibilityCheckControllerSpec
   with AuthSupport
   with EnrolmentAndEligibilityCheckBehaviour
   with SessionStoreBehaviourSupport
-  with GeneratorDrivenPropertyChecks {
+  with ScalaCheckDrivenPropertyChecks {
 
   def newController(earlyCapCheck: Boolean): EligibilityCheckController = {
 

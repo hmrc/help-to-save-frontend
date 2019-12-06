@@ -25,8 +25,7 @@ import hts.utils.{Configuration, ScenarioContext}
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.openqa.selenium.{By, OutputType, TakesScreenshot, WebDriver}
-import org.scalatest.Assertion
-import org.scalatest.Matchers
+import org.scalatest.{Assertion, Matchers}
 import uk.gov.hmrc.webdriver.SingletonDriver
 
 import scala.hts.utils.TestVariables

@@ -24,7 +24,7 @@ import hts.utils.Configuration
 import org.openqa.selenium._
 import org.openqa.selenium.support.ui._
 import org.scalatest.Matchers
-import org.scalatest.selenium.WebBrowser
+import org.scalatestplus.selenium.WebBrowser
 
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
@@ -145,7 +145,7 @@ trait Assertions {
     val urlMatches =
       Either.cond(isActualUrlExpectedUrl(page.expectedURL),
         (),
-        s"Expected URL was ${page.expectedURL}, but actual URL was " + driver.getCurrentUrl()
+        s"Expected URL was ${page.expectedURL}, but actual URL was " + driver.getCurrentUrl
       )
 
     urlMatches shouldBe Right(())

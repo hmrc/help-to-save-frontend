@@ -20,7 +20,7 @@ import java.util.UUID
 
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -34,7 +34,7 @@ class SessionStoreSpec
   extends ControllerSpecWithGuiceApp
   with MongoSupport
   with ScalaFutures
-  with GeneratorDrivenPropertyChecks
+  with ScalaCheckDrivenPropertyChecks
   with Eventually {
 
   implicit val config: PatienceConfig =

@@ -231,7 +231,7 @@ class AccountHolderControllerSpec
               Left(AlreadyVerified))
           }
           val result = Future.successful(await(
-            csrfAddToken(controller.onSubmit())(fakePostRequest))(20.seconds))
+            csrfAddToken(controller.onSubmit())(fakePostRequest))(60.seconds))
           status(result) shouldBe Status.SEE_OTHER
 
           val redirectURL = redirectLocation(result)
