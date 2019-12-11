@@ -21,6 +21,21 @@
     outline: 3px solid #ffbf47;
 }
 
+.button:focus {
+  border-color: #fd0;
+  outline: 3px solid transparent;
+  -webkit-box-shadow: inset 0 0 0 1px #fd0;
+  box-shadow: inset 0 0 0 1px #fd0
+}
+
+.button:focus:not(:active):not(:hover) {
+  border-color: #fd0;
+  color: #0b0c0c;
+  background-color: #fd0;
+  -webkit-box-shadow: 0 2px 0 #0b0c0c;
+  box-shadow: 0 2px 0 #0b0c0c
+}
+
 input:focus, textarea:focus, select:focus, button:focus {
     outline-offset: 0;
 }
