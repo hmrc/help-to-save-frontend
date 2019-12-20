@@ -22,10 +22,10 @@ val dependencies = Seq(
   ws,
   hmrc %% "govuk-template" % "5.45.0-play-26",
   hmrc %% "mongo-caching" % "6.6.0-play-26",
-  hmrc %% "auth-client" % "2.31.0-play-26",
+  hmrc %% "auth-client" % "2.32.0-play-26",
   hmrc %% "play-whitelist-filter" % "3.1.0-play-26",
   hmrc %% "bootstrap-play-26" % "1.3.0",
-  hmrc %% "play-ui" % "8.3.0-play-26",
+  hmrc %% "play-ui" % "8.5.0-play-26",
   hmrc %% "play-language" % "4.2.0-play-26",
   "com.github.kxbmap" %% "configs" % "0.4.4",
   "org.typelevel" %% "cats-core" % "2.0.0"
