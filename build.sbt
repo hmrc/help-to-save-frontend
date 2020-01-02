@@ -1,16 +1,15 @@
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
 import play.core.PlayVersion
-import sbt.Keys.{testOptions, _}
+import sbt.Keys._
 import sbt.{Compile, _}
 import scalariform.formatter.preferences._
 import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import uk.gov.hmrc.versioning.SbtGitVersioning
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-import uk.gov.hmrc.{SbtAutoBuildPlugin, _}
-import wartremover.{Wart, Warts, wartremoverErrors, wartremoverExcluded}
+import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.{publishingSettings, _}
+import uk.gov.hmrc.versioning.SbtGitVersioning
+import wartremover.{Wart, Warts, wartremoverErrors, wartremoverExcluded}
 
 val appName = "help-to-save-frontend"
 lazy val hmrc = "uk.gov.hmrc"
@@ -50,8 +49,8 @@ lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
-    ScoverageKeys.coverageExcludedPackages := "<empty>;Reverse.*;.*(config|views.*);.*(AuthService|BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimum := 85,
+    ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|views.*);.*(AuthService|BuildInfo|Routes).*",
+    ScoverageKeys.coverageMinimum := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     parallelExecution in Test := false
@@ -92,24 +91,16 @@ lazy val scalariformSettings = {
 def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File]) = {
   // list of warts here: http://www.wartremover.org/doc/warts.html
   val excludedWarts = Seq(
-    Wart.DefaultArguments,
-    Wart.FinalCaseClass,
-    Wart.FinalVal,
-    Wart.ImplicitConversion,
-    Wart.ImplicitParameter,
-    Wart.LeakingSealed,
-    Wart.Nothing,
-    Wart.Overloading,
-    Wart.ToString,
-    Wart.Var)
+    Wart.DefaultArguments,Wart.FinalCaseClass,Wart.FinalVal,Wart.ImplicitConversion,Wart.ImplicitParameter,
+    Wart.LeakingSealed,Wart.Nothing,Wart.Overloading,Wart.ToString,Wart.Var)
 
   Seq(
-    wartremoverErrors in (Compile, compile) ++= Warts.allBut(excludedWarts: _*),
+    wartremoverErrors in(Compile, compile) ++= Warts.allBut(excludedWarts: _*),
     // disable some wart remover checks in tests - (Any, Null, PublicInference) seems to struggle with
     // scalamock, (Equals) seems to struggle with stub generator AutoGen and (NonUnitStatements) is
     // imcompatible with a lot of WordSpec
-    wartremoverErrors in (Test, compile) --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference),
-    wartremoverExcluded in (Compile, compile) ++=
+    wartremoverErrors in(Test, compile) --= Seq(Wart.Any, Wart.Equals, Wart.Null, Wart.NonUnitStatements, Wart.PublicInference),
+    wartremoverExcluded in(Compile, compile) ++=
       routes.in(Compile).value ++
         ignoreFiles(baseDirectory.value) ++
         (baseDirectory.value ** "*.sc").get ++
@@ -133,19 +124,14 @@ lazy val commonSettings = Seq(
 
 lazy val microservice = Project(appName, file("."))
   .settings(commonSettings: _*)
-  .settings(wartRemoverSettings( baseDirectory ⇒
-      (baseDirectory ** "HealthCheck.scala").get ++
+  .settings(wartRemoverSettings(baseDirectory ⇒
+    (baseDirectory ** "HealthCheck.scala").get ++
       (baseDirectory ** "HealthCheckRunner.scala").get ++
       (baseDirectory ** "Lock.scala").get
   ))
   .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
   .settings(PlayKeys.playDefaultPort := 7000)
-  .settings(
-      libraryDependencies ++= appDependencies
-    //retrieveManaged := true,
-    //testGrouping in Test := oneForkedJvmPerTest((definedTests in Test).value),
-
-  )
+  .settings(libraryDependencies ++= appDependencies)
   .configs(IntegrationTest)
   .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
   .settings(itDependenciesList := externalServices)
@@ -163,39 +149,9 @@ lazy val microservice = Project(appName, file("."))
       val rightQuoteReplace = List("sed", "-i", s"""s/&rsquo;\\|''/’/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !
       val leftQuoteReplace = List("sed", "-i", s"""s/&lsquo;/‘/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !
 
-      if(rightQuoteReplace != 0 || leftQuoteReplace != 0){ logger.log(Level.Warn, "WARNING: could not replace quotes with smart quotes") }
+      if (rightQuoteReplace != 0 || leftQuoteReplace != 0) {
+        logger.log(Level.Warn, "WARNING: could not replace quotes with smart quotes")
+      }
     },
     compile := ((compile in Compile) dependsOn formatMessageQuotes).value
-  )
-
-lazy val selenium = (project in file("selenium-system-test"))
-  .dependsOn(microservice)
-  .settings(commonSettings: _*)
-  .settings(wartRemoverSettings(): _*)
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
-  .settings(
-    libraryDependencies ++= testDependencies() ++ Seq(
-      "io.cucumber"           %% "cucumber-scala"         % "4.7.1",
-      "io.cucumber"           %  "cucumber-junit"         % "4.7.1",
-      "uk.gov.hmrc"           %% "webdriver-factory"      % "0.7.0"   exclude( "org.slf4j","slf4j-simple")
-    )
-  )
-  .settings(
-    Keys.fork in Test := true,
-    scalaSource in Test := baseDirectory.value / "src" / "test",
-    resourceDirectory in Test := baseDirectory.value / "src" / "test" / "resources",
-    testOptions in Test := Seq(Tests.Filter(name ⇒  name.contains("suites"))),
-    testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/test-reports/html-report"),
-    testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-u", "target/test-reports"),
-    testOptions in Test += Tests.Argument(TestFrameworks.ScalaTest, "-oDF")
-  )
-
-lazy val zap = (project in file("zap"))
-  .settings(commonSettings: _*)
-  .settings(wartRemoverSettings(): _*)
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
-  .settings(libraryDependencies += "uk.gov.hmrc" %% "zap-automation" % "2.4.0")
-  .settings(
-    scalaSource in Test := baseDirectory.value / "src" / "test",
-    resourceDirectory in Test := baseDirectory.value / "src" / "test" /  "resources"
   )

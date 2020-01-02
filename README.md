@@ -11,9 +11,6 @@ Table of Contents
 * [Running and Testing](#running-and-testing)
    * [Running](#running)
    * [Unit tests](#unit-tests)
-   * [Selenium tests](#selenium-tests)
-   * [BrowserStack (cross-browser/-platform compatibility testing)](#browserstack-cross-browser-platform-compatibility-testing)
-   * [ZAP (pen testing)](#zap-pen-testing)
 * [Endpoints](#endpoints)
    * [Main Public API](#main-public-api)
    * [Eligibility Check API](#eligibility-check-api)
@@ -63,121 +60,6 @@ Run `sbt run` on the terminal to start the service. The service runs on port 700
 Unit tests
 ----------
 Run `sbt test` on the terminal to run the unit tests.
-
-
-Selenium tests
---------------
-Selenium system tests are distinguished from unit tests by having `SeleniumSystemTest` in the relevant runner name. Note
-that you will need to download Selenium drivers from [here](http://docs.seleniumhq.org/download/). The exact version of a driver
-to be downloaded will depend on the version of the corresponding browser - the versions of the driver and browser must be
-compatible. Mac users will have to rename the downloaded `chromedriver` file to `chromedriver_mac`.
-
-
-If you want to run the Selenium tests locally, execute the following command to start the relevant services:
-```
-sm --start HTS_ALL -f
-```
-Then execute:
- ```
- ./run_selenium_system_test.sh -e=${ENV} -b=${BROWSER} -d=${DRIVERS} -r=${rootUrl}
-```
-where `${ENV}` indicates the environment the tests should run on (one of `dev`, `qa` or `local`), `${BROWSER}` is
-the browser the tests should run on (e.g. `chrome`) and `${DRIVERS}` is the path to the folder
-containing the Selenium driver files. This command will not run the unit tests. To run only a subset of
-Selenium scenarios, tag the relevant scenarios and then run the command
- ```
- ./run_selenium_system_test.sh -e=${ENV} -b=${BROWSER} -d=${DRIVERS} -r=${rootUrl} -t=${TAGS}
- ```
-where `${TAGS}` is a comma separated list containing the relevant tags. Examples:
-
-```
-# (1) runs all selenium tests on the dev environment using chrome
-./run_selenium_system_test.sh \
-    -e=dev \
-    -b=chrome \
-    -d=/usr/local/bin/chromedriver \
-    -r={mdtp dev host url}
-
-# (2) runs selenium scenarios tagged with the `@wip` tag on the QA environment using chrome                 
-./run_selenium_system_test.sh \
-    -e=qa \
-    -b=chrome \
-    -d=/usr/local/bin/chromedriver \
-    -r={mdtp qa host url} \
-    -t="wip"
-
-# (3) the same as (2)        
-./run_selenium_system_test.sh \
-    -e=dev \
-    -b=chrome \
-    -d=/usr/local/bin/chromedriver \
-    -r={mdtp dev host url} \
-    -t="wip"       
-
-# (4) runs selenium scenarios tagged with either the `@wip` or `@sit` tags locally using chrome
-./run_selenium_system_test.sh \
-    -e=local \
-    -b=chrome \
-    -d=/usr/local/bin/chromedriver \
-    -t="wip,sit" 
-```
-
-If you wish to run the Selenium tests from Intellij, you`ll need to:
-1. Install the Cucumber for Java plugin.
-2. In "Edit configurations" > "Cucumber java" > "VM options" enter, for example: -Dbrowser=chrome -Denvironment=dev -Ddrivers=/usr/local/bin
-3. In "Edit configurations" > "Cucumber java" > "Glue" enter: hts.steps
-
-BrowserStack (cross-browser/-platform compatibility testing)
-------------------------------------------------------------
-NOTE: BrowserStack has compatibility issues with Safari accessing localhost, so please run tests against Safari 
-MANUALLY at [browserstack](https://www.browserstack.com/start). All iOS devices run Safari by default.
-
-To run parallel tests using BrowserStack in AUTOMATED mode, you need to:
-1. If necessary, start mongod using ```sudo service mongod start```
-2. Start service manager using ```sm --start HTS_ALL -f```
-3. Run the BrowserStackLocal file in this project up to four times using:
-
-```
-./BrowserStackLocal --key {KEY} --local-identifier {1/2/3/4} # (the script is configured to accept either no local identifier or just 1/2/3/4)
-```
-
-4. Once you have the desired number of BrowserStack instances running locally,
-   configure the run script script to use the desired OS/Browser combination by
-   replacing the placeholders with the values listed [here](https://www.browserstack.com/automate/capabilities) or
-   you can visit the spreadsheet [here](https://docs.google.com/spreadsheets/d/1xa9h-A7goX3yOd954Oo2sdE2KNUsAWpWa6VFCXHKt-g/edit#gid=0).
-   For example, You can run commands such as:
-
-        
-```
-./run_selenium_system_test.sh \
-    -e=local \
-    -b=browserstack{1/2/3/4} \
-    -d=BrowserStackLocal \
-    -j="-Dbrowserstack.os={OS},-Dbrowserstack.os_version="{OS_Version}",-Dbrowserstack.device={device},-Dbrowserstack.real_mobile=true,-Dbrowserstack.username={USERNAME},-Dbrowserstack.key={KEY}" \
-    -t=@BrowserStack
-./run_selenium_system_test.sh \
-    -e=local \
-    -b=browserstack{1/2/3/4} \
-    -d=BrowserStackLocal \
-    -j="-Dbrowserstack.os={OS},-Dbrowserstack.os_version="{OS_Version}",-Dbrowserstack.browser={browser},-Dbrowserstack.browser_version={browser_version},-Dbrowserstack.username={USERNAME},-Dbrowserstack.key={KEY}" \
-    -t=@BrowserStack
-```
-       
-5. Visit [browserstack](https://www.browserstack.com/automate) to look at the results. Make sure you choose "Local" Build and "HTS" Project
-
-ZAP (pen testing)
------------------
-
-You need to have ZAP installed and running locally via command:
-```
-zap.sh -daemon -config api.disablekey=true -port 11000
-```
-from inside your zaproxy folder. Download and install ZAP from [here](https://github.com/zaproxy/zaproxy/wiki/Downloads)
-
-Once zap is up and running, run the script:
-```
-./run_zap_tests_locally.sh
-```
 
 Endpoints
 =========
@@ -274,7 +156,6 @@ Close Account API
 | Path                                                        | Method | Description  |
 | ------------------------------------------------------------| -------| ------------ |
 |/help-to-save/account-home/close-account-are-you-sure        |  GET   | Displays a page informing users how to close their account if they wish to and the consequences of doing so|
-
 
 
 IP Whitelisting API
