@@ -548,9 +548,9 @@ hts.help-information.section.bonuses.s1.ul1-li2=paid after 2 years
 hts.help-information.section.bonuses.s1.h2=Final bonus:
 hts.help-information.section.bonuses.s1.ul2-li1=earn up to £600
 hts.help-information.section.bonuses.s1.ul2-li2=paid after 4 years
-hts.help-information.section.bonuses.s1.p2=Your bonus is calculated using your highest balance.
+hts.help-information.section.bonuses.s1.p2=Your bonus is worked out using your highest balance.
 hts.help-information.section.bonuses.s1.p3=You can withdraw money and still get any bonus money you’ve earned. You can earn £1,200 in bonuses in total.
-hts.help-information.section.bonuses.s1.p4=If you close your account before it matures after 4 years, you will not get a bonus.
+hts.help-information.section.bonuses.s1.p4=If you close your account before it ends after 4 years, you will not get a bonus.
 hts.help-information.section.bonuses.s1.video-title=Help to Save - Bonuses
 
 hts.help-information.section.bonuses.s2.title=What your ‘highest balance’ is
@@ -559,12 +559,12 @@ hts.help-information.section.bonuses.s2.p2=It’s different to your ‘current b
 hts.help-information.section.bonuses.s2.p3=Withdrawals will not reduce your highest balance, but they will make it harder for you to grow your bonus.
 
 hts.help-information.section.bonuses.s3.title=First bonus
-hts.help-information.section.bonuses.s3.p1=After your first 2 years, you’ll get a first tax-free bonus if you’ve been using your account to save. This bonus will be 50% of the highest balance you’ve saved.
-hts.help-information.section.bonuses.s3.p2=You will get any bonus money you've earned, even if you make withdrawals.
+hts.help-information.section.bonuses.s3.p1=After your first 2 years, you’ll get your first tax-free bonus if you’ve been using your account to save. This bonus will be 50% of the highest balance you’ve saved.
+hts.help-information.section.bonuses.s3.p2=You will get any bonus money you’ve earned, even if you make withdrawals.
 
 hts.help-information.section.bonuses.s4.title=Final bonus
-hts.help-information.section.bonuses.s4.p1=After 4 years, you can get a final bonus if you use your account to save. This bonus will be 50% of savings you pay into your account above the highest balance you saved in the first 2 years. If your highest balance does not increase, you will not earn a final bonus.
-hts.help-information.section.bonuses.s4.p2=You will get any bonus money you've earned, even if you make withdrawals.
+hts.help-information.section.bonuses.s4.p1=After 4 years, you can get your final bonus if you use your account to save. This bonus will be 50% of savings you pay into your account above the highest balance you saved in the first 2 years. If your highest balance does not increase, you will not earn a final bonus.
+hts.help-information.section.bonuses.s4.p2=You will get any bonus money you’ve earned, even if you make withdrawals.
 
 hts.help-information.section.bonuses.s5.title=Bonus examples
 hts.help-information.section.bonuses.s5.h1=Example 1
@@ -573,6 +573,8 @@ hts.help-information.section.bonuses.s5.p2=You continue to save £50 each month 
 hts.help-information.section.bonuses.s5.h2=Example 2
 hts.help-information.section.bonuses.s5.p3=You save £25 every calendar month in years 1 and 2. You make some withdrawals. Your highest balance at the end of 2 years is £400. Your first bonus is £200, which is 50% of £400.
 hts.help-information.section.bonuses.s5.p4=In years 3 and 4 you save money but also make some withdrawals. At the end of year 4, you have saved an extra £200 to grow your highest balance from £400 to £600. Your final bonus is £100, which is 50% of £200.
+hts.help-information.section.bonuses.s5.h3=Calendar Month
+hts.help-information.section.bonuses.s5.p5=A calendar month is a full month from the first day of the month until the last day of the month. For example, 1 to 31 January.
 
 hts.help-information.section.bonuses.s6.title=Where your bonus is paid
 hts.help-information.section.bonuses.s6.p1=Any bonus money you earn will be paid into your bank account, not your Help to Save account.
@@ -581,9 +583,9 @@ hts.help-information.section.bonuses.s7.title=How withdrawals affect bonuses (vi
 hts.help-information.section.bonuses.s7.p1=You can make withdrawals and you will still get bonuses.
 hts.help-information.section.bonuses.s7.p2=Withdrawals do not reduce the amount of bonus money you’ve already earned. Withdrawals make it harder for you to grow your highest balance and bonus.
 hts.help-information.section.bonuses.s7.p3=This is because you:
-hts.help-information.section.bonuses.s7.ul1-li1=can only pay in £50 per calendar month
+hts.help-information.section.bonuses.s7.ul1-li1=can only pay in £50 per calendar month (a calendar month is from the first day to the last day of any month)
 hts.help-information.section.bonuses.s7.ul1-li2=cannot pay in more money later to make up for withdrawals
-hts.help-information.section.bonuses.s7.p4=Withdrawing money could mean you are not able to earn a final bonus, depending on how much you withdraw and when.
+hts.help-information.section.bonuses.s7.p4=Withdrawing money could also mean you are not able to earn a final bonus, depending on how much you withdraw and when.
 hts.help-information.section.bonuses.s7.h1=Example
 hts.help-information.section.bonuses.s7.p5=You save in years 1 and 2. Your highest balance in your first 2 years is £300. Your first bonus paid after 2 years is £150, which is 50% of £300.
 hts.help-information.section.bonuses.s7.p6=At the start of the third year, you withdraw all of your savings. In years 3 and 4 you save £100. Your highest balance in years 3 and 4 is £100. You do not get a final bonus. This is because your highest balance in years 3 and 4 is not more than what it was in years 1 and 2.
