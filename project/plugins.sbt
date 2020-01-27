@@ -6,7 +6,7 @@ resolvers += "Typesafe Releases" at "http://repo.typesafe.com/typesafe/releases/
 
 resolvers += Resolver.url("scoverage-bintray", url("https://dl.bintray.com/sksamuel/sbt-plugins/"))(Resolver.ivyStylePatterns)
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "2.4.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "2.5.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-git-versioning" % "2.1.0")
 
@@ -14,17 +14,17 @@ addSbtPlugin("uk.gov.hmrc" % "sbt-artifactory" % "1.0.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "2.0.0")
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-bobby" % "1.0.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-bobby" % "1.1.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-service-manager" % "0.4.0")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.23")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.23" exclude("org.slf4j", "slf4j-simple"))
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
 
 addSbtPlugin("org.scalastyle" % "scalastyle-sbt-plugin" % "1.0.0")
 
-addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.12")
+addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.4.13")
 
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 
