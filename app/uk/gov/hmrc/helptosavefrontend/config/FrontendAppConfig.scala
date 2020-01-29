@@ -60,7 +60,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
     ).toString
   }
 
-  val ggContinueUrlPrefix: String = s"${servicesConfig.getString("microservice.services.company-auth-frontend.continue-url-prefix")}/help-to-save/"
+  val ggContinueUrlPrefix: String = s"${servicesConfig.getString("microservice.services.company-auth-frontend.continue-url-prefix")}/help-to-save"
 
   val signOutUrl: String = s"${getUrlFor("company-auth-frontend")}/sign-out?continue=${getUrlFor("feedback-survey")}/HTS"
 
