@@ -85,7 +85,7 @@
             <span class="form-hint" id="new-email-hint">@Html(Messages("hts.select-email.enter-new-address-hint"))</span>
             @if(hasInvalidEmail) { <span class="error-message" id="new-email-error">@email_form_validation_error_message(form, "new-email")</span> }
             
-            <input class="form-control @if(hasInvalidEmail){form-control-error}" name="new-email" type="email" id="new-email" aria-describedby="new-email-hint @if(hasInvalidEmail || hasNotSelected){ new-email-error}"  @{form.data.get("new-email").map(e ⇒ Html(s"""value="$e""""))}>
+            <input class="form-control @if(hasInvalidEmail){form-control-error}" name="new-email" type="email" id="new-email" aria-describedby="new-email-hint @if(hasInvalidEmail || hasNotSelected){ new-email-error}"  value=@{form.data.get("new-email")}>
           </div>
           <p>@messages("hts.select-email.enter-new-address-body-text")</p>
         </div>
