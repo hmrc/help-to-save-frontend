@@ -36,15 +36,19 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   private def getUrlFor(service: String) = servicesConfig.getString(s"microservice.services.$service.url")
 
+  val authUrl: String = servicesConfig.baseUrl("auth")
+
   val helpToSaveUrl: String = servicesConfig.baseUrl("help-to-save")
 
   val helpToSaveFrontendUrl: String = getUrlFor("help-to-save-frontend")
 
-  val checkEligibilityUrl: String = s"$helpToSaveFrontendUrl/check-eligibility"
+  val checkEligibilityUrl: String = s"${getUrlFor("help-to-save-frontend")}/check-eligibility"
+
+  val accessAccountUrl: String = s"${getUrlFor("help-to-save-frontend")}/access-account"
 
   val ivJourneyResultUrl: String = s"${servicesConfig.baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
-  val accessAccountUrl: String = s"$helpToSaveFrontendUrl/access-account"
+  val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"
 
   val ivFailedMatchingUrl: String = servicesConfig.getString("gov-uk.url.contact-us")
 
@@ -52,24 +56,29 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
       def encodedCallbackUrl(redirectOnLoginURL: String): String =
         urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?continueURL=$redirectOnLoginURL")
 
-    new URI(s"${getUrlFor("identity-verification-uplift")}/uplift?" +
-      Seq(s"origin=$appName",
-        s"completionURL=${encodedCallbackUrl(redirectOnLoginURL)}",
-        s"failureURL=${encodedCallbackUrl(redirectOnLoginURL)}",
-        "confidenceLevel=200").mkString("&")
+    new URI(s"$ivUpliftUrl" +
+      s"?origin=$appName" +
+      s"&completionURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
+      s"&failureURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
+      "&confidenceLevel=200"
     ).toString
   }
 
-  val ggContinueUrlPrefix: String = s"${servicesConfig.getString("microservice.services.company-auth-frontend.continue-url-prefix")}/help-to-save"
+  val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
 
-  val signOutUrl: String = s"${getUrlFor("company-auth-frontend")}/sign-out?continue=${getUrlFor("feedback-survey")}/HTS"
+  val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
+  val ggContinueUrlPrefix: String = servicesConfig.getString("microservice.services.company-auth-frontend.continue-url-prefix")
+
+  val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
+
+  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl/HTS"
 
   val ggUserUrl: String =
     s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?" +
-      Seq("accountType=individual",
-        s"continue=${urlEncode(s"$ggContinueUrlPrefix/check-eligibility")}",
-        "origin=help-to-save-frontend",
-        "registerForSa=skip").mkString("&")
+      "accountType=individual&" +
+      s"continue=${urlEncode(ggContinueUrlPrefix)}%2Fhelp-to-save%2Fcheck-eligibility&" +
+      "origin=help-to-save-frontend&" +
+      "registerForSa=skip"
 
   def ivJourneyResultUrl(journeyId: JourneyId): String = new URI(s"$ivJourneyResultUrl/${journeyId.Id}").toString
 
