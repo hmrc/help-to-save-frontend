@@ -89,9 +89,13 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
   }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
 */
 
-  def getselectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+  def getselectRendersPage(): Action[AnyContent] = Action.async { implicit request ⇒
 
-      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+    Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm())) {
+
+
+    Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+  }
   }
 
   def onSubmit(): Action[AnyContent] = Action.async { implicit request ⇒
@@ -107,103 +111,5 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
 
   }
 
-  def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
-    def handleForm(email:    String,
-                   backLink: Option[String],
-                   session:  HTSSession
-                  ): Future[PlayResult] =
-      SelectEmailForm.selectEmailForm.bindFromRequest().fold(
-        withErrors ⇒ Ok(selectEmail(email, withErrors, backLink)),
-        { form ⇒
-          val (updatedSession, result) = form.newEmail.fold {
-            session.copy(hasSelectedEmail = true) →
-              SeeOther(routes.EmailController.emailConfirmed(crypto.encrypt(email)).url)
-          } { newEmail ⇒
-            session.copy(pendingEmail     = Some(newEmail), confirmedEmail = None, hasSelectedEmail = true) →
-              SeeOther(routes.EmailController.confirmEmail().url)
-          }
-
-          if (updatedSession =!= session) {
-            updateSessionAndReturnResult(updatedSession, result)
-          } else {
-            result
-          }
-        }
-      )
-
-    def ifDigitalNewApplicant = { maybeSession: Option[HTSSession] ⇒
-      withEligibleSession({
-        case (session, eligibleWithEmail) ⇒
-          val backLink = backLinkFromSession(session)
-          handleForm(eligibleWithEmail.email,
-            Some(backLink),
-            session
-          )
-      }, {
-        case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage().url)
-      })(maybeSession)
-    }
-
-    def ifDE = { maybeSession: Option[HTSSession] ⇒
-      maybeSession.fold[Future[Result]](
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-      ) { session ⇒
-        session.pendingEmail.fold[Future[Result]] {
-          logger.warn("Could not find pending email for select email submit")
-          internalServerError()
-        } {
-          email ⇒ handleForm(email, None, session)
-        }
-      }
-    }
-
-    checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
-
-  }(loginContinueURL = routes.EmailController.selectEmailSubmit().url)
-
-
-
-
-
-  private def checkIfAlreadyEnrolled(ifEnrolled: Email ⇒ Future[PlayResult], path: String)(
-      implicit
-      htsContext: HtsContextWithNINO,
-      hc:         HeaderCarrier,
-      request:    Request[_]
-  ): Future[PlayResult] = {
-    val enrolled: EitherT[Future, String, (EnrolmentStatus, Option[Email])] = for {
-      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
-      maybeEmail ← helpToSaveService.getConfirmedEmail()
-    } yield (enrolmentStatus, maybeEmail)
-
-    enrolled
-      .leftMap {
-        error ⇒
-          logger.warn(s"Could not check enrolment status: $error")
-          SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
-      }
-      .semiflatMap {
-        case (enrolmentStatus, maybeEmail) ⇒
-          val nino = htsContext.nino
-
-          (enrolmentStatus, maybeEmail) match {
-            case (EnrolmentStatus.NotEnrolled, _) ⇒
-              // user is not enrolled in this case
-              logger.warn("SuspiciousActivity: missing HtS enrolment record for user")
-              auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_enrolment", path), nino)
-              SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
-
-            case (EnrolmentStatus.Enrolled(_), None) ⇒
-              // this should never happen since we cannot have created an account
-              // without a successful write to our email store
-              logger.warn("SuspiciousActivity: user is enrolled but the HtS email record does not exist")
-              auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_email_record", path), nino)
-              SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
-
-            case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
-              ifEnrolled(email)
-          }
-      }.merge
-  }
 }
