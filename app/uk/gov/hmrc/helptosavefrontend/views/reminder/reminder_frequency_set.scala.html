@@ -53,7 +53,7 @@
         <h1 class="heading-large">@title</h1>
         <p>@Html(Messages("hts.reminder-frequency.intro"))</p>
                <p> @Html(Messages("hts.reminder-frequency.note"))</p>
-        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.ReminderController.onSubmit(), 'class -> "group subsection--wide", 'novalidate → "") {
+        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.ReminderController.getSelectRendersPage(), 'class -> "group subsection--wide", 'novalidate → "") {
           @summary_section_head(heading = Messages("hts.reminder-frequency.select"))
 
             <div class="multiple-choice" data-target="collect-choice">

@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, Result => PlayResult, _}
+import play.api.mvc.{Action, Result ⇒ PlayResult, _}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder.reminder_frequency_set
@@ -66,7 +66,7 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
                                                                                                 bankDetailsValidation: BankDetailsValidation,
                                                                                                 ec:                    ExecutionContext)
 
-  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour with VerifyEmailBehaviour with SessionBehaviour {
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour with VerifyEmailBehaviour with SessionBehaviour with Logging {
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
   private def backLinkFromSession(session: HTSSession): String =
@@ -89,55 +89,42 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
   }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
 */
 
-  def getselectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
-      s ⇒
-        s.bankDetails.fold(
-          Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), backLinkFromSession(s)))
-        )(bankDetails ⇒
-          Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm().fill(bankDetails), backLinkFromSession(s)))
-        )
-    }
-  }(loginContinueURL = routes.ReminderController.getselectRendersPage().url)
+  def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-  def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
-    implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
-        s ⇒ReminderForm.giveRemindersDetailsForm().fold(
-          withErrors ⇒
-            Ok(reminderFrequencySet(withErrors, backLinkFromSession(s))),
-          {
-            form ⇒ Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
-          }
-        )
-  }
+    Ok(updateEmailAddress(ReminderForm.giveRemindersDetailsForm()))
 
-  }
+  }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
-  private def checkIfAlreadyEnrolledAndDoneEligibilityChecks(nino: String)(ifNotEnrolled: HTSSession ⇒ Future[PlayResult])(implicit htsContext: HtsContextWithNINO, request: Request[_]) =
-    checkIfAlreadyEnrolled { () ⇒
-      checkSession(
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-      ) { session ⇒
-        session.eligibilityCheckResult.fold[Future[PlayResult]](
-          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-        )(_.fold[Future[PlayResult]](
-          { ineligibleReason ⇒
-            val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
-            val threshold = ineligibleReason.value.threshold
-
-            ineligibilityType.fold {
-              logger.warn(s"Could not parse ineligibility reason when storing bank details: $ineligibleReason", nino)
-              toFuture(internalServerError())
-            } { i ⇒
-              toFuture(Ok(notEligible(i, threshold)))
-            }
-          },
-          _ ⇒ ifNotEnrolled(session)
-        )
-        )
+  def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    ReminderForm.giveRemindersDetailsForm().fold(
+      withErrors ⇒
+        Ok(reminderFrequencySet(withErrors)),
+      {
+        validForm ⇒ Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
       }
-    }
+    )
 
+  } (loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+
+  def getCheckYourEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    val result: EitherT[Future, String, Email] = for {
+      maybeSession ← sessionStore.get
+      pendingEmail ← EitherT.fromEither[Future](getEmailFromSession(maybeSession)(_.pendingEmail, "pending email"))
+    } yield pendingEmail
+
+    result.fold(
+      { e ⇒
+        //logger.warn(s"Could not get pending email: $e", htsContext.nino)
+        SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
+      }, { pendingEmail ⇒
+        Ok(checkYourEmail(pendingEmail))
+      }
+    )
+  }(loginContinueURL = routes.AccountHolderController.getCheckYourEmail().url)
+
+  private def getEmailFromSession(session: Option[HTSSession])(getEmail: HTSSession ⇒ Option[Email], description: String): Either[String, Email] =
+    session.fold[Either[String, Email]](
+      Left("Could not find session")
+    )(getEmail(_).fold[Either[String, Email]](Left(s"Could not find $description in session"))(Right(_)))
 
 }

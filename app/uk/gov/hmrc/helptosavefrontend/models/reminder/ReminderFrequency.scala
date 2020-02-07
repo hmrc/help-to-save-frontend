@@ -21,14 +21,14 @@ import java.time.LocalDate
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.auth.core.Nino
 
-case class ReminderFrequency(nino: Nino,
-                             email: String,
-                             name: String,
-                             optInStatus: Boolean = false,
-                             daysToReceive: Seq[Int] = Seq(),
-                             nextSendDate: LocalDate = LocalDate.now(),
-                             bounceCount: Int = 0,
-                             callBackUrlRef: String = "")
+case class ReminderFrequency(nino:           Nino,
+                             email:          String,
+                             name:           String,
+                             optInStatus:    Boolean   = false,
+                             daysToReceive:  Seq[Int]  = Seq(),
+                             nextSendDate:   LocalDate = LocalDate.now(),
+                             bounceCount:    Int       = 0,
+                             callBackUrlRef: String    = "")
 
 object ReminderFrequency {
   implicit val formats: Format[ReminderFrequency] = Json.format[ReminderFrequency]
