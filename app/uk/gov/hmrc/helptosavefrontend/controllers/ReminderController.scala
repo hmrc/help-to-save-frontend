@@ -90,42 +90,46 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
   }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
 */
 
-  def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
-    implicit htsContext ⇒
+  def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+    Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
 
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
-  def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
-    implicit htsContext ⇒
-      ReminderForm.giveRemindersDetailsForm().fold(
-        withErrors ⇒
-          Ok(reminderFrequencySet(withErrors)),
-        {
-          validForm ⇒ Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
-        }
-      )
+  def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    ReminderForm.giveRemindersDetailsForm().fold(
+      withErrors ⇒
+        Ok(reminderFrequencySet(withErrors)),
+      {
+        validForm ⇒ Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+      }
+    )
 
-  }(loginContinueURL = routes.ReminderController.getRendersConfirmPage().url)
+  }(loginContinueURL = routes.ReminderController.submitRendersConfirmPage().url)
 
-  def getRendersConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
-    implicit htsContext ⇒
+  def getRendersConfirmPage(email: String, period: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    val result: EitherT[Future, String, String] = for {
+      session ← sessionStore.get
+      email ← EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
+    } yield email
+    Ok(reminderConfirmation("brown@gmail", "25th"))
 
-      Ok(reminderConfirmation(ReminderForm.giveRemindersDetailsForm()))
+  }(loginContinueURL = routes.ReminderController.submitRendersConfirmPage().url)
 
-  }(loginContinueURL = routes.ReminderController.getRendersConfirmPage().url)
+  def submitRendersConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    ReminderForm.giveRemindersDetailsForm().fold(
+      withErrors ⇒
+        Ok(reminderFrequencySet(withErrors)),
+      {
+        validForm ⇒ Ok(reminderConfirmation("email", "1st"))
+      }
+    )
 
-  def submitRendersConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
-    implicit htsContext ⇒
-      ReminderForm.giveRemindersDetailsForm().fold(
-        withErrors ⇒
-          Ok(reminderFrequencySet(withErrors)),
-        {
-          validForm ⇒ Ok(reminderConfirmation(ReminderForm.giveRemindersDetailsForm()))
-        }
-      )
+  }(loginContinueURL = routes.ReminderController.submitRendersConfirmPage().url)
 
-  }(loginContinueURL = routes.ReminderController.getRendersConfirmPage().url)
+  private def getEmailFromSession(session: Option[HTSSession])(getEmail: HTSSession ⇒ Option[Email], description: String): Either[String, Email] =
+    session.fold[Either[String, Email]](
+      Left("Could not find session")
+    )(getEmail(_).fold[Either[String, Email]](Left(s"Could not find $description in session"))(Right(_)))
 
 }

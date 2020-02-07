@@ -83,5 +83,5 @@ GET        /switch-to-english                               uk.gov.hmrc.helptosa
 
 GET        /account-home/reminders-frequency-set                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getSelectRendersPage
 POST       /account-home/reminders-frequency-set                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectRemindersSubmit
-GET        /account-home/reminders-confirmation                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getRendersConfirmPage
+GET        /account-home/reminders-confirmation                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getRendersConfirmPage(email,period)
 POST       /account-home/reminders-confirmation                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.submitRendersConfirmPage
