@@ -107,12 +107,18 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
 
   }(loginContinueURL = routes.ReminderController.submitRendersConfirmPage().url)
 
-  def getRendersConfirmPage(email: String, period: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+  def getRendersConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     val result: EitherT[Future, String, String] = for {
       session ← sessionStore.get
       email ← EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
     } yield email
-    Ok(reminderConfirmation("brown@gmail", "25th"))
+    result.fold(
+      { e ⇒
+        logger.warn(s"Could not find confirmed email: $e")
+        SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
+      },
+      email ⇒ Ok(reminderConfirmation(email, "25th"))
+    )
 
   }(loginContinueURL = routes.ReminderController.submitRendersConfirmPage().url)
 
