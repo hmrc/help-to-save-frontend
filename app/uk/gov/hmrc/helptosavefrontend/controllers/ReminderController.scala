@@ -91,7 +91,7 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
 
   def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
-    Ok(updateEmailAddress(ReminderForm.giveRemindersDetailsForm()))
+    Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
 
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 

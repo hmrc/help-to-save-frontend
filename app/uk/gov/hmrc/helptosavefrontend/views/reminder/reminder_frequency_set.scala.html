@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
+@import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
@@ -53,7 +53,7 @@
         <h1 class="heading-large">@title</h1>
         <p>@Html(Messages("hts.reminder-frequency.intro"))</p>
                <p> @Html(Messages("hts.reminder-frequency.note"))</p>
-        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.ReminderController.getSelectRendersPage(), 'class -> "group subsection--wide", 'novalidate → "") {
+        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.ReminderController.selectRemindersSubmit(), 'class -> "group subsection--wide", 'novalidate → "") {
           @summary_section_head(heading = Messages("hts.reminder-frequency.select"))
 
             <div class="multiple-choice" data-target="collect-choice">

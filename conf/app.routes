@@ -81,5 +81,5 @@ GET        /change-email-address                            uk.gov.hmrc.helptosa
 GET        /switch-to-welsh                                 uk.gov.hmrc.helptosavefrontend.controllers.CustomLanguageController.switchToWelsh
 GET        /switch-to-english                               uk.gov.hmrc.helptosavefrontend.controllers.CustomLanguageController.switchToEnglish
 
-GET        /account-home/reminders-frequency-set                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getselectRendersPage
-POST       /account-home/reminders-frequency-set                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectRemindersSubmit()
+GET        /account-home/reminders-frequency-set                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getSelectRendersPage
+POST       /account-home/reminders-frequency-set                          uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectRemindersSubmit
