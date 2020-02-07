@@ -25,7 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetailsValidation, EmailValidation, ReminderForm, SelectEmailForm, UpdateEmailForm}
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, EmailValidation, ReminderForm, SelectEmailForm, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
@@ -89,27 +89,55 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
   }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
 */
 
-  def getselectRendersPage(): Action[AnyContent] = Action.async { implicit request ⇒
+  def getselectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+    checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
+      s ⇒
+        s.bankDetails.fold(
+          Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), backLinkFromSession(s)))
+        )(bankDetails ⇒
+          Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm().fill(bankDetails), backLinkFromSession(s)))
+        )
+    }
+  }(loginContinueURL = routes.ReminderController.getselectRendersPage().url)
 
-    Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm())) {
-
-
-    Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+  def onSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
+    implicit htsContext ⇒
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
+        s ⇒ReminderForm.giveRemindersDetailsForm().fold(
+          withErrors ⇒
+            Ok(reminderFrequencySet(withErrors, backLinkFromSession(s))),
+          {
+            form ⇒ Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+          }
+        )
   }
+
   }
 
-  def onSubmit(): Action[AnyContent] = Action.async { implicit request ⇒
+  private def checkIfAlreadyEnrolledAndDoneEligibilityChecks(nino: String)(ifNotEnrolled: HTSSession ⇒ Future[PlayResult])(implicit htsContext: HtsContextWithNINO, request: Request[_]) =
+    checkIfAlreadyEnrolled { () ⇒
+      checkSession(
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+      ) { session ⇒
+        session.eligibilityCheckResult.fold[Future[PlayResult]](
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        )(_.fold[Future[PlayResult]](
+          { ineligibleReason ⇒
+            val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
+            val threshold = ineligibleReason.value.threshold
 
-    ReminderForm.giveRemindersDetailsForm().bindFromRequest().fold(
-      withErrors ⇒ Ok(reminderFrequencySet(withErrors)),
-      {
-        form ⇒  Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+            ineligibilityType.fold {
+              logger.warn(s"Could not parse ineligibility reason when storing bank details: $ineligibleReason", nino)
+              toFuture(internalServerError())
+            } { i ⇒
+              toFuture(Ok(notEligible(i, threshold)))
+            }
+          },
+          _ ⇒ ifNotEnrolled(session)
+        )
+        )
       }
-
-    )
-
-
-  }
+    }
 
 
 }
