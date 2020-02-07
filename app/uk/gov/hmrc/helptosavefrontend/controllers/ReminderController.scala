@@ -34,7 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.reminder_frequency_set
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_confirmation, reminder_frequency_set}
 import uk.gov.hmrc.helptosavefrontend.views.html.email.{update_email_address, we_updated_your_email}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -53,6 +53,7 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
                                     errorHandler:                   ErrorHandler,
                                     updateEmailAddress:             update_email_address,
                                     reminderFrequencySet:           reminder_frequency_set,
+                                    reminderConfirmation:           reminder_confirmation,
                                     bankAccountDetails:             bank_account_details,
                                     notEligible:                    not_eligible,
                                     checkYourEmail:                 check_your_email,
@@ -89,42 +90,42 @@ class ReminderController @Inject() (val helpToSaveService:          HelpToSaveSe
   }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
 */
 
-  def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+  def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
+    implicit htsContext ⇒
 
-    Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
 
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
-  def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    ReminderForm.giveRemindersDetailsForm().fold(
-      withErrors ⇒
-        Ok(reminderFrequencySet(withErrors)),
-      {
-        validForm ⇒ Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
-      }
-    )
+  def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
+    implicit htsContext ⇒
+      ReminderForm.giveRemindersDetailsForm().fold(
+        withErrors ⇒
+          Ok(reminderFrequencySet(withErrors)),
+        {
+          validForm ⇒ Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm()))
+        }
+      )
 
-  } (loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+  }(loginContinueURL = routes.ReminderController.getRendersConfirmPage().url)
 
-  def getCheckYourEmail: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    val result: EitherT[Future, String, Email] = for {
-      maybeSession ← sessionStore.get
-      pendingEmail ← EitherT.fromEither[Future](getEmailFromSession(maybeSession)(_.pendingEmail, "pending email"))
-    } yield pendingEmail
+  def getRendersConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
+    implicit htsContext ⇒
 
-    result.fold(
-      { e ⇒
-        //logger.warn(s"Could not get pending email: $e", htsContext.nino)
-        SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
-      }, { pendingEmail ⇒
-        Ok(checkYourEmail(pendingEmail))
-      }
-    )
-  }(loginContinueURL = routes.AccountHolderController.getCheckYourEmail().url)
+      Ok(reminderConfirmation(ReminderForm.giveRemindersDetailsForm()))
 
-  private def getEmailFromSession(session: Option[HTSSession])(getEmail: HTSSession ⇒ Option[Email], description: String): Either[String, Email] =
-    session.fold[Either[String, Email]](
-      Left("Could not find session")
-    )(getEmail(_).fold[Either[String, Email]](Left(s"Could not find $description in session"))(Right(_)))
+  }(loginContinueURL = routes.ReminderController.getRendersConfirmPage().url)
+
+  def submitRendersConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒
+    implicit htsContext ⇒
+      ReminderForm.giveRemindersDetailsForm().fold(
+        withErrors ⇒
+          Ok(reminderFrequencySet(withErrors)),
+        {
+          validForm ⇒ Ok(reminderConfirmation(ReminderForm.giveRemindersDetailsForm()))
+        }
+      )
+
+  }(loginContinueURL = routes.ReminderController.getRendersConfirmPage().url)
 
 }
