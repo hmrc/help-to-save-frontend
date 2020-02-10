@@ -25,51 +25,42 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, EmailValidation, ReminderForm, SelectEmailForm, UpdateEmailForm}
+import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
-import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_confirmation, reminder_frequency_set}
-import uk.gov.hmrc.helptosavefrontend.views.html.email.{update_email_address, we_updated_your_email}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ReminderController @Inject() (val helpToSaveReminderService:  HelpToSaveReminderService,
-                                    val sessionStore:               SessionStore,
-                                    val emailVerificationConnector: EmailVerificationConnector,
-                                    val authConnector:              AuthConnector,
-                                    val metrics:                    Metrics,
-                                    val auditor:                    HTSAuditor,
-                                    cpd:                            CommonPlayDependencies,
-                                    mcc:                            MessagesControllerComponents,
-                                    errorHandler:                   ErrorHandler,
-                                    updateEmailAddress:             update_email_address,
-                                    reminderFrequencySet:           reminder_frequency_set,
-                                    reminderConfirmation:           reminder_confirmation,
-                                    bankAccountDetails:             bank_account_details,
-                                    notEligible:                    not_eligible,
-                                    checkYourEmail:                 check_your_email,
-                                    weUpdatedYourEmail:             we_updated_your_email,
-                                    closeAccountAreYouSure:         close_account_are_you_sure)(implicit val crypto: Crypto,
-                                                                                                emailValidation:       EmailValidation,
-                                                                                                val transformer:       NINOLogMessageTransformer,
-                                                                                                val frontendAppConfig: FrontendAppConfig,
-                                                                                                val config:            Configuration,
-                                                                                                val env:               Environment,
-                                                                                                bankDetailsValidation: BankDetailsValidation,
-                                                                                                ec:                    ExecutionContext)
+class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveReminderService,
+                                    val sessionStore:              SessionStore,
+                                    val authConnector:             AuthConnector,
+                                    val metrics:                   Metrics,
+                                    val auditor:                   HTSAuditor,
+                                    cpd:                           CommonPlayDependencies,
+                                    mcc:                           MessagesControllerComponents,
+                                    errorHandler:                  ErrorHandler,
+                                    reminderFrequencySet:          reminder_frequency_set,
+                                    reminderConfirmation:          reminder_confirmation,
+                                    notEligible:                   not_eligible,
+                                    checkYourEmail:                check_your_email,
+                                    closeAccountAreYouSure:        close_account_are_you_sure)(implicit val crypto: Crypto,
+                                                                                               val transformer:       NINOLogMessageTransformer,
+                                                                                               val frontendAppConfig: FrontendAppConfig,
+                                                                                               val config:            Configuration,
+                                                                                               val env:               Environment,
+                                                                                               ec:                    ExecutionContext)
 
-  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with VerifyEmailBehaviour with SessionBehaviour with Logging {
+  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
   private def backLinkFromSession(session: HTSSession): String =
@@ -78,19 +69,6 @@ class ReminderController @Inject() (val helpToSaveReminderService:  HelpToSaveRe
     } else {
       eligibilityPage
     }
-
-  /*def getselectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-
-    checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) {
-      s ⇒
-        s.bankDetails.fold(
-          Ok(bankAccountDetails(BankDetails.giveBankDetailsForm(), backLinkFromSession(s)))
-        )(bankDetails ⇒
-            Ok(bankAccountDetails(BankDetails.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
-          )
-    }
-  }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
-*/
 
   def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
@@ -101,69 +79,23 @@ class ReminderController @Inject() (val helpToSaveReminderService:  HelpToSaveRe
   def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     ReminderForm.giveRemindersDetailsForm().bindFromRequest().fold(
       withErrors ⇒ {
-        Ok(reminderConfirmation("raomohan2006@yahoo.com", "25th"))
+        Ok(reminderConfirmation("errorOccurred", "25th"))
       },
       {
-
-        validForm ⇒
+        success ⇒
           {
-            /*val result: EitherT[Future, String, String] = for {
-              session ← sessionStore.get
-              email ← EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
-            } yield email
-            result.fold(
-              { e ⇒
-                logger.warn(s"Could not find confirmed email: $e")
-                SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
-              },
-            val userInfo = htsContext.userDetails.right
-            htsContext.userDetails.fold({ err ⇒ println(err) }, {
-              s ⇒ println(s.email)
-            })*/
-
-            //println("MOHAN SUCCESS " + userEmail)
-
-            val htsUserToModify = HtsUser(Nino("LR219465C"), "moahndola@gmail.com", "Mohan D")
-            val returnVal = helpToSaveReminderService.updateHtsUser(htsUserToModify)
-
-            Ok(reminderConfirmation("raomohan2006@yahoo.com", validForm.first))
+            val emailVal = htsContext.userDetails match {
+              case Left(x)  ⇒ "noEmail"
+              case Right(y) ⇒ y.email.getOrElse("default")
+            }
+            val htsUserToModify = HtsUser(Nino(htsContext.nino), emailVal, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.first, Seq(1)))
+            val result = helpToSaveReminderService.updateHtsUser(htsUserToModify)
+            Ok(reminderConfirmation(emailVal, success.first))
           }
-        // Ok(reminderConfirmation("raomohan2006@yahoo.com", "25th"))
+
       }
     )
 
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
-
-  def getRendersConfirmPage(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    /*val result: EitherT[Future, String, String] = for {
-      session ← sessionStore.get
-      email ← EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
-    } yield email
-    result.fold(
-      { e ⇒
-        logger.warn(s"Could not find confirmed email: $e")
-        SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
-      },
-      email ⇒ Ok(reminderConfirmation(email, "25th"))*/
-    Ok(reminderConfirmation("raomohan2006@yahoo.com", "25th"))
-    //)
-
-  }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
-
-  def submitRendersConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    ReminderForm.giveRemindersDetailsForm().fold(
-      withErrors ⇒
-        Ok(reminderFrequencySet(withErrors)),
-      {
-        validForm ⇒ Ok(reminderConfirmation("email@gmail.com", "1st"))
-      }
-    )
-
-  }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
-
-  private def getEmailFromSession(session: Option[HTSSession])(getEmail: HTSSession ⇒ Option[Email], description: String): Either[String, Email] =
-    session.fold[Either[String, Email]](
-      Left("Could not find session")
-    )(getEmail(_).fold[Either[String, Email]](Left(s"Could not find $description in session"))(Right(_)))
 
 }

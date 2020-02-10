@@ -40,7 +40,7 @@ object ReminderFrequency {
 case class HtsUser(
     nino:           Nino,
     email:          String,
-    name:           String,
+    name:           String    = "",
     optInStatus:    Boolean   = false,
     daysToReceive:  Seq[Int]  = Seq(),
     nextSendDate:   LocalDate = LocalDate.now(),
@@ -52,3 +52,10 @@ object HtsUser {
   implicit val writes: Writes[HtsUser] = Writes[HtsUser](s ⇒ JsString(s.toString))
 
 }
+
+object DateToDaysMapper {
+  val d2dMapper: Map[String, Seq[Int]] = Map("1st" -> Seq(1),
+    "25th" -> Seq(25),
+    "1st and 25th" -> Seq(1, 25))
+}
+
