@@ -22,14 +22,14 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 
 object ReminderForm {
-  def giveRemindersDetailsForm()(): Form[ReminderForm] = Form(
+  def giveRemindersDetailsForm(): Form[ReminderForm] = Form(
     mapping(
-      "first" → text.verifying(l ⇒ l === "Yes" || l === "No"),
-      "twentyfive" → text.verifying(l ⇒ l === "Yes" || l === "No"),
-      "both" → text.verifying(l ⇒ l === "Yes" || l === "No")
+      "first" → text //.verifying(l ⇒ l === "Yes" || l === "No"),
+    //"twentyfive" → text, //.verifying(l ⇒ l === "Yes" || l === "No"),
+    //"both" → text //.verifying(l ⇒ l === "Yes" || l === "No")
     )(ReminderForm.apply)(ReminderForm.unapply)
   )
 }
 
-case class ReminderForm(first: String, twentyfive: String, both: String)
+case class ReminderForm(first: String) //, twentyfive: String, both: String)
 

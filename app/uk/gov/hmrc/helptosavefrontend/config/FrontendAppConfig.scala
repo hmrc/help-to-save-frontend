@@ -46,6 +46,8 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val accessAccountUrl: String = s"${getUrlFor("help-to-save-frontend")}/access-account"
 
+  val updateHtsReminderUrl: String = s"${servicesConfig.baseUrl("help-to-save-reminder")}/help-to-save-reminder/update-htsUser-entity"
+
   val ivJourneyResultUrl: String = s"${servicesConfig.baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
   val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"

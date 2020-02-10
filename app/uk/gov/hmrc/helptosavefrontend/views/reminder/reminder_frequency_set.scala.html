@@ -20,6 +20,8 @@
 @import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import views.html.helper.CSRF
 
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
@@ -53,21 +55,23 @@
         <h1 class="heading-large">@title</h1>
         <p>@Html(Messages("hts.reminder-frequency.intro"))</p>
                <p> @Html(Messages("hts.reminder-frequency.note"))</p>
-        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.ReminderController.selectRemindersSubmit(), 'class -> "group subsection--wide", 'novalidate → "") {
+
+          <form method="post" action=@routes.ReminderController.selectRemindersSubmit novalidate>
+              @CSRF.formField(request)
           @summary_section_head(heading = Messages("hts.reminder-frequency.select"))
 
             <div class="multiple-choice" data-target="collect-choice">
-                    <input id="first" type="radio" name="first" value="Yes" >
+                    <input id="first" type="radio" name="first" value="1st" >
                     <label for="first">@messages("hts.reminder-frequency.first")</label>
                 </div>
 
                 <div class="multiple-choice" data-target="collect-choice">
-                    <input id="twentyfive" type="radio" name="twentyfive" value="No">
+                    <input id="twentyfive" type="radio" name="first" value="25th">
                     <label for="twentyfive">@messages("hts.reminder-frequency.25")</label>
                 </div>
 
                 <div class="multiple-choice" data-target="collect-choice">
-                    <input id="both" type="radio" name="both" value="Yes">
+                    <input id="both" type="radio" name="first" value="1st and 25th">
                     <label for="both">@messages("hts.reminder-frequency.both")</label>
                 </div>
 
@@ -76,10 +80,11 @@
         @messages("hts.global.continue-button")
       </button>
     </div>
+          </form>
 
 
 
-}
+
 
     }
 }

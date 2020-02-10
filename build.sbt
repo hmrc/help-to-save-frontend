@@ -27,6 +27,7 @@ val dependencies = Seq(
   hmrc %% "play-ui" % "8.7.0-play-26",
   hmrc %% "play-language" % "4.2.0-play-26",
   "com.github.kxbmap" %% "configs" % "0.4.4",
+  hmrc %% "domain" % "5.6.0-play-26",
   "org.typelevel" %% "cats-core" % "2.0.0"
 )
 
