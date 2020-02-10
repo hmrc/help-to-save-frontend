@@ -14,16 +14,13 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
-@import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
 
 @(email: String,period :String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -40,14 +37,16 @@
         <h1 class="heading-xlarge">@title</h1>
         <span class="heading-large">
             @Messages("hts.reminder-confirmation.title.p1")
-            @email
         </span>
     </div>
             <h2 class="heading-medium">@Messages("hts.reminder-confirmation.h2")</h2>
             <p>@Html(Messages("hts.reminder-confirmation.title.p1-1")) @period @Html(Messages("hts.reminder-confirmation.title.p1-2"))</p>
-    <p>@Html(Messages("hts.reminder-confirmation.title.p1-3"))@email@Html(Messages("hts.reminder-confirmation.title.p1-4"))</p>
-    <p>@Messages("hts.reminder-confirmation.title.p1-5") SavingsReminders @Html(Messages("hts.reminder-confirmation.title.p1-6"))</p>
+            <p>@Html(Messages("hts.reminder-confirmation.title.p1-3")) <span class="bold">@email. </span>
+                @Html(Messages("hts.reminder-confirmation.title.p1-4"))
+                <a href=@routes.AccountHolderController.getUpdateYourEmailAddress().url>
+            @Html(Messages("hts.reminder-confirmation.change-email.descriptive-link"))</a></p>
+            <p>@Messages("hts.reminder-confirmation.title.p1-5") <a href=@routes.ReminderController.getSelectRendersPage().url>@Html(Messages("hts.reminder-confirmation.saving-reminders.descriptive-link"))</a> @Html(Messages("hts.reminder-confirmation.title.p1-6"))</p>
 
-
+            <p class="subsection--wide push--bottom"><a href=@{appConfig.nsiManageAccountUrl} class="button" role="button">@messages("hts.global.back-to-account")</a></p>
 
 }
