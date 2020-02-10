@@ -19,18 +19,19 @@ import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, Result ⇒ PlayResult, _}
-import play.api.{Configuration, Environment}
+import play.api.{Configuration, Environment, Logger}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, HelpToSaveConnectorImpl}
 import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
@@ -42,6 +43,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveReminderService,
+                                    val helpToSaveService:         HelpToSaveService,
                                     val sessionStore:              SessionStore,
                                     val authConnector:             AuthConnector,
                                     val metrics:                   Metrics,
@@ -84,18 +86,19 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
       {
         success ⇒
           {
-            val emailVal = htsContext.userDetails match {
-              case Left(x)  ⇒ "noEmail"
-              case Right(y) ⇒ y.email.getOrElse("default")
-            }
-            val htsUserToModify = HtsUser(Nino(htsContext.nino), emailVal, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.first, Seq(1)))
-            val result = helpToSaveReminderService.updateHtsUser(htsUserToModify)
-            Ok(reminderConfirmation(emailVal, success.first))
+            val emailResult = helpToSaveService.getConfirmedEmail
+            emailResult.fold({
+              err ⇒
+                Ok(reminderConfirmation("noEMail", success.first))
+            }, {
+              emailRetrieved ⇒
+                val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.first, Seq(1)))
+                val result = helpToSaveReminderService.updateHtsUser(htsUserToModify)
+                Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.first))
+            })
           }
-
       }
     )
-
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
 }
