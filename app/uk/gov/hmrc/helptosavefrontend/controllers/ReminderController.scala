@@ -57,16 +57,13 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                                     mcc:                           MessagesControllerComponents,
                                     errorHandler:                  ErrorHandler,
                                     reminderFrequencySet:          reminder_frequency_set,
-                                    reminderConfirmation:          reminder_confirmation,
-                                    notEligible:                   not_eligible,
-                                    checkYourEmail:                check_your_email,
-                                    closeAccountAreYouSure:        close_account_are_you_sure)(implicit val crypto: Crypto,
-                                                                                               implicit val transformer:                 NINOLogMessageTransformer,
-                                                                                               implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
-                                                                                               val frontendAppConfig:                    FrontendAppConfig,
-                                                                                               val config:                               Configuration,
-                                                                                               val env:                                  Environment,
-                                                                                               ec:                                       ExecutionContext)
+                                    reminderConfirmation:          reminder_confirmation)(implicit val crypto: Crypto,
+                                                                                          implicit val transformer:                 NINOLogMessageTransformer,
+                                                                                          implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
+                                                                                          val frontendAppConfig:                    FrontendAppConfig,
+                                                                                          val config:                               Configuration,
+                                                                                          val env:                                  Environment,
+                                                                                          ec:                                       ExecutionContext)
 
   extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
@@ -94,7 +91,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
           {
             helpToSaveService.getConfirmedEmail.fold({
               err ⇒
-                SeeOther(routes.ReminderController.getRendersConfirmPage("noEmail", success.reminderFrequency).url)
+                SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
             }, {
               emailRetrieved ⇒
                 val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
@@ -105,13 +102,12 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                   }
                   .semiflatMap {
                     case updateStatus: String ⇒ if (updateStatus === "SUCCESS") {
-                      //Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
                       SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(emailRetrieved.getOrElse("noUseEmail")), success.reminderFrequency).url)
                     } else {
-                      Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), "noFrequency updated"))
+                      SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
                     }
                   }
-                Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
+                SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(emailRetrieved.getOrElse("noUseEmail")), success.reminderFrequency).url)
 
             })
           }
