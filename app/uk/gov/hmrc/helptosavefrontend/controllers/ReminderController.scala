@@ -44,6 +44,7 @@ import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details,
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
 @Singleton
 class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveReminderService,
@@ -93,7 +94,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
           {
             helpToSaveService.getConfirmedEmail.fold({
               err ⇒
-                Ok(reminderConfirmation("noEMail", success.reminderFrequency))
+                SeeOther(routes.ReminderController.getRendersConfirmPage("noEmail", success.reminderFrequency).url)
             }, {
               emailRetrieved ⇒
                 val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
@@ -104,16 +105,27 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                   }
                   .semiflatMap {
                     case updateStatus: String ⇒ if (updateStatus === "SUCCESS") {
-                      Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
+                      //Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
+                      SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(emailRetrieved.getOrElse("noUseEmail")), success.reminderFrequency).url)
                     } else {
                       Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), "noFrequency updated"))
                     }
                   }
                 Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
+
             })
           }
       }
     )
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+
+  def getRendersConfirmPage(email: String, period: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+
+    crypto.decrypt(email) match {
+      case Success(value) ⇒ Ok(reminderConfirmation(value, period))
+      case Failure(e)     ⇒ Ok(reminderConfirmation("emailNotDecrypt", period))
+    }
+
+  }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period).url)
 
 }
