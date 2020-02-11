@@ -33,19 +33,19 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[HelpToSaveReminderServiceImpl])
 trait HelpToSaveReminderService {
 
-  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[String]
 
 }
 
 @Singleton
 class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: HelpToSaveReminderConnector) extends HelpToSaveReminderService with Logging {
 
-  override def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    EitherT(helpToSaveReminderConnector.updateHtsUser(htsUser).map[Either[String, Unit]] { response ⇒
+  override def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[String] =
+    EitherT(helpToSaveReminderConnector.updateHtsUser(htsUser).map[Either[String, String]] { response ⇒
 
       response.status match {
         case Status.OK ⇒
-          Right(())
+          Right(("SUCCESS"))
 
         case other ⇒
           Left(s"Received unexpected status $other from HTS Reminder Service while trying to update htsUser. Body was ${maskNino(response.body)}")

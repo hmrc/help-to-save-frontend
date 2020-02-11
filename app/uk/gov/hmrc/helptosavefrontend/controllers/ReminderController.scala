@@ -17,6 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.option._
+import cats.instances.string._
+import cats.syntax.eq._
+import cats.syntax.traverse._
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, Result ⇒ PlayResult, _}
 import play.api.{Configuration, Environment, Logger}
@@ -92,7 +97,18 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
             }, {
               emailRetrieved ⇒
                 val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
-                val result = helpToSaveReminderService.updateHtsUser(htsUserToModify)
+                val nothing = helpToSaveReminderService.updateHtsUser(htsUserToModify)
+                  .leftSemiflatMap { e ⇒
+                    logger.warn(s"Could not update the user email: $e")
+                    internalServerError()
+                  }
+                  .semiflatMap {
+                    case updateStatus: String ⇒ if (updateStatus === "SUCCESS") {
+                      Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
+                    } else {
+                      Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), "noFrequency updated"))
+                    }
+                  }
                 Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
             })
           }
