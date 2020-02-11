@@ -25,8 +25,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, HelpToSaveConnectorImpl}
-import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
+import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
@@ -56,11 +55,12 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                                     notEligible:                   not_eligible,
                                     checkYourEmail:                check_your_email,
                                     closeAccountAreYouSure:        close_account_are_you_sure)(implicit val crypto: Crypto,
-                                                                                               val transformer:       NINOLogMessageTransformer,
-                                                                                               val frontendAppConfig: FrontendAppConfig,
-                                                                                               val config:            Configuration,
-                                                                                               val env:               Environment,
-                                                                                               ec:                    ExecutionContext)
+                                                                                               implicit val transformer:                 NINOLogMessageTransformer,
+                                                                                               implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
+                                                                                               val frontendAppConfig:                    FrontendAppConfig,
+                                                                                               val config:                               Configuration,
+                                                                                               val env:                                  Environment,
+                                                                                               ec:                                       ExecutionContext)
 
   extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
@@ -81,20 +81,19 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
   def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     ReminderForm.giveRemindersDetailsForm().bindFromRequest().fold(
       withErrors ⇒ {
-        Ok(reminderConfirmation("errorOccurred", "25th"))
+        Ok(reminderFrequencySet(withErrors))
       },
       {
         success ⇒
           {
-            val emailResult = helpToSaveService.getConfirmedEmail
-            emailResult.fold({
+            helpToSaveService.getConfirmedEmail.fold({
               err ⇒
-                Ok(reminderConfirmation("noEMail", success.first))
+                Ok(reminderConfirmation("noEMail", success.reminderFrequency))
             }, {
               emailRetrieved ⇒
-                val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.first, Seq(1)))
+                val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
                 val result = helpToSaveReminderService.updateHtsUser(htsUserToModify)
-                Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.first))
+                Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
             })
           }
       }

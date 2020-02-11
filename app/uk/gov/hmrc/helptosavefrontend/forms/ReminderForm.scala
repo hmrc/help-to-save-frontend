@@ -16,20 +16,16 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import cats.instances.string._
-import cats.syntax.eq._
 import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
+import play.api.data.Forms.{mapping, of, text}
 
 object ReminderForm {
-  def giveRemindersDetailsForm(): Form[ReminderForm] = Form(
+  def giveRemindersDetailsForm()(implicit validation: ReminderFrequencyValidation): Form[ReminderForm] = Form(
     mapping(
-      "first" → text //.verifying(l ⇒ l === "Yes" || l === "No"),
-    //"twentyfive" → text, //.verifying(l ⇒ l === "Yes" || l === "No"),
-    //"both" → text //.verifying(l ⇒ l === "Yes" || l === "No")
+      "reminderFrequency" → of(validation.reminderFrequencyFormatter)
     )(ReminderForm.apply)(ReminderForm.unapply)
   )
 }
 
-case class ReminderForm(first: String) //, twentyfive: String, both: String)
+case class ReminderForm(reminderFrequency: String)
 

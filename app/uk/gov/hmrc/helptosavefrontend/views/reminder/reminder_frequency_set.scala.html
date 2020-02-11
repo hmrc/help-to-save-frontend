@@ -35,19 +35,21 @@
     Messages("hts.reminder-frequency.title.h1")
 }
 
-@defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
+@defining(form.error("reminderFrequency").map(_ ⇒ email_form_validation_error_message(form, "reminderFrequency"))){ errorMessage =>
 
     @main(
-        title = title + " " + Messages("hts.global.title.section.email"),
+        title = title,
         sidebarLinks = None,
         bodyClasses = None,
         isErrorPage = errorMessage.isDefined) {
 
+        @navigate_back(backLink)
+
         @{if(errorMessage.isDefined)
             <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
-            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.email-verification.error-title")}</h2>
+            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.reminder-frequency.select-an-option")}</h2>
             <ul class="error-summary-list">
-            <li><a href="#new-email-address">{Messages("hts.email-verification.error-link-description")}</a></li>
+            <li><a href="#first">{Messages("hts.reminder-frequency.error.missing")}</a></li>
             </ul>
             </div>
         }
@@ -61,17 +63,17 @@
           @summary_section_head(heading = Messages("hts.reminder-frequency.select"))
 
             <div class="multiple-choice" data-target="collect-choice">
-                    <input id="first" type="radio" name="first" value="1st" >
+                    <input id="first" type="radio" name="reminderFrequency" value="1st" >
                     <label for="first">@messages("hts.reminder-frequency.first")</label>
                 </div>
 
                 <div class="multiple-choice" data-target="collect-choice">
-                    <input id="twentyfive" type="radio" name="first" value="25th">
+                    <input id="twentyfive" type="radio" name="reminderFrequency" value="25th">
                     <label for="twentyfive">@messages("hts.reminder-frequency.25")</label>
                 </div>
 
                 <div class="multiple-choice" data-target="collect-choice">
-                    <input id="both" type="radio" name="first" value="1st and 25th">
+                    <input id="both" type="radio" name="reminderFrequency" value="1st and 25th">
                     <label for="both">@messages("hts.reminder-frequency.both")</label>
                 </div>
 
