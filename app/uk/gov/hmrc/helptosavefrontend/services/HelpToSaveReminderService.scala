@@ -16,19 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
-import java.util.UUID
-
-import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject}
 import javax.inject.Singleton
-import play.api.http.Status
-import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
+import uk.gov.hmrc.helptosavefrontend.util.{Logging, Result}
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[HelpToSaveReminderServiceImpl])
 trait HelpToSaveReminderService {

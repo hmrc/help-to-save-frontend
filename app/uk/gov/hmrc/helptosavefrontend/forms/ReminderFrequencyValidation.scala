@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.forms
 
 import cats.data.Validated.Valid
-import cats.instances.int._
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._

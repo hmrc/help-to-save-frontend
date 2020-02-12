@@ -15,16 +15,12 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.controllers
-import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.option._
 import cats.instances.string._
 import cats.syntax.eq._
-import cats.syntax.traverse._
-import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, Result ⇒ PlayResult, _}
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -32,16 +28,11 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
-import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_confirmation, reminder_frequency_set}
-import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -66,7 +57,6 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                                                                                           ec:                                       ExecutionContext)
 
   extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
-  private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
   private def backLink: String = routes.AccessAccountController.accessAccount().url
 
