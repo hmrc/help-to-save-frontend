@@ -44,7 +44,7 @@ import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details,
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Either, Failure, Success}
 
 @Singleton
 class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveReminderService,
@@ -66,14 +66,6 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                                                                                           ec:                                       ExecutionContext)
 
   extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
-  private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
-
-  private def backLinkFromSession(session: HTSSession): String =
-    if (session.changingDetails) {
-      routes.EmailController.getSelectEmailPage().url
-    } else {
-      eligibilityPage
-    }
 
   def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
@@ -82,56 +74,37 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
   def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+
     ReminderForm.giveRemindersDetailsForm().bindFromRequest().fold(
       withErrors ⇒ {
-
         Ok(reminderFrequencySet(withErrors))
       },
 
       success ⇒
-      {
-        //Get the name
-        val userName = htsContext.userDetails match {
-          case Left(x)  ⇒ ""
-          case Right(x) ⇒ x.forename
-
-        }
-
-        helpToSaveService.getConfirmedEmail.fold({
-          err ⇒
-            SeeOther(routes.ReminderController.getRendersConfirmPage("noEmail", success.reminderFrequency).url)
-        }, {
-          emailRetrieved ⇒
-          {
-            val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), userName, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
-
-            val noParserVal = helpToSaveReminderService.updateHtsUser(htsUserToModify).fold[Future[PlayResult]](
-              {
-                err ⇒
-                {
-                  SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-
-                }
-              },
-              succesfulReturn ⇒
-
-                if (succesfulReturn === "SUCCESS") {
-
-                  Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
-
-                } else {
-                  //  Ok(reminderConfirmation("failedService", "failedFrequecy"))
-                  SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-                }
-
-
-            )
-
-            Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
+        {
+          //Get the user name
+          val userName = htsContext.userDetails match {
+            case Left(x)  ⇒ ""
+            case Right(x) ⇒ x.forename
 
           }
-        })
-      }
+
+          val htsUserModified = for {
+
+            emailRetrieved ← helpToSaveService.getConfirmedEmail
+
+            htsUserModified ← helpToSaveReminderService.updateHtsUser(HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noEmail"), userName, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1))))
+
+          } yield htsUserModified
+
+          htsUserModified.fold(
+            { e ⇒
+              logger.warn(s"Could not find confirmed email: $e")
+              SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
+            },
+            htsUserModified ⇒ Ok(reminderConfirmation(htsUserModified.email, success.reminderFrequency))
+          )
+        }
     )
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 

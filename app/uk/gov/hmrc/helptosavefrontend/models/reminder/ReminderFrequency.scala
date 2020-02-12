@@ -20,9 +20,8 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Format, JsPath, JsString, Json, Reads, Writes}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.helptosavefrontend.forms.SortCode
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-
+import play.api.libs.functional.syntax._
+import play.api.libs.json.{Format, JsPath, Json, Reads}
 case class ReminderFrequency(nino:           Nino,
                              email:          String,
                              name:           String,
@@ -50,6 +49,16 @@ case class HtsUser(
 object HtsUser {
   implicit val htsUserFormat: Format[HtsUser] = Json.format[HtsUser]
   implicit val writes: Writes[HtsUser] = Writes[HtsUser](s ⇒ JsString(s.toString))
+  implicit val reads: Reads[HtsUser] = (
+    (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(Nino.apply(_)) and
+    (JsPath \ "email").read[String] and //.orElse((JsPath \ "nino").read[String]).map(Email.apply(_)) and
+    (JsPath \ "name").read[String] and
+    (JsPath \ "optInStatus").read[Boolean] and
+    (JsPath \ "daysToReceive").read[List[Int]] and
+    (JsPath \ "nextSendDate").read[LocalDate] and
+    (JsPath \ "bounceCount").read[Int] and
+    (JsPath \ "callBackUrlRef").read[String]
+  )(HtsUser.apply(_, _, _, _, _, _, _, _))
 
 }
 

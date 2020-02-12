@@ -19,22 +19,12 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import java.util.UUID
 
 import cats.data.EitherT
-import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnectorImpl.GetHtsUserResponse
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
-import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.Account
-import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResultType}
-import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIPayload}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
-import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
+import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -44,7 +34,7 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[HelpToSaveReminderConnectorImpl])
 trait HelpToSaveReminderConnector {
 
-  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[String]
+  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser]
 
 }
 
@@ -53,8 +43,8 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private val updateHtsReminderURL: String = frontendAppConfig.updateHtsReminderUrl
 
-  override def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[String] =
-    handlePost(updateHtsReminderURL, htsUser, _.parseJSON[GetHtsUserResponse]().map(_.updateStatus), "update htsUser", identity)
+  override def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
+    handlePost(updateHtsReminderURL, htsUser, _.parseJSON[HtsUser](), "update htsUser", identity)
 
   private def handlePost[A, B](url:         String,
                                body:        HtsUser,
@@ -76,16 +66,6 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
     }.recover {
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
-  }
-
-}
-
-object HelpToSaveReminderConnectorImpl {
-
-  private[connectors] case class GetHtsUserResponse(updateStatus: String)
-
-  private[connectors] object GetHtsUserResponse {
-    implicit val format: Format[GetHtsUserResponse] = Json.format[GetHtsUserResponse]
   }
 
 }
