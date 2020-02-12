@@ -29,7 +29,6 @@
 
 @(form: Form[ReminderForm],backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@navigate_back(backLink)
 
 @title = @{
     Messages("hts.reminder-frequency.title.h1")
