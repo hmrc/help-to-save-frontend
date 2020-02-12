@@ -839,8 +839,8 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None,  = true))))
-          mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None,  = true))(Right(None))
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None, changingDetails = true))))
+          mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None, changingDetails = true))(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
           mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
         }
@@ -1398,7 +1398,7 @@ class EmailControllerSpec
         inSequence{
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")),
-                                                     = true))))
+                                                    changingDetails = true))))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 

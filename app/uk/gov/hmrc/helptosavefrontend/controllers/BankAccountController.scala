@@ -81,8 +81,7 @@ class BankAccountController @Inject() (val helpToSaveService: HelpToSaveService,
       session ⇒
         BankDetails.giveBankDetailsForm().bindFromRequest().fold(
           withErrors ⇒
-            Ok(bankAccountDetails(withErrors, backLinkFromSession(session))),
-          { bankDetails ⇒
+            Ok(bankAccountDetails(withErrors, backLinkFromSession(session))), { bankDetails ⇒
             helpToSaveService.validateBankDetails(ValidateBankDetailsRequest(htsContext.nino, bankDetails.sortCode.toString, bankDetails.accountNumber)).fold[Future[PlayResult]](
               error ⇒ {
                 logger.warn(s"Could not validate bank details due to : $error")
