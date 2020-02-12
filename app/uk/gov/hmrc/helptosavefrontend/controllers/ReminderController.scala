@@ -57,16 +57,13 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                                     mcc:                           MessagesControllerComponents,
                                     errorHandler:                  ErrorHandler,
                                     reminderFrequencySet:          reminder_frequency_set,
-                                    reminderConfirmation:          reminder_confirmation,
-                                    notEligible:                   not_eligible,
-                                    checkYourEmail:                check_your_email,
-                                    closeAccountAreYouSure:        close_account_are_you_sure)(implicit val crypto: Crypto,
-                                                                                               implicit val transformer:                 NINOLogMessageTransformer,
-                                                                                               implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
-                                                                                               val frontendAppConfig:                    FrontendAppConfig,
-                                                                                               val config:                               Configuration,
-                                                                                               val env:                                  Environment,
-                                                                                               ec:                                       ExecutionContext)
+                                    reminderConfirmation:          reminder_confirmation)(implicit val crypto: Crypto,
+                                                                                          implicit val transformer:                 NINOLogMessageTransformer,
+                                                                                          implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
+                                                                                          val frontendAppConfig:                    FrontendAppConfig,
+                                                                                          val config:                               Configuration,
+                                                                                          val env:                                  Environment,
+                                                                                          ec:                                       ExecutionContext)
 
   extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
@@ -92,49 +89,49 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
       },
 
       success ⇒
-        {
-          //Get the name
-          val userName = htsContext.userDetails match {
-            case Left(x)  ⇒ ""
-            case Right(x) ⇒ x.forename
+      {
+        //Get the name
+        val userName = htsContext.userDetails match {
+          case Left(x)  ⇒ ""
+          case Right(x) ⇒ x.forename
+
+        }
+
+        helpToSaveService.getConfirmedEmail.fold({
+          err ⇒
+            SeeOther(routes.ReminderController.getRendersConfirmPage("noEmail", success.reminderFrequency).url)
+        }, {
+          emailRetrieved ⇒
+          {
+            val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), userName, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
+
+            val noParserVal = helpToSaveReminderService.updateHtsUser(htsUserToModify).fold[Future[PlayResult]](
+              {
+                err ⇒
+                {
+                  SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+
+                }
+              },
+              succesfulReturn ⇒
+
+                if (succesfulReturn === "SUCCESS") {
+
+                  Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
+
+                } else {
+                  //  Ok(reminderConfirmation("failedService", "failedFrequecy"))
+                  SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+                }
+
+
+            )
+
+            Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
 
           }
-
-          helpToSaveService.getConfirmedEmail.fold({
-            err ⇒
-              SeeOther(routes.ReminderController.getRendersConfirmPage("noEmail", success.reminderFrequency).url)
-          }, {
-            emailRetrieved ⇒
-              {
-                val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), userName, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
-
-                val noParserVal = helpToSaveReminderService.updateHtsUser(htsUserToModify).fold[Future[PlayResult]](
-                  {
-                    err ⇒
-                      {
-                        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-
-                      }
-                  },
-                  succesfulReturn ⇒
-
-                    if (succesfulReturn === "SUCCESS") {
-
-                      Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
-
-                    } else {
-                    //  Ok(reminderConfirmation("failedService", "failedFrequecy"))
-                      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-                    }
-
-
-                )
-
-                Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
-
-              }
-          })
-        }
+        })
+      }
     )
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
