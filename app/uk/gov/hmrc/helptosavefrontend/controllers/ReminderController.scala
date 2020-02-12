@@ -87,35 +87,54 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
   def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
     ReminderForm.giveRemindersDetailsForm().bindFromRequest().fold(
       withErrors ⇒ {
+
         Ok(reminderFrequencySet(withErrors))
       },
-      {
-        success ⇒
-          {
-            helpToSaveService.getConfirmedEmail.fold({
-              err ⇒
-                SeeOther(routes.ReminderController.getRendersConfirmPage("noEmail", success.reminderFrequency).url)
-            }, {
-              emailRetrieved ⇒
-                val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
-                val nothing = helpToSaveReminderService.updateHtsUser(htsUserToModify)
-                  .leftSemiflatMap { e ⇒
-                    logger.warn(s"Could not update the user email: $e")
-                    internalServerError()
-                  }
-                  .semiflatMap {
-                    case updateStatus: String ⇒ if (updateStatus === "SUCCESS") {
-                      //Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
-                      SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(emailRetrieved.getOrElse("noUseEmail")), success.reminderFrequency).url)
+
+      success ⇒
+        {
+          //Get the name
+          val userName = htsContext.userDetails match {
+            case Left(x)  ⇒ ""
+            case Right(x) ⇒ x.forename
+
+          }
+
+          helpToSaveService.getConfirmedEmail.fold({
+            err ⇒
+              SeeOther(routes.ReminderController.getRendersConfirmPage("noEmail", success.reminderFrequency).url)
+          }, {
+            emailRetrieved ⇒
+              {
+                val htsUserToModify = HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noUSeEmail"), userName, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))
+
+                val noParserVal = helpToSaveReminderService.updateHtsUser(htsUserToModify).fold[Future[PlayResult]](
+                  {
+                    err ⇒
+                      {
+                        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+
+                      }
+                  },
+                  succesfulReturn ⇒
+
+                    if (succesfulReturn === "SUCCESS") {
+
+                      Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
+
                     } else {
-                      Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), "noFrequency updated"))
+                    //  Ok(reminderConfirmation("failedService", "failedFrequecy"))
+                      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
                     }
-                  }
+
+
+                )
+
                 Ok(reminderConfirmation(emailRetrieved.getOrElse("noUseEmail"), success.reminderFrequency))
 
-            })
-          }
-      }
+              }
+          })
+        }
     )
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 

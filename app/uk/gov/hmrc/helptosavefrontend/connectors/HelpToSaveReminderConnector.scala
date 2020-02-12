@@ -24,6 +24,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnectorImpl.GetHtsUserResponse
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.Account
@@ -43,7 +44,7 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[HelpToSaveReminderConnectorImpl])
 trait HelpToSaveReminderConnector {
 
-  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ex: ExecutionContext): Future[HttpResponse]
+  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[String]
 
 }
 
@@ -52,19 +53,39 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private val updateHtsReminderURL: String = frontendAppConfig.updateHtsReminderUrl
 
-  private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
+  override def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[String] =
+    handlePost(updateHtsReminderURL, htsUser, _.parseJSON[GetHtsUserResponse]().map(_.updateStatus), "update htsUser", identity)
 
-  override def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] =
-    http.post(updateHtsReminderURL, htsUser)
+  private def handlePost[A, B](url:         String,
+                               body:        HtsUser,
+                               ifHTTP200:   HttpResponse ⇒ Either[B, A],
+                               description: ⇒ String,
+                               toError:     String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
+    handle(http.post(url, body), ifHTTP200, description, toError)
+
+  private def handle[A, B](resF:        Future[HttpResponse],
+                           ifHTTP200:   HttpResponse ⇒ Either[B, A],
+                           description: ⇒ String,
+                           toError:     String ⇒ B)(implicit ec: ExecutionContext) = {
+    EitherT(resF.map { response ⇒
+      if (response.status == 200) {
+        ifHTTP200(response)
+      } else {
+        Left(toError(s"Call to $description came back with status ${response.status}. Body was ${(response.body)}"))
+      }
+    }.recover {
+      case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
+    })
+  }
 
 }
 
 object HelpToSaveReminderConnectorImpl {
 
-  private[connectors] case class GetEmailResponse(email: Option[String])
+  private[connectors] case class GetHtsUserResponse(updateStatus: String)
 
-  private[connectors] object GetEmailResponse {
-    implicit val format: Format[GetEmailResponse] = Json.format[GetEmailResponse]
+  private[connectors] object GetHtsUserResponse {
+    implicit val format: Format[GetHtsUserResponse] = Json.format[GetHtsUserResponse]
   }
 
 }

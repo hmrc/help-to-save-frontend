@@ -40,22 +40,8 @@ trait HelpToSaveReminderService {
 @Singleton
 class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: HelpToSaveReminderConnector) extends HelpToSaveReminderService with Logging {
 
-  override def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[String] =
-    EitherT(helpToSaveReminderConnector.updateHtsUser(htsUser).map[Either[String, String]] { response ⇒
-
-      response.status match {
-        case Status.OK ⇒
-          Right(("SUCCESS"))
-
-        case other ⇒
-          Left(s"Received unexpected status $other from HTS Reminder Service while trying to update htsUser. Body was ${maskNino(response.body)}")
-
-      }
-    }.recover {
-      case e ⇒
-        Left(s"Encountered error while trying to update htsUser: ${e.getMessage}")
-    }
-    )
+  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[String] =
+    helpToSaveReminderConnector.updateHtsUser(htsUser)
 
 }
 
