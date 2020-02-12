@@ -1,10 +1,8 @@
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys
-import play.core.PlayVersion
 import sbt.{Compile, _}
 import scalariform.formatter.preferences._
-import uk.gov.hmrc.DefaultBuildSettings.{addTestReportOption, defaultSettings, scalaSettings}
+import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
 import uk.gov.hmrc.SbtAutoBuildPlugin
-import uk.gov.hmrc.ServiceManagerPlugin.Keys.itDependenciesList
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import wartremover.{Warts, wartremoverErrors, wartremoverExcluded}
@@ -12,34 +10,10 @@ import wartremover.{Warts, wartremoverErrors, wartremoverExcluded}
 import scala.language.postfixOps
 
 val appName = "help-to-save-frontend"
-lazy val hmrc = "uk.gov.hmrc"
 
-lazy val appDependencies: Seq[ModuleID] = dependencies ++ testDependencies() ++ testDependencies("it")
-lazy val externalServices = List()
+lazy val appDependencies: Seq[ModuleID] = Seq(ws) ++ AppDependencies.compile ++ AppDependencies.test
 
-val dependencies = Seq(
-  ws,
-  hmrc %% "govuk-template" % "5.48.0-play-26",
-  hmrc %% "mongo-caching" % "6.8.0-play-26",
-  hmrc %% "auth-client" % "2.32.2-play-26",
-  hmrc %% "play-whitelist-filter" % "3.1.0-play-26",
-  hmrc %% "bootstrap-play-26" % "1.3.0",
-  hmrc %% "play-ui" % "8.7.0-play-26",
-  hmrc %% "play-language" % "4.2.0-play-26",
-  "com.github.kxbmap" %% "configs" % "0.4.4",
-  hmrc %% "domain" % "5.6.0-play-26",
-  "org.typelevel" %% "cats-core" % "2.0.0"
-)
-
-def testDependencies(scope: String = "test") = Seq(
-  hmrc %% "service-integration-test" % "0.9.0-play-26" % scope,
-  hmrc %% "stub-data-generator" % "0.5.3" % scope,
-  hmrc %% "reactivemongo-test" % "4.16.0-play-26" % scope,
-  "org.scalatest" %% "scalatest" % "3.0.8" % scope,
-  "org.scalamock" %% "scalamock-scalatest-support" % "3.6.0" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.0" % scope,
-  "com.typesafe.play" %% "play-test" % PlayVersion.current % scope
-)
+dependencyOverrides ++= AppDependencies.overrides
 
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
 lazy val plugins: Seq[Plugins] = Seq.empty
@@ -121,13 +95,12 @@ lazy val commonSettings = Seq(
   addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"),
   majorVersion := 2,
   evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
-  resolvers ++= Seq(
-    Resolver.bintrayRepo("hmrc", "releases"),
-    Resolver.jcenterRepo,
-    "emueller-bintray" at "http://dl.bintray.com/emueller/maven" // for play json schema validator
-  ),
+  resolvers += Resolver.bintrayRepo("hmrc", "releases"),
   scalacOptions ++= Seq("-Xcheckinit", "-feature")
-) ++ scalaSettings ++ publishingSettings ++ defaultSettings() ++ scalariformSettings ++ scoverageSettings ++ playSettings
+) ++
+  scalaSettings ++ publishingSettings ++ defaultSettings() ++
+  scalariformSettings ++ scoverageSettings ++
+  playSettings
 
 
 lazy val microservice = Project(appName, file("."))
@@ -137,21 +110,14 @@ lazy val microservice = Project(appName, file("."))
       (baseDirectory ** "HealthCheckRunner.scala").get ++
       (baseDirectory ** "Lock.scala").get
   ))
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*)
+  .enablePlugins(Seq(play.sbt.PlayScala,
+    SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory
+  ) ++ plugins: _*)
   .settings(PlayKeys.playDefaultPort := 7000)
   .settings(
     libraryDependencies ++= appDependencies
   )
-  .configs(IntegrationTest)
-  .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
-  .settings(itDependenciesList := externalServices)
   .settings(scalaVersion := "2.11.12")
-  .settings(
-    Keys.fork in IntegrationTest := false,
-    unmanagedSourceDirectories in IntegrationTest := Seq((baseDirectory in IntegrationTest).value / "it"),
-    addTestReportOption(IntegrationTest, "int-test-reports"),
-    parallelExecution in IntegrationTest := false
-  )
   .settings(
     formatMessageQuotes := {
       import sys.process._
