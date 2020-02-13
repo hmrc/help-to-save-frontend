@@ -42,8 +42,7 @@ class HelpToSaveReminderConnectorSpec
   val htsReminderURL = "http://localhost:7008"
 
   val UpdateHtsURL =
-    s"$htsReminderURL/help-to-save-reminder/update-htsUser-entity"
-
+    s"$htsReminderURL/help-to-save-reminder/update-htsuser-entity"
 
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
