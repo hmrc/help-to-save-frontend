@@ -75,7 +75,6 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
 
       success ⇒
         {
-
           //Get the user name
           val userName = htsContext.userDetails match {
             case Left(x)  ⇒ ""
@@ -94,9 +93,9 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
           htsUserModified.fold(
             { e ⇒
               logger.warn(s"Could not find confirmed email: $e")
-              SeeOther(routes.EmailController.confirmEmailErrorTryLater().url)
+              SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
             },
-            htsUserModified ⇒ Ok(reminderConfirmation(htsUserModified.email, success.reminderFrequency))
+            htsUserModified ⇒ SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUserModified.email), success.reminderFrequency).url)
           )
 
         }

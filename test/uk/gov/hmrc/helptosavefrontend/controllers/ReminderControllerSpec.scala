@@ -38,9 +38,9 @@ import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpT
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_confirmation, reminder_frequency_set}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class ReminderControllerSpec
   extends ControllerSpecWithGuiceApp
@@ -52,8 +52,6 @@ class ReminderControllerSpec
   implicit val reminderFrequencyValidation: ReminderFrequencyValidation = mock[ReminderFrequencyValidation]
   val encryptedEmail = "encrypted"
   val mockAuditor = mock[HTSAuditor]
-
-  private val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
   val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
   val mockHelpToSaveService = mock[HelpToSaveService]
@@ -76,17 +74,11 @@ class ReminderControllerSpec
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockStoreEmail(email: Email)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService
-      .storeConfirmedEmail(_: Email)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(email, *, *)
-      .returning(EitherT.fromEither[Future](result))
+  def mockEncrypt(p: String)(result: String): Unit =
+    (crypto.encrypt(_: String)).expects(p).returning(result)
 
-  def mockAuditSuspiciousActivity() =
-    (mockAuditor
-      .sendEvent(_: SuspiciousActivity, _: NINO)(_: ExecutionContext))
-      .expects(*, nino, *)
-      .returning(Future.successful(AuditResult.Success))
+  def mockDecrypt(p: String)(result: String): Unit =
+    (crypto.decrypt(_: String)).expects(p).returning(Try(result))
 
   def newController()(implicit crypto: Crypto, reminderFrequencyValidation: ReminderFrequencyValidation) = new ReminderController(
     mockHelpToSaveReminderService,
@@ -105,63 +97,66 @@ class ReminderControllerSpec
   }
   lazy val controller = newController()
 
-  /*"The ReminderController" should {
+  "The Reminder Controller" must {
 
-    "handling getSelectRendersPage requests" in {
+    val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
-        def getSelectRendersPage(): Future[Result] = csrfAddToken(controller.getSelectRendersPage)(fakeRequest)
-
-      inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-          mockedNINORetrieval)
-        mockSessionStoreGet(Right(None))
-        mockEnrolmentCheck()(Left(""))
-      }
-      val result = getSelectRendersPage()
-      status(result) shouldBe 200
-      contentAsString(result) should include("Select when you want to receive reminders")
-      contentAsString(result) should include("/help-to-save/account-home/reminders-frequency-set")
-    }
-  }*/
-
-  "handling verified emails" must {
-
-    val verifiedEmail = "new email"
-      //val htsUserForUpdate = HtsUser(Nino("SK614700A"), "jack@mercator.it", "Jack L", true, Seq(1), LocalDate.now(), 0 )
-
-      def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
+    def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
         csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
 
-    /*behave like commonEnrolmentBehaviour(
-      () ⇒
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals),
-      () ⇒ verifyHtsUserUpdate(htsUserForUpdate),
-      () ⇒
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
-          mockedRetrievalsMissingNinoEnrolment)
-    )*/
-
-    "show a success page if the NINO in the URL matches the NINO from auth, the update with " +
-      "NS&I is successful and the email is successfully updated in mongo" in {
+    "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
         val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEmailGet()(Right(Some("email")))
           mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+          mockEncrypt("email")(encryptedEmail)
+          //mockDecrypt("encrypted")("email")
+
         }
 
         val result = verifyHtsUserUpdate(htsUserForUpdate)
-        status(result) shouldBe Status.OK
+        status(result) shouldBe Status.SEE_OTHER
+
         //redirectLocation(result) shouldBe Some(
         //  routes.EmailController.confirmEmailErrorTryLater().url)
       }
+
+
+    "should show the form validation errors when the user submits an HtsUser to update in the HTS Reminder backend service with nobody " in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+      }
+
+      val result = csrfAddToken(controller.selectRemindersSubmit())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should return the reminder frquency setting page when asked for it" in {
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
+          mockedNINORetrieval)
+      }
+
+      val result = csrfAddToken(controller.getSelectRendersPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
   }
 
   def commonEnrolmentBehaviour(
       getResult:          () ⇒ Future[Result],
       mockSuccessfulAuth: () ⇒ Unit,
-      mockNoNINOAuth:     () ⇒ Unit): Unit = { // scalastyle:ignore method.length
+      mockNoNINOAuth:     () ⇒ Unit): Unit = {
 
     "return an error" when {
 
@@ -204,7 +199,6 @@ class ReminderControllerSpec
           mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockEmailGet()(Right(None))
-          mockAuditSuspiciousActivity()
         }
 
         checkIsErrorPage(getResult())
