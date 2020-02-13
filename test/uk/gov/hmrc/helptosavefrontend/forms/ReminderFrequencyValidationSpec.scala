@@ -41,14 +41,20 @@ class ReminderFrequencyValidationSpec extends WordSpec with Matchers with ScalaC
         result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
       }
 
+
     "validate against blank" in {
       val reminderFrequencyValidation = validation
 
       test(reminderFrequencyValidation)("")(Left(Set(ErrorMessages.reminderFrequencyEmpty)))
     }
 
-    "informs if the frequency choice is empty" in {
-      testForm.frequencyChoiceEmpty("") shouldBe false
+    "validate against not blank" in {
+      val reminderFrequencyValidation = validation
+
+      test(reminderFrequencyValidation)("1st")(Right(Set(ErrorMessages.reminderFrequencyEmpty))).equals(false)
+    }
+
+    "informs if the frequency choice is empty" in {testForm.frequencyChoiceEmpty("") shouldBe false
 
       testFormWithErrorMessage("error").frequencyChoiceEmpty(TestForm.key) shouldBe false
 
@@ -57,7 +63,7 @@ class ReminderFrequencyValidationSpec extends WordSpec with Matchers with ScalaC
     "informs if the frequency choice is not empty" in {
       testForm.frequencyChoiceEmpty("1st") shouldBe false
 
-   //   testFormWithErrorMessage("error").frequencyChoiceEmpty(TestForm.key) shouldBe false
+     testFormWithErrorMessage("").frequencyChoiceEmpty(TestForm.key) shouldBe false
 
     }
   }
