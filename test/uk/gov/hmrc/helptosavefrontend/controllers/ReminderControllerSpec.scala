@@ -151,6 +151,20 @@ class ReminderControllerSpec
 
     }
 
+    "should redirect to an the service unavailable page" in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Left("error occurred while retrieving the email details"))
+
+      }
+
+      val result = verifyHtsUserUpdate(htsUserForUpdate)
+      status(result) shouldBe Status.SEE_OTHER
+
+    }
+
   }
 
   def commonEnrolmentBehaviour(
