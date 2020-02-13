@@ -112,7 +112,6 @@ class ReminderControllerSpec
           mockEmailGet()(Right(Some("email")))
           mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
           mockEncrypt("email")(encryptedEmail)
-          //mockDecrypt("encrypted")("email")
 
         }
 
@@ -162,6 +161,19 @@ class ReminderControllerSpec
 
       val result = verifyHtsUserUpdate(htsUserForUpdate)
       status(result) shouldBe Status.SEE_OTHER
+
+    }
+
+    "should redirect to a renders confirmation page with email encrypted " in {
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
+          mockedNINORetrieval)
+        mockDecrypt("encrypted")("email")
+      }
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+      val result = controller.getRendersConfirmPage("encrypted", "1st")(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
 
     }
 

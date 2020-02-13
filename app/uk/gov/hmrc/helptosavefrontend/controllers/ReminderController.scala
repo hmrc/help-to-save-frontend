@@ -105,8 +105,15 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
   def getRendersConfirmPage(email: String, period: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
 
     crypto.decrypt(email) match {
-      case Success(value) ⇒ Ok(reminderConfirmation(value, period))
-      case Failure(e)     ⇒ Ok(reminderConfirmation("emailNotDecrypt", period))
+      case Success(value) ⇒ {
+        println("Decrypt success")
+        Ok(reminderConfirmation(value, period))
+      }
+
+      case Failure(e)     ⇒ {
+        println("Decrypt failure")
+        Ok(reminderConfirmation("emailNotDecrypt", period))
+      }
     }
 
   }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period).url)
