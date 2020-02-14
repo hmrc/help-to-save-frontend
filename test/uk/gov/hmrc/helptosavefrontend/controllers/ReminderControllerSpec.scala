@@ -106,7 +106,7 @@ class ReminderControllerSpec
         csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
 
     "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -124,7 +124,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if htsUser update fails " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
