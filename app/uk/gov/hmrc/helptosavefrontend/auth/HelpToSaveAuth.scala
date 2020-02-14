@@ -150,22 +150,21 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       itmpDob.orElse(dob)
         .toValidNel(MissingUserInfo.DateOfBirth)
 
-    val addressValidation: ValidOrMissingUserInfo[ItmpAddress] =
-      {
-        val missingContactDetails = Invalid(NonEmptyList.of(MissingUserInfo.Contact))
+    val addressValidation: ValidOrMissingUserInfo[ItmpAddress] = {
+      val missingContactDetails = Invalid(NonEmptyList.of(MissingUserInfo.Contact))
 
-        itmpAddress.fold[ValidOrMissingUserInfo[ItmpAddress]](missingContactDetails){ a ⇒
-          val lineCount =
-            List(a.line1, a.line2, a.line3, a.line4, a.line5).map(_.map(_.trim)).filter(_.nonEmpty).collect { case Some(_) ⇒ () }.length
+      itmpAddress.fold[ValidOrMissingUserInfo[ItmpAddress]](missingContactDetails){ a ⇒
+        val lineCount =
+          List(a.line1, a.line2, a.line3, a.line4, a.line5).map(_.map(_.trim)).filter(_.nonEmpty).collect { case Some(_) ⇒ () }.length
 
-          if (lineCount < 2 || !a.postCode.exists(_.trim.nonEmpty)) {
-            missingContactDetails
-          } else {
-            Valid(a)
-          }
+        if (lineCount < 2 || !a.postCode.exists(_.trim.nonEmpty)) {
+          missingContactDetails
+        } else {
+          Valid(a)
         }
-
       }
+
+    }
 
     val validation: ValidOrMissingUserInfo[UserInfo] =
       (givenNameValidation, surnameValidation, dateOfBirthValidation, addressValidation).mapN {
