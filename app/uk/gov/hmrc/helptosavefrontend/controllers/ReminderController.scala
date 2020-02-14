@@ -88,7 +88,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
               val result: EitherT[Future, GetEmailError, HtsUser] = for {
                 emailRetrieved ← helpToSaveService.getConfirmedEmail.leftMap(GetEmailError.HtsEmailError)
                 htsUser ← helpToSaveReminderService.updateHtsUser(HtsUser(Nino(htsContext.nino),
-                                                                          emailRetrieved.getOrElse("noEmailFound"), userInfo.forename,
+                                                                          emailRetrieved.getOrElse(""), userInfo.forename,
                                                                           daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))) //.leftMap(GetEmailError.UpdateHtsUserError)
                   .leftMap[GetEmailError](GetEmailError.UpdateHtsUserError)
 
