@@ -60,11 +60,17 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
 
   extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
 
+  val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
+
   private def backLink: String = routes.AccessAccountController.accessAccount().url
 
-  def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+  def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
 
-    Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+    if (isFeatureEnabled) {
+      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+    } else {
+      SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+    }
 
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
