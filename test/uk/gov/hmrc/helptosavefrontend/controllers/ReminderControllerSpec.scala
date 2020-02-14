@@ -27,6 +27,7 @@ import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, ReminderFrequencyValidation, SortCode}
@@ -40,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_confirmation
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Try}
 
 class ReminderControllerSpec
   extends ControllerSpecWithGuiceApp
@@ -101,27 +102,43 @@ class ReminderControllerSpec
 
     val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
-    def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
+      def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
         csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
 
     "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
-        val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
 
-        inSequence {
-          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEmailGet()(Right(Some("email")))
-          mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
-          mockEncrypt("email")(encryptedEmail)
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("email")))
+        mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+        mockEncrypt("email")(encryptedEmail)
 
-        }
-
-        val result = verifyHtsUserUpdate(htsUserForUpdate)
-        status(result) shouldBe Status.SEE_OTHER
-
-        //redirectLocation(result) shouldBe Some(
-        //  routes.EmailController.confirmEmailErrorTryLater().url)
       }
 
+      val result = verifyHtsUserUpdate(htsUserForUpdate)
+      status(result) shouldBe Status.SEE_OTHER
+
+      //redirectLocation(result) shouldBe Some(
+      //  routes.EmailController.confirmEmailErrorTryLater().url)
+    }
+
+    "should redirect to internal server error page if htsUser update fails " in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("email")))
+        mockUpdateHtsUserPost(htsUserForUpdate)(Left("error occurred while updating htsUser"))
+
+      }
+
+      val result = verifyHtsUserUpdate(htsUserForUpdate)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+      //redirectLocation(result) shouldBe Some(
+      //  routes.EmailController.confirmEmailErrorTryLater().url)
+    }
 
     "should show the form validation errors when the user submits an HtsUser to update in the HTS Reminder backend service with nobody " in {
       val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
@@ -134,6 +151,20 @@ class ReminderControllerSpec
 
       val result = csrfAddToken(controller.selectRemindersSubmit())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
+
+    }
+
+    "should redirect to internal server error page if user info is missing from the htsContext " in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+
+      inSequence {
+        mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString("error occurred"))
+      }
+
+      val result = csrfAddToken(controller.selectRemindersSubmit())(fakeRequestWithNoBody)
+      status(result) shouldBe INTERNAL_SERVER_ERROR
 
     }
 
@@ -150,7 +181,7 @@ class ReminderControllerSpec
 
     }
 
-    "should redirect to an the service unavailable page" in {
+    "should redirect to an the internal server error page if email retrieveal is failed" in {
       val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
 
       inSequence {
@@ -160,7 +191,7 @@ class ReminderControllerSpec
       }
 
       val result = verifyHtsUserUpdate(htsUserForUpdate)
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 
     }
 

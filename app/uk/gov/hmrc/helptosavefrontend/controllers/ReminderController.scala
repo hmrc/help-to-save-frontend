@@ -15,6 +15,7 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.controllers
+import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
@@ -26,6 +27,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.GetEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
@@ -75,28 +77,38 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
 
       success ⇒
         {
-          //Get the user name
-          val userName = htsContext.userDetails match {
-            case Left(x)  ⇒ ""
-            case Right(x) ⇒ x.forename
+          htsContext.userDetails match {
 
+            case Left(missingUserInfos) ⇒
+              logger.warn(s"Email was verified but missing some user info ${missingUserInfos}")
+
+              internalServerError()
+
+            case Right(userInfo) ⇒
+              val result: EitherT[Future, GetEmailError, HtsUser] = for {
+                emailRetrieved ← helpToSaveService.getConfirmedEmail.leftMap(GetEmailError.HtsEmailError)
+                htsUser ← helpToSaveReminderService.updateHtsUser(HtsUser(Nino(htsContext.nino),
+                                                                          emailRetrieved.getOrElse("noEmailFound"), userInfo.forename,
+                                                                          daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))) //.leftMap(GetEmailError.UpdateHtsUserError)
+                  .leftMap[GetEmailError](GetEmailError.UpdateHtsUserError)
+
+              } yield htsUser
+
+              result.fold({
+                case GetEmailError.HtsEmailError(e) ⇒
+                  logger.warn(s"Could not get email from hts service: $e")
+                  internalServerError()
+
+                case GetEmailError.UpdateHtsUserError(e) ⇒
+                  logger.warn(s"Could not update the HtsUser details on Hts Reminder service: $e")
+                  internalServerError()
+
+              }, { htsUser ⇒
+                logger.info("Successfully updated htsUser")
+
+                SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency).url)
+              })
           }
-
-          val htsUserModified = for {
-
-            emailRetrieved ← helpToSaveService.getConfirmedEmail
-
-            htsUserModified ← helpToSaveReminderService.updateHtsUser(HtsUser(Nino(htsContext.nino), emailRetrieved.getOrElse("noEmail"), userName, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1))))
-
-          } yield htsUserModified
-
-          htsUserModified.fold(
-            { e ⇒
-              logger.warn(s"Could not find confirmed email: $e")
-              SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
-            },
-            htsUserModified ⇒ SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUserModified.email), success.reminderFrequency).url)
-          )
 
         }
     )
@@ -106,9 +118,26 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
 
     crypto.decrypt(email) match {
       case Success(value) ⇒ Ok(reminderConfirmation(value, period))
-      case Failure(e)     ⇒ Ok(reminderConfirmation("emailNotDecrypt", period))
+      case Failure(e) ⇒ {
+        logger.warn(s"Could not write confirmed email: $email and the exception : $e")
+        internalServerError()
+      }
     }
 
   }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period).url)
+
+}
+
+object ReminderController {
+
+  private sealed trait GetEmailError
+
+  private object GetEmailError {
+
+    case class HtsEmailError(message: String) extends GetEmailError
+
+    case class UpdateHtsUserError(message: String) extends GetEmailError
+
+  }
 
 }
