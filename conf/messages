@@ -646,3 +646,25 @@ language-switcher.welsh=Cymraeg
 language-switcher.welsh.hidden=Newid yr iaith i’r Gymraeg
 language-switcher.welsh.hover=Defnyddio’r cyfrif hwn yn Cymraeg
 language-switcher.nav=Language switcher
+
+
+hts.reminder-frequency.title.h1=Email savings reminders
+hts.reminder-frequency.intro=Reminders help you remember to save each month. This helps you earn the highest possible bonus.
+hts.reminder-frequency.note=Currently, you are not receiving any reminders.
+hts.reminder-frequency.select=Select when you want to receive reminders
+hts.reminder-frequency.first=On the 1st day of each month
+hts.reminder-frequency.25=On the 25th day of each month
+hts.reminder-frequency.both=On the 1st day and 25th day of each month
+hts.reminder-confirmation.title.h1=Savings reminders set
+hts.reminder-confirmation.title.p1=You’ll now get monthly email reminders
+hts.reminder-confirmation.title.p1-1=You’ll get a Help to Save email reminder on the
+hts.reminder-confirmation.title.p1-2=day of each month
+hts.reminder-confirmation.title.p1-3=We'll send your reminders to
+hts.reminder-confirmation.title.p1-4=If you want your reminders to go somewhere else you'll need to 
+hts.reminder-confirmation.change-email.descriptive-link=change your email address.
+hts.reminder-confirmation.saving-reminders.descriptive-link=savings reminders
+hts.reminder-confirmation.title.p1-5=You can change or cancel your email reminders at anytime. Go to
+hts.reminder-confirmation.title.p1-6=in your Help to Save account home.
+hts.reminder-confirmation.h2=What happens next
+hts.reminder-frequency.select-an-option=Select an option for setting up reminders
+hts.reminder-frequency.error.missing=No reminder frequency option selected
