@@ -89,27 +89,22 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
             helpToSaveService.getConfirmedEmail.value.flatMap{
               _.fold(
                 noEmailError ⇒ {
-                  logger.warn(s"An error occurred while accessing confirmed email service for user: ${userInfo.nino}")
+                  logger.warn(s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : ${noEmailError}")
                   internalServerError()
                 },
                 emailRetrieved ⇒
                   emailRetrieved match {
-                    case Some(email) ⇒
-                      if (email.length > 0)
-                        helpToSaveReminderService.updateHtsUser(HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1))))
-                          .fold(
-                            htsError ⇒ {
-                              logger.warn(s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino}")
-                              internalServerError()
-                            },
-                            htsUser ⇒ SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency).url)
-                          )
-                      else {
-                        logger.warn(s"Email retrieved for user: ${userInfo.nino}")
-                        internalServerError()
-                      }
-                    case None ⇒ {
-                      logger.warn(s"No email retrieved for user: ${userInfo.nino} is empty")
+                    case Some(email) if !email.isEmpty ⇒
+                      helpToSaveReminderService.updateHtsUser(HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1))))
+                        .fold(
+                          htsError ⇒ {
+                            logger.warn(s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: ${htsError}")
+                            internalServerError()
+                          },
+                          htsUser ⇒ SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency).url)
+                        )
+                    case Some(_) ⇒ {
+                      logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
                       internalServerError()
                     }
                   })
