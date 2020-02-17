@@ -94,8 +94,10 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                 },
                 emailRetrieved ⇒
                   emailRetrieved match {
-                    case Some(email) if !email.isEmpty ⇒
-                      helpToSaveReminderService.updateHtsUser(HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1))))
+                    case Some(email) if !email.isEmpty ⇒ {
+
+                      val htsUserToBeUpdated = HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq()))
+                      helpToSaveReminderService.updateHtsUser(htsUserToBeUpdated)
                         .fold(
                           htsError ⇒ {
                             logger.warn(s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: ${htsError}")
@@ -103,6 +105,8 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                           },
                           htsUser ⇒ SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency).url)
                         )
+
+                    }
                     case Some(_) ⇒ {
                       logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
                       internalServerError()
