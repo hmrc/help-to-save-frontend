@@ -48,20 +48,17 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
 
   "The HelpToSaveReminderService" when {
 
-
     "update email" must {
-
 
       val nino: Nino = Nino("AE123456D")
 
-
       val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
-      def mockupdateUser(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit = {
-        (htsReminderConnector.updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(htsUser, *, *)
-          .returning(EitherT.fromEither[Future](result))
-      }
+        def mockupdateUser(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit = {
+          (htsReminderConnector.updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
+            .expects(htsUser, *, *)
+            .returning(EitherT.fromEither[Future](result))
+        }
 
       "return a successful response" in {
         mockupdateUser(htsUser)(Right(htsUser))
@@ -69,7 +66,6 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
         val result = htsReminderService.updateHtsUser(htsUser)
         await(result.value) shouldBe (Right(htsUser))
       }
-
 
     }
 
