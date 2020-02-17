@@ -46,7 +46,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val accessAccountUrl: String = s"${getUrlFor("help-to-save-frontend")}/access-account"
 
-  val updateHtsReminderUrl: String = s"${servicesConfig.baseUrl("help-to-save-reminder")}/help-to-save-reminder/update-htsuser-entity"
+  val helpToSaveReminderUrl: String = servicesConfig.baseUrl("help-to-save-reminder")
 
   val reminderServiceFeatureSwitch: Boolean = servicesConfig.getBoolean("reminder-feature-switch")
 
