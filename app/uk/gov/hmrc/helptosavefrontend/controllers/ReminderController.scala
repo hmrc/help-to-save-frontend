@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_confirmation, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Either, Failure, Success}
@@ -49,13 +49,16 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                                     mcc:                           MessagesControllerComponents,
                                     errorHandler:                  ErrorHandler,
                                     reminderFrequencySet:          reminder_frequency_set,
-                                    reminderConfirmation:          reminder_confirmation)(implicit val crypto: Crypto,
-                                                                                          implicit val transformer:                 NINOLogMessageTransformer,
-                                                                                          implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
-                                                                                          val frontendAppConfig:                    FrontendAppConfig,
-                                                                                          val config:                               Configuration,
-                                                                                          val env:                                  Environment,
-                                                                                          ec:                                       ExecutionContext)
+                                    reminderFrequencyChange:       reminder_frequency_change,
+                                    reminderConfirmation:          reminder_confirmation,
+                                    reminderCancelConfirmation:    reminder_cancel_confirmation,
+                                    reminderDashboard:             reminder_dashboard)(implicit val crypto: Crypto,
+                                                                                       implicit val transformer:                 NINOLogMessageTransformer,
+                                                                                       implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
+                                                                                       val frontendAppConfig:                    FrontendAppConfig,
+                                                                                       val config:                               Configuration,
+                                                                                       val env:                                  Environment,
+                                                                                       ec:                                       ExecutionContext)
 
   extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
 
@@ -65,11 +68,34 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
 
   def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
 
-    if (isFeatureEnabled) {
-      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
-    } else {
+    /* if (isFeatureEnabled) {
+   */
+    // get optin status
+    helpToSaveReminderService.getHtsUser(htsContext.nino).fold(
+      e ⇒ {
+        logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
+
+        Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+      },
+      htsUser ⇒
+        Ok(reminderDashboard(htsUser.email, htsUser.daysToReceive.toString(), Some(backLink)))
+
+    )
+
+    /*} else {
       SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
-    }
+    }*/
+
+  }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+
+  def getSelectedRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+    Ok(reminderFrequencyChange(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+
+  }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+
+  def getRendersCancelConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+
+    Ok(reminderCancelConfirmation())
 
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 

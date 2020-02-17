@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
+import java.time.LocalDate
+
 import com.google.inject.{ImplementedBy, Inject}
 import javax.inject.Singleton
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, Result}
@@ -29,6 +32,7 @@ import scala.concurrent.ExecutionContext
 trait HelpToSaveReminderService {
 
   def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser]
+  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser]
 
 }
 
@@ -37,6 +41,9 @@ class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: Help
 
   def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
     helpToSaveReminderConnector.updateHtsUser(htsUser)
+
+  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
+    helpToSaveReminderConnector.getHtsUser(nino)
 
 }
 
