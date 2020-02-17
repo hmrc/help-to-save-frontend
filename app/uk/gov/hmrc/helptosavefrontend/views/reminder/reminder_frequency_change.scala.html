@@ -1,0 +1,98 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import views.html.helper.CSRF
+
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
+
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+
+@(form: Form[ReminderForm],backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+
+
+@title = @{
+    Messages("hts.reminder-frequency.title.h1")
+}
+
+@defining(form.error("reminderFrequency").map(_ ⇒ email_form_validation_error_message(form, "reminderFrequency"))){ errorMessage =>
+
+    @main(
+        title = title,
+        sidebarLinks = None,
+        bodyClasses = None,
+        isErrorPage = errorMessage.isDefined) {
+
+        @navigate_back(backLink)
+
+        @{if(errorMessage.isDefined)
+            <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
+            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.reminder-frequency.select-an-option")}</h2>
+            <ul class="error-summary-list">
+            <li><a href="#first">{Messages("hts.reminder-frequency.error.missing")}</a></li>
+            </ul>
+            </div>
+        }
+
+        <h1 class="heading-large">@title</h1>
+
+          <form method="post" action=@routes.ReminderController.selectRemindersSubmit novalidate>
+              @CSRF.formField(request)
+          @summary_section_head(heading = Messages("hts.reminder-frequency.select"))
+
+            <div class="multiple-choice" data-target="collect-choice">
+                    <input id="first" type="radio" name="reminderFrequency" value="1st" >
+                    <label for="first">@messages("hts.reminder-frequency.first")</label>
+                </div>
+
+                <div class="multiple-choice" data-target="collect-choice">
+                    <input id="twentyfive" type="radio" name="reminderFrequency" value="25th">
+                    <label for="twentyfive">@messages("hts.reminder-frequency.25")</label>
+                </div>
+
+                <div class="multiple-choice" data-target="collect-choice">
+                    <input id="both" type="radio" name="reminderFrequency" value="1st and 25th">
+                    <label for="both">@messages("hts.reminder-frequency.both")</label>
+                </div>
+
+                <div class="multiple-choice">
+                    <label for="or">@messages("hts.reminder-frequency.or")</label>
+                </div>
+
+                <div class="multiple-choice" data-target="collect-choice">
+                    <input id="cancel" type="radio" name="reminderFrequency" value="cancel">
+                    <label for="cancel">@messages("hts.reminder-frequency.cancel")</label>
+                </div>
+
+             <div class="form-field form-field--submit">
+      <button id="confirm-selection" class="button getSelectedChoice" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected reminder', 'Applicant select reminder frequency page');">
+        @messages("hts.global.continue-button")
+      </button>
+    </div>
+          </form>
+
+
+
+
+
+    }
+}
