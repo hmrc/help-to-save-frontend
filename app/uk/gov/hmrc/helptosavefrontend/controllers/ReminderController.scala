@@ -96,7 +96,8 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                   emailRetrieved match {
                     case Some(email) if !email.isEmpty ⇒ {
 
-                      val htsUserToBeUpdated = HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq()))
+                      val daysToReceiveReminders = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
+                      val htsUserToBeUpdated = HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceiveReminders)
                       helpToSaveReminderService.updateHtsUser(htsUserToBeUpdated)
                         .fold(
                           htsError ⇒ {
