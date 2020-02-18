@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
@@ -88,17 +88,6 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
 
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
-  def getSelectedRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
-    Ok(reminderFrequencyChange(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
-
-  }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
-
-  def getRendersCancelConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
-
-    Ok(reminderCancelConfirmation())
-
-  }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
-
   def selectRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
 
     ReminderForm.giveRemindersDetailsForm().bindFromRequest().fold(
@@ -154,5 +143,73 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
     }
 
   }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period).url)
+
+
+  def getSelectedRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+    Ok(reminderFrequencyChange(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+
+  }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit().url)
+
+  def selectedRemindersSubmit(): Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+
+    ReminderForm.giveRemindersDetailsForm().bindFromRequest().fold(
+      withErrors ⇒ {
+        Ok(reminderFrequencySet(withErrors))
+      },
+      success ⇒
+        htsContext.userDetails match {
+          case Left(missingUserInfos) ⇒
+            logger.warn(s"Email was verified but missing some user info ${missingUserInfos}")
+            internalServerError()
+
+          case Right(userInfo) ⇒
+            helpToSaveService.getConfirmedEmail.value.flatMap{
+              _.fold(
+                noEmailError ⇒ {
+                  logger.warn(s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : ${noEmailError}")
+                  internalServerError()
+                },
+                emailRetrieved ⇒
+                  emailRetrieved match {
+                    case Some(email) if !email.isEmpty ⇒ {
+                      if (success.reminderFrequency === "cancel") {
+                        val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
+                        helpToSaveReminderService.cancelHtsUserReminders(cancelHtsUserReminder)
+                          .fold(
+                            htsservError ⇒ {
+                              logger.warn(s"An error occurred while accessing HTS Reminder service for user: ${htsContext.nino} Error: ${htsservError}")
+                              internalServerError()
+                            },
+                            _ ⇒ SeeOther(routes.ReminderController.getRendersCancelConfirmPage().url)
+                          )
+
+                      } else {
+                        val daysToReceiveReminders = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
+                        val htsUserToBeUpdated = HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceiveReminders)
+                        helpToSaveReminderService.updateHtsUser(htsUserToBeUpdated)
+                          .fold(
+                            htsError ⇒ {
+                              logger.warn(s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: ${htsError}")
+                              internalServerError()
+                            },
+                            htsUser ⇒ SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency).url)
+                          )
+                      }
+                    }
+                    case Some(_) ⇒ {
+                      logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
+                      internalServerError()
+                    }
+                  })
+            }
+        })
+  }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit().url)
+
+  def getRendersCancelConfirmPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
+
+    Ok(reminderCancelConfirmation())
+
+  }(loginContinueURL = routes.ReminderController.getRendersCancelConfirmPage().url)
+
 }
 

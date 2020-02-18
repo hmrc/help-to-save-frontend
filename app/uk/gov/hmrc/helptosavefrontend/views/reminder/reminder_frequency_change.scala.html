@@ -55,7 +55,7 @@
 
         <h1 class="heading-large">@title</h1>
 
-          <form method="post" action=@routes.ReminderController.selectRemindersSubmit novalidate>
+          <form method="post" action=@routes.ReminderController.selectedRemindersSubmit novalidate>
               @CSRF.formField(request)
           @summary_section_head(heading = Messages("hts.reminder-frequency.select"))
 
