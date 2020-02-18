@@ -25,7 +25,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
-import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -39,6 +39,7 @@ trait HelpToSaveReminderConnector {
 
   def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser]
   def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser]
+  def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
 }
 
@@ -49,7 +50,9 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private val updateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-entity"
 
-  private def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getIfHtsUserExists/${nino}"
+  private def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getifhtsuserexists/${nino}"
+
+  private val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
   /* val nino: Nino = Nino("AE123456D")
 
   val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
@@ -63,11 +66,22 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
   override def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser] =
     handleGet(getHtsReminderUserURL(nino), emptyQueryParameters, _.parseJSON[HtsUser](), "get hts user", identity)
 
+  override def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+    //  http.post(cancelHtsReminderURL, nino)
+    handlePostCancel(cancelHtsReminderURL, cancelHtsUserReminder, _ ⇒ Right(()), "cancel reminder", identity)
+
   private def handlePost[A, B](url:         String,
                                body:        HtsUser,
                                ifHTTP200:   HttpResponse ⇒ Either[B, A],
                                description: ⇒ String,
                                toError:     String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
+    handle(http.post(url, body), ifHTTP200, description, toError)
+
+  private def handlePostCancel[A, B](url:         String,
+                                     body:        CancelHtsUserReminder,
+                                     ifHTTP200:   HttpResponse ⇒ Either[B, A],
+                                     description: ⇒ String,
+                                     toError:     String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(http.post(url, body), ifHTTP200, description, toError)
 
   private def handleGet[A, B](url:             String,
