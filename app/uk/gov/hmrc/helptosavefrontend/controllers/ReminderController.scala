@@ -27,7 +27,6 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.GetEmailError
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
@@ -80,44 +79,42 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
       withErrors ⇒ {
         Ok(reminderFrequencySet(withErrors))
       },
-
       success ⇒
-        {
-          htsContext.userDetails match {
+        htsContext.userDetails match {
+          case Left(missingUserInfos) ⇒
+            logger.warn(s"Email was verified but missing some user info ${missingUserInfos}")
+            internalServerError()
 
-            case Left(missingUserInfos) ⇒
-              logger.warn(s"Email was verified but missing some user info ${missingUserInfos}")
-
-              internalServerError()
-
-            case Right(userInfo) ⇒
-              val result: EitherT[Future, GetEmailError, HtsUser] = for {
-                emailRetrieved ← helpToSaveService.getConfirmedEmail.leftMap(GetEmailError.HtsEmailError)
-                htsUser ← helpToSaveReminderService.updateHtsUser(HtsUser(Nino(htsContext.nino),
-                                                                          emailRetrieved.getOrElse(""), userInfo.forename, true,
-                                                                          daysToReceive = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq(1)))) //.leftMap(GetEmailError.UpdateHtsUserError)
-                  .leftMap[GetEmailError](GetEmailError.UpdateHtsUserError)
-
-              } yield htsUser
-
-              result.fold({
-                case GetEmailError.HtsEmailError(e) ⇒
-                  logger.warn(s"Could not get email from hts service: $e")
+          case Right(userInfo) ⇒
+            helpToSaveService.getConfirmedEmail.value.flatMap{
+              _.fold(
+                noEmailError ⇒ {
+                  logger.warn(s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : ${noEmailError}")
                   internalServerError()
+                },
+                emailRetrieved ⇒
+                  emailRetrieved match {
+                    case Some(email) if !email.isEmpty ⇒ {
 
-                case GetEmailError.UpdateHtsUserError(e) ⇒
-                  logger.warn(s"Could not update the HtsUser details on Hts Reminder service: $e")
-                  internalServerError()
+                      val daysToReceiveReminders = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
+                      val htsUserToBeUpdated = HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceiveReminders)
+                      helpToSaveReminderService.updateHtsUser(htsUserToBeUpdated)
+                        .fold(
+                          htsError ⇒ {
+                            logger.warn(s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: ${htsError}")
+                            internalServerError()
+                          },
+                          htsUser ⇒ SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency).url)
+                        )
 
-              }, { htsUser ⇒
-                logger.info("Successfully updated htsUser")
-
-                SeeOther(routes.ReminderController.getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency).url)
-              })
-          }
-
-        }
-    )
+                    }
+                    case Some(_) ⇒ {
+                      logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
+                      internalServerError()
+                    }
+                  })
+            }
+        })
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
   def getRendersConfirmPage(email: String, period: String): Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -131,19 +128,5 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
     }
 
   }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period).url)
-
 }
 
-object ReminderController {
-
-  private sealed trait GetEmailError
-
-  private object GetEmailError {
-
-    case class HtsEmailError(message: String) extends GetEmailError
-
-    case class UpdateHtsUserError(message: String) extends GetEmailError
-
-  }
-
-}

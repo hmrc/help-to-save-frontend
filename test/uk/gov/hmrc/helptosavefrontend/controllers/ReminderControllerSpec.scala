@@ -119,8 +119,31 @@ class ReminderControllerSpec
       val result = verifyHtsUserUpdate(htsUserForUpdate)
       status(result) shouldBe Status.SEE_OTHER
 
-      //redirectLocation(result) shouldBe Some(
-      //  routes.EmailController.confirmEmailErrorTryLater().url)
+    }
+
+    "should redirect to internal server error page if the call to htsContext userdetails returns missingUserInfos  " in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+      }
+
+      val result = verifyHtsUserUpdate(htsUserForUpdate)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+    }
+
+    "should redirect to internal server error page if email retrieved is empty " in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("")))
+      }
+
+      val result = verifyHtsUserUpdate(htsUserForUpdate)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
     }
 
     "should redirect to internal server error page if htsUser update fails " in {
