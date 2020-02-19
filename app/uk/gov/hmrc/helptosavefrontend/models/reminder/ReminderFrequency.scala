@@ -65,8 +65,13 @@ object HtsUser {
 object DateToDaysMapper {
   val d2dMapper: Map[String, Seq[Int]] = Map("1st" -> Seq(1),
     "25th" -> Seq(25),
-    "1st and 25th" -> Seq(1, 25),
+    "1st day and 25th" -> Seq(1, 25),
     "cancel" -> Seq(0))
+}
+
+object DaysToDateMapper {
+  val reverseMapper: Map[Seq[Int], String] = for ((k, v) ← DateToDaysMapper.d2dMapper) yield (v, k)
+
 }
 
 case class CancelHtsUserReminder(
