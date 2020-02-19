@@ -25,7 +25,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
-import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -43,6 +43,11 @@ class HelpToSaveReminderConnectorSpec
 
   val UpdateHtsURL =
     s"$htsReminderURL/help-to-save-reminder/update-htsuser-entity"
+
+  def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getifhtsuserexists/${nino}"
+
+   val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
+
 
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
@@ -68,9 +73,43 @@ class HelpToSaveReminderConnectorSpec
           Some(response))
       val result = connector.updateHtsUser(htsUser)
       await(result.value) should equal(Right(htsUser))
-      /*await.(
-        connector.updateHtsUser(htsUser).value) shouldBe Right(Option(htsUser)
-        */
+
+    }
+  }
+  "get HtsUser" must {
+
+    val ninoNew ="AE123456D"
+    val nino: Nino = Nino("AE123456D")
+
+    "return http response as it is to the caller" in {
+      val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+
+      val response =
+        HttpResponse(200, Some(Json.toJson(htsUser)))
+      mockGet(getHtsReminderUserURL(ninoNew),
+        Map.empty)(
+        Some(response))
+      val result = connector.getHtsUser(ninoNew)
+      await(result.value) should equal(Right(htsUser))
+
+    }
+  }
+  "cancel HtsUser Reminder" must {
+
+    val ninoNew ="AE123456D"
+    val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
+
+
+    "return http response as it is to the caller" in {
+      val response =
+        HttpResponse(200)
+      mockPost(cancelHtsReminderURL,
+        Map.empty,
+        cancelHtsUserReminder)(
+        Some(response))
+      val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
+      await(result.value) should equal(Right(()))
+
     }
   }
 

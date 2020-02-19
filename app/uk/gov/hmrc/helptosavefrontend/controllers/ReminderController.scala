@@ -29,7 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
@@ -68,23 +68,26 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
 
   def getSelectRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
 
-    /* if (isFeatureEnabled) {
-   */
-    // get optin status
-    helpToSaveReminderService.getHtsUser(htsContext.nino).fold(
-      e ⇒ {
-        logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
+    if (isFeatureEnabled) {
+      // get optin status
+      helpToSaveReminderService.getHtsUser(htsContext.nino).fold(
+        e ⇒ {
+          logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
 
-        Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
-      },
-      htsUser ⇒
-        Ok(reminderDashboard(htsUser.email, htsUser.daysToReceive.toString(), Some(backLink)))
+          Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+        },
+        {
 
-    )
+          htsUser ⇒
+            // val daysToReceiveReminders = DaysToDateMapper.reverseMapper.getOrElse(Seq(), htsUser.daysToReceive)
 
-    /*} else {
+            Ok(reminderDashboard(htsUser.email, DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"), Some(backLink)))
+        }
+      )
+
+    } else {
       SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
-    }*/
+    }
 
   }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 

@@ -34,10 +34,10 @@ import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, ReminderFrequencyValid
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_confirmation, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -61,6 +61,19 @@ class ReminderControllerSpec
     (mockHelpToSaveReminderService
       .updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
       .expects(htsUser, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockCancelHtsUserReminderPost(cancelHtsUserReminder:CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveReminderService
+      .cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(cancelHtsUserReminder, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+
+  def mockGetHtsUser(nino:String) (result:Either[String, HtsUser]): Unit =
+    (mockHelpToSaveReminderService
+      .getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
@@ -92,7 +105,10 @@ class ReminderControllerSpec
     testMcc,
     testErrorHandler,
     injector.instanceOf[reminder_frequency_set],
-    injector.instanceOf[reminder_confirmation]
+    injector.instanceOf[reminder_frequency_change],
+    injector.instanceOf[reminder_confirmation],
+    injector.instanceOf[reminder_cancel_confirmation],
+    injector.instanceOf[reminder_dashboard]
   ) {
 
   }
@@ -104,6 +120,11 @@ class ReminderControllerSpec
 
       def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
         csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
+    def verifiedHtsUserUpdate(params: HtsUser): Future[Result] =
+      csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
+    def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
+      csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
+
 
     "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
       val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
@@ -169,11 +190,14 @@ class ReminderControllerSpec
     }
 
     "should return the reminder frquency setting page when asked for it" in {
+      val getHtsUser = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
           mockedNINORetrieval)
+         mockGetHtsUser(nino)(Right(getHtsUser))
       }
 
       val result = csrfAddToken(controller.getSelectRendersPage())(fakeRequestWithNoBody)
@@ -207,6 +231,94 @@ class ReminderControllerSpec
       status(result) shouldBe Status.OK
 
     }
+
+    "should return the selected reminder   page when asked for it" in {
+      val getHtsUser = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
+          mockedNINORetrieval)
+     //   mockGetHtsUser(nino)(Right(getHtsUser))
+      }
+
+      val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should return the Cancel reminder   page when asked for it" in {
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
+          mockedNINORetrieval)
+        }
+
+      val result = csrfAddToken(controller.getRendersCancelConfirmPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should show a success page if the user submits an CancelHtsUserReminder to cancel in the HTS Reminder backend service " in {
+      val ninoNew="AE123456D"
+      val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
+
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("email")))
+       // mockCancelHtsUserReminderPost(cancelHtsUserReminder)
+        mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+
+        mockEncrypt("email")(encryptedEmail)
+
+      }
+
+      val result = verifiedHtsUserUpdate(htsUserForUpdate)
+      status(result) shouldBe Status.SEE_OTHER
+
+      //redirectLocation(result) shouldBe Some(
+      //  routes.EmailController.confirmEmailErrorTryLater().url)
+    }
+    "should show a success page if the user submits an CancelHtsUserReminder nextpage to cancel in the HTS Reminder backend service " in {
+      val ninoNew="AE123456D"
+      val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
+
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("email")))
+        mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+        mockEncrypt("email")(encryptedEmail)
+      }
+
+      val result = cancelHtsUserReminders(cancelHtsUserReminder)
+      status(result) shouldBe Status.SEE_OTHER
+
+      //redirectLocation(result) shouldBe Some(
+      //  routes.EmailController.confirmEmailErrorTryLater().url)
+    }
+
+
+
+    "should show the form validation errors when the user submits an Cancel Reminders to cancel in the HTS Reminder backend service with nobody " in {
+
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+      }
+
+      val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
 
   }
 

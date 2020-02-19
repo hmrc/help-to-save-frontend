@@ -38,20 +38,35 @@
 
     <h1 class="heading-large">@Messages("hts.reminder-dashboard.h2")</h1>
     <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.reminder-dashboard.t1"),Messages("hts.reminder-dashboard.t1-1")+period+ Messages("hts.reminder-dashboard.t1-2"),
-    summary_section_change(
-    routes.ReminderController.getSelectedRendersPage().url,
-    Messages("hts.reminder-dashboard-change"),
-    "change-details-are-incorrect"
-    )
-    )
-    @summary_row(Messages("hts.reminder-dashboard.t2"), email,
-    summary_section_change(
-    routes.AccountHolderController.getUpdateYourEmailAddress().url,
-    Messages("hts.reminder-dashboard-change"),
-    "change-details-are-incorrect"
-    )
-    )
+       <div class="govuk-summary-list__row">
+                <dt class="cya-question">
+                @Messages("hts.reminder-dashboard.t1")
+                </dt>
+                <dd class="govuk-summary-list__value">
+                    @Messages("hts.reminder-dashboard.t1-1")  @period
+                    @Messages("hts.reminder-dashboard.t1-2")
+                </dd>
+                <dd class="govuk-summary-list__actions">
+                    <a class="govuk-link" href=@routes.ReminderController.getSelectedRendersPage().url>
+                    @Messages("hts.reminder-dashboard-change")
+                    </a>
+                </dd>
+            </div>
+
+        <div class="govuk-summary-list__row">
+            <dt class="cya-question">
+            @Messages("hts.reminder-dashboard.t2")
+            </dt>
+            <dd class="govuk-summary-list__value">
+                @email
+            </dd>
+            <dd class="govuk-summary-list__actions">
+                <a class="govuk-link" href=@routes.AccountHolderController.getUpdateYourEmailAddress().url>
+                @Messages("hts.reminder-dashboard-change")
+                </a>
+            </dd>
+
+        </div>
 
     }
     </dl>
