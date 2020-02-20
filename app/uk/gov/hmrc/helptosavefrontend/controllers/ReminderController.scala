@@ -15,12 +15,11 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.controllers
-import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, Result ⇒ PlayResult, _}
+import play.api.mvc.{Action, _}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
@@ -33,10 +32,10 @@ import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, Da
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Either, Failure, Success}
+import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 @Singleton
 class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveReminderService,
@@ -79,8 +78,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
         {
 
           htsUser ⇒
-            // val daysToReceiveReminders = DaysToDateMapper.reverseMapper.getOrElse(Seq(), htsUser.daysToReceive)
-
+          
             Ok(reminderDashboard(htsUser.email, DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"), Some(backLink)))
         }
       )
