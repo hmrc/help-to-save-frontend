@@ -255,11 +255,26 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
           mockedNINORetrieval)
-     //   mockGetHtsUser(nino)(Right(getHtsUser))
+       mockGetHtsUser(nino)(Right(getHtsUser))
       }
 
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
+
+    }
+    "should return the internal error when selected reminderpage " in {
+      val getHtsUser = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
+          mockedNINORetrieval)
+        mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
+      }
+
+      val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 
     }
 
