@@ -149,7 +149,17 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
 
 
   def getSelectedRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
-    Ok(reminderFrequencyChange(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+
+    helpToSaveReminderService.getHtsUser(htsContext.nino).fold(
+      e ⇒ {
+        logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
+        internalServerError()
+      },
+      {
+        htsUser ⇒
+          Ok(reminderFrequencyChange(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+      }
+    )
 
   }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit().url)
 
