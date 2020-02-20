@@ -16,15 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.time.LocalDate
-import java.util.UUID
-
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
-import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Result
@@ -53,10 +48,6 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
   private def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getifhtsuserexists/${nino}"
 
   private val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
-  /* val nino: Nino = Nino("AE123456D")
-
-  val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
-*/
 
   private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
 
@@ -67,8 +58,7 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
     handleGet(getHtsReminderUserURL(nino), emptyQueryParameters, _.parseJSON[HtsUser](), "get hts user", identity)
 
   override def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    //  http.post(cancelHtsReminderURL, nino)
-    handlePostCancel(cancelHtsReminderURL, cancelHtsUserReminder, _ ⇒ Right(()), "cancel reminder", identity)
+     handlePostCancel(cancelHtsReminderURL, cancelHtsUserReminder, _ ⇒ Right(()), "cancel reminder", identity)
 
   private def handlePost[A, B](url:         String,
                                body:        HtsUser,
