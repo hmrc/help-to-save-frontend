@@ -58,7 +58,7 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
     handleGet(getHtsReminderUserURL(nino), emptyQueryParameters, _.parseJSON[HtsUser](), "get hts user", identity)
 
   override def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-     handlePostCancel(cancelHtsReminderURL, cancelHtsUserReminder, _ ⇒ Right(()), "cancel reminder", identity)
+    handlePostCancel(cancelHtsReminderURL, cancelHtsUserReminder, _ ⇒ Right(()), "cancel reminder", identity)
 
   private def handlePost[A, B](url:         String,
                                body:        HtsUser,
