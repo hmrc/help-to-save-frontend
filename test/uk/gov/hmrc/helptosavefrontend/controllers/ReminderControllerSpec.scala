@@ -180,7 +180,7 @@ class ReminderControllerSpec
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
       inSequence {
-        mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString("error occurred"))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
       }
 
       val result = csrfAddToken(controller.selectRemindersSubmit())(fakeRequestWithNoBody)
@@ -307,6 +307,20 @@ class ReminderControllerSpec
       val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
       status(result) shouldBe SEE_OTHER
    }
+
+    "should redirect to an the internal server error page if email retrieveal is failed in selected renders submit" in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Left("error occurred while retrieving the email details"))
+
+      }
+
+      val result = verifiedHtsUserUpdate(htsUserForUpdate)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+    }
     "should show a error page if the user submits an CancelHtsUserReminder to cancel in the HTS Reminder backend service " in {
       val ninoNew="WM123456C"
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
@@ -361,7 +375,7 @@ class ReminderControllerSpec
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
       inSequence {
-        mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString("error occurred"))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
       }
 
       val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
