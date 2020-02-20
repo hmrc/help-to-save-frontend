@@ -77,6 +77,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
         },
         {
           htsUser ⇒
+
             Ok(reminderDashboard(htsUser.email, DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"), Some(backLink)))
         }
       )
