@@ -118,10 +118,12 @@ class ReminderControllerSpec
 
     val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
-      def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
-        csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
+    def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
+      csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
+
     def verifiedHtsUserUpdate(params: HtsUser): Future[Result] =
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
+
     def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
 
@@ -219,7 +221,23 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
           mockedNINORetrieval)
-         mockGetHtsUser(nino)(Right(getHtsUser))
+        mockGetHtsUser(nino)(Right(getHtsUser))
+      }
+
+      val result = csrfAddToken(controller.getSelectRendersPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should return the reminder frquency dashboard page when asked for it" in {
+      val getHtsUser = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
+          mockedNINORetrieval)
+        mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
       }
 
       val result = csrfAddToken(controller.getSelectRendersPage())(fakeRequestWithNoBody)
@@ -278,7 +296,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
           mockedNINORetrieval)
-       mockGetHtsUser(nino)(Right(getHtsUser))
+        mockGetHtsUser(nino)(Right(getHtsUser))
       }
 
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
@@ -308,7 +326,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
           mockedNINORetrieval)
-        }
+      }
 
       val result = csrfAddToken(controller.getRendersCancelConfirmPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
@@ -316,173 +334,179 @@ class ReminderControllerSpec
     }
 
     "should show a success page if the user submits an CancelHtsUserReminder to cancel in the HTS Reminder backend service " in {
-      val ninoNew="WM123456C"
+      val ninoNew = "WM123456C"
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
-         mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Right((())))
+        mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Right((())))
 
       }
 
       val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
       status(result) shouldBe SEE_OTHER
-   }
+    }
 
     "should redirect to an the internal server error page if email retrieveal is failed in selected renders submit" in {
       val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, false, Seq(1), LocalDate.now(), 0)
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Left("error occurred while retrieving the email details"))
 
+        val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
+        status(result) shouldBe SEE_OTHER
       }
+      "should show a error page if the user submits an CancelHtsUserReminder to cancel in the HTS Reminder backend service " in {
+        val ninoNew = "WM123456C"
+        val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
+        val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
 
-      val result = verifiedHtsUserUpdate(htsUserForUpdate)
-      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-
-    }
-    "should show a error page if the user submits an CancelHtsUserReminder to cancel in the HTS Reminder backend service " in {
-      val ninoNew="WM123456C"
-      val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
-
-      inSequence {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEmailGet()(Right(Some("email")))
-        mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Left("error occurred while updating htsUser"))
+        val result = verifiedHtsUserUpdate(htsUserForUpdate)
+        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 
       }
+      "should show a error page if the user submits an CancelHtsUserReminder to cancel in the HTS Reminder backend service " in {
+        val ninoNew = "WM123456C"
+        val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
+        val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
 
-      val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
-      status(result) shouldBe INTERNAL_SERVER_ERROR
-    }
-    "should show a success page if the user submits an CancelHtsUserReminder nextpage to cancel in the HTS Reminder backend service " in {
-      val ninoNew="AE123456D"
-      val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
-
-
-      inSequence {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEmailGet()(Right(Some("email")))
-        mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
-        mockEncrypt("email")(encryptedEmail)
-      }
-
-      val result = cancelHtsUserReminders(cancelHtsUserReminder)
-      status(result) shouldBe Status.SEE_OTHER
-
-
-    }
-    "should redirect to internal server error page if htsUser update fails in selected submit " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
-
-      inSequence {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEmailGet()(Right(Some("email")))
-        mockUpdateHtsUserPost(htsUserForUpdate)(Left("error occurred while updating htsUser"))
-
-      }
-
-      val result = verifiedHtsUserUpdate(htsUserForUpdate)
-      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-
-
-    }
-
-    "should redirect to internal server error page if user info is missing from the htsContext in selected submit" in {
-
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
-
-      inSequence {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
-      }
-
-      val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
-      status(result) shouldBe INTERNAL_SERVER_ERROR
-
-    }
-
-
-
-    "should show the form validation errors when the user submits an Cancel Reminders to cancel in the HTS Reminder backend service with nobody " in {
-
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
-
-      inSequence {
-        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-      }
-
-      val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
-      status(result) shouldBe Status.OK
-
-    }
-
-
-  }
-
-  def commonEnrolmentBehaviour(
-      getResult:          () ⇒ Future[Result],
-      mockSuccessfulAuth: () ⇒ Unit,
-      mockNoNINOAuth:     () ⇒ Unit): Unit = {
-
-    "return an error" when {
-
-      "the user has no NINO" in {
-        mockNoNINOAuth()
-
-        checkIsTechnicalErrorPage(getResult())
-      }
-
-      "there is an error getting the enrolment status" in {
         inSequence {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Left(""))
-        }
-
-        checkIsErrorPage(getResult())
-      }
-
-      "there is an error getting the confirmed email" in {
-        inSequence {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(Enrolled(true)))
-          mockEmailGet()(Left(""))
-        }
-
-        checkIsErrorPage(getResult())
-      }
-
-      "the user is not enrolled" in {
-        inSequence {
-          mockSuccessfulAuth()
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEmailGet()(Right(Some("email")))
+          mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Left("error occurred while updating htsUser"))
+
         }
 
-        checkIsErrorPage(getResult())
+        val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
       }
+      "should show a success page if the user submits an CancelHtsUserReminder nextpage to cancel in the HTS Reminder backend service " in {
+        val ninoNew = "AE123456D"
+        val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
+        val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
 
-      "the user is enrolled but has no stored email" in {
+
         inSequence {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(Enrolled(true)))
-          mockEmailGet()(Right(None))
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEmailGet()(Right(Some("email")))
+          mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+          mockEncrypt("email")(encryptedEmail)
         }
 
-        checkIsErrorPage(getResult())
+        val result = cancelHtsUserReminders(cancelHtsUserReminder)
+        status(result) shouldBe Status.SEE_OTHER
+
+
       }
+      "should redirect to internal server error page if htsUser update fails in selected submit " in {
+        val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, true, Seq(1), LocalDate.now(), 0)
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEmailGet()(Right(Some("email")))
+          mockUpdateHtsUserPost(htsUserForUpdate)(Left("error occurred while updating htsUser"))
+
+        }
+
+        val result = verifiedHtsUserUpdate(htsUserForUpdate)
+        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+
+      }
+
+      "should redirect to internal server error page if user info is missing from the htsContext in selected submit" in {
+
+        val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+        }
+
+        val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+
+      }
+
+
+      "should show the form validation errors when the user submits an Cancel Reminders to cancel in the HTS Reminder backend service with nobody " in {
+
+        val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        }
+
+        val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
+        status(result) shouldBe Status.OK
+
+      }
+
 
     }
-  }
 
-  def checkIsErrorPage(result: Future[Result]): Unit = {
-    status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(
-      routes.EmailController.confirmEmailErrorTryLater().url)
-  }
+    def commonEnrolmentBehaviour(
+                                  getResult: () ⇒ Future[Result],
+                                  mockSuccessfulAuth: () ⇒ Unit,
+                                  mockNoNINOAuth: () ⇒ Unit): Unit = {
 
-}
+      "return an error" when {
+
+        "the user has no NINO" in {
+          mockNoNINOAuth()
+
+          checkIsTechnicalErrorPage(getResult())
+        }
+
+        "there is an error getting the enrolment status" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockEnrolmentCheck()(Left(""))
+          }
+
+          checkIsErrorPage(getResult())
+        }
+
+        "there is an error getting the confirmed email" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockEnrolmentCheck()(Right(Enrolled(true)))
+            mockEmailGet()(Left(""))
+          }
+
+          checkIsErrorPage(getResult())
+        }
+
+        "the user is not enrolled" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockEmailGet()(Right(Some("email")))
+          }
+
+          checkIsErrorPage(getResult())
+        }
+
+        "the user is enrolled but has no stored email" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockEnrolmentCheck()(Right(Enrolled(true)))
+            mockEmailGet()(Right(None))
+          }
+
+          checkIsErrorPage(getResult())
+        }
+
+      }
+    }
+
+    def checkIsErrorPage(result: Future[Result]): Unit = {
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(
+        routes.EmailController.confirmEmailErrorTryLater().url)
+    }
+
+  }
 
