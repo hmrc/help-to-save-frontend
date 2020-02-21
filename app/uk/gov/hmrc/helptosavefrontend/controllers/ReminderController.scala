@@ -109,7 +109,6 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                 emailRetrieved ⇒
                   emailRetrieved match {
                     case Some(email) if !email.isEmpty ⇒ {
-
                       val daysToReceiveReminders = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
                       val htsUserToBeUpdated = HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceiveReminders)
                       helpToSaveReminderService.updateHtsUser(htsUserToBeUpdated)
@@ -142,8 +141,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
     }
 
   }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period).url)
-
-
+  
   def getSelectedRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
 
     helpToSaveReminderService.getHtsUser(htsContext.nino).fold(
