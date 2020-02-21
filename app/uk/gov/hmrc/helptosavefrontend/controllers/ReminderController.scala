@@ -141,7 +141,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
     }
 
   }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period).url)
-  
+
   def getSelectedRendersPage(): Action[AnyContent] = authorisedForHtsWithNINO{ implicit request ⇒ implicit htsContext ⇒
 
     helpToSaveReminderService.getHtsUser(htsContext.nino).fold(
