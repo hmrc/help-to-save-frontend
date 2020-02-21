@@ -77,8 +77,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
         },
         {
           htsUser ⇒
-
-            Ok(reminderDashboard(htsUser.email, DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"), Some(backLink)))
+          Ok(reminderDashboard(htsUser.email, DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"), Some(backLink)))
         }
       )
 
@@ -110,7 +109,6 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                 emailRetrieved ⇒
                   emailRetrieved match {
                     case Some(email) if !email.isEmpty ⇒ {
-
                       val daysToReceiveReminders = DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
                       val htsUserToBeUpdated = HtsUser(Nino(htsContext.nino), email, userInfo.forename, true, daysToReceiveReminders)
                       helpToSaveReminderService.updateHtsUser(htsUserToBeUpdated)

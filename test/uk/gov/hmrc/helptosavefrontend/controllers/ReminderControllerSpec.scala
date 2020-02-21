@@ -123,8 +123,7 @@ class ReminderControllerSpec
 
     def verifiedHtsUserUpdate(params: HtsUser): Future[Result] =
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
-
-    def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
+   def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
 
 
