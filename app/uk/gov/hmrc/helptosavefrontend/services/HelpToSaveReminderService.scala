@@ -16,19 +16,24 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
+import java.time.LocalDate
+
 import com.google.inject.{ImplementedBy, Inject}
 import javax.inject.Singleton
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
-import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, Result}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[HelpToSaveReminderServiceImpl])
 trait HelpToSaveReminderService {
 
   def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser]
+  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser]
+  def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
 }
 
@@ -37,6 +42,12 @@ class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: Help
 
   def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
     helpToSaveReminderConnector.updateHtsUser(htsUser)
+
+  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
+    helpToSaveReminderConnector.getHtsUser(nino)
+
+  def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+    helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)
 
 }
 

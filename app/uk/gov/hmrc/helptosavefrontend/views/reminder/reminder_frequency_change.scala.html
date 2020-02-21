@@ -53,13 +53,9 @@
             </div>
         }
 
-        <h1 class="heading-large">@title</h1>
-        <p>@Html(Messages("hts.reminder-frequency.intro"))</p>
-               <p> @Html(Messages("hts.reminder-frequency.note"))</p>
-
-          <form method="post" action=@routes.ReminderController.selectRemindersSubmit novalidate>
+          <form method="post" action=@routes.ReminderController.selectedRemindersSubmit novalidate>
               @CSRF.formField(request)
-          @summary_section_head(heading = Messages("hts.reminder-frequency.select"))
+             <h1 class="heading-large">@Messages("hts.reminder-frequency.select")</h1>
 
             <div class="multiple-choice" data-target="collect-choice">
                     <input id="first" type="radio" name="reminderFrequency" value="1st" >
@@ -74,6 +70,15 @@
                 <div class="multiple-choice" data-target="collect-choice">
                     <input id="both" type="radio" name="reminderFrequency" value="1st day and 25th">
                     <label for="both">@messages("hts.reminder-frequency.both")</label>
+                </div>
+
+                <div class="multiple-choice">
+                    <label for="or">@messages("hts.reminder-frequency.or")</label>
+                </div>
+
+                <div class="multiple-choice" data-target="collect-choice">
+                    <input id="cancel" type="radio" name="reminderFrequency" value="cancel">
+                    <label for="cancel">@messages("hts.reminder-frequency.cancel")</label>
                 </div>
 
              <div class="form-field form-field--submit">
