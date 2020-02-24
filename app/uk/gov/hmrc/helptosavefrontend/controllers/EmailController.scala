@@ -36,9 +36,10 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.UpdateReminderEmail
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views.html.email._
@@ -50,6 +51,7 @@ import scala.util.{Failure, Success}
 
 @Singleton
 class EmailController @Inject() (val helpToSaveService:          HelpToSaveService,
+                                 val helpToSaveReminderService:  HelpToSaveReminderService,
                                  val sessionStore:               SessionStore,
                                  val emailVerificationConnector: EmailVerificationConnector,
                                  val authConnector:              AuthConnector,
@@ -409,6 +411,7 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             for {
               _ ← helpToSaveService.updateEmail(NSIPayload(userInfo.copy(email = Some(params.email)), params.email, frontendAppConfig.version, frontendAppConfig.systemId))
               _ ← helpToSaveService.storeConfirmedEmail(params.email)
+              _ ← helpToSaveReminderService.updateReminderEmail(UpdateReminderEmail(htsContext.nino, params.email))
               r ← EitherT.liftF(updateSessionAndReturnResult(
                 HTSSession(None, Some(params.email), None),
                 SeeOther(routes.EmailController.getEmailConfirmed().url))

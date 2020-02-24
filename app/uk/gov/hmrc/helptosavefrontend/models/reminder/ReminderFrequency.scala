@@ -83,5 +83,18 @@ object CancelHtsUserReminder {
   implicit val reads: Reads[CancelHtsUserReminder] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(CancelHtsUserReminder.apply(_))
   )
+}
+case class UpdateReminderEmail(nino: String, email: String)
+
+object UpdateReminderEmail {
+
+  implicit val htsUpdateEmailFormat: Format[UpdateReminderEmail] = Json.format[UpdateReminderEmail]
+
+  implicit val writes: Writes[UpdateReminderEmail] = Writes[UpdateReminderEmail](s ⇒ JsString(s.toString))
+
+  implicit val reads: Reads[UpdateReminderEmail] = (
+    (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]) and
+    (JsPath \ "email").read[String]
+  )(UpdateReminderEmail.apply(_, _))
 
 }

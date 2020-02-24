@@ -37,6 +37,8 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, UpdateReminderEmail}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.helptosavefrontend.views.html.email._
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
@@ -54,6 +56,7 @@ class EmailControllerSpec
   with SessionStoreBehaviourSupport {
 
   val mockEmailVerificationConnector: EmailVerificationConnector = mock[EmailVerificationConnector]
+  val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
 
   val mockAuditor = mock[HTSAuditor]
 
@@ -65,6 +68,7 @@ class EmailControllerSpec
   def newController()(implicit crypto: Crypto) =
     new EmailController(
       mockHelpToSaveService,
+      mockHelpToSaveReminderService,
       mockSessionStore,
       mockEmailVerificationConnector,
       mockAuthConnector,
@@ -102,6 +106,12 @@ class EmailControllerSpec
   def mockStoreConfirmedEmail(email: String)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(email, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockStoreConfirmedEmailInReminders(updateReminderEmail: UpdateReminderEmail)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveReminderService
+      .updateReminderEmail(_: UpdateReminderEmail)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(updateReminderEmail, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockGetConfirmedEmail()(result: Either[String, Option[String]]): Unit =
@@ -960,12 +970,15 @@ class EmailControllerSpec
       "handle DE users and update email successfully with NS&I" in {
 
         val updatedNSIPayload = NSIPayload(validUserInfo.copy(email = Some(email)), email, version, systemId)
+        val updateReminderEmail = UpdateReminderEmail(nino,email)
+
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
           mockDecrypt("encrypted")(s"WM123456C#$email")
           mockUpdateEmail(updatedNSIPayload)(Right(None))
           mockStoreConfirmedEmail(email)(Right(None))
+          mockStoreConfirmedEmailInReminders(updateReminderEmail)(Right((())))
           mockSessionStorePut(HTSSession(None, Some(email), None))(Right(None))
           mockAudit(EmailChanged(nino, "", email, false, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
         }

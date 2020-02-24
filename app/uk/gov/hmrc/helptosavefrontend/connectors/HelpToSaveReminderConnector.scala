@@ -20,7 +20,7 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -35,6 +35,7 @@ trait HelpToSaveReminderConnector {
   def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser]
   def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser]
   def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def updateReminderEmail(updateReminderEmail: UpdateReminderEmail)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
 }
 
@@ -48,6 +49,8 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
   private def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getifhtsuserexists/${nino}"
 
   private val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
+
+  private val emailUpdateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-email"
 
   private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
 
@@ -95,5 +98,15 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
       case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
     })
   }
+
+  override def updateReminderEmail(updateReminderEmail: UpdateReminderEmail)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+    handlePostEmailUpdate(emailUpdateHtsReminderURL, updateReminderEmail, _ ⇒ Right(()), "update email", identity)
+
+  private def handlePostEmailUpdate[A, B](url:         String,
+                                          body:        UpdateReminderEmail,
+                                          ifHTTP200:   HttpResponse ⇒ Either[B, A],
+                                          description: ⇒ String,
+                                          toError:     String ⇒ B)(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
+    handle(http.post(url, body), ifHTTP200, description, toError)
 
 }

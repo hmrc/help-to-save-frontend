@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -54,11 +54,11 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
 
       val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
-        def mockupdateUser(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit = {
-          (htsReminderConnector.updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
-            .expects(htsUser, *, *)
-            .returning(EitherT.fromEither[Future](result))
-        }
+      def mockupdateUser(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit = {
+        (htsReminderConnector.updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(htsUser, *, *)
+          .returning(EitherT.fromEither[Future](result))
+      }
 
       "return a successful response" in {
         mockupdateUser(htsUser)(Right(htsUser))
@@ -73,11 +73,11 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
       val ninoNew = "AE123456D"
       val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
-        def mockGetHtsUser(nino: String)(result: Either[String, HtsUser]): Unit = {
-          (htsReminderConnector.getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
-            .expects(ninoNew, *, *)
-            .returning(EitherT.fromEither[Future](result))
-        }
+      def mockGetHtsUser(nino: String)(result: Either[String, HtsUser]): Unit = {
+        (htsReminderConnector.getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(ninoNew, *, *)
+          .returning(EitherT.fromEither[Future](result))
+      }
 
       "return a successful response" in {
         mockGetHtsUser(ninoNew)(Right(htsUser))
@@ -92,11 +92,11 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
       val ninoNew = "AE123456D"
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
 
-        def mockCancelHtsUserReminder(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit = {
-          (htsReminderConnector.cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
-            .expects(cancelHtsUserReminder, *, *)
-            .returning(EitherT.fromEither[Future]((result)))
-        }
+      def mockCancelHtsUserReminder(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit = {
+        (htsReminderConnector.cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
+          .expects(cancelHtsUserReminder, *, *)
+          .returning(EitherT.fromEither[Future]((result)))
+      }
 
       "return a successful response" in {
         mockCancelHtsUserReminder(cancelHtsUserReminder)(Right(()))
@@ -105,8 +105,26 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
         await(result.value) shouldBe Right((()))
       }
 
+      "cancel Hts User Reminder" must {
+        val ninoNew = "AE123456D"
+        val email = "test@user.com"
+        val updateReminderEmail = UpdateReminderEmail(ninoNew, email)
+
+
+        def mockUpdateReminderEmail(updateReminderEmail: UpdateReminderEmail)(result: Either[String, Unit]): Unit = {
+          (htsReminderConnector.updateReminderEmail(_: UpdateReminderEmail)(_: HeaderCarrier, _: ExecutionContext))
+            .expects(updateReminderEmail, *, *)
+            .returning(EitherT.fromEither[Future]((result)))
+        }
+
+        "return a successful response" in {
+          mockUpdateReminderEmail(updateReminderEmail)(Right(()))
+
+          val result = htsReminderService.updateReminderEmail(updateReminderEmail)
+          await(result.value) shouldBe Right((()))
+        }
+
+      }
     }
-
   }
-
 }
