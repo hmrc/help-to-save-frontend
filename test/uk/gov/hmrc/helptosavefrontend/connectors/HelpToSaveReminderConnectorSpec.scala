@@ -50,7 +50,6 @@ class HelpToSaveReminderConnectorSpec
 
   val emailUpdateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-email"
 
-
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
 
@@ -118,15 +117,15 @@ class HelpToSaveReminderConnectorSpec
 
     val ninoNew = "AE123456D"
     val email = "test@user.com"
-    val updateReminderEmail = UpdateReminderEmail(ninoNew, email)
+    val updateReminderEmail = UpdateReminderEmail(ninoNew, email, "Tyrion")
 
     "return http response as it is to the caller" in {
       val response =
         HttpResponse(200)
       mockPost(emailUpdateHtsReminderURL,
-        Map.empty,
-        updateReminderEmail)(
-        Some(response))
+               Map.empty,
+               updateReminderEmail)(
+          Some(response))
       val result = connector.updateReminderEmail(updateReminderEmail)
       await(result.value) should equal(Right(()))
 

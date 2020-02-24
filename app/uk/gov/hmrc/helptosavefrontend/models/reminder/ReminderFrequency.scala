@@ -84,7 +84,7 @@ object CancelHtsUserReminder {
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(CancelHtsUserReminder.apply(_))
   )
 }
-case class UpdateReminderEmail(nino: String, email: String)
+case class UpdateReminderEmail(nino: String, email: String, name: String)
 
 object UpdateReminderEmail {
 
@@ -94,7 +94,8 @@ object UpdateReminderEmail {
 
   implicit val reads: Reads[UpdateReminderEmail] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]) and
-    (JsPath \ "email").read[String]
-  )(UpdateReminderEmail.apply(_, _))
+    (JsPath \ "email").read[String] and
+    (JsPath \ "name").read[String]
+  )(UpdateReminderEmail.apply(_, _, _))
 
 }

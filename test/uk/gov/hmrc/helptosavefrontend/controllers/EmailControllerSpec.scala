@@ -970,7 +970,7 @@ class EmailControllerSpec
       "handle DE users and update email successfully with NS&I" in {
 
         val updatedNSIPayload = NSIPayload(validUserInfo.copy(email = Some(email)), email, version, systemId)
-        val updateReminderEmail = UpdateReminderEmail(nino,email)
+        val updateReminderEmail = UpdateReminderEmail(nino, email, "Tyrion")
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
