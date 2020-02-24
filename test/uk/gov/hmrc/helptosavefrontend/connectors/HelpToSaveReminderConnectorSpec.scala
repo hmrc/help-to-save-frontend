@@ -25,7 +25,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -47,6 +47,8 @@ class HelpToSaveReminderConnectorSpec
   def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getifhtsuserexists/${nino}"
 
   val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
+
+  val emailUpdateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-email"
 
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
@@ -106,6 +108,25 @@ class HelpToSaveReminderConnectorSpec
                cancelHtsUserReminder)(
           Some(response))
       val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
+      await(result.value) should equal(Right(()))
+
+    }
+  }
+
+  "Update HtsUser Reminder Email" must {
+
+    val ninoNew = "AE123456D"
+    val email = "test@user.com"
+    val updateReminderEmail = UpdateReminderEmail(ninoNew, email, "Tyrion")
+
+    "return http response as it is to the caller" in {
+      val response =
+        HttpResponse(200)
+      mockPost(emailUpdateHtsReminderURL,
+               Map.empty,
+               updateReminderEmail)(
+          Some(response))
+      val result = connector.updateReminderEmail(updateReminderEmail)
       await(result.value) should equal(Right(()))
 
     }

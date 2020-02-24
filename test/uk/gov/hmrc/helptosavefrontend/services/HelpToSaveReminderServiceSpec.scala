@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -105,8 +105,25 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
         await(result.value) shouldBe Right((()))
       }
 
+      "cancel Hts User Reminder" must {
+        val ninoNew = "AE123456D"
+        val email = "test@user.com"
+        val updateReminderEmail = UpdateReminderEmail(ninoNew, email, "new user")
+
+          def mockUpdateReminderEmail(updateReminderEmail: UpdateReminderEmail)(result: Either[String, Unit]): Unit = {
+            (htsReminderConnector.updateReminderEmail(_: UpdateReminderEmail)(_: HeaderCarrier, _: ExecutionContext))
+              .expects(updateReminderEmail, *, *)
+              .returning(EitherT.fromEither[Future]((result)))
+          }
+
+        "return a successful response" in {
+          mockUpdateReminderEmail(updateReminderEmail)(Right(()))
+
+          val result = htsReminderService.updateReminderEmail(updateReminderEmail)
+          await(result.value) shouldBe Right((()))
+        }
+
+      }
     }
-
   }
-
 }
