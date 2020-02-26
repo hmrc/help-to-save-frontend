@@ -78,6 +78,8 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
 
   private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
 
+  val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
+
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
       routes.RegisterController.getCreateAccountPage().url
@@ -411,7 +413,13 @@ class EmailController @Inject() (val helpToSaveService:          HelpToSaveServi
             for {
               _ ← helpToSaveService.updateEmail(NSIPayload(userInfo.copy(email = Some(params.email)), params.email, frontendAppConfig.version, frontendAppConfig.systemId))
               _ ← helpToSaveService.storeConfirmedEmail(params.email)
-              _ ← helpToSaveReminderService.updateReminderEmail(UpdateReminderEmail(htsContext.nino, params.email, userInfo.forename, userInfo.surname))
+              _ ← {
+                if (isFeatureEnabled) {
+                  helpToSaveReminderService.updateReminderEmail(UpdateReminderEmail(htsContext.nino, params.email, userInfo.forename, userInfo.surname))
+                } else {
+                  EitherT.pure[Future, String](())
+                }
+              }
               r ← EitherT.liftF(updateSessionAndReturnResult(
                 HTSSession(None, Some(params.email), None),
                 SeeOther(routes.EmailController.getEmailConfirmed().url))
