@@ -39,7 +39,8 @@ object ReminderFrequency {
 case class HtsUser(
     nino:           Nino,
     email:          String,
-    name:           String    = "",
+    firstName:      String    = "",
+    lastName:       String    = "",
     optInStatus:    Boolean   = false,
     daysToReceive:  Seq[Int]  = Seq(),
     nextSendDate:   LocalDate = LocalDate.now(),
@@ -52,13 +53,14 @@ object HtsUser {
   implicit val reads: Reads[HtsUser] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(Nino.apply(_)) and
     (JsPath \ "email").read[String] and //.orElse((JsPath \ "nino").read[String]).map(Email.apply(_)) and
-    (JsPath \ "name").read[String] and
+    (JsPath \ "firstName").read[String] and
+    (JsPath \ "lastName").read[String] and
     (JsPath \ "optInStatus").read[Boolean] and
     (JsPath \ "daysToReceive").read[List[Int]] and
     (JsPath \ "nextSendDate").read[LocalDate] and
     (JsPath \ "bounceCount").read[Int] and
     (JsPath \ "callBackUrlRef").read[String]
-  )(HtsUser.apply(_, _, _, _, _, _, _, _))
+  )(HtsUser.apply(_, _, _, _, _, _, _, _, _))
 
 }
 
@@ -84,7 +86,7 @@ object CancelHtsUserReminder {
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(CancelHtsUserReminder.apply(_))
   )
 }
-case class UpdateReminderEmail(nino: String, email: String, name: String)
+case class UpdateReminderEmail(nino: String, email: String, firstName: String, lastName: String)
 
 object UpdateReminderEmail {
 
@@ -95,7 +97,8 @@ object UpdateReminderEmail {
   implicit val reads: Reads[UpdateReminderEmail] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]) and
     (JsPath \ "email").read[String] and
-    (JsPath \ "name").read[String]
-  )(UpdateReminderEmail.apply(_, _, _))
+    (JsPath \ "firstName").read[String] and
+    (JsPath \ "lastName").read[String]
+  )(UpdateReminderEmail.apply(_, _, _, _))
 
 }

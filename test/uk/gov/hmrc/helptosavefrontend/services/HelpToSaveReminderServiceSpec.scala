@@ -17,26 +17,15 @@
 package uk.gov.hmrc.helptosavefrontend.services
 
 import java.time.LocalDate
-import java.util.UUID
 
-import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
-import akka.stream.impl.fusing.Fold
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatest.concurrent.ScalaFutures
-import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, HelpToSaveReminderConnector}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
-import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibility
-import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
-import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
-import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -52,7 +41,7 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
 
     "update email" must {
 
-      val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+      val htsUser = HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
         def mockupdateUser(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit = {
           (htsReminderConnector.updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
@@ -71,7 +60,7 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
 
     "get Hts User" must {
       val ninoNew = "AE123456D"
-      val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+      val htsUser = HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
         def mockGetHtsUser(nino: String)(result: Either[String, HtsUser]): Unit = {
           (htsReminderConnector.getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
@@ -108,7 +97,7 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
       "cancel Hts User Reminder" must {
         val ninoNew = "AE123456D"
         val email = "test@user.com"
-        val updateReminderEmail = UpdateReminderEmail(ninoNew, email, "new user")
+        val updateReminderEmail = UpdateReminderEmail(ninoNew, email, "Tyrion", "Lannister")
 
           def mockUpdateReminderEmail(updateReminderEmail: UpdateReminderEmail)(result: Either[String, Unit]): Unit = {
             (htsReminderConnector.updateReminderEmail(_: UpdateReminderEmail)(_: HeaderCarrier, _: ExecutionContext))
