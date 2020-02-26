@@ -64,7 +64,7 @@ class HelpToSaveReminderConnectorSpec
     val nino: Nino = Nino("AE123456D")
 
     "return http response as it is to the caller" in {
-      val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+      val htsUser = HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
       val response =
         HttpResponse(200, Some(Json.toJson(htsUser)))
@@ -83,7 +83,7 @@ class HelpToSaveReminderConnectorSpec
     val nino: Nino = Nino("AE123456D")
 
     "return http response as it is to the caller" in {
-      val htsUser = HtsUser(nino, "user@gmail.com", "new user", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+      val htsUser = HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
       val response =
         HttpResponse(200, Some(Json.toJson(htsUser)))
@@ -117,7 +117,7 @@ class HelpToSaveReminderConnectorSpec
 
     val ninoNew = "AE123456D"
     val email = "test@user.com"
-    val updateReminderEmail = UpdateReminderEmail(ninoNew, email, "Tyrion")
+    val updateReminderEmail = UpdateReminderEmail(ninoNew, email, "Tyrion", "Lannister")
 
     "return http response as it is to the caller" in {
       val response =
