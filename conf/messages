@@ -395,6 +395,10 @@ hts.account-created.ul1-li5=withdraw money and still earn bonuses
 hts.account-created.p4=You have until {0} to pay in this month.
 hts.account-created.continue-button=Continue to your account
 
+hts.account-created.savingreminders.h2=Savings reminders
+hts.account-created.savingreminders.l1=You can also
+hts.account-created.savingreminders.l2=to help you remember to save each month, or you can set them up later. Just go to ‘savings reminders’ in your Help to Save account home.
+hts.account-created.savingreminders.link=set up monthly email savings reminders now
 # Incorrect details
 hts.incorrect-details.title.h1=We need your correct details
 hts.incorrect-details.p1=We cannot create your account until we have your:
