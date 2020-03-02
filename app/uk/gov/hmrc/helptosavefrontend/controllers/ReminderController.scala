@@ -151,7 +151,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
       },
       {
         htsUser ⇒
-          Ok(reminderFrequencyChange(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+          Ok(reminderFrequencyChange(ReminderForm.giveRemindersDetailsForm(), DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"), Some(backLink)))
       }
     )
 
