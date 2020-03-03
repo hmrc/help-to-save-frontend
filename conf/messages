@@ -688,3 +688,10 @@ hts.reminder-cancel-confirmation.title.p1=We wont send you any more savings remi
 hts.reminder-cancel-confirmation.p1-1=You can
 hts.reminder-cancel-confirmation.p1-2=again at any time.
 hts.reminder-cancel-confirmation.li-signup=sign up for reminders
+
+hts.reminder-manage-email-address.title.h1=Manage your email address
+hts.reminder-manage-email-address.p1=We’ll use this email address to contact you about your Help to Save account.
+hts.reminder-manage-email-address.p2=change or cancel your savings reminders
+hts.reminder-manage-email-address.p2-1=.
+hts.reminder-manage-email-address.t1=Your email address
+hts.reminder-manage-email-address.button.link=Change email

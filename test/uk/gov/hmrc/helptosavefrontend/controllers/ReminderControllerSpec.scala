@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{manage_email_address, reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -107,6 +107,7 @@ class ReminderControllerSpec
     injector.instanceOf[reminder_frequency_change],
     injector.instanceOf[reminder_confirmation],
     injector.instanceOf[reminder_cancel_confirmation],
+    injector.instanceOf[manage_email_address],
     injector.instanceOf[reminder_dashboard]
   ) {
 
@@ -253,6 +254,22 @@ class ReminderControllerSpec
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 
     }
+
+
+    "should redirect to an the internal server error page if email is empty in renders submit" in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, false, Seq(1), LocalDate.now(), 0)
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("")))
+
+      }
+
+      val result = verifiedHtsUserUpdate(htsUserForUpdate)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+    }
+
 
     "should redirect to a renders confirmation page with email encrypted " in {
 
@@ -410,6 +427,62 @@ class ReminderControllerSpec
 
       val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
+
+    }
+
+    "should return the manage email address  page when asked for it" in {
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
+          mockedRetrievals)
+        mockEmailGet()(Right(Some("email")))
+      }
+
+      val result = csrfAddToken(controller.getManageEmailAddressPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should redirect to internal server error page if user info is missing from the htsContext in manage email address get" in {
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+      }
+
+      val result = csrfAddToken(controller.getManageEmailAddressPage())(fakeRequestWithNoBody)
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+
+    }
+
+    "should redirect to an the internal server error page if email retrieveal is failed in manage email address get" in {
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Left("error occurred while retrieving the email details"))
+
+      }
+
+      val result = csrfAddToken(controller.getManageEmailAddressPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+    }
+
+    "should redirect to internal server error page if email retrieved is empty in manage email address get " in {
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("")))
+      }
+
+      val result = csrfAddToken(controller.getManageEmailAddressPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 
     }
 

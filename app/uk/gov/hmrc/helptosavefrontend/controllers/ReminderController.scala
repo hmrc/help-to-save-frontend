@@ -51,6 +51,7 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
                                     reminderFrequencyChange:       reminder_frequency_change,
                                     reminderConfirmation:          reminder_confirmation,
                                     reminderCancelConfirmation:    reminder_cancel_confirmation,
+                                    manageEmailAddress:            manage_email_address,
                                     reminderDashboard:             reminder_dashboard)(implicit val crypto: Crypto,
                                                                                        implicit val transformer:                 NINOLogMessageTransformer,
                                                                                        implicit val reminderFrequencyValidation: ReminderFrequencyValidation,
@@ -217,6 +218,33 @@ class ReminderController @Inject() (val helpToSaveReminderService: HelpToSaveRem
     Ok(reminderCancelConfirmation())
 
   }(loginContinueURL = routes.ReminderController.getRendersCancelConfirmPage().url)
+
+  def getManageEmailAddressPage(): Action[AnyContent] = authorisedForHtsWithInfo{ implicit request ⇒ implicit htsContext ⇒
+
+    htsContext.userDetails match {
+      case Left(missingUserInfos) ⇒
+        logger.warn(s"Email was verified but missing some user info ${missingUserInfos}")
+        internalServerError()
+
+      case Right(userInfo) ⇒
+        helpToSaveService.getConfirmedEmail.fold(
+          noEmailError ⇒ {
+            logger.warn(s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : ${noEmailError}")
+            internalServerError()
+          },
+          emailRetrieved ⇒
+            emailRetrieved match {
+              case Some(email) if !email.isEmpty ⇒ {
+                Ok(manageEmailAddress(email, Some(backLink)))
+
+              }
+              case Some(_) ⇒ {
+                logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
+                internalServerError()
+              }
+            })
+    }
+  }(loginContinueURL = routes.ReminderController.getManageEmailAddressPage().url)
 
 }
 
