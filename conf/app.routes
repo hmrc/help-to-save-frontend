@@ -81,9 +81,9 @@ GET        /change-email-address                            uk.gov.hmrc.helptosa
 GET        /switch-to-welsh                                 uk.gov.hmrc.helptosavefrontend.controllers.CustomLanguageController.switchToWelsh
 GET        /switch-to-english                               uk.gov.hmrc.helptosavefrontend.controllers.CustomLanguageController.switchToEnglish
 
-GET        /account-home/reminders-dashboard                uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getSelectRendersPage
-POST       /account-home/reminders-dashboard                uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectRemindersSubmit
+GET        /account-home/set-reminders                      uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getSelectRendersPage
+POST       /account-home/set-reminders                      uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectRemindersSubmit
 GET        /account-home/reminders-confirmation             uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getRendersConfirmPage(email: String,period: String)
-GET        /account-home/reminders-frequency                uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getSelectedRendersPage
-POST       /account-home/reminders-frequency                uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectedRemindersSubmit
+GET        /account-home/select-change-cancel-reminders     uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getSelectedRendersPage
+POST       /account-home/select-change-cancel-reminders     uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectedRemindersSubmit
 GET        /account-home/reminders-cancel-confirmation      uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getRendersCancelConfirmPage
