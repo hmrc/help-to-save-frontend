@@ -146,29 +146,29 @@ object BankDetailsValidation {
 
   object ErrorMessages {
 
-    val sortCodeEmpty = "sort_code_empty"
+    val sortCodeEmpty : String = "sort_code_empty"
 
-    val sortCodeIncorrectFormat = "sort_code_incorrect_format"
+    val sortCodeIncorrectFormat : String = "sort_code_incorrect_format"
 
-    val accountNumberEmpty = "account_number_empty"
+    val accountNumberEmpty : String = "account_number_empty"
 
-    val accountNumberIncorrectFormat = "account_number_incorrect_format"
+    val accountNumberIncorrectFormat : String = "account_number_incorrect_format"
 
-    val rollNumberTooShort = "roll_number_too_short"
+    val rollNumberTooShort : String = "roll_number_too_short"
 
-    val rollNumberTooLong = "roll_number_too_long"
+    val rollNumberTooLong : String = "roll_number_too_long"
 
-    val rollNumberIncorrectFormat = "roll_number_incorrect_format"
+    val rollNumberIncorrectFormat : String = "roll_number_incorrect_format"
 
-    val accountNameEmpty = "account_name_empty"
+    val accountNameEmpty : String = "account_name_empty"
 
-    val accountNameTooShort = "account_name_too_short"
+    val accountNameTooShort : String = "account_name_too_short"
 
-    val accountNameTooLong = "account_name_too_long"
+    val accountNameTooLong : String = "account_name_too_long"
 
-    val sortCodeBackendInvalid = "check_your_sortcode_is_correct"
+    val sortCodeBackendInvalid : String = "check_your_sortcode_is_correct"
 
-    val accountNumberBackendInvalid = "check_your_account_number_is_correct"
+    val accountNumberBackendInvalid : String = "check_your_account_number_is_correct"
   }
 
   implicit class FormOps[A](val form: Form[A]) extends AnyVal {
