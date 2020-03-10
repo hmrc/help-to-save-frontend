@@ -28,18 +28,23 @@ import uk.gov.hmrc.helptosavefrontend.forms.ReminderFrequencyValidation.ErrorMes
 import uk.gov.hmrc.helptosavefrontend.forms.TestForm.{testForm, testFormWithErrorMessage}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
-class ReminderFrequencyValidationSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks with ControllerSpecWithGuiceApp {
+class ReminderFrequencyValidationSpec
+    extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks with ControllerSpecWithGuiceApp {
 
   "ReminderFrequencyValidation" must {
 
-    lazy val validation = new ReminderFrequencyValidation(new FrontendAppConfig(new ServicesConfig(fakeApplication.configuration,
-                                                                                                   injector.instanceOf[RunMode])))
+    lazy val validation = new ReminderFrequencyValidation(
+      new FrontendAppConfig(new ServicesConfig(fakeApplication.configuration, injector.instanceOf[RunMode]))
+    )
 
-      def test(reminderFrequencyValidation: ReminderFrequencyValidation)(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
-        val result: Either[Seq[FormError], String] = reminderFrequencyValidation.reminderFrequencyFormatter.bind("key", Map("key" → value))
-        if (log) Logger.error(value + ": " + result.toString)
-        result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
-      }
+    def test(
+      reminderFrequencyValidation: ReminderFrequencyValidation
+    )(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
+      val result: Either[Seq[FormError], String] =
+        reminderFrequencyValidation.reminderFrequencyFormatter.bind("key", Map("key" → value))
+      if (log) Logger.error(value + ": " + result.toString)
+      result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
+    }
 
     "validate against blank" in {
       val reminderFrequencyValidation = validation
@@ -69,4 +74,3 @@ class ReminderFrequencyValidationSpec extends WordSpec with Matchers with ScalaC
   }
 
 }
-

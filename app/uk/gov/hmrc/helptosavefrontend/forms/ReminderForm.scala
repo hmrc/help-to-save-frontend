@@ -28,4 +28,3 @@ object ReminderForm {
 }
 
 case class ReminderForm(reminderFrequency: String)
-

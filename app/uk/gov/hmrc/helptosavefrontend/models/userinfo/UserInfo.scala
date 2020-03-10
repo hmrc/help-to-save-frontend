@@ -24,19 +24,21 @@ import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.util.Email
 
 /** Details of the user obtained from HMRC services */
-case class UserInfo(forename:    String,
-                    surname:     String,
-                    nino:        String,
-                    dateOfBirth: LocalDate,
-                    email:       Option[String],
-                    address:     Address
+case class UserInfo(
+  forename: String,
+  surname: String,
+  nino: String,
+  dateOfBirth: LocalDate,
+  email: Option[String],
+  address: Address
 )
 
 object UserInfo {
 
   implicit val userDetailsFormat: Format[UserInfo] = Json.format[UserInfo]
 
-  implicit val localDateShow: Show[LocalDate] = Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("d MMMM yyyy")))
+  implicit val localDateShow: Show[LocalDate] =
+    Show.show(date ⇒ date.format(DateTimeFormatter.ofPattern("d MMMM yyyy")))
 
   implicit class UserInfoOps(val u: UserInfo) extends AnyVal {
 
@@ -45,4 +47,3 @@ object UserInfo {
   }
 
 }
-

@@ -27,15 +27,17 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 
 import scala.util.{Failure, Success, Try}
 
-case class NSIPayload(forename:            String,
-                      surname:             String,
-                      dateOfBirth:         LocalDate,
-                      nino:                String,
-                      contactDetails:      ContactDetails,
-                      registrationChannel: String              = "online",
-                      nbaDetails:          Option[BankDetails] = None,
-                      version:             String,
-                      systemId:            String)
+case class NSIPayload(
+  forename: String,
+  surname: String,
+  dateOfBirth: LocalDate,
+  nino: String,
+  contactDetails: ContactDetails,
+  registrationChannel: String = "online",
+  nbaDetails: Option[BankDetails] = None,
+  version: String,
+  systemId: String
+)
 
 object NSIPayload {
 
@@ -44,16 +46,18 @@ object NSIPayload {
       nsiPayload.copy(contactDetails = nsiPayload.contactDetails.copy(email = newEmail))
   }
 
-  case class ContactDetails(address1:                String,
-                            address2:                String,
-                            address3:                Option[String],
-                            address4:                Option[String],
-                            address5:                Option[String],
-                            postcode:                String,
-                            countryCode:             Option[String],
-                            email:                   String,
-                            phoneNumber:             Option[String] = None,
-                            communicationPreference: String         = "02")
+  case class ContactDetails(
+    address1: String,
+    address2: String,
+    address3: Option[String],
+    address4: Option[String],
+    address5: Option[String],
+    postcode: String,
+    countryCode: Option[String],
+    email: String,
+    phoneNumber: Option[String] = None,
+    communicationPreference: String = "02"
+  )
 
   private implicit class StringOps(val s: String) {
     def removeAllSpaces: String = s.replaceAll(" ", "")
@@ -63,29 +67,38 @@ object NSIPayload {
   }
 
   /**
-   * Performs validation checks on the given [[UserInfo]] and converts to [[NSIPayload]]
-   * if successful.
-   */
+    * Performs validation checks on the given [[UserInfo]] and converts to [[NSIPayload]]
+    * if successful.
+    */
   def apply(userInfo: UserInfo, email: String, version: String, systemId: String): NSIPayload = {
-      def extractContactDetails(userInfo: UserInfo): ContactDetails = {
-        val (line1, line2, line3, line4, line5) =
-          userInfo.address.lines.map(_.cleanupSpecialCharacters).filter(_.nonEmpty) match {
-            case Nil ⇒ ("", "", None, None, None)
-            case line1 :: Nil ⇒ (line1, "", None, None, None)
-            case line1 :: line2 :: Nil ⇒ (line1, line2, None, None, None)
-            case line1 :: line2 :: line3 :: Nil ⇒ (line1, line2, Some(line3), None, None)
-            case line1 :: line2 :: line3 :: line4 :: Nil ⇒ (line1, line2, Some(line3), Some(line4), None)
-            case line1 :: line2 :: line3 :: line4 :: line5 :: Nil ⇒ (line1, line2, Some(line3), Some(line4), Some(s"$line5"))
-            case line1 :: line2 :: line3 :: line4 :: line5 :: other ⇒ (line1, line2, Some(line3), Some(line4), Some(s"$line5,${other.mkString(",")}"))
-          }
+    def extractContactDetails(userInfo: UserInfo): ContactDetails = {
+      val (line1, line2, line3, line4, line5) =
+        userInfo.address.lines.map(_.cleanupSpecialCharacters).filter(_.nonEmpty) match {
+          case Nil ⇒ ("", "", None, None, None)
+          case line1 :: Nil ⇒ (line1, "", None, None, None)
+          case line1 :: line2 :: Nil ⇒ (line1, line2, None, None, None)
+          case line1 :: line2 :: line3 :: Nil ⇒ (line1, line2, Some(line3), None, None)
+          case line1 :: line2 :: line3 :: line4 :: Nil ⇒ (line1, line2, Some(line3), Some(line4), None)
+          case line1 :: line2 :: line3 :: line4 :: line5 :: Nil ⇒
+            (line1, line2, Some(line3), Some(line4), Some(s"$line5"))
+          case line1 :: line2 :: line3 :: line4 :: line5 :: other ⇒
+            (line1, line2, Some(line3), Some(line4), Some(s"$line5,${other.mkString(",")}"))
+        }
 
-        ContactDetails(
-          line1, line2, line3, line4, line5,
-          userInfo.address.postcode.getOrElse("").cleanupSpecialCharacters.removeAllSpaces,
-          userInfo.address.country.map(_.cleanupSpecialCharacters.removeAllSpaces).filter(_.toLowerCase =!= "other").map(_.take(2)),
-          email
-        )
-      }
+      ContactDetails(
+        line1,
+        line2,
+        line3,
+        line4,
+        line5,
+        userInfo.address.postcode.getOrElse("").cleanupSpecialCharacters.removeAllSpaces,
+        userInfo.address.country
+          .map(_.cleanupSpecialCharacters.removeAllSpaces)
+          .filter(_.toLowerCase =!= "other")
+          .map(_.take(2)),
+        email
+      )
+    }
 
     NSIPayload(
       userInfo.forename.cleanupSpecialCharacters,
@@ -106,10 +119,11 @@ object NSIPayload {
     override def writes(o: LocalDate): JsValue = JsString(o.format(formatter))
 
     override def reads(json: JsValue): JsResult[LocalDate] = json match {
-      case JsString(s) ⇒ Try(LocalDate.parse(s, formatter)) match {
-        case Success(date)  ⇒ JsSuccess(date)
-        case Failure(error) ⇒ JsError(s"Could not parse date as yyyyMMdd: ${error.getMessage}")
-      }
+      case JsString(s) ⇒
+        Try(LocalDate.parse(s, formatter)) match {
+          case Success(date) ⇒ JsSuccess(date)
+          case Failure(error) ⇒ JsError(s"Could not parse date as yyyyMMdd: ${error.getMessage}")
+        }
 
       case other ⇒ JsError(s"Expected string but got $other")
     }

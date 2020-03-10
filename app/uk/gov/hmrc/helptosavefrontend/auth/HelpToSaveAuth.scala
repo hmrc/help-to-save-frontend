@@ -50,7 +50,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
   private type RelativeURL = String
 
-  def authorisedForHtsWithNINO(action: HtsAction[HtsContextWithNINO])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHtsWithNINO(
+    action: HtsAction[HtsContextWithNINO]
+  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -58,7 +60,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
         }(request)
     }(loginContinueURL)
 
-  def authorisedForHtsWithNINOAndName(action: HtsAction[HtsContextWithNINOAndFirstName])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHtsWithNINOAndName(
+    action: HtsAction[HtsContextWithNINOAndFirstName]
+  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Name and V2ItmpName and V2Nino) {
       case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -67,14 +71,20 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
         }(request)
     }(loginContinueURL)
 
-  def authorisedForHtsWithInfo(action: HtsAction[HtsContextWithNINOAndUserDetails])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHtsWithInfo(
+    action: HtsAction[HtsContextWithNINOAndUserDetails]
+  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(UserInfoRetrievals and V2Nino) {
       case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
           val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
           userDetails.fold(
-            m ⇒ logger.warn(s"User details retrieval failed, missing details [${m.missingInfo.mkString(", ")}] ${timeString(time)}", nino),
+            m ⇒
+              logger.warn(
+                s"User details retrieval failed, missing details [${m.missingInfo.mkString(", ")}] ${timeString(time)}",
+                nino
+              ),
             _ ⇒ logger.debug(s"Successfully retrieved NINO and user details ${timeString(time)}", nino)
           )
 
@@ -82,13 +92,17 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
         }(request)
     }(loginContinueURL)
 
-  def authorisedForHts(action: HtsAction[HtsContext])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHts(
+    action: HtsAction[HtsContext]
+  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(EmptyRetrieval, AuthProvider) {
       case (_, request, _) ⇒
         action(request)(HtsContext(authorised = true))
     }(loginContinueURL)
 
-  def authorisedForHtsWithNINOAndNoCL(action: HtsAction[HtsContextWithNINO])(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  def authorisedForHtsWithNINOAndNoCL(
+    action: HtsAction[HtsContextWithNINO]
+  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino, AuthProvider) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -106,22 +120,26 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       }
     }
 
-  private def authorised[A](retrieval: Retrieval[A],
-                            predicate: Predicate    = AuthWithCL200
-  )(toResult: (A, Request[AnyContent], Long) ⇒ Future[Result])(loginContinueURL: ⇒ RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  private def authorised[A](retrieval: Retrieval[A], predicate: Predicate = AuthWithCL200)(
+    toResult: (A, Request[AnyContent], Long) ⇒ Future[Result]
+  )(loginContinueURL: ⇒ RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
     Action.async { implicit request ⇒
       val timer = metrics.authTimer.time()
 
-      authorised(predicate).retrieve(retrieval) { a ⇒
-        val time = timer.stop()
-        toResult(a, request, time)
-      }.recover {
-        val time = timer.stop()
-        handleFailure(loginContinueURL, time)
-      }
+      authorised(predicate)
+        .retrieve(retrieval) { a ⇒
+          val time = timer.stop()
+          toResult(a, request, time)
+        }
+        .recover {
+          val time = timer.stop()
+          handleFailure(loginContinueURL, time)
+        }
     }
 
-  private def withNINO[A](mayBeNino: Option[String], nanos: Long)(action: NINO ⇒ Future[Result])(implicit request: Request[_]): Future[Result] =
+  private def withNINO[A](mayBeNino: Option[String], nanos: Long)(
+    action: NINO ⇒ Future[Result]
+  )(implicit request: Request[_]): Future[Result] =
     mayBeNino.fold {
       logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
       toFuture(internalServerError())
@@ -130,32 +148,45 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   // need this type to be able to use the apply syntax on ValidatedNel and mapN
   private type ValidOrMissingUserInfo[A] = ValidatedNel[MissingUserInfo, A]
 
-  private def getUserInfo(nino:        String,
-                          name:        Option[Name],
-                          email:       Option[String],
-                          dob:         Option[LocalDate],
-                          itmpName:    Option[ItmpName],
-                          itmpDob:     Option[LocalDate],
-                          itmpAddress: Option[ItmpAddress]): Either[MissingUserInfos, UserInfo] = {
+  private def getUserInfo(
+    nino: String,
+    name: Option[Name],
+    email: Option[String],
+    dob: Option[LocalDate],
+    itmpName: Option[ItmpName],
+    itmpDob: Option[LocalDate],
+    itmpAddress: Option[ItmpAddress]
+  ): Either[MissingUserInfos, UserInfo] = {
 
     val givenNameValidation: ValidOrMissingUserInfo[String] =
-      itmpName.flatMap(_.givenName).orElse(name.flatMap(_.name)).filter(_.nonEmpty)
+      itmpName
+        .flatMap(_.givenName)
+        .orElse(name.flatMap(_.name))
+        .filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.GivenName)
 
     val surnameValidation: ValidOrMissingUserInfo[String] =
-      itmpName.flatMap(_.familyName).orElse(name.flatMap(_.lastName)).filter(_.nonEmpty)
+      itmpName
+        .flatMap(_.familyName)
+        .orElse(name.flatMap(_.lastName))
+        .filter(_.nonEmpty)
         .toValidNel(MissingUserInfo.Surname)
 
     val dateOfBirthValidation: ValidOrMissingUserInfo[LocalDate] =
-      itmpDob.orElse(dob)
+      itmpDob
+        .orElse(dob)
         .toValidNel(MissingUserInfo.DateOfBirth)
 
     val addressValidation: ValidOrMissingUserInfo[ItmpAddress] = {
       val missingContactDetails = Invalid(NonEmptyList.of(MissingUserInfo.Contact))
 
-      itmpAddress.fold[ValidOrMissingUserInfo[ItmpAddress]](missingContactDetails){ a ⇒
+      itmpAddress.fold[ValidOrMissingUserInfo[ItmpAddress]](missingContactDetails) { a ⇒
         val lineCount =
-          List(a.line1, a.line2, a.line3, a.line4, a.line5).map(_.map(_.trim)).filter(_.nonEmpty).collect { case Some(_) ⇒ () }.length
+          List(a.line1, a.line2, a.line3, a.line4, a.line5)
+            .map(_.map(_.trim))
+            .filter(_.nonEmpty)
+            .collect { case Some(_) ⇒ () }
+            .length
 
         if (lineCount < 2 || !a.postCode.exists(_.trim.nonEmpty)) {
           missingContactDetails
@@ -177,7 +208,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       .toEither
   }
 
-  def handleFailure(loginContinueURL: RelativeURL, time: Long)(implicit request: Request[_]): PartialFunction[Throwable, Result] = {
+  def handleFailure(loginContinueURL: RelativeURL, time: Long)(
+    implicit request: Request[_]
+  ): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
       toGGLogin(loginContinueURL)
 
@@ -193,11 +226,14 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   }
 
   override def toGGLogin(redirectOnLoginURL: RelativeURL): Result =
-    Redirect(ggLoginUrl, Map(
-      "continue" -> Seq(appConfig.ggContinueUrlPrefix + redirectOnLoginURL),
-      "accountType" -> Seq("individual"),
-      "origin" -> Seq(appConfig.appName)
-    ))
+    Redirect(
+      ggLoginUrl,
+      Map(
+        "continue"    -> Seq(appConfig.ggContinueUrlPrefix + redirectOnLoginURL),
+        "accountType" -> Seq("individual"),
+        "origin"      -> Seq(appConfig.appName)
+      )
+    )
 
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 

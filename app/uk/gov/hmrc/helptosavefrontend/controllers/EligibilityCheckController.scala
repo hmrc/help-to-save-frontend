@@ -44,27 +44,32 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
-class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveService,
-                                            val sessionStore:      SessionStore,
-                                            val authConnector:     AuthConnector,
-                                            val metrics:           Metrics,
-                                            cpd:                   CommonPlayDependencies,
-                                            mcc:                   MessagesControllerComponents,
-                                            errorHandler:          ErrorHandler,
-                                            notEligible:           not_eligible,
-                                            youAreEligible:        you_are_eligible,
-                                            missingUserInfo:       missing_user_info,
-                                            thinkYouAreEligible:   think_you_are_eligible)(implicit val transformer: NINOLogMessageTransformer,
-                                                                                           val frontendAppConfig: FrontendAppConfig,
-                                                                                           val config:            Configuration,
-                                                                                           val env:               Environment,
-                                                                                           ec:                    ExecutionContext)
-  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour with SessionBehaviour with CapCheckBehaviour {
+class EligibilityCheckController @Inject() (
+  val helpToSaveService: HelpToSaveService,
+  val sessionStore: SessionStore,
+  val authConnector: AuthConnector,
+  val metrics: Metrics,
+  cpd: CommonPlayDependencies,
+  mcc: MessagesControllerComponents,
+  errorHandler: ErrorHandler,
+  notEligible: not_eligible,
+  youAreEligible: you_are_eligible,
+  missingUserInfo: missing_user_info,
+  thinkYouAreEligible: think_you_are_eligible
+)(
+  implicit val transformer: NINOLogMessageTransformer,
+  val frontendAppConfig: FrontendAppConfig,
+  val config: Configuration,
+  val env: Environment,
+  ec: ExecutionContext
+) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour
+    with SessionBehaviour with CapCheckBehaviour {
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.earlyCapCheckOn
 
-  def getCheckEligibility: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒ // scalastyle:ignore
-    def eligibilityAction(session: Option[HTSSession]): Future[PlayResult] =
+  def getCheckEligibility: Action[AnyContent] =
+    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒ // scalastyle:ignore
+      def eligibilityAction(session: Option[HTSSession]): Future[PlayResult] =
         if (earlyCapCheckOn) {
           logger.info("Checking pre-eligibility cap for nino", htsContext.nino)
           checkIfAccountCreateAllowed(getEligibilityActionResult(session))
@@ -72,11 +77,15 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
           getEligibilityActionResult(session)
         }
 
-      def handleSessionAndEnrolmentStatus(maybeSession:    Option[HTSSession],
-                                          enrolmentStatus: Option[EnrolmentStatus]): Future[PlayResult] =
+      def handleSessionAndEnrolmentStatus(
+        maybeSession: Option[HTSSession],
+        enrolmentStatus: Option[EnrolmentStatus]
+      ): Future[PlayResult] =
         (maybeSession, enrolmentStatus) match {
           case (s, Some(EnrolmentStatus.Enrolled(itmpHtSFlag))) ⇒
-            if (!itmpHtSFlag) { setItmpFlag(htsContext.nino) }
+            if (!itmpHtSFlag) {
+              setItmpFlag(htsContext.nino)
+            }
             SeeOther(s.flatMap(_.attemptedAccountHolderPageURL).getOrElse(appConfig.nsiManageAccountUrl))
 
           case (s, _) ⇒
@@ -89,25 +98,32 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
         }
 
       def getEnrolmentStatus: Future[Option[EnrolmentStatus]] =
-        helpToSaveService.getUserEnrolmentStatus().bimap(
-          { e ⇒
-            logger.warn(s"Could not check enrolment status: $e")
-            None: Option[EnrolmentStatus]
-          },
-          Some(_)
-        ).merge
+        helpToSaveService
+          .getUserEnrolmentStatus()
+          .bimap(
+            { e ⇒
+              logger.warn(s"Could not check enrolment status: $e")
+              None: Option[EnrolmentStatus]
+            },
+            Some(_)
+          )
+          .merge
 
-    val result = for {
-      session ← sessionStore.get
-      enrolmentStatus ← EitherT.liftF(getEnrolmentStatus)
-      eligibilityResult ← EitherT.liftF[Future, String, PlayResult](handleSessionAndEnrolmentStatus(session, enrolmentStatus))
-    } yield eligibilityResult
+      val result = for {
+        session ← sessionStore.get
+        enrolmentStatus ← EitherT.liftF(getEnrolmentStatus)
+        eligibilityResult ← EitherT.liftF[Future, String, PlayResult](
+                             handleSessionAndEnrolmentStatus(session, enrolmentStatus)
+                           )
+      } yield eligibilityResult
 
-    result.leftMap[PlayResult]({ e ⇒
-      logger.warn(s"Could not check eligibility: $e")
-      internalServerError()
-    }).merge
-  }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
+      result
+        .leftMap[PlayResult]({ e ⇒
+          logger.warn(s"Could not check eligibility: $e")
+          internalServerError()
+        })
+        .merge
+    }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
   val getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     checkIfAlreadyEnrolled { () ⇒
@@ -149,13 +165,15 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
       SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
     } {
       _.eligibilityResult.fold(
-        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-        { userInfo ⇒
-          val url = userInfo.userInfo.email.fold(
-            routes.EmailController.getGiveEmailPage()
-          )(_ ⇒ routes.EmailController.getSelectEmailPage()).url
+        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), { userInfo ⇒
+          val url = userInfo.userInfo.email
+            .fold(
+              routes.EmailController.getGiveEmailPage()
+            )(_ ⇒ routes.EmailController.getSelectEmailPage())
+            .url
           SeeOther(url)
-        })
+        }
+      )
     }
   }(loginContinueURL = routes.EligibilityCheckController.youAreEligibleSubmit().url)
 
@@ -166,20 +184,23 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
     )
   }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
-  val getThinkYouAreEligiblePage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkHasDoneEligibilityChecks {
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-    } {
-      _.eligibilityResult.fold(
-        _ ⇒ Ok(thinkYouAreEligible()),
-        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-      )
-    }
+  val getThinkYouAreEligiblePage: Action[AnyContent] = authorisedForHtsWithNINO {
+    implicit request ⇒ implicit htsContext ⇒
+      checkHasDoneEligibilityChecks {
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+      } {
+        _.eligibilityResult.fold(
+          _ ⇒ Ok(thinkYouAreEligible()),
+          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+        )
+      }
   }(loginContinueURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
 
-  private def getEligibilityActionResult(session: Option[HTSSession])(implicit hc: HeaderCarrier,
-                                                                      htsContext: HtsContextWithNINOAndUserDetails,
-                                                                      request:    Request[AnyContent]): Future[PlayResult] = {
+  private def getEligibilityActionResult(session: Option[HTSSession])(
+    implicit hc: HeaderCarrier,
+    htsContext: HtsContextWithNINOAndUserDetails,
+    request: Request[AnyContent]
+  ): Future[PlayResult] =
     htsContext.userDetails.fold[Future[PlayResult]](
       { missingUserInfo ⇒
         logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
@@ -189,30 +210,33 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
           { e ⇒
             logger.warn(e, htsContext.nino)
             internalServerError()
-          }, handleEligibilityResult(_, session)
+          },
+          handleEligibilityResult(_, session)
         )
       }
     )
-  }
 
   private def performEligibilityChecks(userInfo: UserInfo)(
-      implicit
-      hc:         HeaderCarrier,
-      htsContext: HtsContextWithNINOAndUserDetails): EitherT[Future, String, EligibilityCheckResultType] =
+    implicit
+    hc: HeaderCarrier,
+    htsContext: HtsContextWithNINOAndUserDetails
+  ): EitherT[Future, String, EligibilityCheckResultType] =
     for {
       eligible ← helpToSaveService.checkEligibility()
       session = {
         val result = eligible.fold[Option[Either[Ineligible, EligibleWithUserInfo]]](
           e ⇒ Some(Right(EligibleWithUserInfo(Eligible(e), userInfo))),
           ineligible ⇒ Some(Left(Ineligible(ineligible))),
-          _ ⇒ None)
+          _ ⇒ None
+        )
         result.map(r ⇒ HTSSession(Some(r), None, None))
       }
       _ ← session.map(sessionStore.store).traverse[Result, Unit](identity)
     } yield eligible
 
-  private def handleEligibilityResult(result:  EligibilityCheckResultType,
-                                      session: Option[HTSSession]
+  private def handleEligibilityResult(
+    result: EligibilityCheckResultType,
+    session: Option[HTSSession]
   )(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
     val nino = htsContext.nino
     result.fold(
@@ -220,27 +244,32 @@ class EligibilityCheckController @Inject() (val helpToSaveService: HelpToSaveSer
       _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
       _ ⇒ {
         helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
-          case Failure(e)        ⇒ logger.warn(s"error in setting ITMP flag and updating mongo, future failed: ${e.getMessage}", nino)
-          case Success(Left(e))  ⇒ logger.warn(s"error in setting ITMP flag and updating mongo: $e", nino)
+          case Failure(e) ⇒
+            logger.warn(s"error in setting ITMP flag and updating mongo, future failed: ${e.getMessage}", nino)
+          case Success(Left(e)) ⇒ logger.warn(s"error in setting ITMP flag and updating mongo: $e", nino)
           case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag and updated mongo for user", nino)
         }
 
-        val redirectTo = session.flatMap(_.attemptedAccountHolderPageURL).getOrElse(frontendAppConfig.nsiManageAccountUrl)
+        val redirectTo =
+          session.flatMap(_.attemptedAccountHolderPageURL).getOrElse(frontendAppConfig.nsiManageAccountUrl)
         SeeOther(redirectTo)
       }
     )
   }
 
-  private def checkHasDoneEligibilityChecks(noSession: ⇒ Future[PlayResult])(hasDoneChecks: SessionWithEligibilityCheck ⇒ Future[PlayResult])(
-      implicit
-      htsContext:  HtsContextWithNINO,
-      hc:          HeaderCarrier,
-      request:     Request[AnyContent],
-      transformer: NINOLogMessageTransformer): Future[PlayResult] =
-    checkSession(noSession){ session ⇒
-      session.eligibilityCheckResult.fold[Future[PlayResult]](SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(
-        result ⇒ hasDoneChecks(SessionWithEligibilityCheck(result, session.pendingEmail, session.confirmedEmail)))
+  private def checkHasDoneEligibilityChecks(
+    noSession: ⇒ Future[PlayResult]
+  )(hasDoneChecks: SessionWithEligibilityCheck ⇒ Future[PlayResult])(
+    implicit
+    htsContext: HtsContextWithNINO,
+    hc: HeaderCarrier,
+    request: Request[AnyContent],
+    transformer: NINOLogMessageTransformer
+  ): Future[PlayResult] =
+    checkSession(noSession) { session ⇒
+      session.eligibilityCheckResult.fold[Future[PlayResult]](
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+      )(result ⇒ hasDoneChecks(SessionWithEligibilityCheck(result, session.pendingEmail, session.confirmedEmail)))
     }
 
 }
-

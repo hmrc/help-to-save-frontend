@@ -51,7 +51,9 @@ trait HelpToSaveService {
 
   def getConfirmedEmail()(implicit hv: HeaderCarrier, ec: ExecutionContext): Result[Option[String]]
 
-  def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): CreateAccountResultType
+  def createAccount(
+    createAccountRequest: CreateAccountRequest
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): CreateAccountResultType
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse]
 
@@ -59,14 +61,17 @@ trait HelpToSaveService {
 
   def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 
-  def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult]
+  def validateBankDetails(
+    request: ValidateBankDetailsRequest
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult]
 
   def getAccountNumber()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountNumber]
 
 }
 
 @Singleton
-class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector) extends HelpToSaveService with Logging {
+class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
+    extends HelpToSaveService with Logging {
 
   def getUserEnrolmentStatus()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[EnrolmentStatus] =
     helpToSaveConnector.getUserEnrolmentStatus()
@@ -83,27 +88,33 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
   def getConfirmedEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     helpToSaveConnector.getEmail()
 
-  def createAccount(createAccountRequest: CreateAccountRequest)(implicit hc: HeaderCarrier, ec: ExecutionContext): CreateAccountResultType =
-    EitherT(helpToSaveConnector.createAccount(createAccountRequest)
-      .map[Either[SubmissionFailure, SubmissionSuccess]] { response ⇒
+  def createAccount(
+    createAccountRequest: CreateAccountRequest
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): CreateAccountResultType =
+    EitherT(
+      helpToSaveConnector
+        .createAccount(createAccountRequest)
+        .map[Either[SubmissionFailure, SubmissionSuccess]] { response ⇒
+          response.status match {
+            case Status.CREATED ⇒
+              response
+                .parseJSON[AccountNumber]()
+                .fold[Either[SubmissionFailure, SubmissionSuccess]](
+                  e ⇒ Left(SubmissionFailure(None, "Couldn't parse account number JSON", e)),
+                  account ⇒ Right(SubmissionSuccess(account))
+                )
 
-        response.status match {
-          case Status.CREATED ⇒
-            response.parseJSON[AccountNumber]().fold[Either[SubmissionFailure, SubmissionSuccess]](
-              e ⇒ Left(SubmissionFailure(None, "Couldn't parse account number JSON", e)),
-              account ⇒ Right(SubmissionSuccess(account))
-            )
+            case Status.CONFLICT ⇒
+              Right(SubmissionSuccess(AccountNumber(None)))
 
-          case Status.CONFLICT ⇒
-            Right(SubmissionSuccess(AccountNumber(None)))
-
-          case _ ⇒
-            Left(handleError(response))
+            case _ ⇒
+              Left(handleError(response))
+          }
         }
-      }.recover {
-        case e ⇒
-          Left(SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage))
-      }
+        .recover {
+          case e ⇒
+            Left(SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage))
+        }
     )
 
   def isAccountCreationAllowed()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[UserCapResponse] =
@@ -113,23 +124,30 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
     helpToSaveConnector.getAccount(nino, correlationId)
 
   override def updateEmail(userInfo: NSIPayload)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    EitherT(helpToSaveConnector.updateEmail(userInfo).map[Either[String, Unit]] { response ⇒
+    EitherT(
+      helpToSaveConnector
+        .updateEmail(userInfo)
+        .map[Either[String, Unit]] { response ⇒
+          response.status match {
+            case Status.OK ⇒
+              Right(())
 
-      response.status match {
-        case Status.OK ⇒
-          Right(())
+            case other ⇒
+              Left(
+                s"Received unexpected status $other from NS&I proxy while trying to update email. Body was ${maskNino(response.body)}"
+              )
 
-        case other ⇒
-          Left(s"Received unexpected status $other from NS&I proxy while trying to update email. Body was ${maskNino(response.body)}")
-
-      }
-    }.recover {
-      case e ⇒
-        Left(s"Encountered error while trying to update email: ${e.getMessage}")
-    }
+          }
+        }
+        .recover {
+          case e ⇒
+            Left(s"Encountered error while trying to update email: ${e.getMessage}")
+        }
     )
 
-  override def validateBankDetails(request: ValidateBankDetailsRequest)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult] =
+  override def validateBankDetails(
+    request: ValidateBankDetailsRequest
+  )(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult] =
     EitherT(helpToSaveConnector.validateBankDetails(request).map[Either[String, ValidateBankDetailsResult]] { response ⇒
       response.status match {
         case Status.OK ⇒
@@ -137,18 +155,16 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
         case other ⇒
           Left(s"Received unexpected status $other from /validate-bank-details. Body was ${maskNino(response.body)}")
       }
-    }
-    )
+    })
 
   def getAccountNumber()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountNumber] =
     helpToSaveConnector.getAccountNumber()
 
-  private def handleError(response: HttpResponse): SubmissionFailure = {
+  private def handleError(response: HttpResponse): SubmissionFailure =
     response.parseJSON[SubmissionFailure]() match {
       case Right(submissionFailure) ⇒ submissionFailure
-      case Left(error)              ⇒ SubmissionFailure(None, "", error)
+      case Left(error) ⇒ SubmissionFailure(None, "", error)
     }
-  }
 }
 
 object HelpToSaveServiceImpl {
@@ -159,8 +175,8 @@ object HelpToSaveServiceImpl {
 
   implicit val submissionSuccessFormat: Format[SubmissionSuccess] = Json.format[SubmissionSuccess]
 
-  case class SubmissionFailure(errorMessageId: Option[String], errorMessage: String, errorDetail: String) extends SubmissionResult
+  case class SubmissionFailure(errorMessageId: Option[String], errorMessage: String, errorDetail: String)
+      extends SubmissionResult
 
   implicit val submissionFailureFormat: Format[SubmissionFailure] = Json.format[SubmissionFailure]
 }
-

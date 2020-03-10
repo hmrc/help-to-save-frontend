@@ -21,8 +21,7 @@ import play.api.data._
 
 object UpdateEmailForm {
   def verifyEmailForm(implicit emailValidation: EmailValidation): Form[UpdateEmail] = Form(
-    mapping("new-email-address" -> of(emailValidation.emailFormatter)
-    )(UpdateEmail.apply)(UpdateEmail.unapply)
+    mapping("new-email-address" -> of(emailValidation.emailFormatter))(UpdateEmail.apply)(UpdateEmail.unapply)
   )
 }
 

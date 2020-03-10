@@ -36,38 +36,43 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class IvController @Inject() (val sessionStore:         SessionStore,
-                              ivConnector:              IvConnector,
-                              val authConnector:        AuthConnector,
-                              val metrics:              Metrics,
-                              cpd:                      CommonPlayDependencies,
-                              mcc:                      MessagesControllerComponents,
-                              errorHandler:             ErrorHandler,
-                              ivSuccessView:            iv_success,
-                              failedIVview:             failed_iv,
-                              insufficientEvidenceView: insufficient_evidence,
-                              lockedOutView:            locked_out,
-                              userAbortedView:          user_aborted,
-                              timeOutView:              time_out,
-                              technicalIVissuesView:    technical_iv_issues,
-                              preconditionFailedView:   precondition_failed
-)(implicit val transformer: NINOLogMessageTransformer,
+class IvController @Inject() (
+  val sessionStore: SessionStore,
+  ivConnector: IvConnector,
+  val authConnector: AuthConnector,
+  val metrics: Metrics,
+  cpd: CommonPlayDependencies,
+  mcc: MessagesControllerComponents,
+  errorHandler: ErrorHandler,
+  ivSuccessView: iv_success,
+  failedIVview: failed_iv,
+  insufficientEvidenceView: insufficient_evidence,
+  lockedOutView: locked_out,
+  userAbortedView: user_aborted,
+  timeOutView: time_out,
+  technicalIVissuesView: technical_iv_issues,
+  preconditionFailedView: precondition_failed
+)(
+  implicit val transformer: NINOLogMessageTransformer,
   val frontendAppConfig: FrontendAppConfig,
-  val config:            Configuration,
-  val env:               Environment,
-  ec:                    ExecutionContext)
-  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth {
+  val config: Configuration,
+  val env: Environment,
+  ec: ExecutionContext
+) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth {
 
   val eligibilityUrl: String = routes.EligibilityCheckController.getCheckEligibility().url
 
   val defaultIVUrl: String = appConfig.ivUrl(eligibilityUrl)
 
-  def journeyResult(continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
-                    journeyId:   Option[String]): Action[AnyContent] =
+  def journeyResult(
+    continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
+    journeyId: Option[String]
+  ): Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       //Will be populated if we arrived here because of an IV success/failure
       val newIVUrl = frontendAppConfig.ivUrl(continueURL)
-      lazy val storeNewIVURLThenRedirectTo = storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None), journeyId) _
+      lazy val storeNewIVURLThenRedirectTo =
+        storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None), journeyId) _
 
       journeyId match {
         case Some(id) ⇒
@@ -75,7 +80,8 @@ class IvController @Inject() (val sessionStore:         SessionStore,
             case Some(Success) ⇒
               metrics.ivSuccessCounter.inc()
               storeInSessionCacheThenRedirect(HTSSession(None, None, None, None, Some(continueURL)), Some(id))(
-                routes.IvController.getIVSuccessful().url)
+                routes.IvController.getIVSuccessful().url
+              )
 
             case Some(Incomplete) ⇒
               metrics.ivIncompleteCounter.inc()
@@ -137,7 +143,7 @@ class IvController @Inject() (val sessionStore:         SessionStore,
           // No journeyId signifies subsequent 2FA failure
           logger.warn("response from identityVerificationFrontendService did not contain token or journeyId param")
           storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
-      }
+    }
     }(loginContinueURL = routes.IvController.journeyResult(continueURL, journeyId).url)
 
   def getIVSuccessful: Action[AnyContent] =
@@ -152,11 +158,13 @@ class IvController @Inject() (val sessionStore:         SessionStore,
     }(routes.IvController.getFailedIV().url)
 
   def getInsufficientEvidence: Action[AnyContent] =
-    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(insufficientEvidenceView())
+    authorisedForHts { implicit r ⇒ implicit h ⇒
+      Ok(insufficientEvidenceView())
     }(routes.IvController.getInsufficientEvidence().url)
 
   def getLockedOut: Action[AnyContent] =
-    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(lockedOutView())
+    authorisedForHts { implicit r ⇒ implicit h ⇒
+      Ok(lockedOutView())
     }(routes.IvController.getLockedOut().url)
 
   def getUserAborted: Action[AnyContent] =
@@ -175,33 +183,32 @@ class IvController @Inject() (val sessionStore:         SessionStore,
     }(routes.IvController.getTechnicalIssue().url)
 
   def getPreconditionFailed: Action[AnyContent] =
-    authorisedForHts { implicit r ⇒ implicit h ⇒ Ok(preconditionFailedView())
+    authorisedForHts { implicit r ⇒ implicit h ⇒
+      Ok(preconditionFailedView())
     }(routes.IvController.getPreconditionFailed().url)
 
   private def storeInSessionCacheThenRedirect(session: HTSSession, journeyId: Option[String])(redirectTo: ⇒ String)(
-      implicit
-      request: Request[_],
-      hc:      HeaderCarrier
+    implicit
+    request: Request[_],
+    hc: HeaderCarrier
   ): Future[Result] =
-    sessionStore.store(session) fold ({
-      e ⇒
-        logger.warn(s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e")
-        internalServerError()
-    }, _ ⇒
-      SeeOther(redirectTo)
-    )
+    sessionStore.store(session) fold ({ e ⇒
+      logger.warn(
+        s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e"
+      )
+      internalServerError()
+    }, _ ⇒ SeeOther(redirectTo))
 
   private def retrieveURLFromSessionCache(url: HTSSession ⇒ Option[String], defaultUrl: String)(f: String ⇒ Result)(
-      implicit
-      request: Request[_],
-      hc:      HeaderCarrier
+    implicit
+    request: Request[_],
+    hc: HeaderCarrier
   ): Future[Result] =
-    sessionStore.get.fold({
-      e ⇒
+    sessionStore.get.fold(
+      { e ⇒
         logger.warn(s"Could not retrieve data from session cache: $e")
         internalServerError()
-    }, {
-      mayBeSession ⇒
+      }, { mayBeSession ⇒
         mayBeSession.fold {
           logger.warn(s"no session found for user in mongo, redirecting to $defaultUrl")
           f(defaultUrl)
@@ -213,6 +220,7 @@ class IvController @Inject() (val sessionStore:         SessionStore,
             f
           )
         }
-    })
+      }
+    )
 
 }

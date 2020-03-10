@@ -34,7 +34,14 @@ class AccountSpec extends WordSpec with Matchers {
       val bonusTerm4 = BonusTerm(0, 0, today.plusDays(1L), dummyDate)
 
       val account1 = Account(
-        false, Blocking(false), 0, 0, 0, 0, dummyDate, List(bonusTerm3, bonusTerm4)
+        false,
+        Blocking(false),
+        0,
+        0,
+        0,
+        0,
+        dummyDate,
+        List(bonusTerm3, bonusTerm4)
       )
 
       account1.currentBonusTerm() shouldBe Some(bonusTerm4)

@@ -25,24 +25,25 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.util.Email
 
 /**
- * Session data for the HTS journey
- *
- * @param eligibilityCheckResult Contains `Some` if the user has gone through the eligibility checks
- *                               and they are eligible for HtS and contains `None` if the user has gone
- *                               through eligibility checks and they are ineligible
- * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
- *                               if they haven't
- */
-case class HTSSession(eligibilityCheckResult:        Option[Either[Ineligible, EligibleWithUserInfo]],
-                      confirmedEmail:                Option[Email],
-                      pendingEmail:                  Option[Email],
-                      ivURL:                         Option[String]                                   = None,
-                      ivSuccessURL:                  Option[String]                                   = None,
-                      bankDetails:                   Option[BankDetails]                              = None,
-                      changingDetails:               Boolean                                          = false,
-                      accountNumber:                 Option[String]                                   = None,
-                      hasSelectedEmail:              Boolean                                          = false,
-                      attemptedAccountHolderPageURL: Option[String]                                   = None
+  * Session data for the HTS journey
+  *
+  * @param eligibilityCheckResult Contains `Some` if the user has gone through the eligibility checks
+  *                               and they are eligible for HtS and contains `None` if the user has gone
+  *                               through eligibility checks and they are ineligible
+  * @param confirmedEmail         Contains `Some` if the user has confirmed their email address and `None`
+  *                               if they haven't
+  */
+case class HTSSession(
+  eligibilityCheckResult: Option[Either[Ineligible, EligibleWithUserInfo]],
+  confirmedEmail: Option[Email],
+  pendingEmail: Option[Email],
+  ivURL: Option[String] = None,
+  ivSuccessURL: Option[String] = None,
+  bankDetails: Option[BankDetails] = None,
+  changingDetails: Boolean = false,
+  accountNumber: Option[String] = None,
+  hasSelectedEmail: Boolean = false,
+  attemptedAccountHolderPageURL: Option[String] = None
 )
 
 object HTSSession {
@@ -58,7 +59,9 @@ object HTSSession {
   implicit def eitherFormat[A, B](implicit aFormat: Format[A], bFormat: Format[B]): Format[Either[A, B]] =
     new Format[Either[A, B]] {
       override def reads(json: JsValue): JsResult[Either[A, B]] =
-        (json \ "l").validate[A].map[Either[A, B]](Left(_))
+        (json \ "l")
+          .validate[A]
+          .map[Either[A, B]](Left(_))
           .orElse((json \ "r").validate[B].map(Right(_)))
 
       override def writes(o: Either[A, B]): JsValue =
@@ -83,8 +86,17 @@ object HTSSession {
         attemptedAccountHolderPageURL ← (json \ "attemptedAccountHolderPageURL").validateOpt[String]
 
       } yield HTSSession(
-        eligibilityCheckResult, confirmedEmail, pendingEmail, ivURL, ivSuccessURL, bankDetails,
-        changingDetails.getOrElse(false), accountNumber, hasSelectedEmail.getOrElse(false), attemptedAccountHolderPageURL)
+        eligibilityCheckResult,
+        confirmedEmail,
+        pendingEmail,
+        ivURL,
+        ivSuccessURL,
+        bankDetails,
+        changingDetails.getOrElse(false),
+        accountNumber,
+        hasSelectedEmail.getOrElse(false),
+        attemptedAccountHolderPageURL
+      )
 
   }
 

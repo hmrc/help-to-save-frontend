@@ -33,12 +33,14 @@ trait SessionStoreBehaviourSupport { this: MockFactory ⇒
   val mockSessionStore: SessionStore = mock[SessionStore]
 
   def mockSessionStorePut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
-    (mockSessionStore.store(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
+    (mockSessionStore
+      .store(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
       .expects(expectedSession, *, *)
       .returning(EitherT.fromEither[Future](result.map(_ ⇒ ())))
 
   def mockSessionStoreGet(result: Either[String, Option[HTSSession]]): Unit =
-    (mockSessionStore.get(_: Reads[HTSSession], _: HeaderCarrier))
+    (mockSessionStore
+      .get(_: Reads[HTSSession], _: HeaderCarrier))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 }

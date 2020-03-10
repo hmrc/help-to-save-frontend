@@ -24,7 +24,8 @@ import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, Ve
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, NINO}
 import uk.gov.hmrc.http.HttpResponse
 
-class EmailVerificationConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with ScalaCheckDrivenPropertyChecks {
+class EmailVerificationConnectorSpec
+    extends ControllerSpecWithGuiceApp with HttpSupport with ScalaCheckDrivenPropertyChecks {
 
   val nino: NINO = "AE123XXXX"
   val name: String = "first-name"
@@ -38,7 +39,8 @@ class EmailVerificationConnectorSpec extends ControllerSpecWithGuiceApp with Htt
       "hts_verification_email",
       "PT2H",
       if (isNewApplicant) s"${appConfig.newApplicantContinueURL}?p=" else s"${appConfig.accountHolderContinueURL}?p=",
-      Map("name" → name))
+      Map("name" → name)
+    )
 
   lazy val connector: EmailVerificationConnectorImpl =
     new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
@@ -56,55 +58,65 @@ class EmailVerificationConnectorSpec extends ControllerSpecWithGuiceApp with Htt
       test(isNewApplicant = false)
     }
 
-      def test(isNewApplicant: Boolean): Unit = { // scalastyle:ignore method.length
+    def test(isNewApplicant: Boolean): Unit = { // scalastyle:ignore method.length
 
-        val verificationRequest = emailVerificationRequest(isNewApplicant)
+      val verificationRequest = emailVerificationRequest(isNewApplicant)
 
-        "return a success when given good json" in {
+      "return a success when given good json" in {
+        mockEncrypt(nino + "#" + email)("")
+        mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
+          Some(HttpResponse(Status.OK))
+        )
+        await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Right(())
+      }
+
+      "indicate the email has already been verified when the email has already been verified" in {
+        mockEncrypt(nino + "#" + email)("")
+        mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
+          Some(HttpResponse(Status.CONFLICT))
+        )
+        await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
+      }
+
+      "return an error" when {
+
+        "given bad json" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(Status.OK)))
-          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Right(())
+          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
+            Some(HttpResponse(Status.BAD_REQUEST))
+          )
+          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
         }
 
-        "indicate the email has already been verified when the email has already been verified" in {
+        "the email verification service is down" in {
           mockEncrypt(nino + "#" + email)("")
-          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(Status.CONFLICT)))
-          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
+          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
+            Some(HttpResponse(Status.SERVICE_UNAVAILABLE))
+          )
+          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
         }
 
-        "return an error" when {
+        "the call comes back with an unexpected status" in {
+          val statuses = Set(Status.OK, Status.CREATED, Status.BAD_REQUEST, Status.CONFLICT, Status.SERVICE_UNAVAILABLE)
 
-          "given bad json" in {
-            mockEncrypt(nino + "#" + email)("")
-            mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(Status.BAD_REQUEST)))
-            await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
-          }
-
-          "the email verification service is down" in {
-            mockEncrypt(nino + "#" + email)("")
-            mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(Status.SERVICE_UNAVAILABLE)))
-            await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
-          }
-
-          "the call comes back with an unexpected status" in {
-            val statuses = Set(Status.OK, Status.CREATED, Status.BAD_REQUEST, Status.CONFLICT, Status.SERVICE_UNAVAILABLE)
-
-            forAll { status: Int ⇒
-              whenever(!statuses.contains(status)) {
-                mockEncrypt(nino + "#" + email)("")
-                mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(Some(HttpResponse(status)))
-                await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
-              }
+          forAll { status: Int ⇒
+            whenever(!statuses.contains(status)) {
+              mockEncrypt(nino + "#" + email)("")
+              mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
+                Some(HttpResponse(status))
+              )
+              await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
             }
           }
-
-          "the future fails" in {
-            mockEncrypt(nino + "#" + email)("")
-            mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(None)
-            await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
-          }
         }
 
+        "the future fails" in {
+          mockEncrypt(nino + "#" + email)("")
+          mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(None)
+          await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
+        }
       }
+
+    }
   }
 }

@@ -59,9 +59,11 @@ object HtsContextWithNINOAndFirstName {
 }
 
 object HtsContextWithNINOAndUserDetails {
-  def apply(authorised: Boolean,
-            NINO:       NINO,
-            details:    Either[MissingUserInfos, UserInfo]): HtsContextWithNINOAndUserDetails =
+  def apply(
+    authorised: Boolean,
+    NINO: NINO,
+    details: Either[MissingUserInfos, UserInfo]
+  ): HtsContextWithNINOAndUserDetails =
     new HtsContextWithNINOAndUserDetails {
       override val nino: NINO = NINO
       override val isAuthorised: Boolean = authorised

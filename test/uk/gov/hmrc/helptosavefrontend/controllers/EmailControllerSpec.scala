@@ -49,11 +49,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class EmailControllerSpec
-  extends ControllerSpecWithGuiceApp
-  with AuthSupport
-  with CSRFSupport
-  with EnrolmentAndEligibilityCheckBehaviour
-  with SessionStoreBehaviourSupport {
+    extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with EnrolmentAndEligibilityCheckBehaviour
+    with SessionStoreBehaviourSupport {
 
   val mockEmailVerificationConnector: EmailVerificationConnector = mock[EmailVerificationConnector]
   val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
@@ -92,19 +89,21 @@ class EmailControllerSpec
 
   val eligibleWithValidUserInfo = randomEligibleWithUserInfo(validUserInfo)
 
-  def mockEmailVerification(nino: String, email: String, firstName: String)(result: Either[VerifyEmailError, Unit]) = {
-    (mockEmailVerificationConnector.verifyEmail(_: String, _: String, _: String, _: Boolean)(_: HeaderCarrier, _: ExecutionContext))
+  def mockEmailVerification(nino: String, email: String, firstName: String)(result: Either[VerifyEmailError, Unit]) =
+    (mockEmailVerificationConnector
+      .verifyEmail(_: String, _: String, _: String, _: Boolean)(_: HeaderCarrier, _: ExecutionContext))
       .expects(nino, email, firstName, true, *, *)
       .returning(Future.successful(result))
-  }
 
   def mockAudit(expectedEvent: HTSEvent) =
-    (mockAuditor.sendEvent(_: HTSEvent, _: NINO)(_: ExecutionContext))
+    (mockAuditor
+      .sendEvent(_: HTSEvent, _: NINO)(_: ExecutionContext))
       .expects(expectedEvent, *, *)
       .returning(Future.successful(AuditResult.Success))
 
   def mockStoreConfirmedEmail(email: String)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService
+      .storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(email, *, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -115,17 +114,20 @@ class EmailControllerSpec
       .returning(EitherT.fromEither[Future](result))
 
   def mockGetConfirmedEmail()(result: Either[String, Option[String]]): Unit =
-    (mockHelpToSaveService.getConfirmedEmail()(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService
+      .getConfirmedEmail()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEligibilityResult()(result: Either[String, EligibilityCheckResultType]): Unit =
-    (mockHelpToSaveService.checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService
+      .checkEligibility()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockUpdateEmail(nsiPayload: NSIPayload)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveService.updateEmail(_: NSIPayload)(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService
+      .updateEmail(_: NSIPayload)(_: HeaderCarrier, _: ExecutionContext))
       .expects(nsiPayload, *, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -146,7 +148,7 @@ class EmailControllerSpec
 
     "handling getSelectEmailPage requests" must {
 
-        def getSelectEmailPage(): Future[Result] = csrfAddToken(controller.getSelectEmailPage)(fakeRequest)
+      def getSelectEmailPage(): Future[Result] = csrfAddToken(controller.getSelectEmailPage)(fakeRequest)
 
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
@@ -165,7 +167,9 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -178,7 +182,17 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(
+                  Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))),
+                  None,
+                  None
+                )
+              )
+            )
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -191,7 +205,13 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true)
+              )
+            )
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -299,12 +319,13 @@ class EmailControllerSpec
 
     "handling selectEmailSubmit requests" must {
 
-        def selectEmailSubmit(newEmail: Option[String]): Future[Result] = {
-          newEmail.fold(
-            csrfAddToken(controller.selectEmailSubmit())(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
-          ) { e ⇒
-              csrfAddToken(controller.selectEmailSubmit())(fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e))
-            }
+      def selectEmailSubmit(newEmail: Option[String]): Future[Result] =
+        newEmail.fold(
+          csrfAddToken(controller.selectEmailSubmit())(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
+        ) { e ⇒
+          csrfAddToken(controller.selectEmailSubmit())(
+            fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e)
+          )
         }
 
       "handle Digital(new applicant) users with no valid session in mongo" in {
@@ -349,13 +370,20 @@ class EmailControllerSpec
       "handle Digital(new applicant) who submitted form with new-email" in {
 
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
-        val session = HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")))
+        val session = HTSSession(
+          Some(Right(userInfo)),
+          None,
+          None,
+          None,
+          None,
+          Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))
+        )
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockSessionStoreGet(Right(Some(session)))
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionStorePut(session.copy(pendingEmail     = Some(testEmail), hasSelectedEmail = true))(Right(None))
+          mockSessionStorePut(session.copy(pendingEmail = Some(testEmail), hasSelectedEmail = true))(Right(None))
         }
 
         val result = selectEmailSubmit(Some(testEmail))
@@ -463,7 +491,7 @@ class EmailControllerSpec
     }
 
     "handling getGiveEmailPage requests" must {
-        def getGiveEmailPage(): Future[Result] = csrfAddToken(controller.getGiveEmailPage)(fakeRequest)
+      def getGiveEmailPage(): Future[Result] = csrfAddToken(controller.getGiveEmailPage)(fakeRequest)
 
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
@@ -482,7 +510,9 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -495,7 +525,17 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(
+                  Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))),
+                  None,
+                  None
+                )
+              )
+            )
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -508,7 +548,21 @@ class EmailControllerSpec
 
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))), None, None, None, None, None, true))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(
+                  Some(Right(randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail")))),
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  true
+                )
+              )
+            )
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -634,8 +688,8 @@ class EmailControllerSpec
 
       val email = "email@test.com"
 
-        def giveEmailSubmit(email: String): Future[Result] = csrfAddToken(controller.giveEmailSubmit())(
-          fakeRequest.withFormUrlEncodedBody("email" → email))
+      def giveEmailSubmit(email: String): Future[Result] =
+        csrfAddToken(controller.giveEmailSubmit())(fakeRequest.withFormUrlEncodedBody("email" → email))
 
       "handle Digital(new applicant) users with no valid session in mongo" in {
 
@@ -665,9 +719,31 @@ class EmailControllerSpec
         val userInfo = randomEligibleWithUserInfo(validUserInfo)
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(
+                  Some(Right(userInfo)),
+                  None,
+                  None,
+                  None,
+                  None,
+                  Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))
+                )
+              )
+            )
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionStorePut(HTSSession(Some(Right(userInfo)), None, Some(email), None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))))(Right(None))
+          mockSessionStorePut(
+            HTSSession(
+              Some(Right(userInfo)),
+              None,
+              Some(email),
+              None,
+              None,
+              Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))
+            )
+          )(Right(None))
         }
 
         val result = giveEmailSubmit(email)
@@ -735,7 +811,8 @@ class EmailControllerSpec
       val userInfo = randomEligibleWithUserInfo(validUserInfo)
       val userInfoWithInvalidEmail = randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail"))
 
-        def emailConfirmed(encryptedEmail: String): Future[Result] = csrfAddToken(controller.emailConfirmed(encryptedEmail))(fakeRequest)
+      def emailConfirmed(encryptedEmail: String): Future[Result] =
+        csrfAddToken(controller.emailConfirmed(encryptedEmail))(fakeRequest)
 
       "handle Digital(new applicant) users with an existing valid email from GG but not gone through eligibility checks" in {
 
@@ -772,9 +849,33 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockDecrypt("encrypted")("decrypted")
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(
+                  Some(Right(userInfo)),
+                  None,
+                  None,
+                  None,
+                  None,
+                  Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")),
+                  true
+                )
+              )
+            )
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
-          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")), true))(Right(None))
+          mockSessionStorePut(
+            HTSSession(
+              Some(Right(userInfo)),
+              Some("decrypted"),
+              None,
+              None,
+              None,
+              Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")),
+              true
+            )
+          )(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
         }
 
@@ -821,8 +922,12 @@ class EmailControllerSpec
           mockGetConfirmedEmail()(Right(None))
           mockSessionStorePut(HTSSession(None, Some("decrypted"), None))(Right(None))
           mockStoreConfirmedEmail("decrypted")(Right(None))
-          mockUpdateEmail(NSIPayload(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted", version, systemId))(Right(None))
-          mockAudit(EmailChanged(nino, "", "decrypted", false, routes.EmailController.emailConfirmed(encryptedEmail).url))
+          mockUpdateEmail(
+            NSIPayload(userInfo.userInfo.copy(email = Some("decrypted")), "decrypted", version, systemId)
+          )(Right(None))
+          mockAudit(
+            EmailChanged(nino, "", "decrypted", false, routes.EmailController.emailConfirmed(encryptedEmail).url)
+          )
         }
 
         val result = emailConfirmed(encryptedEmail)
@@ -833,8 +938,8 @@ class EmailControllerSpec
 
     "handling emailConfirmedCallback requests" must {
 
-        def emailConfirmedCallback(emailVerificationParams: String): Future[Result] =
-          csrfAddToken(controller.emailConfirmedCallback(emailVerificationParams))(fakeRequest)
+      def emailConfirmedCallback(emailVerificationParams: String): Future[Result] =
+        csrfAddToken(controller.emailConfirmedCallback(emailVerificationParams))(fakeRequest)
 
       val email = "test@user.com"
 
@@ -849,10 +954,27 @@ class EmailControllerSpec
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None, changingDetails = true))))
-          mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None, changingDetails = true))(Right(None))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(Some(Right(eligibleWithUserInfo)), None, None, changingDetails = true)))
+          )
+          mockSessionStorePut(
+            HTSSession(
+              Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))),
+              Some(newEmail),
+              None,
+              changingDetails = true
+            )
+          )(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
+          mockAudit(
+            EmailChanged(
+              nino,
+              email,
+              newEmail,
+              true,
+              routes.EmailController.emailConfirmedCallback(encryptedParams).url
+            )
+          )
         }
 
         val result = emailConfirmedCallback(encryptedParams)
@@ -870,9 +992,13 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(None))), None, None))))
-          mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockSessionStorePut(
+            HTSSession(Some(Right(eligibleWithUserInfo.withEmail(Some(newEmail)))), Some(newEmail), None)
+          )(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, "", newEmail, true, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
+          mockAudit(
+            EmailChanged(nino, "", newEmail, true, routes.EmailController.emailConfirmedCallback(encryptedParams).url)
+          )
         }
 
         val result = emailConfirmedCallback(encryptedParams)
@@ -900,7 +1026,13 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect", routes.EmailController.emailConfirmedCallback("blah blah").url))
+          mockAudit(
+            SuspiciousActivity(
+              Some(nino),
+              "malformed_redirect",
+              routes.EmailController.emailConfirmedCallback("blah blah").url
+            )
+          )
         }
 
         val result = emailConfirmedCallback("blah blah")
@@ -919,9 +1051,19 @@ class EmailControllerSpec
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockDecrypt("encrypted")(s"$nino#$newEmail")
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibilityResult)), Some(email), None))))
-          mockSessionStorePut(HTSSession(Some(Right(eligibilityResult.withEmail(Some(newEmail)))), Some(newEmail), None))(Right(None))
+          mockSessionStorePut(
+            HTSSession(Some(Right(eligibilityResult.withEmail(Some(newEmail)))), Some(newEmail), None)
+          )(Right(None))
           mockStoreConfirmedEmail(newEmail)(Right(None))
-          mockAudit(EmailChanged(nino, email, newEmail, true, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
+          mockAudit(
+            EmailChanged(
+              nino,
+              email,
+              newEmail,
+              true,
+              routes.EmailController.emailConfirmedCallback(encryptedParams).url
+            )
+          )
         }
 
         val result = emailConfirmedCallback(encryptedParams)
@@ -980,7 +1122,9 @@ class EmailControllerSpec
           mockStoreConfirmedEmail(email)(Right(None))
           mockStoreConfirmedEmailInReminders(updateReminderEmail)(Right((())))
           mockSessionStorePut(HTSSession(None, Some(email), None))(Right(None))
-          mockAudit(EmailChanged(nino, "", email, false, routes.EmailController.emailConfirmedCallback(encryptedParams).url))
+          mockAudit(
+            EmailChanged(nino, "", email, false, routes.EmailController.emailConfirmedCallback(encryptedParams).url)
+          )
         }
 
         val result = emailConfirmedCallback(encryptedParams)
@@ -1007,7 +1151,13 @@ class EmailControllerSpec
         inSequence {
           mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-          mockAudit(SuspiciousActivity(Some(nino), "malformed_redirect", routes.EmailController.emailConfirmedCallback("blah blah").url))
+          mockAudit(
+            SuspiciousActivity(
+              Some(nino),
+              "malformed_redirect",
+              routes.EmailController.emailConfirmedCallback("blah blah").url
+            )
+          )
         }
 
         val result = emailConfirmedCallback("blah blah")
@@ -1019,8 +1169,8 @@ class EmailControllerSpec
     }
 
     "handling confirmEmail requests" must {
-        def confirmEmail: Future[Result] =
-          csrfAddToken(controller.confirmEmail)(fakeRequest)
+      def confirmEmail: Future[Result] =
+        csrfAddToken(controller.confirmEmail)(fakeRequest)
 
       "handle Digital users and return the check your email page with a status of Ok" in {
 
@@ -1124,8 +1274,8 @@ class EmailControllerSpec
 
     "handling confirmEmailError requests" must {
 
-        def confirmEmailError: Future[Result] =
-          csrfAddToken(controller.confirmEmailError)(fakeRequest)
+      def confirmEmailError: Future[Result] =
+        csrfAddToken(controller.confirmEmailError)(fakeRequest)
 
       "handle Digital users who are already gone through eligibility checks" in {
         val newEmail = "email@hmrc.com"
@@ -1171,8 +1321,8 @@ class EmailControllerSpec
     }
 
     "handling confirmEmailErrorTryLater requests" must {
-        def confirmEmailErrorTryLater: Future[Result] =
-          csrfAddToken(controller.confirmEmailErrorTryLater)(fakeRequest)
+      def confirmEmailErrorTryLater: Future[Result] =
+        csrfAddToken(controller.confirmEmailErrorTryLater)(fakeRequest)
 
       "handle Digital users who are already gone through eligibility checks" in {
         inSequence {
@@ -1202,13 +1352,19 @@ class EmailControllerSpec
 
     "handling confirmEmailErrorSubmit requests" must {
 
-        def confirmEmailErrorSubmit(continue: Boolean): Future[Result] =
-          csrfAddToken(controller.confirmEmailErrorSubmit())(fakeRequest.withFormUrlEncodedBody("radio-inline-group" → continue.toString))
+      def confirmEmailErrorSubmit(continue: Boolean): Future[Result] =
+        csrfAddToken(controller.confirmEmailErrorSubmit())(
+          fakeRequest.withFormUrlEncodedBody("radio-inline-group" → continue.toString)
+        )
 
       "handle Digital users and redirect to the email verify error page try later if there is no email for the user" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))))
+          mockSessionStoreGet(
+            Right(
+              Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo.copy(email = None)))), None, None))
+            )
+          )
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
@@ -1289,7 +1445,7 @@ class EmailControllerSpec
 
     "handling getEmailConfirmed" must {
 
-        def getEmailConfirmed = csrfAddToken(controller.getEmailConfirmed)(fakeRequest)
+      def getEmailConfirmed = csrfAddToken(controller.getEmailConfirmed)(fakeRequest)
 
       "handle Digital users and return the email verified page" in {
         inSequence {
@@ -1336,7 +1492,17 @@ class EmailControllerSpec
         "there is no confirmed email in the session when there is no email for the user" in {
           inSequence {
             mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo.copy(userInfo = validUserInfo.copy(email = None)))), None, None))))
+            mockSessionStoreGet(
+              Right(
+                Some(
+                  HTSSession(
+                    Some(Right(eligibleWithValidUserInfo.copy(userInfo = validUserInfo.copy(email = None)))),
+                    None,
+                    None
+                  )
+                )
+              )
+            )
             mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           }
 
@@ -1373,8 +1539,8 @@ class EmailControllerSpec
 
     "handling getEmailUpdated" must {
 
-        def getEmailUpdated(): Future[Result] =
-          csrfAddToken(controller.getEmailUpdated())(fakeRequest)
+      def getEmailUpdated(): Future[Result] =
+        csrfAddToken(controller.getEmailUpdated())(fakeRequest)
 
       "show the email updated page otherwise" in {
         inSequence {
@@ -1395,7 +1561,7 @@ class EmailControllerSpec
 
       "handle Digital users and redirect to the getBankDetailsPage if bank details are not already in session" in {
 
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None))))
           mockEnrolmentCheck()(Right(NotEnrolled))
@@ -1408,10 +1574,23 @@ class EmailControllerSpec
 
       "handle Digital users and redirect to the checkDetailsPage if the user is in the process of changing details" in {
 
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(eligibleWithValidUserInfo)), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")),
-                                                    changingDetails = true))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(
+                  Some(Right(eligibleWithValidUserInfo)),
+                  None,
+                  None,
+                  None,
+                  None,
+                  Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")),
+                  changingDetails = true
+                )
+              )
+            )
+          )
           mockEnrolmentCheck()(Right(NotEnrolled))
         }
 
@@ -1422,7 +1601,7 @@ class EmailControllerSpec
 
       "handle Digital users and redirect to the eligibilityCheck if session doesnt contain eligibility result" in {
 
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(NotEnrolled))

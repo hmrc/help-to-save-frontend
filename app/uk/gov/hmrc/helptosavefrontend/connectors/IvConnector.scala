@@ -31,29 +31,36 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[IvConnectorImpl])
 trait IvConnector {
-  def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]]
+  def getJourneyStatus(
+    journeyId: JourneyId
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]]
 }
 
 @Singleton
 class IvConnectorImpl @Inject() (http: HttpClient)(implicit val frontendAppConfig: FrontendAppConfig)
-  extends IvConnector with Logging {
+    extends IvConnector with Logging {
 
-  override def getJourneyStatus(journeyId: JourneyId)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]] = {
+  override def getJourneyStatus(
+    journeyId: JourneyId
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[IvResponse]] =
+    http
+      .get(frontendAppConfig.ivJourneyResultUrl(journeyId))
+      .flatMap {
 
-    http.get(frontendAppConfig.ivJourneyResultUrl(journeyId)).flatMap {
+        case r if r.status === OK ⇒
+          val result = (r.json \ "result").as[String]
+          IvSuccessResponse.fromString(result)
 
-      case r if r.status === OK ⇒
-        val result = (r.json \ "result").as[String]
-        IvSuccessResponse.fromString(result)
+        case r ⇒
+          logger.warn(
+            s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service"
+          )
+          Some(IvUnexpectedResponse(r))
 
-      case r ⇒
-        logger.warn(s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service")
-        Some(IvUnexpectedResponse(r))
-
-    }.recoverWith {
-      case e: Exception ⇒
-        logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
-        Some(IvErrorResponse(e))
-    }
-  }
+      }
+      .recoverWith {
+        case e: Exception ⇒
+          logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
+          Some(IvErrorResponse(e))
+      }
 }

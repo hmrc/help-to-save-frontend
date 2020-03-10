@@ -28,21 +28,21 @@ trait HTSEvent {
 }
 
 object HTSEvent {
-  def apply(appName:         String,
-            auditType:       String,
-            detail:          JsValue,
-            transactionName: String,
-            path:            String)(implicit hc: HeaderCarrier): ExtendedDataEvent =
+  def apply(appName: String, auditType: String, detail: JsValue, transactionName: String, path: String)(
+    implicit hc: HeaderCarrier
+  ): ExtendedDataEvent =
     ExtendedDataEvent(appName, auditType = auditType, detail = detail, tags = hc.toAuditTags(transactionName, path))
 
 }
 
-case class EmailChanged(nino:                      NINO,
-                        oldEmail:                  String,
-                        newEmail:                  String,
-                        duringRegistrationJourney: Boolean,
-                        path:                      String
-)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
+case class EmailChanged(
+  nino: NINO,
+  oldEmail: String,
+  newEmail: String,
+  duringRegistrationJourney: Boolean,
+  path: String
+)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig)
+    extends HTSEvent {
   val value: ExtendedDataEvent = HTSEvent(
     appConfig.appName,
     "EmailChanged",
@@ -60,9 +60,18 @@ object EmailChanged {
 
 }
 
-case class SuspiciousActivity(nino: Option[NINO], activity: String, path: String)(implicit hc: HeaderCarrier, appConfig: FrontendAppConfig) extends HTSEvent {
+case class SuspiciousActivity(nino: Option[NINO], activity: String, path: String)(
+  implicit hc: HeaderCarrier,
+  appConfig: FrontendAppConfig
+) extends HTSEvent {
   val value: ExtendedDataEvent =
-    HTSEvent(appConfig.appName, "SuspiciousActivity", Json.toJson(SuspiciousActivity.Details(nino, activity)), "suspicious-activity", path)
+    HTSEvent(
+      appConfig.appName,
+      "SuspiciousActivity",
+      Json.toJson(SuspiciousActivity.Details(nino, activity)),
+      "suspicious-activity",
+      path
+    )
 
 }
 

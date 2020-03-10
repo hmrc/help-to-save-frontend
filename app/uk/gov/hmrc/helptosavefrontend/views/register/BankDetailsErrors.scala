@@ -23,10 +23,11 @@ import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.FormOps
 
 object BankDetailsErrors {
 
-  def getErrorMessage(form: Form[_], // scalastyle:ignore cyclomatic.complexity
-                      key:  String
+  def getErrorMessage(
+    form: Form[_], // scalastyle:ignore cyclomatic.complexity
+    key: String
   )(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
-      def has(f: Form[_] ⇒ String ⇒ Boolean): Boolean = f(form)(key)
+    def has(f: Form[_] ⇒ String ⇒ Boolean): Boolean = f(form)(key)
 
     if (has(_.sortCodeEmpty)) {
       Some(messages("hts.sort-code.empty"))
@@ -53,8 +54,10 @@ object BankDetailsErrors {
     }
   }
 
-  def getBankDetailsBackendErrorMessage(form: Form[_], key: String)(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
-
+  def getBankDetailsBackendErrorMessage(
+    form: Form[_],
+    key: String
+  )(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] =
     if (form.sortCodeBackendInvalid(key)) {
       Some(messages("hts.bank_details.check_your_sortcode_is_correct"))
     } else if (form.accountNumberBackendInvalid(key)) {
@@ -62,5 +65,4 @@ object BankDetailsErrors {
     } else {
       None
     }
-  }
 }

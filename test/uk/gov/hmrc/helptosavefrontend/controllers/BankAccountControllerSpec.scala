@@ -33,16 +33,17 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
-  with CSRFSupport
-  with AuthSupport
-  with EnrolmentAndEligibilityCheckBehaviour
-  with SessionStoreBehaviourSupport {
+class BankAccountControllerSpec
+    extends ControllerSpecWithGuiceApp with CSRFSupport with AuthSupport with EnrolmentAndEligibilityCheckBehaviour
+    with SessionStoreBehaviourSupport {
 
   implicit lazy val bankDetailsValidation: BankDetailsValidation = new BankDetailsValidation(appConfig)
 
-  def mockValidateBankDetails(request: ValidateBankDetailsRequest)(response: Either[String, ValidateBankDetailsResult]) =
-    (mockHelpToSaveService.validateBankDetails(_: ValidateBankDetailsRequest)(_: HeaderCarrier, _: ExecutionContext))
+  def mockValidateBankDetails(
+    request: ValidateBankDetailsRequest
+  )(response: Either[String, ValidateBankDetailsResult]) =
+    (mockHelpToSaveService
+      .validateBankDetails(_: ValidateBankDetailsRequest)(_: HeaderCarrier, _: ExecutionContext))
       .expects(request, *, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -55,7 +56,8 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
     testMcc,
     testErrorHandler,
     injector.instanceOf[bank_account_details],
-    injector.instanceOf[not_eligible])
+    injector.instanceOf[not_eligible]
+  )
 
   private val fakeRequest = FakeRequest("GET", "/")
 
@@ -63,7 +65,7 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
 
     "handling getBankDetailsPage" must {
 
-        def doRequest() = csrfAddToken(controller.getBankDetailsPage())(fakeRequest)
+      def doRequest() = csrfAddToken(controller.getBankDetailsPage())(fakeRequest)
 
       doCommonChecks(doRequest)
 
@@ -72,12 +74,16 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
+          )
         }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
+        contentAsString(result) should include(
+          "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
+        )
 
       }
 
@@ -86,12 +92,16 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None))))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
+          )
         }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
+        contentAsString(result) should include(
+          "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
+        )
         contentAsString(result) should include("/help-to-save/select-email")
       }
 
@@ -100,12 +110,16 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, Some("pendingEmail")))))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, Some("pendingEmail"))))
+          )
         }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
+        contentAsString(result) should include(
+          "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
+        )
         contentAsString(result) should include("/help-to-save/email-confirmed")
       }
 
@@ -114,12 +128,20 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true)
+              )
+            )
+          )
         }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into")
+        contentAsString(result) should include(
+          "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
+        )
         contentAsString(result) should include("/help-to-save/create-account")
 
       }
@@ -129,13 +151,27 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some(""), "accountName"))))))
+          mockSessionStoreGet(
+            Right(
+              Some(
+                HTSSession(
+                  Some(Right(randomEligibleWithUserInfo(validUserInfo))),
+                  None,
+                  None,
+                  None,
+                  None,
+                  Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some(""), "accountName"))
+                )
+              )
+            )
+          )
         }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
-        contentAsString(result) should (
-          include("Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into") and
+        contentAsString(result) should (include(
+          "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
+        ) and
           include("sortCode") and
           include("accountNumber") and
           include("accountName"))
@@ -149,11 +185,11 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
         .withFormUrlEncodedBody(
           "sortCode" → "123456",
           "accountNumber" -> "12345678",
-          "rollNumber" -> "",
-          "accountName" -> "test user name"
+          "rollNumber"    -> "",
+          "accountName"   -> "test user name"
         )
 
-        def doRequest() = csrfAddToken(controller.submitBankDetails())(submitBankDetailsRequest)
+      def doRequest() = csrfAddToken(controller.submitBankDetails())(submitBankDetailsRequest)
 
       doCommonChecks(doRequest)
 
@@ -166,7 +202,8 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
         }
 
-        val result = csrfAddToken(controller.submitBankDetails())(fakeRequest.withFormUrlEncodedBody("rollNumber" → "a"))
+        val result =
+          csrfAddToken(controller.submitBankDetails())(fakeRequest.withFormUrlEncodedBody("rollNumber" → "a"))
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Enter sort code")
         contentAsString(result) should include("Enter account number")
@@ -181,7 +218,9 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(ValidateBankDetailsResult(false, true)))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(
+            Right(ValidateBankDetailsResult(false, true))
+          )
         }
 
         val result = doRequest()
@@ -198,7 +237,9 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(ValidateBankDetailsResult(true, false)))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(
+            Right(ValidateBankDetailsResult(true, false))
+          )
         }
 
         val result = doRequest()
@@ -216,8 +257,19 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(ValidateBankDetailsResult(true, true)))
-          mockSessionStorePut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Right(()))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(
+            Right(ValidateBankDetailsResult(true, true))
+          )
+          mockSessionStorePut(
+            HTSSession(
+              eligibilityResult,
+              None,
+              None,
+              None,
+              None,
+              Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))
+            )
+          )(Right(()))
         }
 
         val result = doRequest()
@@ -233,8 +285,19 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(Right(ValidateBankDetailsResult(true, true)))
-          mockSessionStorePut(HTSSession(eligibilityResult, None, None, None, None, Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))))(Left("error"))
+          mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(
+            Right(ValidateBankDetailsResult(true, true))
+          )
+          mockSessionStorePut(
+            HTSSession(
+              eligibilityResult,
+              None,
+              None,
+              None,
+              None,
+              Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))
+            )
+          )(Left("error"))
         }
 
         val result = doRequest()
@@ -296,8 +359,23 @@ class BankAccountControllerSpec extends ControllerSpecWithGuiceApp
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-        mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility().copy(value =
-          EligibilityCheckResponse(eligibilityCheckResult, randomEligibility().value.threshold)))), None, None))))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                Some(
+                  Left(
+                    randomIneligibility().copy(
+                      value = EligibilityCheckResponse(eligibilityCheckResult, randomEligibility().value.threshold)
+                    )
+                  )
+                ),
+                None,
+                None
+              )
+            )
+          )
+        )
       }
 
       val result = doRequest()

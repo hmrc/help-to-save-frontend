@@ -36,7 +36,7 @@ class CryptoImplSpec extends UnitSpec with ScalaCheckDrivenPropertyChecks {
     }
 
     val encrypter = new CryptoImpl(Configuration(ConfigFactory.parseString(s"""
-         | crypto.encryption-key = "$key"
+                                                                              | crypto.encryption-key = "$key"
       """.stripMargin)))
 
     "correctly encrypt and decrypt the data given" in {

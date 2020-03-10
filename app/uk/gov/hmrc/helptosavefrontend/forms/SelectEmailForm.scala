@@ -34,7 +34,7 @@ object SelectEmailForm {
 
           // the value for "email" should be "Yes" or "No" - this will get picked up in the mapping in the form below.
           // if the value is "Yes" ignore any new email that has been entered
-          case _          ⇒ Right(None)
+          case _ ⇒ Right(None)
         }
 
       override def unbind(key: String, value: Option[String]): Map[String, String] =

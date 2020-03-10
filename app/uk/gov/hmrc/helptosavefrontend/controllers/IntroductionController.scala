@@ -34,21 +34,22 @@ import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_informatio
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class IntroductionController @Inject() (val authConnector:     AuthConnector,
-                                        val metrics:           Metrics,
-                                        val helpToSaveService: HelpToSaveService,
-                                        cpd:                   CommonPlayDependencies,
-                                        mcc:                   MessagesControllerComponents,
-                                        errorHandler:          ErrorHandler,
-                                        privacyView:           privacy,
-                                        helpInformationView:   help_information
-)(implicit val transformer: NINOLogMessageTransformer,
+class IntroductionController @Inject() (
+  val authConnector: AuthConnector,
+  val metrics: Metrics,
+  val helpToSaveService: HelpToSaveService,
+  cpd: CommonPlayDependencies,
+  mcc: MessagesControllerComponents,
+  errorHandler: ErrorHandler,
+  privacyView: privacy,
+  helpInformationView: help_information
+)(
+  implicit val transformer: NINOLogMessageTransformer,
   val frontendAppConfig: FrontendAppConfig,
-  val config:            Configuration,
-  val env:               Environment,
-  ec:                    ExecutionContext)
-
-  extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour {
+  val config: Configuration,
+  val env: Environment,
+  ec: ExecutionContext
+) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour {
 
   private val baseUrl: String = frontendAppConfig.govUkURL
 
@@ -76,26 +77,30 @@ class IntroductionController @Inject() (val authConnector:     AuthConnector,
     Ok(privacyView())
   }
 
-  def getHelpPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkIfEnrolled({
-      // not enrolled
-      () ⇒ SeeOther(routes.AccessAccountController.getNoAccountPage().url)
-    }, {
-      e ⇒
-        logger.warn(s"Could not check enrolment: $e", htsContext.nino)
-        internalServerError()
-    }, () ⇒
-      // get account number
-      helpToSaveService.getAccountNumber().fold(
-        e ⇒ {
-          logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-          Ok(helpInformationView(None))
-        }, {
-          accountNumber ⇒
-            Ok(helpInformationView(accountNumber.accountNumber))
-        }
+  def getHelpPage: Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      checkIfEnrolled(
+        {
+          // not enrolled
+          () ⇒
+            SeeOther(routes.AccessAccountController.getNoAccountPage().url)
+        }, { e ⇒
+          logger.warn(s"Could not check enrolment: $e", htsContext.nino)
+          internalServerError()
+        },
+        () ⇒
+          // get account number
+          helpToSaveService
+            .getAccountNumber()
+            .fold(
+              e ⇒ {
+                logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+                Ok(helpInformationView(None))
+              }, { accountNumber ⇒
+                Ok(helpInformationView(accountNumber.accountNumber))
+              }
+            )
       )
-    )
 
-  }(routes.IntroductionController.getAboutHelpToSave().url)
+    }(routes.IntroductionController.getAboutHelpToSave().url)
 }

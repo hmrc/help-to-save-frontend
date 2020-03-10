@@ -21,5 +21,6 @@ import play.api.libs.json.{Format, Json}
 case class ValidateBankDetailsRequest(nino: String, sortCode: String, accountNumber: String)
 
 object ValidateBankDetailsRequest {
-  implicit val validateBankDetailsRequestFormat: Format[ValidateBankDetailsRequest] = Json.format[ValidateBankDetailsRequest]
+  implicit val validateBankDetailsRequestFormat: Format[ValidateBankDetailsRequest] =
+    Json.format[ValidateBankDetailsRequest]
 }

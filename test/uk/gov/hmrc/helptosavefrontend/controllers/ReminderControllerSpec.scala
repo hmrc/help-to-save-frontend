@@ -44,10 +44,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Try}
 
 class ReminderControllerSpec
-  extends ControllerSpecWithGuiceApp
-  with AuthSupport
-  with CSRFSupport
-  with SessionStoreBehaviourSupport {
+    extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with SessionStoreBehaviourSupport {
 
   override implicit val crypto: Crypto = mock[Crypto]
   implicit val reminderFrequencyValidation: ReminderFrequencyValidation = mock[ReminderFrequencyValidation]
@@ -93,36 +90,35 @@ class ReminderControllerSpec
   def mockDecrypt(p: String)(result: String): Unit =
     (crypto.decrypt(_: String)).expects(p).returning(Try(result))
 
-  def newController()(implicit crypto: Crypto, reminderFrequencyValidation: ReminderFrequencyValidation) = new ReminderController(
-    mockHelpToSaveReminderService,
-    mockHelpToSaveService,
-    mockSessionStore,
-    mockAuthConnector,
-    mockMetrics,
-    mockAuditor,
-    testCpd,
-    testMcc,
-    testErrorHandler,
-    injector.instanceOf[reminder_frequency_set],
-    injector.instanceOf[reminder_frequency_change],
-    injector.instanceOf[reminder_confirmation],
-    injector.instanceOf[reminder_cancel_confirmation],
-    injector.instanceOf[reminder_dashboard]
-  ) {
-
-  }
+  def newController()(implicit crypto: Crypto, reminderFrequencyValidation: ReminderFrequencyValidation) =
+    new ReminderController(
+      mockHelpToSaveReminderService,
+      mockHelpToSaveService,
+      mockSessionStore,
+      mockAuthConnector,
+      mockMetrics,
+      mockAuditor,
+      testCpd,
+      testMcc,
+      testErrorHandler,
+      injector.instanceOf[reminder_frequency_set],
+      injector.instanceOf[reminder_frequency_change],
+      injector.instanceOf[reminder_confirmation],
+      injector.instanceOf[reminder_cancel_confirmation],
+      injector.instanceOf[reminder_dashboard]
+    ) {}
   lazy val controller = newController()
 
   "The Reminder Controller" must {
 
     val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
-      def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
-        csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
-      def verifiedHtsUserUpdate(params: HtsUser): Future[Result] =
-        csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
-      def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
-        csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
+    def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
+      csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
+    def verifiedHtsUserUpdate(params: HtsUser): Future[Result] =
+      csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
+    def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
+      csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
 
     "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
       val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now(), 0)
@@ -214,8 +210,7 @@ class ReminderControllerSpec
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-          mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockGetHtsUser(nino)(Right(getHtsUser))
       }
 
@@ -230,8 +225,7 @@ class ReminderControllerSpec
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-          mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
       }
 
@@ -257,8 +251,7 @@ class ReminderControllerSpec
     "should redirect to a renders confirmation page with email encrypted " in {
 
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-          mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockDecrypt("encrypted")("email")
       }
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
@@ -273,8 +266,7 @@ class ReminderControllerSpec
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-          mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockGetHtsUser(nino)(Right(getHtsUser))
       }
 
@@ -288,8 +280,7 @@ class ReminderControllerSpec
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-          mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
       }
 
@@ -303,8 +294,7 @@ class ReminderControllerSpec
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-          mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
       }
 
       val result = csrfAddToken(controller.getRendersCancelConfirmPage())(fakeRequestWithNoBody)
@@ -416,10 +406,10 @@ class ReminderControllerSpec
   }
 
   def commonEnrolmentBehaviour(
-      getResult:          () ⇒ Future[Result],
-      mockSuccessfulAuth: () ⇒ Unit,
-      mockNoNINOAuth:     () ⇒ Unit): Unit = {
-
+    getResult: () ⇒ Future[Result],
+    mockSuccessfulAuth: () ⇒ Unit,
+    mockNoNINOAuth: () ⇒ Unit
+  ): Unit =
     "return an error" when {
 
       "the user has no NINO" in {
@@ -467,13 +457,10 @@ class ReminderControllerSpec
       }
 
     }
-  }
 
   def checkIsErrorPage(result: Future[Result]): Unit = {
     status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(
-      routes.EmailController.confirmEmailErrorTryLater().url)
+    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
   }
 
 }
-

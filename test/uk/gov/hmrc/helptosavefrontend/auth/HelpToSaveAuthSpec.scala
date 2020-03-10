@@ -27,28 +27,18 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
-import uk.gov.hmrc.helptosavefrontend.controllers.{
-  AuthSupport,
-  BaseController,
-  ControllerSpecWithGuiceApp
-}
+import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, BaseController, ControllerSpecWithGuiceApp}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.util.{
-  NINOLogMessageTransformer,
-  toJavaDate,
-  urlEncode
-}
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toJavaDate, urlEncode}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
-  class HtsAuth
-    extends BaseController(testCpd, testMcc, testErrorHandler)
-    with HelpToSaveAuth {
+  class HtsAuth extends BaseController(testCpd, testMcc, testErrorHandler) with HelpToSaveAuth {
     override implicit val metrics: Metrics = mockMetrics
     override implicit val transformer: NINOLogMessageTransformer =
       ninoLogMessageTransformer
@@ -70,7 +60,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
   private def actionWithEnrols =
     htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
       htsContext.userDetails match {
-        case Left(_)         ⇒ Future.successful(InternalServerError(""))
+        case Left(_) ⇒ Future.successful(InternalServerError(""))
         case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
       }
     }(appConfig.checkEligibilityUrl)
@@ -98,66 +88,45 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
     }
 
     "filter out empty emails" in {
-      val retrieval = new ~(Some(name), Option("")) and Option(dob) and Some(
-        itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
+      val retrieval = new ~(Some(name), Option("")) and Option(dob) and Some(itmpName) and itmpDob and Some(itmpAddress) and mockedNINORetrieval
 
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval)
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.OK
-      contentAsJson(Future.successful(result)) shouldBe Json.toJson(
-        userInfo.copy(email = None))
+      contentAsJson(Future.successful(result)) shouldBe Json.toJson(userInfo.copy(email = None))
     }
 
     "handle when some user info is missing" in {
-      mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
-        mockedRetrievalsMissingUserInfo)
+      mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
 
       val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
     "handle when address info is missing" in {
-        def retrieval(address: ItmpAddress) =
-          new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(
-            None,
-            None,
-            None)) and itmpDob and Some(address) and mockedNINORetrieval
+      def retrieval(address: ItmpAddress) =
+        new ~(Some(Name(None, None)), email) and Option(dob) and Some(ItmpName(None, None, None)) and itmpDob and Some(
+          address
+        ) and mockedNINORetrieval
 
       List(
         ItmpAddress(None, None, None, None, None, Some("postcode"), None, None),
-        ItmpAddress(Some("l1"),
-                    None,
-                    None,
-                    None,
-                    None,
-                    Some("postcode"),
-                    None,
-                    None),
-        ItmpAddress(Some("l1"),
-                    Some("l2"),
-                    None,
-                    None,
-                    None,
-                    Some(""),
-                    None,
-                    None),
+        ItmpAddress(Some("l1"), None, None, None, None, Some("postcode"), None, None),
+        ItmpAddress(Some("l1"), Some("l2"), None, None, None, Some(""), None, None),
         ItmpAddress(Some("l1"), Some("l2"), None, None, None, None, None, None)
       ).foreach { address ⇒
-          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval(address))
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval(address))
 
-          val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
-          status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-        }
+        val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
+        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
 
     }
 
     "handle NoActiveSession exception and redirect user to GG login page" in {
 
-      val exceptions = List("BearerTokenExpired",
-        "MissingBearerToken",
-        "InvalidBearerToken",
-        "SessionRecordNotFound")
+      val exceptions = List("BearerTokenExpired", "MissingBearerToken", "InvalidBearerToken", "SessionRecordNotFound")
 
       exceptions.foreach { error ⇒
         mockAuthResultWithFail(fromString(error))

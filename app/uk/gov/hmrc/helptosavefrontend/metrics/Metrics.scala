@@ -82,34 +82,32 @@ object Metrics {
     (numerator / denominator) → (numerator % denominator)
 
   /**
-   * Convert `nanos` to a human-friendly string - will return the time in terms of
-   * the two highest time resolutions that are appropriate. For example:
-   *
-   * 2 nanoseconds      -> "2ns"
-   * 1.23456789 seconds -> "1s 234ms"
-   */
+    * Convert `nanos` to a human-friendly string - will return the time in terms of
+    * the two highest time resolutions that are appropriate. For example:
+    *
+    * 2 nanoseconds      -> "2ns"
+    * 1.23456789 seconds -> "1s 234ms"
+    */
   def nanosToPrettyString(nanos: Long): String = {
 
-      @tailrec
-      def loop(l:   List[(String, Long)],
-               t:   Long,
-               acc: List[(Long, String)]): List[(Long, String)] = l match {
-        case Nil ⇒
-          acc
+    @tailrec
+    def loop(l: List[(String, Long)], t: Long, acc: List[(Long, String)]): List[(Long, String)] = l match {
+      case Nil ⇒
+        acc
 
-        case (word, number) :: tail ⇒
-          if (t < number) {
-            (t → word) :: acc
+      case (word, number) :: tail ⇒
+        if (t < number) {
+          (t → word) :: acc
+        } else {
+          val (remaining, currentUnits) = divide(t, number)
+
+          if (currentUnits === 0L) {
+            loop(tail, remaining, acc)
           } else {
-            val (remaining, currentUnits) = divide(t, number)
-
-            if (currentUnits === 0L) {
-              loop(tail, remaining, acc)
-            } else {
-              loop(tail, remaining, (currentUnits → word) :: acc)
-            }
+            loop(tail, remaining, (currentUnits → word) :: acc)
           }
-      }
+        }
+    }
 
     val result = loop(timeWordToDenomination, nanos, List.empty[(Long, String)])
     result.take(2).map(x ⇒ s"${x._1}${x._2}").mkString(" ")

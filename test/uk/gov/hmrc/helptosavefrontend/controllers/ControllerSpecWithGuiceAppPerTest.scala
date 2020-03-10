@@ -28,28 +28,26 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 
 import scala.concurrent.ExecutionContext
 
-trait ControllerSpecWithGuiceAppPerTest extends ControllerSpecBase
-  with GuiceOneAppPerTest
-  with I18nSupport {
+trait ControllerSpecWithGuiceAppPerTest extends ControllerSpecBase with GuiceOneAppPerTest with I18nSupport {
 
   lazy val additionalConfig = Configuration()
 
-  def buildFakeApplication(additionalConfig: Configuration): Application = {
+  def buildFakeApplication(additionalConfig: Configuration): Application =
     new GuiceApplicationBuilder()
-      .configure(Configuration(
-        ConfigFactory.parseString(
-          """
-            | metrics.jvm = false
-            | metrics.enabled = true
-            | play.modules.disabled = [ "play.api.mvc.CookiesModule",
-            |   "uk.gov.hmrc.helptosavefrontend.config.HealthCheckModule",
-            |   "akka.event.slf4j.Slf4jLogger"
-            | ]
-            | mongodb.session.expireAfter = 5 seconds
+      .configure(
+        Configuration(
+          ConfigFactory.parseString("""
+                                      | metrics.jvm = false
+                                      | metrics.enabled = true
+                                      | play.modules.disabled = [ "play.api.mvc.CookiesModule",
+                                      |   "uk.gov.hmrc.helptosavefrontend.config.HealthCheckModule",
+                                      |   "akka.event.slf4j.Slf4jLogger"
+                                      | ]
+                                      | mongodb.session.expireAfter = 5 seconds
           """.stripMargin)
-      ) ++ additionalConfig)
+        ) ++ additionalConfig
+      )
       .build()
-  }
 
   override def fakeApplication = buildFakeApplication(additionalConfig)
 

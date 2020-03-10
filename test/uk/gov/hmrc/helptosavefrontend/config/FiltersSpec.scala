@@ -37,20 +37,21 @@ class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
 
   val mockMDCFilter = new MDCFilter(fakeApplication.materializer, fakeApplication.configuration, "")
 
-  class TestableFrontendFilters extends FrontendFilters(
-    stub[Configuration],
-    stub[LoggingFilter],
-    stub[HeadersFilter],
-    stub[SecurityHeadersFilter],
-    stub[FrontendAuditFilter],
-    stub[MetricsFilter],
-    stub[DeviceIdFilter],
-    stub[CSRFFilter],
-    stub[SessionCookieCryptoFilter],
-    stub[SessionTimeoutFilter],
-    mockCacheControllerFilter,
-    mockMDCFilter
-  ) {
+  class TestableFrontendFilters
+      extends FrontendFilters(
+        stub[Configuration],
+        stub[LoggingFilter],
+        stub[HeadersFilter],
+        stub[SecurityHeadersFilter],
+        stub[FrontendAuditFilter],
+        stub[MetricsFilter],
+        stub[DeviceIdFilter],
+        stub[CSRFFilter],
+        stub[SessionCookieCryptoFilter],
+        stub[SessionTimeoutFilter],
+        mockCacheControllerFilter,
+        mockMDCFilter
+      ) {
     override lazy val enableSecurityHeaderFilter: Boolean = false
     override val filters: Seq[EssentialFilter] = Seq()
   }

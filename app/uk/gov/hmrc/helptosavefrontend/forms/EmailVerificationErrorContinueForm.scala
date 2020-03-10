@@ -25,14 +25,12 @@ object EmailVerificationErrorContinueForm {
   // the default boolean format returns a field with false if the field doesn't exist - the
   // formatter below fails if the field does not exist
   val booleanFormat: Formatter[Boolean] = new Formatter[Boolean] {
-    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] = {
-      data.get(key).fold[Either[Seq[FormError], Boolean]](
-        Left(Seq(FormError(key, "error.boolean", Nil)))){
-          case "true"  ⇒ Right(true)
-          case "false" ⇒ Right(false)
-          case _       ⇒ Left(Seq(FormError(key, "error.boolean", Nil)))
-        }
-    }
+    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] =
+      data.get(key).fold[Either[Seq[FormError], Boolean]](Left(Seq(FormError(key, "error.boolean", Nil)))) {
+        case "true" ⇒ Right(true)
+        case "false" ⇒ Right(false)
+        case _ ⇒ Left(Seq(FormError(key, "error.boolean", Nil)))
+      }
 
     def unbind(key: String, value: Boolean) = Map(key -> value.toString)
   }
