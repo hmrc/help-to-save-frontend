@@ -1,6 +1,4 @@
-import com.typesafe.sbt.SbtScalariform.ScalariformKeys
-import sbt.{Compile, _}
-import scalariform.formatter.preferences._
+import sbt.{Compile, taskKey, _}
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
@@ -29,37 +27,6 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageHighlighting := true,
     parallelExecution in Test := false
   )
-}
-
-lazy val scalariformSettings = {
-  // description of options found here -> https://github.com/scala-ide/scalariform
-  ScalariformKeys.preferences := ScalariformKeys.preferences.value
-    .setPreference(AlignArguments, true)
-    .setPreference(AlignParameters, true)
-    .setPreference(AlignSingleLineCaseStatements, true)
-    .setPreference(CompactControlReadability, false)
-    .setPreference(CompactStringConcatenation, false)
-    .setPreference(DanglingCloseParenthesis, Preserve)
-    .setPreference(DoubleIndentConstructorArguments, true)
-    .setPreference(DoubleIndentMethodDeclaration, true)
-    .setPreference(FirstArgumentOnNewline, Preserve)
-    .setPreference(FirstParameterOnNewline, Preserve)
-    .setPreference(FormatXml, true)
-    .setPreference(IndentLocalDefs, true)
-    .setPreference(IndentPackageBlocks, true)
-    .setPreference(IndentSpaces, 2)
-    .setPreference(IndentWithTabs, false)
-    .setPreference(MultilineScaladocCommentsStartOnFirstLine, false)
-    .setPreference(NewlineAtEndOfFile, true)
-    .setPreference(PlaceScaladocAsterisksBeneathSecondAsterisk, false)
-    .setPreference(PreserveSpaceBeforeArguments, true)
-    .setPreference(RewriteArrowSymbols, true)
-    .setPreference(SpaceBeforeColon, false)
-    .setPreference(SpaceBeforeContextColon, false)
-    .setPreference(SpaceInsideBrackets, false)
-    .setPreference(SpaceInsideParentheses, false)
-    .setPreference(SpacesAroundMultiImports, false)
-    .setPreference(SpacesWithinPatternBinders, true)
 }
 
 def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File]) = {
@@ -98,9 +65,7 @@ lazy val commonSettings = Seq(
   resolvers += Resolver.bintrayRepo("hmrc", "releases"),
   scalacOptions ++= Seq("-Xcheckinit", "-feature")
 ) ++
-  scalaSettings ++ publishingSettings ++ defaultSettings() ++
-  scalariformSettings ++ scoverageSettings ++
-  playSettings
+  scalaSettings ++ publishingSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
 
 
 lazy val microservice = Project(appName, file("."))
@@ -130,3 +95,4 @@ lazy val microservice = Project(appName, file("."))
     },
     compile := ((compile in Compile) dependsOn formatMessageQuotes).value
   )
+  .settings(scalafmtOnCompile := true)
