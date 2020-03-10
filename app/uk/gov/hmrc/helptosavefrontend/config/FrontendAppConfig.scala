@@ -50,28 +50,31 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val reminderServiceFeatureSwitch: Boolean = servicesConfig.getBoolean("reminder-feature-switch")
 
-  val ivJourneyResultUrl: String = s"${servicesConfig.baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
+  val ivJourneyResultUrl: String =
+    s"${servicesConfig.baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
   val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"
 
   val ivFailedMatchingUrl: String = servicesConfig.getString("gov-uk.url.contact-us")
 
   def ivUrl(redirectOnLoginURL: String): String = {
-      def encodedCallbackUrl(redirectOnLoginURL: String): String =
-        urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?continueURL=$redirectOnLoginURL")
+    def encodedCallbackUrl(redirectOnLoginURL: String): String =
+      urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?continueURL=$redirectOnLoginURL")
 
-    new URI(s"$ivUpliftUrl" +
-      s"?origin=$appName" +
-      s"&completionURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
-      s"&failureURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
-      "&confidenceLevel=200"
+    new URI(
+      s"$ivUpliftUrl" +
+        s"?origin=$appName" +
+        s"&completionURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
+        s"&failureURL=${encodedCallbackUrl(redirectOnLoginURL)}" +
+        "&confidenceLevel=200"
     ).toString
   }
 
   val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
 
   val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
-  val ggContinueUrlPrefix: String = servicesConfig.getString("microservice.services.company-auth-frontend.continue-url-prefix")
+  val ggContinueUrlPrefix: String =
+    servicesConfig.getString("microservice.services.company-auth-frontend.continue-url-prefix")
 
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
@@ -86,7 +89,8 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   def ivJourneyResultUrl(journeyId: JourneyId): String = new URI(s"$ivJourneyResultUrl/${journeyId.Id}").toString
 
-  val verifyEmailURL: String = s"${servicesConfig.baseUrl("email-verification")}/email-verification/verification-requests"
+  val verifyEmailURL: String =
+    s"${servicesConfig.baseUrl("email-verification")}/email-verification/verification-requests"
 
   val linkTTLMinutes: Int = servicesConfig.getInt("microservice.services.email-verification.linkTTLMinutes")
 
@@ -104,19 +108,24 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   val contactFormServiceIdentifier: String = "HTS"
 
   val contactBaseUrl: String = getUrlFor("contact-frontend")
-  val reportAProblemPartialUrl: String = s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  val reportAProblemNonJSUrl: String = s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  val betaFeedbackUrlNoAuth: String = s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
+  val reportAProblemPartialUrl: String =
+    s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+  val reportAProblemNonJSUrl: String =
+    s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  val betaFeedbackUrlNoAuth: String =
+    s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
 
   val govUkURL: String = servicesConfig.getString("gov-uk.url.base")
   val govUkEligibilityInfoUrl: String = s"$govUkURL/eligibility"
   val govUkCallChargesUrl: String = servicesConfig.getString("gov-uk.url.call-charges")
-  val govUkDealingWithHRMCAdditionalNeedsUrl: String = servicesConfig.getString("gov-uk.url.dealing-with-hmrc-additional-needs")
+  val govUkDealingWithHRMCAdditionalNeedsUrl: String =
+    servicesConfig.getString("gov-uk.url.dealing-with-hmrc-additional-needs")
   val hmrcAppGuideURL: String = servicesConfig.getString("gov-uk.url.hmrc-app-guide")
 
   val youtubeSavingsExplained: String = servicesConfig.getString("youtube-embeds.savings-explained")
   val youtubeWhatBonuses: String = servicesConfig.getString("youtube-embeds.what-bonuses")
-  val youtubeHowWithdrawalsAffectBonuses: String = servicesConfig.getString("youtube-embeds.how-withdrawals-affect-bonuses")
+  val youtubeHowWithdrawalsAffectBonuses: String =
+    servicesConfig.getString("youtube-embeds.how-withdrawals-affect-bonuses")
 
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enableLanguageSwitching")
 

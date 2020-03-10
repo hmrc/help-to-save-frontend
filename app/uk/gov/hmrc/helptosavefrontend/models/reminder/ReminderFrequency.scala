@@ -22,14 +22,16 @@ import play.api.libs.json.{Format, JsPath, JsString, Json, Reads, Writes}
 import uk.gov.hmrc.domain.Nino
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Format, JsPath, Json, Reads}
-case class ReminderFrequency(nino:           Nino,
-                             email:          String,
-                             name:           String,
-                             optInStatus:    Boolean   = false,
-                             daysToReceive:  Seq[Int]  = Seq(),
-                             nextSendDate:   LocalDate = LocalDate.now(),
-                             bounceCount:    Int       = 0,
-                             callBackUrlRef: String    = "")
+case class ReminderFrequency(
+  nino: Nino,
+  email: String,
+  name: String,
+  optInStatus: Boolean = false,
+  daysToReceive: Seq[Int] = Seq(),
+  nextSendDate: LocalDate = LocalDate.now(),
+  bounceCount: Int = 0,
+  callBackUrlRef: String = ""
+)
 
 object ReminderFrequency {
   implicit val formats: Format[ReminderFrequency] = Json.format[ReminderFrequency]
@@ -37,38 +39,37 @@ object ReminderFrequency {
 }
 
 case class HtsUser(
-    nino:           Nino,
-    email:          String,
-    firstName:      String    = "",
-    lastName:       String    = "",
-    optInStatus:    Boolean   = false,
-    daysToReceive:  Seq[Int]  = Seq(),
-    nextSendDate:   LocalDate = LocalDate.now(),
-    bounceCount:    Int       = 0,
-    callBackUrlRef: String    = "")
+  nino: Nino,
+  email: String,
+  firstName: String = "",
+  lastName: String = "",
+  optInStatus: Boolean = false,
+  daysToReceive: Seq[Int] = Seq(),
+  nextSendDate: LocalDate = LocalDate.now(),
+  bounceCount: Int = 0,
+  callBackUrlRef: String = ""
+)
 
 object HtsUser {
   implicit val htsUserFormat: Format[HtsUser] = Json.format[HtsUser]
   implicit val writes: Writes[HtsUser] = Writes[HtsUser](s ⇒ JsString(s.toString))
   implicit val reads: Reads[HtsUser] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(Nino.apply(_)) and
-    (JsPath \ "email").read[String] and //.orElse((JsPath \ "nino").read[String]).map(Email.apply(_)) and
-    (JsPath \ "firstName").read[String] and
-    (JsPath \ "lastName").read[String] and
-    (JsPath \ "optInStatus").read[Boolean] and
-    (JsPath \ "daysToReceive").read[List[Int]] and
-    (JsPath \ "nextSendDate").read[LocalDate] and
-    (JsPath \ "bounceCount").read[Int] and
-    (JsPath \ "callBackUrlRef").read[String]
+      (JsPath \ "email").read[String] and //.orElse((JsPath \ "nino").read[String]).map(Email.apply(_)) and
+      (JsPath \ "firstName").read[String] and
+      (JsPath \ "lastName").read[String] and
+      (JsPath \ "optInStatus").read[Boolean] and
+      (JsPath \ "daysToReceive").read[List[Int]] and
+      (JsPath \ "nextSendDate").read[LocalDate] and
+      (JsPath \ "bounceCount").read[Int] and
+      (JsPath \ "callBackUrlRef").read[String]
   )(HtsUser.apply(_, _, _, _, _, _, _, _, _))
 
 }
 
 object DateToDaysMapper {
-  val d2dMapper: Map[String, Seq[Int]] = Map("1st" -> Seq(1),
-    "25th" -> Seq(25),
-    "1st day and 25th" -> Seq(1, 25),
-    "cancel" -> Seq(0))
+  val d2dMapper: Map[String, Seq[Int]] =
+    Map("1st" -> Seq(1), "25th" -> Seq(25), "1st day and 25th" -> Seq(1, 25), "cancel" -> Seq(0))
 }
 
 object DaysToDateMapper {
@@ -76,8 +77,7 @@ object DaysToDateMapper {
 
 }
 
-case class CancelHtsUserReminder(
-    nino: String)
+case class CancelHtsUserReminder(nino: String)
 
 object CancelHtsUserReminder {
   implicit val htsUserCancelFormat: Format[CancelHtsUserReminder] = Json.format[CancelHtsUserReminder]
@@ -96,9 +96,9 @@ object UpdateReminderEmail {
 
   implicit val reads: Reads[UpdateReminderEmail] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]) and
-    (JsPath \ "email").read[String] and
-    (JsPath \ "firstName").read[String] and
-    (JsPath \ "lastName").read[String]
+      (JsPath \ "email").read[String] and
+      (JsPath \ "firstName").read[String] and
+      (JsPath \ "lastName").read[String]
   )(UpdateReminderEmail.apply(_, _, _, _))
 
 }

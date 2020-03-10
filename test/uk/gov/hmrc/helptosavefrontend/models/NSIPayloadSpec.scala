@@ -127,13 +127,16 @@ class NSIPayloadSpec extends WordSpec with Matchers {
         }
 
         "removes leading and trailing whitespaces, new lines, tabs, carriage returns from all address lines" in {
-          val specialAddress = Address(List(
-            "   Address\t\n\r   line1\t\n\r   ",
-            "   Address\t\n\r   line2\t\n\r   ",
-            "   Address\t\n\r   line3\t\n\r   ",
-            "   Address\t\n\r   line4\t\n\r   ",
-            "   Address\t\n\r   line5\t\n\r   "), Some("BN43 XXX"),
-                                       None
+          val specialAddress = Address(
+            List(
+              "   Address\t\n\r   line1\t\n\r   ",
+              "   Address\t\n\r   line2\t\n\r   ",
+              "   Address\t\n\r   line3\t\n\r   ",
+              "   Address\t\n\r   line4\t\n\r   ",
+              "   Address\t\n\r   line5\t\n\r   "
+            ),
+            Some("BN43 XXX"),
+            None
           )
 
           val ui: UserInfo = validUserInfo.copy(address = specialAddress)
@@ -149,14 +152,16 @@ class NSIPayloadSpec extends WordSpec with Matchers {
         "removes any spaces bigger than 1 character" in {
           val longName = "John Paul      \n\t\r   Harry"
           val longSurname = "  Smith    Brown  \n\r  "
-          val specialAddress = Address(List(
-            "   Address\t\n\r     line1\t\n\r   ",
-            "   Address\t\n\r     line2\t\n\r   ",
-            "   Address\t\n\rline3\t\n\r   ",
-            "   Address\t\n\r   line4\t\n\r   ",
-            "   Address\t\n\r             line5\t\n\r   "),
-                                       Some("BN43XXX  \t\r\n"),
-                                       Some("GB    \n\r\t")
+          val specialAddress = Address(
+            List(
+              "   Address\t\n\r     line1\t\n\r   ",
+              "   Address\t\n\r     line2\t\n\r   ",
+              "   Address\t\n\rline3\t\n\r   ",
+              "   Address\t\n\r   line4\t\n\r   ",
+              "   Address\t\n\r             line5\t\n\r   "
+            ),
+            Some("BN43XXX  \t\r\n"),
+            Some("GB    \n\r\t")
           )
 
           val ui: UserInfo = validUserInfo.copy(forename = longName, surname = longSurname, address = specialAddress)
@@ -174,7 +179,7 @@ class NSIPayloadSpec extends WordSpec with Matchers {
         }
 
         "filters out country codes equal to the string 'other'" in {
-          Set("other", "OTHER", "Other").foreach{ other ⇒
+          Set("other", "OTHER", "Other").foreach { other ⇒
             val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(country = Some(other)))
             NSIPayload(ui, email, version, systemId).contactDetails.countryCode shouldBe None
           }
@@ -192,8 +197,7 @@ class NSIPayloadSpec extends WordSpec with Matchers {
 
         "returns a blank string for address lines 1 or 2 if they are missing" in {
           // check when there are no address lines
-          val ui1: UserInfo = validUserInfo.copy(address =
-            validUserInfo.address.copy(lines = List()))
+          val ui1: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(lines = List()))
 
           val payload1 = NSIPayload(ui1, email, version, systemId)
           payload1.contactDetails.address1 shouldBe ""
@@ -203,8 +207,7 @@ class NSIPayloadSpec extends WordSpec with Matchers {
           payload1.contactDetails.address5 shouldBe None
 
           // check when there is only one address line
-          val ui2: UserInfo = validUserInfo.copy(address =
-            validUserInfo.address.copy(lines = List("line")))
+          val ui2: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(lines = List("line")))
 
           val payload = NSIPayload(ui2, email, version, systemId)
           payload.contactDetails.address1 shouldBe "line"
@@ -221,8 +224,8 @@ class NSIPayloadSpec extends WordSpec with Matchers {
             l ::: l.combinations(2).flatten.toList
           }
 
-          val ui: UserInfo = validUserInfo.copy(address =
-            validUserInfo.address.copy(lines = willBeFilteredOut ::: List("line")))
+          val ui: UserInfo =
+            validUserInfo.copy(address = validUserInfo.address.copy(lines = willBeFilteredOut ::: List("line")))
 
           val payload = NSIPayload(ui, email, version, systemId)
           payload.contactDetails.address1 shouldBe "line"

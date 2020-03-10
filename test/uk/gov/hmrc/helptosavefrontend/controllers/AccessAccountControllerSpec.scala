@@ -23,20 +23,14 @@ import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
-import uk.gov.hmrc.helptosavefrontend.views.html.core.{
-  confirm_check_eligibility,
-  error_template
-}
+import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class AccessAccountControllerSpec
-  extends ControllerSpecWithGuiceApp
-  with EnrolmentAndEligibilityCheckBehaviour
-  with SessionStoreBehaviourSupport
-  with CSRFSupport
-  with AuthSupport {
+    extends ControllerSpecWithGuiceApp with EnrolmentAndEligibilityCheckBehaviour with SessionStoreBehaviourSupport
+    with CSRFSupport with AuthSupport {
 
   lazy val controller = new AccessAccountController(
     mockHelpToSaveService,
@@ -56,23 +50,21 @@ class AccessAccountControllerSpec
 
       "redirect to the govuk sign in page" in {
         (mockAuthConnector
-          .authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier,
-            _: ExecutionContext))
+          .authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
           .expects(EmptyPredicate, EmptyRetrieval, *, *)
           .returning(Future.successful(Unit))
 
         val result = controller.getSignInPage()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(
-          "https://www.gov.uk/sign-in-help-to-save")
+        redirectLocation(result) shouldBe Some("https://www.gov.uk/sign-in-help-to-save")
 
       }
     }
 
     "handling accessAccount" must {
 
-        def doRequest(): Future[Result] =
-          Future.successful(await(controller.accessAccount(FakeRequest())))
+      def doRequest(): Future[Result] =
+        Future.successful(await(controller.accessAccount(FakeRequest())))
 
       behave like commonBehaviour(doRequest, appConfig.nsiManageAccountUrl)
 
@@ -80,8 +72,8 @@ class AccessAccountControllerSpec
 
     "handling payIn" must {
 
-        def doRequest(): Future[Result] =
-          Future.successful(await(controller.payIn(FakeRequest())))
+      def doRequest(): Future[Result] =
+        Future.successful(await(controller.payIn(FakeRequest())))
 
       behave like commonBehaviour(doRequest, appConfig.nsiPayInUrl)
 
@@ -89,68 +81,58 @@ class AccessAccountControllerSpec
 
     "handling getNoAccountPage" must {
 
-        def doRequest() =
-          Future.successful(await(controller.getNoAccountPage(FakeRequest())))
+      def doRequest() =
+        Future.successful(await(controller.getNoAccountPage(FakeRequest())))
 
       "show the 'no account' page if the user is not enrolled" in {
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-            mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         }
 
         val result = csrfAddToken(controller.getNoAccountPage)(FakeRequest())
         status(result) shouldBe 200
-        contentAsString(result) should include(
-          "You do not have a Help to Save account")
+        contentAsString(result) should include("You do not have a Help to Save account")
       }
 
       "redirect to check eligibility if there is an error checking eligibility" in {
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-            mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockSessionStoreGet(Right(None))
           mockEnrolmentCheck()(Left(""))
         }
 
         val result = doRequest()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(
-          routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
       }
 
       "redirect to a previously attempted redirect URL if the user is enrolled and the session indicates they were" +
         "trying to previously reach an account holder page" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-              mockedNINORetrieval)
-            mockSessionStoreGet(
-              Right(Some(HTSSession.empty.copy(
-                attemptedAccountHolderPageURL = Some("abc")))))
-            mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-          }
-
-          val result = doRequest()
-          status(result) shouldBe 303
-          redirectLocation(result) shouldBe Some("abc")
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 
-      "redirect to the NS&I homepage by default if the user is enrolled and there is no session data" in {
-          def test(session: Option[HTSSession]) = {
-            withClue(s"For session $session: ") {
-              inSequence {
-                mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-                  mockedNINORetrieval)
-                mockSessionStoreGet(Right(session))
-                mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-              }
+        val result = doRequest()
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some("abc")
+      }
 
-              val result = doRequest()
-              status(result) shouldBe 303
-              redirectLocation(result) shouldBe Some(
-                appConfig.nsiManageAccountUrl)
+      "redirect to the NS&I homepage by default if the user is enrolled and there is no session data" in {
+        def test(session: Option[HTSSession]) =
+          withClue(s"For session $session: ") {
+            inSequence {
+              mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+              mockSessionStoreGet(Right(session))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
             }
+
+            val result = doRequest()
+            status(result) shouldBe 303
+            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
           }
 
         test(None)
@@ -159,8 +141,7 @@ class AccessAccountControllerSpec
 
       "show an error page when there session data cannot be obtained" in {
         inSequence {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-            mockedNINORetrieval)
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockSessionStoreGet(Left(""))
         }
 
@@ -170,83 +151,74 @@ class AccessAccountControllerSpec
 
     }
 
-      def commonBehaviour(
-          doRequest:           () ⇒ Future[Result],
-          expectedRedirectURL: String): Unit = { // scalastyle:ignore
-        "redirect to NS&I if the user is enrolled" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-              mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-          }
-
-          val result = doRequest()
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(expectedRedirectURL)
+    def commonBehaviour(doRequest: () ⇒ Future[Result], expectedRedirectURL: String): Unit = { // scalastyle:ignore
+      "redirect to NS&I if the user is enrolled" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 
-        "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
-          "it hasn't already been set" in {
-            inSequence {
-              mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-                mockedNINORetrieval)
-              mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
-              mockWriteITMPFlag(Right(()))
-            }
-
-            val result = doRequest()
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(expectedRedirectURL)
-          }
-
-        "redirect to the no-account page if the user is not enrolled to HTS" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-              mockedNINORetrieval)
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockSessionStorePut(
-              HTSSession.empty.copy(attemptedAccountHolderPageURL =
-                Some(expectedRedirectURL)))(Right(()))
-          }
-
-          val result = doRequest()
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(
-            routes.AccessAccountController.getNoAccountPage().url)
-        }
-
-        "store the attempted redirect location and redirect to check eligibility if there is  an error" +
-          "checking the enrolment status" in {
-            inSequence {
-              mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-                mockedNINORetrieval)
-              mockEnrolmentCheck()(Left("Oh no!"))
-              mockSessionStorePut(
-                HTSSession.empty.copy(attemptedAccountHolderPageURL =
-                  Some(expectedRedirectURL)))(Right(()))
-            }
-
-            val result = doRequest()
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(
-              routes.EligibilityCheckController.getCheckEligibility().url)
-          }
-
-        "show an error screen if there is an error storing the session data" in {
-          inSequence {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(
-              mockedNINORetrieval)
-            mockEnrolmentCheck()(Left("Oh no!"))
-            mockSessionStorePut(
-              HTSSession.empty.copy(attemptedAccountHolderPageURL =
-                Some(expectedRedirectURL)))(Left(""))
-          }
-
-          val result = doRequest()
-          checkIsTechnicalErrorPage(result)
-        }
-
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirectURL)
       }
+
+      "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
+        "it hasn't already been set" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
+          mockWriteITMPFlag(Right(()))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirectURL)
+      }
+
+      "redirect to the no-account page if the user is not enrolled to HTS" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
+            Right(())
+          )
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
+      }
+
+      "store the attempted redirect location and redirect to check eligibility if there is  an error" +
+        "checking the enrolment status" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Left("Oh no!"))
+          mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
+            Right(())
+          )
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      }
+
+      "show an error screen if there is an error storing the session data" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Left("Oh no!"))
+          mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
+            Left("")
+          )
+        }
+
+        val result = doRequest()
+        checkIsTechnicalErrorPage(result)
+      }
+
+    }
 
   }
 }

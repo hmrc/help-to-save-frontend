@@ -37,29 +37,30 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(nino:           String,
-                  newEmail:       String,
-                  firstName:      String,
-                  isNewApplicant: Boolean)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]]
+  def verifyEmail(nino: String, newEmail: String, firstName: String, isNewApplicant: Boolean)(
+    implicit hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Either[VerifyEmailError, Unit]]
 
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject() (http:    HttpClient,
-                                                metrics: Metrics
-)(implicit crypto: Crypto, transformer: NINOLogMessageTransformer, frontendAppConfig: FrontendAppConfig)
-  extends EmailVerificationConnector with Logging {
+class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metrics)(
+  implicit crypto: Crypto,
+  transformer: NINOLogMessageTransformer,
+  frontendAppConfig: FrontendAppConfig
+) extends EmailVerificationConnector with Logging {
 
   val templateId: String = "hts_verification_email"
 
-  def verifyEmail(nino:           String,
-                  newEmail:       String,
-                  firstName:      String,
-                  isNewApplicant: Boolean)(
-      implicit
-      hc: HeaderCarrier, ec: ExecutionContext): Future[Either[VerifyEmailError, Unit]] = {
+  def verifyEmail(nino: String, newEmail: String, firstName: String, isNewApplicant: Boolean)(
+    implicit
+    hc: HeaderCarrier,
+    ec: ExecutionContext
+  ): Future[Either[VerifyEmailError, Unit]] = {
     val continueUrlWithParams = {
-      val continueURL = if (isNewApplicant) frontendAppConfig.newApplicantContinueURL else frontendAppConfig.accountHolderContinueURL
+      val continueURL =
+        if (isNewApplicant) frontendAppConfig.newApplicantContinueURL else frontendAppConfig.accountHolderContinueURL
       continueURL + "?p=" + EmailVerificationParams(nino, newEmail).encode()
     }
 
@@ -68,32 +69,47 @@ class EmailVerificationConnectorImpl @Inject() (http:    HttpClient,
       templateId,
       Duration.ofMinutes(frontendAppConfig.linkTTLMinutes).toString,
       continueUrlWithParams,
-      Map("name" → firstName))
+      Map("name" → firstName)
+    )
 
     val timerContext = metrics.emailVerificationTimer.time()
 
-    http.post[EmailVerificationRequest](frontendAppConfig.verifyEmailURL, verificationRequest).map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) ⇒
-      val time = timerContext.stop()
-
-      response.status match {
-        case OK | CREATED ⇒
-          logger.info(s"Email verification successfully triggered, received status ${response.status} " +
-            s"(round-trip time: ${nanosToPrettyString(time)})", nino)
-          Right(())
-        case other ⇒
-          handleErrorStatus(other, response, time, nino)
-      }
-    }.recover {
-      case NonFatal(e) ⇒
+    http
+      .post[EmailVerificationRequest](frontendAppConfig.verifyEmailURL, verificationRequest)
+      .map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) ⇒
         val time = timerContext.stop()
-        metrics.emailVerificationErrorCounter.inc()
 
-        logger.warn(s"Error while calling email verification service: ${e.getMessage} (round-trip time: ${nanosToPrettyString(time)})", nino)
-        Left(OtherError)
-    }
+        response.status match {
+          case OK | CREATED ⇒
+            logger.info(
+              s"Email verification successfully triggered, received status ${response.status} " +
+                s"(round-trip time: ${nanosToPrettyString(time)})",
+              nino
+            )
+            Right(())
+          case other ⇒
+            handleErrorStatus(other, response, time, nino)
+        }
+      }
+      .recover {
+        case NonFatal(e) ⇒
+          val time = timerContext.stop()
+          metrics.emailVerificationErrorCounter.inc()
+
+          logger.warn(
+            s"Error while calling email verification service: ${e.getMessage} (round-trip time: ${nanosToPrettyString(time)})",
+            nino
+          )
+          Left(OtherError)
+      }
   }
 
-  private def handleErrorStatus(status: Int, response: HttpResponse, time: Long, nino: NINO): Either[VerifyEmailError, Unit] = {
+  private def handleErrorStatus(
+    status: Int,
+    response: HttpResponse,
+    time: Long,
+    nino: NINO
+  ): Either[VerifyEmailError, Unit] = {
     metrics.emailVerificationErrorCounter.inc()
 
     status match {
@@ -102,8 +118,11 @@ class EmailVerificationConnectorImpl @Inject() (http:    HttpClient,
         Left(OtherError)
 
       case CONFLICT ⇒
-        logger.info("Email address already verified, received status 409 (Conflict) " +
-          s"(round-trip time: ${nanosToPrettyString(time)})", nino)
+        logger.info(
+          "Email address already verified, received status 409 (Conflict) " +
+            s"(round-trip time: ${nanosToPrettyString(time)})",
+          nino
+        )
         Left(AlreadyVerified)
 
       case SERVICE_UNAVAILABLE ⇒
@@ -111,8 +130,11 @@ class EmailVerificationConnectorImpl @Inject() (http:    HttpClient,
         Left(OtherError)
 
       case other ⇒
-        logger.warn(s"Received unexpected status $other from email verification" +
-          s" body = ${maskNino(response.body)} (round-trip time: ${nanosToPrettyString(time)})", nino)
+        logger.warn(
+          s"Received unexpected status $other from email verification" +
+            s" body = ${maskNino(response.body)} (round-trip time: ${nanosToPrettyString(time)})",
+          nino
+        )
         Left(OtherError)
     }
   }

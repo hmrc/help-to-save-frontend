@@ -26,11 +26,12 @@ object EligibilityReason {
 
   case class EntitledToWTC(sufficientUCIncome: Boolean) extends EligibilityReason
 
-  def fromEligible(eligible: Eligible): Option[EligibilityReason] = eligible.value.eligibilityCheckResult.reasonCode match {
-    case 6 ⇒ Some(UCClaimantAndIncomeSufficient) // scalastyle:ignore magic.number
-    case 7 ⇒ Some(EntitledToWTC(false)) // scalastyle:ignore magic.number
-    case 8 ⇒ Some(EntitledToWTC(true)) // scalastyle:ignore magic.number
-    case _ ⇒ None
-  }
+  def fromEligible(eligible: Eligible): Option[EligibilityReason] =
+    eligible.value.eligibilityCheckResult.reasonCode match {
+      case 6 ⇒ Some(UCClaimantAndIncomeSufficient) // scalastyle:ignore magic.number
+      case 7 ⇒ Some(EntitledToWTC(false)) // scalastyle:ignore magic.number
+      case 8 ⇒ Some(EntitledToWTC(true)) // scalastyle:ignore magic.number
+      case _ ⇒ None
+    }
 
 }

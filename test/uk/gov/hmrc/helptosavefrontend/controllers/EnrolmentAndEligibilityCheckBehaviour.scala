@@ -44,7 +44,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val confirmedEmail = "confirmed"
   val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")
   val userInfo = randomEligibleWithUserInfo(validUserInfo)
-  val payload = validNSIPayload.updateEmail(confirmedEmail)
+  val payload = validNSIPayload
+    .updateEmail(confirmedEmail)
     .copy(nbaDetails = Some(bankDetails))
     .copy(version = "V2.0")
     .copy(systemId = "MDTP REGISTRATION")
@@ -54,39 +55,51 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.eligibilityCheckResult.reasonCode)
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService.getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService
+      .getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockWriteITMPFlag(result: Option[Either[String, Unit]]): Unit =
-    (mockHelpToSaveService.setITMPFlagAndUpdateMongo()(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService
+      .setITMPFlagAndUpdateMongo()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
-      .returning(result.fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r ⇒ EitherT.fromEither[Future](r)))
+      .returning(
+        result
+          .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r ⇒ EitherT.fromEither[Future](r))
+      )
 
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))
 
-  def mockCreateAccount(createAccountRequest: CreateAccountRequest)(response: Either[SubmissionFailure, SubmissionSuccess]): Unit =
-    (mockHelpToSaveService.createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
+  def mockCreateAccount(
+    createAccountRequest: CreateAccountRequest
+  )(response: Either[SubmissionFailure, SubmissionSuccess]): Unit =
+    (mockHelpToSaveService
+      .createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
       .expects(createAccountRequest, *, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockGetAccountNumber()(result: Either[String, AccountNumber]): Unit =
-    (mockHelpToSaveConnector.getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveConnector
+      .getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockGetAccountNumberFromService()(result: Either[String, AccountNumber]): Unit =
-    (mockHelpToSaveService.getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
+    (mockHelpToSaveService
+      .getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def commonEnrolmentAndSessionBehaviour(getResult:                              () ⇒ Future[Result], // scalastyle:ignore method.length
-                                         mockSuccessfulAuth:                     () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
-                                         mockNoNINOAuth:                         () ⇒ Unit           = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None),
-                                         testRedirectOnNoSession:                Boolean             = true,
-                                         testEnrolmentCheckError:                Boolean             = true,
-                                         testRedirectOnNoEligibilityCheckResult: Boolean             = true): Unit = {
+  def commonEnrolmentAndSessionBehaviour(
+    getResult: () ⇒ Future[Result], // scalastyle:ignore method.length
+    mockSuccessfulAuth: () ⇒ Unit = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
+    mockNoNINOAuth: () ⇒ Unit = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None),
+    testRedirectOnNoSession: Boolean = true,
+    testEnrolmentCheckError: Boolean = true,
+    testRedirectOnNoEligibilityCheckResult: Boolean = true
+  ): Unit = {
 
     "redirect to NS&I if the user is already enrolled" in {
       inSequence {
@@ -101,38 +114,38 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     "redirect to NS&I if the user is already enrolled and set the ITMP flag " +
       "if it has not already been set" in {
-        inSequence {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-          mockWriteITMPFlag(Right(()))
-        }
+      inSequence {
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+        mockWriteITMPFlag(Right(()))
+      }
 
+      val result = getResult()
+      status(result) shouldBe SEE_OTHER
+      redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
+    }
+
+    "redirect to NS&I if the user is already enrolled even if there is an " +
+      "setting the ITMP flag" in {
+      def test(mockActions: ⇒ Unit): Unit = {
+        mockActions
         val result = getResult()
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
       }
 
-    "redirect to NS&I if the user is already enrolled even if there is an " +
-      "setting the ITMP flag" in {
-          def test(mockActions: ⇒ Unit): Unit = {
-            mockActions
-            val result = getResult()
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
-          }
+      test(inSequence {
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+        mockWriteITMPFlag(Left(""))
+      })
 
-        test(inSequence {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-          mockWriteITMPFlag(Left(""))
-        })
-
-        test(inSequence {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-          mockWriteITMPFlag(None)
-        })
-      }
+      test(inSequence {
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+        mockWriteITMPFlag(None)
+      })
+    }
 
     if (testRedirectOnNoSession) {
       "redirect to the eligibility checks if there is no session data for the user" in {

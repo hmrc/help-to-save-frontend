@@ -40,4 +40,3 @@ class CryptoImpl @Inject() (configuration: Configuration) extends AesGCMCrypto w
   def decrypt(s: String): Try[String] = Try(decrypt(Crypted(s)).value)
 
 }
-

@@ -52,9 +52,10 @@ object TestData {
     implicit val ineligibilityReason5WithNoThreshold: Ineligible =
       Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", 5), None))
 
-    implicit def ineligibilityReason4or9Gen(threshold: Option[Double]): Gen[Ineligible] = for {
-      reasonCode ← Gen.oneOf(4, 9)
-    } yield Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", reasonCode), threshold))
+    implicit def ineligibilityReason4or9Gen(threshold: Option[Double]): Gen[Ineligible] =
+      for {
+        reasonCode ← Gen.oneOf(4, 9)
+      } yield Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", reasonCode), threshold))
 
     def randomEligibilityResponse() = sample(eligibilityCheckResponseGen)
 
@@ -73,7 +74,10 @@ object TestData {
     def randomEligibleWithUserInfo(userInfo: UserInfo) = EligibleWithUserInfo(randomEligibility(), userInfo)
 
     def eligibleSpecificReasonCodeWithUserInfo(userInfo: UserInfo, reasonCode: Int) =
-      EligibleWithUserInfo(Eligible(EligibilityCheckResponse(EligibilityCheckResult("", 1, "", reasonCode), Some(134.45))), userInfo)
+      EligibleWithUserInfo(
+        Eligible(EligibilityCheckResponse(EligibilityCheckResult("", 1, "", reasonCode), Some(134.45))),
+        userInfo
+      )
   }
 
   object UserData {
@@ -82,8 +86,8 @@ object TestData {
     def randomUserInfo(): UserInfo = sample(userInfoGen)
 
     /**
-     * Valid user details which will pass NSI validation checks
-     */
+      * Valid user details which will pass NSI validation checks
+      */
     val (validUserInfo, nsiValidContactDetails, validNSIPayload) = {
       val (forename, surname) = "Tyrion" → "Lannister"
       val dateOfBirth = LocalDate.ofEpochDay(0L)
@@ -92,16 +96,24 @@ object TestData {
       val addressLine3 = "Westeros"
       val postcode = "BA148FY"
       val country = "GB"
-      val address = Address(List(addressLine1, addressLine2, addressLine3),
-                            Some(postcode), Some(country))
+      val address = Address(List(addressLine1, addressLine2, addressLine3), Some(postcode), Some(country))
       val nino = "WM123456C"
       val email = "tyrion_lannister@gmail.com"
 
       val userInfo = UserInfo(forename, surname, nino, dateOfBirth, Some(email), address)
-      val nsiValidContactDetails = ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
+      val nsiValidContactDetails =
+        ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email)
       val nsiPayload =
-        NSIPayload(forename, surname, dateOfBirth, nino,
-                   ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email), "online", None, "V2.0", "systemId"
+        NSIPayload(
+          forename,
+          surname,
+          dateOfBirth,
+          nino,
+          ContactDetails(addressLine1, addressLine2, Some(addressLine3), None, None, postcode, Some(country), email),
+          "online",
+          None,
+          "V2.0",
+          "systemId"
         )
 
       (userInfo, nsiValidContactDetails, nsiPayload)

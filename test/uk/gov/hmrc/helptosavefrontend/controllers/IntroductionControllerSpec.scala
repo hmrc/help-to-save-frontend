@@ -30,21 +30,25 @@ import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_informatio
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IntroductionControllerSpec extends ControllerSpecWithGuiceApp with AuthSupport
-  with CSRFSupport with SessionStoreBehaviourSupport with EnrolmentAndEligibilityCheckBehaviour {
+class IntroductionControllerSpec
+    extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with SessionStoreBehaviourSupport
+    with EnrolmentAndEligibilityCheckBehaviour {
 
   val fakeRequest = FakeRequest("GET", "/")
-  val helpToSave = new IntroductionController(mockAuthConnector,
-                                              mockMetrics,
-                                              mockHelpToSaveService,
-                                              testCpd,
-                                              testMcc,
-                                              testErrorHandler,
-                                              injector.instanceOf[privacy],
-                                              injector.instanceOf[help_information])
+  val helpToSave = new IntroductionController(
+    mockAuthConnector,
+    mockMetrics,
+    mockHelpToSaveService,
+    testCpd,
+    testMcc,
+    testErrorHandler,
+    injector.instanceOf[privacy],
+    injector.instanceOf[help_information]
+  )
 
   def mockAuthorise(loggedIn: Boolean) =
-    (mockAuthConnector.authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
+    (mockAuthConnector
+      .authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
       .expects(EmptyPredicate, EmptyRetrieval, *, *)
       .returning(if (loggedIn) Future.successful(()) else Future.failed(new Exception("")))
 
@@ -92,7 +96,7 @@ class IntroductionControllerSpec extends ControllerSpecWithGuiceApp with AuthSup
     "getHelpPage" should {
 
       "show the help page content if the user is logged in and has a HTS account" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetAccountNumberFromService()(Right(AccountNumber(Some(accountNumber))))
@@ -106,7 +110,7 @@ class IntroductionControllerSpec extends ControllerSpecWithGuiceApp with AuthSup
       }
 
       "show an error page if the user's enrolment status cannot be checked" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Left(""))
         }
@@ -116,7 +120,7 @@ class IntroductionControllerSpec extends ControllerSpecWithGuiceApp with AuthSup
       }
 
       "show the no-account page if the user does not have a HTS account" in {
-        inSequence{
+        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Right(NotEnrolled))
         }

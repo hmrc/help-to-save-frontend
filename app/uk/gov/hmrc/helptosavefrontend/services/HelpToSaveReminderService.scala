@@ -33,12 +33,17 @@ trait HelpToSaveReminderService {
 
   def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser]
   def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser]
-  def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
-  def updateReminderEmail(updateReminderEmail: UpdateReminderEmail)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def cancelHtsUserReminders(
+    cancelHtsUserReminder: CancelHtsUserReminder
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
+  def updateReminderEmail(
+    updateReminderEmail: UpdateReminderEmail
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
 }
 
 @Singleton
-class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: HelpToSaveReminderConnector) extends HelpToSaveReminderService with Logging {
+class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: HelpToSaveReminderConnector)
+    extends HelpToSaveReminderService with Logging {
 
   def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
     helpToSaveReminderConnector.updateHtsUser(htsUser)
@@ -46,11 +51,14 @@ class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: Help
   def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
     helpToSaveReminderConnector.getHtsUser(nino)
 
-  def cancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+  def cancelHtsUserReminders(
+    cancelHtsUserReminder: CancelHtsUserReminder
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)
 
-  def updateReminderEmail(updateReminderEmail: UpdateReminderEmail)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+  def updateReminderEmail(
+    updateReminderEmail: UpdateReminderEmail
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     helpToSaveReminderConnector.updateReminderEmail(updateReminderEmail)
 
 }
-

@@ -27,15 +27,14 @@ case class EmailVerificationParams(nino: String, email: String) {
 
 object EmailVerificationParams {
 
-  def decode(base64: String)(implicit crypto: Crypto): Try[EmailVerificationParams] = {
+  def decode(base64: String)(implicit crypto: Crypto): Try[EmailVerificationParams] =
     for {
       decoded ← Try(new String(base64Decode(base64)))
       decrypted ← crypto.decrypt(decoded)
-      (nino, email) ← Try{
-        val nino = decrypted.substring(0, decrypted.indexOf('#'))
-        val email = decrypted.substring(decrypted.indexOf('#') + 1)
-        nino → email
-      }
+      (nino, email) ← Try {
+                       val nino = decrypted.substring(0, decrypted.indexOf('#'))
+                       val email = decrypted.substring(decrypted.indexOf('#') + 1)
+                       nino → email
+                     }
     } yield EmailVerificationParams(nino, email)
-  }
 }

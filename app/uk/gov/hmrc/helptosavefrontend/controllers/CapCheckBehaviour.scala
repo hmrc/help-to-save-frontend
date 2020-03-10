@@ -29,7 +29,9 @@ trait CapCheckBehaviour {
 
   val helpToSaveService: HelpToSaveService
 
-  def checkIfAccountCreateAllowed(ifAllowed: ⇒ Future[Result])(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
+  def checkIfAccountCreateAllowed(
+    ifAllowed: ⇒ Future[Result]
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     helpToSaveService.isAccountCreationAllowed().value.flatMap {
       _.fold(
         error ⇒ {
@@ -48,6 +50,5 @@ trait CapCheckBehaviour {
         }
       )
     }
-  }
 
 }

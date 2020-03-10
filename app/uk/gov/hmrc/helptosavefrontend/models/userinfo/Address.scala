@@ -19,9 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.models.userinfo
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 
-case class Address(lines:    List[String],
-                   postcode: Option[String],
-                   country:  Option[String])
+case class Address(lines: List[String], postcode: Option[String], country: Option[String])
 
 object Address {
 
