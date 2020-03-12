@@ -1,0 +1,1 @@
+GET     /getHtsUser/:nino         uk.gov.hmrc.helptosavefrontend.controllers.test.TestOnlyController.getHtsUser(nino: String)
