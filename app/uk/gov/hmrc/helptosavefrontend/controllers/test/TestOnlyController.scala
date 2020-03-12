@@ -17,25 +17,19 @@
 package uk.gov.hmrc.helptosavefrontend.controllers.test
 
 import cats.instances.future._
-import cats.instances.string._
-import cats.syntax.eq._
-import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import com.google.inject.{Inject, Singleton}
-import org.omg.CosNaming.NamingContextPackage.NotFound
-import play.api.{Configuration, Environment}
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.controllers.{BaseController, CommonPlayDependencies, SessionBehaviour, routes}
-import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
+import uk.gov.hmrc.helptosavefrontend.controllers.{BaseController, CommonPlayDependencies, SessionBehaviour}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 @Singleton
