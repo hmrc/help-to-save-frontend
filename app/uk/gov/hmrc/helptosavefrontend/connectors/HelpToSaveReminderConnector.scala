@@ -51,7 +51,7 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private val updateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-entity"
 
-  private def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getifhtsuserexists/$nino"
+  private def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/gethtsuser/$nino"
 
   private val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
 
