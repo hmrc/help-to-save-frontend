@@ -41,7 +41,7 @@ class HelpToSaveReminderConnectorSpec
   val UpdateHtsURL =
     s"$htsReminderURL/help-to-save-reminder/update-htsuser-entity"
 
-  def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getifhtsuserexists/$nino"
+  def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/gethtsuser/$nino"
 
   val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
 
