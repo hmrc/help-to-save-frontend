@@ -53,21 +53,21 @@ bodyClasses = None) {
       summary_section_change(
         routes.RegisterController.getDetailsAreIncorrect().url,
         Messages("hts.register.create_account.change-your-name"),
-        "change-details-are-incorrect"
+        "change-your-name"
       )
     )
     @summary_row(Messages("hts.register.create_account.your-details.dob"), eligibleWithUserInfo.userInfo.dateOfBirth.show,
       summary_section_change(
         routes.RegisterController.getDetailsAreIncorrect().url,
         Messages("hts.register.create_account.change-your-dob"),
-        "change-details-are-incorrect"
+        "change-your-dob"
       )
     )
     @summary_row(Messages("hts.register.create_account.your-details.nino"), display2CharFormat(eligibleWithUserInfo.userInfo.nino),
       summary_section_change(
         routes.RegisterController.getDetailsAreIncorrect().url,
         Messages("hts.register.create_account.change-your-nino"),
-        "change-details-are-incorrect"
+        "change-your-nino"
       )
     )
   </dl>
@@ -89,14 +89,14 @@ bodyClasses = None) {
       summary_section_change(
         (routes.RegisterController.changeBankDetails().url + "#sortCode"),
         Messages("hts.register.create_account.change-your-sort-code"),
-        "change-bank-details"
+        "change-your-sort-code"
       )
     )
     @summary_row(Messages("hts.register.create_account.your-bank-details.account-number"), bankDetails.accountNumber,
       summary_section_change(
         (routes.RegisterController.changeBankDetails().url + "#accountNumber"),
         Messages("hts.register.create_account.change-your-account-number"),
-        "change-bank-details"
+        "change-your-account-number"
       )
     )
     @if(bankDetails.rollNumber.nonEmpty) {
@@ -104,7 +104,7 @@ bodyClasses = None) {
         summary_section_change(
           (routes.RegisterController.changeBankDetails().url + "#rollNumber"),
           Messages("hts.register.create_account.change-your-roll-number"),
-          "change-bank-details"
+          "change-your-roll-number"
         )
       )
     }
@@ -112,7 +112,7 @@ bodyClasses = None) {
       summary_section_change(
         (routes.RegisterController.changeBankDetails().url + "#accountName"),
         Messages("hts.register.create_account.change-your-account-name"),
-        "change-bank-details"
+        "change-your-account-name"
       )
     )
   </dl>
