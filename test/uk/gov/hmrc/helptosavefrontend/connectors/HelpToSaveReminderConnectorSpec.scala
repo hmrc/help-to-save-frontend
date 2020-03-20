@@ -32,19 +32,16 @@ import scala.concurrent.Future
 
 // scalastyle:off magic.number
 class HelpToSaveReminderConnectorSpec
-  extends ControllerSpecWithGuiceApp
-  with HttpSupport
-  with ScalaCheckDrivenPropertyChecks {
+    extends ControllerSpecWithGuiceApp with HttpSupport with ScalaCheckDrivenPropertyChecks {
 
-  lazy val connector: HelpToSaveReminderConnector = new HelpToSaveReminderConnectorImpl(
-    mockHttp)
+  lazy val connector: HelpToSaveReminderConnector = new HelpToSaveReminderConnectorImpl(mockHttp)
 
   val htsReminderURL = "http://localhost:7008"
 
   val UpdateHtsURL =
     s"$htsReminderURL/help-to-save-reminder/update-htsuser-entity"
 
-  def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/getifhtsuserexists/${nino}"
+  def getHtsReminderUserURL(nino: String) = s"$htsReminderURL/help-to-save-reminder/gethtsuser/$nino"
 
   val cancelHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/delete-htsuser-entity"
 
@@ -55,7 +52,7 @@ class HelpToSaveReminderConnectorSpec
 
     override def reads(json: JsValue) = json match {
       case JsNull ⇒ JsSuccess(())
-      case _      ⇒ JsError("JSON was not null")
+      case _ ⇒ JsError("JSON was not null")
     }
   }
 
@@ -64,14 +61,12 @@ class HelpToSaveReminderConnectorSpec
     val nino: Nino = Nino("AE123456D")
 
     "return http response as it is to the caller" in {
-      val htsUser = HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+      val htsUser =
+        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
       val response =
         HttpResponse(200, Some(Json.toJson(htsUser)))
-      mockPost(UpdateHtsURL,
-               Map.empty,
-               htsUser)(
-          Some(response))
+      mockPost(UpdateHtsURL, Map.empty, htsUser)(Some(response))
       val result = connector.updateHtsUser(htsUser)
       await(result.value) should equal(Right(htsUser))
 
@@ -83,13 +78,12 @@ class HelpToSaveReminderConnectorSpec
     val nino: Nino = Nino("AE123456D")
 
     "return http response as it is to the caller" in {
-      val htsUser = HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+      val htsUser =
+        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
 
       val response =
         HttpResponse(200, Some(Json.toJson(htsUser)))
-      mockGet(getHtsReminderUserURL(ninoNew),
-              Map.empty)(
-          Some(response))
+      mockGet(getHtsReminderUserURL(ninoNew), Map.empty)(Some(response))
       val result = connector.getHtsUser(ninoNew)
       await(result.value) should equal(Right(htsUser))
 
@@ -103,10 +97,7 @@ class HelpToSaveReminderConnectorSpec
     "return http response as it is to the caller" in {
       val response =
         HttpResponse(200)
-      mockPost(cancelHtsReminderURL,
-               Map.empty,
-               cancelHtsUserReminder)(
-          Some(response))
+      mockPost(cancelHtsReminderURL, Map.empty, cancelHtsUserReminder)(Some(response))
       val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
       await(result.value) should equal(Right(()))
 
@@ -122,22 +113,22 @@ class HelpToSaveReminderConnectorSpec
     "return http response as it is to the caller" in {
       val response =
         HttpResponse(200)
-      mockPost(emailUpdateHtsReminderURL,
-               Map.empty,
-               updateReminderEmail)(
-          Some(response))
+      mockPost(emailUpdateHtsReminderURL, Map.empty, updateReminderEmail)(Some(response))
       val result = connector.updateReminderEmail(updateReminderEmail)
       await(result.value) should equal(Right(()))
 
     }
   }
 
-  private def testCommon[E, A, B](mockHttp:        ⇒ Option[HttpResponse] ⇒ Unit,
-                                  result:          () ⇒ EitherT[Future, E, A],
-                                  validBody:       B,
-                                  testInvalidJSON: Boolean                       = true)(
-      implicit
-      writes: Writes[B]): Unit = { // scalstyle:ignore method.length
+  private def testCommon[E, A, B](
+    mockHttp: ⇒ Option[HttpResponse] ⇒ Unit,
+    result: () ⇒ EitherT[Future, E, A],
+    validBody: B,
+    testInvalidJSON: Boolean = true
+  )(
+    implicit
+    writes: Writes[B]
+  ): Unit = { // scalstyle:ignore method.length
     "make a request to the help-to-save backend" in {
       mockHttp(Some(HttpResponse(200)))
       await(result().value)
@@ -149,14 +140,20 @@ class HelpToSaveReminderConnectorSpec
         "the call comes back with a 200 and an unknown JSON format" in {
           mockHttp(
             Some(
-              HttpResponse(200,
-                responseJson = Some(Json.parse(
-                  """
-                    |{
-                    |  "foo": "bar"
-                    |}
+              HttpResponse(
+                200,
+                responseJson = Some(
+                  Json.parse(
+                    """
+                      |{
+                      |  "foo": "bar"
+                      |}
               """.stripMargin
-                )))))
+                  )
+                )
+              )
+            )
+          )
 
           await(result().value).isLeft shouldBe
             true

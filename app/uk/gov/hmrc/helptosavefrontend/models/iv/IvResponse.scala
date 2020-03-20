@@ -44,22 +44,21 @@ object IvSuccessResponse {
 
   case object PrecondFailed extends IvSuccessResponse
 
-  def fromString(s: String): Option[IvSuccessResponse] = { // scalastyle:ignore cyclomatic.complexity
+  def fromString(s: String): Option[IvSuccessResponse] = // scalastyle:ignore cyclomatic.complexity
     s match {
-      case "Success"              ⇒ Some(Success)
-      case "Incomplete"           ⇒ Some(Incomplete)
-      case "FailedMatching"       ⇒ Some(FailedMatching)
-      case "FailedIV"             ⇒ Some(FailedIV)
+      case "Success" ⇒ Some(Success)
+      case "Incomplete" ⇒ Some(Incomplete)
+      case "FailedMatching" ⇒ Some(FailedMatching)
+      case "FailedIV" ⇒ Some(FailedIV)
       case "InsufficientEvidence" ⇒ Some(InsufficientEvidence)
-      case "LockedOut"            ⇒ Some(LockedOut)
-      case "UserAborted"          ⇒ Some(UserAborted)
-      case "Timeout"              ⇒ Some(Timeout)
-      case "TechnicalIssue"       ⇒ Some(TechnicalIssue)
-      case "PreconditionFailed"   ⇒ Some(PrecondFailed)
-      case _                      ⇒ None
+      case "LockedOut" ⇒ Some(LockedOut)
+      case "UserAborted" ⇒ Some(UserAborted)
+      case "Timeout" ⇒ Some(Timeout)
+      case "TechnicalIssue" ⇒ Some(TechnicalIssue)
+      case "PreconditionFailed" ⇒ Some(PrecondFailed)
+      case _ ⇒ None
 
     }
-  }
 
 }
 

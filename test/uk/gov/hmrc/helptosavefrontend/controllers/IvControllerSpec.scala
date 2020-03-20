@@ -37,21 +37,23 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
 
   val journeyId = JourneyId(randomUUID().toString)
 
-  lazy val ivController = new IvController(mockSessionStore,
-                                           ivConnector,
-                                           mockAuthConnector,
-                                           mockMetrics,
-                                           testCpd,
-                                           testMcc,
-                                           testErrorHandler,
-                                           injector.instanceOf[iv_success],
-                                           injector.instanceOf[failed_iv],
-                                           injector.instanceOf[insufficient_evidence],
-                                           injector.instanceOf[locked_out],
-                                           injector.instanceOf[user_aborted],
-                                           injector.instanceOf[time_out],
-                                           injector.instanceOf[technical_iv_issues],
-                                           injector.instanceOf[precondition_failed])
+  lazy val ivController = new IvController(
+    mockSessionStore,
+    ivConnector,
+    mockAuthConnector,
+    mockMetrics,
+    testCpd,
+    testMcc,
+    testErrorHandler,
+    injector.instanceOf[iv_success],
+    injector.instanceOf[failed_iv],
+    injector.instanceOf[insufficient_evidence],
+    injector.instanceOf[locked_out],
+    injector.instanceOf[user_aborted],
+    injector.instanceOf[time_out],
+    injector.instanceOf[technical_iv_issues],
+    injector.instanceOf[precondition_failed]
+  )
 
   val continueURL = "continue-here"
 
@@ -62,7 +64,9 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
   def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
-    (ivConnector.getJourneyStatus(_: JourneyId)(_: HeaderCarrier, _: ExecutionContext)).expects(journeyId, *, *)
+    (ivConnector
+      .getJourneyStatus(_: JourneyId)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(journeyId, *, *)
       .returning(Future.successful(IvSuccessResponse.fromString(ivServiceResponse)))
 
   private def doRequest() =
@@ -70,45 +74,43 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
 
   "GET /iv/journey-result" when {
 
-      def noSessionPutBehaviour(expectedRedirectURL: ⇒ String, ivServiceResponse: String): Unit = {
+    def noSessionPutBehaviour(expectedRedirectURL: ⇒ String, ivServiceResponse: String): Unit =
+      "redirect to the correct URL" in {
+        inSequence {
+          mockAuthWithNoRetrievals(AuthProvider)
+          mockIvConnector(journeyId, ivServiceResponse)
 
-        "redirect to the correct URL" in {
-          inSequence {
-            mockAuthWithNoRetrievals(AuthProvider)
-            mockIvConnector(journeyId, ivServiceResponse)
-
-          }
-          val result = doRequest()
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(expectedRedirectURL)
         }
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirectURL)
       }
 
-      def sessionPutIVURLBehaviour(expectedRedirectURL: ⇒ String, ivServiceResponse: String): Unit = {
+    def sessionPutIVURLBehaviour(expectedRedirectURL: ⇒ String, ivServiceResponse: String): Unit = {
 
-        "redirect to the correct URL if the write to session cache is successful" in {
-          inSequence {
-            mockAuthWithNoRetrievals(AuthProvider)
-            mockIvConnector(journeyId, ivServiceResponse)
-            mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
+      "redirect to the correct URL if the write to session cache is successful" in {
+        inSequence {
+          mockAuthWithNoRetrievals(AuthProvider)
+          mockIvConnector(journeyId, ivServiceResponse)
+          mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
-          }
-          val result = doRequest()
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(expectedRedirectURL)
         }
-
-        "show an error page if the write to session cache is unsuccessful" in {
-          inSequence {
-            mockAuthWithNoRetrievals(AuthProvider)
-            mockIvConnector(journeyId, ivServiceResponse)
-            mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Left(""))
-          }
-          val result = doRequest()
-          checkIsTechnicalErrorPage(result)
-        }
-
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirectURL)
       }
+
+      "show an error page if the write to session cache is unsuccessful" in {
+        inSequence {
+          mockAuthWithNoRetrievals(AuthProvider)
+          mockIvConnector(journeyId, ivServiceResponse)
+          mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Left(""))
+        }
+        val result = doRequest()
+        checkIsTechnicalErrorPage(result)
+      }
+
+    }
 
     "handling success responses" must {
 
@@ -145,8 +147,10 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     }
 
     "handling failed matching responses" must {
-      behave like sessionPutIVURLBehaviour("https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme",
-        "FailedMatching")
+      behave like sessionPutIVURLBehaviour(
+        "https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme",
+        "FailedMatching"
+      )
     }
 
     "handling insufficient evidence responses" must {
@@ -199,57 +203,57 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
 
   "The IV controller" when {
 
-      def testIndividualPage(name:                      String, // scalastyle:ignore method.length
-                             getResult:                 () ⇒ Future[Result],
-                             mockSessionCacheBehaviour: Option[() ⇒ Unit],
-                             expectedUrl:               Option[String],
-                             defaultUrl:                Option[String])(
-          successChecks: (Option[String], Future[Result]) ⇒ Unit): Unit = {
-        s"handling $name" must {
+    def testIndividualPage(
+      name: String, // scalastyle:ignore method.length
+      getResult: () ⇒ Future[Result],
+      mockSessionCacheBehaviour: Option[() ⇒ Unit],
+      expectedUrl: Option[String],
+      defaultUrl: Option[String]
+    )(successChecks: (Option[String], Future[Result]) ⇒ Unit): Unit =
+      s"handling $name" must {
 
-          s"show the correct $name page" in {
-            mockSessionCacheBehaviour.fold(
+        s"show the correct $name page" in {
+          mockSessionCacheBehaviour.fold(
+            mockAuthWithNoRetrievals(AuthProvider)
+          ) { behaviour ⇒
+            inSequence {
               mockAuthWithNoRetrievals(AuthProvider)
-            ) { behaviour ⇒
-                inSequence {
-                  mockAuthWithNoRetrievals(AuthProvider)
-                  behaviour()
-                }
-              }
-
-            successChecks(expectedUrl, getResult())
+              behaviour()
+            }
           }
 
-          if (mockSessionCacheBehaviour.isDefined) {
+          successChecks(expectedUrl, getResult())
+        }
 
-            "show an error page" when {
+        if (mockSessionCacheBehaviour.isDefined) {
 
-              "session cache retrieval fails" in {
-                inSequence {
-                  mockAuthWithNoRetrievals(AuthProvider)
-                  mockSessionStoreGet(Left(""))
-                }
+          "show an error page" when {
 
-                checkIsTechnicalErrorPage(getResult())
+            "session cache retrieval fails" in {
+              inSequence {
+                mockAuthWithNoRetrievals(AuthProvider)
+                mockSessionStoreGet(Left(""))
               }
 
-              "there is no session data" in {
-                inSequence {
-                  mockAuthWithNoRetrievals(AuthProvider)
-                  mockSessionStoreGet(Right(None))
-                }
+              checkIsTechnicalErrorPage(getResult())
+            }
 
-                successChecks(defaultUrl, getResult())
+            "there is no session data" in {
+              inSequence {
+                mockAuthWithNoRetrievals(AuthProvider)
+                mockSessionStoreGet(Right(None))
               }
 
-              "the data required is not present in the session" in {
-                inSequence {
-                  mockAuthWithNoRetrievals(AuthProvider)
-                  mockSessionStoreGet(Right(Some(HTSSession(None, None, None, None, None))))
-                }
+              successChecks(defaultUrl, getResult())
+            }
 
-                checkIsTechnicalErrorPage(getResult())
+            "the data required is not present in the session" in {
+              inSequence {
+                mockAuthWithNoRetrievals(AuthProvider)
+                mockSessionStoreGet(Right(Some(HTSSession(None, None, None, None, None))))
               }
+
+              checkIsTechnicalErrorPage(getResult())
             }
           }
         }
@@ -257,8 +261,8 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
 
     val url = "my-url"
 
-      def contentAsStringWithAmpersandsEscaped(result: Future[Result]): String =
-        contentAsString(result).replaceAllLiterally("&amp;", "&")
+    def contentAsStringWithAmpersandsEscaped(result: Future[Result]): String =
+      contentAsString(result).replaceAllLiterally("&amp;", "&")
 
     testIndividualPage(
       "IV successful",
@@ -267,10 +271,10 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       Some(url),
       Some(ivController.eligibilityUrl)
     ) { (maybeUrl, result) ⇒
-        status(result) shouldBe OK
-        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
-        contentAsString(result) should include("ve verified your identity")
-      }
+      status(result) shouldBe OK
+      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      contentAsString(result) should include("ve verified your identity")
+    }
 
     testIndividualPage(
       "failed iv",
@@ -279,10 +283,10 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒
-        status(result) shouldBe OK
-        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
-        contentAsString(result) should include("You did not answer all the questions correctly")
-      }
+      status(result) shouldBe OK
+      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      contentAsString(result) should include("You did not answer all the questions correctly")
+    }
 
     testIndividualPage(
       "insufficient evidence",
@@ -291,9 +295,9 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       None,
       None
     ) { (_, result) ⇒
-        status(result) shouldBe OK
-        contentAsString(result) should include("be able to apply for a Help to Save account by phone, after")
-      }
+      status(result) shouldBe OK
+      contentAsString(result) should include("be able to apply for a Help to Save account by phone, after")
+    }
 
     testIndividualPage(
       "locked out",
@@ -302,9 +306,9 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       None,
       None
     ) { (_, result) ⇒
-        status(result) shouldBe OK
-        contentAsString(result) should include("You have tried to verify your identity too many times")
-      }
+      status(result) shouldBe OK
+      contentAsString(result) should include("You have tried to verify your identity too many times")
+    }
 
     testIndividualPage(
       "user aborted",
@@ -313,10 +317,10 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒
-        status(result) shouldBe OK
-        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
-        contentAsString(result) should include("You have not provided enough information")
-      }
+      status(result) shouldBe OK
+      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      contentAsString(result) should include("You have not provided enough information")
+    }
 
     testIndividualPage(
       "timed out",
@@ -325,10 +329,10 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒
-        status(result) shouldBe OK
-        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
-        contentAsString(result) should include("Your session has ended")
-      }
+      status(result) shouldBe OK
+      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      contentAsString(result) should include("Your session has ended")
+    }
 
     testIndividualPage(
       "technical issue",
@@ -337,10 +341,10 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       Some(url),
       Some(ivController.defaultIVUrl)
     ) { (maybeUrl, result) ⇒
-        status(result) shouldBe OK
-        maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
-        contentAsString(result) should include("Something went wrong")
-      }
+      status(result) shouldBe OK
+      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      contentAsString(result) should include("Something went wrong")
+    }
 
     testIndividualPage(
       "precondition failed",
@@ -349,11 +353,10 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       None,
       None
     ) { (_, result) ⇒
-        status(result) shouldBe OK
-        contentAsString(result) should include("not able to use this service")
-      }
+      status(result) shouldBe OK
+      contentAsString(result) should include("not able to use this service")
+    }
 
   }
 
 }
-

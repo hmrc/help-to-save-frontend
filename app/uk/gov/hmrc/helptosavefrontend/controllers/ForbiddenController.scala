@@ -21,10 +21,12 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 
 @Singleton
-class ForbiddenController @Inject() (cpd:          CommonPlayDependencies,
-                                     mcc:          MessagesControllerComponents,
-                                     errorHandler: ErrorHandler)(implicit appConfig: FrontendAppConfig)
-  extends BaseController(cpd, mcc, errorHandler) {
+class ForbiddenController @Inject() (
+  cpd: CommonPlayDependencies,
+  mcc: MessagesControllerComponents,
+  errorHandler: ErrorHandler
+)(implicit appConfig: FrontendAppConfig)
+    extends BaseController(cpd, mcc, errorHandler) {
 
   def forbidden: Action[AnyContent] = Action {
     Forbidden("Please ask the HtS Dev team for permissions to access this site")

@@ -25,9 +25,9 @@ import uk.gov.hmrc.play.bootstrap.filters.FrontendFilters
 
 @Singleton
 class Filters @Inject() (
-    configuration:   Configuration,
-    whitelistFilter: WhitelistFilter,
-    frontendFilters: FrontendFilters
+  configuration: Configuration,
+  whitelistFilter: WhitelistFilter,
+  frontendFilters: FrontendFilters
 ) extends HttpFilters {
 
   val whiteListFilterEnabled: Boolean =

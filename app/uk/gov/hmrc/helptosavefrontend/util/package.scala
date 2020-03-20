@@ -38,9 +38,8 @@ package object util {
 
   implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
 
-  implicit def toJavaDate(jodaDate: LocalDate): java.time.LocalDate = {
+  implicit def toJavaDate(jodaDate: LocalDate): java.time.LocalDate =
     java.time.LocalDate.of(jodaDate.getYear, jodaDate.getMonthOfYear, jodaDate.getDayOfMonth)
-  }
 
   def base64Encode(input: String): Array[Byte] = Base64.getEncoder.encode(input.getBytes)
 
@@ -52,11 +51,10 @@ package object util {
 
   val ninoRegex: Regex = """[A-Za-z]{2}[0-9]{6}[A-Za-z]{1}""".r
 
-  def maskNino(original: String): String = {
+  def maskNino(original: String): String =
     Option(original) match {
       case Some(text) ⇒ ninoRegex.replaceAllIn(text, "<NINO>")
-      case None       ⇒ original
+      case None ⇒ original
     }
-  }
 
 }

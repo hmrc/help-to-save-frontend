@@ -21,7 +21,8 @@ import javax.inject.Inject
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
-class ConfigModule @Inject() (val runMode: RunMode, configuration: Configuration, environment: Environment) extends Provider[ServicesConfig] {
+class ConfigModule @Inject() (val runMode: RunMode, configuration: Configuration, environment: Environment)
+    extends Provider[ServicesConfig] {
 
   override def get(): ServicesConfig = new ServicesConfig(configuration, runMode)
 }

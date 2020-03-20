@@ -25,9 +25,11 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
-class BaseController @Inject() (cpd:          CommonPlayDependencies,
-                                mcc:          MessagesControllerComponents,
-                                errorHandler: ErrorHandler) extends FrontendController(mcc) with I18nSupport {
+class BaseController @Inject() (
+  cpd: CommonPlayDependencies,
+  mcc: MessagesControllerComponents,
+  errorHandler: ErrorHandler
+) extends FrontendController(mcc) with I18nSupport {
 
   override implicit val messagesApi: MessagesApi = cpd.messagesApi
 
@@ -42,5 +44,4 @@ class BaseController @Inject() (cpd:          CommonPlayDependencies,
     InternalServerError(errorHandler.internalServerErrorTemplate(request))
 }
 
-class CommonPlayDependencies @Inject() (val appConfig:   FrontendAppConfig,
-                                        val messagesApi: MessagesApi)
+class CommonPlayDependencies @Inject() (val appConfig: FrontendAppConfig, val messagesApi: MessagesApi)

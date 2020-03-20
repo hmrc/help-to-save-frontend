@@ -34,19 +34,25 @@ trait EnrolmentCheckBehaviour extends Logging {
   val frontendAppConfig: FrontendAppConfig
   val helpToSaveService: HelpToSaveService
 
-  def checkIfAlreadyEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
-                             handleEnrolmentServiceError: String ⇒ Future[Result]
-  )(implicit htsContext: HtsContextWithNINO, hc: HeaderCarrier, transformer: NINOLogMessageTransformer, ec: ExecutionContext): Future[Result] = {
+  def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result], handleEnrolmentServiceError: String ⇒ Future[Result])(
+    implicit htsContext: HtsContextWithNINO,
+    hc: HeaderCarrier,
+    transformer: NINOLogMessageTransformer,
+    ec: ExecutionContext
+  ): Future[Result] = {
     val nino = htsContext.nino
 
-    helpToSaveService.getUserEnrolmentStatus()
-      .leftSemiflatMap{ error ⇒
+    helpToSaveService
+      .getUserEnrolmentStatus()
+      .leftSemiflatMap { error ⇒
         logger.warn(s"Error while trying to check if user was already enrolled to HtS: $error", nino)
         handleEnrolmentServiceError(error)
       }
-      .semiflatMap{
+      .semiflatMap {
         case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
-          if (!itmpHtSFlag) { setItmpFlag(nino) }
+          if (!itmpHtSFlag) {
+            setItmpFlag(nino)
+          }
 
           SeeOther(frontendAppConfig.nsiManageAccountUrl)
 
@@ -57,30 +63,38 @@ trait EnrolmentCheckBehaviour extends Logging {
   }
 
   def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result])(
-      implicit
-      htsContext:  HtsContextWithNINO,
-      hc:          HeaderCarrier,
-      request:     Request[_],
-      transformer: NINOLogMessageTransformer,
-      ec:          ExecutionContext): Future[Result] =
+    implicit
+    htsContext: HtsContextWithNINO,
+    hc: HeaderCarrier,
+    request: Request[_],
+    transformer: NINOLogMessageTransformer,
+    ec: ExecutionContext
+  ): Future[Result] =
     checkIfAlreadyEnrolled(ifNotEnrolled, _ ⇒ internalServerError())
 
-  def checkIfEnrolled(ifNotEnrolled:               () ⇒ Future[Result],
-                      handleEnrolmentServiceError: String ⇒ Future[Result],
-                      ifEnrolled:                  () ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO,
-                                                                        hc:          HeaderCarrier,
-                                                                        transformer: NINOLogMessageTransformer,
-                                                                        ec:          ExecutionContext): Future[Result] = {
+  def checkIfEnrolled(
+    ifNotEnrolled: () ⇒ Future[Result],
+    handleEnrolmentServiceError: String ⇒ Future[Result],
+    ifEnrolled: () ⇒ Future[Result]
+  )(
+    implicit htsContext: HtsContextWithNINO,
+    hc: HeaderCarrier,
+    transformer: NINOLogMessageTransformer,
+    ec: ExecutionContext
+  ): Future[Result] = {
     val nino = htsContext.nino
 
-    helpToSaveService.getUserEnrolmentStatus()
-      .leftSemiflatMap{ error ⇒
+    helpToSaveService
+      .getUserEnrolmentStatus()
+      .leftSemiflatMap { error ⇒
         logger.warn(s"Error while trying to check if user was already enrolled to HtS: $error", nino)
         handleEnrolmentServiceError(error)
       }
-      .semiflatMap{
+      .semiflatMap {
         case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
-          if (!itmpHtSFlag) { setItmpFlag(nino) }
+          if (!itmpHtSFlag) {
+            setItmpFlag(nino)
+          }
           ifEnrolled()
 
         case EnrolmentStatus.NotEnrolled ⇒
@@ -89,13 +103,12 @@ trait EnrolmentCheckBehaviour extends Logging {
       .merge
   }
 
-  def setItmpFlag(nino: NINO)(implicit ec: ExecutionContext,
-                              hc:          HeaderCarrier,
-                              transformer: NINOLogMessageTransformer
-  ): Unit =
+  def setItmpFlag(
+    nino: NINO
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Unit =
     helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
-      case Failure(e)        ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
-      case Success(Left(e))  ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
+      case Failure(e) ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
+      case Success(Left(e)) ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
       case Success(Right(_)) ⇒ logger.info(s"Process started to set ITMP flag", nino)
     }
 

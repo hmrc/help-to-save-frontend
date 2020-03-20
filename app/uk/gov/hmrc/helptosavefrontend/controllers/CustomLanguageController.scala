@@ -24,14 +24,15 @@ import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.play.language.{LanguageController, LanguageUtils}
 
 class CustomLanguageController @Inject() (
-    configuration: Configuration,
-    languageUtils: LanguageUtils,
-    cpd:           CommonPlayDependencies,
-    mcc:           MessagesControllerComponents,
-    errorHandler:  ErrorHandler)(
-    implicit
-    val frontendAppConfig: FrontendAppConfig)
-  extends LanguageController(configuration, languageUtils, mcc) with I18nSupport {
+  configuration: Configuration,
+  languageUtils: LanguageUtils,
+  cpd: CommonPlayDependencies,
+  mcc: MessagesControllerComponents,
+  errorHandler: ErrorHandler
+)(
+  implicit
+  val frontendAppConfig: FrontendAppConfig
+) extends LanguageController(configuration, languageUtils, mcc) with I18nSupport {
 
   val english: Lang = Lang("en")
   val welsh: Lang = Lang("cy")

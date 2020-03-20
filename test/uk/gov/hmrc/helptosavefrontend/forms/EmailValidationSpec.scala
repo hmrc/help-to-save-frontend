@@ -31,26 +31,34 @@ class EmailValidationSpec extends WordSpec with Matchers with ScalaCheckDrivenPr
 
   "EmailValidation" must {
 
-      def genString(length: Int) = Gen.listOfN(length, Gen.alphaChar).map(_.mkString(""))
+    def genString(length: Int) = Gen.listOfN(length, Gen.alphaChar).map(_.mkString(""))
 
-      def test(emailValidation: EmailValidation)(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
-        val result: Either[Seq[FormError], String] = emailValidation.emailFormatter.bind("key", Map("key" → value))
-        if (log) Logger.error(value + ": " + result.toString)
-        result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
-      }
+    def test(
+      emailValidation: EmailValidation
+    )(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
+      val result: Either[Seq[FormError], String] = emailValidation.emailFormatter.bind("key", Map("key" → value))
+      if (log) Logger.error(value + ": " + result.toString)
+      result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
+    }
 
-      def newValidation(maxTotalLength:  Int = Int.MaxValue,
-                        maxLocalLength:  Int = Int.MaxValue,
-                        maxDomainLength: Int = Int.MaxValue): EmailValidation =
-        new EmailValidation(Configuration(
+    def newValidation(
+      maxTotalLength: Int = Int.MaxValue,
+      maxLocalLength: Int = Int.MaxValue,
+      maxDomainLength: Int = Int.MaxValue
+    ): EmailValidation =
+      new EmailValidation(
+        Configuration(
           "email-validation.max-total-length" → maxTotalLength,
           "email-validation.max-local-length" → maxLocalLength,
           "email-validation.max-domain-length" → maxDomainLength
-        ))
+        )
+      )
 
     "validate against blank strings" in {
       val emailValidation = newValidation()
-      test(emailValidation)("")(Left(Set(blankEmailAddress, noAtSymbol, noDotSymbol, noTextAfterDotSymbol, noTextAfterAtSymbolButBeforeDot)))
+      test(emailValidation)("")(
+        Left(Set(blankEmailAddress, noAtSymbol, noDotSymbol, noTextAfterDotSymbol, noTextAfterAtSymbolButBeforeDot))
+      )
     }
 
     "validate against the configured max total length" in {
@@ -102,9 +110,11 @@ class EmailValidationSpec extends WordSpec with Matchers with ScalaCheckDrivenPr
     "validate against no characters after the '@' symbol" in {
       val emailValidation = newValidation()
 
-      forAll(Gen.identifier){ l ⇒
-        whenever(l.nonEmpty){
-          test(emailValidation)(s"$l@")(Left(Set(domainTooShort, noDotSymbol, noTextAfterDotSymbol, noTextAfterAtSymbolButBeforeDot)))
+      forAll(Gen.identifier) { l ⇒
+        whenever(l.nonEmpty) {
+          test(emailValidation)(s"$l@")(
+            Left(Set(domainTooShort, noDotSymbol, noTextAfterDotSymbol, noTextAfterAtSymbolButBeforeDot))
+          )
         }
       }
     }
@@ -170,4 +180,3 @@ class EmailValidationSpec extends WordSpec with Matchers with ScalaCheckDrivenPr
 }
 
 // scalastyle:on magic.number
-

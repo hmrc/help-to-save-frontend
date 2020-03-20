@@ -23,9 +23,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.util.{Failure, Success, Try}
 
-class EmailVerificationParamsSpec
-  extends UnitSpec
-  with ScalaCheckDrivenPropertyChecks {
+class EmailVerificationParamsSpec extends UnitSpec with ScalaCheckDrivenPropertyChecks {
 
   val nino: NINO = "AE1234XXX"
   val email: Email = "email@gmail.com"
@@ -62,8 +60,7 @@ class EmailVerificationParamsSpec
       "the parameters do not contain a hash symbol" in {
         implicit val crypto: Crypto = successfulCrypto()
 
-        val s = new String(Base64.getEncoder.encode("wibble".getBytes()),
-                           Charset.forName("UTF-8"))
+        val s = new String(Base64.getEncoder.encode("wibble".getBytes()), Charset.forName("UTF-8"))
         EmailVerificationParams.decode(s).isFailure shouldBe true
       }
 

@@ -35,7 +35,8 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
   import configuration.BankDetailsConfig._
 
-  private val rollNoRegex: String ⇒ Matcher = (s"^([0-9a-zA-Z\\/.-]{$rollNumberMinLength,$rollNumberMaxLength})" + "$").r.pattern.matcher _
+  private val rollNoRegex: String ⇒ Matcher =
+    (s"^([0-9a-zA-Z\\/.-]{$rollNumberMinLength,$rollNumberMaxLength})" + "$").r.pattern.matcher _
 
   val sortCodeFormatter: Formatter[SortCode] = new Formatter[SortCode] {
 
@@ -43,12 +44,14 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], SortCode] = {
       val validation: ValidOrErrorStrings[SortCode] =
-        data.get(key)
+        data
+          .get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
           .fold(invalid[SortCode](ErrorMessages.sortCodeEmpty)) { s ⇒
             val p = s.filterNot(allowedSeparators.contains)
             if (p.length === sortCodeLength && p.forall(_.isDigit)) {
-              SortCode(p.map(_.asDigit)).fold[ValidOrErrorStrings[SortCode]](invalid(ErrorMessages.sortCodeIncorrectFormat))(Valid(_))
+              SortCode(p.map(_.asDigit))
+                .fold[ValidOrErrorStrings[SortCode]](invalid(ErrorMessages.sortCodeIncorrectFormat))(Valid(_))
             } else if (p.isEmpty) {
               invalid(ErrorMessages.sortCodeEmpty)
             } else {
@@ -68,16 +71,15 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
       val validation: ValidOrErrorStrings[String] =
-        data.get(key)
+        data
+          .get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
           .fold(invalid[String](ErrorMessages.accountNumberEmpty)) { s ⇒
-            validatedFromBoolean(s)(s ⇒ s.length === accountNumberLength && s.forall(_.isDigit),
-              if (s.isEmpty) {
-                ErrorMessages.accountNumberEmpty
-              } else {
-                ErrorMessages.accountNumberIncorrectFormat
-              }
-            )
+            validatedFromBoolean(s)(s ⇒ s.length === accountNumberLength && s.forall(_.isDigit), if (s.isEmpty) {
+              ErrorMessages.accountNumberEmpty
+            } else {
+              ErrorMessages.accountNumberIncorrectFormat
+            })
           }
 
       validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
@@ -91,7 +93,8 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] = {
       val validation: ValidOrErrorStrings[Option[String]] =
-        data.get(key)
+        data
+          .get(key)
           .filter(_.nonEmpty)
           .fold[ValidOrErrorStrings[Option[String]]](Valid(None)) { s ⇒
             if (rollNoRegex(s).matches()) {
@@ -115,7 +118,8 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
       val validation: ValidOrErrorStrings[String] =
-        data.get(key)
+        data
+          .get(key)
           .map(_.cleanupSpecialCharacters.trim)
           .fold(invalid[String](ErrorMessages.accountNameEmpty)) { s ⇒
             if (s.isEmpty) {
@@ -142,29 +146,29 @@ object BankDetailsValidation {
 
   object ErrorMessages {
 
-    val sortCodeEmpty = "sort_code_empty"
+    val sortCodeEmpty : String = "sort_code_empty"
 
-    val sortCodeIncorrectFormat = "sort_code_incorrect_format"
+    val sortCodeIncorrectFormat : String = "sort_code_incorrect_format"
 
-    val accountNumberEmpty = "account_number_empty"
+    val accountNumberEmpty : String = "account_number_empty"
 
-    val accountNumberIncorrectFormat = "account_number_incorrect_format"
+    val accountNumberIncorrectFormat : String = "account_number_incorrect_format"
 
-    val rollNumberTooShort = "roll_number_too_short"
+    val rollNumberTooShort : String = "roll_number_too_short"
 
-    val rollNumberTooLong = "roll_number_too_long"
+    val rollNumberTooLong : String = "roll_number_too_long"
 
-    val rollNumberIncorrectFormat = "roll_number_incorrect_format"
+    val rollNumberIncorrectFormat : String = "roll_number_incorrect_format"
 
-    val accountNameEmpty = "account_name_empty"
+    val accountNameEmpty : String = "account_name_empty"
 
-    val accountNameTooShort = "account_name_too_short"
+    val accountNameTooShort : String = "account_name_too_short"
 
-    val accountNameTooLong = "account_name_too_long"
+    val accountNameTooLong : String = "account_name_too_long"
 
-    val sortCodeBackendInvalid = "check_your_sortcode_is_correct"
+    val sortCodeBackendInvalid : String = "check_your_sortcode_is_correct"
 
-    val accountNumberBackendInvalid = "check_your_account_number_is_correct"
+    val accountNumberBackendInvalid : String = "check_your_account_number_is_correct"
   }
 
   implicit class FormOps[A](val form: Form[A]) extends AnyVal {

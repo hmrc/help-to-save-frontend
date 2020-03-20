@@ -35,13 +35,17 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
     "bank-details-validation.account-name.max-length" → 4
   )
 
-  lazy val validation = new BankDetailsValidation(new FrontendAppConfig(new ServicesConfig(fakeApplication.configuration ++ bankValidationConfig,
-    injector.instanceOf[RunMode])))
+  lazy val validation = new BankDetailsValidation(
+    new FrontendAppConfig(
+      new ServicesConfig(fakeApplication.configuration ++ bankValidationConfig, injector.instanceOf[RunMode])
+    )
+  )
 
   type Key = String
 
-  def test[A, B](f:      (String, Map[String, String]) ⇒ Either[Seq[FormError], A],
-                 insert: (Key, Option[B]) ⇒ Map[String, String]
+  def test[A, B](
+    f: (String, Map[String, String]) ⇒ Either[Seq[FormError], A],
+    insert: (Key, Option[B]) ⇒ Map[String, String]
   )(value: Option[B])(expectedResult: Either[Set[String], A]): Unit = {
     val result: Either[Seq[FormError], A] = f("key", insert("key", value))
     result.leftMap(_.toSet) shouldBe expectedResult.leftMap(_.map(s ⇒ FormError("key", s)))
@@ -50,14 +54,14 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
   def insertString(k: Key, v: Option[String]): Map[String, String] =
     v.fold(Map.empty[String, String])(v ⇒ Map(k → v))
 
-  "BankDetailsValidation" when afterWord("validating"){
+  "BankDetailsValidation" when afterWord("validating") {
 
     "sort codes" must {
 
       val sortCode = SortCode(1, 2, 3, 4, 5, 6)
 
-        def testSortCode(value: Option[String])(expectedResult: Either[Set[String], SortCode]): Unit =
-          test[SortCode, String](validation.sortCodeFormatter.bind, insertString)(value)(expectedResult)
+      def testSortCode(value: Option[String])(expectedResult: Either[Set[String], SortCode]): Unit =
+        test[SortCode, String](validation.sortCodeFormatter.bind, insertString)(value)(expectedResult)
 
       "allow inputs with the configured numbered digits" when {
 
@@ -118,8 +122,8 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
         }
 
         "have numbers separated by non-supported characters" in {
-          List(',', '.', '&', '*', '/', '_').foreach{ c ⇒
-            withClue(s"For char $c: "){
+          List(',', '.', '&', '*', '/', '_').foreach { c ⇒
+            withClue(s"For char $c: ") {
               testSortCode(Some(s"12${c}34${c}56"))(Left(Set(ErrorMessages.sortCodeIncorrectFormat)))
             }
           }
@@ -132,8 +136,8 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
     "account numbers" must {
 
-        def testAccountNumber(value: Option[String])(expectedResult: Either[Set[String], String]): Unit =
-          test(validation.accountNumberFormatter.bind, insertString)(value)(expectedResult)
+      def testAccountNumber(value: Option[String])(expectedResult: Either[Set[String], String]): Unit =
+        test(validation.accountNumberFormatter.bind, insertString)(value)(expectedResult)
 
       "allow inputs" which {
         "contains the configured number of digits" in {
@@ -179,8 +183,10 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
     "roll numbers" must {
 
-        def testRollNumber(value: Option[String])(expectedResult: Either[Set[String], Option[String]]): Unit =
-          test[Option[String], Option[String]](validation.rollNumberFormatter.bind, { case (k, o) ⇒ insertString(k, o.flatten) })(Some(value))(expectedResult)
+      def testRollNumber(value: Option[String])(expectedResult: Either[Set[String], Option[String]]): Unit =
+        test[Option[String], Option[String]](validation.rollNumberFormatter.bind, {
+          case (k, o) ⇒ insertString(k, o.flatten)
+        })(Some(value))(expectedResult)
 
       "allow inputs" which {
 
@@ -230,8 +236,8 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
     "account names" must {
 
-        def testAccountName(value: Option[String])(expectedResult: Either[Set[String], String]): Unit =
-          test(validation.accountNameFormatter.bind, insertString)(value)(expectedResult)
+      def testAccountName(value: Option[String])(expectedResult: Either[Set[String], String]): Unit =
+        test(validation.accountNameFormatter.bind, insertString)(value)(expectedResult)
 
       "allow inputs" which {
 
@@ -280,11 +286,11 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
         import TestForm._
         import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.FormOps
 
-          def test(formHasError: Form[TestData] ⇒ String ⇒ Boolean, message: String): Unit = {
-            formHasError(testForm)(TestForm.key) shouldBe false
-            formHasError(testFormWithErrorMessage("error"))(TestForm.key) shouldBe false
-            formHasError(testFormWithErrorMessage(message))(TestForm.key) shouldBe true
-          }
+        def test(formHasError: Form[TestData] ⇒ String ⇒ Boolean, message: String): Unit = {
+          formHasError(testForm)(TestForm.key) shouldBe false
+          formHasError(testFormWithErrorMessage("error"))(TestForm.key) shouldBe false
+          formHasError(testFormWithErrorMessage(message))(TestForm.key) shouldBe true
+        }
 
         "the sort code is empty" in {
           test(_.sortCodeEmpty, ErrorMessages.sortCodeEmpty)
@@ -341,4 +347,3 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
   }
 
 }
-

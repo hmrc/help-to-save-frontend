@@ -38,13 +38,21 @@ class HTSAuditorSpec extends ControllerSpecWithGuiceApp {
 
       "use the audit connector to send an event" in {
         val dataEvent: ExtendedDataEvent =
-          ExtendedDataEvent("source", "type", "id", Map("tag" → "value"), Json.parse("""{ "detail": "value" }"""), DateTime.now())
+          ExtendedDataEvent(
+            "source",
+            "type",
+            "id",
+            Map("tag" → "value"),
+            Json.parse("""{ "detail": "value" }"""),
+            DateTime.now()
+          )
 
         val htsEvent: HTSEvent = new HTSEvent {
           override val value = dataEvent
         }
 
-        (mockAuditConnector.sendExtendedEvent(_: ExtendedDataEvent)(_: HeaderCarrier, _: ExecutionContext))
+        (mockAuditConnector
+          .sendExtendedEvent(_: ExtendedDataEvent)(_: HeaderCarrier, _: ExecutionContext))
           .expects(dataEvent, *, *)
           .returning(Future.failed(new Exception))
 

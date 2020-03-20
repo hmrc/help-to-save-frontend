@@ -34,7 +34,8 @@ class ReminderFrequencyValidation @Inject() (configuration: FrontendAppConfig) {
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
       val validation: ValidOrErrorStrings[String] = {
-        data.get(key)
+        data
+          .get(key)
           .map(_.cleanupSpecialCharacters.trim)
           .fold(invalid[String](ErrorMessages.reminderFrequencyEmpty)) { s ⇒
             if (s.isEmpty) {
@@ -57,7 +58,7 @@ object ReminderFrequencyValidation {
 
   object ErrorMessages {
 
-    val reminderFrequencyEmpty = "reminder_frequency_empty"
+    val reminderFrequencyEmpty : String = "reminder_frequency_empty"
 
   }
 

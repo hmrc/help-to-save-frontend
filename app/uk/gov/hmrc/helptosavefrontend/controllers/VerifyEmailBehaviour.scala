@@ -37,36 +37,47 @@ trait VerifyEmailBehaviour extends Logging {
 
   val auditor: HTSAuditor
 
-  def sendEmailVerificationRequest(email:                String,
-                                   firstName:            String,
-                                   ifSuccess:            ⇒ Result,
-                                   ifAlreadyVerifiedURL: EmailVerificationParams ⇒ String,
-                                   ifFailure:            VerifyEmailError ⇒ Result,
-                                   isNewApplicant:       Boolean)(implicit request: Request[AnyContent],
-                                                                  htsContext: HtsContextWithNINO,
-                                                                  crypto:     Crypto,
-                                                                  ec:         ExecutionContext): Future[Result] =
+  def sendEmailVerificationRequest(
+    email: String,
+    firstName: String,
+    ifSuccess: ⇒ Result,
+    ifAlreadyVerifiedURL: EmailVerificationParams ⇒ String,
+    ifFailure: VerifyEmailError ⇒ Result,
+    isNewApplicant: Boolean
+  )(
+    implicit request: Request[AnyContent],
+    htsContext: HtsContextWithNINO,
+    crypto: Crypto,
+    ec: ExecutionContext
+  ): Future[Result] =
     emailVerificationConnector.verifyEmail(htsContext.nino, email, firstName, isNewApplicant).map {
-      case Right(_)              ⇒ ifSuccess
+      case Right(_) ⇒ ifSuccess
       case Left(AlreadyVerified) ⇒ SeeOther(ifAlreadyVerifiedURL(EmailVerificationParams(htsContext.nino, email)))
-      case Left(e)               ⇒ ifFailure(e)
+      case Left(e) ⇒ ifFailure(e)
     }
 
-  def withEmailVerificationParameters(emailVerificationParams: String,
-                                      ifValid:                 EmailVerificationParams ⇒ EitherT[Future, String, Result],
-                                      ifInvalid:               ⇒ EitherT[Future, String, Result])(path: String)(implicit request: Request[AnyContent],
-                                                                                                                htsContext:  HtsContextWithNINOAndUserDetails,
-                                                                                                                crypto:      Crypto,
-                                                                                                                appConfig:   FrontendAppConfig,
-                                                                                                                transformer: NINOLogMessageTransformer,
-                                                                                                                ec:          ExecutionContext
+  def withEmailVerificationParameters(
+    emailVerificationParams: String,
+    ifValid: EmailVerificationParams ⇒ EitherT[Future, String, Result],
+    ifInvalid: ⇒ EitherT[Future, String, Result]
+  )(path: String)(
+    implicit request: Request[AnyContent],
+    htsContext: HtsContextWithNINOAndUserDetails,
+    crypto: Crypto,
+    appConfig: FrontendAppConfig,
+    transformer: NINOLogMessageTransformer,
+    ec: ExecutionContext
   ): EitherT[Future, String, Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
       case Failure(e) ⇒
         val nino = htsContext.nino
-        logger.warn("SuspiciousActivity: malformed redirect from email verification service back to HtS, " +
-          s"could not decode email verification parameters: ${e.getMessage}", e, nino)
+        logger.warn(
+          "SuspiciousActivity: malformed redirect from email verification service back to HtS, " +
+            s"could not decode email verification parameters: ${e.getMessage}",
+          e,
+          nino
+        )
         auditor.sendEvent(SuspiciousActivity(Some(nino), "malformed_redirect", path), nino)
         ifInvalid
 

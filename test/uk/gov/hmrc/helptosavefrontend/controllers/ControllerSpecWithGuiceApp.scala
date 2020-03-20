@@ -43,29 +43,26 @@ import scala.language.postfixOps
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-trait ControllerSpecWithGuiceApp
-  extends ControllerSpecBase
-  with GuiceOneAppPerSuite
-  with I18nSupport {
+trait ControllerSpecWithGuiceApp extends ControllerSpecBase with GuiceOneAppPerSuite with I18nSupport {
 
   lazy val additionalConfig = Configuration()
 
-  def buildFakeApplication(additionalConfig: Configuration): Application = {
+  def buildFakeApplication(additionalConfig: Configuration): Application =
     new GuiceApplicationBuilder()
-      .configure(Configuration(
-        ConfigFactory.parseString(
-          """
-            | metrics.jvm = false
-            | metrics.enabled = true
-            | play.modules.disabled = [ "play.api.mvc.CookiesModule",
-            |   "uk.gov.hmrc.helptosavefrontend.config.HealthCheckModule",
-            |   "akka.event.slf4j.Slf4jLogger"
-            | ]
-            | mongodb.session.expireAfter = 5 seconds
+      .configure(
+        Configuration(
+          ConfigFactory.parseString("""
+                                      | metrics.jvm = false
+                                      | metrics.enabled = true
+                                      | play.modules.disabled = [ "play.api.mvc.CookiesModule",
+                                      |   "uk.gov.hmrc.helptosavefrontend.config.HealthCheckModule",
+                                      |   "akka.event.slf4j.Slf4jLogger"
+                                      | ]
+                                      | mongodb.session.expireAfter = 5 seconds
             """.stripMargin)
-      ) ++ additionalConfig)
+        ) ++ additionalConfig
+      )
       .build()
-  }
 
   override lazy val app = buildFakeApplication(additionalConfig)
 
@@ -93,7 +90,8 @@ trait ControllerSpecWithGuiceApp
     override def counter(name: String): Counter = new Counter()
   }
 
-  private lazy val technicalErrorPageContent: String = injector.instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body
+  private lazy val technicalErrorPageContent: String =
+    injector.instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body
 
   def checkIsTechnicalErrorPage(result: Future[Result]): Unit = {
     implicit val timeout: Timeout = Timeout(5 seconds)
@@ -113,4 +111,3 @@ trait ControllerSpecWithGuiceApp
 
   implicit val crypto: Crypto = injector.instanceOf[Crypto]
 }
-

@@ -18,9 +18,13 @@ package uk.gov.hmrc.helptosavefrontend.models.email
 
 import play.api.libs.json._
 
-case class EmailVerificationRequest(email: String, templateId: String,
-                                    linkExpiryDuration: String, continueUrl: String,
-                                    templateParameters: Map[String, String])
+case class EmailVerificationRequest(
+  email: String,
+  templateId: String,
+  linkExpiryDuration: String,
+  continueUrl: String,
+  templateParameters: Map[String, String]
+)
 
 object EmailVerificationRequest {
   implicit val formats: Format[EmailVerificationRequest] = Json.format[EmailVerificationRequest]

@@ -34,25 +34,28 @@ trait SessionBehaviour {
   val sessionStore: SessionStore
 
   def checkSession(noSession: ⇒ Future[Result])(whenSession: HTSSession ⇒ Future[Result])(
-      implicit
-      htsContext:  HtsContextWithNINO,
-      hc:          HeaderCarrier,
-      request:     Request[_],
-      transformer: NINOLogMessageTransformer,
-      ec:          ExecutionContext): Future[Result] =
+    implicit
+    htsContext: HtsContextWithNINO,
+    hc: HeaderCarrier,
+    request: Request[_],
+    transformer: NINOLogMessageTransformer,
+    ec: ExecutionContext
+  ): Future[Result] =
     sessionStore.get
       .semiflatMap(_.fold(noSession)(whenSession))
-      .leftMap {
-        e ⇒
-          logger.warn(s"Could not read sessions data from mongo due to : $e", htsContext.nino)
-          internalServerError()
-      }.merge
+      .leftMap { e ⇒
+        logger.warn(s"Could not read sessions data from mongo due to : $e", htsContext.nino)
+        internalServerError()
+      }
+      .merge
 }
 
 object SessionBehaviour {
 
-  case class SessionWithEligibilityCheck(eligibilityResult: Either[Ineligible, EligibleWithUserInfo],
-                                         pendingEmail:      Option[Email],
-                                         confirmedEmail:    Option[Email])
+  case class SessionWithEligibilityCheck(
+    eligibilityResult: Either[Ineligible, EligibleWithUserInfo],
+    pendingEmail: Option[Email],
+    confirmedEmail: Option[Email]
+  )
 
 }

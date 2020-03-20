@@ -27,7 +27,8 @@ import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter
 
 import scala.concurrent.Future
 
-class WhitelistFilter @Inject() (configuration: Configuration, val mat: Materializer) extends AkamaiWhitelistFilter with Logging {
+class WhitelistFilter @Inject() (configuration: Configuration, val mat: Materializer)
+    extends AkamaiWhitelistFilter with Logging {
 
   override def whitelist: Seq[String] =
     configuration.underlying.get[List[String]]("http-header-ip-whitelist").value
@@ -38,8 +39,7 @@ class WhitelistFilter @Inject() (configuration: Configuration, val mat: Material
   // of the HTTP request but is not in the whitelist
   override def destination: Call = forbiddenCall
 
-  override def noHeaderAction(f:  (RequestHeader) ⇒ Future[Result],
-                              rh: RequestHeader): Future[Result] = {
+  override def noHeaderAction(f: (RequestHeader) ⇒ Future[Result], rh: RequestHeader): Future[Result] = {
     logger.warn("SuspiciousActivity: No client IP found in http request header")
     Future.successful(Results.Redirect(forbiddenCall))
   }
@@ -49,7 +49,7 @@ class WhitelistFilter @Inject() (configuration: Configuration, val mat: Material
   val healthCheckCall: Call = Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url)
 
   override def apply(f: (RequestHeader) ⇒ Future[Result])(rh: RequestHeader): Future[Result] = {
-    rh.headers.get(trueClient).foreach{ ip ⇒
+    rh.headers.get(trueClient).foreach { ip ⇒
       if (!whitelist.contains(ip)) {
         logger.warn(s"SuspiciousActivity: Received request from non-whitelisted ip $ip")
       }

@@ -31,11 +31,11 @@ class HTSEventSpec extends ControllerSpecWithGuiceApp {
       event.value.auditType shouldBe "EmailChanged"
       event.value.detail shouldBe Json.parse(
         s"""{
-          | "nino": "${validNSIPayload.nino}",
-          | "originalEmail": "old-email@test.com",
-          | "newEmail": "new-email@test.com",
-          | "duringRegistrationJourney": true
-          | }
+           | "nino": "${validNSIPayload.nino}",
+           | "originalEmail": "old-email@test.com",
+           | "newEmail": "new-email@test.com",
+           | "duringRegistrationJourney": true
+           | }
         """.stripMargin
       )
       event.value.tags.get("path") shouldBe Some("path")
@@ -62,9 +62,9 @@ class HTSEventSpec extends ControllerSpecWithGuiceApp {
       event.value.auditType shouldBe "SuspiciousActivity"
       event.value.detail shouldBe Json.parse(
         s"""{
-          | "nino": "${validNSIPayload.nino}",
-          | "reason" : "missing_email_record"
-          | }
+           | "nino": "${validNSIPayload.nino}",
+           | "reason" : "missing_email_record"
+           | }
         """.stripMargin
       )
       event.value.tags.get("path") shouldBe Some("path")

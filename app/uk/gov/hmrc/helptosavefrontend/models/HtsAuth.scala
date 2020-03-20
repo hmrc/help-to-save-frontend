@@ -28,7 +28,9 @@ object HtsAuth {
 
   val AuthWithCL200: Predicate = AuthProvider and ConfidenceLevel.L200
 
-  val UserInfoRetrievals: Retrieval[Option[CoreName] ~ Option[String] ~ Option[LocalDate] ~ Option[ItmpName] ~ Option[LocalDate] ~ Option[ItmpAddress]] =
+  val UserInfoRetrievals: Retrieval[
+    Option[CoreName] ~ Option[String] ~ Option[LocalDate] ~ Option[ItmpName] ~ Option[LocalDate] ~ Option[ItmpAddress]
+  ] =
     v2.Retrievals.name and
       v2.Retrievals.email and
       v2.Retrievals.dateOfBirth and

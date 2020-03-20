@@ -52,13 +52,12 @@ trait NINOLogMessageTransformer {
 class NINOLogMessageTransformerImpl @Inject() (configuration: Configuration) extends NINOLogMessageTransformer {
 
   private val loggingPrefix: NINO ⇒ String =
-    if (configuration.underlying.getBoolean("nino-logging.enabled")) {
-      nino ⇒ s"For NINO [$nino]: "
-    } else {
-      _ ⇒ ""
+    if (configuration.underlying.getBoolean("nino-logging.enabled")) { nino ⇒
+      s"For NINO [$nino]: "
+    } else { _ ⇒
+      ""
     }
 
   def transform(message: String, nino: NINO): String = loggingPrefix(nino) + message
 
 }
-

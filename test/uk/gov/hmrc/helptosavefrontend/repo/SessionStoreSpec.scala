@@ -31,11 +31,8 @@ import uk.gov.hmrc.http.logging.SessionId
 import scala.concurrent.duration._
 
 class SessionStoreSpec
-  extends ControllerSpecWithGuiceApp
-  with MongoSupport
-  with ScalaFutures
-  with ScalaCheckDrivenPropertyChecks
-  with Eventually {
+    extends ControllerSpecWithGuiceApp with MongoSupport with ScalaFutures with ScalaCheckDrivenPropertyChecks
+    with Eventually {
 
   implicit val config: PatienceConfig =
     PatienceConfig().copy(timeout = scaled(1.minute))
@@ -49,9 +46,11 @@ class SessionStoreSpec
     implicit val htsSessionGen: Gen[HTSSession] =
       for {
         result ← Gen.option(
-          Gen.oneOf[Either[Ineligible, EligibleWithUserInfo]](
-            TestData.Eligibility.ineligibilityGen.map(Left(_)),
-            eligibleWithUserInfoGen.map(Right(_))))
+                  Gen.oneOf[Either[Ineligible, EligibleWithUserInfo]](
+                    TestData.Eligibility.ineligibilityGen.map(Left(_)),
+                    eligibleWithUserInfoGen.map(Right(_))
+                  )
+                )
         email ← Gen.option(Gen.alphaStr)
         pendingEmail ← Gen.option(Gen.alphaStr)
       } yield HTSSession(result, email, pendingEmail)
@@ -83,8 +82,7 @@ class SessionStoreSpec
         val hc: HeaderCarrier = HeaderCarrier(sessionId = None)
         val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
 
-        result.value.futureValue should be(
-          Left("can't query mongo dueto no sessionId in the HeaderCarrier"))
+        result.value.futureValue should be(Left("can't query mongo dueto no sessionId in the HeaderCarrier"))
 
       }
     }
@@ -95,13 +93,9 @@ class SessionStoreSpec
         val ivUrl = "/some/iv/url"
         val ivSuccessUrl = "/some/iv/successUrl"
 
-        val existingSession = HTSSession(None,
-                                         None,
-                                         None,
-                                         ivURL        = Some(ivUrl),
-                                         ivSuccessURL = Some(ivSuccessUrl))
+        val existingSession = HTSSession(None, None, None, ivURL = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl))
         val expectedSessionToStore =
-          htsSession.copy(ivURL        = None, ivSuccessURL = None)
+          htsSession.copy(ivURL = None, ivSuccessURL = None)
 
         val hc: HeaderCarrier =
           HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
@@ -114,8 +108,8 @@ class SessionStoreSpec
 
         val getResult = sessionStore.get(htsSessionReads, hc)
         getResult.value.futureValue should be(
-          Right(Some(htsSession.copy(ivURL        = Some(ivUrl),
-                                     ivSuccessURL = Some(ivSuccessUrl)))))
+          Right(Some(htsSession.copy(ivURL = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl))))
+        )
 
       }
     }
