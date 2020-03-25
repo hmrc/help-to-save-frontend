@@ -96,6 +96,7 @@ hts.register.bank-details.title.h1=Enter the UK bank account details you want us
 hts.register.bank-details.sort-code.label=Sort code
 hts.register.bank-details.sort-code.hint=For example, 02 03 04
 hts.register.bank-details.accountNumber.label=Account number
+hts.register.bank-details.accountNumber.hint=For example, 12345678
 hts.register.bank-details.accountName.label=Name on the account
 hts.register.bank-details.rollNumber.label=Roll number
 hts.register.bank-details.rollNumber.hint=Building societies only
