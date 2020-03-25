@@ -93,6 +93,7 @@
       inputType = "tel",
       label = messages("hts.register.bank-details.accountNumber.label"),
       value = form.data.getOrElse("accountNumber", ""),
+      hint = Some(messages("hts.register.bank-details.accountNumber.hint")),
       describedByHint = Some("account-number-hint"),
       describedByError = Some("account-number-error"),
       name = "accountNumber",
