@@ -61,7 +61,7 @@
     @CSRF.formField(request)
 
     <div class="@{"form-group" + {if(hasNotSelected) " form-group-error" else "" }}" id="select-one-option">
-      <fieldset aria-describedby="select-email-error">
+      <fieldset class="govuk-fieldset" aria-describedby="select-email-error">
         <legend>
           <h1 class="@{"heading-large" + {if(hasNotSelected) " flush--top" else ""}}">@title</h1>
         </legend>
