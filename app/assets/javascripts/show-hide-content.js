@@ -28,8 +28,6 @@
       // Set aria-controls and defaults
       if ($content.length) {
         $control.attr('aria-controls', $content.attr('id'))
-        $control.attr('aria-expanded', 'false')
-        $content.attr('aria-hidden', 'true')
       }
     }
 
