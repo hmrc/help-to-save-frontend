@@ -62,7 +62,7 @@ class HelpToSaveReminderConnectorSpec
 
     "return http response as it is to the caller" in {
       val htsUser =
-        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       val response =
         HttpResponse(200, Some(Json.toJson(htsUser)))
@@ -79,7 +79,7 @@ class HelpToSaveReminderConnectorSpec
 
     "return http response as it is to the caller" in {
       val htsUser =
-        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       val response =
         HttpResponse(200, Some(Json.toJson(htsUser)))

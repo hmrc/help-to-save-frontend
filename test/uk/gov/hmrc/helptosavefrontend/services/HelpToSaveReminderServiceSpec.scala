@@ -42,7 +42,7 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
     "update email" must {
 
       val htsUser =
-        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       def mockupdateUser(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit =
         (htsReminderConnector
@@ -62,7 +62,7 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
     "get Hts User" must {
       val ninoNew = "AE123456D"
       val htsUser =
-        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"), 1)
+        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       def mockGetHtsUser(nino: String)(result: Either[String, HtsUser]): Unit =
         (htsReminderConnector
