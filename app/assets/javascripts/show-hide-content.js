@@ -65,7 +65,6 @@
       // Hide content
       if (!$content.hasClass('js-hidden')) {
         $content.addClass('js-hidden')
-        $content.attr('aria-hidden', 'true')
 
         // If the controlling input, update aria-expanded
         if ($control.attr('aria-controls')) {
