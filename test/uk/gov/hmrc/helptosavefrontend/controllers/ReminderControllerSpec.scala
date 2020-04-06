@@ -235,6 +235,19 @@ class ReminderControllerSpec
 
     }
 
+    "should return the reminder setting page when asked for it" in {
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+      val bckLink = routes.ReminderController.getEmailsavingsReminders().url
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      }
+
+      val result = csrfAddToken(controller.getSelectRendersPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
     "should redirect to an the internal server error page if email retrieveal is failed" in {
       val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
