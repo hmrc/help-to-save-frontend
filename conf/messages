@@ -653,9 +653,10 @@ language-switcher.welsh.hover=Defnyddio’r cyfrif hwn yn Cymraeg
 language-switcher.nav=Language switcher
 
 
-hts.reminder-frequency.title.h1=Email savings reminders
-hts.reminder-frequency.intro=Reminders help you remember to save each month. This helps you earn the highest possible bonus.
-hts.reminder-frequency.note=Currently, you are not receiving any reminders.
+hts.email-saving-remainders.title.h1=Email savings reminders
+hts.email-saving-remainders.intro=Reminders help you remember to save each month. This helps you earn the highest possible bonus.
+hts.email-saving-remainders.note=Currently, you are not receiving any reminders.
+hts.email-saving-remainders-button=Set up reminders
 hts.reminder-frequency.select=Select when you want to receive reminders
 hts.reminder-frequency.first=On the 1st day of each month
 hts.reminder-frequency.25=On the 25th day of each month

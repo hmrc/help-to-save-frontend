@@ -53,13 +53,12 @@
             </div>
         }
 
-        <h1 class="heading-large">@title</h1>
-        <p>@Html(Messages("hts.reminder-frequency.intro"))</p>
-               <p> @Html(Messages("hts.reminder-frequency.note"))</p>
+        <h1 class="heading-large">@Messages("hts.reminder-frequency.select")</h1>
+
 
           <form method="post" action=@routes.ReminderController.selectRemindersSubmit novalidate>
               @CSRF.formField(request)
-          @summary_section_head(heading = Messages("hts.reminder-frequency.select"))
+
 
             <div class="multiple-choice" data-target="collect-choice">
                     <input id="first" type="radio" name="reminderFrequency" value="1st" >
