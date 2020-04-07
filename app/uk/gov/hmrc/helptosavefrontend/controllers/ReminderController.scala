@@ -48,6 +48,7 @@ class ReminderController @Inject() (
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
+  emailSavingsReminder: email_savings_reminders,
   reminderFrequencySet: reminder_frequency_set,
   reminderFrequencyChange: reminder_frequency_change,
   reminderConfirmation: reminder_confirmation,
@@ -67,7 +68,7 @@ class ReminderController @Inject() (
 
   private def backLink: String = routes.AccessAccountController.accessAccount().url
 
-  def getSelectRendersPage(): Action[AnyContent] =
+  def getEmailsavingsReminders(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
         // get optin status
@@ -77,7 +78,7 @@ class ReminderController @Inject() (
             e ⇒ {
               logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
 
-              Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+              Ok(emailSavingsReminder(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
             }, { htsUser ⇒
               Ok(
                 reminderDashboard(
@@ -92,6 +93,13 @@ class ReminderController @Inject() (
       } else {
         SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
       }
+
+    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+
+  def getSelectRendersPage(): Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
+      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(bckLink)))
 
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 

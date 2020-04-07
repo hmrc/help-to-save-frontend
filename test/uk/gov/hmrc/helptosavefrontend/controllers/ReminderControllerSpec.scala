@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{email_savings_reminders, reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -101,6 +101,7 @@ class ReminderControllerSpec
       testCpd,
       testMcc,
       testErrorHandler,
+      injector.instanceOf[email_savings_reminders],
       injector.instanceOf[reminder_frequency_set],
       injector.instanceOf[reminder_frequency_change],
       injector.instanceOf[reminder_confirmation],
@@ -214,7 +215,7 @@ class ReminderControllerSpec
         mockGetHtsUser(nino)(Right(getHtsUser))
       }
 
-      val result = csrfAddToken(controller.getSelectRendersPage())(fakeRequestWithNoBody)
+      val result = csrfAddToken(controller.getEmailsavingsReminders())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
 
     }
@@ -227,6 +228,19 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
+      }
+
+      val result = csrfAddToken(controller.getEmailsavingsReminders())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should return the reminder setting page when asked for it" in {
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+      val bckLink = routes.ReminderController.getEmailsavingsReminders().url
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
       }
 
       val result = csrfAddToken(controller.getSelectRendersPage())(fakeRequestWithNoBody)
