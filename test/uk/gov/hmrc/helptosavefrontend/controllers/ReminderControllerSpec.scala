@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{email_savings_reminders, reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{email_savings_reminders, reminder_cancel_confirmation, reminder_confirmation_set, reminder_confirmation_update, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -104,7 +104,8 @@ class ReminderControllerSpec
       injector.instanceOf[email_savings_reminders],
       injector.instanceOf[reminder_frequency_set],
       injector.instanceOf[reminder_frequency_change],
-      injector.instanceOf[reminder_confirmation],
+      injector.instanceOf[reminder_confirmation_set],
+      injector.instanceOf[reminder_confirmation_update],
       injector.instanceOf[reminder_cancel_confirmation],
       injector.instanceOf[reminder_dashboard]
     ) {}
@@ -262,14 +263,26 @@ class ReminderControllerSpec
 
     }
 
-    "should redirect to a renders confirmation page with email encrypted " in {
+    "should redirect to a renders confirmation set page with email encrypted " in {
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockDecrypt("encrypted")("email")
       }
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      val result = controller.getRendersConfirmPage("encrypted", "1st")(fakeRequestWithNoBody)
+      val result = controller.getRendersConfirmPage("encrypted", "1st", "Set")(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should redirect to a renders confirmation update page with email encrypted " in {
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockDecrypt("encrypted")("email")
+      }
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+      val result = controller.getRendersConfirmPage("encrypted", "1st", "Update")(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
 
     }
