@@ -144,7 +144,11 @@ class ReminderController @Inject() (
                               htsUser ⇒
                                 SeeOther(
                                   routes.ReminderController
-                                    .getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency)
+                                    .getRendersConfirmPage(
+                                      crypto.encrypt(htsUser.email),
+                                      success.reminderFrequency,
+                                      "Set"
+                                    )
                                     .url
                                 )
                             )
@@ -161,17 +165,17 @@ class ReminderController @Inject() (
         )
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
-  def getRendersConfirmPage(email: String, period: String): Action[AnyContent] =
+  def getRendersConfirmPage(email: String, period: String, page: String): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       crypto.decrypt(email) match {
-        case Success(value) ⇒ Ok(reminderConfirmation(value, period))
+        case Success(value) ⇒ Ok(reminderConfirmation(value, period, page))
         case Failure(e) ⇒ {
           logger.warn(s"Could not write confirmed email: $email and the exception : $e")
           internalServerError()
         }
       }
 
-    }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period).url)
+    }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period, "page").url)
 
   def getSelectedRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -252,7 +256,11 @@ class ReminderController @Inject() (
                                 htsUser ⇒
                                   SeeOther(
                                     routes.ReminderController
-                                      .getRendersConfirmPage(crypto.encrypt(htsUser.email), success.reminderFrequency)
+                                      .getRendersConfirmPage(
+                                        crypto.encrypt(htsUser.email),
+                                        success.reminderFrequency,
+                                        "Update"
+                                      )
                                       .url
                                   )
                               )

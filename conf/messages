@@ -664,6 +664,8 @@ hts.reminder-frequency.or= or
 hts.reminder-frequency.cancel=Cancel all reminders
 hts.reminder-confirmation.title.h1=Savings reminders set
 hts.reminder-confirmation.title.p1=You’ll now get monthly email reminders
+hts.reminder-confirmation.title.h2=Savings reminders changed
+hts.reminder-confirmation.title.p2=You have new dates for monthly email reminders
 hts.reminder-confirmation.title.p1-1=You’ll get a Help to Save email reminder on the
 hts.reminder-confirmation.title.p1-2=day of each month
 hts.reminder-confirmation.title.p1-3=We'll send your reminders to
@@ -685,7 +687,7 @@ hts.reminder-dashboard.t1-2= day of each month
 hts.reminder-dashboard-change=Change
 
 hts.reminder-cancel-confirmation.title.h1=Reminders cancelled
-hts.reminder-cancel-confirmation.title.p1=We wont send you any more savings reminders
+hts.reminder-cancel-confirmation.title.p1=We will not send you any more savings reminders
 hts.reminder-cancel-confirmation.p1-1=You can
 hts.reminder-cancel-confirmation.p1-2=again at any time.
 hts.reminder-cancel-confirmation.li-signup=sign up for reminders
