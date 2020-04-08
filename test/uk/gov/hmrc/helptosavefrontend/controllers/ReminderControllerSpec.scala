@@ -262,14 +262,26 @@ class ReminderControllerSpec
 
     }
 
-    "should redirect to a renders confirmation page with email encrypted " in {
+    "should redirect to a renders confirmation set page with email encrypted " in {
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockDecrypt("encrypted")("email")
       }
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      val result = controller.getRendersConfirmPage("encrypted", "1st")(fakeRequestWithNoBody)
+      val result = controller.getRendersConfirmPage("encrypted", "1st", "Set")(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should redirect to a renders confirmation update page with email encrypted " in {
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockDecrypt("encrypted")("email")
+      }
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+      val result = controller.getRendersConfirmPage("encrypted", "1st", "Update")(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
 
     }

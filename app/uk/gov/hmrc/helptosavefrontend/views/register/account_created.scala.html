@@ -68,7 +68,7 @@ extraMeta = extraMeta) {
 
     <h2 class="heading-medium">@Messages("hts.account-created.savingreminders.h2")</h2>
     <p>@Html(Messages("hts.account-created.savingreminders.l1"))
-        <a href=@routes.ReminderController.getSelectRendersPage().url>@Html(Messages("hts.account-created.savingreminders.link"))</a> @Html(Messages("hts.account-created.savingreminders.l2"))</p>
+        <a href=@routes.ReminderController.getEmailsavingsReminders().url>@Html(Messages("hts.account-created.savingreminders.link"))</a> @Html(Messages("hts.account-created.savingreminders.l2"))</p>
 
   @form(routes.AccessAccountController.accessAccount){
       @ga_submit_button(
