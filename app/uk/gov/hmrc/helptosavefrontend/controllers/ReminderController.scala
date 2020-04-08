@@ -51,8 +51,7 @@ class ReminderController @Inject() (
   emailSavingsReminder: email_savings_reminders,
   reminderFrequencySet: reminder_frequency_set,
   reminderFrequencyChange: reminder_frequency_change,
-  setreminderConfirmation: reminder_confirmation_set,
-  updatereminderConfirmation: reminder_confirmation_update,
+  reminderConfirmation: reminder_confirmation,
   reminderCancelConfirmation: reminder_cancel_confirmation,
   reminderDashboard: reminder_dashboard
 )(
@@ -179,9 +178,23 @@ class ReminderController @Inject() (
       crypto.decrypt(email) match {
         case Success(value) ⇒
           if (page === "Set") {
-            Ok(setreminderConfirmation(value, period))
+            Ok(
+              reminderConfirmation(
+                value,
+                period,
+                "hts.reminder-confirmation-set.title.h1",
+                "hts.reminder-confirmation-set.title.p1"
+              )
+            )
           } else {
-            Ok(updatereminderConfirmation(value, period))
+            Ok(
+              reminderConfirmation(
+                value,
+                period,
+                "hts.reminder-confirmation-update.title.h1",
+                "hts.reminder-confirmation-update.title.p1"
+              )
+            )
           }
 
         case Failure(e) ⇒ {

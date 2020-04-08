@@ -22,11 +22,11 @@
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
 
-@(email: String,period :String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(email: String,period :String,headMessage : String, paraMessage : String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 
 @title = @{
-        Messages("hts.reminder-confirmation_set.title.h1")
+        Messages(headMessage)
      }
 
 @main(
@@ -35,7 +35,7 @@
     <div class="govuk-box-highlight">
         <h1 class="heading-xlarge">@title</h1>
         <span class="heading-large">
-            @Messages("hts.reminder-confirmation_set.title.p1")
+            @Messages(paraMessage)
         </span>
     </div>
 
