@@ -214,7 +214,13 @@ class ReminderController @Inject() (
             logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
             internalServerError()
           }, { htsUser ⇒
-            Ok(reminderFrequencyChange(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+            Ok(
+              reminderFrequencyChange(
+                ReminderForm.giveRemindersDetailsForm(),
+                DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
+                Some(backLink)
+              )
+            )
           }
         )
 
