@@ -610,7 +610,7 @@ hts.help-information.section.how-account-works.s1.title=Help to Save savings exp
 
 hts.help-information.section.how-account-works.s2.title=How to sign in
 hts.help-information.section.how-account-works.s2.p1=Go to www.gov.uk/helptosave.
-hts.help-information.section.how-account-works.s2.p2=You can also sign in using the free HMRC app. Go to <a href={0} target="_blank">www.gov.uk/hmrc/app</a> to find out more.
+hts.help-information.section.how-account-works.s2.p2=You can also sign in using the free HMRC app. Go to <a href={0} tabindex="-1" target="_blank">www.gov.uk/hmrc/app</a> to find out more.
 
 hts.help-information.section.how-account-works.s3.title=Why use the app
 hts.help-information.section.how-account-works.s3.h1=You can use the free HMRC app to:
@@ -619,7 +619,7 @@ hts.help-information.section.how-account-works.s3.ul1-li2=keep track of your sav
 hts.help-information.section.how-account-works.s3.ul1-li3=see how much you can still pay in each calendar month
 hts.help-information.section.how-account-works.s3.ul1-li4=set yourself reminders
 hts.help-information.section.how-account-works.s3.ul1-li5=view your payments and withdrawals
-hts.help-information.section.how-account-works.s3.p1=Go to <a href={0} target="_blank">www.gov.uk/hmrc/app</a> to find out more.
+hts.help-information.section.how-account-works.s3.p1=Go to <a href={0} tabindex="-1" target="_blank">www.gov.uk/hmrc/app</a> to find out more.
 
 hts.help-information.section.how-account-works.s4.title=How we will contact you
 hts.help-information.section.how-account-works.s4.p1=When we send you a message to ‘Your messages’ in your account, we’ll send you an email to let you know. Go to ‘Your messages’ to read it.
