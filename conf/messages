@@ -194,7 +194,7 @@ hts.register.think_you_are_eligible.review.disagree.ul1-li2=you have asked for a
 hts.register.think_you_are_eligible.review.disagree.ul1-li3=you received your review of the decision within the last month
 hts.register.think_you_are_eligible.review.disagree.ul1-li4=you want to challenge the decision not to allow you to open a Help to Save account
 hts.register.think_you_are_eligible.review.disagree.p2=The tribunal is independent of government. It will listen to both sides before making a decision.
-hts.register.think_you_are_eligible.review.disagree.p3=Go to GOV.UK to find out how to <a href={0}>appeal to the tax tribunal</a>.
+hts.register.think_you_are_eligible.review.disagree.p3=Go to GOV.UK to find out how to <a href={0} tabindex="-1">appeal to the tax tribunal</a>.
 
 # IV Locked Out
 hts.iv.locked_out.title.h1=We were not able to verify your identity
