@@ -207,6 +207,7 @@ class ReminderController @Inject() (
 
   def getSelectedRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
       helpToSaveReminderService
         .getHtsUser(htsContext.nino)
         .fold(
@@ -218,7 +219,7 @@ class ReminderController @Inject() (
               reminderFrequencyChange(
                 ReminderForm.giveRemindersDetailsForm(),
                 DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
-                Some(backLink)
+                Some(bckLink)
               )
             )
           }
