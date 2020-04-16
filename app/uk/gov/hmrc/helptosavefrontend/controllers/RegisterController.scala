@@ -133,7 +133,7 @@ class RegisterController @Inject() (
   def getDetailsAreIncorrect: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Ok(detailsAreIncorrectView())
-    }(loginContinueURL = frontendAppConfig.checkEligibilityUrl)
+    }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
   def createAccount: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

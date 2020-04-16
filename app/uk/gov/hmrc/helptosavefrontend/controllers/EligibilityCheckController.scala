@@ -160,7 +160,7 @@ class EligibilityCheckController @Inject() (
           )
         }
       }
-    }(loginContinueURL = frontendAppConfig.checkEligibilityUrl)
+    }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
   def youAreEligibleSubmit: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

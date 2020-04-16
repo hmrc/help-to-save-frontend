@@ -27,7 +27,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}
 import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport.ROps
-import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, BaseController, ControllerSpecWithGuiceApp}
+import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, BaseController, ControllerSpecWithGuiceApp, routes}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, UserInfo}
@@ -55,7 +55,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
   private def actionWithNoEnrols =
     htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Future.successful(Ok(""))
-    }(appConfig.checkEligibilityUrl)
+    }(routes.EligibilityCheckController.getCheckEligibility().url)
 
   private def actionWithEnrols =
     htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -63,7 +63,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
         case Left(_) ⇒ Future.successful(InternalServerError(""))
         case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
       }
-    }(appConfig.checkEligibilityUrl)
+    }(routes.EligibilityCheckController.getCheckEligibility().url)
 
   private def mockAuthWith(error: String) =
     mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString(error))
@@ -136,7 +136,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
           redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
-        redirectTo should include(urlEncode(appConfig.checkEligibilityUrl))
+        redirectTo should include(urlEncode(routes.EligibilityCheckController.getCheckEligibility().url))
       }
     }
 
