@@ -78,7 +78,7 @@ class ReminderController @Inject() (
             e ⇒ {
               logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
 
-              Ok(emailSavingsReminder(ReminderForm.giveRemindersDetailsForm(), Some(backLink)))
+              Ok(emailSavingsReminder(Some(backLink)))
             }, { htsUser ⇒
               Ok(
                 reminderDashboard(
