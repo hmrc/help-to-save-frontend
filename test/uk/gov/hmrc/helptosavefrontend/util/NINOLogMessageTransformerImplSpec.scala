@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class NINOLogMessageTransformerImplSpec extends WordSpec with Matchers {
+class NINOLogMessageTransformerImplSpec extends AnyWordSpec with Matchers {
 
   "NINOLogMessageTransformerImpl" must {
 

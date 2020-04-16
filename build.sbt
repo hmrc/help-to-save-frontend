@@ -17,10 +17,6 @@ lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used i
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-scalafixDependencies in ThisBuild += "org.scalatest" %% "autofix" % "3.1.0.0"
-
-addCompilerPlugin(scalafixSemanticdb) // enable SemanticDB
-
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
@@ -100,5 +96,3 @@ lazy val microservice = Project(appName, file("."))
     compile := ((compile in Compile) dependsOn formatMessageQuotes).value
   )
   .settings(scalafmtOnCompile := true)
-
-
