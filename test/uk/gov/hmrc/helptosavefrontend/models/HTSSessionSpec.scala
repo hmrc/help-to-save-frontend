@@ -16,10 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsSuccess, Json}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class HTSSessionSpec extends WordSpec with Matchers {
+class HTSSessionSpec extends AnyWordSpec with Matchers {
 
   "HTSSession" must {
 

@@ -17,12 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.Matchers
 import play.api.libs.json.Writes
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import org.scalatest.matchers.should.Matchers
 
 trait HttpSupport { this: MockFactory with Matchers ⇒
 

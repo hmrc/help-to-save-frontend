@@ -6,11 +6,11 @@ object AppDependencies {
   val hmrc = "uk.gov.hmrc"
 
   val compile = Seq(
-    hmrc %% "govuk-template" % "5.52.0-play-26",
-    hmrc %% "mongo-caching" % "6.8.0-play-26",
+    hmrc %% "govuk-template" % "5.54.0-play-26",
+    hmrc %% "mongo-caching" % "6.12.0-play-26",
     hmrc %% "auth-client" % "2.35.0-play-26",
     hmrc %% "play-whitelist-filter" % "3.1.0-play-26",
-    hmrc %% "bootstrap-play-26" % "1.5.0",
+    hmrc %% "bootstrap-play-26" % "1.7.0",
     hmrc %% "play-ui" % "8.8.0-play-26",
     hmrc %% "play-language" % "4.2.0-play-26",
     "com.github.kxbmap" %% "configs" % "0.4.4",
@@ -19,9 +19,9 @@ object AppDependencies {
   )
 
   val test = Seq(
-    hmrc %% "service-integration-test" % "0.9.0-play-26" % "test",
+    hmrc %% "service-integration-test" % "0.10.0-play-26" % "test",
     hmrc %% "stub-data-generator" % "0.5.3" % "test",
-    hmrc %% "reactivemongo-test" % "4.16.0-play-26" % "test",
+    hmrc %% "reactivemongo-test" % "4.19.0-play-26" % "test",
     "org.scalatest" %% "scalatest" % "3.1.1" % "test",
     "com.vladsch.flexmark" % "flexmark-all" % "0.35.10" % "test",
     "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % "test",

@@ -20,14 +20,15 @@ import cats.data.Validated.Valid
 import cats.syntax.either._
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scalatest.{Matchers, WordSpec}
 import play.api.data.FormError
 import play.api.{Configuration, Logger}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages._
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
 // scalastyle:off magic.number
-class EmailValidationSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   "EmailValidation" must {
 

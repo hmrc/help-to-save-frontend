@@ -125,67 +125,71 @@ class EligibilityCheckController @Inject() (
         .merge
     }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
-  def getIsNotEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { () ⇒
-      checkHasDoneEligibilityChecks {
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-      } {
-        _.eligibilityResult.fold(
-          { ineligibleReason ⇒
-            val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
-            val threshold = ineligibleReason.value.threshold
-            ineligibilityType.fold {
-              logger.warn(s"Could not parse ineligibility reason: $ineligibleReason", htsContext.nino)
-              internalServerError()
-            } { i ⇒
-              Ok(notEligible(i, threshold))
-            }
-          },
-          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
-        )
-      }
-    }
-  }(loginContinueURL = routes.EligibilityCheckController.getIsNotEligible().url)
-
-  def getIsEligible: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkIfAlreadyEnrolled { () ⇒
-      checkHasDoneEligibilityChecks {
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-      } {
-        _.eligibilityResult.fold(
-          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
-          eligibleWithUserInfo ⇒ Ok(youAreEligible(eligibleWithUserInfo.userInfo))
-        )
-      }
-    }
-  }(loginContinueURL = frontendAppConfig.checkEligibilityUrl)
-
-  def youAreEligibleSubmit: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-    checkHasDoneEligibilityChecks {
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-    } {
-      _.eligibilityResult.fold(
-        _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), { userInfo ⇒
-          val url = userInfo.userInfo.email
-            .fold(
-              routes.EmailController.getGiveEmailPage()
-            )(_ ⇒ routes.EmailController.getSelectEmailPage())
-            .url
-          SeeOther(url)
+  def getIsNotEligible: Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      checkIfAlreadyEnrolled { () ⇒
+        checkHasDoneEligibilityChecks {
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        } {
+          _.eligibilityResult.fold(
+            { ineligibleReason ⇒
+              val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
+              val threshold = ineligibleReason.value.threshold
+              ineligibilityType.fold {
+                logger.warn(s"Could not parse ineligibility reason: $ineligibleReason", htsContext.nino)
+                internalServerError()
+              } { i ⇒
+                Ok(notEligible(i, threshold))
+              }
+            },
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
+          )
         }
+      }
+    }(loginContinueURL = routes.EligibilityCheckController.getIsNotEligible().url)
+
+  def getIsEligible: Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      checkIfAlreadyEnrolled { () ⇒
+        checkHasDoneEligibilityChecks {
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        } {
+          _.eligibilityResult.fold(
+            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+            eligibleWithUserInfo ⇒ Ok(youAreEligible(eligibleWithUserInfo.userInfo))
+          )
+        }
+      }
+    }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
+
+  def youAreEligibleSubmit: Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      checkHasDoneEligibilityChecks {
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+      } {
+        _.eligibilityResult.fold(
+          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url), { userInfo ⇒
+            val url = userInfo.userInfo.email
+              .fold(
+                routes.EmailController.getGiveEmailPage()
+              )(_ ⇒ routes.EmailController.getSelectEmailPage())
+              .url
+            SeeOther(url)
+          }
+        )
+      }
+    }(loginContinueURL = routes.EligibilityCheckController.youAreEligibleSubmit().url)
+
+  def getMissingInfoPage: Action[AnyContent] =
+    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+      htsContext.userDetails.fold(
+        missingInfo ⇒ Ok(missingUserInfo(missingInfo.missingInfo)),
+        _ ⇒ SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       )
-    }
-  }(loginContinueURL = routes.EligibilityCheckController.youAreEligibleSubmit().url)
+    }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
 
-  def getMissingInfoPage: Action[AnyContent] = authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-    htsContext.userDetails.fold(
-      missingInfo ⇒ Ok(missingUserInfo(missingInfo.missingInfo)),
-      _ ⇒ SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-    )
-  }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
-
-  def getThinkYouAreEligiblePage: Action[AnyContent] = authorisedForHtsWithNINO {
-    implicit request ⇒ implicit htsContext ⇒
+  def getThinkYouAreEligiblePage: Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkHasDoneEligibilityChecks {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
       } {
@@ -194,7 +198,7 @@ class EligibilityCheckController @Inject() (
           _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible().url)
         )
       }
-  }(loginContinueURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
+    }(loginContinueURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage().url)
 
   private def getEligibilityActionResult(session: Option[HTSSession])(
     implicit hc: HeaderCarrier,

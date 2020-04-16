@@ -42,8 +42,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val helpToSaveFrontendUrl: String = getUrlFor("help-to-save-frontend")
 
-  val checkEligibilityUrl: String = s"${getUrlFor("help-to-save-frontend")}/check-eligibility"
-
   val accessAccountUrl: String = s"${getUrlFor("help-to-save-frontend")}/access-account"
 
   val helpToSaveReminderUrl: String = servicesConfig.baseUrl("help-to-save-reminder")
