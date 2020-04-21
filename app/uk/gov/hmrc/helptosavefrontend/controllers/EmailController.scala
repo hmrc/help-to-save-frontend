@@ -79,15 +79,13 @@ class EmailController @Inject() (
 ) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with SessionBehaviour with VerifyEmailBehaviour {
 
-  private val eligibilityPage: String = routes.EligibilityCheckController.getIsEligible().url
-
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
 
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
       routes.RegisterController.getCreateAccountPage().url
     } else {
-      eligibilityPage
+      routes.EligibilityCheckController.getIsEligible().url
     }
 
   def getSelectEmailPage: Action[AnyContent] =
