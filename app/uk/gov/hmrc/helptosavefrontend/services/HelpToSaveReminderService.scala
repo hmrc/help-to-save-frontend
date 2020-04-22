@@ -16,17 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
-import java.time.LocalDate
-
 import com.google.inject.{ImplementedBy, Inject}
 import javax.inject.Singleton
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, Result}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[HelpToSaveReminderServiceImpl])
 trait HelpToSaveReminderService {
