@@ -450,6 +450,15 @@ class EmailController @Inject() (
                    )
                  )
               _ ← helpToSaveService.storeConfirmedEmail(params.email)
+              _ ← {
+                if (isFeatureEnabled) {
+                  helpToSaveReminderService.updateReminderEmail(
+                    UpdateReminderEmail(htsContext.nino, params.email, userInfo.forename, userInfo.surname)
+                  )
+                } else {
+                  EitherT.pure[Future, String](())
+                }
+              }
               r ← EitherT.liftF(
                    updateSessionAndReturnResult(
                      HTSSession(None, Some(params.email), None),
