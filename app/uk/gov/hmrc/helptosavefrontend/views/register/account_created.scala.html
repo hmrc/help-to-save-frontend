@@ -27,6 +27,8 @@
 
 @(accountNumber: String, email: String, lastPayDateThisMonth: LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@areRemindersEnabled = @{appConfig.reminderServiceFeatureSwitch}
+
 @title = @{
   Messages("hts.account-created.title.h1")
 }
@@ -64,11 +66,14 @@ extraMeta = extraMeta) {
     <li>@Html(Messages("hts.account-created.ul1-li5"))</li>
   </ul>
 
+
+@if(areRemindersEnabled) {
   <p>@Messages("hts.account-created.p4", lastPayDateThisMonth.format(dateTimeFormatter))</p>
 
     <h2 class="heading-medium">@Messages("hts.account-created.savingreminders.h2")</h2>
     <p>@Html(Messages("hts.account-created.savingreminders.l1"))
         <a href=@routes.ReminderController.getEmailsavingsReminders().url>@Html(Messages("hts.account-created.savingreminders.link"))</a> @Html(Messages("hts.account-created.savingreminders.l2"))</p>
+}
 
   @form(routes.AccessAccountController.accessAccount){
       @ga_submit_button(
