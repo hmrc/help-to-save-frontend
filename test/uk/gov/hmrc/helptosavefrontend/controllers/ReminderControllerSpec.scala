@@ -37,7 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{email_savings_reminders, reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{apply_savings_reminders, email_savings_reminders, reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -106,7 +106,8 @@ class ReminderControllerSpec
       injector.instanceOf[reminder_frequency_change],
       injector.instanceOf[reminder_confirmation],
       injector.instanceOf[reminder_cancel_confirmation],
-      injector.instanceOf[reminder_dashboard]
+      injector.instanceOf[reminder_dashboard],
+      injector.instanceOf[apply_savings_reminders]
     ) {}
   lazy val controller = newController()
 
@@ -427,6 +428,53 @@ class ReminderControllerSpec
       val result = csrfAddToken(controller.selectedRemindersSubmit())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
 
+    }
+    "should show the form validation errors when the user submits no selection in the HTS Reminder " in {
+
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      }
+
+      val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+    }
+
+    "should return the apply savings reminder  page when asked for it" in {
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+
+      }
+
+      val result = csrfAddToken(controller.getApplySavingsReminderPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+    "should show a success page if the user submits an ApplySavingsReminderPage with No  " in {
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "no")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+
+      }
+
+      val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
+      status(result) shouldBe SEE_OTHER
+    }
+
+    "should show a success page if the user submits an ApplySavingsReminderPage with Yes  " in {
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "yes")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+
+      }
+
+      val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
+      status(result) shouldBe OK
     }
 
   }
