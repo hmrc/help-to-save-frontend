@@ -53,7 +53,8 @@ class ReminderController @Inject() (
   reminderFrequencyChange: reminder_frequency_change,
   reminderConfirmation: reminder_confirmation,
   reminderCancelConfirmation: reminder_cancel_confirmation,
-  reminderDashboard: reminder_dashboard
+  reminderDashboard: reminder_dashboard,
+  applySavingsReminders: apply_savings_reminders
 )(
   implicit val crypto: Crypto,
   implicit val transformer: NINOLogMessageTransformer,
@@ -318,4 +319,31 @@ class ReminderController @Inject() (
 
     }(loginContinueURL = routes.ReminderController.getRendersCancelConfirmPage().url)
 
+  def getApplySavingsReminderPage(): Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      def bckLink: String = routes.EmailController.getSelectEmailPage().url
+      Ok(applySavingsReminders(ReminderForm.giveRemindersDetailsForm(), Some(bckLink)))
+
+    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+
+  def submitApplySavingsReminderPage(): Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      def bckLink: String = routes.ReminderController.getApplySavingsReminderPage().url
+      ReminderForm
+        .giveRemindersDetailsForm()
+        .bindFromRequest()
+        .fold(
+          withErrors ⇒ {
+            Ok(applySavingsReminders(withErrors))
+          },
+          success ⇒
+            if (success.reminderFrequency === "no") {
+              SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+
+            } else {
+              Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(bckLink)))
+            }
+        )
+
+    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 }

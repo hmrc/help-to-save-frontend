@@ -654,7 +654,7 @@ language-switcher.nav=Language switcher
 
 
 hts.email-saving-remainders.title.h1=Email savings reminders
-hts.email-saving-remainders.intro=Reminders help you remember to save each month. This helps you earn the highest possible bonus.
+hts.email-saving-remainders.intro=Email reminders help you remember to save each month. This helps you earn the highest possible bonus.
 hts.email-saving-remainders.note=Currently, you are not receiving any reminders.
 hts.email-saving-remainders-button=Set up reminders
 hts.reminder-frequency.select=Select when you want to receive reminders
@@ -693,3 +693,8 @@ hts.reminder-cancel-confirmation.title.p1=We will not send you any more savings 
 hts.reminder-cancel-confirmation.p1-1=You can
 hts.reminder-cancel-confirmation.p1-2=again at any time.
 hts.reminder-cancel-confirmation.li-signup=sign up for reminders
+
+hts.reminder-frequency.yes=Yes, set up email reminders
+hts.reminder-frequency.no=No, I do not want to set up email reminders now
+hts.reminder-apply-savings=Do you want to receive email savings reminders?
+hts.reminder-select.error.missing=Select whether you want to set up email reminders
