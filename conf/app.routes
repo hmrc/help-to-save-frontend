@@ -90,3 +90,6 @@ GET        /account-home/reminders-cancel-confirmation      uk.gov.hmrc.helptosa
 GET        /account-home/reminders-dashboard                uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getEmailsavingsReminders
 GET        /apply-savings-reminders                         uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getApplySavingsReminderPage
 POST       /apply-savings-reminders                         uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.submitApplySavingsReminderPage
+GET        /apply-savings-reminders-signup                  uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getApplySavingsReminderSignUpPage
+POST       /apply-savings-reminders-signup                  uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.submitApplySavingsReminderSignUpPage
+

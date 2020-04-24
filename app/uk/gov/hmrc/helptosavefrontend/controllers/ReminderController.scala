@@ -100,7 +100,7 @@ class ReminderController @Inject() (
   def getSelectRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
-      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(bckLink)))
+      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), "account", Some(bckLink)))
 
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
@@ -111,7 +111,7 @@ class ReminderController @Inject() (
         .bindFromRequest()
         .fold(
           withErrors ⇒ {
-            Ok(reminderFrequencySet(withErrors))
+            Ok(reminderFrequencySet(withErrors, "error"))
           },
           success ⇒
             htsContext.userDetails match {
@@ -235,7 +235,7 @@ class ReminderController @Inject() (
         .bindFromRequest()
         .fold(
           withErrors ⇒ {
-            Ok(reminderFrequencySet(withErrors))
+            Ok(reminderFrequencySet(withErrors, "error"))
           },
           success ⇒
             htsContext.userDetails match {
@@ -328,7 +328,6 @@ class ReminderController @Inject() (
 
   def submitApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      def bckLink: String = routes.ReminderController.getApplySavingsReminderPage().url
       ReminderForm
         .giveRemindersDetailsForm()
         .bindFromRequest()
@@ -341,9 +340,79 @@ class ReminderController @Inject() (
               SeeOther(routes.BankAccountController.getBankDetailsPage().url)
 
             } else {
-              Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some(bckLink)))
+              //   Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some("registration"), Some(bckLink)))
+              SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage().url)
             }
         )
 
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+
+  def getApplySavingsReminderSignUpPage(): Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      def bckLink: String = routes.ReminderController.getApplySavingsReminderPage().url
+      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), "registration", Some(bckLink)))
+
+    }(loginContinueURL = routes.ReminderController.getApplySavingsReminderSignUpPage().url)
+
+  def submitApplySavingsReminderSignUpPage(): Action[AnyContent] =
+    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+      ReminderForm
+        .giveRemindersDetailsForm()
+        .bindFromRequest()
+        .fold(
+          withErrors ⇒ {
+            Ok(reminderFrequencySet(withErrors, "error"))
+          },
+          success ⇒
+            htsContext.userDetails match {
+              case Left(missingUserInfos) ⇒
+                logger.warn(s"Email was verified but missing some user info $missingUserInfos")
+                internalServerError()
+
+              case Right(userInfo) ⇒
+                helpToSaveService.getConfirmedEmail.value.flatMap {
+                  _.fold(
+                    noEmailError ⇒ {
+                      logger.warn(
+                        s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : $noEmailError"
+                      )
+                      internalServerError()
+                    },
+                    emailRetrieved ⇒
+                      emailRetrieved match {
+                        case Some(email) if !email.isEmpty ⇒ {
+                          val daysToReceiveReminders =
+                            DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
+                          val htsUserToBeUpdated = HtsUser(
+                            Nino(htsContext.nino),
+                            email,
+                            userInfo.forename,
+                            userInfo.surname,
+                            true,
+                            daysToReceiveReminders
+                          )
+                          helpToSaveReminderService
+                            .updateHtsUser(htsUserToBeUpdated)
+                            .fold(
+                              htsError ⇒ {
+                                logger.warn(
+                                  s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
+                                )
+                                internalServerError()
+                              },
+                              htsUser ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                            )
+
+                        }
+                        case Some(_) ⇒ {
+                          logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
+                          internalServerError()
+                        }
+                      }
+                  )
+                }
+            }
+        )
+    }(loginContinueURL = routes.ReminderController.submitApplySavingsReminderSignUpPage().url)
+
 }

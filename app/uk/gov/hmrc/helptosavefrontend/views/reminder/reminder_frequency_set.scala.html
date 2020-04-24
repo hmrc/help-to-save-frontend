@@ -27,7 +27,7 @@
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
-@(form: Form[ReminderForm],backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[ReminderForm],screenFrom :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 
 @title = @{
@@ -55,8 +55,8 @@
 
         <h1 class="heading-large">@Messages("hts.reminder-frequency.select")</h1>
 
+          <form method="post" action= @if(screenFrom.matches("account")) { @routes.ReminderController.selectRemindersSubmit} else {@routes.ReminderController.submitApplySavingsReminderSignUpPage} novalidate>
 
-          <form method="post" action=@routes.ReminderController.selectRemindersSubmit novalidate>
               @CSRF.formField(request)
 
 

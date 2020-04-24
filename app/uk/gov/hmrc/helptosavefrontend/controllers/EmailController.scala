@@ -302,7 +302,7 @@ class EmailController @Inject() (
                 if (session.changingDetails) {
                   SeeOther(routes.RegisterController.getCreateAccountPage().url)
                 } else {
-                  SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                  SeeOther(routes.ReminderController.getApplySavingsReminderPage().url)
                 }
               }
           },
@@ -762,7 +762,7 @@ class EmailController @Inject() (
               if (session.changingDetails) {
                 SeeOther(routes.RegisterController.getCreateAccountPage().url)
               } else {
-                SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                SeeOther(routes.ReminderController.getApplySavingsReminderPage().url)
               }
           )
         },

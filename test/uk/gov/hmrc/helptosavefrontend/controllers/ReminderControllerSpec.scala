@@ -121,6 +121,8 @@ class ReminderControllerSpec
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
     def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
+    def verifyHtsUser(params: HtsUser): Future[Result] =
+      csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequest)
 
     "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
       val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
@@ -474,7 +476,94 @@ class ReminderControllerSpec
       }
 
       val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
-      status(result) shouldBe OK
+      status(result) shouldBe SEE_OTHER
+    }
+
+    "should return the apply savings reminder  signup page when asked for it" in {
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+
+      }
+
+      val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
+    "should redirect to internal server error page if user info is missing from the htsContext in savings reminder  signup page" in {
+
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+      }
+
+      val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+
+    }
+
+    "should show the form validation errors when the user submits an savings reminder  signup page in the HTS Reminder backend service with nobody " in {
+
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+      }
+
+      val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+    "should redirect to an the internal server error page if email retrieveal is failed in savings reminder  signup page" in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Left("error occurred while retrieving the email details"))
+
+      }
+
+      //  val result = verifyHtsUser(htsUserForUpdate)
+      val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+    }
+
+    "should redirect to internal server error page if htsUser update fails in savings reminder  signup page " in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("email")))
+        mockUpdateHtsUserPost(htsUserForUpdate)(Left("error occurred while updating htsUser"))
+
+      }
+
+      // val result = verifyHtsUser(htsUserForUpdate)
+      val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+    }
+
+    "should show a success page if the user submits an HtsUser to update in savings reminder  signup page" in {
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEmailGet()(Right(Some("email")))
+        mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+
+      }
+
+      val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.SEE_OTHER
+
     }
 
   }

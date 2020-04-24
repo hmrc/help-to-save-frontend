@@ -64,7 +64,7 @@ class BankAccountController @Inject() (
       if (session.pendingEmail.isDefined) {
         routes.EmailController.getEmailConfirmed().url
       } else {
-        routes.EmailController.getSelectEmailPage().url
+        routes.ReminderController.getApplySavingsReminderPage().url
       }
     }
 
