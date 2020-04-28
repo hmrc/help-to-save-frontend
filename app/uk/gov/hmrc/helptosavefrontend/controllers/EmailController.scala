@@ -513,6 +513,7 @@ class EmailController @Inject() (
               None,
               None,
               session.flatMap(_.bankDetails),
+              None,
               session.exists(_.changingDetails)
             )
             for {

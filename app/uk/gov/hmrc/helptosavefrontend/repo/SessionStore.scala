@@ -106,8 +106,10 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
                 ivSuccessURL = newSession.ivSuccessURL.orElse(existing.ivSuccessURL),
                 bankDetails = newSession.bankDetails,
                 changingDetails = newSession.changingDetails,
+                reminderDetails = newSession.reminderDetails.orElse(existing.reminderDetails),
                 accountNumber = newSession.accountNumber,
                 hasSelectedEmail = newSession.hasSelectedEmail,
+                hasSelectedReminder = newSession.hasSelectedReminder,
                 attemptedAccountHolderPageURL =
                   newSession.attemptedAccountHolderPageURL.orElse(existing.attemptedAccountHolderPageURL)
               )

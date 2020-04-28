@@ -698,3 +698,4 @@ hts.reminder-frequency.yes=Yes, set up email reminders
 hts.reminder-frequency.no=No, I do not want to set up email reminders now
 hts.reminder-apply-savings=Do you want to receive email savings reminders?
 hts.reminder-select.error.missing=Select whether you want to set up email reminders
+hts.register.create_account.your-remainder.note=We will not send you any reminders. You can set these up later if you wish.

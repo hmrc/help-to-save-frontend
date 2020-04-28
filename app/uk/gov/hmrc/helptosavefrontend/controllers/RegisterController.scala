@@ -103,9 +103,21 @@ class RegisterController @Inject() (
                     )
                     internalServerError()
                   } { reason ⇒
+                    val period = eligibleWithInfo.session.reminderDetails match {
+                      case Some(x) => x
+                      case None    => "noValue"
+                    }
+
                     eligibleWithInfo.session.bankDetails match {
                       case Some(bankDetails) ⇒
-                        Ok(createAccountView(eligibleWithInfo.userInfo, eligibleWithInfo.email, bankDetails))
+                        Ok(
+                          createAccountView(
+                            eligibleWithInfo.userInfo,
+                            period,
+                            eligibleWithInfo.email,
+                            bankDetails
+                          )
+                        )
                       case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
                     }
                   }
@@ -271,6 +283,18 @@ class RegisterController @Inject() (
         }
       }
     }(loginContinueURL = routes.RegisterController.changeBankDetails().url)
+
+  def changeReminder: Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      checkIfAlreadyEnrolled { () ⇒
+        checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+          startChangingDetailsAndRedirect(
+            eligibleWithInfo.session,
+            routes.ReminderController.getApplySavingsReminderSignUpPage().url
+          )
+        }
+      }
+    }(loginContinueURL = routes.RegisterController.changeReminder().url)
 
   def getCannotCheckDetailsPage: Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)

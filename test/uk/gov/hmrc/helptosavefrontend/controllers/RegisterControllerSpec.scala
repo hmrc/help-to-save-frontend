@@ -682,6 +682,7 @@ class RegisterControllerSpec
 
     "handling getCreateAccountErrorPage" must {
       val confirmedEmail = "confirmed"
+
       def doRequest(): Future[PlayResult] = controller.getCreateAccountErrorPage(FakeRequest())
 
       behave like commonEnrolmentAndSessionBehaviour(doRequest)
@@ -702,6 +703,7 @@ class RegisterControllerSpec
 
     "handling getCreateAccountErrorBankDetailsPage" must {
       val confirmedEmail = "confirmed"
+
       def doRequest(): Future[PlayResult] = controller.getCreateAccountErrorBankDetailsPage(FakeRequest())
 
       behave like commonEnrolmentAndSessionBehaviour(doRequest)
@@ -832,5 +834,28 @@ class RegisterControllerSpec
       }
 
     }
+    "handling changeReminders" must {
+      def doRequest(): Future[PlayResult] = controller.changeReminder()(FakeRequest())
+
+      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+
+      "write a new session and redirect to bank details page" in {
+        val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+        val session = HTSSession(eligibilityResult, Some("valid@email.com"), None)
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockSessionStoreGet(Right(Some(session)))
+          mockSessionStorePut(session.copy(changingDetails = true))(Right(()))
+        }
+        val result = doRequest()
+
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderSignUpPage().url)
+      }
+
+    }
+
   }
 }

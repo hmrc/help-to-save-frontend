@@ -28,7 +28,7 @@
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
-@(eligibleWithUserInfo: EligibleWithUserInfo, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(eligibleWithUserInfo: EligibleWithUserInfo,period: String, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{Messages("hts.register.create_account.title")}
 
@@ -81,6 +81,23 @@ bodyClasses = None) {
         "change-email"
       )
     )
+@if(period.matches("noValue")) {
+  @summary_row(Messages("hts.email-saving-remainders.title.h1"), Messages("hts.register.create_account.your-remainder.note"),
+    summary_section_change(
+      routes.RegisterController.changeReminder().url,
+      (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
+      "change-reminder"
+    )
+  )
+  } else{
+  @summary_row(Messages("hts.email-saving-remainders.title.h1"),Messages("hts.reminder-confirmation.title.p1-1") +" "+ period +" "+ Messages("hts.reminder-confirmation.title.p1-2"),
+    summary_section_change(
+      routes.RegisterController.changeReminder().url,
+      (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
+      "change-reminder"
+    )
+  )
+    }
   </dl>
 
   @summary_section_head(heading = Messages("hts.register.create_account.your-bank-details"))

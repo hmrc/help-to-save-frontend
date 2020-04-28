@@ -27,7 +27,7 @@
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
-@(form: Form[ReminderForm],backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[ReminderForm],selection:String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 
 @title = @{
@@ -61,12 +61,12 @@
 
 
             <div class="multiple-choice" data-target="collect-choice">
-                    <input id="yes" type="radio" name="reminderFrequency" value="yes" >
+                    <input id="yes" type="radio" name="reminderFrequency" value="yes" @if(selection.matches("yes")) {checked}>
                     <label for="yes">@messages("hts.reminder-frequency.yes")</label>
                 </div>
 
                 <div class="multiple-choice" data-target="collect-choice">
-                    <input id="no" type="radio" name="reminderFrequency" value="no">
+                    <input id="no" type="radio" name="reminderFrequency" value="no" @if(selection.matches("no")) {checked}>
                     <label for="no">@messages("hts.reminder-frequency.no")</label>
                 </div>
 

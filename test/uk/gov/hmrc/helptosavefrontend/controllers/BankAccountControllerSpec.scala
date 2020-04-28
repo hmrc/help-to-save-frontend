@@ -102,7 +102,7 @@ class BankAccountControllerSpec
         contentAsString(result) should include(
           "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
         )
-        contentAsString(result) should include("/help-to-save/select-email")
+        contentAsString(result) should include("/help-to-save/apply-savings-reminders")
       }
 
       "display the page with correct Back link when they came from emailVerified page" in {
@@ -131,7 +131,16 @@ class BankAccountControllerSpec
           mockSessionStoreGet(
             Right(
               Some(
-                HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true)
+                HTSSession(
+                  Some(Right(randomEligibleWithUserInfo(validUserInfo))),
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  true
+                )
               )
             )
           )

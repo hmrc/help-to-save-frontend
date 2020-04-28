@@ -28,13 +28,16 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -54,7 +57,8 @@ class ReminderController @Inject() (
   reminderConfirmation: reminder_confirmation,
   reminderCancelConfirmation: reminder_cancel_confirmation,
   reminderDashboard: reminder_dashboard,
-  applySavingsReminders: apply_savings_reminders
+  applySavingsReminders: apply_savings_reminders,
+  notEligible: not_eligible
 )(
   implicit val crypto: Crypto,
   implicit val transformer: NINOLogMessageTransformer,
@@ -63,9 +67,19 @@ class ReminderController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging {
+) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging
+    with EnrolmentCheckBehaviour {
 
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
+
+  private def backLinkFromSession(session: HTSSession): String =
+    if (session.changingDetails) {
+      routes.RegisterController.getCreateAccountPage().url
+    } else if (session.hasSelectedReminder) {
+      routes.ReminderController.getApplySavingsReminderPage().url
+    } else {
+      routes.EmailController.getSelectEmailPage().url
+    }
 
   private def backLink: String = routes.AccessAccountController.accessAccount().url
 
@@ -100,7 +114,7 @@ class ReminderController @Inject() (
   def getSelectRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
-      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), "account", Some(bckLink)))
+      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), "none", "account", Some(bckLink)))
 
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
@@ -111,7 +125,7 @@ class ReminderController @Inject() (
         .bindFromRequest()
         .fold(
           withErrors ⇒ {
-            Ok(reminderFrequencySet(withErrors, "error"))
+            Ok(reminderFrequencySet(withErrors, "none", "error"))
           },
           success ⇒
             htsContext.userDetails match {
@@ -235,7 +249,7 @@ class ReminderController @Inject() (
         .bindFromRequest()
         .fold(
           withErrors ⇒ {
-            Ok(reminderFrequencySet(withErrors, "error"))
+            Ok(reminderFrequencySet(withErrors, "none", "error"))
           },
           success ⇒
             htsContext.userDetails match {
@@ -321,98 +335,138 @@ class ReminderController @Inject() (
 
   def getApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      def bckLink: String = routes.EmailController.getSelectEmailPage().url
-      Ok(applySavingsReminders(ReminderForm.giveRemindersDetailsForm(), Some(bckLink)))
-
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) { s ⇒
+        if (s.hasSelectedReminder) {
+          Ok(applySavingsReminders(ReminderForm.giveRemindersDetailsForm(), "yes", Some(backLinkFromSession(s))))
+        } else {
+          Ok(applySavingsReminders(ReminderForm.giveRemindersDetailsForm(), "none", Some(backLinkFromSession(s))))
+        }
+      }
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
   def submitApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      ReminderForm
-        .giveRemindersDetailsForm()
-        .bindFromRequest()
-        .fold(
-          withErrors ⇒ {
-            Ok(applySavingsReminders(withErrors))
-          },
-          success ⇒
-            if (success.reminderFrequency === "no") {
-              SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) { session ⇒
+        ReminderForm
+          .giveRemindersDetailsForm()
+          .bindFromRequest()
+          .fold(
+            withErrors ⇒ {
+              Ok(applySavingsReminders(withErrors, "none"))
+            },
+            success ⇒
+              if (success.reminderFrequency === "no") {
+                sessionStore
+                  .store(session.copy(hasSelectedReminder = false, reminderDetails = None))
+                  .fold(
+                    error ⇒ {
+                      logger.warn(s"Could not update session reminder: $error")
+                      internalServerError()
+                    },
+                    _ ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                  )
+              } else {
+                sessionStore
+                  .store(session.copy(hasSelectedReminder = true))
+                  .fold(
+                    error ⇒ {
+                      logger.warn(s"Could not update session reminder: $error")
+                      internalServerError()
+                    },
+                    _ ⇒ SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage().url)
+                  )
 
-            } else {
-              //   Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), Some("registration"), Some(bckLink)))
-              SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage().url)
-            }
-        )
+              }
+          )
+      }
 
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
   def getApplySavingsReminderSignUpPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      def bckLink: String = routes.ReminderController.getApplySavingsReminderPage().url
-      Ok(reminderFrequencySet(ReminderForm.giveRemindersDetailsForm(), "registration", Some(bckLink)))
-
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) { s ⇒
+        s.reminderDetails.fold(
+          Ok(
+            reminderFrequencySet(
+              ReminderForm.giveRemindersDetailsForm(),
+              "none",
+              "registration",
+              Some(backLinkFromSession(s))
+            )
+          )
+        )(
+          reminderDetails ⇒
+            Ok(
+              reminderFrequencySet(
+                ReminderForm.giveRemindersDetailsForm(),
+                reminderDetails.toString(),
+                "registration",
+                Some(backLinkFromSession(s))
+              )
+            )
+        )
+      }
     }(loginContinueURL = routes.ReminderController.getApplySavingsReminderSignUpPage().url)
 
   def submitApplySavingsReminderSignUpPage(): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-      ReminderForm
-        .giveRemindersDetailsForm()
-        .bindFromRequest()
-        .fold(
-          withErrors ⇒ {
-            Ok(reminderFrequencySet(withErrors, "error"))
-          },
-          success ⇒
-            htsContext.userDetails match {
-              case Left(missingUserInfos) ⇒
-                logger.warn(s"Email was verified but missing some user info $missingUserInfos")
-                internalServerError()
-
-              case Right(userInfo) ⇒
-                helpToSaveService.getConfirmedEmail.value.flatMap {
-                  _.fold(
-                    noEmailError ⇒ {
-                      logger.warn(
-                        s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : $noEmailError"
-                      )
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) { session ⇒
+        ReminderForm
+          .giveRemindersDetailsForm()
+          .bindFromRequest()
+          .fold(
+            withErrors ⇒ {
+              Ok(reminderFrequencySet(withErrors, "none", "error"))
+            },
+            success ⇒
+              if (success.reminderFrequency.nonEmpty) {
+                sessionStore
+                  .store(session.copy(reminderDetails = Some(success.reminderFrequency)))
+                  .fold(
+                    error ⇒ {
+                      logger.warn(s"Could not update session reminder: $error")
                       internalServerError()
                     },
-                    emailRetrieved ⇒
-                      emailRetrieved match {
-                        case Some(email) if !email.isEmpty ⇒ {
-                          val daysToReceiveReminders =
-                            DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
-                          val htsUserToBeUpdated = HtsUser(
-                            Nino(htsContext.nino),
-                            email,
-                            userInfo.forename,
-                            userInfo.surname,
-                            true,
-                            daysToReceiveReminders
-                          )
-                          helpToSaveReminderService
-                            .updateHtsUser(htsUserToBeUpdated)
-                            .fold(
-                              htsError ⇒ {
-                                logger.warn(
-                                  s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
-                                )
-                                internalServerError()
-                              },
-                              htsUser ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
-                            )
-
-                        }
-                        case Some(_) ⇒ {
-                          logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
-                          internalServerError()
-                        }
-                      }
+                    if (session.changingDetails) { _ ⇒
+                      SeeOther(routes.RegisterController.getCreateAccountPage().url)
+                    } else { _ ⇒
+                      SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                    }
                   )
-                }
-            }
-        )
+              } else {
+                internalServerError()
+              }
+          )
+      }
+
     }(loginContinueURL = routes.ReminderController.submitApplySavingsReminderSignUpPage().url)
+
+  private def checkIfAlreadyEnrolledAndDoneEligibilityChecks(
+    nino: String
+  )(ifNotEnrolled: HTSSession ⇒ Future[Result])(implicit htsContext: HtsContextWithNINO, request: Request[_]) =
+    checkIfAlreadyEnrolled { () ⇒
+      checkSession(
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+      ) { session ⇒
+        session.eligibilityCheckResult.fold[Future[Result]](
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        )(
+          _.fold[Future[Result]](
+            { ineligibleReason ⇒
+              val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
+              val threshold = ineligibleReason.value.threshold
+
+              ineligibilityType.fold {
+                logger.warn(s"Could not parse ineligibility reason when storing bank details: $ineligibleReason")
+                toFuture(internalServerError())
+              } { i ⇒
+                toFuture(Ok(notEligible(i, threshold)))
+              }
+            },
+            _ ⇒ ifNotEnrolled(session)
+          )
+        )
+      }
+    }
 
 }
