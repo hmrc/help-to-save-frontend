@@ -113,6 +113,7 @@ class RegisterController @Inject() (
                               period,
                               eligibleWithInfo.email,
                               bankDetails
+                            )
                           )
                         case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
                       }
