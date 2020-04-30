@@ -77,6 +77,7 @@ POST       /enter-uk-bank-details                           uk.gov.hmrc.helptosa
 
 GET        /change-bank-details                             uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeBankDetails
 GET        /change-email-address                            uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeEmail
+GET        /change-saving-reminders                         uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.changeReminder
 
 GET        /switch-to-welsh                                 uk.gov.hmrc.helptosavefrontend.controllers.CustomLanguageController.switchToWelsh
 GET        /switch-to-english                               uk.gov.hmrc.helptosavefrontend.controllers.CustomLanguageController.switchToEnglish
@@ -90,3 +91,6 @@ GET        /account-home/reminders-cancel-confirmation      uk.gov.hmrc.helptosa
 GET        /account-home/reminders-dashboard                uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getEmailsavingsReminders
 GET        /apply-savings-reminders                         uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getApplySavingsReminderPage
 POST       /apply-savings-reminders                         uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.submitApplySavingsReminderPage
+GET        /apply-savings-reminders-signup                  uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getApplySavingsReminderSignUpPage
+POST       /apply-savings-reminders-signup                  uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.submitApplySavingsReminderSignUpPage
+

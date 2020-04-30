@@ -208,7 +208,16 @@ class EmailControllerSpec
           mockSessionStoreGet(
             Right(
               Some(
-                HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None, None, None, None, true)
+                HTSSession(
+                  Some(Right(randomEligibleWithUserInfo(validUserInfo))),
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  None,
+                  true
+                )
               )
             )
           )
@@ -558,6 +567,7 @@ class EmailControllerSpec
                   None,
                   None,
                   None,
+                  None,
                   true
                 )
               )
@@ -841,7 +851,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage().url)
       }
 
       "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks but bank details are already in session" in {
@@ -859,6 +869,7 @@ class EmailControllerSpec
                   None,
                   None,
                   Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")),
+                  None,
                   true
                 )
               )
@@ -873,6 +884,7 @@ class EmailControllerSpec
               None,
               None,
               Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")),
+              None,
               true
             )
           )(Right(None))
@@ -1569,7 +1581,7 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage().url)
       }
 
       "handle Digital users and redirect to the checkDetailsPage if the user is in the process of changing details" in {

@@ -302,7 +302,7 @@ class EmailController @Inject() (
                 if (session.changingDetails) {
                   SeeOther(routes.RegisterController.getCreateAccountPage().url)
                 } else {
-                  SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                  SeeOther(routes.ReminderController.getApplySavingsReminderPage().url)
                 }
               }
           },
@@ -513,6 +513,7 @@ class EmailController @Inject() (
               None,
               None,
               session.flatMap(_.bankDetails),
+              None,
               session.exists(_.changingDetails)
             )
             for {
@@ -762,7 +763,7 @@ class EmailController @Inject() (
               if (session.changingDetails) {
                 SeeOther(routes.RegisterController.getCreateAccountPage().url)
               } else {
-                SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                SeeOther(routes.ReminderController.getApplySavingsReminderPage().url)
               }
           )
         },

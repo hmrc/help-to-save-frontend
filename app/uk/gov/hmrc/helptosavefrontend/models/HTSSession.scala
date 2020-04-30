@@ -18,9 +18,10 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import cats.Eq
 import play.api.libs.json._
-import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
+import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, ReminderForm}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.ReminderFrequency
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.util.Email
 
@@ -40,9 +41,11 @@ case class HTSSession(
   ivURL: Option[String] = None,
   ivSuccessURL: Option[String] = None,
   bankDetails: Option[BankDetails] = None,
+  reminderDetails: Option[String] = None,
   changingDetails: Boolean = false,
   accountNumber: Option[String] = None,
   hasSelectedEmail: Boolean = false,
+  hasSelectedReminder: Boolean = false,
   attemptedAccountHolderPageURL: Option[String] = None
 )
 
@@ -80,9 +83,11 @@ object HTSSession {
         ivURL ← (json \ "ivURL").validateOpt[String]
         ivSuccessURL ← (json \ "ivSuccessURL").validateOpt[String]
         bankDetails ← (json \ "bankDetails").validateOpt[BankDetails]
+        reminderDetails ← (json \ "reminderDetails").validateOpt[String]
         changingDetails ← (json \ "changingDetails").validateOpt[Boolean]
         accountNumber ← (json \ "accountNumber").validateOpt[String]
         hasSelectedEmail ← (json \ "hasSelectedEmail").validateOpt[Boolean]
+        hasSelectedReminder ← (json \ "hasSelectedReminder").validateOpt[Boolean]
         attemptedAccountHolderPageURL ← (json \ "attemptedAccountHolderPageURL").validateOpt[String]
 
       } yield HTSSession(
@@ -92,9 +97,11 @@ object HTSSession {
         ivURL,
         ivSuccessURL,
         bankDetails,
+        reminderDetails,
         changingDetails.getOrElse(false),
         accountNumber,
         hasSelectedEmail.getOrElse(false),
+        hasSelectedReminder.getOrElse(false),
         attemptedAccountHolderPageURL
       )
 

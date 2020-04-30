@@ -27,13 +27,12 @@
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
-@(form: Form[ReminderForm],backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[ReminderForm],period :String,screenFrom :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 
 @title = @{
     Messages("hts.reminder-frequency.select")
 }
-
 @defining(form.error("reminderFrequency").map(_ ⇒ email_form_validation_error_message(form, "reminderFrequency"))){ errorMessage =>
 
     @main(
@@ -55,25 +54,36 @@
 
         <h1 class="heading-large">@Messages("hts.reminder-frequency.select")</h1>
 
+        <form method="post" action= @if(screenFrom.matches("account")) { @routes.ReminderController.selectRemindersSubmit} else if(screenFrom.matches("registration")) {@routes.ReminderController.submitApplySavingsReminderSignUpPage} else if(screenFrom.matches("cancel")){@routes.ReminderController.selectedRemindersSubmit} novalidate >
 
-          <form method="post" action=@routes.ReminderController.selectRemindersSubmit novalidate>
               @CSRF.formField(request)
 
 
             <div class="multiple-choice" data-target="collect-choice">
-                    <input id="first" type="radio" name="reminderFrequency" value="1st" >
+                    <input id="first" type="radio" name="reminderFrequency" value="1st" @if(period.matches("1st")) {checked}>
                     <label for="first">@messages("hts.reminder-frequency.first")</label>
                 </div>
 
                 <div class="multiple-choice" data-target="collect-choice">
-                    <input id="twentyfive" type="radio" name="reminderFrequency" value="25th">
+                    <input id="twentyfive" type="radio" name="reminderFrequency" value="25th" @if(period.matches("25th")) {checked}>
                     <label for="twentyfive">@messages("hts.reminder-frequency.25")</label>
                 </div>
 
                 <div class="multiple-choice" data-target="collect-choice">
-                    <input id="both" type="radio" name="reminderFrequency" value="1st day and 25th">
+                    <input id="both" type="radio" name="reminderFrequency" value="1st day and 25th" @if(period.matches("1st day and 25th")) {checked}>
                     <label for="both">@messages("hts.reminder-frequency.both")</label>
                 </div>
+            @if(screenFrom.matches("cancel")) {
+                <div class="multiple-choice">
+                    <label>@messages("hts.reminder-frequency.or")</label>
+                </div>
+
+                <div class="multiple-choice" data-target="collect-choice">
+                    <input id="cancel" type="radio" name="reminderFrequency" value="cancel">
+                    <label for="cancel">@messages("hts.reminder-frequency.cancel")</label>
+                </div>
+            }
+
 
              <div class="form-field form-field--submit">
       <button id="confirm-selection" class="button getSelectedChoice" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected reminder', 'Applicant select reminder frequency page');">
