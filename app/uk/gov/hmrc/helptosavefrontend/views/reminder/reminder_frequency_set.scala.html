@@ -33,7 +33,6 @@
 @title = @{
     Messages("hts.reminder-frequency.select")
 }
-
 @defining(form.error("reminderFrequency").map(_ ⇒ email_form_validation_error_message(form, "reminderFrequency"))){ errorMessage =>
 
     @main(
@@ -55,7 +54,7 @@
 
         <h1 class="heading-large">@Messages("hts.reminder-frequency.select")</h1>
 
-          <form method="post" action= @if(screenFrom.matches("account")) { @routes.ReminderController.selectRemindersSubmit} else {@routes.ReminderController.submitApplySavingsReminderSignUpPage} novalidate>
+        <form method="post" action= @if(screenFrom.matches("account")) { @routes.ReminderController.selectRemindersSubmit} else if(screenFrom.matches("registration")) {@routes.ReminderController.submitApplySavingsReminderSignUpPage} else if(screenFrom.matches("cancel")){@routes.ReminderController.selectedRemindersSubmit} novalidate >
 
               @CSRF.formField(request)
 
@@ -74,6 +73,17 @@
                     <input id="both" type="radio" name="reminderFrequency" value="1st day and 25th" @if(period.matches("1st day and 25th")) {checked}>
                     <label for="both">@messages("hts.reminder-frequency.both")</label>
                 </div>
+            @if(screenFrom.matches("cancel")) {
+                <div class="multiple-choice">
+                    <label>@messages("hts.reminder-frequency.or")</label>
+                </div>
+
+                <div class="multiple-choice" data-target="collect-choice">
+                    <input id="cancel" type="radio" name="reminderFrequency" value="cancel">
+                    <label for="cancel">@messages("hts.reminder-frequency.cancel")</label>
+                </div>
+            }
+
 
              <div class="form-field form-field--submit">
       <button id="confirm-selection" class="button getSelectedChoice" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected reminder', 'Applicant select reminder frequency page');">

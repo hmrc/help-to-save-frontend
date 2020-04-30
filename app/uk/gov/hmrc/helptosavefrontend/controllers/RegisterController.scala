@@ -102,21 +102,20 @@ class RegisterController @Inject() (
                       eligibleWithInfo.userInfo.userInfo.nino
                     )
                     internalServerError()
-                  } {
-                    reason ⇒
-                      val period = eligibleWithInfo.session.reminderDetails.getOrElse("noValue")
-                      eligibleWithInfo.session.bankDetails match {
-                        case Some(bankDetails) ⇒
-                          Ok(
-                            createAccountView(
-                              eligibleWithInfo.userInfo,
-                              period,
-                              eligibleWithInfo.email,
-                              bankDetails
-                            )
+                  } { reason ⇒
+                    val period = eligibleWithInfo.session.reminderDetails.getOrElse("noValue")
+                    eligibleWithInfo.session.bankDetails match {
+                      case Some(bankDetails) ⇒
+                        Ok(
+                          createAccountView(
+                            eligibleWithInfo.userInfo,
+                            period,
+                            eligibleWithInfo.email,
+                            bankDetails
                           )
-                        case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
-                      }
+                        )
+                      case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                    }
                   }
               }
             )

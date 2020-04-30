@@ -359,8 +359,7 @@ class BankAccountControllerSpec
       }
 
       val result = doRequest()
-      status(result) shouldBe 200
-      contentAsString(result) should include("You’re not eligible for a Help to Save account")
+      status(result) shouldBe SEE_OTHER
     }
 
     "show user an error page if the session is found but user is not eligible and in-eligibility reason can't be parsed" in {

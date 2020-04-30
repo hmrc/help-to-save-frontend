@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, Ht
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{apply_savings_reminders, email_savings_reminders, reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_change, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{apply_savings_reminders, email_savings_reminders, reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_set}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -107,7 +107,6 @@ class ReminderControllerSpec
       testErrorHandler,
       injector.instanceOf[email_savings_reminders],
       injector.instanceOf[reminder_frequency_set],
-      injector.instanceOf[reminder_frequency_change],
       injector.instanceOf[reminder_confirmation],
       injector.instanceOf[reminder_cancel_confirmation],
       injector.instanceOf[reminder_dashboard],
@@ -454,11 +453,44 @@ class ReminderControllerSpec
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                Some(Right(randomEligibleWithUserInfo(validUserInfo))),
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                false,
+                None,
+                false,
+                true
+              )
+            )
+          )
+        )
+
       }
 
       val result = csrfAddToken(controller.getApplySavingsReminderPage())(fakeRequestWithNoBody)
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe Status.OK
+
+    }
+    "should return the apply savings reminder  page with out select when asked for it" in {
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+
+      }
+
+      val result = csrfAddToken(controller.getApplySavingsReminderPage())(fakeRequestWithNoBody)
+      status(result) shouldBe SEE_OTHER
 
     }
     "should show a success page if the user submits an ApplySavingsReminderPage with No  " in {
@@ -466,25 +498,128 @@ class ReminderControllerSpec
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockSessionStoreGet(Right(None))
+
       }
 
       val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
       status(result) shouldBe SEE_OTHER
     }
 
-    "should show a success page if the user submits an ApplySavingsReminderPage with Yes  " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "yes")
-
+    "should show a success page if the user submits an ApplySavingsReminderPage with no  " in {
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "no")
+      val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                eligibilityResult,
+                None,
+                None,
+                None,
+                None,
+                None,
+                reminderDetails = Some("1st"),
+                false,
+                None,
+                false,
+                true
+              )
+            )
+          )
+        )
+        mockSessionStorePut(
+          HTSSession(
+            eligibilityResult,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
+          )
+        )(Right(()))
       }
 
       val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
       status(result) shouldBe SEE_OTHER
     }
+    "should show a success page if the user submits an ApplySavingsReminderPage with out option  " in {
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "yes")
+      val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                eligibilityResult,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+              )
+            )
+          )
+        )
+        mockSessionStorePut(
+          HTSSession(
+            eligibilityResult,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            false,
+            None,
+            false,
+            true
+          )
+        )(Right(()))
+      }
 
+      val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
+      status(result) shouldBe SEE_OTHER
+    }
+    "should show a success page if the user submits an ApplySavingsReminderPage with yes  " in {
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+      val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                eligibilityResult,
+                None,
+                None,
+                None,
+                None,
+                None,
+                reminderDetails = Some("1st"),
+                false,
+                None,
+                false,
+                true
+              )
+            )
+          )
+        )
+      }
+
+      val result = csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include("Select whether you want to set up email reminders")
+    }
     "should return the apply savings reminder  signup page when asked for it" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
@@ -518,7 +653,9 @@ class ReminderControllerSpec
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockSessionStoreGet(Right(None))
+
       }
 
       val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
@@ -526,7 +663,6 @@ class ReminderControllerSpec
 
     }
     "should redirect to an the internal server error page if email retrieveal is failed in savings reminder  signup page" in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
       inSequence {
@@ -557,19 +693,118 @@ class ReminderControllerSpec
 
     }
 
-    "should show a success page if the user submits an HtsUser to update in savings reminder  signup page" in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+    "should show a success page if the user submits an submitApplySavingsReminderSignUpPage with no  " in {
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
-
+      val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-        mockEnrolmentCheck()(Right(Enrolled(true)))
-
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                eligibilityResult,
+                None,
+                None,
+                None,
+                None,
+                None,
+                reminderDetails = Some("1st"),
+                false,
+                None,
+                false,
+                true
+              )
+            )
+          )
+        )
+        mockSessionStorePut(
+          HTSSession(
+            eligibilityResult,
+            None,
+            None,
+            None,
+            None,
+            None,
+            reminderDetails = Some("1st"),
+            false,
+            None,
+            false,
+            true
+          )
+        )(Right(()))
       }
 
       val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
-      status(result) shouldBe Status.SEE_OTHER
+      status(result) shouldBe SEE_OTHER
+    }
+    "should show a success page if the user submits an submitApplySavingsReminderSignUpPage with out option  " in {
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
+      val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                eligibilityResult,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None
+              )
+            )
+          )
+        )
+        mockSessionStorePut(
+          HTSSession(
+            eligibilityResult,
+            None,
+            None,
+            None,
+            None,
+            None,
+            reminderDetails = Some("cancel")
+          )
+        )(Right(()))
+      }
 
+      val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      status(result) shouldBe SEE_OTHER
+    }
+    "should show a success page if the user submits an submitApplySavingsReminderSignUpPage with cancel  " in {
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+      val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+      inSequence {
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockSessionStoreGet(
+          Right(
+            Some(
+              HTSSession(
+                eligibilityResult,
+                None,
+                None,
+                None,
+                None,
+                None,
+                reminderDetails = Some("1st"),
+                false,
+                None,
+                false,
+                true
+              )
+            )
+          )
+        )
+      }
+
+      val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+      contentAsString(result) should include("Select when you want to receive reminders")
     }
 
     "display the page with correct Back link when they came from SelectEmail page" in {
@@ -605,8 +840,8 @@ class ReminderControllerSpec
                 None,
                 None,
                 None,
-                None,
-                false,
+                reminderDetails = Some("1st"),
+                true,
                 None,
                 false,
                 true
@@ -750,8 +985,7 @@ class ReminderControllerSpec
     }
 
     val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
-    status(result) shouldBe 200
-    contentAsString(result) should include("You’re not eligible for a Help to Save account")
+    status(result) shouldBe SEE_OTHER
   }
 
   "show user an error page if the session is found but user is not eligible and in-eligibility reason can't be parsed" in {

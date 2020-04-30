@@ -55,7 +55,7 @@ class BankAccountController @Inject() (
   bankDetailsValidation: BankDetailsValidation,
   ec: ExecutionContext
 ) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour
-    with SessionBehaviour {
+    with SessionBehaviour with EnrollAndEligibilityCheck {
 
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
@@ -72,7 +72,7 @@ class BankAccountController @Inject() (
 
   def getBankDetailsPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) { s ⇒
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
         s.bankDetails.fold(
           Ok(bankAccountDetails(BankDetails.giveBankDetailsForm(), backLinkFromSession(s)))
         )(
@@ -84,7 +84,7 @@ class BankAccountController @Inject() (
 
   def submitBankDetails(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks(htsContext.nino) { session ⇒
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks { session ⇒
         BankDetails
           .giveBankDetailsForm()
           .bindFromRequest()
@@ -133,32 +133,4 @@ class BankAccountController @Inject() (
       }
 
     }(loginContinueURL = routes.BankAccountController.submitBankDetails().url)
-
-  private def checkIfAlreadyEnrolledAndDoneEligibilityChecks(
-    nino: String
-  )(ifNotEnrolled: HTSSession ⇒ Future[PlayResult])(implicit htsContext: HtsContextWithNINO, request: Request[_]) =
-    checkIfAlreadyEnrolled { () ⇒
-      checkSession(
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-      ) { session ⇒
-        session.eligibilityCheckResult.fold[Future[PlayResult]](
-          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
-        )(
-          _.fold[Future[PlayResult]](
-            { ineligibleReason ⇒
-              val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
-              val threshold = ineligibleReason.value.threshold
-
-              ineligibilityType.fold {
-                logger.warn(s"Could not parse ineligibility reason when storing bank details: $ineligibleReason", nino)
-                toFuture(internalServerError())
-              } { i ⇒
-                toFuture(Ok(notEligible(i, threshold)))
-              }
-            },
-            _ ⇒ ifNotEnrolled(session)
-          )
-        )
-      }
-    }
 }
