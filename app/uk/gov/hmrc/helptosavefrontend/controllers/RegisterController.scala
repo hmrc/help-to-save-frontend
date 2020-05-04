@@ -30,6 +30,7 @@ import javax.inject.Singleton
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.{CreateAccountError, EligibleWithInfo}
@@ -39,9 +40,10 @@ import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -55,6 +57,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class RegisterController @Inject() (
   val helpToSaveService: HelpToSaveService,
+  val helpToSaveReminderService: HelpToSaveReminderService,
   val sessionStore: SessionStore,
   val authConnector: AuthConnector,
   val metrics: Metrics,
@@ -167,6 +170,9 @@ class RegisterController @Inject() (
                 submissionSuccess ← helpToSaveService
                                      .createAccount(createAccountRequest)
                                      .leftMap(s ⇒ CreateAccountError(Left(s)))
+                r ← EitherT.liftF(
+                     processReminderServiceRequest(eligibleWithInfo.session.reminderDetails, nino, eligibleWithInfo)
+                   )
                 _ ← {
                   val update = submissionSuccess.accountNumber.accountNumber
                     .map(a ⇒ sessionStore.store(eligibleWithInfo.session.copy(accountNumber = Some(a))))
@@ -211,6 +217,39 @@ class RegisterController @Inject() (
         }
       }
     }(loginContinueURL = routes.RegisterController.createAccount().url)
+
+  def processReminderServiceRequest(reminderDetails: Option[String], nino: String, eligibleWithInfo: EligibleWithInfo)(
+    implicit request: Request[_]
+  ): Future[Result] = {
+    val daysToReceiveReminders = reminderDetails.getOrElse("None")
+    if (daysToReceiveReminders =!= "None") {
+      helpToSaveReminderService
+        .updateHtsUser(
+          HtsUser(
+            Nino(nino),
+            eligibleWithInfo.email,
+            eligibleWithInfo.userInfo.userInfo.forename,
+            eligibleWithInfo.userInfo.userInfo.surname,
+            true,
+            DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq())
+          )
+        )
+        .fold(
+          { htsError ⇒
+            logger.warn(
+              s"An error occurred while accessing HTS Reminder service for user: ${eligibleWithInfo.userInfo.userInfo.nino} Error: $htsError"
+            )
+            internalServerError()
+          }, { htsUser ⇒
+            logger.info(s"reminder updated $htsUser")
+            SeeOther(routes.RegisterController.getAccountCreatedPage().url)
+          }
+        )
+
+    } else {
+      SeeOther(routes.RegisterController.getAccountCreatedPage().url)
+    }
+  }
 
   def getAccountCreatedPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

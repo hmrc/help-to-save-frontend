@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.time.{Clock, Instant, ZoneId}
+import java.time.{Clock, Instant, LocalDate, ZoneId}
 import java.util.UUID
 
 import cats.data.EitherT
@@ -24,10 +24,12 @@ import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
-import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleWithInfo
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.{AuthProvider, AuthWithCL200}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
@@ -36,6 +38,8 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Eligible
+import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
+import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.cannot_check_details
@@ -50,15 +54,14 @@ class RegisterControllerSpec
     with SessionStoreBehaviourSupport with ScalaCheckDrivenPropertyChecks {
 
   val january1970Clock = Clock.fixed(Instant.ofEpochMilli(0L), ZoneId.of("Z"))
-
   def newController(earlyCapCheck: Boolean)(implicit crypto: Crypto): RegisterController = {
-
     implicit lazy val appConfig: FrontendAppConfig =
       buildFakeApplication(Configuration("enable-early-cap-check" -> earlyCapCheck)).injector
         .instanceOf[FrontendAppConfig]
 
     new RegisterController(
       mockHelpToSaveService,
+      mockHelpToSaveReminderService,
       mockSessionStore,
       mockAuthConnector,
       mockMetrics,
@@ -100,6 +103,12 @@ class RegisterControllerSpec
       .decrypt(_: String))
       .expects(expected)
       .returning(result.fold[Try[String]](Failure(new Exception))(Success.apply))
+
+  def mockUpdateHtsUserPost(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit =
+    (mockHelpToSaveReminderService
+      .updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(htsUser, *, *)
+      .returning(EitherT.fromEither[Future](result))
 
   def checkRedirectIfNoEmailInSession(doRequest: ⇒ Future[PlayResult]): Unit =
     "redirect to the give email page if the session data does not contain an email for the user" in {
@@ -383,6 +392,8 @@ class RegisterControllerSpec
     "creating an account" must {
 
       def doCreateAccountRequest(): Future[PlayResult] = csrfAddToken(controller.createAccount)(fakeRequest)
+
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 
@@ -854,8 +865,33 @@ class RegisterControllerSpec
         status(result) shouldBe 303
         redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderSignUpPage().url)
       }
-
     }
 
+    "handling updateReminders" must {
+      val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+      val eligibilityInfo = EligibleWithInfo(
+        randomEligibleWithUserInfo(validUserInfo),
+        "email",
+        HTSSession(eligibilityResult, Some("valid@email.com"), None)
+      )
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+
+      def doRequest(): Future[PlayResult] =
+        controller.processReminderServiceRequest(Some("1st"), eligibilityInfo.userInfo.userInfo.nino, eligibilityInfo)(
+          fakeRequestWithNoBody
+        )
+      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+
+      "write a new session and redirect to Account Page " in {
+        inSequence {
+          mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+        }
+        val result = doRequest()
+
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage().url)
+      }
+
+    }
   }
 }

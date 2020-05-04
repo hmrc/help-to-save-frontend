@@ -81,7 +81,7 @@ bodyClasses = None) {
         "change-email"
       )
     )
-@if(period.matches("noValue")) {
+@if(period.matches("None")) {
   @summary_row(Messages("hts.email-saving-remainders.title.h1"), Messages("hts.register.create_account.your-remainder.note"),
     summary_section_change(
       routes.RegisterController.changeReminder().url,
