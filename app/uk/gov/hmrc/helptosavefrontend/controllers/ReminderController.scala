@@ -367,7 +367,7 @@ class ReminderController @Inject() (
             success ⇒
               if (success.reminderFrequency === "no") {
                 sessionStore
-                  .store(s.copy(hasSelectedReminder = false, reminderDetails = None))
+                  .store(s.copy(reminderDetails = Some("None"), hasSelectedReminder = false))
                   .fold(
                     error ⇒ {
                       logger.warn(s"Could not update session reminder: $error")

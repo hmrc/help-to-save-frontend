@@ -23,7 +23,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibleWithUserInfo
@@ -40,6 +40,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val mockHelpToSaveService = mock[HelpToSaveService]
 
   val mockHelpToSaveConnector = mock[HelpToSaveConnector]
+
+  val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
 
   val confirmedEmail = "confirmed"
   val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")

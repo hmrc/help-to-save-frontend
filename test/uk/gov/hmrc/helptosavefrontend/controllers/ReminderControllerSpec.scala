@@ -540,7 +540,11 @@ class ReminderControllerSpec
             None,
             None,
             None,
-            None
+            reminderDetails = Some("None"),
+            false,
+            None,
+            false,
+            false
           )
         )(Right(()))
       }

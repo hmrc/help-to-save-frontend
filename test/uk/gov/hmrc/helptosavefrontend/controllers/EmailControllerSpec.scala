@@ -53,7 +53,6 @@ class EmailControllerSpec
     with SessionStoreBehaviourSupport {
 
   val mockEmailVerificationConnector: EmailVerificationConnector = mock[EmailVerificationConnector]
-  val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
 
   val mockAuditor = mock[HTSAuditor]
 
