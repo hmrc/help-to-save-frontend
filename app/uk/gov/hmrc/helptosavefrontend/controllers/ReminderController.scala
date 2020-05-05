@@ -344,11 +344,12 @@ class ReminderController @Inject() (
   def getApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
+        def bckLink: String = routes.EmailController.getSelectEmailPage().url
         Ok(
           applySavingsReminders(
             ReminderForm.giveRemindersDetailsForm(),
-            if (s.hasSelectedReminder) "yes" else "none",
-            Some(backLinkFromSession(s))
+            s.reminderValue.getOrElse("none"),
+            Some(bckLink)
           )
         )
       }
@@ -367,7 +368,13 @@ class ReminderController @Inject() (
             success ⇒
               if (success.reminderFrequency === "no") {
                 sessionStore
-                  .store(s.copy(reminderDetails = Some("None"), hasSelectedReminder = false))
+                  .store(
+                    s.copy(
+                      reminderDetails = Some("none"),
+                      reminderValue = Some("no"),
+                      hasSelectedReminder = false
+                    )
+                  )
                   .fold(
                     error ⇒ {
                       logger.warn(s"Could not update session reminder: $error")
@@ -377,7 +384,7 @@ class ReminderController @Inject() (
                   )
               } else {
                 sessionStore
-                  .store(s.copy(hasSelectedReminder = true))
+                  .store(s.copy(reminderValue = Some(success.reminderFrequency), hasSelectedReminder = true))
                   .fold(
                     error ⇒ {
                       logger.warn(s"Could not update session reminder: $error")
@@ -437,7 +444,11 @@ class ReminderController @Inject() (
             success ⇒
               if (success.reminderFrequency.nonEmpty) {
                 sessionStore
-                  .store(session.copy(reminderDetails = Some(success.reminderFrequency)))
+                  .store(if (success.reminderFrequency === "cancel") {
+                    session.copy(reminderDetails = Some("none"))
+                  } else {
+                    session.copy(reminderDetails = Some(success.reminderFrequency))
+                  })
                   .fold(
                     error ⇒ {
                       logger.warn(s"Could not update session reminder: $error")

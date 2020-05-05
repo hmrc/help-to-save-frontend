@@ -28,8 +28,6 @@
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
 @(form: Form[ReminderForm],period :String,screenFrom :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
-
-
 @title = @{
     Messages("hts.reminder-frequency.select")
 }
@@ -73,7 +71,7 @@
                     <input id="both" type="radio" name="reminderFrequency" value="1st day and 25th" @if(period.matches("1st day and 25th")) {checked}>
                     <label for="both">@messages("hts.reminder-frequency.both")</label>
                 </div>
-            @if(screenFrom.matches("cancel")) {
+            @if(screenFrom.matches("cancel") || (!period.matches("none"))) {
                 <div class="multiple-choice">
                     <label>@messages("hts.reminder-frequency.or")</label>
                 </div>
