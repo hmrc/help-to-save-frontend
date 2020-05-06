@@ -465,6 +465,7 @@ class ReminderControllerSpec
                 None,
                 None,
                 None,
+                None,
                 false,
                 None,
                 false,
@@ -524,6 +525,7 @@ class ReminderControllerSpec
                 None,
                 None,
                 reminderDetails = Some("1st"),
+                None,
                 false,
                 None,
                 false,
@@ -540,7 +542,8 @@ class ReminderControllerSpec
             None,
             None,
             None,
-            reminderDetails = Some("None"),
+            reminderDetails = Some("none"),
+            reminderValue = Some("no"),
             false,
             None,
             false,
@@ -582,6 +585,7 @@ class ReminderControllerSpec
             None,
             None,
             None,
+            reminderValue = Some("yes"),
             false,
             None,
             false,
@@ -610,6 +614,7 @@ class ReminderControllerSpec
                 None,
                 None,
                 reminderDetails = Some("1st"),
+                None,
                 false,
                 None,
                 false,
@@ -714,6 +719,7 @@ class ReminderControllerSpec
                 None,
                 None,
                 reminderDetails = Some("1st"),
+                None,
                 false,
                 None,
                 false,
@@ -731,6 +737,7 @@ class ReminderControllerSpec
             None,
             None,
             reminderDetails = Some("1st"),
+            None,
             false,
             None,
             false,
@@ -771,7 +778,7 @@ class ReminderControllerSpec
             None,
             None,
             None,
-            reminderDetails = Some("cancel")
+            reminderDetails = Some("none")
           )
         )(Right(()))
       }
@@ -796,6 +803,7 @@ class ReminderControllerSpec
                 None,
                 None,
                 reminderDetails = Some("1st"),
+                None,
                 false,
                 None,
                 false,
@@ -845,6 +853,7 @@ class ReminderControllerSpec
                 None,
                 None,
                 reminderDetails = Some("1st"),
+                None,
                 true,
                 None,
                 false,
@@ -873,6 +882,7 @@ class ReminderControllerSpec
             Some(
               HTSSession(
                 Some(Right(randomEligibleWithUserInfo(validUserInfo))),
+                None,
                 None,
                 None,
                 None,

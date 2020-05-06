@@ -42,6 +42,7 @@ case class HTSSession(
   ivSuccessURL: Option[String] = None,
   bankDetails: Option[BankDetails] = None,
   reminderDetails: Option[String] = None,
+  reminderValue: Option[String] = None,
   changingDetails: Boolean = false,
   accountNumber: Option[String] = None,
   hasSelectedEmail: Boolean = false,
@@ -84,6 +85,7 @@ object HTSSession {
         ivSuccessURL ← (json \ "ivSuccessURL").validateOpt[String]
         bankDetails ← (json \ "bankDetails").validateOpt[BankDetails]
         reminderDetails ← (json \ "reminderDetails").validateOpt[String]
+        reminderValue ← (json \ "reminderValue").validateOpt[String]
         changingDetails ← (json \ "changingDetails").validateOpt[Boolean]
         accountNumber ← (json \ "accountNumber").validateOpt[String]
         hasSelectedEmail ← (json \ "hasSelectedEmail").validateOpt[Boolean]
@@ -98,6 +100,7 @@ object HTSSession {
         ivSuccessURL,
         bankDetails,
         reminderDetails,
+        reminderValue,
         changingDetails.getOrElse(false),
         accountNumber,
         hasSelectedEmail.getOrElse(false),

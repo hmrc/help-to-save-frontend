@@ -107,6 +107,7 @@ class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, metrics: Metric
                 bankDetails = newSession.bankDetails,
                 changingDetails = newSession.changingDetails,
                 reminderDetails = newSession.reminderDetails.orElse(existing.reminderDetails),
+                reminderValue = newSession.reminderValue.orElse(existing.reminderValue),
                 accountNumber = newSession.accountNumber,
                 hasSelectedEmail = newSession.hasSelectedEmail,
                 hasSelectedReminder = newSession.hasSelectedReminder,

@@ -215,6 +215,7 @@ class EmailControllerSpec
                   None,
                   None,
                   None,
+                  None,
                   true
                 )
               )
@@ -567,6 +568,7 @@ class EmailControllerSpec
                   None,
                   None,
                   None,
+                  None,
                   true
                 )
               )
@@ -869,6 +871,7 @@ class EmailControllerSpec
                   None,
                   Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")),
                   None,
+                  None,
                   true
                 )
               )
@@ -883,6 +886,7 @@ class EmailControllerSpec
               None,
               None,
               Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")),
+              None,
               None,
               true
             )
