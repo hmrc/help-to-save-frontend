@@ -224,23 +224,6 @@ class ReminderControllerSpec
       status(result) shouldBe Status.OK
 
     }
-
-   /* "should return internel server error if feature not enabled the reminder frquency setting page when asked for it" in {
-     // val getHtsUser = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
-      val isFeatureEnabled: Boolean = false
-      val fakeRequestWithNoBody = FakeRequest("GET", "/")
-
-      inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        isFeatureEnabled
-
-      }
-
-      val result = csrfAddToken(controller.getEmailsavingsReminders())(fakeRequestWithNoBody)
-      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-
-    }*/
-
     "should return the reminder frquency dashboard page when asked for it" in {
       val getHtsUser = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
