@@ -17,35 +17,31 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.time.LocalDate
-import java.util.Base64
 
-import play.api.test.FakeRequest
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.AuthorisationException.fromString
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
-import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, ReminderFrequencyValidation, SortCode}
+import uk.gov.hmrc.helptosavefrontend.forms.ReminderFrequencyValidation
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, SuspiciousActivity}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
-import uk.gov.hmrc.helptosavefrontend.views.html.reminder.{apply_savings_reminders, email_savings_reminders, reminder_cancel_confirmation, reminder_confirmation, reminder_dashboard, reminder_frequency_set}
+import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 class ReminderControllerSpec
     extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with SessionStoreBehaviourSupport {
@@ -63,6 +59,8 @@ class ReminderControllerSpec
       .updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
       .expects(htsUser, *, *)
       .returning(EitherT.fromEither[Future](result))
+
+  val mockedFeatureEnabled: Boolean = false
 
   def mockCancelHtsUserReminderPost(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveReminderService
@@ -226,6 +224,22 @@ class ReminderControllerSpec
       status(result) shouldBe Status.OK
 
     }
+
+   /* "should return internel server error if feature not enabled the reminder frquency setting page when asked for it" in {
+     // val getHtsUser = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val isFeatureEnabled: Boolean = false
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        isFeatureEnabled
+
+      }
+
+      val result = csrfAddToken(controller.getEmailsavingsReminders())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+
+    }*/
 
     "should return the reminder frquency dashboard page when asked for it" in {
       val getHtsUser = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
@@ -854,7 +868,7 @@ class ReminderControllerSpec
                 None,
                 reminderDetails = Some("1st"),
                 None,
-                true,
+                false,
                 None,
                 false,
                 true
