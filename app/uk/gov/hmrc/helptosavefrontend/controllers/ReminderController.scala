@@ -112,16 +112,19 @@ class ReminderController @Inject() (
 
   def getSelectRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
-      Ok(
-        reminderFrequencySet(
-          ReminderForm.giveRemindersDetailsForm(),
-          "none",
-          "account",
-          Some(bckLink)
+      if (isFeatureEnabled) {
+        def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
+        Ok(
+          reminderFrequencySet(
+            ReminderForm.giveRemindersDetailsForm(),
+            "none",
+            "account",
+            Some(bckLink)
+          )
         )
-      )
-
+      } else {
+        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+      }
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
   def selectRemindersSubmit(): Action[AnyContent] =
@@ -196,57 +199,65 @@ class ReminderController @Inject() (
 
   def getRendersConfirmPage(email: String, period: String, page: String): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      crypto.decrypt(email) match {
-        case Success(value) ⇒
-          if (page === "Set") {
-            Ok(
-              reminderConfirmation(
-                value,
-                period,
-                "hts.reminder-confirmation-set.title.h1",
-                "hts.reminder-confirmation-set.title.p1"
+      if (isFeatureEnabled) {
+        crypto.decrypt(email) match {
+          case Success(value) ⇒
+            if (page === "Set") {
+              Ok(
+                reminderConfirmation(
+                  value,
+                  period,
+                  "hts.reminder-confirmation-set.title.h1",
+                  "hts.reminder-confirmation-set.title.p1"
+                )
               )
-            )
-          } else {
-            Ok(
-              reminderConfirmation(
-                value,
-                period,
-                "hts.reminder-confirmation-update.title.h1",
-                "hts.reminder-confirmation-update.title.p1"
+            } else {
+              Ok(
+                reminderConfirmation(
+                  value,
+                  period,
+                  "hts.reminder-confirmation-update.title.h1",
+                  "hts.reminder-confirmation-update.title.p1"
+                )
               )
-            )
-          }
+            }
 
-        case Failure(e) ⇒ {
-          logger.warn(s"Could not write confirmed email: $email and the exception : $e")
-          internalServerError()
+          case Failure(e) ⇒ {
+            logger.warn(s"Could not write confirmed email: $email and the exception : $e")
+            internalServerError()
+          }
         }
+      } else {
+        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
       }
 
     }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period, "page").url)
 
   def getSelectedRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
-      helpToSaveReminderService
-        .getHtsUser(htsContext.nino)
-        .fold(
-          e ⇒ {
-            logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
-            internalServerError()
-          }, { htsUser ⇒
-            Ok(
-              reminderFrequencySet(
-                ReminderForm.giveRemindersDetailsForm(),
-                DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
-                "cancel",
-                Some(bckLink)
+      if (isFeatureEnabled) {
+        def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
+        helpToSaveReminderService
+          .getHtsUser(htsContext.nino)
+          .fold(
+            e ⇒ {
+              logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
+              internalServerError()
+            }, { htsUser ⇒
+              Ok(
+                reminderFrequencySet(
+                  ReminderForm.giveRemindersDetailsForm(),
+                  DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
+                  "cancel",
+                  Some(bckLink)
+                )
               )
-            )
 
-          }
-        )
+            }
+          )
+      } else {
+        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+      }
 
     }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit().url)
 
@@ -325,7 +336,6 @@ class ReminderController @Inject() (
                           }
                         }
                         case Some(_) ⇒ {
-                          logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
                           internalServerError()
                         }
                       }
@@ -337,8 +347,11 @@ class ReminderController @Inject() (
 
   def getRendersCancelConfirmPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      Ok(reminderCancelConfirmation())
-
+      if (isFeatureEnabled) {
+        Ok(reminderCancelConfirmation())
+      } else {
+        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+      }
     }(loginContinueURL = routes.ReminderController.getRendersCancelConfirmPage().url)
 
   def getApplySavingsReminderPage(): Action[AnyContent] =
@@ -377,7 +390,6 @@ class ReminderController @Inject() (
                   )
                   .fold(
                     error ⇒ {
-                      logger.warn(s"Could not update session reminder: $error")
                       internalServerError()
                     },
                     _ ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
@@ -387,7 +399,6 @@ class ReminderController @Inject() (
                   .store(s.copy(reminderValue = Some(success.reminderFrequency), hasSelectedReminder = true))
                   .fold(
                     error ⇒ {
-                      logger.warn(s"Could not update session reminder: $error")
                       internalServerError()
                     },
                     _ ⇒ SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage().url)
@@ -451,7 +462,6 @@ class ReminderController @Inject() (
                   })
                   .fold(
                     error ⇒ {
-                      logger.warn(s"Could not update session reminder: $error")
                       internalServerError()
                     },
                     if (session.changingDetails) { _ ⇒
