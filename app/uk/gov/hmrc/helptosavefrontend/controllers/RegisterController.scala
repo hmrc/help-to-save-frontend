@@ -325,7 +325,7 @@ class RegisterController @Inject() (
         checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
           startChangingDetailsAndRedirect(
             eligibleWithInfo.session,
-            routes.ReminderController.getApplySavingsReminderSignUpPage().url
+            routes.ReminderController.getApplySavingsReminderPage().url
           )
         }
       }

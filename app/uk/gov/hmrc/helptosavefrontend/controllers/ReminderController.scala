@@ -74,9 +74,10 @@ class ReminderController @Inject() (
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
       routes.RegisterController.getCreateAccountPage().url
-    } else if (session.hasSelectedReminder) {
+    } /*else if (session.hasSelectedReminder) {
       routes.ReminderController.getApplySavingsReminderPage().url
-    } else {
+    }*/
+    else {
       routes.EmailController.getSelectEmailPage().url
     }
 
@@ -357,12 +358,12 @@ class ReminderController @Inject() (
   def getApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
-        def bckLink: String = routes.EmailController.getSelectEmailPage().url
+        //  def bckLink: String = routes.EmailController.getSelectEmailPage().url
         Ok(
           applySavingsReminders(
             ReminderForm.giveRemindersDetailsForm(),
             s.reminderValue.getOrElse("none"),
-            Some(bckLink)
+            Some(backLinkFromSession(s))
           )
         )
       }
@@ -392,7 +393,11 @@ class ReminderController @Inject() (
                     error ⇒ {
                       internalServerError()
                     },
-                    _ ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                    if (s.changingDetails) { _ ⇒
+                      SeeOther(routes.RegisterController.getCreateAccountPage().url)
+                    } else { _ ⇒
+                      SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                    }
                   )
               } else {
                 sessionStore
@@ -413,13 +418,14 @@ class ReminderController @Inject() (
   def getApplySavingsReminderSignUpPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
+        def bckLink: String = routes.ReminderController.getApplySavingsReminderPage().url
         s.reminderDetails.fold(
           Ok(
             reminderFrequencySet(
               ReminderForm.giveRemindersDetailsForm(),
               "none",
               "registration",
-              Some(backLinkFromSession(s))
+              Some(bckLink)
             )
           )
         )(
@@ -429,7 +435,7 @@ class ReminderController @Inject() (
                 ReminderForm.giveRemindersDetailsForm(),
                 reminderDetails,
                 "registration",
-                Some(backLinkFromSession(s))
+                Some(bckLink)
               )
             )
         )
