@@ -356,7 +356,6 @@ class ReminderController @Inject() (
   def getApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
-        //  def bckLink: String = routes.EmailController.getSelectEmailPage().url
         Ok(
           applySavingsReminders(
             ReminderForm.giveRemindersDetailsForm(),
