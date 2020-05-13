@@ -863,7 +863,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderSignUpPage().url)
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage().url)
       }
     }
 

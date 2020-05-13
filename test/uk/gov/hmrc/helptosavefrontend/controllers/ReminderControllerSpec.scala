@@ -831,7 +831,7 @@ class ReminderControllerSpec
       contentAsString(result) should include(
         "Select when you want to receive reminders"
       )
-      contentAsString(result) should include("/help-to-save/select-email")
+      contentAsString(result) should include("/help-to-save/apply-savings-reminders")
     }
 
     "display the page with correct Back link when they came from emailVerified page" in {
@@ -893,10 +893,10 @@ class ReminderControllerSpec
         )
       }
 
-      val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+      val result = csrfAddToken(controller.getApplySavingsReminderPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
       contentAsString(result) should include(
-        "Select when you want to receive reminders"
+        "Do you want to receive email savings reminders"
       )
       contentAsString(result) should include("/help-to-save/create-account")
 

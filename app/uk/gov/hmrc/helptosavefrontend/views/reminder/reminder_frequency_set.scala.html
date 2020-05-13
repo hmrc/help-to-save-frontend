@@ -71,7 +71,7 @@
                     <input id="both" type="radio" name="reminderFrequency" value="1st day and 25th" @if(period.matches("1st day and 25th")) {checked}>
                     <label for="both">@messages("hts.reminder-frequency.both")</label>
                 </div>
-            @if(screenFrom.matches("cancel") || (!period.matches("none"))) {
+            @if(screenFrom.matches("cancel")) {
                 <div class="multiple-choice">
                     <label>@messages("hts.reminder-frequency.or")</label>
                 </div>
