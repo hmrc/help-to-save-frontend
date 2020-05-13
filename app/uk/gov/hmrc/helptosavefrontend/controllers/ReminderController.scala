@@ -74,9 +74,7 @@ class ReminderController @Inject() (
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
       routes.RegisterController.getCreateAccountPage().url
-    } /*else if (session.hasSelectedReminder) {
-      routes.ReminderController.getApplySavingsReminderPage().url
-    }*/
+    }
     else {
       routes.EmailController.getSelectEmailPage().url
     }
