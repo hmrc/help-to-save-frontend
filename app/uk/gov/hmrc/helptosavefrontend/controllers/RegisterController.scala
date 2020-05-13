@@ -94,7 +94,6 @@ class RegisterController @Inject() (
             .store(eligibleWithInfo.session.copy(changingDetails = false))
             .fold(
               { e ⇒
-                logger.warn(s"Could not write to session cache: $e")
                 internalServerError()
               }, { _ ⇒
                 EligibilityReason
@@ -236,9 +235,6 @@ class RegisterController @Inject() (
         )
         .fold(
           { htsError ⇒
-            logger.warn(
-              s"An error occurred while accessing HTS Reminder service for user: ${eligibleWithInfo.userInfo.userInfo.nino} Error: $htsError"
-            )
             internalServerError()
           }, { htsUser ⇒
             logger.info(s"reminder updated $htsUser")

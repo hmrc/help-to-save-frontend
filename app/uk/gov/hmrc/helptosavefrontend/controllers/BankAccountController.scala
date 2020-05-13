@@ -56,13 +56,15 @@ class BankAccountController @Inject() (
   ec: ExecutionContext
 ) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with SessionBehaviour with EnrollAndEligibilityCheck {
-
+  val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
       routes.RegisterController.getCreateAccountPage().url
     } else {
       if (session.pendingEmail.isDefined) {
         routes.EmailController.getEmailConfirmed().url
+      } else if (!isFeatureEnabled) {
+        routes.EmailController.getSelectEmailPage().url
       } else if (session.hasSelectedReminder) {
         routes.ReminderController.getApplySavingsReminderSignUpPage().url
       } else {
