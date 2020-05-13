@@ -30,6 +30,8 @@
 
 @(eligibleWithUserInfo: EligibleWithUserInfo,period: String, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@areRemindersEnabled = @{appConfig.reminderServiceFeatureSwitch}
+
 @title = @{Messages("hts.register.create_account.title")}
 
 @display2CharFormat(str: String) = @{
@@ -81,7 +83,8 @@ bodyClasses = None) {
         "change-email"
       )
     )
-@if(period.matches("none")) {
+    @if(areRemindersEnabled) {
+      @if(period.matches("none")) {
   @summary_row(Messages("hts.email-saving-remainders.title.h1"), Messages("hts.register.create_account.your-remainder.note"),
     summary_section_change(
       routes.RegisterController.changeReminder().url,
@@ -98,6 +101,7 @@ bodyClasses = None) {
     )
   )
     }
+      }
   </dl>
 
   @summary_section_head(heading = Messages("hts.register.create_account.your-bank-details"))

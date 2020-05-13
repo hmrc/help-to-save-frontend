@@ -74,8 +74,7 @@ class ReminderController @Inject() (
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
       routes.RegisterController.getCreateAccountPage().url
-    }
-    else {
+    } else {
       routes.EmailController.getSelectEmailPage().url
     }
 
@@ -222,7 +221,6 @@ class ReminderController @Inject() (
             }
 
           case Failure(e) ⇒ {
-            logger.warn(s"Could not write confirmed email: $email and the exception : $e")
             internalServerError()
           }
         }
@@ -355,14 +353,18 @@ class ReminderController @Inject() (
 
   def getApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
-        Ok(
-          applySavingsReminders(
-            ReminderForm.giveRemindersDetailsForm(),
-            s.reminderValue.getOrElse("none"),
-            Some(backLinkFromSession(s))
+      if (isFeatureEnabled) {
+        checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
+          Ok(
+            applySavingsReminders(
+              ReminderForm.giveRemindersDetailsForm(),
+              s.reminderValue.getOrElse("none"),
+              Some(backLinkFromSession(s))
+            )
           )
-        )
+        }
+      } else {
+        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
       }
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
 
@@ -414,28 +416,33 @@ class ReminderController @Inject() (
 
   def getApplySavingsReminderSignUpPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
-        def bckLink: String = routes.ReminderController.getApplySavingsReminderPage().url
-        s.reminderDetails.fold(
-          Ok(
-            reminderFrequencySet(
-              ReminderForm.giveRemindersDetailsForm(),
-              "none",
-              "registration",
-              Some(bckLink)
-            )
-          )
-        )(
-          reminderDetails ⇒
+      if (isFeatureEnabled) {
+        checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
+          def bckLink: String = routes.ReminderController.getApplySavingsReminderPage().url
+
+          s.reminderDetails.fold(
             Ok(
               reminderFrequencySet(
                 ReminderForm.giveRemindersDetailsForm(),
-                reminderDetails,
+                "none",
                 "registration",
                 Some(bckLink)
               )
             )
-        )
+          )(
+            reminderDetails ⇒
+              Ok(
+                reminderFrequencySet(
+                  ReminderForm.giveRemindersDetailsForm(),
+                  reminderDetails,
+                  "registration",
+                  Some(bckLink)
+                )
+              )
+          )
+        }
+      } else {
+        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
       }
     }(loginContinueURL = routes.ReminderController.getApplySavingsReminderSignUpPage().url)
 
