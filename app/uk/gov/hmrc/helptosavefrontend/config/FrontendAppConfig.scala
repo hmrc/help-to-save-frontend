@@ -76,7 +76,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
-  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl/HTS"
+  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl"
 
   val ggUserUrl: String =
     s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?" +
