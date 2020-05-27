@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
+import java.time.LocalDateTime
+
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.syntax.apply._
@@ -45,6 +47,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   val metrics: Metrics
   val appConfig: FrontendAppConfig
+  val maintainceTimes: Seq[appConfig.MaintainceTimes] = appConfig.getMaintainceTimes()
   implicit val transformer: NINOLogMessageTransformer
 
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
@@ -120,6 +123,14 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       }
     }
 
+  private def isInMaintaince(currantTime: Long, maintainceTimes: Seq[appConfig.MaintainceTimes]): Boolean = {
+    val currantDateTime = LocalDateTime.now();
+    val checkTimes = maintainceTimes.map(
+      mt ⇒ if (currantDateTime.isAfter(mt.startTime) && currantDateTime.isBefore(mt.endTime)) false else true
+    )
+    checkTimes.forall(x ⇒ x)
+  }
+
   private def authorised[A](retrieval: Retrieval[A], predicate: Predicate = AuthWithCL200)(
     toResult: (A, Request[AnyContent], Long) ⇒ Future[Result]
   )(loginContinueURL: ⇒ RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
@@ -129,11 +140,11 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       authorised(predicate)
         .retrieve(retrieval) { a ⇒
           val time = timer.stop()
-          toResult(a, request, time)
+          if (isInMaintaince(time, maintainceTimes)) toResult(a, request, time) else Future.failed(new isInMaintaince)
         }
         .recover {
           val time = timer.stop()
-          handleFailure(loginContinueURL, time)
+          handleAuthFailure(loginContinueURL, time)
         }
     }
 
@@ -208,7 +219,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       .toEither
   }
 
-  def handleFailure(loginContinueURL: RelativeURL, time: Long)(
+  class isInMaintaince extends AuthorisationException("isInMaintaince")
+
+  def handleAuthFailure(loginContinueURL: RelativeURL, time: Long)(
     implicit request: Request[_]
   ): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
@@ -216,6 +229,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
       SeeOther(appConfig.ivUrl(loginContinueURL))
+
+    case _: isInMaintaince ⇒
+      SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)
 
     case _: UnsupportedAuthProvider ⇒
       SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)
