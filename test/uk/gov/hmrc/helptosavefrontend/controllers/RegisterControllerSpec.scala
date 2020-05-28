@@ -177,6 +177,17 @@ class RegisterControllerSpec
 
     }
 
+    "handling service_outage page" must {
+
+      "return the account create disabled page" in {
+
+        val result = controller.getServiceOutagePage(FakeRequest())
+        status(result) shouldBe Status.OK
+        contentAsString(result) should include("The Help to Save service is unavailable")
+      }
+
+    }
+
     "handling getDetailsAreIncorrect" must {
 
       "return the details are incorrect page" in {

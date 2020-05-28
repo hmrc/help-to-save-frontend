@@ -20,7 +20,6 @@ import java.net.URI
 import java.time.LocalDateTime
 
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.util.urlEncode
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
@@ -28,7 +27,7 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import scala.concurrent.duration.Duration
 
 @Singleton
-class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig, config: Configuration) {
+class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val appName: String = servicesConfig.getString("appName")
 
@@ -72,9 +71,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig, config: Confi
 
   case class MaintainceTimes(startTime: LocalDateTime, endTime: LocalDateTime)
   def getMaintainceTimes(): Seq[MaintainceTimes] = {
-    // val scheduleAsStrings: String = config.getOptional("scheduledMaintenanceTimes.times").getOrElse(String)
     val scheduleAsStrings: String = servicesConfig.getString("scheduledMaintenanceTimes")
-    // val schedules = scheduleAsStrings.flatMap(s => { s.toString.split(",") })
     val schedules = scheduleAsStrings.split(",")
     val maintainceTimes = schedules.map(s => {
       val splitDate = s.split(" ")
