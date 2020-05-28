@@ -231,7 +231,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       SeeOther(appConfig.ivUrl(loginContinueURL))
 
     case _: isInMaintaince ⇒
-      SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)
+      SeeOther(routes.RegisterController.getServiceOutagePage().url)
 
     case _: UnsupportedAuthProvider ⇒
       SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)

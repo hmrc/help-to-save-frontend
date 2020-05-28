@@ -137,9 +137,13 @@ class RegisterController @Inject() (
 
   def getServiceUnavailablePage: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-      Ok(serviceUnavailableView())
+      Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", "unavailable"))
     }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage().url)
 
+  def getServiceOutagePage: Action[AnyContent] = Action { implicit request ⇒
+    implicit val htsContext: HtsContext = HtsContext(authorised = false)
+    Ok(serviceUnavailableView("hts.register.service-outage.title.h1", "outage"))
+  }
   def getDetailsAreIncorrect: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Ok(detailsAreIncorrectView())
