@@ -45,7 +45,7 @@ GET        /try-again-tomorrow                              uk.gov.hmrc.helptosa
 GET        /try-again-later-in-year                         uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getTotalCapReachedPage
 GET        /service-unavailable                             uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceUnavailablePage
 GET        /incorrect-details                               uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDetailsAreIncorrect
-GET        /service-outage                                  uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceOutagePage
+GET        /service-outage                                  uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getServiceOutagePage(endTime: String)
 GET        /iv/journey-result                               uk.gov.hmrc.helptosavefrontend.controllers.IvController.journeyResult(continueURL: String, journeyId: Option[String])
 GET        /identity-verified                               uk.gov.hmrc.helptosavefrontend.controllers.IvController.getIVSuccessful
 GET        /failed-iv                                       uk.gov.hmrc.helptosavefrontend.controllers.IvController.getFailedIV

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneId}
 
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
@@ -27,7 +27,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName ⇒ V2ItmpName, name ⇒ V2Name, nino ⇒ V2Nino}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName => V2ItmpName, name => V2Name, nino => V2Nino}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -47,12 +47,11 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   val metrics: Metrics
   val appConfig: FrontendAppConfig
-  val maintainceTimes: Seq[appConfig.MaintainceTimes] = appConfig.getMaintainceTimes()
+  val maintenanceTimes: Seq[appConfig.MaintainceTimes] = appConfig.getMaintainceTimes()
   implicit val transformer: NINOLogMessageTransformer
-
+  var endTime: String = ""
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
   private type RelativeURL = String
-
   def authorisedForHtsWithNINO(
     action: HtsAction[HtsContextWithNINO]
   )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
@@ -123,10 +122,17 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       }
     }
 
-  private def isInMaintaince(currantTime: Long, maintainceTimes: Seq[appConfig.MaintainceTimes]): Boolean = {
-    val currantDateTime = LocalDateTime.now();
-    val checkTimes = maintainceTimes.map(
-      mt ⇒ if (currantDateTime.isAfter(mt.startTime) && currantDateTime.isBefore(mt.endTime)) false else true
+  private def isInMaintenance(currentTime: Long, maintenanceTimes: Seq[appConfig.MaintainceTimes]): Boolean = {
+    val currentDateTime =
+      if (isSummerTime(LocalDateTime.now())) LocalDateTime.now().minusHours(1) else LocalDateTime.now()
+    val checkTimes = maintenanceTimes.map(
+      mt ⇒
+        if (currentDateTime.isAfter(mt.startTime) && currentDateTime.isBefore(mt.endTime)) {
+          endTime = mt.endTime.toString()
+          false
+        } else {
+          true
+        }
     )
     checkTimes.forall(x ⇒ x)
   }
@@ -140,7 +146,8 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       authorised(predicate)
         .retrieve(retrieval) { a ⇒
           val time = timer.stop()
-          if (isInMaintaince(time, maintainceTimes)) toResult(a, request, time) else Future.failed(new isInMaintaince)
+          if (isInMaintenance(time, maintenanceTimes)) toResult(a, request, time)
+          else Future.failed(MaintenancePeriodException("maintenance"))
         }
         .recover {
           val time = timer.stop()
@@ -219,7 +226,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       .toEither
   }
 
-  class isInMaintaince extends AuthorisationException("isInMaintaince")
+  case class MaintenancePeriodException(time: String) extends AuthorisationException("MaintenancePeriodException")
 
   def handleAuthFailure(loginContinueURL: RelativeURL, time: Long)(
     implicit request: Request[_]
@@ -230,8 +237,8 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
       SeeOther(appConfig.ivUrl(loginContinueURL))
 
-    case _: isInMaintaince ⇒
-      SeeOther(routes.RegisterController.getServiceOutagePage().url)
+    case _: MaintenancePeriodException ⇒
+      SeeOther(routes.RegisterController.getServiceOutagePage(endTime).url)
 
     case _: UnsupportedAuthProvider ⇒
       SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)
@@ -254,4 +261,13 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
   def internalServerError()(implicit request: Request[_]): Result
+
+  private def isSummerTime(dateTimeToCheck: LocalDateTime): Boolean = {
+
+    val ukTz = ZoneId.of("Europe/London")
+    val zonedTimeSeconds = dateTimeToCheck.atZone(ukTz).getOffset.getTotalSeconds
+
+    if (zonedTimeSeconds > 0) true else false
+
+  }
 }

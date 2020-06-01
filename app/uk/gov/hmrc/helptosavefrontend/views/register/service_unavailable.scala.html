@@ -19,7 +19,7 @@
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
-@(headMessage : String, paraMessage :String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(headMessage : String, paraMessage :String,endTime: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages(headMessage)
@@ -38,9 +38,11 @@
         </header>
         @if(paraMessage.matches("outage")){
         <p>@Html(Messages("hts.register.service-outage.p1"))</p>
-        }
-        <p>@Html(Messages("hts.register.service-unavailable.p1"))</p>
+         <p>@Html(Messages("hts.register.service-outage.p2")) @endTime</p>
 
+        } else {
+            <p>@Html(Messages("hts.register.service-unavailable.p1"))</p>
+        }
         <p><a href="https://www.gov.uk/">@Messages("hts.register.service-unavailable.exit.gov.uk")</a></p>
     </div>
 </div>

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
+
 import akka.util.Timeout
 import play.api.http.Status
 import play.api.libs.json.Json
@@ -139,6 +140,17 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
         redirectTo should include(urlEncode(routes.EligibilityCheckController.getCheckEligibility().url))
       }
     }
+    "handle MaintenancePeriodException exception and redirect user to outage page" in {
+
+      val exception = "MaintenancePeriodException"
+
+
+        mockAuthResultWithFail(fromString(exception))
+        val result = actionWithNoEnrols(FakeRequest())
+        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      }
+
+
 
     "handle InsufficientEnrolments exception and redirect user to IV Journey" in {
 
@@ -188,6 +200,15 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
       val result = actionWithEnrols(FakeRequest())
       checkIsTechnicalErrorPage(result)
+    }
+    "handle MaintenancePeriodException exceptions and redirect user to the correct page" in {
+
+      mockAuthWith("MaintenancePeriodException")
+      val result = actionWithEnrols(FakeRequest())
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+      val redirectTo =
+        redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
+      redirectTo should include("")
     }
   }
 }

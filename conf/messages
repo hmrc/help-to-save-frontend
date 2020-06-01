@@ -162,6 +162,7 @@ hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 # Service outage
 hts.register.service-outage.title.h1=Sorry,the service is unavailable
 hts.register.service-outage.p1=The Help to Save service is unavailable
+hts.register.service-outage.p2=You will be able to use the service again after
 
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=If you think you’re eligible for a Help to Save account

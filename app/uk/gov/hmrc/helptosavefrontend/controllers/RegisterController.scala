@@ -137,12 +137,18 @@ class RegisterController @Inject() (
 
   def getServiceUnavailablePage: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-      Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", "unavailable"))
+      Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", "unavailable", ""))
     }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage().url)
 
-  def getServiceOutagePage: Action[AnyContent] = Action { implicit request ⇒
+  def getServiceOutagePage(endTime: String): Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
-    Ok(serviceUnavailableView("hts.register.service-outage.title.h1", "outage"))
+    Ok(
+      serviceUnavailableView(
+        "hts.register.service-outage.title.h1",
+        "outage",
+        endTime.replace("T", " ")
+      )
+    )
   }
   def getDetailsAreIncorrect: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
@@ -343,7 +349,6 @@ class RegisterController @Inject() (
     sessionStore
       .store(session.copy(changingDetails = true))
       .fold({ e ⇒
-        logger.warn(s"Could not write to session cache: $e")
         internalServerError()
       }, _ ⇒ SeeOther(redirectTo))
 
