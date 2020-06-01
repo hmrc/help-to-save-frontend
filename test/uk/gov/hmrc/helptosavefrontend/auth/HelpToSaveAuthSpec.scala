@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-
 import akka.util.Timeout
 import play.api.http.Status
 import play.api.libs.json.Json
@@ -144,13 +143,10 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
       val exception = "MaintenancePeriodException"
 
-
-        mockAuthResultWithFail(fromString(exception))
-        val result = actionWithNoEnrols(FakeRequest())
-        status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      }
-
-
+      mockAuthResultWithFail(fromString(exception))
+      val result = actionWithNoEnrols(FakeRequest())
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
 
     "handle InsufficientEnrolments exception and redirect user to IV Journey" in {
 

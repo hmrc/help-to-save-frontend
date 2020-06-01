@@ -1027,5 +1027,52 @@ class ReminderControllerSpec
     val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
     checkIsTechnicalErrorPage(result)
   }
+  "should show a success create account page if the user submits an submitApplySavingsReminderSignUpPage with no  " in {
+    val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+    val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
+    inSequence {
+      mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+      mockEnrolmentCheck()(Right(NotEnrolled))
+      mockSessionStoreGet(
+        Right(
+          Some(
+            HTSSession(
+              eligibilityResult,
+              None,
+              None,
+              None,
+              None,
+              None,
+              reminderDetails = Some("1st"),
+              None,
+              true,
+              None,
+              false,
+              true
+            )
+          )
+        )
+      )
+      mockSessionStorePut(
+        HTSSession(
+          eligibilityResult,
+          None,
+          None,
+          None,
+          None,
+          None,
+          reminderDetails = Some("1st"),
+          None,
+          true,
+          None,
+          false,
+          true
+        )
+      )(Right(()))
+    }
+
+    val result = csrfAddToken(controller.submitApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
+    status(result) shouldBe SEE_OTHER
+  }
 
 }

@@ -49,7 +49,6 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   val appConfig: FrontendAppConfig
   val maintenanceTimes: Seq[appConfig.MaintainceTimes] = appConfig.getMaintainceTimes()
   implicit val transformer: NINOLogMessageTransformer
-  var endTime: String = ""
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
   private type RelativeURL = String
   def authorisedForHtsWithNINO(
@@ -122,19 +121,15 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       }
     }
 
-  private def isInMaintenance(currentTime: Long, maintenanceTimes: Seq[appConfig.MaintainceTimes]): Boolean = {
+  private def getMaintenance(currentTime: Long, maintenanceTimes: Seq[appConfig.MaintainceTimes]) = {
     val currentDateTime =
-      if (isSummerTime(LocalDateTime.now())) LocalDateTime.now().minusHours(1) else LocalDateTime.now()
+      if (isSummerTime(LocalDateTime.now())) LocalDateTime.now().plusHours(1) else LocalDateTime.now()
     val checkTimes = maintenanceTimes.map(
       mt ⇒
-        if (currentDateTime.isAfter(mt.startTime) && currentDateTime.isBefore(mt.endTime)) {
-          endTime = mt.endTime.toString()
-          false
-        } else {
-          true
-        }
+        if (currentDateTime.isAfter(mt.startTime) && currentDateTime.isBefore(mt.endTime)) mt.endTime.toString()
+        else "None"
     )
-    checkTimes.forall(x ⇒ x)
+    checkTimes.filter(x => x.contains("T"))
   }
 
   private def authorised[A](retrieval: Retrieval[A], predicate: Predicate = AuthWithCL200)(
@@ -146,8 +141,10 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       authorised(predicate)
         .retrieve(retrieval) { a ⇒
           val time = timer.stop()
-          if (isInMaintenance(time, maintenanceTimes)) toResult(a, request, time)
-          else Future.failed(MaintenancePeriodException("maintenance"))
+          val maintenance = getMaintenance(time, maintenanceTimes).mkString("")
+          if (maintenance.contains("T")) {
+            Future.failed(MaintenancePeriodException(maintenance))
+          } else toResult(a, request, time)
         }
         .recover {
           val time = timer.stop()
@@ -226,7 +223,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       .toEither
   }
 
-  case class MaintenancePeriodException(time: String) extends AuthorisationException("MaintenancePeriodException")
+  case class MaintenancePeriodException(endTime: String) extends AuthorisationException("MaintenancePeriodException")
 
   def handleAuthFailure(loginContinueURL: RelativeURL, time: Long)(
     implicit request: Request[_]
@@ -237,7 +234,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
       SeeOther(appConfig.ivUrl(loginContinueURL))
 
-    case _: MaintenancePeriodException ⇒
+    case MaintenancePeriodException(endTime: String) ⇒
       SeeOther(routes.RegisterController.getServiceOutagePage(endTime).url)
 
     case _: UnsupportedAuthProvider ⇒
