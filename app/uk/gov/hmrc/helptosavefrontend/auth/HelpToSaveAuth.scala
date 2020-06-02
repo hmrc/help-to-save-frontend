@@ -121,7 +121,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       }
     }
 
-  private def getMaintenance(currentTime: Long, maintenanceTimes: Seq[appConfig.MaintainceTimes]) = {
+  private def getMaintenanceTime(currentTime: Long, maintenanceTimes: Seq[appConfig.MaintainceTimes]) = {
     val currentDateTime =
       if (isSummerTime(LocalDateTime.now())) LocalDateTime.now().plusHours(1) else LocalDateTime.now()
     val checkTimes = maintenanceTimes.map(
@@ -141,7 +141,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       authorised(predicate)
         .retrieve(retrieval) { a ⇒
           val time = timer.stop()
-          val maintenance = getMaintenance(time, maintenanceTimes).mkString("")
+          val maintenance = getMaintenanceTime(time, maintenanceTimes).mkString("")
           if (maintenance.contains("T")) {
             Future.failed(MaintenancePeriodException(maintenance))
           } else toResult(a, request, time)
