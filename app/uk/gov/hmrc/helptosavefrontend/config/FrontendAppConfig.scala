@@ -69,20 +69,20 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
     ).toString
   }
 
-  case class MaintainceTimes(startTime: LocalDateTime, endTime: LocalDateTime)
-  def getMaintainceTimes(): Seq[MaintainceTimes] = {
+  case class MaintenanceTimes(startTime: LocalDateTime, endTime: LocalDateTime)
+  def getMaintenanceTimes(): Seq[MaintenanceTimes] = {
     val scheduleAsStrings: String = servicesConfig.getString("scheduledMaintenanceTimes")
     val schedules = scheduleAsStrings.split(",")
-    val maintainceTimes = schedules.map(s => {
+    val maintenanceTimes = schedules.map(s => {
       val splitDate = s.split(" ")
       val startDate = splitDate(0)
       val splitTime = splitDate(1)
       val splitTimeStart = splitTime.split("-")
       val startTime = LocalDateTime.parse(startDate + 'T' + splitTimeStart(0))
       val endTime = LocalDateTime.parse(startDate + 'T' + splitTimeStart(1))
-      MaintainceTimes(startTime, endTime)
+      MaintenanceTimes(startTime, endTime)
     })
-    maintainceTimes
+    maintenanceTimes
   }
 
   val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
@@ -156,4 +156,5 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   }
 
   val mongoSessionExpireAfter: Duration = servicesConfig.getDuration("mongodb.session.expireAfter")
+
 }

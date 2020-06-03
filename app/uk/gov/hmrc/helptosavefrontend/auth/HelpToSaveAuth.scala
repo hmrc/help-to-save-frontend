@@ -47,7 +47,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   val metrics: Metrics
   val appConfig: FrontendAppConfig
-  val maintenanceTimes: Seq[appConfig.MaintainceTimes] = appConfig.getMaintainceTimes()
+  val maintenanceTimes: Seq[appConfig.MaintenanceTimes] = appConfig.getMaintenanceTimes()
   implicit val transformer: NINOLogMessageTransformer
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
   private type RelativeURL = String
@@ -121,7 +121,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       }
     }
 
-  private def getMaintenanceTime(currentTime: Long, maintenanceTimes: Seq[appConfig.MaintainceTimes]) = {
+  private def getMaintenanceTime(currentTime: Long, maintenanceTimes: Seq[appConfig.MaintenanceTimes]) = {
     val currentDateTime =
       if (isSummerTime(LocalDateTime.now())) LocalDateTime.now().plusHours(1) else LocalDateTime.now()
     val checkTimes = maintenanceTimes.map(
