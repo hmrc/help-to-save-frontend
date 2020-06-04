@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.time.{Clock, Instant, LocalDate, ZoneId}
+import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId}
 import java.util.UUID
 
 import cats.data.EitherT
@@ -180,10 +180,10 @@ class RegisterControllerSpec
     "handling service_outage page" must {
 
       "return the account create disabled page" in {
-        val currentDate = LocalDate.now().toString()
+        val currentDate = LocalDateTime.now().toString
         val result = controller.getServiceOutagePage(currentDate)(fakeRequest)
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("The Help to Save service is unavailable")
+        contentAsString(result) should include("Sorry,the service is unavailable")
       }
 
     }

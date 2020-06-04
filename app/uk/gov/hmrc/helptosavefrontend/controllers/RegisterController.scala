@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.text.SimpleDateFormat
 import java.time.temporal.TemporalAdjusters
 import java.time.{Clock, LocalDate}
 
@@ -137,16 +138,21 @@ class RegisterController @Inject() (
 
   def getServiceUnavailablePage: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-      Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", "unavailable", ""))
+      Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", "unavailable", "", ""))
     }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage().url)
 
   def getServiceOutagePage(endTime: String): Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
+    val endDateTime = endTime.split("T");
+    val inputFormat = new SimpleDateFormat("yyyy-MM-dd")
+    val outputFormat = new SimpleDateFormat("dd MMM yyyy")
+    val formattedDate = outputFormat.format(inputFormat.parse(endDateTime(0)))
     Ok(
       serviceUnavailableView(
         "hts.register.service-outage.title.h1",
         "outage",
-        endTime.replace("T", " ")
+        formattedDate,
+        endDateTime(1)
       )
     )
   }
