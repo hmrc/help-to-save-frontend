@@ -17,11 +17,10 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import java.net.URI
-import java.time.LocalDateTime
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
-import uk.gov.hmrc.helptosavefrontend.util.urlEncode
+import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, urlEncode}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.duration.Duration
@@ -69,21 +68,8 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
     ).toString
   }
 
-  case class MaintenanceTimes(startTime: LocalDateTime, endTime: LocalDateTime)
-  def getMaintenanceTimes(): Seq[MaintenanceTimes] = {
-    val scheduleAsStrings: String = servicesConfig.getString("scheduledMaintenanceTimes")
-    val schedules = scheduleAsStrings.split(",")
-    val maintenanceTimes = schedules.map(s => {
-      val splitDate = s.split(" ")
-      val startDate = splitDate(0)
-      val splitTime = splitDate(1)
-      val splitTimeStart = splitTime.split("-")
-      val startTime = LocalDateTime.parse(startDate + 'T' + splitTimeStart(0))
-      val endTime = LocalDateTime.parse(startDate + 'T' + splitTimeStart(1))
-      MaintenanceTimes(startTime, endTime)
-    })
-    maintenanceTimes
-  }
+  val maintenanceSchedule: MaintenanceSchedule =
+    MaintenanceSchedule.parse(servicesConfig.getString("scheduled-maintenance-times"))
 
   val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
 

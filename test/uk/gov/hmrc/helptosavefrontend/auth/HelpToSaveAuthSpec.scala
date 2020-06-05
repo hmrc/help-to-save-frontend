@@ -197,14 +197,5 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       val result = actionWithEnrols(FakeRequest())
       checkIsTechnicalErrorPage(result)
     }
-    "handle MaintenancePeriodException exceptions and redirect user to the correct page" in {
-
-      mockAuthWith("MaintenancePeriodException")
-      val result = actionWithEnrols(FakeRequest())
-      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
-      val redirectTo =
-        redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
-      redirectTo should include("")
-    }
   }
 }

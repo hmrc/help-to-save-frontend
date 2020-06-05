@@ -16,10 +16,12 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import java.time.LocalDateTime
+@import java.text.SimpleDateFormat
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
-@(headMessage : String, paraMessage :String,endDate: String,endTime: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(headMessage : String, end:Option[LocalDateTime])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages(headMessage)
@@ -30,19 +32,26 @@
   bodyClasses = None
 ) {
 
-<div class="grid-layout grid-layout--stacked">
+<div class="grid-layout grid-layout--stacked">.
     <div class="grid-layout__column grid-layout__column--2-3">
             
         <header class="page-header text">
             <h1 class="heading-large" id="hts-not-eligible-title">@title</h1>
         </header>
-        @if(paraMessage.matches("outage")){
-        <p>@Html(Messages("hts.register.service-outage.p1"))</p>
-         <p>@Html(Messages("hts.register.service-outage.p2-1")) @endTime @Html(Messages("hts.register.service-outage.p2-2")) @endDate</p>
-         <p>@Html(Messages("hts.register.service-outage.p3"))<a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme">
-             @Messages("hts.register.service-outage.p3.contact")</a></p>
-        } else {
-            <p>@Html(Messages("hts.register.service-unavailable.p1"))</p>
+        @end match {
+            case Some(e:LocalDateTime) => {
+                <p>@Html(Messages("hts.register.service-outage.p1"))</p>
+                <p>@Html(Messages("hts.register.service-outage.p2",
+                    new SimpleDateFormat("h:mma").format(
+                    new SimpleDateFormat("HH:mm").parse(e.toLocalTime.toString)).toLowerCase,
+                    new SimpleDateFormat("EEEEE d MMMMM yyyy").format(
+                        new SimpleDateFormat("yyyy-MM-dd").parse(e.toLocalDate.toString)) ))</p>
+                <p>@Html(Messages("hts.register.service-outage.p3"))<a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme">
+                @Messages("hts.register.service-outage.p3.contact")</a></p>
+            }
+            case None => {
+                <p>@Html(Messages("hts.register.service-unavailable.p1"))</p>
+            }
         }
         <p><a href="https://www.gov.uk/">@Messages("hts.register.service-unavailable.exit.gov.uk")</a></p>
     </div>

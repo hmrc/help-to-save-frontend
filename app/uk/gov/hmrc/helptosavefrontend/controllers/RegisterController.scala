@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.text.SimpleDateFormat
 import java.time.temporal.TemporalAdjusters
-import java.time.{Clock, LocalDate}
+import java.time.{Clock, LocalDate, LocalDateTime}
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -138,23 +138,12 @@ class RegisterController @Inject() (
 
   def getServiceUnavailablePage: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-      Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", "unavailable", "", ""))
+      Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", None))
     }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage().url)
 
-  def getServiceOutagePage(endTime: String): Action[AnyContent] = Action { implicit request ⇒
+  def getServiceOutagePage(end: String): Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
-    val endDateTime = endTime.split("T");
-    val inputFormat = new SimpleDateFormat("yyyy-MM-dd")
-    val outputFormat = new SimpleDateFormat("dd MMM yyyy")
-    val formattedDate = outputFormat.format(inputFormat.parse(endDateTime(0)))
-    Ok(
-      serviceUnavailableView(
-        "hts.register.service-outage.title.h1",
-        "outage",
-        formattedDate,
-        endDateTime(1)
-      )
-    )
+    Ok(serviceUnavailableView("hts.register.service-outage.title.h1", Some(LocalDateTime.parse(end))))
   }
   def getDetailsAreIncorrect: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
