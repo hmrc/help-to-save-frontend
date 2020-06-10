@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import java.time.LocalDateTime
+@import uk.gov.hmrc.helptosavefrontend.util.LanguageUtils
 @import java.text.SimpleDateFormat
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
@@ -34,7 +35,7 @@
 
 <div class="grid-layout grid-layout--stacked">.
     <div class="grid-layout__column grid-layout__column--2-3">
-            
+
         <header class="page-header text">
             <h1 class="heading-large" id="hts-not-eligible-title">@title</h1>
         </header>
@@ -42,10 +43,9 @@
             case Some(e:LocalDateTime) => {
                 <p>@Html(Messages("hts.register.service-outage.p1"))</p>
                 <p>@Html(Messages("hts.register.service-outage.p2",
-                    new SimpleDateFormat("h:mma").format(
-                    new SimpleDateFormat("HH:mm").parse(e.toLocalTime.toString)).toLowerCase,
-                    new SimpleDateFormat("EEEEE d MMMMM yyyy").format(
-                        new SimpleDateFormat("yyyy-MM-dd").parse(e.toLocalDate.toString)) ))</p>
+                    LanguageUtils.formatLocalTime(e.toLocalTime),
+                    LanguageUtils.formatLocalDate(e.toLocalDate)(messages.lang)))
+                </p>
                 <p>@Html(Messages("hts.register.service-outage.p3"))<a href="https://www.gov.uk/government/organisations/hm-revenue-customs/contact/help-to-save-scheme">
                 @Messages("hts.register.service-outage.p3.contact")</a></p>
             }
