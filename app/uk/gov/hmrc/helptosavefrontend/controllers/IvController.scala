@@ -70,7 +70,7 @@ class IvController @Inject() (
   ): Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       //Will be populated if we arrived here because of an IV success/failure
-      val newIVUrl = frontendAppConfig.ivUrl(continueURL)
+      val newIVUrl = frontendAppConfig.ivUrl(sanitizeParam(continueURL))
       lazy val storeNewIVURLThenRedirectTo =
         storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None), journeyId) _
 
@@ -79,7 +79,10 @@ class IvController @Inject() (
           ivConnector.getJourneyStatus(JourneyId(id)).flatMap {
             case Some(Success) ⇒
               metrics.ivSuccessCounter.inc()
-              storeInSessionCacheThenRedirect(HTSSession(None, None, None, None, Some(continueURL)), Some(id))(
+              storeInSessionCacheThenRedirect(
+                HTSSession(None, None, None, None, Some(sanitizeParam(continueURL))),
+                Some(id)
+              )(
                 routes.IvController.getIVSuccessful().url
               )
 
@@ -186,6 +189,9 @@ class IvController @Inject() (
     authorisedForHts { implicit r ⇒ implicit h ⇒
       Ok(preconditionFailedView())
     }(routes.IvController.getPreconditionFailed().url)
+
+  def sanitizeParam(inputValue: String): String =
+    inputValue.replaceAll("javascript:", "")
 
   private def storeInSessionCacheThenRedirect(session: HTSSession, journeyId: Option[String])(redirectTo: ⇒ String)(
     implicit
