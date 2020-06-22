@@ -136,6 +136,17 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
         checkIsTechnicalErrorPage(result)
       }
 
+      "show an error page if URL contains unexpected characters" in {
+        val badURL = "javascript%3Aalert%281%29%3B&journeyId=b9087faf-adcb-40ae-9e74-1e8afe35df69"
+        inSequence {
+          mockAuthWithNoRetrievals(AuthProvider)
+          mockIvConnector(journeyId, "Success")
+          mockSessionStorePut(HTSSession(None, None, None, None, Some(badURL)))(Left(""))
+        }
+        val result = ivController.journeyResult(badURL, Some(journeyId.Id))(FakeRequest())
+        checkIsTechnicalErrorPage(result)
+      }
+
     }
 
     "handling incomplete responses" must {

@@ -34,6 +34,7 @@ import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.matching.{Regex, UnanchoredRegex}
 
 @Singleton
 class IvController @Inject() (
@@ -70,81 +71,86 @@ class IvController @Inject() (
   ): Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       //Will be populated if we arrived here because of an IV success/failure
-      val newIVUrl = frontendAppConfig.ivUrl(sanitizeParam(continueURL))
+      val newIVUrl = frontendAppConfig.ivUrl(continueURL)
       lazy val storeNewIVURLThenRedirectTo =
         storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None), journeyId) _
+      val urlRegex = "[A-Za-z0-9=&-?/]*"
+      request.uri.matches(urlRegex) match {
+        case true =>
+          journeyId match {
+            case Some(id) ⇒
+              ivConnector.getJourneyStatus(JourneyId(id)).flatMap {
+                case Some(Success) ⇒
+                  metrics.ivSuccessCounter.inc()
+                  storeInSessionCacheThenRedirect(
+                    HTSSession(None, None, None, None, Some(continueURL)),
+                    Some(id)
+                  )(
+                    routes.IvController.getIVSuccessful().url
+                  )
 
-      journeyId match {
-        case Some(id) ⇒
-          ivConnector.getJourneyStatus(JourneyId(id)).flatMap {
-            case Some(Success) ⇒
-              metrics.ivSuccessCounter.inc()
-              storeInSessionCacheThenRedirect(
-                HTSSession(None, None, None, None, Some(sanitizeParam(continueURL))),
-                Some(id)
-              )(
-                routes.IvController.getIVSuccessful().url
-              )
+                case Some(Incomplete) ⇒
+                  metrics.ivIncompleteCounter.inc()
+                  //The journey has not been completed yet.
+                  //This result can only occur when a service asks for the result too early (before receiving the redirect from IV)
+                  storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
 
-            case Some(Incomplete) ⇒
-              metrics.ivIncompleteCounter.inc()
-              //The journey has not been completed yet.
-              //This result can only occur when a service asks for the result too early (before receiving the redirect from IV)
-              storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
+                case Some(FailedMatching) ⇒
+                  metrics.ivFailedMatchingCounter.inc()
+                  //The user entered details on the Designatory Details page that could not be matched to an appropriate record in CID
+                  storeNewIVURLThenRedirectTo(frontendAppConfig.ivFailedMatchingUrl)
 
-            case Some(FailedMatching) ⇒
-              metrics.ivFailedMatchingCounter.inc()
-              //The user entered details on the Designatory Details page that could not be matched to an appropriate record in CID
-              storeNewIVURLThenRedirectTo(frontendAppConfig.ivFailedMatchingUrl)
+                case Some(FailedIV) ⇒
+                  metrics.ivFailedIVCounter.inc()
+                  //The user couldn't answer enough questions correctly to pass verification
+                  storeNewIVURLThenRedirectTo(routes.IvController.getFailedIV().url)
 
-            case Some(FailedIV) ⇒
-              metrics.ivFailedIVCounter.inc()
-              //The user couldn't answer enough questions correctly to pass verification
-              storeNewIVURLThenRedirectTo(routes.IvController.getFailedIV().url)
+                case Some(InsufficientEvidence) ⇒
+                  metrics.ivInsufficientEvidenceCounter.inc()
+                  //The user was matched, but we do not have enough information about them to be able to produce the necessary set of questions
+                  // to ask them to meet the required Confidence Level
+                  SeeOther(routes.IvController.getInsufficientEvidence().url)
 
-            case Some(InsufficientEvidence) ⇒
-              metrics.ivInsufficientEvidenceCounter.inc()
-              //The user was matched, but we do not have enough information about them to be able to produce the necessary set of questions
-              // to ask them to meet the required Confidence Level
-              SeeOther(routes.IvController.getInsufficientEvidence().url)
+                case Some(UserAborted) ⇒
+                  metrics.ivUserAbortedCounter.inc()
+                  //The user specifically chose to end the journey
+                  storeNewIVURLThenRedirectTo(routes.IvController.getUserAborted().url)
 
-            case Some(UserAborted) ⇒
-              metrics.ivUserAbortedCounter.inc()
-              //The user specifically chose to end the journey
-              storeNewIVURLThenRedirectTo(routes.IvController.getUserAborted().url)
+                case Some(LockedOut) ⇒
+                  metrics.ivLockedOutCounter.inc()
+                  //The user failed to answer questions correctly and exceeded the lockout threshold
+                  SeeOther(routes.IvController.getLockedOut().url)
 
-            case Some(LockedOut) ⇒
-              metrics.ivLockedOutCounter.inc()
-              //The user failed to answer questions correctly and exceeded the lockout threshold
-              SeeOther(routes.IvController.getLockedOut().url)
+                case Some(PrecondFailed) ⇒
+                  metrics.ivPreconditionFailedCounter.inc()
+                  // The user's authority does not meet the criteria for starting an IV journey.
+                  // This result implies the service should not have sent this user to IV,
+                  // as this condition can get determined by the user's authority. See below for a list of conditions that lead to this result
+                  SeeOther(routes.IvController.getPreconditionFailed().url)
 
-            case Some(PrecondFailed) ⇒
-              metrics.ivPreconditionFailedCounter.inc()
-              // The user's authority does not meet the criteria for starting an IV journey.
-              // This result implies the service should not have sent this user to IV,
-              // as this condition can get determined by the user's authority. See below for a list of conditions that lead to this result
-              SeeOther(routes.IvController.getPreconditionFailed().url)
+                case Some(TechnicalIssue) ⇒
+                  metrics.ivTechnicalIssueCounter.inc()
+                  //A technical issue on the platform caused the journey to end.
+                  // This is usually a transient issue, so that the user should try again later
+                  logger.warn("TechnicalIssue response from identityVerificationFrontendService")
+                  storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
 
-            case Some(TechnicalIssue) ⇒
-              metrics.ivTechnicalIssueCounter.inc()
-              //A technical issue on the platform caused the journey to end.
-              // This is usually a transient issue, so that the user should try again later
-              logger.warn("TechnicalIssue response from identityVerificationFrontendService")
-              storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
+                case Some(Timeout) ⇒
+                  metrics.ivTimeoutCounter.inc()
+                  //The user took to long to proceed the journey and was timed-out
+                  storeNewIVURLThenRedirectTo(routes.IvController.getTimedOut().url)
 
-            case Some(Timeout) ⇒
-              metrics.ivTimeoutCounter.inc()
-              //The user took to long to proceed the journey and was timed-out
-              storeNewIVURLThenRedirectTo(routes.IvController.getTimedOut().url)
+                case _ ⇒
+                  logger.warn("unexpected response from identityVerificationFrontendService")
+                  storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
+              }
 
-            case _ ⇒
-              logger.warn("unexpected response from identityVerificationFrontendService")
+            case None ⇒
+              // No journeyId signifies subsequent 2FA failure
+              logger.warn("response from identityVerificationFrontendService did not contain token or journeyId param")
               storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
           }
-
-        case None ⇒
-          // No journeyId signifies subsequent 2FA failure
-          logger.warn("response from identityVerificationFrontendService did not contain token or journeyId param")
+        case false =>
           storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue().url)
     }
     }(loginContinueURL = routes.IvController.journeyResult(continueURL, journeyId).url)
@@ -189,9 +195,6 @@ class IvController @Inject() (
     authorisedForHts { implicit r ⇒ implicit h ⇒
       Ok(preconditionFailedView())
     }(routes.IvController.getPreconditionFailed().url)
-
-  def sanitizeParam(inputValue: String): String =
-    inputValue.replaceAll("javascript:", "")
 
   private def storeInSessionCacheThenRedirect(session: HTSSession, journeyId: Option[String])(redirectTo: ⇒ String)(
     implicit
