@@ -132,7 +132,7 @@
 
 @serviceInfoHtml = {
   @serviceInfo(
-    betaBanner = betaBanner,
+    betaBanner = HtmlFormat.empty,
     includeGridWrapper = false,
     serviceInfoContent = Some(serviceInfoContent)
   )
@@ -148,9 +148,6 @@
 
 @getHelpForm = @{reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
 
-@betaBanner = {
-  @layoutBetaBanner(false, appConfig.betaFeedbackUrlNoAuth, appConfig.betaFeedbackUrlNoAuth, true, false)
-}
 
 @content = {
   @mainContent(
