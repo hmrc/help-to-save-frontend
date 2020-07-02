@@ -183,7 +183,7 @@ class RegisterControllerSpec
         val currentDate = LocalDateTime.now().toString
         val result = controller.getServiceOutagePage(currentDate)(fakeRequest)
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Sorry,the service is unavailable")
+        contentAsString(result) should include("Sorry, the service is unavailable")
       }
 
     }
