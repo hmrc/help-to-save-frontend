@@ -160,7 +160,7 @@ hts.register.service-unavailable.p1=You’ll be able to use the Help to Save ser
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
 # Service outage
-hts.register.service-outage.title.h1=Sorry,the service is unavailable
+hts.register.service-outage.title.h1=Sorry, the service is unavailable
 hts.register.service-outage.p1=Help to Save is temporarily unavailable because of scheduled maintenance.
 hts.register.service-outage.p2=You will be able to use the service again from {0} on {1}
 hts.register.service-outage.p3=If you need to speak to someone about your Help to Save account
