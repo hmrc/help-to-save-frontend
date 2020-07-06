@@ -139,6 +139,14 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
         redirectTo should include(urlEncode(routes.EligibilityCheckController.getCheckEligibility().url))
       }
     }
+    "handle MaintenancePeriodException exception and redirect user to outage page" in {
+
+      val exception = "MaintenancePeriodException"
+
+      mockAuthResultWithFail(fromString(exception))
+      val result = actionWithNoEnrols(FakeRequest())
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
+    }
 
     "handle InsufficientEnrolments exception and redirect user to IV Journey" in {
 

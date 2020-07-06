@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
+import java.time.LocalDateTime
+
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.syntax.apply._
@@ -25,7 +27,7 @@ import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName ⇒ V2ItmpName, name ⇒ V2Name, nino ⇒ V2Nino}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals.{itmpName => V2ItmpName, name => V2Name, nino => V2Nino}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -46,10 +48,8 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   val metrics: Metrics
   val appConfig: FrontendAppConfig
   implicit val transformer: NINOLogMessageTransformer
-
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
   private type RelativeURL = String
-
   def authorisedForHtsWithNINO(
     action: HtsAction[HtsContextWithNINO]
   )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
@@ -129,11 +129,14 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       authorised(predicate)
         .retrieve(retrieval) { a ⇒
           val time = timer.stop()
-          toResult(a, request, time)
+          appConfig.maintenanceSchedule.endOfMaintenance(LocalDateTime.now) match {
+            case Some(endMaintenance) => Future.failed(MaintenancePeriodException(endMaintenance))
+            case None                 => toResult(a, request, time)
+          }
         }
         .recover {
           val time = timer.stop()
-          handleFailure(loginContinueURL, time)
+          handleAuthFailure(loginContinueURL, time)
         }
     }
 
@@ -208,7 +211,10 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       .toEither
   }
 
-  def handleFailure(loginContinueURL: RelativeURL, time: Long)(
+  case class MaintenancePeriodException(endTime: LocalDateTime)
+      extends AuthorisationException("MaintenancePeriodException")
+
+  def handleAuthFailure(loginContinueURL: RelativeURL, time: Long)(
     implicit request: Request[_]
   ): PartialFunction[Throwable, Result] = {
     case _: NoActiveSession ⇒
@@ -216,6 +222,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
     case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
       SeeOther(appConfig.ivUrl(loginContinueURL))
+
+    case MaintenancePeriodException(endTime: LocalDateTime) ⇒
+      SeeOther(routes.RegisterController.getServiceOutagePage(endTime.toString).url)
 
     case _: UnsupportedAuthProvider ⇒
       SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)
@@ -238,4 +247,5 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   private def timeString(nanos: Long): String = s"(round-trip time: ${nanosToPrettyString(nanos)})"
 
   def internalServerError()(implicit request: Request[_]): Result
+
 }

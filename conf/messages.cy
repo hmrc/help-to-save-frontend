@@ -93,6 +93,7 @@ hts.register.bank-details.title.h1=Nodwch fanylion cyfrif banc y DU yr ydych am 
 hts.register.bank-details.sort-code.label=Cod didoli
 hts.register.bank-details.sort-code.hint=Er enghraifft, 02 03 04
 hts.register.bank-details.accountNumber.label=Rhif y cyfrif
+hts.register.bank-details.accountNumber.hint=Er enghraifft, 12345678
 hts.register.bank-details.accountName.label=Enw pwy sydd ar y cyfrif
 hts.register.bank-details.rollNumber.label=Rhif rôl
 hts.register.bank-details.rollNumber.hint=Cymdeithasau adeiladu yn unig
@@ -154,6 +155,13 @@ hts.register.total-cap-reached.exit.gov.uk=Gadael a mynd i GOV.UK
 hts.register.service-unavailable.title.h1=Nid yw’r gwasanaeth ar gael
 hts.register.service-unavailable.p1=Byddwch yn gallu defnyddio’r gwasanaeth Cymorth i Gynilo yn nes ymlaen.
 hts.register.service-unavailable.exit.gov.uk=Gadael a mynd i GOV.UK
+
+# Service outage
+hts.register.service-outage.title.h1=Mae’n ddrwg gennym, nid yw’r gwasanaeth ar gael
+hts.register.service-outage.p1=Nid yw Cymorth i Gynilo ar gael ar hyn o bryd oherwydd bod gwaith cynnal a chadw wedi’i drefnu.
+hts.register.service-outage.p2=Byddwch yn gallu defnyddio’r gwasanaeth eto ar ôl {0} ar {1}
+hts.register.service-outage.p3=Os ydych am siarad â rhywun am eich cyfrif Cymorth i Gynilo
+hts.register.service-outage.p3.contact=cysylltwch â CThEM
 
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=Os ydych o’r farn eich bod yn gymwys am gyfrif Cymorth i Gynilo
@@ -392,6 +400,11 @@ hts.account-created.ul1-li5=tynnu arian allan a pharhau i ennill bonws
 hts.account-created.p4=Mae gennych hyd at {0} i dalu i mewn y mis hwn.
 hts.account-created.continue-button=Mynd yn eich blaen i’ch cyfrif
 
+hts.account-created.savingreminders.h2=Nodynnau atgoffa ynghylch cynilion
+hts.account-created.savingreminders.l1=Gallwch hefyd
+hts.account-created.savingreminders.l2=er mwyn eich helpu i gofio cynilo bob mis, neu gallwch eu trefnu yn nes ymlaen. Yn syml, ewch i “Nodynnau atgoffa ynghylch cynilion” yn hafan eich cyfrif Cymorth i Gynilo.
+hts.account-created.savingreminders.link=trefnu nodynnau atgoffa misol ynghylch cynilion drwy e-bost nawr
+
 # Incorrect details
 hts.incorrect-details.title.h1=Mae angen eich manylion cywir arnom
 hts.incorrect-details.p1=Ni allwn greu eich cyfrif nes bod gennym eich:
@@ -570,6 +583,8 @@ hts.help-information.section.bonuses.s5.p2=Rydych yn parhau i gynilo £50 bob mi
 hts.help-information.section.bonuses.s5.h2=Enghraifft 2
 hts.help-information.section.bonuses.s5.p3=Rydych yn cynilo £25 bob mis calendr ym mlynyddoedd 1 a 2. Rydych yn tynnu rhywfaint o arian allan. Eich balans uchaf ar ddiwedd 2 flynedd yw £400. Eich bonws cyntaf yw £200, sef 50% o £400.
 hts.help-information.section.bonuses.s5.p4=Ym mlynyddoedd 3 a 4 rydych yn cynilo arian ond hefyd yn tynnu rhywfaint o arian allan. Ar ddiwedd blwyddyn 4, rydych wedi cynilo £200 yn ychwanegol i dyfu’ch balans uchaf o £400 i £600. Eich bonws terfynol yw £100, sef 50% o £200.
+hts.help-information.section.bonuses.s5.h3=Mis calendr
+hts.help-information.section.bonuses.s5.p5=Mae mis calendr yn fis llawn o ddiwrnod cyntaf y mis tan ddiwrnod olaf y mis. Er enghraifft, 1 i 31 Ionawr.
 
 hts.help-information.section.bonuses.s6.title=Ble y telir eich bonws
 hts.help-information.section.bonuses.s6.p1=Telir unrhyw arian bonws a enillwch i mewn i’ch cyfrif banc, nid i’ch cyfrif Cymorth i Gynilo.
@@ -642,3 +657,50 @@ language-switcher.welsh.hidden=Newid yr iaith i''r Gymraeg
 language-switcher.welsh.hover=Defnyddio''r cyfrif hwn yn Cymraeg
 language-switcher.nav=Language switcher
 
+# Savings reminders
+hts.email-saving-remainders.title.h1=E-byst atgoffa ynghylch cynilion
+hts.email-saving-remainders.intro=Mae e-byst atgoffa yn eich helpu i gofio cynilo bob mis. Mae hyn yn eich helpu i ennill y bonws mwyaf posibl.
+hts.email-saving-remainders.note=Ar hyn o bryd, nid ydych yn cael unrhyw nodynnau atgoffa.
+hts.email-saving-remainders-button=Trefnu nodynnau atgoffa
+hts.reminder-frequency.select=Dewiswch bryd yr hoffech gael nodynnau atgoffa
+hts.reminder-frequency.first=Ar ddiwrnod 1 bob mis
+hts.reminder-frequency.25=Ar ddiwrnod 25 bob mis
+hts.reminder-frequency.both=Ar ddiwrnod 1 a diwrnod 25 bob mis
+hts.reminder-frequency.or= neu
+hts.reminder-frequency.cancel=Canslo pob nodyn atgoffa
+hts.reminder-confirmation-set.title.h1=Nodynnau atgoffa ynghylch cynilion wedi’u trefnu
+hts.reminder-confirmation-set.title.p1=Byddwch bellach yn cael e-byst atgoffa misol
+hts.reminder-confirmation-update.title.h1=Nodynnau atgoffa ynghylch cynilion wedi’u newid
+hts.reminder-confirmation-update.title.p1=Mae gennych ddyddiadau newydd ar gyfer e-byst atgoffa misol
+hts.reminder-confirmation.title.p1-1=Byddwn yn anfon y nodynnau atgoffa atoch ar ddiwrnod
+hts.reminder-confirmation.title.p1-2=bob mis
+hts.reminder-confirmation.title.p1-3=Byddwn yn anfon eich nodynnau atgoffa at
+hts.reminder-confirmation.title.p1-4=Os hoffech i’ch nodynnau atgoffa fynd i rywle arall bydd angen i chi 
+hts.reminder-confirmation.change-email.descriptive-link=newid eich cyfeiriad e-bost.
+hts.reminder-confirmation.saving-reminders.descriptive-link=nodynnau atgoffa ynghylch cynilion
+hts.reminder-confirmation.title.p1-5=Gallwch newid neu ganslo’ch e-byst atgoffa ar unrhyw adeg. Ewch i
+hts.reminder-confirmation.title.p1-6=yn hafan eich cyfrif Cymorth i Gynilo.
+hts.reminder-confirmation.h2=Beth sy’n digwydd nesaf
+hts.reminder-frequency.select-an-option=Dewiswch opsiwn ar gyfer trefnu nodynnau atgoffa
+hts.reminder-frequency.error.missing=Dim opsiwn wedi’i ddewis o ran amlder y nodynnau atgoffa
+
+hts.reminder-dashboard.title.h1=Dangosfwrdd nodynnau atgoffa
+hts.reminder-dashboard.h2=Newid neu ganslo e-byst atgoffa
+hts.reminder-dashboard.t1=Dyddiad nodynnau atgoffa
+hts.reminder-dashboard.t2=Cyfeiriad e-bost
+hts.reminder-dashboard.t1-1=Rydych yn cael nodynnau atgoffa ar ddiwrnod
+hts.reminder-dashboard.t1-2= bob mis
+hts.reminder-dashboard-change-cancel=Newid neu ganslo
+hts.reminder-dashboard-change=Newid
+
+hts.reminder-cancel-confirmation.title.h1=Nodynnau atgoffa wedi’u canslo
+hts.reminder-cancel-confirmation.title.p1=Ni fyddwn yn anfon rhagor o nodynnau atgoffa ynghylch cynilion atoch
+hts.reminder-cancel-confirmation.p1-1=Gallwch
+hts.reminder-cancel-confirmation.p1-2=eto ar unrhyw adeg.
+hts.reminder-cancel-confirmation.li-signup=gofrestru ar gyfer nodynnau atgoffa
+
+hts.reminder-frequency.yes=Iawn, trefnu e-byst atgoffa
+hts.reminder-frequency.no=Na, nid wyf am drefnu e-byst atgoffa nawr
+hts.reminder-apply-savings=A ydych am gael e-byst atgoffa ynghylch cynilion?
+hts.reminder-select.error.missing=Dewiswch a ydych am drefnu e-byst atgoffa
+hts.register.create_account.your-remainder.note=Ni fyddwn yn anfon unrhyw nodynnau atgoffa atoch. Gallwch drefnu’r rhain yn nes ymlaen os ydych yn dymuno gwneud hynny.

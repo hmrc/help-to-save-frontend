@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import java.text.SimpleDateFormat
 import java.time.temporal.TemporalAdjusters
-import java.time.{Clock, LocalDate}
+import java.time.{Clock, LocalDate, LocalDateTime}
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -137,9 +138,13 @@ class RegisterController @Inject() (
 
   def getServiceUnavailablePage: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
-      Ok(serviceUnavailableView())
+      Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", None))
     }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage().url)
 
+  def getServiceOutagePage(end: String): Action[AnyContent] = Action { implicit request ⇒
+    implicit val htsContext: HtsContext = HtsContext(authorised = false)
+    Ok(serviceUnavailableView("hts.register.service-outage.title.h1", Some(LocalDateTime.parse(end))))
+  }
   def getDetailsAreIncorrect: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Ok(detailsAreIncorrectView())
@@ -339,7 +344,6 @@ class RegisterController @Inject() (
     sessionStore
       .store(session.copy(changingDetails = true))
       .fold({ e ⇒
-        logger.warn(s"Could not write to session cache: $e")
         internalServerError()
       }, _ ⇒ SeeOther(redirectTo))
 

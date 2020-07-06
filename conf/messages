@@ -159,6 +159,12 @@ hts.register.service-unavailable.title.h1=Service unavailable
 hts.register.service-unavailable.p1=You’ll be able to use the Help to Save service later.
 hts.register.service-unavailable.exit.gov.uk=Exit to GOV.UK
 
+# Service outage
+hts.register.service-outage.title.h1=Sorry, the service is unavailable
+hts.register.service-outage.p1=Help to Save is temporarily unavailable because of scheduled maintenance.
+hts.register.service-outage.p2=You will be able to use the service again from {0} on {1}
+hts.register.service-outage.p3=If you need to speak to someone about your Help to Save account
+hts.register.service-outage.p3.contact=contact HMRC
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=If you think you’re eligible for a Help to Save account
 hts.register.think_you_are_eligible.p1=Have you been told you’re not eligible for a Help to Save account? If yes, you should go to GOV.UK to check the
@@ -652,7 +658,7 @@ language-switcher.welsh.hidden=Newid yr iaith i’r Gymraeg
 language-switcher.welsh.hover=Defnyddio’r cyfrif hwn yn Cymraeg
 language-switcher.nav=Language switcher
 
-
+# Savings reminders
 hts.email-saving-remainders.title.h1=Email savings reminders
 hts.email-saving-remainders.intro=Email reminders help you remember to save each month. This helps you earn the highest possible bonus.
 hts.email-saving-remainders.note=Currently, you are not receiving any reminders.
