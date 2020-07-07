@@ -22,7 +22,7 @@ class MaintenanceScheduleSpec extends UnitSpec {
 
   "MatchingSchedule" must {
     "return the last end time" in {
-      val schedule = "2020-06-03T12:50 2020-06-03T13:01,2020-06-03T12:51 2020-06-03T13:02"
+      val schedule = "2020-06-03T12:50/2020-06-03T13:01,2020-06-03T12:51/2020-06-03T13:02"
       val original = MaintenanceSchedule.parse(schedule).endOfMaintenance(LocalDateTime.parse("2020-06-03T12:52"))
       val expected = Some(LocalDateTime.parse("2020-06-03T13:02"))
 
@@ -30,7 +30,7 @@ class MaintenanceScheduleSpec extends UnitSpec {
     }
 
     "return none when outside maintenance window" in {
-      val schedule = "2020-06-03T12:50 2020-06-03T13:01"
+      val schedule = "2020-06-03T12:50/2020-06-03T13:01"
       val original = MaintenanceSchedule.parse(schedule).endOfMaintenance(LocalDateTime.parse("2020-06-03T13:03"))
       val expected = None
 
