@@ -29,7 +29,7 @@ object MaintenanceSchedule {
   def parse(x: String): MaintenanceSchedule =
     MaintenanceSchedule(
       x.split(",")
-        .map(_.split(" ") match {
+        .map(_.split("/") match {
           case Array(start, end) => Maintenance(LocalDateTime.parse(start), LocalDateTime.parse(end))
         })
     )
