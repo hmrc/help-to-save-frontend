@@ -35,7 +35,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckRespons
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.Crypto
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, base64Decode, base64Encode}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -273,7 +273,8 @@ class ReminderControllerSpec
         mockDecrypt("encrypted")("email")
       }
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      val result = controller.getRendersConfirmPage("encrypted", "1st", "Set")(fakeRequestWithNoBody)
+      val result =
+        controller.getRendersConfirmPage(new String(base64Encode("encrypted")), "1st", "Set")(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
 
     }
@@ -285,7 +286,8 @@ class ReminderControllerSpec
         mockDecrypt("encrypted")("email")
       }
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      val result = controller.getRendersConfirmPage("encrypted", "1st", "Update")(fakeRequestWithNoBody)
+      val result =
+        controller.getRendersConfirmPage(new String(base64Encode("encrypted")), "1st", "Update")(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
 
     }

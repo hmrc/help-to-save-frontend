@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, base64Decode, base64Encode, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
@@ -175,7 +175,7 @@ class ReminderController @Inject() (
                                 SeeOther(
                                   routes.ReminderController
                                     .getRendersConfirmPage(
-                                      crypto.encrypt(htsUser.email),
+                                      new String(base64Encode(crypto.encrypt(htsUser.email))),
                                       success.reminderFrequency,
                                       "Set"
                                     )
@@ -198,7 +198,7 @@ class ReminderController @Inject() (
   def getRendersConfirmPage(email: String, period: String, page: String): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
-        crypto.decrypt(email) match {
+        crypto.decrypt(new String(base64Decode(email))) match {
           case Success(value) ⇒
             if (page === "Set") {
               Ok(
@@ -323,7 +323,7 @@ class ReminderController @Inject() (
                                   SeeOther(
                                     routes.ReminderController
                                       .getRendersConfirmPage(
-                                        crypto.encrypt(htsUser.email),
+                                        new String(base64Encode(crypto.encrypt(htsUser.email))),
                                         success.reminderFrequency,
                                         "Update"
                                       )
