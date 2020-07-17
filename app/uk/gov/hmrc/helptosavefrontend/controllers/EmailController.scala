@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.{NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, NINOLogMessageTransformer, toFuture, Result ⇒ EitherTResult}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, MaintenanceSchedule, NINOLogMessageTransformer, toFuture, Result => EitherTResult}
 import uk.gov.hmrc.helptosavefrontend.views.html.email._
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
 import uk.gov.hmrc.http.HeaderCarrier
@@ -61,6 +61,7 @@ class EmailController @Inject() (
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
+  maintenanceSchedule: MaintenanceSchedule,
   selectEmail: select_email,
   giveEmail: give_email,
   checkYourEmail: check_your_email,
@@ -76,7 +77,7 @@ class EmailController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour
+) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with SessionBehaviour with VerifyEmailBehaviour {
 
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch

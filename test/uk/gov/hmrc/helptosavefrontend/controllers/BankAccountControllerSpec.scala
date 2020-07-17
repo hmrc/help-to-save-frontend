@@ -55,6 +55,7 @@ class BankAccountControllerSpec
     testCpd,
     testMcc,
     testErrorHandler,
+    testMaintenanceSchedule,
     injector.instanceOf[bank_account_details],
     injector.instanceOf[not_eligible]
   )

@@ -42,6 +42,7 @@ class IntroductionControllerSpec
     testCpd,
     testMcc,
     testErrorHandler,
+    testMaintenanceSchedule,
     injector.instanceOf[privacy],
     injector.instanceOf[help_information]
   )

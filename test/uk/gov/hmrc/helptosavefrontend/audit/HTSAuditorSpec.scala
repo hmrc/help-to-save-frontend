@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.audit
 
-import org.joda.time.DateTime
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
@@ -43,8 +42,7 @@ class HTSAuditorSpec extends ControllerSpecWithGuiceApp {
             "type",
             "id",
             Map("tag" → "value"),
-            Json.parse("""{ "detail": "value" }"""),
-            DateTime.now()
+            Json.parse("""{ "detail": "value" }""")
           )
 
         val htsEvent: HTSEvent = new HTSEvent {

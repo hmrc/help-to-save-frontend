@@ -33,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUser}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
@@ -51,6 +51,7 @@ class ReminderController @Inject() (
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
+  maintenanceSchedule: MaintenanceSchedule,
   emailSavingsReminder: email_savings_reminders,
   reminderFrequencySet: reminder_frequency_set,
   reminderConfirmation: reminder_confirmation,
@@ -66,8 +67,8 @@ class ReminderController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with SessionBehaviour with Logging
-    with EnrolmentCheckBehaviour with EnrollAndEligibilityCheck {
+) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with SessionBehaviour
+    with Logging with EnrolmentCheckBehaviour with EnrollAndEligibilityCheck {
 
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
 

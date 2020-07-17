@@ -21,7 +21,7 @@ import cats.instances.future._
 import cats.instances.option._
 import cats.syntax.traverse._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result ⇒ PlayResult}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Request, Result => PlayResult}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
@@ -36,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, Result, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINOLogMessageTransformer, Result, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.{missing_user_info, not_eligible, think_you_are_eligible, you_are_eligible}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -52,6 +52,7 @@ class EligibilityCheckController @Inject() (
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
+  maintenanceSchedule: MaintenanceSchedule,
   notEligible: not_eligible,
   youAreEligible: you_are_eligible,
   missingUserInfo: missing_user_info,
@@ -62,7 +63,7 @@ class EligibilityCheckController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour
+) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with SessionBehaviour with CapCheckBehaviour {
 
   val earlyCapCheckOn: Boolean = frontendAppConfig.earlyCapCheckOn

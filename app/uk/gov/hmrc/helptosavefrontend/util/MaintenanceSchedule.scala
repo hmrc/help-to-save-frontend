@@ -18,21 +18,37 @@ package uk.gov.hmrc.helptosavefrontend.util
 
 import java.time.{LocalDateTime, ZoneId}
 
-case class MaintenanceSchedule(times: Seq[Maintenance]) {
+import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+
+@Singleton
+class MaintenanceSchedule @Inject() (implicit frontendAppConfig: FrontendAppConfig) extends Logging {
+  val schedule: Schedule = Schedule.parse(frontendAppConfig.maintenanceSchedule)
+  logger.info(s"Maintenence schedule $schedule")
+  logger.info(s"Now ${Schedule.londonNow()}")
+
+  def endOfMaintenance(): Option[LocalDateTime] = schedule.endOfMaintenance(Schedule.londonNow())
+}
+
+case class Schedule(times: Seq[Maintenance]) {
   def endOfMaintenance(now: LocalDateTime): Option[LocalDateTime] = {
     val current = times.filter(m => now.isAfter(m.start) && now.isBefore(m.end))
-    current.map(_.end).sortBy(-_.atZone(ZoneId.of("UTC")).toEpochSecond).headOption
+    current.map(_.end).sortBy(-_.atZone(Schedule.londonZone).toEpochSecond).headOption
   }
 }
 
-object MaintenanceSchedule {
-  def parse(x: String): MaintenanceSchedule =
-    MaintenanceSchedule(
+object Schedule {
+  def parse(x: String): Schedule =
+    Schedule(
       x.split(",")
         .map(_.split("/") match {
           case Array(start, end) => Maintenance(LocalDateTime.parse(start), LocalDateTime.parse(end))
         })
     )
+
+  def londonNow(): LocalDateTime = LocalDateTime.now(londonZone)
+
+  def londonZone: ZoneId = ZoneId.of("Europe/London")
 
 }
 

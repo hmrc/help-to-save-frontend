@@ -24,7 +24,7 @@ class ForbiddenControllerSpec extends ControllerSpecWithGuiceApp with AuthSuppor
 
   "The ForbiddenController" must {
 
-    val controller = new ForbiddenController(testCpd, testMcc, testErrorHandler)
+    val controller = new ForbiddenController(testCpd, testMcc, testErrorHandler, testMaintenanceSchedule)
 
     "return a forbidden status" in {
       val result = controller.forbidden(FakeRequest())

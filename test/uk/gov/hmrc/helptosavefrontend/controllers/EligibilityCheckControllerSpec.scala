@@ -58,6 +58,7 @@ class EligibilityCheckControllerSpec
       testCpd,
       testMcc,
       testErrorHandler,
+      testMaintenanceSchedule,
       injector.instanceOf[not_eligible],
       injector.instanceOf[you_are_eligible],
       injector.instanceOf[missing_user_info],
