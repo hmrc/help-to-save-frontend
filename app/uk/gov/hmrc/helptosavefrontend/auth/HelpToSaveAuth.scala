@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneId}
 
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
@@ -50,6 +50,10 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   implicit val transformer: NINOLogMessageTransformer
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
   private type RelativeURL = String
+
+  logger.info(s"Maintenance schedule ${appConfig.maintenanceSchedule}")
+  logger.info(s"Now ${londonNow()}")
+
   def authorisedForHtsWithNINO(
     action: HtsAction[HtsContextWithNINO]
   )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
@@ -129,7 +133,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       authorised(predicate)
         .retrieve(retrieval) { a ⇒
           val time = timer.stop()
-          appConfig.maintenanceSchedule.endOfMaintenance(LocalDateTime.now) match {
+          appConfig.maintenanceSchedule.endOfMaintenance(londonNow()) match {
             case Some(endMaintenance) => Future.failed(MaintenancePeriodException(endMaintenance))
             case None                 => toResult(a, request, time)
           }
@@ -139,6 +143,8 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
           handleAuthFailure(loginContinueURL, time)
         }
     }
+
+  private def londonNow(): LocalDateTime = LocalDateTime.now(ZoneId.of("Europe/London"))
 
   private def withNINO[A](mayBeNino: Option[String], nanos: Long)(
     action: NINO ⇒ Future[Result]
