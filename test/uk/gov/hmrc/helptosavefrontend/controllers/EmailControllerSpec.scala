@@ -73,6 +73,7 @@ class EmailControllerSpec
       testCpd,
       testMcc,
       testErrorHandler,
+      testMaintenanceSchedule,
       injector.instanceOf[select_email],
       injector.instanceOf[give_email],
       injector.instanceOf[check_your_email],

@@ -105,6 +105,7 @@ class AccountHolderControllerSpec
     testCpd,
     testMcc,
     testErrorHandler,
+    testMaintenanceSchedule,
     injector.instanceOf[update_email_address],
     injector.instanceOf[check_your_email],
     injector.instanceOf[we_updated_your_email],

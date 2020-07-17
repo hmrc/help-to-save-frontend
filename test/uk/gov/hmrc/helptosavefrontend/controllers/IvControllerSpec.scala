@@ -45,6 +45,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     testCpd,
     testMcc,
     testErrorHandler,
+    testMaintenanceSchedule,
     injector.instanceOf[iv_success],
     injector.instanceOf[failed_iv],
     injector.instanceOf[insufficient_evidence],

@@ -103,6 +103,7 @@ class ReminderControllerSpec
       testCpd,
       testMcc,
       testErrorHandler,
+      testMaintenanceSchedule,
       injector.instanceOf[email_savings_reminders],
       injector.instanceOf[reminder_frequency_set],
       injector.instanceOf[reminder_confirmation],

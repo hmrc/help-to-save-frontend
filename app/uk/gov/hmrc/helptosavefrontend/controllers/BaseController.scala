@@ -20,6 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc.{MessagesControllerComponents, Request, RequestHeader, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.util.MaintenanceSchedule
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -28,12 +29,15 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 class BaseController @Inject() (
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
-  errorHandler: ErrorHandler
+  errorHandler: ErrorHandler,
+  maintenanceSchedule: MaintenanceSchedule
 ) extends FrontendController(mcc) with I18nSupport {
 
   override implicit val messagesApi: MessagesApi = cpd.messagesApi
 
   implicit val appConfig: FrontendAppConfig = cpd.appConfig
+
+  implicit val maintenence: MaintenanceSchedule = maintenanceSchedule
 
   val Messages: MessagesApi = messagesApi
 

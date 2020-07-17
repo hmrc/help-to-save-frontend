@@ -68,6 +68,7 @@ class RegisterControllerSpec
       testCpd,
       testMcc,
       testErrorHandler,
+      testMaintenanceSchedule,
       injector.instanceOf[create_account],
       injector.instanceOf[daily_cap_reached],
       injector.instanceOf[total_cap_reached],
