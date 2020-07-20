@@ -21,6 +21,8 @@ import scala.util.Try
 case class EmailVerificationParams(nino: String, email: String) {
   def encode()(implicit crypto: Crypto): String = {
     val input = nino + "#" + email
+    // I now believe base64 has been used here to circumvent a ZAP alert for a possible padding oracle attack,
+    // but AES GCM is not vulnerable, because it is authenticated and does not require padding
     new String(base64Encode(crypto.encrypt(input)))
   }
 }
