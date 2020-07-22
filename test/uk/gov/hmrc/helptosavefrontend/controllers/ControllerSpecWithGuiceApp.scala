@@ -22,7 +22,7 @@ import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import akka.util.Timeout
 import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.{Metrics ⇒ PlayMetrics}
+import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.{Application, Configuration, Environment}
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -35,11 +35,11 @@ import play.api.test.Helpers.contentAsString
 import play.filters.csrf.CSRFAddToken
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINOLogMessageTransformer, TestNINOLogMessageTransformer}
+import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
-import scala.language.postfixOps
 
+import scala.language.postfixOps
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -75,6 +75,7 @@ trait ControllerSpecWithGuiceApp extends ControllerSpecBase with GuiceOneAppPerS
 
   implicit val testMcc: MessagesControllerComponents = injector.instanceOf[MessagesControllerComponents]
   implicit val testCpd: CommonPlayDependencies = injector.instanceOf[CommonPlayDependencies]
+  implicit val testMaintenanceSchedule: MaintenanceSchedule = injector.instanceOf[MaintenanceSchedule]
 
   val messagesApi = injector.instanceOf(classOf[MessagesApi])
   val messages = request2Messages(FakeRequest())

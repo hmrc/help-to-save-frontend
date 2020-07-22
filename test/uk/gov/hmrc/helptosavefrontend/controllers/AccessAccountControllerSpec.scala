@@ -40,6 +40,7 @@ class AccessAccountControllerSpec
     testCpd,
     testMcc,
     testErrorHandler,
+    testMaintenanceSchedule,
     injector.instanceOf[confirm_check_eligibility],
     injector.instanceOf[error_template]
   )

@@ -48,7 +48,7 @@ import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpT
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
 import uk.gov.hmrc.helptosavefrontend.util
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.cannot_check_details
 import uk.gov.hmrc.helptosavefrontend.views.html.register._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -65,6 +65,7 @@ class RegisterController @Inject() (
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
+  maintenanceSchedule: MaintenanceSchedule,
   createAccountView: create_account,
   dailyCapReachedView: daily_cap_reached,
   totalCapReachedView: total_cap_reached,
@@ -82,7 +83,7 @@ class RegisterController @Inject() (
   val config: Configuration,
   val env: Environment,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour
+) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with SessionBehaviour with CapCheckBehaviour with Logging {
 
   val clock: Clock = Clock.systemUTC()

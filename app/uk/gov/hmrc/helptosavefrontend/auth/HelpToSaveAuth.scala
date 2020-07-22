@@ -50,9 +50,12 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   implicit val transformer: NINOLogMessageTransformer
   private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
   private type RelativeURL = String
+
   def authorisedForHtsWithNINO(
     action: HtsAction[HtsContextWithNINO]
-  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  )(
+    loginContinueURL: RelativeURL
+  )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -62,7 +65,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   def authorisedForHtsWithNINOAndName(
     action: HtsAction[HtsContextWithNINOAndFirstName]
-  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  )(
+    loginContinueURL: RelativeURL
+  )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Name and V2ItmpName and V2Nino) {
       case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -73,7 +78,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   def authorisedForHtsWithInfo(
     action: HtsAction[HtsContextWithNINOAndUserDetails]
-  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  )(
+    loginContinueURL: RelativeURL
+  )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(UserInfoRetrievals and V2Nino) {
       case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -94,7 +101,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   def authorisedForHts(
     action: HtsAction[HtsContext]
-  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  )(
+    loginContinueURL: RelativeURL
+  )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(EmptyRetrieval, AuthProvider) {
       case (_, request, _) ⇒
         action(request)(HtsContext(authorised = true))
@@ -102,7 +111,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   def authorisedForHtsWithNINOAndNoCL(
     action: HtsAction[HtsContextWithNINO]
-  )(loginContinueURL: RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  )(
+    loginContinueURL: RelativeURL
+  )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino, AuthProvider) {
       case (mayBeNino, request, time) ⇒
         withNINO(mayBeNino, time) { nino ⇒
@@ -122,14 +133,16 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   private def authorised[A](retrieval: Retrieval[A], predicate: Predicate = AuthWithCL200)(
     toResult: (A, Request[AnyContent], Long) ⇒ Future[Result]
-  )(loginContinueURL: ⇒ RelativeURL)(implicit ec: ExecutionContext): Action[AnyContent] =
+  )(
+    loginContinueURL: ⇒ RelativeURL
+  )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     Action.async { implicit request ⇒
       val timer = metrics.authTimer.time()
 
       authorised(predicate)
         .retrieve(retrieval) { a ⇒
           val time = timer.stop()
-          appConfig.maintenanceSchedule.endOfMaintenance(LocalDateTime.now) match {
+          maintenanceSchedule.endOfMaintenance() match {
             case Some(endMaintenance) => Future.failed(MaintenancePeriodException(endMaintenance))
             case None                 => toResult(a, request, time)
           }

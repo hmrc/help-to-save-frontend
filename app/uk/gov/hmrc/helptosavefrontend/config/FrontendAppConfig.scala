@@ -20,7 +20,7 @@ import java.net.URI
 
 import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
-import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, urlEncode}
+import uk.gov.hmrc.helptosavefrontend.util.urlEncode
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.duration.Duration
@@ -68,8 +68,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
     ).toString
   }
 
-  val maintenanceSchedule: MaintenanceSchedule =
-    MaintenanceSchedule.parse(servicesConfig.getString("scheduled-maintenance-times"))
+  val maintenanceSchedule: String = servicesConfig.getString("scheduled-maintenance-times")
 
   val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
 

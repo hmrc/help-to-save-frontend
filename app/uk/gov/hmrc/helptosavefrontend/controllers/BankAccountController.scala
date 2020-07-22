@@ -45,6 +45,7 @@ class BankAccountController @Inject() (
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
+  maintenanceSchedule: MaintenanceSchedule,
   bankAccountDetails: bank_account_details,
   notEligible: not_eligible
 )(
@@ -54,7 +55,7 @@ class BankAccountController @Inject() (
   val env: Environment,
   bankDetailsValidation: BankDetailsValidation,
   ec: ExecutionContext
-) extends BaseController(cpd, mcc, errorHandler) with HelpToSaveAuth with EnrolmentCheckBehaviour
+) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with SessionBehaviour with EnrollAndEligibilityCheck {
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
   private def backLinkFromSession(session: HTSSession): String =
