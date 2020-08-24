@@ -23,12 +23,12 @@ import play.api.Configuration
 import play.api.mvc.{Call, RequestHeader, Result, Results}
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.util.Logging
-import uk.gov.hmrc.whitelist.AkamaiWhitelistFilter
+import uk.gov.hmrc.whitelist.{AkamaiWhitelistFilter => AkamaiAllowListFilter}
 
 import scala.concurrent.Future
 
-class WhitelistFilter @Inject() (configuration: Configuration, val mat: Materializer)
-    extends AkamaiWhitelistFilter with Logging {
+class AllowListFilter @Inject() (configuration: Configuration, val mat: Materializer)
+    extends AkamaiAllowListFilter with Logging {
 
   override def whitelist: Seq[String] =
     configuration.underlying.get[List[String]]("http-header-ip-whitelist").value
@@ -36,7 +36,7 @@ class WhitelistFilter @Inject() (configuration: Configuration, val mat: Material
   override def excludedPaths: Seq[Call] = Seq(forbiddenCall, healthCheckCall)
 
   // This is the `Call` used in the `Redirect` when an IP is present in the header
-  // of the HTTP request but is not in the whitelist
+  // of the HTTP request but is not in the allowList
   override def destination: Call = forbiddenCall
 
   override def noHeaderAction(f: (RequestHeader) ⇒ Future[Result], rh: RequestHeader): Future[Result] = {
@@ -51,7 +51,7 @@ class WhitelistFilter @Inject() (configuration: Configuration, val mat: Material
   override def apply(f: (RequestHeader) ⇒ Future[Result])(rh: RequestHeader): Future[Result] = {
     rh.headers.get(trueClient).foreach { ip ⇒
       if (!whitelist.contains(ip)) {
-        logger.warn(s"SuspiciousActivity: Received request from non-whitelisted ip $ip")
+        logger.warn(s"SuspiciousActivity: Received request from non-allowListed ip $ip")
       }
     }
     super.apply(f)(rh)
