@@ -6,17 +6,17 @@ object AppDependencies {
   val hmrc = "uk.gov.hmrc"
 
   val compile = Seq(
-    hmrc                %% "govuk-template"        % "5.56.0-play-26",
-    hmrc                %% "mongo-caching"         % "6.15.0-play-26",
-    hmrc                %% "auth-client"           % "3.0.0-play-26",
-    hmrc                %% "play-whitelist-filter" % "3.4.0-play-26",
-    hmrc                %% "bootstrap-frontend-play-26"     % "2.24.0",
-    hmrc                %% "play-ui"               % "8.11.0-play-26",
-    hmrc                %% "play-health"           % "3.14.0-play-26",
-    hmrc                %% "play-language"         % "4.3.0-play-26",
-    "com.github.kxbmap" %% "configs"               % "0.4.4",
-    "org.typelevel"     %% "cats-core"             % "2.1.1",
-    hmrc                %% "domain"                % "5.9.0-play-26"
+    hmrc                %% "govuk-template"             % "5.56.0-play-26",
+    hmrc                %% "mongo-caching"              % "6.15.0-play-26",
+    hmrc                %% "auth-client"                % "3.0.0-play-26",
+    hmrc                %% "play-whitelist-filter"      % "3.4.0-play-26",
+    hmrc                %% "bootstrap-frontend-play-26" % "2.24.0",
+    hmrc                %% "play-ui"                    % "8.11.0-play-26",
+    hmrc                %% "play-health"                % "3.15.0-play-26",
+    hmrc                %% "play-language"              % "4.3.0-play-26",
+    "com.github.kxbmap" %% "configs"                    % "0.4.4",
+    "org.typelevel"     %% "cats-core"                  % "2.1.1",
+    hmrc                %% "domain"                     % "5.9.0-play-26"
   )
 
   val test = Seq(

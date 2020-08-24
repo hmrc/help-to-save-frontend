@@ -38,7 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, Ht
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 

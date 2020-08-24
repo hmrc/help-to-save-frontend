@@ -22,7 +22,7 @@ import play.api.mvc.Request
 import play.twirl.api.Html
 import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 import uk.gov.hmrc.helptosavefrontend.views.html.core.error_template
-import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
+import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
 
 @Singleton
 class ErrorHandler @Inject() (
