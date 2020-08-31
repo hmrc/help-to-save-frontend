@@ -25,7 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.forms.ReminderFrequencyValidation.FormOps
 import uk.gov.hmrc.helptosavefrontend.forms.ReminderFrequencyValidation.ErrorMessages
 import uk.gov.hmrc.helptosavefrontend.forms.TestForm.{testForm, testFormWithErrorMessage}
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -35,7 +35,7 @@ class ReminderFrequencyValidationSpec
   "ReminderFrequencyValidation" must {
 
     lazy val validation = new ReminderFrequencyValidation(
-      new FrontendAppConfig(new ServicesConfig(fakeApplication.configuration, injector.instanceOf[RunMode]))
+      new FrontendAppConfig(new ServicesConfig(fakeApplication.configuration))
     )
 
     def test(

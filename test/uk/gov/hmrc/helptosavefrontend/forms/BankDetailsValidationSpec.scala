@@ -22,7 +22,7 @@ import play.api.data.{Form, FormError}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.ErrorMessages
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
@@ -37,7 +37,7 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
   lazy val validation = new BankDetailsValidation(
     new FrontendAppConfig(
-      new ServicesConfig(fakeApplication.configuration ++ bankValidationConfig, injector.instanceOf[RunMode])
+      new ServicesConfig(fakeApplication.configuration ++ bankValidationConfig)
     )
   )
 

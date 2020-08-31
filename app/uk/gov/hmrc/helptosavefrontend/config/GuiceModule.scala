@@ -17,9 +17,10 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import com.google.inject.AbstractModule
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.filters.frontend.crypto.{SessionCookieCrypto, SessionCookieCryptoProvider}
-import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
+import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.{SessionCookieCrypto, SessionCookieCryptoProvider}
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 class GuiceModule extends AbstractModule {
 

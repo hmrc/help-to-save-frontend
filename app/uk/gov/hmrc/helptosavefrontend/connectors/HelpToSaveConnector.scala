@@ -33,8 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIPayload}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Result, base64Encode, maskNino}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal

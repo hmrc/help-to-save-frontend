@@ -28,8 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO, NINOLogMessageTransformer, maskNino}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
