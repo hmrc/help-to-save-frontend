@@ -30,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyVali
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util._
@@ -84,7 +84,7 @@ class ReminderController @Inject() (
   def getEmailsavingsReminders(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
-        // get optin status
+        // get optin statu
         helpToSaveReminderService
           .getHtsUser(htsContext.nino)
           .fold(
@@ -92,11 +92,11 @@ class ReminderController @Inject() (
               logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
 
               Ok(emailSavingsReminder(Some(backLink)))
-            }, { htsUser ⇒
+            }, { htsUserSchedule ⇒
               Ok(
                 reminderDashboard(
-                  htsUser.email,
-                  DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
+                  htsUserSchedule.email,
+                  DaysToDateMapper.reverseMapper.getOrElse(htsUserSchedule.daysToReceive, "String"),
                   Some(backLink)
                 )
               )
@@ -155,7 +155,7 @@ class ReminderController @Inject() (
                         case Some(email) if !email.isEmpty ⇒ {
                           val daysToReceiveReminders =
                             DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
-                          val htsUserToBeUpdated = HtsUser(
+                          val htsUserToBeUpdated = HtsUserSchedule(
                             Nino(htsContext.nino),
                             email,
                             userInfo.forename,
@@ -303,7 +303,7 @@ class ReminderController @Inject() (
                           } else {
                             val daysToReceiveReminders =
                               DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
-                            val htsUserToBeUpdated = HtsUser(
+                            val htsUserToBeUpdated = HtsUserSchedule(
                               Nino(htsContext.nino),
                               email,
                               userInfo.forename,

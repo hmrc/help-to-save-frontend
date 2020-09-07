@@ -41,7 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
@@ -230,7 +230,7 @@ class RegisterController @Inject() (
     if (daysToReceiveReminders =!= "None") {
       helpToSaveReminderService
         .updateHtsUser(
-          HtsUser(
+          HtsUserSchedule(
             Nino(nino),
             eligibleWithInfo.email,
             eligibleWithInfo.userInfo.userInfo.forename,

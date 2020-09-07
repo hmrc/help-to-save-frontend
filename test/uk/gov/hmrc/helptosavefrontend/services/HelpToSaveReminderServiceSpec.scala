@@ -24,7 +24,7 @@ import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -42,11 +42,11 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
     "update email" must {
 
       val htsUser =
-        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
+        HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
-      def mockupdateUser(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit =
+      def mockupdateUser(htsUser: HtsUserSchedule)(result: Either[String, HtsUserSchedule]): Unit =
         (htsReminderConnector
-          .updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
+          .updateHtsUser(_: HtsUserSchedule)(_: HeaderCarrier, _: ExecutionContext))
           .expects(htsUser, *, *)
           .returning(EitherT.fromEither[Future](result))
 
@@ -62,9 +62,9 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
     "get Hts User" must {
       val ninoNew = "AE123456D"
       val htsUser =
-        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
+        HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
-      def mockGetHtsUser(nino: String)(result: Either[String, HtsUser]): Unit =
+      def mockGetHtsUser(nino: String)(result: Either[String, HtsUserSchedule]): Unit =
         (htsReminderConnector
           .getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
           .expects(ninoNew, *, *)
