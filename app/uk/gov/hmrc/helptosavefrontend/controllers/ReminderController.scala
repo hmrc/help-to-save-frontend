@@ -84,7 +84,7 @@ class ReminderController @Inject() (
   def getEmailsavingsReminders(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
-        // get optin statu
+        // get optin status
         helpToSaveReminderService
           .getHtsUser(htsContext.nino)
           .fold(
