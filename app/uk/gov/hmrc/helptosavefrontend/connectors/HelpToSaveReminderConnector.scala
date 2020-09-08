@@ -20,7 +20,7 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
@@ -31,8 +31,8 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[HelpToSaveReminderConnectorImpl])
 trait HelpToSaveReminderConnector {
 
-  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser]
-  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser]
+  def updateHtsUser(htsUser: HtsUserSchedule)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUserSchedule]
+  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUserSchedule]
   def cancelHtsUserReminders(
     cancelHtsUserReminder: CancelHtsUserReminder
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
@@ -58,11 +58,11 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
 
-  override def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
-    handlePost(updateHtsReminderURL, htsUser, _.parseJSON[HtsUser](), "update htsUser", identity)
+  override def updateHtsUser(htsUser: HtsUserSchedule)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
+    handlePost(updateHtsReminderURL, htsUser, _.parseJSON[HtsUserSchedule](), "update htsUser", identity)
 
-  override def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUser] =
-    handleGet(getHtsReminderUserURL(nino), emptyQueryParameters, _.parseJSON[HtsUser](), "get hts user", identity)
+  override def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUserSchedule] =
+    handleGet(getHtsReminderUserURL(nino), emptyQueryParameters, _.parseJSON[HtsUserSchedule](), "get hts user", identity)
 
   override def cancelHtsUserReminders(
     cancelHtsUserReminder: CancelHtsUserReminder
@@ -71,7 +71,7 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private def handlePost[A, B](
     url: String,
-    body: HtsUser,
+    body: HtsUserSchedule,
     ifHTTP200: HttpResponse ⇒ Either[B, A],
     description: ⇒ String,
     toError: String ⇒ B

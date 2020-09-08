@@ -37,7 +37,7 @@ object ReminderFrequency {
 
 }
 
-case class HtsUser(
+case class HtsUserSchedule(
   nino: Nino,
   email: String,
   firstName: String = "",
@@ -48,10 +48,10 @@ case class HtsUser(
   callBackUrlRef: String = ""
 )
 
-object HtsUser {
-  implicit val htsUserFormat: Format[HtsUser] = Json.format[HtsUser]
-  implicit val writes: Writes[HtsUser] = Writes[HtsUser](s ⇒ JsString(s.toString))
-  implicit val reads: Reads[HtsUser] = (
+object HtsUserSchedule {
+  implicit val htsUserFormat: Format[HtsUserSchedule] = Json.format[HtsUserSchedule]
+  implicit val writes: Writes[HtsUserSchedule] = Writes[HtsUserSchedule](s ⇒ JsString(s.toString))
+  implicit val reads: Reads[HtsUserSchedule] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(Nino.apply(_)) and
       (JsPath \ "email").read[String] and //.orElse((JsPath \ "nino").read[String]).map(Email.apply(_)) and
       (JsPath \ "firstName").read[String] and
@@ -60,7 +60,7 @@ object HtsUser {
       (JsPath \ "daysToReceive").read[List[Int]] and
       (JsPath \ "nextSendDate").read[LocalDate] and
       (JsPath \ "callBackUrlRef").read[String]
-  )(HtsUser.apply(_, _, _, _, _, _, _, _))
+  )(HtsUserSchedule.apply(_, _, _, _, _, _, _, _))
 
 }
 

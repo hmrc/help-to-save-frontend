@@ -32,7 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
@@ -54,9 +54,9 @@ class ReminderControllerSpec
   val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
   val mockHelpToSaveService = mock[HelpToSaveService]
 
-  def mockUpdateHtsUserPost(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit =
+  def mockUpdateHtsUserPost(htsUser: HtsUserSchedule)(result: Either[String, HtsUserSchedule]): Unit =
     (mockHelpToSaveReminderService
-      .updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
+      .updateHtsUser(_: HtsUserSchedule)(_: HeaderCarrier, _: ExecutionContext))
       .expects(htsUser, *, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -68,7 +68,7 @@ class ReminderControllerSpec
       .expects(cancelHtsUserReminder, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def mockGetHtsUser(nino: String)(result: Either[String, HtsUser]): Unit =
+  def mockGetHtsUser(nino: String)(result: Either[String, HtsUserSchedule]): Unit =
     (mockHelpToSaveReminderService
       .getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(nino, *, *)
@@ -118,17 +118,17 @@ class ReminderControllerSpec
 
     val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
-    def verifyHtsUserUpdate(params: HtsUser): Future[Result] =
+    def verifyHtsUserUpdate(params: HtsUserSchedule): Future[Result] =
       csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
-    def verifiedHtsUserUpdate(params: HtsUser): Future[Result] =
+    def verifiedHtsUserUpdate(params: HtsUserSchedule): Future[Result] =
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
     def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
-    def verifyHtsUser(params: HtsUser): Future[Result] =
+    def verifyHtsUser(params: HtsUserSchedule): Future[Result] =
       csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequest)
 
     "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -144,7 +144,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if the call to htsContext userdetails returns missingUserInfos  " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
@@ -156,7 +156,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if email retrieved is empty " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -169,7 +169,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if htsUser update fails " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -184,7 +184,7 @@ class ReminderControllerSpec
     }
 
     "should show the form validation errors when the user submits an HtsUser to update in the HTS Reminder backend service with nobody " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
 
@@ -198,7 +198,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if user info is missing from the htsContext " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
@@ -212,7 +212,7 @@ class ReminderControllerSpec
     }
 
     "should return the reminder frquency setting page when asked for it" in {
-      val getHtsUser = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val getHtsUser = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
@@ -226,7 +226,7 @@ class ReminderControllerSpec
 
     }
     "should return the reminder frquency dashboard page when asked for it" in {
-      val getHtsUser = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val getHtsUser = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
@@ -254,7 +254,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to an the internal server error page if email retrieveal is failed" in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -292,7 +292,7 @@ class ReminderControllerSpec
     }
 
     "should return the selected reminder   page when asked for it" in {
-      val getHtsUser = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val getHtsUser = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
@@ -306,7 +306,7 @@ class ReminderControllerSpec
 
     }
     "should return the internal error when selected reminderpage " in {
-      val getHtsUser = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val getHtsUser = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
@@ -350,7 +350,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to an the internal server error page if email retrieveal is failed in selected renders submit" in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -380,7 +380,7 @@ class ReminderControllerSpec
     "should show a success page if the user submits an CancelHtsUserReminder nextpage to cancel in the HTS Reminder backend service " in {
       val ninoNew = "AE123456D"
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -394,7 +394,7 @@ class ReminderControllerSpec
 
     }
     "should redirect to internal server error page if htsUser update fails in selected submit " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -685,7 +685,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if htsUser update fails in savings reminder  signup page " in {
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
       inSequence {
