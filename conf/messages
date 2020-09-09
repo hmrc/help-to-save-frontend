@@ -716,7 +716,6 @@ accessibility.statement.paragraph.three.link = www.tax.service.gov.uk/help-to-sa
 
 ####Using This Service#####
 accessibility.statement.paragraph.four = Help to Save is a type of savings account. It is backed by the government so all savings in the scheme are secure. It allows certain people entitled to Working Tax Credit or receiving Universal Credit to get a bonus of 50p for every £1 they save over 4 years.
-
 accessibility.statement.paragraph.six = This service is run by HM Revenue and Customs (HMRC). We want as many people as possible to be able to use this service. This means you should be able to:
 accessibility.statement.paragraph.seven = We have also made the text in the service as simple as possible to understand.
 accessibility.statement.paragraph.eight = has advice on making your device easier to use if you have a disability.
@@ -730,7 +729,7 @@ accessibility.statement.paragraph.ten = Some people may find parts of this servi
 accessibility.statement.paragraph.eleven = On the paying-in money page, keyboard-only users are able to unexpectedly tab onto the ‘what is a card security code?’ pop-up help screen, however they should not be able to select this with a keyboard. In addition, users of assistive technology are able to access the content behind the pop-up help screen, which causes problems understanding the help content, especially for blind users and users that rely on keyboard commands.
 accessibility.statement.paragraph.twelve = On some Worldline payment screens there are empty headings with no content in them, but for screen reader users browsing with iOS devices (iPhone 7s and 8) the  software identifies these empty headings. This can be confusing because there is no content situated within the tag.
 accessibility.statement.paragraph.thirteen = On some Worldline payment screens the order in which information is presented by users of assistive technology is different to the order displayed on the page. This may be confusing for low vision users who use VoiceOver as a way of navigating the page, as the order they get the information will not match the visual presentation of the page.
-accessibility.statement.paragraph.fifteen = Within account holders’ dashboards there is a table displaying bonuses. Within this table the header ‘How we calculate your bonus’ is marked up incorrectly, and this could cause confusion for screen-readers, as it appears as a table header but should be a heading or a caption. Users navigating with table navigation commands may find it hard to get to the data in the rows below.
+accessibility.statement.paragraph.fourteen = Within account holders’ dashboards there is a table displaying bonuses. Within this table the header ‘How we calculate your bonus’ is marked up incorrectly, and this could cause confusion for screen-readers, as it appears as a table header but should be a heading or a caption. Users navigating with table navigation commands may find it hard to get to the data in the rows below.
 accessibility.statement.paragraph.fifteen = On the ‘View your Transactions’ screen there is a missing fieldset tag which means ‘date range’ elements are not grouped together correctly. This causes confusion for screen readers with the way in which content is presented, and in some situations the audible feedback will not relay information correctly.
 accessibility.statement.paragraph.sixteen = On the payment card details page there is an element marked as ‘+’ whose purpose is not clear for VoiceOver users. It is not clear that it is selectable, or that information will collapse if selected.
 accessibility.statement.paragraph.seventeen = When the timeout pop-up feature is onscreen, screen-readers can still read the content behind the pop-up which can be very confusing for screen reader users or users that rely on keyboard commands.
@@ -784,7 +783,9 @@ accessibility.statement.paragraph.fortyFour = In the ‘View your transactions�
 
 #### How we tested this service ####
 accessibility.statement.paragraph.fortyFive = The service was last tested on {0} and was checked for compliance with WCAG 2.1 AA.
-accessibility.statement.paragraph.fortySix = The service was built using parts that were tested by the Digital Accessibility Centre. The full service was tested by HMRC and included disabled users.
+accessibility.statement.paragraph.fortySix.one = The service was built using parts that were tested by the
+accessibility.statement.paragraph.fortySix.link = Digital Accessibility Centre
+accessibility.statement.paragraph.fortySix.two =. The full service was tested by HMRC and included disabled users.
 accessibility.statement.paragraph.fortySeven = This page was prepared on 9 Sep 2020. It was last updated on {0}.
 
 accessibility.statement.listitem1 = change colours, contrast levels and fonts
