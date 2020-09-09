@@ -16,43 +16,53 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-  import java.net.URLEncoder
+import java.net.URLEncoder
 
-  import akka.http.scaladsl.model.Uri
-  import javax.inject.Inject
-  import play.api.mvc.{Action, AnyContent, BodyParsers, Call, MessagesControllerComponents}
-  import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-  import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-  import uk.gov.hmrc.helptosavefrontend.util.MaintenanceSchedule
-  import uk.gov.hmrc.helptosavefrontend.views.html.accessibility.accessibility_statement
+import akka.http.scaladsl.model.Uri
+import javax.inject.Inject
+import play.api.{Configuration, Environment}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
+import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
+import uk.gov.hmrc.helptosavefrontend.views.html.accessibility.accessibility_statement
 
-  import scala.concurrent.ExecutionContext.Implicits.global
-  import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 
-  class AccessibilityStatementController @Inject()(config: FrontendAppConfig,
-                                                   parser: BodyParsers.Default,
-                                                   htsContext: HtsContext,
-                                                   cpd: CommonPlayDependencies,
-                                                   mcc: MessagesControllerComponents,
-                                                   errorHandler: ErrorHandler,
-                                                   maintenanceSchedule: MaintenanceSchedule,
-                                                   accessibility_statement: accessibility_statement) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with MessagesRequestHelper{
+class AccessibilityStatementController @Inject() (
+  val authConnector: AuthConnector,
+  val metrics: Metrics,
+  cpd: CommonPlayDependencies,
+  mcc: MessagesControllerComponents,
+  errorHandler: ErrorHandler,
+  maintenanceSchedule: MaintenanceSchedule,
+  accessibility_statement: accessibility_statement
+)(
+  implicit val transformer: NINOLogMessageTransformer,
+  val frontendAppConfig: FrontendAppConfig,
+  val config: Configuration,
+  val env: Environment,
+  implicit val ec: ExecutionContext
+) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth {
 
-    def get: Action[AnyContent] = messagesAction(parser).async {
-      implicit request =>
+  def get: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+    val service = "Help To Save"
 
-        val service = "Help To Save"
+    val baseUrl = frontendAppConfig.accessibilityStatementUrl
 
-        val baseUrl = config.accessibilityStatementUrl
-
-        val pageUrl = Uri(request.headers.get("referer").getOrElse(
+    val pageUrl = Uri(
+      request.headers
+        .get("referer")
+        .getOrElse(
           routes.AccessibilityStatementController.get().url
-        ))
+        )
+    )
 
-        val accessibilityUrl = s"${baseUrl}?service=$service&userAction=${
-          URLEncoder.encode(pageUrl.path.toString(), "UTF-8")
-        }"
+    val accessibilityUrl =
+      s"$baseUrl?service=$service&userAction=${URLEncoder.encode(pageUrl.path.toString(), "UTF-8")}"
 
-        Future.successful(Ok(accessibility_statement(accessibilityUrl)(htsContext,request,request2Messages,appConfig)))
-    }
+    Ok(accessibility_statement(accessibilityUrl))
   }
+}
