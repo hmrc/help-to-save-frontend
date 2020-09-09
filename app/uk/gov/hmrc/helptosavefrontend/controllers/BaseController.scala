@@ -51,8 +51,3 @@ class BaseController @Inject() (
 }
 
 class CommonPlayDependencies @Inject() (val appConfig: FrontendAppConfig, val messagesApi: MessagesApi)
-
-trait MessagesRequestHelper {
-  def messagesAction(parsers: BodyParsers.Default)(implicit executionContext: ExecutionContext, messagesApi: MessagesApi):MessagesActionBuilderImpl[AnyContent] =
-    new MessagesActionBuilderImpl[AnyContent](parsers, messagesApi)
-}

@@ -130,9 +130,9 @@
 @footerTop = {}
 @footerLinks = {
     @if(appConfig.accessibilityStatementToggle) {
-        <li>
-            <a href=@appConfig.accessibilityStatementUrl>@Messages("footer.links.accessibility.text")</a>
-        </li>
+        @layoutsFooterLinks(accessibilityFooterUrl=Some(appConfig.accessibilityStatementUrl))
+    } else {
+        @layoutsFooterLinks()
     }
 }
 
@@ -166,4 +166,4 @@
     sidebar = sidebar)
 }
 
-@govUkTemplate(Some(title), bodyClasses)(headHtml, bodyEnd, insideHeader, afterHeader, footerTop, Some(layoutsFooterLinks()), true)(content)
+@govUkTemplate(Some(title), bodyClasses)(headHtml, bodyEnd, insideHeader, afterHeader, footerTop, Some(footerLinks), true)(content)

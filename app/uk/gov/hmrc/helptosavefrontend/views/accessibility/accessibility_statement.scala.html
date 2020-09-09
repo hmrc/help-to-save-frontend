@@ -39,7 +39,7 @@
     title = title,
     bodyClasses = None) {
 
-
+<h1>@Messages("accessibility.statement.title")</h1>
 <p>@Messages("accessibility.statement.paragraph.one")</p>
 <p>@Messages("accessibility.statement.paragraph.two.start") <a href="https://www.gov.uk/help/accessibility">@Messages("accessibility.statement.paragraph.two.link")</a> @Messages("accessibility.statement.paragraph.two.end")</p>
 <p>@Messages("accessibility.statement.paragraph.three") <a href="https://www.tax.service.gov.uk/help-to-save">@Messages("accessibility.statement.paragraph.three.link")</a>@Messages("full.stop")</p>
@@ -109,8 +109,8 @@
 <p>@Messages("accessibility.statement.paragraph.fortyFour")</p>
 
 <h2>@Messages("accessibility.statement.heading.eight")</h2>
-<p>@Messages("accessibility.statement.paragraph.fortyFive", s"${appConfig.accessibilityStatementUpdated}")</p>
+<p>@Messages("accessibility.statement.paragraph.fortyFive", s"${appConfig.accessibilityStatementTested}")</p>
 <p>@Messages("accessibility.statement.paragraph.fortySix.one") <a href="http://www.digitalaccessibilitycentre.org/">@Messages("accessibility.statement.paragraph.fortySix.link")</a>@Messages("accessibility.statement.paragraph.fortySix.two")</p>
-<p>@Messages("accessibility.statement.paragraph.fortySeven", s"${appConfig.accessibilityStatementTested}")</p>
+<p>@Messages("accessibility.statement.paragraph.fortySeven", s"${appConfig.accessibilityStatementUpdated}")</p>
 
 }
