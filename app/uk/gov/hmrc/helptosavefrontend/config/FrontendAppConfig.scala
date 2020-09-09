@@ -131,6 +131,11 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val earlyCapCheckOn: Boolean = servicesConfig.getBoolean("enable-early-cap-check")
 
+  val accessibilityStatementUrl = servicesConfig.getString("accessibility-statement.url")
+  val accessibilityStatementToggle = servicesConfig.getConfBool("accessibility-statement.toggle", true)
+  def accessibilityStatementUpdated = servicesConfig.getConfString("accessibility-statement.updated", "11th May 2020")
+  def accessibilityStatementTested = servicesConfig.getConfString("accessibility-statement.tested", "15th May 2020")
+
   object BankDetailsConfig {
     val sortCodeLength: Int = servicesConfig.getInt("bank-details-validation.sort-code.length")
     val accountNumberLength: Int = servicesConfig.getInt("bank-details-validation.account-number.length")

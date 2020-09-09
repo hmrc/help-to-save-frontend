@@ -128,7 +128,13 @@
 }
 
 @footerTop = {}
-@footerLinks = {}
+@footerLinks = {
+    @if(appConfig.accessibilityStatementToggle) {
+        <li>
+            <a href=@appConfig.accessibilityStatementUrl>@Messages("footer.links.accessibility.text")</a>
+        </li>
+    }
+}
 
 @serviceInfoHtml = {
   @serviceInfo(
