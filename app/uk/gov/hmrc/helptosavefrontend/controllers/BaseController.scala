@@ -18,14 +18,12 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{AnyContent, BodyParsers, MessagesActionBuilderImpl, MessagesControllerComponents, Request, RequestHeader, Result}
+import play.api.mvc.{MessagesControllerComponents, Request, RequestHeader, Result}
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.util.MaintenanceSchedule
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
-
-import scala.concurrent.ExecutionContext
 
 @Singleton
 class BaseController @Inject() (
