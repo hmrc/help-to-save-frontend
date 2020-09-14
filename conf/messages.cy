@@ -704,3 +704,104 @@ hts.reminder-frequency.no=Na, nid wyf am drefnu e-byst atgoffa nawr
 hts.reminder-apply-savings=A ydych am gael e-byst atgoffa ynghylch cynilion?
 hts.reminder-select.error.missing=Dewiswch a ydych am drefnu e-byst atgoffa
 hts.register.create_account.your-remainder.note=Ni fyddwn yn anfon unrhyw nodynnau atgoffa atoch. Gallwch drefnu’r rhain yn nes ymlaen os ydych yn dymuno gwneud hynny.
+
+accessibility.statement.title = Datganiad hygyrchedd ar gyfer Cymorth i Gynilo
+accessibility.statement.paragraph.one = Mae’r datganiad hygyrchedd hwn yn esbonio pa mor hygyrch yw’r gwasanaeth hwn, beth i’w wneud os ydych yn cael anhawster wrth ei ddefnyddio, a sut i roi gwybod am broblemau hygyrchedd gyda’r gwasanaeth.
+accessibility.statement.paragraph.two.start = Mae’r gwasanaeth hwn yn rhan o wefan ehangach GOV.UK. Mae
+accessibility.statement.paragraph.two.link = datganiad hygyrchedd
+accessibility.statement.paragraph.two.end = ar wahân ar gyfer prif wefan GOV.UK.
+accessibility.statement.paragraph.three = Mae’r dudalen hon yn cynnwys gwybodaeth am y gwasanaeth Cymorth i Gynilo yn unig, sydd ar gael yn
+accessibility.statement.paragraph.three.link = www.tax.service.gov.uk/help-to-save
+
+####Using This Service#####
+accessibility.statement.paragraph.four = Math o gyfrif cynilo yw Cymorth i Gynilo. Mae wedi’i gefnogi gan y Llywodraeth sy’n golygu bod yr holl gynilion yn y cynllun yn ddiogel. Mae’n rhoi cyfle i rai pobl sydd ag hawl i gael Credyd Treth Gwaith, neu sy’n cael Credyd Cynhwysol, gael bonws o 50c am bob £1 y maent yn ei chynilo dros 4 blynedd.
+accessibility.statement.paragraph.six = Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EM (CThEM). Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
+accessibility.statement.paragraph.seven = Rydym hefyd wedi sicrhau bod y testun a ddefnyddir yn y gwasanaeth mor syml â phosibl i’w ddeall.
+accessibility.statement.paragraph.eight = gyngor ar wneud eich dyfais yn haws i’w defnyddio os oes gennych anabledd.
+accessibility.statement.paragraph.eight.link = Mae gan AbilityNet
+
+##### How accessible this service is #########
+accessibility.statement.paragraph.nine = Mae’r gwasanaeth hwn yn cydymffurfio’n rhannol â safon
+accessibility.statement.paragraph.nine.link = ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1
+
+accessibility.statement.paragraph.ten = Mae’n bosibl y bydd rhai pobl yn cael anhawster i ddefnyddio rhannau o’r gwasanaeth hwn:
+accessibility.statement.paragraph.eleven = Ar y dudalen talu arian, mae’r rhai sy’n defnyddio bysellfwrdd yn unig yn gallu mynd ar y sgrin help naid ‘Beth yw cod diogelwch cerdyn?’ drwy wasgu’r botwm ‘Tab’. Fodd bynnag, ni ddylent fod yn gallu dewis hyn gyda bysellfwrdd. Yn ogystal, mae defnyddwyr technoleg gynorthwyol yn gallu cael at y cynnwys y tu ôl i’r sgrin help naid, sy’n achosi problemau deall y cynnwys help, yn enwedig ar gyfer defnyddwyr dall a defnyddwyr sy’n dibynnu ar orchmynion bysellfwrdd.
+accessibility.statement.paragraph.twelve = Ar rai sgriniau taliadau Worldline mae yna benynnau gwag sydd heb gynnwys ynddynt, ond ar gyfer defnyddwyr darllenwyr sgrin sy’n pori gyda dyfeisiau iOS (iFfonau 7s ac 8), mae’r feddalwedd yn nodi’r penynnau gwag hyn. Gall hyn peri dryswch gan nad oes cynnwys wedi’i leoli o fewn y tag.
+accessibility.statement.paragraph.thirteen = Ar rai sgriniau taliadau Worldline mae’r drefn y caiff gwybodaeth ei chyflwyno gan ddefnyddwyr technoleg gynorthwyol yn wahanol i’r drefn a ddangosir ar y dudalen. Gall hyn peri dryswch i ddefnyddwyr sydd â golwg gwan sy’n defnyddio VoiceOver fel ffordd o lywio’r dudalen, gan na fydd y drefn y cânt yr wybodaeth yn cyd-fynd â threfn cyflwyniad gweledol y dudalen.
+accessibility.statement.paragraph.fourteen = Ar ddangosfyrddau deiliad cyfrif ceir tabl sy’n dangos bonysau. Ar y tabl hwn mae’r pennyn ‘Sut rydym yn cyfrifo’ch bonws’ wedi’i nodi’n anghywir, a gallai hyn peri dryswch ar gyfer darllenwyr sgrin gan ei fod yn ymddangos fel pennawd tabl ond dylai fod yn bennyn neu’n gapsiwn. Gall defnyddwyr sy’n llywio gan ddefnyddio gorchmynion llywio tabl ei chael hi’n anodd dod o hyd i’r data yn y rhesi isod.
+accessibility.statement.paragraph.fifteen = Ar y sgrin ‘Bwrw golwg dros eich trafodion’ mae yna dag maes ar goll sy’n golygu nad yw elfennau ‘ystod data’ wedi’u grwpio gyda’i gilydd yn gywir. Mae hyn yn peri dryswch i ddarllenwyr sgrin gyda’r ffordd y caiff cynnwys ei gyflwyno, ac mewn rhai amgylchiadau ni fydd yr adborth clywedol yn cyfleu gwybodaeth yn gywir.
+accessibility.statement.paragraph.sixteen = Ar y dudalen manylion cerdyn talu mae yna elfen wedi’i nodi’n ‘+’ nad yw ei diben yn glir i ddefnyddwyr VoiceOver. Nid yw’n glir y gellir ei ddewis, na chwaith y bydd yr wybodaeth yn lleihau os caiff ei dewis.
+accessibility.statement.paragraph.seventeen = Pan fo’r nodwedd naid ar gyfer terfyn amser ar y sgrin, gall darllenwyr sgrin ddarllen y cynnwys y tu ôl i’r neges naid o hyd. Gall hyn peri cryn dipyn o ddryswch i ddarllenwyr sgrin neu ddefnyddwyr sy’n dibynnu ar orchmynion bysellfwrdd.
+accessibility.statement.paragraph.eighteen = Nid yw rhai o’r botymau yn y gwasanaeth hwn yn bodloni safonau cymarebau lliw, sy’n eu gwneud yn anodd eu gweld ar gyfer rhai defnyddwyr, yn enwedig defnyddwyr sydd â golwg gwan.
+accessibility.statement.paragraph.nineteen = Ar y sgrin ‘Bwrw golwg dros eich trafodion’, wrth actifadu’r botwm “hidlo”, does dim arwydd bod cynnwys y dudalen wedi newid. Mae hyn yn golygu na fydd ddefnyddwyr NVDA a VoiceOver yn gwybod bod y cynnwys sydd wedi’i hidlo wedi ymddangos.
+
+####What to do if you have difficulty using this service#####
+
+accessibility.statement.paragraph.twentyOne = Gallwch
+accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEM os oes angen help arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille.
+
+####Reporting accessibility problems with this service#####
+accessibility.statement.paragraph.twentyThree= Rydym bob amser yn ceisio gwella hygyrchedd y gwasanaeth hwn. Os byddwch yn dod o hyd i unrhyw broblemau nad ydynt wedi’u rhestru ar y dudalen hon, neu os ydych o’r farn nad ydym yn bodloni gofynion hygyrchedd,
+accessibility.statement.paragraph.twentyThree.link= rhowch wybod am y broblem hygyrchedd (yn agor ffenestr neu dab newydd).
+
+#### What to do if you are not happy with how we respond to your complaint ####
+
+accessibility.statement.paragraph.twentyFour.one= Mae’r Comisiwn Cydraddoldeb a Hawliau Dynol (EHRC) yn gyfrifol am orfodi Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018 (y ‘rheoliadau hygyrchedd’). Os nad ydych yn hapus â sut rydym yn ateb eich cwyn,
+accessibility.statement.paragraph.twentyFour.link.one=cysylltwch â’r Gwasanaeth Cynghori a Chymorth Cydraddoldeb (EASS)
+accessibility.statement.paragraph.twentyFour.two = , neu’r
+accessibility.statement.paragraph.twentyFour.link.two = Equality Commission for Northern Ireland (ECNI)
+accessibility.statement.paragraph.twentyFour.three = os ydych yn byw yng Ngogledd Iwerddon.
+
+#### Contacting us by phone or getting a visit from us in person ######
+accessibility.statement.paragraph.twentyFive = Rydym yn cynnig gwasanaeth ‘text relay’ os ydych yn fyddar, â nam ar eich clyw neu os oes gennych nam ar eich lleferydd.
+accessibility.statement.paragraph.twentySix = Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEM i’ch helpu i gwblhau’r gwasanaeth.
+accessibility.statement.paragraph.twentySeven = Gwybodaeth am sut i
+accessibility.statement.paragraph.twentySeven.link = gysylltu â ni.
+
+#### Technical information about this service’s accessibility ####
+accessibility.statement.paragraph.twentyEight = Mae CThEM wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
+accessibility.statement.paragraph.twentyNine.one = Mae’r gwasanaeth hwn yn cydymffurfio’n rhannol â safon
+accessibility.statement.paragraph.twentyNine.link = ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1
+accessibility.statement.paragraph.twentyNine.two = , oherwydd y diffyg cydymffurfio a restrir isod.
+
+accessibility.statement.paragraph.thirty = Cynnwys nad yw’n hygyrch
+accessibility.statement.paragraph.thirtyOne = Nid yw’r cynnwys a restrir isod yn hygyrch oherwydd y rhesymau canlynol.
+accessibility.statement.paragraph.thirtyTwo = Diffyg cydymffurfio â’r rheoliadau hygyrchedd
+accessibility.statement.paragraph.thirtyThree = Ar y sgrin taliadau mae cynnwys help ar gyfer ‘Beth yw cod diogelwch cerdyn?’, sy’n ymddangos fel sgrin naid. Mae defnyddwyr technoleg gynorthwyol yn gallu cyrchu cynnwys y tu ôl i’r neges naid, sy’n achosi problemau deall y cynnwys help, yn enwedig ar gyfer defnyddwyr dall a defnyddwyr sy’n dibynnu ar orchmynion bysellfwrdd. Nid yw hyn yn bodloni maen prawf llwyddiant 2.4.3 (Focus Order) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtyFour= Ar yr un sgrin taliadau mae yna ddefnydd anghywir wedi bod o’r dechneg tabindex, sy’n golygu gall ddefnyddwyr fynd ar y neges naid ‘Beth yw cod diogelwch cerdyn?’ pan na ddylent fod yn gallu gwneud hynny. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.1 (Parsing) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Nid yw’r rhyngweithio bysellfwrdd yn yr achos hwn yn gywir a dylid ei osgoi. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtyFive = Ar rai sgriniau taliadau Worldline, mae rhai meddalwedd darllenwyr sgrin hŷn yn nodi pennynau gwag. Gall hyn peri dryswch pan nad oes cynnwys wedi’i leoli o fewn y tag ac nid yw’n bodloni maen prawf llwyddiant 1.3.1 (Info and Relationships) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtySix = Ar rai sgriniau taliadau Worldline, mae’r drefn y caiff gwybodaeth ei chyflwyno gan ddefnyddwyr technoleg gynorthwyol yn wahanol i’r drefn a ddangosir yn weledol ar y dudalen. Gall hyn peri dryswch i ddefnyddwyr golwg gwan sy’n defnyddio VoiceOver fel ffordd o lywio’r dudalen ac sydd ddim yn bodloni maen prawf llwyddiant 1.3.1 (Meaningful Sequence) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtySeven = Rydym yn defnyddio tablau yn y dangosfwrdd cyfrif er mwyn dangos gwybodaeth megis balansau cyfrif a bonysau. Mewn rhai mannau gallai’r ffordd y mae’r tabl wedi’i nodi peri dryswch i ddarllenwyr sgrin, er enghraifft yn ddelfrydol dylai cynnwys sydd wedi’i labelu’n bennyn tabl fod yn bennawd neu’n label. Nid yw hyn yn bodloni maen prawf llwyddiant 1.3.1 (Info and Relationships) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Byddai testun sydd wedi’i nodi’n benynnau tabl yn fwy defnyddiol pe byddai wedi’i nodi’n bennawd neu’n gapsiwn. Rydym yn bwriadu trwsio’r broblem erbyn mis Mehefin 2021.
+accessibility.statement.paragraph.thirtyEight = Ar y sgrin ‘Bwrw golwg dros eich trafodion’ mae yna dag maes ar goll sy’n golygu nad yw’r elfennau ‘hidlo’ wedi’u grwpio gyda’i gilydd yn gywir. Gall hyn peri dryswch i ddarllenwyr sgrin yn y ffordd y caiff cynnwys ei chyflwyno, a nid oedd adborth clywedol yn cyfnewid gwybodaeth yn gywir pan roedd y ffocws ar y botwm hidlo. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.1 (Parsing) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Dylai gwneud yr elfen gyntaf y tu mewn i’r maes yr allwedd briodoli drwsio’r broblem hon. Rydym yn bwriadu cyflawni hyn erbyn mis Mehefin 2021.
+accessibility.statement.paragraph.thirtyNine = Ar y dudalen manylion cerdyn talu mae yna elfen wedi’i nodi’n ‘+’ nad yw ei diben yn glir i ddefnyddwyr VoiceOver. Nodwyd hefyd nad yw’r elfen hon yn cynhyrchu cynnwys cudd pellach. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.2 (Name, Role, Value) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.forty = Am resymau diogelwch, rydym yn defnyddio nodwedd terfyn amser sy’n allgofnodi defnyddwyr o’u cyfrifon ar ôl cyfnod o amser. Pan fo’r neges naid ar gyfer terfyn amser yn cael ei ddangos, bydd defnyddwyr technoleg gynorthwyol yn gallu cyrchu cynnwys y tu ôl i’r neges naid. Mae hyn yn achosi problemau deall y cynnwys help, yn enwedig ar gyfer defnyddwyr dall a defnyddwyr sy’n dibynnu ar orchmynion bysellfwrdd. Nid yw hyn yn bodloni maen prawf llwyddiant 2.4.3 (Focus Order) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Dylai gosod y cefndir fel ei bod wedi ei guddio datrys y broblem hon, ac rydym yn bwriadu cyflawni hyn erbyn mis Mehefin 2021.
+accessibility.statement.paragraph.fortyOne = Mae gan rai o’r botymau ar y tudalennau taliadau cerdyn gymarebau lliw isel, sy’n eu gwneud yn anodd i’w darllen, yn enwedig i ddefnyddwyr sydd â golwg gwan. Nid yw hyn yn bodloni maen prawf llwyddiant 1.4.3 (Contrast-minimum) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.fortyTwo = Mae gan gysylltiad ar ‘Cadarnhau eich cyfeiriad e-bost’ gymhareb lliw isel. Mae hyn yn broblem i ddefnyddwyr sydd â nam ar y golwg ac nid yw hyn yn bodloni maen prawf llwyddiant 1.4.3 (Contrast-minimum) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Bydd y cymarebau lliw yn cael eu newid er mwyn iddynt fodloni’r safonau gofynnol erbyn mis Mehefin 2021.
+accessibility.statement.paragraph.fortyThree = Ar y dudalen ‘Nodi manylion banc yn y DU’ mae yna gymhareb lliw isel ar gyfer y maes cod didoli. Mae hyn yn broblem i ddefnyddwyr sydd â nam ar y golwg ac nid yw hyn yn bodloni maen prawf llwyddiant 1.4.11 (Non-text contrast) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Bydd y cymarebau lliw yn cael eu newid er mwyn iddynt fodloni’r safonau gofynnol erbyn mis Mehefin 2021.
+accessibility.statement.paragraph.fortyFour = Ar y sgrin ‘Bwrw golwg dros eich trafodion’ nid yw statws y canlyniadau chwilio sydd wedi’u hidlo wedi’i ddatgan. Mae hyn yn achosi problemau i ddefnyddwyr NVDA a VoiceOver. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.3 (Status Messages) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Byddai cynnwys neges statws o dan y cysylltiad ailosod, yn nodi faint o ganlyniadau sydd ar y dudalen, yn trwsio’r broblem hon. Rydym yn bwriadu datrys hyn erbyn mis Mehefin 2021.
+
+#### How we tested this service ####
+accessibility.statement.paragraph.fortyFive = Cafodd y gwasanaeth ei brofi ddiwethaf ar 8 Ionawr 2018 a gwiriwyd ei fod yn cydymffurfio â safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1.
+accessibility.statement.paragraph.fortySix.one = Adeiladwyd y gwasanaeth gan ddefnyddio rhannau a brofwyd gan y
+accessibility.statement.paragraph.fortySix.link = Ganolfan Hygyrchedd Digidol (Digital Accessibility Centre)
+accessibility.statement.paragraph.fortySix.two = . Profwyd y gwasanaeth llawn gan CThEM, ac roedd y gwaith o brofi’r gwasanaeth yn cynnwys defnyddwyr anabl.
+accessibility.statement.paragraph.fortySeven = Paratowyd y dudalen hon ar 9 Medi 2020. Cafodd ei diweddaru ddiwethaf ar 14 Medi 2020.
+
+accessibility.statement.listitem1 = newid lliwiau, lefelau cyferbyniad a ffontiau
+accessibility.statement.listitem2 = chwyddo’r sgrin hyd at 300% heb i’r testun ddisgyn oddi ar y sgrin
+accessibility.statement.listitem3 = mynd o ddechrau’r gwasanaeth i’r diwedd gan ddefnyddio bysellfwrdd yn unig
+accessibility.statement.listitem4 = mynd o ddechrau’r gwasanaeth i’r diwedd gan ddefnyddio meddalwedd adnabod lleferydd
+accessibility.statement.listitem5 = gwrando ar y gwasanaeth drwy ddefnyddio darllenydd sgrin (gan gynnwys y fersiynau diweddaraf o JAWS, NVDA a VoiceOver)
+
+accessibility.statement.heading.one = Defnyddio’r gwasanaeth hwn
+accessibility.statement.heading.two = Pa mor hygyrch yw’r gwasanaeth hwn
+accessibility.statement.heading.three = Yr hyn i’w wneud os ydych yn cael anhawster wrth ddefnyddio’r gwasanaeth hwn
+accessibility.statement.heading.four = Rhoi gwybod am broblemau hygyrchedd gyda’r gwasanaeth hwn
+accessibility.statement.heading.five = Beth i’w wneud os nad ydych yn hapus â sut rydym yn ateb eich cwyn
+accessibility.statement.heading.six = Cysylltu â ni dros y ffôn neu gael ymweliad personol gennym
+accessibility.statement.heading.seven = Gwybodaeth dechnegol am hygyrchedd y gwasanaeth hwn
+accessibility.statement.heading.eight = Sut gwnaethom brofi’r gwasanaeth hwn
+full.stop= .
+
+############################### Footer ###############################
+footer.links.accessibility.text = Datganiad hygyrchedd
