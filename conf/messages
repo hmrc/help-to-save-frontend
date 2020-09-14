@@ -705,3 +705,104 @@ hts.reminder-frequency.no=No, I do not want to set up email reminders now
 hts.reminder-apply-savings=Do you want to receive email savings reminders?
 hts.reminder-select.error.missing=Select whether you want to set up email reminders
 hts.register.create_account.your-remainder.note=We will not send you any reminders. You can set these up later if you wish.
+
+accessibility.statement.title = Accessibility statement for Help to Save
+accessibility.statement.paragraph.one = This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
+accessibility.statement.paragraph.two.start = This service is part of the wider GOV.UK website. There is a separate
+accessibility.statement.paragraph.two.link = accessibility statement
+accessibility.statement.paragraph.two.end = for the main GOV.UK website.
+accessibility.statement.paragraph.three = This page only contains information about the Help to Save service, available at
+accessibility.statement.paragraph.three.link = www.tax.service.gov.uk/help-to-save/access-account
+
+####Using This Service#####
+accessibility.statement.paragraph.four = Help to Save is a type of savings account. It is backed by the government so all savings in the scheme are secure. It allows certain people entitled to Working Tax Credit or receiving Universal Credit to get a bonus of 50p for every £1 they save over 4 years.
+accessibility.statement.paragraph.six = This service is run by HM Revenue and Customs (HMRC). We want as many people as possible to be able to use this service. This means you should be able to:
+accessibility.statement.paragraph.seven = We have also made the text in the service as simple as possible to understand.
+accessibility.statement.paragraph.eight = has advice on making your device easier to use if you have a disability.
+accessibility.statement.paragraph.eight.link = AbilityNet
+
+##### How accessible this service is #########
+accessibility.statement.paragraph.nine = This service is partially compliant with the
+accessibility.statement.paragraph.nine.link = Web Content Accessibility Guidelines version 2.1 AA standard
+
+accessibility.statement.paragraph.ten = Some people may find parts of this service difficult to use:
+accessibility.statement.paragraph.eleven = On the paying-in money page, keyboard-only users are able to unexpectedly tab onto the ‘what is a card security code?’ pop-up help screen, however they should not be able to select this with a keyboard. In addition, users of assistive technology are able to access the content behind the pop-up help screen, which causes problems understanding the help content, especially for blind users and users that rely on keyboard commands.
+accessibility.statement.paragraph.twelve = On some Worldline payment screens there are empty headings with no content in them, but for screen reader users browsing with iOS devices (iPhone 7s and 8) the  software identifies these empty headings. This can be confusing because there is no content situated within the tag.
+accessibility.statement.paragraph.thirteen = On some Worldline payment screens the order in which information is presented by users of assistive technology is different to the order displayed on the page. This may be confusing for low vision users who use VoiceOver as a way of navigating the page, as the order they get the information will not match the visual presentation of the page.
+accessibility.statement.paragraph.fourteen = Within account holders’ dashboards there is a table displaying bonuses. Within this table the header ‘How we calculate your bonus’ is marked up incorrectly, and this could cause confusion for screen-readers, as it appears as a table header but should be a heading or a caption. Users navigating with table navigation commands may find it hard to get to the data in the rows below.
+accessibility.statement.paragraph.fifteen = On the ‘View your Transactions’ screen there is a missing fieldset tag which means ‘date range’ elements are not grouped together correctly. This causes confusion for screen readers with the way in which content is presented, and in some situations the audible feedback will not relay information correctly.
+accessibility.statement.paragraph.sixteen = On the payment card details page there is an element marked as ‘+’ whose purpose is not clear for VoiceOver users. It is not clear that it is selectable, or that information will collapse if selected.
+accessibility.statement.paragraph.seventeen = When the timeout pop-up feature is onscreen, screen-readers can still read the content behind the pop-up which can be very confusing for screen reader users or users that rely on keyboard commands.
+accessibility.statement.paragraph.eighteen = Some of the buttons in this service fail to meet colour contrast standards making them difficult to see for some users, especially low-vision users.
+accessibility.statement.paragraph.nineteen = In the ‘View your transactions’ screen, when activating the “filter” button, there is no indication that the content of the page has changed. This means that users of NVDA and VoiceOver will not know that the filtered content has appeared.
+
+####What to do if you have difficulty using this service#####
+
+accessibility.statement.paragraph.twentyOne = You can
+accessibility.statement.paragraph.twentyOne.link = contact HMRC if you need help with filling in forms or getting a different format, like large print, audio recording or Braille.
+
+####Reporting accessibility problems with this service#####
+accessibility.statement.paragraph.twentyThree= We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements,
+accessibility.statement.paragraph.twentyThree.link= report the accessibility problem (opens in a new window or tab).
+
+#### What to do if you are not happy with how we respond to your complaint ####
+
+accessibility.statement.paragraph.twentyFour.one= The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’). If you are not happy with how we respond to your complaint,
+accessibility.statement.paragraph.twentyFour.link.one=contact the Equality Advisory and Support Service (EASS)
+accessibility.statement.paragraph.twentyFour.two = , or the
+accessibility.statement.paragraph.twentyFour.link.two = Equality Commission for Northern Ireland (ECNI)
+accessibility.statement.paragraph.twentyFour.three = if you live in Northern Ireland.
+
+#### Contacting us by phone or getting a visit from us in person ######
+accessibility.statement.paragraph.twentyFive = We provide a text relay service if you are deaf, hearing impaired or have a speech impediment.
+accessibility.statement.paragraph.twentySix = We can provide a British Sign Language (BSL) interpreter, or you can arrange a visit from an HMRC advisor to help you complete the service.
+accessibility.statement.paragraph.twentySeven = Find out how to
+accessibility.statement.paragraph.twentySeven.link = contact us
+
+#### Technical information about this service’s accessibility ####
+accessibility.statement.paragraph.twentyEight = HMRC is committed to making this service accessible, in accordance with the Public Sector Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
+accessibility.statement.paragraph.twentyNine.one = This service is partially compliant with the
+accessibility.statement.paragraph.twentyNine.link = Web Content Accessibility Guidelines version 2.1 AA standard,
+accessibility.statement.paragraph.twentyNine.two = due to the non-compliances listed below.
+
+accessibility.statement.paragraph.thirty = Non-accessible content
+accessibility.statement.paragraph.thirtyOne = The content listed below is non-accessible for the following reasons.
+accessibility.statement.paragraph.thirtyTwo = Non-compliance with the accessibility regulations
+accessibility.statement.paragraph.thirtyThree = In the payments screen there is help content for ‘what is a card security code?’ which appears as a pop-up screen. Users of assistive technology are able to access content behind the pop-up which causes problems understanding the help content, especially for blind users and users that rely on keyboard commands. This fails WCAG 2.1 success criterion 2.4.3 Focus Order. This content is controlled by a third-party payments company (Worldline) and HMRC is not liable for its accessibility.
+accessibility.statement.paragraph.thirtyFour= In the same payments screen there has been an incorrect use of the tabindex technique, meaning users can tab onto the ‘what is a card security code?’ help pop-up when they shouldn’t be able to. This fails WCAG 2.1 Success Criterion 4.1.1 Parsing. The keyboard interaction in this instance is not correct and should be avoided. This content is controlled by a third-party payments company (Worldline) and HMRC is not liable for its accessibility.
+accessibility.statement.paragraph.thirtyFive = On some Worldline payment screens some older screen reader software identifies empty headings. These can be confusing when there is no content situated within the tag and fails WCAG 2.1 Success Criterion 1.3.1 Info and Relationships. This content is controlled by a third-party payments company (Worldline) and HMRC is not liable for its accessibility.
+accessibility.statement.paragraph.thirtySix = On some Worldline payment screens the order in which information is presented by users of assistive technology is different to the order that is visually displayed on the page. This may be confusing for low vision users who use VoiceOver as a way of navigating the page and fails WCAG 2.1 Success Criterion 1.3.2 Meaningful Sequence. This content is controlled by a third-party payments company (Worldline) and HMRC is not liable for its accessibility.
+accessibility.statement.paragraph.thirtySeven = We use tables in the account dashboard to display information such as account balances and bonuses. In some places the way in which the table is marked up could cause confusion for screen-readers, for instance content labelled as a table header should ideally be a heading or a label. This fails WCAG 2.1 Success Criterion 1.3.1 Info and Relationships. Some text marked as table-headers would be more helpful if marked as a heading or caption. We plan to fix this issue by June 2021.
+accessibility.statement.paragraph.thirtyEight = On the ‘View your Transactions’ screen there is a missing fieldset tag which means the ‘filter’ elements are not grouped together correctly. This can cause confusion for screen readers in the way in which content is presented, and audible feedback did not relay information correctly when the focus was situated on the filter button. This fails WCAG 2.1 Success Criterion 4.1.1 Parsing. Making the first element inside the fieldset the legend attribute should fix this issue. We plan to have this done by June 2021.
+accessibility.statement.paragraph.thirtyNine = On the payment card details page there is an element marked as ‘+’ whose purpose is not clear for VoiceOver users. It’s also not stated that this element produces further collapsible content. This fails WCAG 2.1 Success Criterion 4.1.2 Name, Role, Value. This content is controlled by a third-party payments company (Worldline) and HMRC is not liable for its accessibility.
+accessibility.statement.paragraph.forty = For security reasons, we use a timeout feature that logs users out of their accounts after a period of time. When the timeout pop-up is displayed, users of assistive technology are able to access content behind the pop-up which causes problems understanding the help content, especially for blind users and users that rely on keyboard commands. This fails WCAG 2.1 success criterion 2.4.3 Focus Order. Setting the background to hidden should solve this problem, and we plan to have this done by June 2021.
+accessibility.statement.paragraph.fortyOne = Some of the buttons on the card payment pages have low colour contrast ratios, making them difficult to read, especially for low-vision users. This fails WCAG 2.1 Success Criterion 1.4.3 Contrast-minimum. This content is controlled by a third-party payments company (Worldline) and HMRC is not liable for its accessibility.
+accessibility.statement.paragraph.fortyTwo = A link on the ‘Confirm your email’ has a low colour contrast ratio. This is a problem for visually-impaired users and fails WCAG 2.1 Success Criterion 1.4.3 Contrast-minimum. The colour contrast ratios will be changed so they meet the required standards by June 2021.
+accessibility.statement.paragraph.fortyThree = On the ‘Enter UK bank details’ page there is a low colour contrast for the sort code field. This is a problem for visually-impaired users and fails WCAG 2.1 Success Criterion 1.4.11 Non-text contrast. The colour contrast ratios will be changed so they meet the required standards by June 2021.
+accessibility.statement.paragraph.fortyFour = In the ‘View your transactions’ screen the status of the filtered search results is not announced. This causes problems for users of NVDA and VoiceOver. This fails WCAG 2.1 Success Criterion 4.1.3 Status Messages. Including a status message underneath the reset link stating how many results are present on the page would fix this issue. We plan to resolve this by June 2021.
+
+#### How we tested this service ####
+accessibility.statement.paragraph.fortyFive = The service was last tested on {0} and was checked for compliance with WCAG 2.1 AA.
+accessibility.statement.paragraph.fortySix.one = The service was built using parts that were tested by the
+accessibility.statement.paragraph.fortySix.link = Digital Accessibility Centre
+accessibility.statement.paragraph.fortySix.two =. The full service was tested by HMRC and included disabled users.
+accessibility.statement.paragraph.fortySeven = This page was prepared on 9 Sep 2020. It was last updated on {0}.
+
+accessibility.statement.listitem1 = change colours, contrast levels and fonts
+accessibility.statement.listitem2 = zoom in up to 300% without the text spilling off the screen
+accessibility.statement.listitem3 = get from the start of the service to the end using just a keyboard
+accessibility.statement.listitem4 = get from the start of the service to the end using speech recognition software
+accessibility.statement.listitem5 = listen to the service using a screen reader (including the most recent versions of JAWS, NVDA and VoiceOver)
+
+accessibility.statement.heading.one = Using this service
+accessibility.statement.heading.two = How accessible this service is
+accessibility.statement.heading.three = What to do if you have difficulty using this service
+accessibility.statement.heading.four = Reporting accessibility problems with this service
+accessibility.statement.heading.five = What to do if you are not happy with how we respond to your complaint
+accessibility.statement.heading.six = Contacting us by phone or getting a visit from us in person
+accessibility.statement.heading.seven = Technical information about this service’s accessibility
+accessibility.statement.heading.eight = How we tested this service
+full.stop= .
+
+############################### Footer ###############################
+footer.links.accessibility.text = Accessibility
