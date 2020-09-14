@@ -25,7 +25,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -62,7 +62,7 @@ class HelpToSaveReminderConnectorSpec
 
     "return http response as it is to the caller" in {
       val htsUser =
-        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
+        HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       val response =
         HttpResponse(200, Some(Json.toJson(htsUser)))
@@ -79,7 +79,7 @@ class HelpToSaveReminderConnectorSpec
 
     "return http response as it is to the caller" in {
       val htsUser =
-        HtsUser(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
+        HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       val response =
         HttpResponse(200, Some(Json.toJson(htsUser)))

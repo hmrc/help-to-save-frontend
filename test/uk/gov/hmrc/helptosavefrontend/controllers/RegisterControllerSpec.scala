@@ -38,7 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Eligible
-import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUser
+import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
@@ -105,9 +105,9 @@ class RegisterControllerSpec
       .expects(expected)
       .returning(result.fold[Try[String]](Failure(new Exception))(Success.apply))
 
-  def mockUpdateHtsUserPost(htsUser: HtsUser)(result: Either[String, HtsUser]): Unit =
+  def mockUpdateHtsUserPost(htsUser: HtsUserSchedule)(result: Either[String, HtsUserSchedule]): Unit =
     (mockHelpToSaveReminderService
-      .updateHtsUser(_: HtsUser)(_: HeaderCarrier, _: ExecutionContext))
+      .updateHtsUser(_: HtsUserSchedule)(_: HeaderCarrier, _: ExecutionContext))
       .expects(htsUser, *, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -405,7 +405,7 @@ class RegisterControllerSpec
 
       def doCreateAccountRequest(): Future[PlayResult] = csrfAddToken(controller.createAccount)(fakeRequest)
 
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 
@@ -892,7 +892,7 @@ class RegisterControllerSpec
         controller.processReminderServiceRequest(Some("1st"), eligibilityInfo.userInfo.userInfo.nino, eligibilityInfo)(
           fakeRequestWithNoBody
         )
-      val htsUserForUpdate = HtsUser(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       "write a new session and redirect to Account Page " in {
         inSequence {

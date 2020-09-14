@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.services
 import com.google.inject.{ImplementedBy, Inject}
 import javax.inject.Singleton
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUser, UpdateReminderEmail}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -28,8 +28,8 @@ import scala.concurrent.ExecutionContext
 @ImplementedBy(classOf[HelpToSaveReminderServiceImpl])
 trait HelpToSaveReminderService {
 
-  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser]
-  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser]
+  def updateHtsUser(htsUser: HtsUserSchedule)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule]
+  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule]
   def cancelHtsUserReminders(
     cancelHtsUserReminder: CancelHtsUserReminder
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit]
@@ -42,10 +42,10 @@ trait HelpToSaveReminderService {
 class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: HelpToSaveReminderConnector)
     extends HelpToSaveReminderService with Logging {
 
-  def updateHtsUser(htsUser: HtsUser)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
-    helpToSaveReminderConnector.updateHtsUser(htsUser)
+  def updateHtsUser(htsUserSchedule: HtsUserSchedule)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
+    helpToSaveReminderConnector.updateHtsUser(htsUserSchedule)
 
-  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUser] =
+  def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
     helpToSaveReminderConnector.getHtsUser(nino)
 
   def cancelHtsUserReminders(
