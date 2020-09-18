@@ -804,4 +804,4 @@ accessibility.statement.heading.eight = Sut gwnaethom brofi’r gwasanaeth hwn
 full.stop= .
 
 ############################### Footer ###############################
-footer.links.accessibility.text = Datganiad hygyrchedd
+footer.links.accessibility.text = Hygyrchedd
