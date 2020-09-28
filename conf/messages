@@ -712,7 +712,7 @@ accessibility.statement.paragraph.two.start = This service is part of the wider 
 accessibility.statement.paragraph.two.link = accessibility statement
 accessibility.statement.paragraph.two.end = for the main GOV.UK website.
 accessibility.statement.paragraph.three = This page only contains information about the Help to Save service, available at
-accessibility.statement.paragraph.three.link = www.tax.service.gov.uk/help-to-save/access-account
+accessibility.statement.paragraph.three.link = www.tax.service.gov.uk/help-to-save
 
 ####Using This Service#####
 accessibility.statement.paragraph.four = Help to Save is a type of savings account. It is backed by the government so all savings in the scheme are secure. It allows certain people entitled to Working Tax Credit or receiving Universal Credit to get a bonus of 50p for every £1 they save over 4 years.
@@ -782,11 +782,11 @@ accessibility.statement.paragraph.fortyThree = On the ‘Enter UK bank details�
 accessibility.statement.paragraph.fortyFour = In the ‘View your transactions’ screen the status of the filtered search results is not announced. This causes problems for users of NVDA and VoiceOver. This fails WCAG 2.1 Success Criterion 4.1.3 Status Messages. Including a status message underneath the reset link stating how many results are present on the page would fix this issue. We plan to resolve this by June 2021.
 
 #### How we tested this service ####
-accessibility.statement.paragraph.fortyFive = The service was last tested on {0} and was checked for compliance with WCAG 2.1 AA.
+accessibility.statement.paragraph.fortyFive = The service was last tested on 8 January 2018 and was checked for compliance with WCAG 2.1 AA.
 accessibility.statement.paragraph.fortySix.one = The service was built using parts that were tested by the
 accessibility.statement.paragraph.fortySix.link = Digital Accessibility Centre
 accessibility.statement.paragraph.fortySix.two =. The full service was tested by HMRC and included disabled users.
-accessibility.statement.paragraph.fortySeven = This page was prepared on 9 Sep 2020. It was last updated on {0}.
+accessibility.statement.paragraph.fortySeven = This page was prepared on 9 September 2020. It was last updated on 14 September 2020.
 
 accessibility.statement.listitem1 = change colours, contrast levels and fonts
 accessibility.statement.listitem2 = zoom in up to 300% without the text spilling off the screen
