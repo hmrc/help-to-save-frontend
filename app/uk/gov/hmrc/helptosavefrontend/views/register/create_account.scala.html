@@ -90,7 +90,7 @@ bodyClasses = None) {
       routes.RegisterController.changeReminder().url,
       (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
       "change-reminder"
-    )
+    ),true
   )
   } else{
   @summary_row(Messages("hts.email-saving-remainders.title.h1"),Messages("hts.reminder-confirmation.title.p1-1") +" "+ period +" "+ Messages("hts.reminder-confirmation.title.p1-2"),
@@ -98,7 +98,7 @@ bodyClasses = None) {
       routes.RegisterController.changeReminder().url,
       (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
       "change-reminder"
-    )
+    ),true
   )
     }
       }

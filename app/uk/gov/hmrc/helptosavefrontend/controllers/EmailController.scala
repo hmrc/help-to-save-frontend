@@ -302,9 +302,7 @@ class EmailController @Inject() (
                 //once email is confirmed and , if we were in the process of changing details then we should redirect user to check_details page
                 if (session.changingDetails) {
                   SeeOther(routes.RegisterController.getCreateAccountPage().url)
-                } else if (isFeatureEnabled) {
-                  SeeOther(routes.ReminderController.getApplySavingsReminderPage().url)
-                } else {
+                }  else {
                   SeeOther(routes.BankAccountController.getBankDetailsPage().url)
                 }
               }
@@ -766,8 +764,6 @@ class EmailController @Inject() (
             session ⇒
               if (session.changingDetails) {
                 SeeOther(routes.RegisterController.getCreateAccountPage().url)
-              } else if (isFeatureEnabled) {
-                SeeOther(routes.ReminderController.getApplySavingsReminderPage().url)
               } else {
                 SeeOther(routes.BankAccountController.getBankDetailsPage().url)
               }

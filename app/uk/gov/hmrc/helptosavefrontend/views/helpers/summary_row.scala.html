@@ -14,9 +14,13 @@
  * limitations under the License.
  *@
 
-@(label: String, value: String, change: Html)
+@(label: String, value: String, change: Html, hidden: Boolean = false)
 
-<div>
+@if(hidden){
+ <div class="reminders-default">
+ }else{
+ <div>
+  }
   <dt class="cya-question">@label</dt>
   <dd class="cya-answer">@value</dd>
   <dd class="cya-change">@change</dd>

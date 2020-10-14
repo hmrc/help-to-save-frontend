@@ -103,7 +103,7 @@ class BankAccountControllerSpec
         contentAsString(result) should include(
           "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
         )
-        contentAsString(result) should include("/help-to-save/apply-savings-reminders")
+        contentAsString(result) should include("/help-to-save/enter-email")
       }
 
       "display the page with correct Back link when they came from emailVerified page" in {
