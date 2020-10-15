@@ -605,7 +605,7 @@ hts.help-information.section.bonuses.s7.video-title=Help to Save - Bonuses
 # Help/information: Withdrawals
 hts.help-information.section.withdrawals.title=Withdrawals
 hts.help-information.section.withdrawals.s1.title=Withdrawing money
-hts.help-information.section.withdrawals.s1.p1=You can withdraw some or all of your savings at any time. If you pay in money by debit card, you'll need to wait one working day before you can withdraw it.
+hts.help-information.section.withdrawals.s1.p1=You can withdraw some or all of your savings at any time. If you pay in money by debit card, you’ll need to wait one working day before you can withdraw it.
 hts.help-information.section.withdrawals.s1.p2=It takes up to 3 working days for the money to reach your bank account. Weekends and public holidays are not considered to be working days.
 hts.help-information.section.withdrawals.s1.p3=You can only pay in £50 each month, even if you make withdrawals.
 hts.help-information.section.withdrawals.s1.p4=If you need to withdraw some or all of your money, you should still keep your account open. This is because if you close your account early, before it matures, you will not get a bonus payment.
@@ -676,7 +676,7 @@ hts.reminder-confirmation-update.title.p1=You have new dates for monthly email r
 hts.reminder-confirmation.title.p1-1=We will send you reminders on the
 hts.reminder-confirmation.title.p1-2=day of each month
 hts.reminder-confirmation.title.p1-3=We will send your reminders to
-hts.reminder-confirmation.title.p1-4=If you want your reminders to go somewhere else you'll need to 
+hts.reminder-confirmation.title.p1-4=If you want your reminders to go somewhere else you’ll need to
 hts.reminder-confirmation.change-email.descriptive-link=change your email address.
 hts.reminder-confirmation.saving-reminders.descriptive-link=savings reminders
 hts.reminder-confirmation.title.p1-5=You can change or cancel your email reminders at anytime. Go to
