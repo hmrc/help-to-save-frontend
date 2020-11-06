@@ -94,7 +94,7 @@ hts.register.bank-details.sort-code.label=Cod didoli
 hts.register.bank-details.sort-code.hint=Er enghraifft, 02 03 04
 hts.register.bank-details.accountNumber.label=Rhif y cyfrif
 hts.register.bank-details.accountNumber.hint=Er enghraifft, 12345678
-hts.register.bank-details.accountName.label=Enw pwy sydd ar y cyfrif
+hts.register.bank-details.accountName.label=Enw sydd ar y cyfrif
 hts.register.bank-details.rollNumber.label=Rhif rôl
 hts.register.bank-details.rollNumber.hint=Cymdeithasau adeiladu yn unig
 hts.bank_details.check_your_sortcode_is_correct=Gwiriwch fod eich cod didoli yn gywir
@@ -802,6 +802,20 @@ accessibility.statement.heading.six = Cysylltu â ni dros y ffôn neu gael ymwel
 accessibility.statement.heading.seven = Gwybodaeth dechnegol am hygyrchedd y gwasanaeth hwn
 accessibility.statement.heading.eight = Sut gwnaethom brofi’r gwasanaeth hwn
 full.stop= .
+
+##Month Names##
+hts.month.january = Ionawr
+hts.month.february = Chwefror
+hts.month.march = Mawrth
+hts.month.april = Ebrill
+hts.month.may = Mai
+hts.month.june = Mehefin
+hts.month.july = Gorffennaf
+hts.month.august  = Awst
+hts.month.september = Medi
+hts.month.october = Hydref
+hts.month.november = Tachwedd
+hts.month.december = Rhagfyr
 
 ############################### Footer ###############################
 footer.links.accessibility.text = Hygyrchedd

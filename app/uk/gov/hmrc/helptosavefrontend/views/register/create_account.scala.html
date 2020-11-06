@@ -58,7 +58,11 @@ bodyClasses = None) {
         "change-your-name"
       )
     )
-    @summary_row(Messages("hts.register.create_account.your-details.dob"), eligibleWithUserInfo.userInfo.dateOfBirth.show,
+    @summary_row(Messages("hts.register.create_account.your-details.dob"),
+      (eligibleWithUserInfo.userInfo.dateOfBirth.getDayOfMonth.toString + " " +
+        (Messages("hts.month."+eligibleWithUserInfo.userInfo.dateOfBirth.getMonth.name.toLowerCase)) + " " +
+          eligibleWithUserInfo.userInfo.dateOfBirth.getYear.toString
+      ),
       summary_section_change(
         routes.RegisterController.getDetailsAreIncorrect().url,
         Messages("hts.register.create_account.change-your-dob"),
@@ -93,7 +97,14 @@ bodyClasses = None) {
     ),true
   )
   } else{
-  @summary_row(Messages("hts.email-saving-remainders.title.h1"),Messages("hts.reminder-confirmation.title.p1-1") +" "+ period +" "+ Messages("hts.reminder-confirmation.title.p1-2"),
+  @summary_row(Messages("hts.email-saving-remainders.title.h1"),Messages("hts.reminder-confirmation.title.p1-1") +" "+
+    (period match {
+      case "1st" => messages("hts.reminder-frequency.1")
+      case "25th" =>messages("hts.reminder-frequency.25")
+      case "1st day and 25th" => messages("hts.reminder-frequency.both")
+      case _ => ""
+    }).toString
+    +" "+ Messages("hts.reminder-confirmation.title.p1-2"),
     summary_section_change(
       routes.RegisterController.changeReminder().url,
       (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
