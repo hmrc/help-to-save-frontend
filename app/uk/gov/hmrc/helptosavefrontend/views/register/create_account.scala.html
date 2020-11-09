@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 @import cats.syntax.show._
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo.localDateShow
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.DateHelper
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
@@ -59,10 +60,7 @@ bodyClasses = None) {
       )
     )
     @summary_row(Messages("hts.register.create_account.your-details.dob"),
-      (eligibleWithUserInfo.userInfo.dateOfBirth.getDayOfMonth.toString + " " +
-        (Messages("hts.month."+eligibleWithUserInfo.userInfo.dateOfBirth.getMonth.name.toLowerCase)) + " " +
-          eligibleWithUserInfo.userInfo.dateOfBirth.getYear.toString
-      ),
+    DateHelper.date(eligibleWithUserInfo.userInfo.dateOfBirth),
       summary_section_change(
         routes.RegisterController.getDetailsAreIncorrect().url,
         Messages("hts.register.create_account.change-your-dob"),
