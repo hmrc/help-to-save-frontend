@@ -804,21 +804,5 @@ accessibility.statement.heading.seven = Technical information about this service
 accessibility.statement.heading.eight = How we tested this service
 full.stop= .
 
-## Month Names ##
-
-hts.month.january = January
-hts.month.february = February
-hts.month.march = March
-hts.month.april = April
-hts.month.may = May
-hts.month.june = June
-hts.month.july = July
-hts.month.august  = August
-hts.month.september = September
-hts.month.october = October
-hts.month.november = November
-hts.month.december = December
-
-
 ############################### Footer ###############################
 footer.links.accessibility.text = Accessibility

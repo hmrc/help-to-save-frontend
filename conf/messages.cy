@@ -804,18 +804,18 @@ accessibility.statement.heading.eight = Sut gwnaethom brofi’r gwasanaeth hwn
 full.stop= .
 
 ##Month Names##
-hts.month.january = Ionawr
-hts.month.february = Chwefror
-hts.month.march = Mawrth
-hts.month.april = Ebrill
-hts.month.may = Mai
-hts.month.june = Mehefin
-hts.month.july = Gorffennaf
-hts.month.august  = Awst
-hts.month.september = Medi
-hts.month.october = Hydref
-hts.month.november = Tachwedd
-hts.month.december = Rhagfyr
+hts.month.January = Ionawr
+hts.month.February = Chwefror
+hts.month.March = Mawrth
+hts.month.April = Ebrill
+hts.month.May = Mai
+hts.month.June = Mehefin
+hts.month.July = Gorffennaf
+hts.month.August  = Awst
+hts.month.September = Medi
+hts.month.October = Hydref
+hts.month.November = Tachwedd
+hts.month.December = Rhagfyr
 
 ############################### Footer ###############################
 footer.links.accessibility.text = Hygyrchedd

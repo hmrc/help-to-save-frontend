@@ -27,7 +27,7 @@ object DateUtils {
   val yearExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy")
 
   def toLocalisedString(date: LocalDate)(implicit messages: Messages): String = {
-    val monthKey = date.format(monthExtractor).toLowerCase
+    val monthKey = date.format(monthExtractor)
     val monthValue = messages.translate(s"hts.month.${monthKey}", Seq.empty).getOrElse(monthKey)
     s"${date.format(dayExtractor)} $monthValue ${date.format(yearExtractor)}"
   }
