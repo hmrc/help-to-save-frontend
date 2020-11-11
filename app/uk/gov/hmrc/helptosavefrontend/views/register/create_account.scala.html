@@ -26,6 +26,8 @@
 @import cats.syntax.show._
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo.localDateShow
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
+
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
@@ -96,12 +98,7 @@ bodyClasses = None) {
   )
   } else{
   @summary_row(Messages("hts.email-saving-remainders.title.h1"),Messages("hts.reminder-confirmation.title.p1-1") +" "+
-    (period match {
-      case "1st" => messages("hts.reminder-confirmation.frequency.1")
-      case "25th" =>messages("hts.reminder-confirmation.frequency.25")
-      case "1st day and 25th" => messages("hts.reminder-confirmation.frequency.both")
-      case _ => ""
-    }).toString
+    PeriodUtils.getMessage(period)
     +" "+ Messages("hts.reminder-confirmation.title.p1-2"),
     summary_section_change(
       routes.RegisterController.changeReminder().url,
