@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 
 import akka.stream.Materializer
 import com.kenshoo.play.metrics.MetricsFilter
+import uk.gov.hmrc.play.bootstrap.frontend.filters.FrontendFilters
 import play.api.Configuration
 import play.api.mvc.EssentialFilter
 import play.filters.csrf.CSRFFilter
@@ -36,9 +37,9 @@ class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
   val mockCacheControllerFilter = new CacheControlFilter(CacheControlConfig(), mock[Materializer])
 
   val mockMDCFilter = new MDCFilter(fakeApplication.materializer, fakeApplication.configuration, "")
-  val mockWhiteListFilter = mock[uk.gov.hmrc.play.bootstrap.frontend.filters.WhitelistFilter]
+  val mockWhiteListFilter = mock[uk.gov.hmrc.play.bootstrap.frontend.filters.AllowlistFilter]
 
-  val mockSessionIdFilter =mock[SessionIdFilter]
+  val mockSessionIdFilter = mock[SessionIdFilter]
 
   class TestableFrontendFilters
       extends FrontendFilters(
