@@ -81,3 +81,71 @@ object SuspiciousActivity {
 
   private implicit val detailsFormat: Format[Details] = Json.format[Details]
 }
+
+case class HtsReminderUserUpdated(account: JsValue)
+
+case class HtsReminderUserCreated(account: JsValue)
+
+case class HtsReminderUserCancelled(nino:String ,emailAddress: String)
+
+object HtsReminderUserUpdated {
+  implicit val format: Format[HtsReminderUserUpdated] = Json.format[HtsReminderUserUpdated]
+}
+
+object HtsReminderUserCreated {
+  implicit val format: Format[HtsReminderUserCreated] = Json.format[HtsReminderUserCreated]
+}
+
+object HtsReminderUserCancelled {
+  implicit val format: Format[HtsReminderUserCancelled] = Json.format[HtsReminderUserCancelled]
+}
+
+case class HtsReminderCancelled(htsReminderUserCancelled: HtsReminderUserCancelled, path: String)(
+  implicit hc: HeaderCarrier,
+  appConfig: FrontendAppConfig)
+  extends HTSEvent {
+
+  val value: ExtendedDataEvent = {
+    HTSEvent(
+      appConfig.appName,
+      "ReminderCancelled",
+      Json.toJson(htsReminderUserCancelled),
+      "reminder-cancelled",
+      path)
+  }
+
+}
+
+case class HtsReminderUserUpdatedEvent(htsReminderUserUpdated: HtsReminderUserUpdated, path: String)(
+  implicit hc: HeaderCarrier,
+  appConfig: FrontendAppConfig)
+  extends HTSEvent {
+
+  val value: ExtendedDataEvent = {
+    HTSEvent(
+      appConfig.appName,
+      "ReminderUpdated",
+      Json.toJson(htsReminderUserUpdated),
+      "reminder-updated",
+      path)
+  }
+
+}
+
+case class HtsReminderUserCreatedEvent(htsReminderUserCreated: HtsReminderUserCreated, path: String)(
+  implicit hc: HeaderCarrier,
+  appConfig: FrontendAppConfig)
+  extends HTSEvent {
+
+  val value: ExtendedDataEvent = {
+    HTSEvent(
+      appConfig.appName,
+      "ReminderCreated",
+      Json.toJson(htsReminderUserCreated),
+      "reminder-created",
+      path)
+  }
+
+}
+
+
