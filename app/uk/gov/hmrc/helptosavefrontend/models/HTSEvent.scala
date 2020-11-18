@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -82,25 +83,25 @@ object SuspiciousActivity {
   private implicit val detailsFormat: Format[Details] = Json.format[Details]
 }
 
-case class HtsReminderUserUpdated(account: JsValue)
+case class HtsReminderUpdated(account: HtsUserSchedule)
 
-case class HtsReminderUserCreated(account: JsValue)
+case class HtsReminderCreated(account: HtsUserSchedule)
 
-case class HtsReminderUserCancelled(nino:String ,emailAddress: String)
+case class HtsReminderCancelled(nino:String ,emailAddress: String)
 
-object HtsReminderUserUpdated {
-  implicit val format: Format[HtsReminderUserUpdated] = Json.format[HtsReminderUserUpdated]
+object HtsReminderUpdated {
+  implicit val format: Format[HtsReminderUpdated] = Json.format[HtsReminderUpdated]
 }
 
-object HtsReminderUserCreated {
-  implicit val format: Format[HtsReminderUserCreated] = Json.format[HtsReminderUserCreated]
+object HtsReminderCreated {
+  implicit val format: Format[HtsReminderCreated] = Json.format[HtsReminderCreated]
 }
 
-object HtsReminderUserCancelled {
-  implicit val format: Format[HtsReminderUserCancelled] = Json.format[HtsReminderUserCancelled]
+object HtsReminderCancelled {
+  implicit val format: Format[HtsReminderCancelled] = Json.format[HtsReminderCancelled]
 }
 
-case class HtsReminderCancelled(htsReminderUserCancelled: HtsReminderUserCancelled, path: String)(
+case class HtsReminderCancelledEvent(htsReminderCancelled: HtsReminderCancelled, path: String)(
   implicit hc: HeaderCarrier,
   appConfig: FrontendAppConfig)
   extends HTSEvent {
@@ -109,14 +110,14 @@ case class HtsReminderCancelled(htsReminderUserCancelled: HtsReminderUserCancell
     HTSEvent(
       appConfig.appName,
       "ReminderCancelled",
-      Json.toJson(htsReminderUserCancelled),
+      Json.toJson(htsReminderCancelled),
       "reminder-cancelled",
       path)
   }
 
 }
 
-case class HtsReminderUserUpdatedEvent(htsReminderUserUpdated: HtsReminderUserUpdated, path: String)(
+case class HtsReminderUpdatedEvent(htsReminderUpdated: HtsReminderUpdated, path: String)(
   implicit hc: HeaderCarrier,
   appConfig: FrontendAppConfig)
   extends HTSEvent {
@@ -125,14 +126,14 @@ case class HtsReminderUserUpdatedEvent(htsReminderUserUpdated: HtsReminderUserUp
     HTSEvent(
       appConfig.appName,
       "ReminderUpdated",
-      Json.toJson(htsReminderUserUpdated),
+      Json.toJson(htsReminderUpdated),
       "reminder-updated",
       path)
   }
 
 }
 
-case class HtsReminderUserCreatedEvent(htsReminderUserCreated: HtsReminderUserCreated, path: String)(
+case class HtsReminderCreatedEvent(htsReminderCreated: HtsReminderCreated, path: String)(
   implicit hc: HeaderCarrier,
   appConfig: FrontendAppConfig)
   extends HTSEvent {
@@ -141,7 +142,7 @@ case class HtsReminderUserCreatedEvent(htsReminderUserCreated: HtsReminderUserCr
     HTSEvent(
       appConfig.appName,
       "ReminderCreated",
-      Json.toJson(htsReminderUserCreated),
+      Json.toJson(htsReminderCreated),
       "reminder-created",
       path)
   }
