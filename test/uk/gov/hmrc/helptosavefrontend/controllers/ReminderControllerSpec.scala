@@ -21,6 +21,7 @@ import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -33,12 +34,13 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibi
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -61,6 +63,21 @@ class ReminderControllerSpec
       .returning(EitherT.fromEither[Future](result))
 
   val mockedFeatureEnabled: Boolean = false
+
+  def mockCancelRemindersAuditEvent(nino: String, emailAddress :String) :Unit =
+    (mockAuditor.sendEvent(_: HtsReminderCancelledEvent,_:String)(_: ExecutionContext))
+      .expects(HtsReminderCancelledEvent(HtsReminderCancelled(nino,emailAddress),"/"), nino, *)
+      .returning(Future.successful(AuditResult.Success))
+
+  def mockUpdateRemindersAuditEvent(user: HtsUserSchedule) :Unit =
+    (mockAuditor.sendEvent(_: HtsReminderUpdatedEvent,_:String)(_: ExecutionContext))
+      .expects(HtsReminderUpdatedEvent(HtsReminderUpdated(user),"/"), nino, *)
+      .returning(Future.successful(AuditResult.Success))
+
+  def mockCreateRemindersAuditEvent(user: HtsUserSchedule) :Unit =
+    (mockAuditor.sendEvent(_: HtsReminderCreatedEvent,_:String)(_: ExecutionContext))
+      .expects(HtsReminderCreatedEvent(HtsReminderCreated(user),"/"), nino, *)
+      .returning(Future.successful(AuditResult.Success))
 
   def mockCancelHtsUserReminderPost(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveReminderService
@@ -133,6 +150,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
+        mockCreateRemindersAuditEvent(htsUserForUpdate)
         mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
         mockEncrypt("email")(encryptedEmail)
 
@@ -174,6 +192,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
+        mockCreateRemindersAuditEvent(htsUserForUpdate)
         mockUpdateHtsUserPost(htsUserForUpdate)(Left("error occurred while updating htsUser"))
 
       }
@@ -341,6 +360,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
+        mockCancelRemindersAuditEvent(ninoNew,"email")
         mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Right((())))
 
       }
@@ -370,6 +390,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
+        mockCancelRemindersAuditEvent(ninoNew,"email")
         mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Left("error occurred while updating htsUser"))
 
       }
@@ -385,6 +406,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
+        mockUpdateRemindersAuditEvent(htsUserForUpdate)
         mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
         mockEncrypt("email")(encryptedEmail)
       }
@@ -399,6 +421,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
+        mockUpdateRemindersAuditEvent(htsUserForUpdate)
         mockUpdateHtsUserPost(htsUserForUpdate)(Left("error occurred while updating htsUser"))
 
       }
