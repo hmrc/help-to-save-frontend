@@ -11,7 +11,7 @@ object AppDependencies {
     hmrc                %% "auth-client"                % "3.0.0-play-26",
     hmrc                %% "play-whitelist-filter"      % "3.4.0-play-26",
     hmrc                %% "bootstrap-frontend-play-26" % "2.24.0",
-    hmrc                %% "play-ui"                    % "8.11.0-play-26",
+    hmrc                %% "play-ui"                    % "8.15.0-play-26",
     hmrc                %% "play-health"                % "3.15.0-play-26",
     hmrc                %% "play-language"              % "4.3.0-play-26",
     "com.github.kxbmap" %% "configs"                    % "0.4.4",
