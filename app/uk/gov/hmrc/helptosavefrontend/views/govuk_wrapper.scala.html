@@ -16,12 +16,13 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-@import uk.gov.hmrc.play.views.html.layouts.{Head, HeaderNav, Footer, ServiceInfo, MainContentHeader, MainContent, Sidebar, Article, FooterLinks, BetaBanner}
+@import uk.gov.hmrc.play.views.html.layouts.{Head, HeadWithTrackingConsent, HeaderNav, Footer, ServiceInfo, MainContentHeader, MainContent, Sidebar, Article, FooterLinks, BetaBanner}
 @import play.twirl.api.HtmlFormat
 @import uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
 
 @this(
   head: Head,
+  headWithTrackingConsent: HeadWithTrackingConsent,
   headerNav: HeaderNav,
   serviceInfo: ServiceInfo,
   sidebar: Sidebar,
@@ -85,7 +86,7 @@
 
 
 @headHtml = {
-  @head(
+  @headWithTrackingConsent(
     linkElem = Some(linkElement),
     headScripts = Some(headScripts))
     <meta name="format-detection" content="telephone=no" />
@@ -153,7 +154,6 @@
 }
 
 @getHelpForm = @{reportAProblemLink(appConfig.reportAProblemPartialUrl, appConfig.reportAProblemNonJSUrl)}
-
 
 @content = {
   @mainContent(
