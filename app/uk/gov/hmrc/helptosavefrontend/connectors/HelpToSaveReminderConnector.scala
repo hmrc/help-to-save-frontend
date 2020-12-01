@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
+import play.mvc.Http.Status
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
@@ -105,7 +106,7 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
     EitherT(
       resF
         .map { response ⇒
-          if (response.status == 200 || response.status == 404) {
+          if (response.status == Status.OK || response.status == Status.NOT_FOUND) {
             ifHTTP200(response)
           } else {
             Left(toError(s"Call to $description came back with status ${response.status}. Body was ${(response.body)}"))
