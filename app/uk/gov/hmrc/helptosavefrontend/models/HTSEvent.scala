@@ -83,11 +83,17 @@ object SuspiciousActivity {
   private implicit val detailsFormat: Format[Details] = Json.format[Details]
 }
 
-case class HtsReminderUpdated(account: HtsUserSchedule)
+case class HTSReminderAccount(nino : String, emailAddress: String, firstName: String, lastName: String, optInStatus: Boolean, daysToReceive: Seq[Int])
 
-case class HtsReminderCreated(account: HtsUserSchedule)
+case class HtsReminderUpdated(account: HTSReminderAccount)
+
+case class HtsReminderCreated(account: HTSReminderAccount)
 
 case class HtsReminderCancelled(nino:String ,emailAddress: String)
+
+object HTSReminderAccount {
+  implicit val format: Format[HTSReminderAccount] = Json.format[HTSReminderAccount]
+}
 
 object HtsReminderUpdated {
   implicit val format: Format[HtsReminderUpdated] = Json.format[HtsReminderUpdated]
