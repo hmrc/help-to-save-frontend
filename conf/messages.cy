@@ -94,7 +94,7 @@ hts.register.bank-details.sort-code.label=Cod didoli
 hts.register.bank-details.sort-code.hint=Er enghraifft, 02 03 04
 hts.register.bank-details.accountNumber.label=Rhif y cyfrif
 hts.register.bank-details.accountNumber.hint=Er enghraifft, 12345678
-hts.register.bank-details.accountName.label=Enw pwy sydd ar y cyfrif
+hts.register.bank-details.accountName.label=Enw sydd ar y cyfrif
 hts.register.bank-details.rollNumber.label=Rhif rôl
 hts.register.bank-details.rollNumber.hint=Cymdeithasau adeiladu yn unig
 hts.bank_details.check_your_sortcode_is_correct=Gwiriwch fod eich cod didoli yn gywir
@@ -673,6 +673,9 @@ hts.reminder-confirmation-set.title.p1=Byddwch bellach yn cael e-byst atgoffa mi
 hts.reminder-confirmation-update.title.h1=Nodynnau atgoffa ynghylch cynilion wedi’u newid
 hts.reminder-confirmation-update.title.p1=Mae gennych ddyddiadau newydd ar gyfer e-byst atgoffa misol
 hts.reminder-confirmation.title.p1-1=Byddwn yn anfon y nodynnau atgoffa atoch ar ddiwrnod
+hts.reminder-confirmation.frequency.1=1
+hts.reminder-confirmation.frequency.25=25
+hts.reminder-confirmation.frequency.both=1 a diwrnod 25
 hts.reminder-confirmation.title.p1-2=bob mis
 hts.reminder-confirmation.title.p1-3=Byddwn yn anfon eich nodynnau atgoffa at
 hts.reminder-confirmation.title.p1-4=Os hoffech i’ch nodynnau atgoffa fynd i rywle arall bydd angen i chi 
@@ -802,6 +805,20 @@ accessibility.statement.heading.six = Cysylltu â ni dros y ffôn neu gael ymwel
 accessibility.statement.heading.seven = Gwybodaeth dechnegol am hygyrchedd y gwasanaeth hwn
 accessibility.statement.heading.eight = Sut gwnaethom brofi’r gwasanaeth hwn
 full.stop= .
+
+##Month Names##
+hts.month.January = Ionawr
+hts.month.February = Chwefror
+hts.month.March = Mawrth
+hts.month.April = Ebrill
+hts.month.May = Mai
+hts.month.June = Mehefin
+hts.month.July = Gorffennaf
+hts.month.August  = Awst
+hts.month.September = Medi
+hts.month.October = Hydref
+hts.month.November = Tachwedd
+hts.month.December = Rhagfyr
 
 ############################### Footer ###############################
 footer.links.accessibility.text = Hygyrchedd

@@ -679,6 +679,9 @@ hts.reminder-confirmation.title.p1-3=We will send your reminders to
 hts.reminder-confirmation.title.p1-4=If you want your reminders to go somewhere else you'll need to 
 hts.reminder-confirmation.change-email.descriptive-link=change your email address.
 hts.reminder-confirmation.saving-reminders.descriptive-link=savings reminders
+hts.reminder-confirmation.frequency.1=1st
+hts.reminder-confirmation.frequency.25=25th
+hts.reminder-confirmation.frequency.both=1st day and 25th
 hts.reminder-confirmation.title.p1-5=You can change or cancel your email reminders at anytime. Go to
 hts.reminder-confirmation.title.p1-6=in your Help to Save account home.
 hts.reminder-confirmation.h2=What happens next
@@ -803,6 +806,7 @@ accessibility.statement.heading.six = Contacting us by phone or getting a visit 
 accessibility.statement.heading.seven = Technical information about this service’s accessibility
 accessibility.statement.heading.eight = How we tested this service
 full.stop= .
+
 
 ############################### Footer ###############################
 footer.links.accessibility.text = Accessibility

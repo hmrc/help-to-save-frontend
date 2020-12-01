@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
 
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
@@ -43,7 +44,7 @@
                 @Messages("hts.reminder-dashboard.t1")
                 </dt>
                 <dd class="govuk-summary-list__value">
-                    @Messages("hts.reminder-dashboard.t1-1")  @period
+                    @Messages("hts.reminder-dashboard.t1-1")  @PeriodUtils.getMessage(period)
                     @Messages("hts.reminder-dashboard.t1-2")
                 </dd>
                 <dd class="govuk-summary-list__actions">
