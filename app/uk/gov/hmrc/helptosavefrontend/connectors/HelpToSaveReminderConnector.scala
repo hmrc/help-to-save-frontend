@@ -105,7 +105,7 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
     EitherT(
       resF
         .map { response ⇒
-          if (response.status == 200) {
+          if (response.status == 200 || response.status == 404) {
             ifHTTP200(response)
           } else {
             Left(toError(s"Call to $description came back with status ${response.status}. Body was ${(response.body)}"))
