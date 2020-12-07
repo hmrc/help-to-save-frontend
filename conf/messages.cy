@@ -741,11 +741,11 @@ accessibility.statement.paragraph.nineteen = Ar y sgrin ‘Bwrw golwg dros eich 
 ####What to do if you have difficulty using this service#####
 
 accessibility.statement.paragraph.twentyOne = Gallwch
-accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEM os oes angen help arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille.
+accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEM os oes angen help arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille
 
 ####Reporting accessibility problems with this service#####
 accessibility.statement.paragraph.twentyThree= Rydym bob amser yn ceisio gwella hygyrchedd y gwasanaeth hwn. Os byddwch yn dod o hyd i unrhyw broblemau nad ydynt wedi’u rhestru ar y dudalen hon, neu os ydych o’r farn nad ydym yn bodloni gofynion hygyrchedd,
-accessibility.statement.paragraph.twentyThree.link= rhowch wybod am y broblem hygyrchedd (yn agor ffenestr neu dab newydd).
+accessibility.statement.paragraph.twentyThree.link= rhowch wybod am y broblem hygyrchedd (yn agor ffenestr neu dab newydd)
 
 #### What to do if you are not happy with how we respond to your complaint ####
 
@@ -759,7 +759,7 @@ accessibility.statement.paragraph.twentyFour.three = os ydych yn byw yng Ngogled
 accessibility.statement.paragraph.twentyFive = Rydym yn cynnig gwasanaeth ‘text relay’ os ydych yn fyddar, â nam ar eich clyw neu os oes gennych nam ar eich lleferydd.
 accessibility.statement.paragraph.twentySix = Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEM i’ch helpu i gwblhau’r gwasanaeth.
 accessibility.statement.paragraph.twentySeven = Gwybodaeth am sut i
-accessibility.statement.paragraph.twentySeven.link = gysylltu â ni.
+accessibility.statement.paragraph.twentySeven.link = gysylltu â ni
 
 #### Technical information about this service’s accessibility ####
 accessibility.statement.paragraph.twentyEight = Mae CThEM wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
