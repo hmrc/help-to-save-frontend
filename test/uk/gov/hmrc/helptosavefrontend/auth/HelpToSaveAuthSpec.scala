@@ -135,7 +135,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
         status(result) shouldBe Status.SEE_OTHER
         val redirectTo =
           redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
-        redirectTo should include("/gg/sign-in")
+        redirectTo should include("/bas-gateway/sign-in?continue_url=")
         redirectTo should include("accountType=individual")
         redirectTo should include(urlEncode(routes.EligibilityCheckController.getCheckEligibility().url))
       }
