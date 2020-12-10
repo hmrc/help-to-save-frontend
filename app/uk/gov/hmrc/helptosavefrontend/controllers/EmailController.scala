@@ -142,6 +142,12 @@ class EmailController @Inject() (
     }(loginContinueURL = routes.EmailController.getSelectEmailPage().url)
 
   def selectEmailSubmit(): Action[AnyContent] =
+    selectEmailSubmitter(routes.EmailController.selectEmailSubmit().url)
+
+  def selectEmailSubmitReminder():  Action[AnyContent] =
+    selectEmailSubmitter(routes.EmailController.selectEmailSubmitReminder().url, true)
+
+  def selectEmailSubmitter(URI: String, isReminder: Boolean = false): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
       def handleForm(email: String, backLink: Option[String], session: HTSSession): Future[Result] =
         SelectEmailForm.selectEmailForm
@@ -150,7 +156,7 @@ class EmailController @Inject() (
             withErrors ⇒ Ok(selectEmail(email, withErrors, backLink)), { form ⇒
               val (updatedSession, result) = form.newEmail.fold {
                 session.copy(hasSelectedEmail = true) →
-                  SeeOther(routes.EmailController.emailConfirmed(crypto.encrypt(email)).url)
+                  SeeOther(routes.EmailController.emailConfirmed(crypto.encrypt(email), isReminder).url)
               } { newEmail ⇒
                 session.copy(pendingEmail = Some(newEmail), confirmedEmail = None, hasSelectedEmail = true) →
                   SeeOther(routes.EmailController.confirmEmail().url)
@@ -191,7 +197,8 @@ class EmailController @Inject() (
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-    }(loginContinueURL = routes.EmailController.selectEmailSubmit().url)
+    }(loginContinueURL = URI)
+
 
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -272,7 +279,7 @@ class EmailController @Inject() (
 
     }(loginContinueURL = routes.EmailController.getGiveEmailPage().url)
 
-  def emailConfirmed(email: String): Action[AnyContent] =
+  def emailConfirmed(email: String, isReminder: Boolean = false): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
       val nino = htsContext.nino
       val decryptedEmailEither = EitherT.fromEither[Future](decryptEmail(email))
@@ -302,6 +309,8 @@ class EmailController @Inject() (
                 //once email is confirmed and , if we were in the process of changing details then we should redirect user to check_details page
                 if (session.changingDetails) {
                   SeeOther(routes.RegisterController.getCreateAccountPage().url)
+                } else if (isFeatureEnabled && isReminder) {
+                  SeeOther(routes.ReminderController.getApplySavingsReminderPage().url)
                 }  else {
                   SeeOther(routes.BankAccountController.getBankDetailsPage().url)
                 }
@@ -358,7 +367,7 @@ class EmailController @Inject() (
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-    }(loginContinueURL = routes.EmailController.emailConfirmed(email).url)
+    }(loginContinueURL = routes.EmailController.emailConfirmed(email, isReminder).url)
 
   def emailConfirmedCallback(emailVerificationParams: String): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒

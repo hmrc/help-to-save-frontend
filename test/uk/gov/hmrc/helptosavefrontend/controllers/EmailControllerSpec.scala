@@ -500,6 +500,179 @@ class EmailControllerSpec
       }
     }
 
+    "handling selectEmailSubmitReminder requests" must {
+
+      def selectEmailSubmitReminder(newEmail: Option[String]): Future[Result] =
+        newEmail.fold(
+          csrfAddToken(controller.selectEmailSubmitReminder())(fakeRequest.withFormUrlEncodedBody("email" → "Yes"))
+        ) { e ⇒
+          csrfAddToken(controller.selectEmailSubmitReminder())(
+            fakeRequest.withFormUrlEncodedBody("email" → "No", "new-email" → e)
+          )
+        }
+
+      "handle Digital(new applicant) users with no valid session in mongo" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(None))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+        }
+
+        val result = selectEmailSubmitReminder(None)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      }
+
+      "handle errors during session cache lookup in mongo" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Left("unexpected error"))
+        }
+
+        val result = selectEmailSubmitReminder(None)
+        status(result) shouldBe 500
+      }
+
+      "handle Digital(new applicant) who submitted form with no new-email but with checked existing email" in {
+        val session = HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(Some(session)))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+          mockEncrypt(emailStr)(encryptedEmail)
+          mockSessionStorePut(session.copy(hasSelectedEmail = true))(Right(()))
+        }
+
+        val result = selectEmailSubmitReminder(None)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some("/help-to-save/confirm-email/encrypted?isReminder=true")
+      }
+
+      "handle Digital(new applicant) who submitted form with new-email" in {
+
+        val userInfo = randomEligibleWithUserInfo(validUserInfo)
+        val session = HTSSession(
+          Some(Right(userInfo)),
+          None,
+          None,
+          None,
+          None,
+          Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))
+        )
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(Some(session)))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+          mockSessionStorePut(session.copy(pendingEmail = Some(testEmail), hasSelectedEmail = true))(Right(None))
+        }
+
+        val result = selectEmailSubmitReminder(Some(testEmail))
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
+      }
+
+      "handle existing digital account holders and redirect them to nsi" in {
+        val userInfo = randomEligibleWithUserInfo(validUserInfo)
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), Some("email"), None))))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(Some("email")))
+        }
+        val result = selectEmailSubmitReminder(Some(testEmail))
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
+      }
+
+      "handle DE users - throw server error if no existing session found" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(None))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+        }
+
+        val result = selectEmailSubmitReminder(None)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      }
+
+      "handle DE users - throw server error if there is an existing session but no email" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+        }
+
+        val result = selectEmailSubmitReminder(None)
+        status(result) shouldBe 500
+      }
+
+      "handle DE users who submitted form with no new-email but with checked existing email" in {
+        val session = HTSSession(None, None, Some(testEmail))
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+          mockSessionStoreGet(Right(Some(session)))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+          mockEncrypt("email@gmail.com")(encryptedEmail)
+          mockSessionStorePut(session.copy(hasSelectedEmail = true))(Right(()))
+        }
+
+        val result = selectEmailSubmitReminder(None)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some("/help-to-save/confirm-email/encrypted?isReminder=true")
+      }
+
+      "handle DE user who submitted form with new-email" in {
+        val userInfo = randomEligibleWithUserInfo(validUserInfo)
+        val session = HTSSession(Some(Right(userInfo)), None, Some(testEmail))
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(Some(session)))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+          mockSessionStorePut(session.copy(hasSelectedEmail = true))(Right(()))
+        }
+
+        val result = selectEmailSubmitReminder(Some(testEmail))
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
+      }
+
+      "handle DE user who submitted form with errors" in {
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(None))
+        }
+
+        val result = selectEmailSubmitReminder(Some("invalidEmail"))
+        status(result) shouldBe 200
+        contentAsString(result) should include("What email address do you want to use for your Help to Save account?")
+      }
+
+      "handle an existing account holder who submitted form with no new-email but with checked existing email" in {
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsWithEmail(None))
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, Some(testEmail)))))
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetConfirmedEmail()(Right(Some(testEmail)))
+        }
+
+        val result = selectEmailSubmitReminder(None)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(nsiAccountHomeURL)
+      }
+    }
+
     "handling getGiveEmailPage requests" must {
       def getGiveEmailPage(): Future[Result] = csrfAddToken(controller.getGiveEmailPage)(fakeRequest)
 
@@ -814,6 +987,32 @@ class EmailControllerSpec
         val result = giveEmailSubmit("badEmail")
         status(result) shouldBe 200
         contentAsString(result) should include("Which email address do you want to use for Help to Save?")
+      }
+    }
+
+    "handling emailConfirmed requests in reminder journey " must {
+
+      val email = "test@user.com"
+      val userInfo = randomEligibleWithUserInfo(validUserInfo)
+      val userInfoWithInvalidEmail = randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail"))
+
+      def emailConfirmed(encryptedEmail: String): Future[Result] =
+        csrfAddToken(controller.emailConfirmed(encryptedEmail, true))(fakeRequest)
+
+      "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks and no bank details in session" in {
+
+        inSequence {
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockDecrypt("encrypted")("decrypted")
+          mockSessionStoreGet(Right(Some(HTSSession(Some(Right(userInfo)), None, None))))
+          mockEnrolmentCheck()(Right(NotEnrolled))
+          mockSessionStorePut(HTSSession(Some(Right(userInfo)), Some("decrypted"), None))(Right(None))
+          mockStoreConfirmedEmail("decrypted")(Right(None))
+        }
+
+        val result = emailConfirmed(encryptedEmail)
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage().url)
       }
     }
 
