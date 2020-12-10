@@ -249,9 +249,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
   override def toGGLogin(redirectOnLoginURL: RelativeURL): Result =
     Redirect(
-      ggLoginUrl,
+      appConfig.ggLoginUrl,
       Map(
-        "continue"    -> Seq(appConfig.ggContinueUrlPrefix + redirectOnLoginURL),
+        "continue_url"    -> Seq(appConfig.ggContinueUrlPrefix + redirectOnLoginURL),
         "accountType" -> Seq("individual"),
         "origin"      -> Seq(appConfig.appName)
       )

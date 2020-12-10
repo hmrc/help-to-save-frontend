@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -81,3 +82,77 @@ object SuspiciousActivity {
 
   private implicit val detailsFormat: Format[Details] = Json.format[Details]
 }
+
+case class HTSReminderAccount(nino : String, emailAddress: String, firstName: String, lastName: String, optInStatus: Boolean, daysToReceive: Seq[Int])
+
+case class HtsReminderUpdated(account: HTSReminderAccount)
+
+case class HtsReminderCreated(account: HTSReminderAccount)
+
+case class HtsReminderCancelled(nino:String ,emailAddress: String)
+
+object HTSReminderAccount {
+  implicit val format: Format[HTSReminderAccount] = Json.format[HTSReminderAccount]
+}
+
+object HtsReminderUpdated {
+  implicit val format: Format[HtsReminderUpdated] = Json.format[HtsReminderUpdated]
+}
+
+object HtsReminderCreated {
+  implicit val format: Format[HtsReminderCreated] = Json.format[HtsReminderCreated]
+}
+
+object HtsReminderCancelled {
+  implicit val format: Format[HtsReminderCancelled] = Json.format[HtsReminderCancelled]
+}
+
+case class HtsReminderCancelledEvent(htsReminderCancelled: HtsReminderCancelled, path: String)(
+  implicit hc: HeaderCarrier,
+  appConfig: FrontendAppConfig)
+  extends HTSEvent {
+
+  val value: ExtendedDataEvent = {
+    HTSEvent(
+      appConfig.appName,
+      "ReminderCancelled",
+      Json.toJson(htsReminderCancelled),
+      "reminder-cancelled",
+      path)
+  }
+
+}
+
+case class HtsReminderUpdatedEvent(htsReminderUpdated: HtsReminderUpdated, path: String)(
+  implicit hc: HeaderCarrier,
+  appConfig: FrontendAppConfig)
+  extends HTSEvent {
+
+  val value: ExtendedDataEvent = {
+    HTSEvent(
+      appConfig.appName,
+      "ReminderUpdated",
+      Json.toJson(htsReminderUpdated),
+      "reminder-updated",
+      path)
+  }
+
+}
+
+case class HtsReminderCreatedEvent(htsReminderCreated: HtsReminderCreated, path: String)(
+  implicit hc: HeaderCarrier,
+  appConfig: FrontendAppConfig)
+  extends HTSEvent {
+
+  val value: ExtendedDataEvent = {
+    HTSEvent(
+      appConfig.appName,
+      "ReminderCreated",
+      Json.toJson(htsReminderCreated),
+      "reminder-created",
+      path)
+  }
+
+}
+
+

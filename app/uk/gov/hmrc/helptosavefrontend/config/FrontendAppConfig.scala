@@ -70,15 +70,15 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val maintenanceSchedule: String = servicesConfig.getString("scheduled-maintenance-times")
 
-  val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
+  val basGatewayFrontendUrl: String = s"${getUrlFor("bas-gateway-frontend")}"
 
-  val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
+  val ggLoginUrl: String = s"$basGatewayFrontendUrl/sign-in"
   val ggContinueUrlPrefix: String =
-    servicesConfig.getString("microservice.services.company-auth-frontend.continue-url-prefix")
+    servicesConfig.getString("microservice.services.bas-gateway-frontend.continue-url-prefix")
 
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
-  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl"
+  val signOutUrl: String = s"$basGatewayFrontendUrl/sign-out-without-state?continue=$feedbackSurveyUrl"
 
   val ggUserUrl: String =
     s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?" +

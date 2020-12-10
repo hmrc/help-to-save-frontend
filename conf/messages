@@ -679,6 +679,9 @@ hts.reminder-confirmation.title.p1-3=We will send your reminders to
 hts.reminder-confirmation.title.p1-4=If you want your reminders to go somewhere else you'll need to 
 hts.reminder-confirmation.change-email.descriptive-link=change your email address.
 hts.reminder-confirmation.saving-reminders.descriptive-link=savings reminders
+hts.reminder-confirmation.frequency.1=1st
+hts.reminder-confirmation.frequency.25=25th
+hts.reminder-confirmation.frequency.both=1st day and 25th
 hts.reminder-confirmation.title.p1-5=You can change or cancel your email reminders at anytime. Go to
 hts.reminder-confirmation.title.p1-6=in your Help to Save account home.
 hts.reminder-confirmation.h2=What happens next
@@ -739,11 +742,11 @@ accessibility.statement.paragraph.nineteen = In the ‘View your transactions’
 ####What to do if you have difficulty using this service#####
 
 accessibility.statement.paragraph.twentyOne = You can
-accessibility.statement.paragraph.twentyOne.link = contact HMRC if you need help with filling in forms or getting a different format, like large print, audio recording or Braille.
+accessibility.statement.paragraph.twentyOne.link = contact HMRC if you need help with filling in forms or getting a different format, like large print, audio recording or Braille
 
 ####Reporting accessibility problems with this service#####
 accessibility.statement.paragraph.twentyThree= We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements,
-accessibility.statement.paragraph.twentyThree.link= report the accessibility problem (opens in a new window or tab).
+accessibility.statement.paragraph.twentyThree.link= report the accessibility problem (opens in a new window or tab)
 
 #### What to do if you are not happy with how we respond to your complaint ####
 
@@ -803,6 +806,7 @@ accessibility.statement.heading.six = Contacting us by phone or getting a visit 
 accessibility.statement.heading.seven = Technical information about this service’s accessibility
 accessibility.statement.heading.eight = How we tested this service
 full.stop= .
+
 
 ############################### Footer ###############################
 footer.links.accessibility.text = Accessibility

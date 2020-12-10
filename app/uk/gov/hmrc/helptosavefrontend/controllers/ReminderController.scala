@@ -19,6 +19,7 @@ import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
+import play.api.libs.json.Json
 import play.api.mvc.{Action, _}
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -28,7 +29,8 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.HTSSession
+import uk.gov.hmrc.helptosavefrontend.models.{HTSReminderAccount, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
@@ -162,6 +164,10 @@ class ReminderController @Inject() (
                             true,
                             daysToReceiveReminders
                           )
+                          auditor.sendEvent(
+                            HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                            userInfo.nino
+                          )
                           helpToSaveReminderService
                             .updateHtsUser(htsUserToBeUpdated)
                             .fold(
@@ -286,6 +292,11 @@ class ReminderController @Inject() (
                       emailRetrieved match {
                         case Some(email) if !email.isEmpty ⇒ {
                           if (success.reminderFrequency === "cancel") {
+                            auditor.sendEvent(
+                              HtsReminderCancelledEvent(HtsReminderCancelled(
+                                userInfo.nino, email), request.uri),
+                              userInfo.nino
+                            )
                             val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
                             helpToSaveReminderService
                               .cancelHtsUserReminders(cancelHtsUserReminder)
@@ -309,6 +320,10 @@ class ReminderController @Inject() (
                               userInfo.surname,
                               true,
                               daysToReceiveReminders
+                            )
+                            auditor.sendEvent(
+                              HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                              userInfo.nino
                             )
                             helpToSaveReminderService
                               .updateHtsUser(htsUserToBeUpdated)
