@@ -6,10 +6,11 @@ object AppDependencies {
   val hmrc = "uk.gov.hmrc"
 
   val compile = Seq(
-    hmrc                %% "govuk-template"             % "5.59.0-play-26",
-    hmrc                %% "mongo-caching"              % "6.15.0-play-26",
+    hmrc                %% "govuk-template"             % "5.60.0-play-26",
+    hmrc                %% "mongo-caching"              % "6.16.0-play-26",
     hmrc                %% "play-whitelist-filter"      % "3.4.0-play-26",
     hmrc                %% "bootstrap-frontend-play-26" % "3.2.0",
+    hmrc                %% "play-ui"                    % "8.18.0-play-26",
     hmrc                %% "play-health"                % "3.15.0-play-26",
     hmrc                %% "play-language"              % "4.5.0-play-26",
     "com.github.kxbmap" %% "configs"                    % "0.4.4",

@@ -18,11 +18,12 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import play.twirl.api.HtmlFormat
 @import uk.gov.hmrc.play.views.html.layouts.{Sidebar, MainContentHeader, Article}
+@import uk.gov.hmrc.helptosavefrontend.views.html.govuk_wrapper
 
 @this(govukWrapper: govuk_wrapper,
-      sidebar: Sidebar,
-      mainContentHeader: MainContentHeader,
-      article: Article)
+sidebar: Sidebar,
+mainContentHeader: MainContentHeader,
+article: Article)
 
 @(title: String,
   sidebarLinks: Option[Html] = None,
