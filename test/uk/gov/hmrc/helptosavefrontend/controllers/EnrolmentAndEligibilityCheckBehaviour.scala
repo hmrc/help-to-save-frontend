@@ -20,16 +20,16 @@ import cats.data.EitherT
 import cats.instances.future._
 import play.api.mvc.Result
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
-import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
+import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
+import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}

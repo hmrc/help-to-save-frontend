@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.text.SimpleDateFormat
 import java.time.temporal.TemporalAdjusters
 import java.time.{Clock, LocalDate, LocalDateTime}
 
@@ -44,8 +43,8 @@ import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}

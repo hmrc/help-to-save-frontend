@@ -17,11 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import com.codahale.metrics.{Counter, Timer}
+import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
 import org.scalamock.scalatest.MockFactory
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import com.kenshoo.play.metrics.{Metrics ⇒ PlayMetrics}
 
 trait MockActions extends MockFactory {
 

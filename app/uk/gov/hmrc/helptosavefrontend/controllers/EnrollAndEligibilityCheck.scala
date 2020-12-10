@@ -19,9 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}

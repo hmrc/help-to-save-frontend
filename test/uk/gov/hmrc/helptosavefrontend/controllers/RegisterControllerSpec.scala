@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId}
+import java.time._
 import java.util.UUID
 
 import cats.data.EitherT
@@ -39,7 +39,6 @@ import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.cannot_check_details

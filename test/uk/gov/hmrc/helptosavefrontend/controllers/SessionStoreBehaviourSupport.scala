@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
 import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{Reads, Writes}
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession

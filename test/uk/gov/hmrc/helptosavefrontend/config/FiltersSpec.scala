@@ -18,16 +18,15 @@ package uk.gov.hmrc.helptosavefrontend.config
 
 import akka.stream.Materializer
 import com.kenshoo.play.metrics.MetricsFilter
-import uk.gov.hmrc.play.bootstrap.frontend.filters.FrontendFilters
 import play.api.Configuration
 import play.api.mvc.EssentialFilter
 import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceAppPerTest
+import uk.gov.hmrc.play.bootstrap.filters._
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCryptoFilter
 import uk.gov.hmrc.play.bootstrap.frontend.filters.deviceid.DeviceIdFilter
-import uk.gov.hmrc.play.bootstrap.frontend.filters.{FrontendAuditFilter, HeadersFilter, SessionIdFilter, SessionTimeoutFilter}
-import uk.gov.hmrc.play.bootstrap.filters._
+import uk.gov.hmrc.play.bootstrap.frontend.filters.{FrontendFilters => _, _}
 
 class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
 

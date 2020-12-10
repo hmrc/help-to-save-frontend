@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import play.api.test.FakeRequest
 import play.api.test.CSRFTokenHelper._
+import play.api.test.FakeRequest
 
 trait CSRFSupport {
 

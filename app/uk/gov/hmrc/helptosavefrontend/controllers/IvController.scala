@@ -34,7 +34,6 @@ import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.matching.{Regex, UnanchoredRegex}
 
 @Singleton
 class IvController @Inject() (

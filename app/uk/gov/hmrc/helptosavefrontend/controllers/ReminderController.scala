@@ -28,8 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
+import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
@@ -37,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 @Singleton
