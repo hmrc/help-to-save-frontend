@@ -26,7 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceAppPerT
 import uk.gov.hmrc.play.bootstrap.filters._
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCryptoFilter
 import uk.gov.hmrc.play.bootstrap.frontend.filters.deviceid.DeviceIdFilter
-import uk.gov.hmrc.play.bootstrap.frontend.filters.{FrontendFilters => _, _}
+import uk.gov.hmrc.play.bootstrap.frontend.filters.{FrontendFilters, _}
 
 class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
 
