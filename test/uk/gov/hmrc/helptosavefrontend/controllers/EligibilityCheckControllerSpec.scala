@@ -23,7 +23,7 @@ import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
-import play.api.mvc.{Result ⇒ PlayResult}
+import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, Name, ~}

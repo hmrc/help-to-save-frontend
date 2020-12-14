@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import play.api.libs.json.{JsSuccess, Json}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.libs.json.{JsSuccess, Json}
 
 class HTSSessionSpec extends AnyWordSpec with Matchers {
 

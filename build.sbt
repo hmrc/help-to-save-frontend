@@ -17,6 +17,20 @@ lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used i
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
+val akkaVersion     = "2.5.23"
+
+val akkaHttpVersion = "10.0.15"
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-stream"    % akkaVersion
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-protobuf"  % akkaVersion
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-actor"     % akkaVersion
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
+
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(

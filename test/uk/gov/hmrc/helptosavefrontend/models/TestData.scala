@@ -20,12 +20,13 @@ import java.time.LocalDate
 
 import org.scalacheck.Gen
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.testutil._
-import uk.gov.hmrc.smartstub.{AutoGen, _}
+import uk.gov.hmrc.smartstub.AutoGen
+
 import scala.language.implicitConversions
 
 object TestData {

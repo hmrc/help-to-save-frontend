@@ -19,19 +19,19 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import java.util.UUID
 
 import akka.stream.Materializer
-import com.typesafe.config.ConfigFactory
 import akka.util.Timeout
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
+import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.{Application, Configuration, Environment}
+import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.inject.Injector
-import play.api.mvc.{MessagesControllerComponents, Result}
-import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.mvc.{MessagesControllerComponents, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.contentAsString
+import play.api.{Application, Configuration, Environment}
 import play.filters.csrf.CSRFAddToken
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
@@ -39,9 +39,9 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 
-import scala.language.postfixOps
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.language.postfixOps
 
 trait ControllerSpecWithGuiceApp extends ControllerSpecBase with GuiceOneAppPerSuite with I18nSupport {
 

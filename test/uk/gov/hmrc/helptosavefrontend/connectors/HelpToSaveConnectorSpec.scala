@@ -30,8 +30,8 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
 import uk.gov.hmrc.http.HttpResponse

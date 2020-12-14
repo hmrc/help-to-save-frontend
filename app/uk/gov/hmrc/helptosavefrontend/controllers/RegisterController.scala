@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.text.SimpleDateFormat
 import java.time.temporal.TemporalAdjusters
 import java.time.{Clock, LocalDate, LocalDateTime}
 

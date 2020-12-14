@@ -38,7 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 @Singleton

@@ -17,9 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
+import cats.instances.future._
 import play.api.http.Status
 import play.api.mvc.Result
-import cats.instances.future._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}

@@ -22,7 +22,6 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
