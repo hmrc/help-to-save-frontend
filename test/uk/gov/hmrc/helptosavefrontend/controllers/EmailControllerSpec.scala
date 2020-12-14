@@ -20,7 +20,7 @@ import java.util.Base64
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -32,13 +32,12 @@ import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
+import uk.gov.hmrc.helptosavefrontend.models.reminder.UpdateReminderEmail
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
-import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, UpdateReminderEmail}
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.helptosavefrontend.views.html.email._
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired

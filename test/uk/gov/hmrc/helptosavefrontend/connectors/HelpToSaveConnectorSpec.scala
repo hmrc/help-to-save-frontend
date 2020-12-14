@@ -30,8 +30,8 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{AlreadyHasAccount, Eligible, Ineligible}
+import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
 import uk.gov.hmrc.http.HttpResponse
@@ -77,6 +77,8 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
   private val validateBankDetailsURL =
     s"$helpToSaveUrl/help-to-save/validate-bank-details"
+
+  private val emptyHeaders: Map[String, Seq[String]] = Map.empty
 
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
@@ -124,7 +126,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
             Eligible(EligibilityCheckResponse(response, Some(123.45)))
 
           mockGet(eligibilityURL)(
-            Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(response, Some(123.45))))))
+            Some(HttpResponse(
+              200,
+              Json.toJson(EligibilityCheckResponse(response, Some(123.45))),
+                emptyHeaders))
           )
 
           val result = connector.getEligibility()
@@ -139,7 +144,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
             Ineligible(EligibilityCheckResponse(response, Some(123.45)))
 
           mockGet(eligibilityURL)(
-            Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(response, Some(123.45))))))
+            Some(HttpResponse(
+              200,
+              Json.toJson(EligibilityCheckResponse(response, Some(123.45))),
+              emptyHeaders))
           )
 
           val result = connector.getEligibility()
@@ -154,7 +162,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
         val response = EligibilityCheckResult("HtS account already exists", 3, reasonString, 1)
 
         mockGet(eligibilityURL)(
-          Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResponse(response, Some(123.45))))))
+          Some(HttpResponse(
+            200,
+            Json.toJson(EligibilityCheckResponse(response, Some(123.45))),
+            emptyHeaders))
         )
 
         val result = connector.getEligibility()
@@ -165,7 +176,11 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
         def testError(resultCode: Int): Unit = {
           mockGet(eligibilityURL)(
-            Some(HttpResponse(200, responseJson = Some(Json.toJson(EligibilityCheckResult("", resultCode, "", 1)))))
+            Some(HttpResponse(
+              200,
+              Json.toJson(EligibilityCheckResult("", resultCode, "", 1)),
+              emptyHeaders
+            ))
           )
 
           val result = connector.getEligibility()
@@ -221,12 +236,13 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
           Some(
             HttpResponse(
               200,
-              Some(Json.parse("""
+              Json.parse("""
                                 |{
                                 |  "enrolled"    : true,
                                 |  "itmpHtSFlag" : true
                                 |}
-            """.stripMargin))
+            """.stripMargin),
+              emptyHeaders
             )
           )
         )
@@ -237,12 +253,13 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
           Some(
             HttpResponse(
               200,
-              Some(Json.parse("""
+              Json.parse("""
                                 |{
                                 |  "enrolled"    : true,
                                 |  "itmpHtSFlag" : false
                                 |}
-            """.stripMargin))
+            """.stripMargin),
+              emptyHeaders
             )
           )
         )
@@ -253,12 +270,13 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
           Some(
             HttpResponse(
               200,
-              Some(Json.parse("""
+              Json.parse("""
                                 |{
                                 |  "enrolled" : false,
                                 |  "itmpHtSFlag" : false
                                 |}
-            """.stripMargin))
+            """.stripMargin),
+              emptyHeaders
             )
           )
         )
@@ -279,7 +297,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-        mockGet(setITMPFlagURL)(Some(HttpResponse(200)))
+        mockGet(setITMPFlagURL)(Some(HttpResponse(200, "")))
 
         await(connector.setITMPFlagAndUpdateMongo().value) shouldBe Right(())
       }
@@ -299,7 +317,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {
-        mockGet(storeEmailURL, Map("email" -> encodedEmail))(Some(HttpResponse(200)))
+        mockGet(storeEmailURL, Map("email" -> encodedEmail))(Some(HttpResponse(200, "")))
 
         await(connector.storeEmail(email).value) shouldBe Right(())
       }
@@ -318,10 +336,18 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       "return a Right if the call comes back with HTTP status 200 and " +
         "valid JSON in the body" in {
-        mockGet(getEmailURL)(Some(HttpResponse(200, Some(Json.toJson(GetEmailResponse(Some(email)))))))
+        mockGet(getEmailURL)(Some(HttpResponse(
+          200,
+          Json.toJson(GetEmailResponse(Some(email))),
+          emptyHeaders))
+        )
         await(connector.getEmail().value) shouldBe Right(Some(email))
 
-        mockGet(getEmailURL)(Some(HttpResponse(200, Some(Json.toJson(GetEmailResponse(None))))))
+        mockGet(getEmailURL)(Some(HttpResponse(
+          200,
+          Json.toJson(GetEmailResponse(None)),
+          emptyHeaders))
+        )
         await(connector.getEmail().value) shouldBe Right(None)
       }
     }
@@ -335,7 +361,12 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
       )
 
       "return a Right if the call comes with HTTP 200 and valid response in the body" in {
-        mockGet(accountCreateAllowedURL)(Some(HttpResponse(200, Some(Json.toJson(UserCapResponse())))))
+        mockGet(accountCreateAllowedURL)(Some(HttpResponse(
+          200,
+          Json.toJson(UserCapResponse()),
+          emptyHeaders))
+        )
+
         await(connector.isAccountCreationAllowed().value) shouldBe Right(UserCapResponse())
       }
     }
@@ -355,7 +386,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
       )
 
       "be able to handle 200 responses with valid Account json" in {
-        mockGet(url, queryParameters)(Some(HttpResponse(200, Some(Json.toJson(account)))))
+        mockGet(url, queryParameters)(Some(HttpResponse(
+          200,
+          Json.toJson(account),
+          emptyHeaders)))
         await(connector.getAccount(nino, correlationId).value) shouldBe Right(account)
       }
 
@@ -365,7 +399,11 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       "return http response as it is to the caller" in {
         val request = CreateAccountRequest(validNSIPayload, 7)
-        val response = HttpResponse(201, Some(Json.toJson(SubmissionSuccess(AccountNumber(Some("1234567890123"))))))
+        val response = HttpResponse(
+          201,
+          Json.toJson(SubmissionSuccess(AccountNumber(Some("1234567890123")))),
+          emptyHeaders
+        )
         mockPost(createAccountURL, Map.empty[String, String], request)(Some(response))
         await(connector.createAccount(request)) shouldBe response
       }
@@ -374,7 +412,11 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
     "update email" must {
 
       "return http response as it is to the caller" in {
-        val response = HttpResponse(200, Some(Json.toJson(())))
+        val response = HttpResponse(
+          200,
+          Json.toJson(()),
+          emptyHeaders
+        )
         mockPut(updateEmailURL, validNSIPayload)(Some(response))
         await(connector.updateEmail(validNSIPayload)) shouldBe response
       }
@@ -384,7 +426,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       "return http response as it is to the caller" in {
         val response =
-          HttpResponse(200, Some(Json.parse("""{"isValid":true}""")))
+          HttpResponse(
+            200,
+            Json.parse("""{"isValid":true}"""),
+            emptyHeaders)
         mockPost(validateBankDetailsURL, Map.empty, ValidateBankDetailsRequest(nino, "123456", "02012345"))(
           Some(response)
         )
@@ -404,7 +449,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
     writes: Writes[B]
   ): Unit = { // scalstyle:ignore method.length
     "make a request to the help-to-save backend" in {
-      mockHttp(Some(HttpResponse(200)))
+      mockHttp(Some(HttpResponse(200, "")))
       await(result().value)
     }
 
@@ -416,15 +461,14 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
             Some(
               HttpResponse(
                 200,
-                responseJson = Some(
                   Json.parse(
                     """
                       |{
                       |  "foo": "bar"
                       |}
               """.stripMargin
-                  )
-                )
+                ),
+                emptyHeaders
               )
             )
           )
@@ -438,7 +482,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
         forAll { status: Int ⇒
           whenever(status =!= 200) {
             // check we get an error even though there was valid JSON in the response
-            mockHttp(Some(HttpResponse(status, Some(Json.toJson(validBody)))))
+            mockHttp(Some(HttpResponse(status, Json.toJson(validBody), emptyHeaders)))
             await(result().value).isLeft shouldBe true
 
           }

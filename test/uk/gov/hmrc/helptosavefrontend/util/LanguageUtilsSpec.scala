@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import play.api.i18n.Lang
 import java.time.{LocalDate, LocalTime}
+
+import play.api.i18n.Lang
 
 class LanguageUtilsSpec extends UnitSpec {
 

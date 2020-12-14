@@ -16,9 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import play.api.Configuration
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.Configuration
 
 class NINOLogMessageTransformerImplSpec extends AnyWordSpec with Matchers {
 
