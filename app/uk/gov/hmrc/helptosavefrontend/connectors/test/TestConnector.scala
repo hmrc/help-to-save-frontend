@@ -36,20 +36,21 @@ class TestConnector @Inject()(http: HttpClient, config: Configuration)(implicit 
   def populateReminders(noUsers: Int, emailPrefix: String, daysToReceive: List[Int])(implicit hc: HeaderCarrier): Future[HttpResponse] = {
 
     @tailrec
-    def makeDaysPath(daysToReceive: List[Int], currentString: String = "daysToReceive?"): String = {
+    def daysToReceiveAsListParams(daysToReceive: List[Int], currentString: String = "daysToReceive?"): String = {
           daysToReceive match {
             case Nil => currentString
             case head :: remainingDays if remainingDays.isEmpty => {
               val daysReadyForUrl = s"$currentString" + "day=" + head.toString
-              makeDaysPath(remainingDays, daysReadyForUrl)
+              daysToReceiveAsListParams(remainingDays, daysReadyForUrl)
             }
             case head :: remainingDays =>
               val daysReadyForUrl = s"$currentString" + "day=" + head.toString + "&"
-              makeDaysPath(remainingDays, daysReadyForUrl)
+              daysToReceiveAsListParams(remainingDays, daysReadyForUrl)
           }
         }
 
-    val as = makeDaysPath(daysToReceive)
-    http.GET[HttpResponse](s"$htsReminderUrl/test-only/populate-reminders/$noUsers/$emailPrefix/$as")
+    val days = daysToReceiveAsListParams(daysToReceive)
+
+    http.GET[HttpResponse](s"$htsReminderUrl/test-only/populate-reminders/$noUsers/$emailPrefix/$days")
   }
 }
