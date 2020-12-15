@@ -38,7 +38,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -59,6 +59,7 @@ class ReminderController @Inject() (
   reminderCancelConfirmation: reminder_cancel_confirmation,
   reminderDashboard: reminder_dashboard,
   applySavingsReminders: apply_savings_reminders,
+  notEligible: not_eligible
 )(
   implicit val crypto: Crypto,
   implicit val transformer: NINOLogMessageTransformer,

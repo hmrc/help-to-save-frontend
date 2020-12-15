@@ -44,6 +44,7 @@ class AccessAccountController @Inject() (
   errorHandler: ErrorHandler,
   maintenanceSchedule: MaintenanceSchedule,
   confirmCheckEligibility: confirm_check_eligibility,
+  errorTemplate: error_template
 )(
   implicit val transformer: NINOLogMessageTransformer,
   val frontendAppConfig: FrontendAppConfig,
