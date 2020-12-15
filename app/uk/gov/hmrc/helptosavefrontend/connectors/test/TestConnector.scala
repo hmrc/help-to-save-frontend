@@ -22,25 +22,34 @@ import configs.syntax._
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
-
+import scala.annotation.tailrec
 import scala.concurrent.{ExecutionContext, Future}
 
 class TestConnector @Inject()(http: HttpClient, config: Configuration)(implicit ec: ExecutionContext) {
 
   val conf: Config = config.underlying.get[Config]("microservice.services.help-to-save-reminder").value
-
-//  def getHTSUrl(serviceName: String): String = (for {
-//    proto <- conf.get[String]("protocol")
-//    host  <- conf.get[String]("host")
-//    port  <- conf.get[Int]("port")
-//  } yield s"$proto://$host:$port/$serviceName").value
-
-
   val htsReminderUrl: String = "http://localhost:7008/help-to-save-reminder"
 
   def getHtsUser(nino: NINO)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     http.GET[HttpResponse](s"$htsReminderUrl/test-only/gethtsuser/$nino")
 
-  def populateReminders(noUsers: Int, emailPrefix: String, daysToReceive: List[Int])(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    http.GET[HttpResponse](s"$htsReminderUrl/test-only/populate-reminders/$noUsers/$emailPrefix/$daysToReceive")
+  def populateReminders(noUsers: Int, emailPrefix: String, daysToReceive: List[Int])(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+
+    @tailrec
+    def makeDaysPath(daysToReceive: List[Int], currentString: String = "daysToReceive?"): String = {
+          daysToReceive match {
+            case Nil => currentString
+            case head :: remainingDays if remainingDays.isEmpty => {
+              val daysReadyForUrl = s"$currentString" + "day=" + head.toString
+              makeDaysPath(remainingDays, daysReadyForUrl)
+            }
+            case head :: remainingDays =>
+              val daysReadyForUrl = s"$currentString" + "day=" + head.toString + "&"
+              makeDaysPath(remainingDays, daysReadyForUrl)
+          }
+        }
+
+    val as = makeDaysPath(daysToReceive)
+    http.GET[HttpResponse](s"$htsReminderUrl/test-only/populate-reminders/$noUsers/$emailPrefix/$as")
+  }
 }
