@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.connectors
+package uk.gov.hmrc.helptosavefrontend.connectors.test
 
 import com.google.inject.Inject
 import com.typesafe.config.Config
-import play.api.Configuration
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 import configs.syntax._
+import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.util.NINO
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.controllers
+package uk.gov.hmrc.helptosavefrontend.controllers.test
 
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
@@ -22,7 +22,8 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.connectors.TestConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.test.TestConnector
+import uk.gov.hmrc.helptosavefrontend.controllers.{BaseController, CommonPlayDependencies, EnrolmentCheckBehaviour}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINO, NINOLogMessageTransformer}
@@ -47,7 +48,7 @@ class TestController @Inject()(
   BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour {
 
 
-  def getHTSUser(nino: NINO)(implicit hc: HeaderCarrier): Action[AnyContent] = {
+  def getHTSUser(nino: NINO): Action[AnyContent] = {
     authorisedForHtsWithNINO {
       implicit request =>
         implicit htsContext =>
