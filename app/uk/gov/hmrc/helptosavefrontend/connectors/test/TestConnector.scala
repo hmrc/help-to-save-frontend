@@ -29,13 +29,14 @@ class TestConnector @Inject()(http: HttpClient, config: Configuration)(implicit 
 
   val conf: Config = config.underlying.get[Config]("microservice.services.help-to-save-reminder").value
 
-  def getHTSUrl(serviceName: String): String = (for {
-    proto <- conf.get[String]("protocol")
-    host  <- conf.get[String]("host")
-    port  <- conf.get[Int]("port")
-  } yield s"$proto://$host:$port/$serviceName").value
+//  def getHTSUrl(serviceName: String): String = (for {
+//    proto <- conf.get[String]("protocol")
+//    host  <- conf.get[String]("host")
+//    port  <- conf.get[Int]("port")
+//  } yield s"$proto://$host:$port/$serviceName").value
 
-  val htsReminderUrl: String = getHTSUrl("help-to-save-reminder")
+
+  val htsReminderUrl: String = "http://localhost:7008/help-to-save-reminder"
 
   def getHtsUser(nino: NINO)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     http.GET[HttpResponse](s"$htsReminderUrl/test-only/gethtsuser/$nino")
