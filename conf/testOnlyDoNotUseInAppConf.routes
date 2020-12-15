@@ -10,4 +10,8 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
+#
+#GET     /help-to-save-reminder/test-only/populate-reminders/:noUsers/:emailPrefix/daysToReceive        uk.gov.hmrc.helptosavefrontend.controllers.test.TestController.populateReminders(noUsers: Int, emailPrefix: String, day: List[Int])
+#GET     /help-to-save-reminder/test-only/gethtsuser/:nino                                              uk.gov.hmrc.helptosavefrontend.controllers.test.TestController.getHtsUser(nino: String)
+
 ->        /        prod.Routes

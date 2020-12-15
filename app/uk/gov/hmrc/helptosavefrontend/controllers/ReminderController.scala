@@ -59,7 +59,6 @@ class ReminderController @Inject() (
   reminderCancelConfirmation: reminder_cancel_confirmation,
   reminderDashboard: reminder_dashboard,
   applySavingsReminders: apply_savings_reminders,
-  notEligible: not_eligible
 )(
   implicit val crypto: Crypto,
   implicit val transformer: NINOLogMessageTransformer,
