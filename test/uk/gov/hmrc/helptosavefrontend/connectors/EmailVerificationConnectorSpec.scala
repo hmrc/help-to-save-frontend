@@ -65,7 +65,7 @@ class EmailVerificationConnectorSpec
       "return a success when given good json" in {
         mockEncrypt(nino + "#" + email)("")
         mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-          Some(HttpResponse(Status.OK))
+          Some(HttpResponse(Status.OK, ""))
         )
         await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Right(())
       }
@@ -73,7 +73,7 @@ class EmailVerificationConnectorSpec
       "indicate the email has already been verified when the email has already been verified" in {
         mockEncrypt(nino + "#" + email)("")
         mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-          Some(HttpResponse(Status.CONFLICT))
+          Some(HttpResponse(Status.CONFLICT, ""))
         )
         await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
       }
