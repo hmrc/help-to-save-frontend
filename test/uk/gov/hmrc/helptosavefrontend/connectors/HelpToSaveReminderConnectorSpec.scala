@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,8 @@ class HelpToSaveReminderConnectorSpec
 
   val emailUpdateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-email"
 
+  val emptyBody = ""
+  val emptyHeaders :Map[String, Seq[String]] = Map.empty
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
 
@@ -65,7 +67,7 @@ class HelpToSaveReminderConnectorSpec
         HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       val response =
-        HttpResponse(200, Some(Json.toJson(htsUser)))
+        HttpResponse(200, Json.toJson(htsUser), emptyHeaders)
       mockPost(UpdateHtsURL, Map.empty, htsUser)(Some(response))
       val result = connector.updateHtsUser(htsUser)
       await(result.value) should equal(Right(htsUser))
@@ -82,7 +84,7 @@ class HelpToSaveReminderConnectorSpec
         HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
       val response =
-        HttpResponse(200, Some(Json.toJson(htsUser)))
+        HttpResponse(200, Json.toJson(htsUser), emptyHeaders)
       mockGet(getHtsReminderUserURL(ninoNew), Map.empty)(Some(response))
       val result = connector.getHtsUser(ninoNew)
       await(result.value) should equal(Right(htsUser))
@@ -96,7 +98,7 @@ class HelpToSaveReminderConnectorSpec
 
     "return http response as it is to the caller" in {
       val response =
-        HttpResponse(200)
+        HttpResponse(200, emptyBody)
       mockPost(cancelHtsReminderURL, Map.empty, cancelHtsUserReminder)(Some(response))
       val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
       await(result.value) should equal(Right(()))
@@ -112,7 +114,7 @@ class HelpToSaveReminderConnectorSpec
 
     "return http response as it is to the caller" in {
       val response =
-        HttpResponse(200)
+        HttpResponse(200, emptyBody)
       mockPost(emailUpdateHtsReminderURL, Map.empty, updateReminderEmail)(Some(response))
       val result = connector.updateReminderEmail(updateReminderEmail)
       await(result.value) should equal(Right(()))
@@ -130,7 +132,7 @@ class HelpToSaveReminderConnectorSpec
     writes: Writes[B]
   ): Unit = { // scalstyle:ignore method.length
     "make a request to the help-to-save backend" in {
-      mockHttp(Some(HttpResponse(200)))
+      mockHttp(Some(HttpResponse(200, emptyBody)))
       await(result().value)
     }
 
@@ -142,15 +144,14 @@ class HelpToSaveReminderConnectorSpec
             Some(
               HttpResponse(
                 200,
-                responseJson = Some(
-                  Json.parse(
+                Json.parse(
                     """
                       |{
                       |  "foo": "bar"
                       |}
               """.stripMargin
-                  )
-                )
+                  ),
+                  emptyHeaders
               )
             )
           )
@@ -164,7 +165,7 @@ class HelpToSaveReminderConnectorSpec
         forAll { status: Int ⇒
           whenever(status =!= 200) {
             // check we get an error even though there was valid JSON in the response
-            mockHttp(Some(HttpResponse(status, Some(Json.toJson(validBody)))))
+            mockHttp(Some(HttpResponse(status, Json.toJson(validBody),emptyHeaders)))
             await(result().value).isLeft shouldBe true
 
           }

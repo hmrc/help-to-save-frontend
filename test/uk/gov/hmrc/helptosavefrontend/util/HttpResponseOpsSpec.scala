@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,21 +44,23 @@ class HttpResponseOpsSpec extends UnitSpec {
       import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 
       val status = 200
+      val emptyBody= ""
+      val emptyHeaders :Map[String, Seq[String]] = Map.empty
       val data = Test1(0)
 
       // test when there is an exception
       ThrowingHttpResponse().parseJSON[Test1]().isLeft shouldBe true
 
       // test when there is no JSON
-      HttpResponse(status).parseJSON[Test1]().isLeft shouldBe true
+      HttpResponse(status,emptyBody).parseJSON[Test1]().isLeft shouldBe true
 
       // test when the JSON isn't the right format
-      HttpResponse(status, Some(Json.toJson(data)))
+      HttpResponse(status, Json.toJson(data),emptyHeaders)
         .parseJSON[Test2]()
         .isLeft shouldBe true
 
       // test when everything is ok
-      HttpResponse(status, Some(Json.toJson(data)))
+      HttpResponse(status, Json.toJson(data), emptyHeaders)
         .parseJSON[Test1]() shouldBe Right(data)
     }
   }
