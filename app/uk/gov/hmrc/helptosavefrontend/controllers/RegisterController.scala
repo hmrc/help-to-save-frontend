@@ -242,7 +242,7 @@ class RegisterController @Inject() (
           { htsError ⇒
             internalServerError()
           }, { htsUser ⇒
-            logger.info(s"reminder updated $htsUser")
+            logger.info(s"reminder updated ${htsUser.nino}")
             SeeOther(routes.RegisterController.getAccountCreatedPage().url)
           }
         )
