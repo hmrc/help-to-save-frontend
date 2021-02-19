@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.models
 
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.util.NINO
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._

@@ -21,7 +21,6 @@ import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
-import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
