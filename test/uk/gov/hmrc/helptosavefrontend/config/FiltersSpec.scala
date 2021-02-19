@@ -62,21 +62,21 @@ class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
   }
 
   val frontendFilters = new TestableFrontendFilters
-  val whiteListFilter = mock[WhitelistFilter]
+  val allowListFilter = mock[AllowListFilter]
 
   "Filters" must {
 
-    "include the whitelist filter if the whitelist from config is non empty" in {
+    "include the allowList filter if the allowList from config is non empty" in {
       val config = Configuration("http-header-ip-whitelist" → List("1.2.3"))
 
-      val filters = new Filters(config, whiteListFilter, frontendFilters)
-      filters.filters shouldBe Seq(whiteListFilter)
+      val filters = new Filters(config, allowListFilter, frontendFilters)
+      filters.filters shouldBe Seq(allowListFilter)
     }
 
-    "not include the whitelist filter if the whitelist from config is empty" in {
+    "not include the allowList filter if the allowList from config is empty" in {
       val config = Configuration("http-header-ip-whitelist" → List())
 
-      val filters = new Filters(config, whiteListFilter, frontendFilters)
+      val filters = new Filters(config, allowListFilter, frontendFilters)
       filters.filters shouldBe Seq()
     }
   }

@@ -25,17 +25,17 @@ import uk.gov.hmrc.play.bootstrap.frontend.filters.FrontendFilters
 
 @Singleton
 class Filters @Inject() (
-  configuration: Configuration,
-  whitelistFilter: WhitelistFilter,
-  frontendFilters: FrontendFilters
+                          configuration: Configuration,
+                          AllowListFilter: AllowListFilter,
+                          frontendFilters: FrontendFilters
 ) extends HttpFilters {
 
-  val whiteListFilterEnabled: Boolean =
+  val allowListFilterEnabled: Boolean =
     configuration.underlying.get[List[String]]("http-header-ip-whitelist").value.nonEmpty
 
   override val filters: Seq[EssentialFilter] =
-    if (whiteListFilterEnabled) {
-      frontendFilters.filters :+ whitelistFilter
+    if (allowListFilterEnabled) {
+      frontendFilters.filters :+ AllowListFilter
     } else {
       frontendFilters.filters
     }
