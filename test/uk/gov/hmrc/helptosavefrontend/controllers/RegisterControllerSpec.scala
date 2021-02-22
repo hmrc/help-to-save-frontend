@@ -28,7 +28,6 @@ import play.api.mvc.{Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleWithInfo
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
@@ -65,7 +64,6 @@ class RegisterControllerSpec
       mockSessionStore,
       mockAuthConnector,
       mockMetrics,
-      injector.instanceOf[HTSAuditor],
       testCpd,
       testMcc,
       testErrorHandler,
