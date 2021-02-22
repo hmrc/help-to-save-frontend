@@ -31,7 +31,6 @@ import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.{CreateAccountError, EligibleWithInfo}
@@ -62,7 +61,6 @@ class RegisterController @Inject() (
   val sessionStore: SessionStore,
   val authConnector: AuthConnector,
   val metrics: Metrics,
-  val auditor: HTSAuditor,
   cpd: CommonPlayDependencies,
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
@@ -229,10 +227,6 @@ class RegisterController @Inject() (
   ): Future[Result] = {
     val daysToReceiveReminders = reminderDetails.getOrElse("None")
     if (daysToReceiveReminders =!= "None") {
-      auditor.sendEvent(
-        HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(nino, eligibleWithInfo.email, eligibleWithInfo.userInfo.userInfo.forename, eligibleWithInfo.userInfo.userInfo.surname, true, DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq()))), request.uri),
-        nino
-      )
       helpToSaveReminderService
         .updateHtsUser(
           HtsUserSchedule(
