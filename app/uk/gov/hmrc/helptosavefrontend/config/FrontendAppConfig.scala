@@ -101,10 +101,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
   val nsiPayInUrl: String = getUrlFor("nsi.pay-in")
 
-  val analyticsToken: String = servicesConfig.getString("google-analytics.token")
-  val analyticsHost: String = servicesConfig.getString("google-analytics.host")
-  val analyticsGovUkToken: String = servicesConfig.getString("google-analytics.govuk-token")
-
   val contactFormServiceIdentifier: String = "HTS"
 
   val contactBaseUrl: String = getUrlFor("contact-frontend")
