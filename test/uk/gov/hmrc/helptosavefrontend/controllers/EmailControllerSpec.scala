@@ -1051,7 +1051,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage().url)
       }
 
       "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks but bank details are already in session" in {
