@@ -26,7 +26,7 @@ POST       /select-email                                    uk.gov.hmrc.helptosa
 POST       /select-email-reminder                           uk.gov.hmrc.helptosavefrontend.controllers.EmailController.selectEmailSubmitReminder()
 GET        /enter-email                                     uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getGiveEmailPage
 POST       /enter-email                                     uk.gov.hmrc.helptosavefrontend.controllers.EmailController.giveEmailSubmit
-GET        /confirm-email/:email                            uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailConfirmed(email, isReminder: Boolean ?= false)
+GET        /confirm-email/:email                            uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailConfirmed(email)
 GET        /confirm-email                                   uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmail
 GET        /email-confirmed-callback                        uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailConfirmedCallback(p: String)
 GET        /email-confirmed                                 uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailConfirmed
