@@ -65,7 +65,7 @@ extraMeta = extraMeta) {
     <li>@Html(Messages("hts.account-created.ul1-li5"))</li>
   </ul>
 
-
+<p>@Messages("hts.account-created.p4",DateUtils.toLocalisedString(lastPayDateThisMonth))</p>
 
   @form(routes.AccessAccountController.accessAccount){
       @ga_submit_button(
