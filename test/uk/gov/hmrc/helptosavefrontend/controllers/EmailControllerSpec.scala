@@ -546,7 +546,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmitReminder(None)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("/help-to-save/confirm-email/encrypted?isReminder=true")
+        redirectLocation(result) shouldBe Some("/help-to-save/confirm-email/encrypted")
       }
 
       "handle Digital(new applicant) who submitted form with new-email" in {
@@ -626,7 +626,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmitReminder(None)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some("/help-to-save/confirm-email/encrypted?isReminder=true")
+        redirectLocation(result) shouldBe Some("/help-to-save/confirm-email/encrypted")
       }
 
       "handle DE user who submitted form with new-email" in {
@@ -996,7 +996,7 @@ class EmailControllerSpec
       val userInfoWithInvalidEmail = randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail"))
 
       def emailConfirmed(encryptedEmail: String): Future[Result] =
-        csrfAddToken(controller.emailConfirmed(encryptedEmail, true))(fakeRequest)
+        csrfAddToken(controller.emailConfirmed(encryptedEmail))(fakeRequest)
 
       "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks and no bank details in session" in {
 
@@ -1051,7 +1051,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage().url)
       }
 
       "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks but bank details are already in session" in {
