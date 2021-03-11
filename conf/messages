@@ -650,6 +650,25 @@ hts.help-information.section.how-account-works.s8.p2=If you need to close your a
 hts.help-information.section.how-account-works.s9.title=If the account holder dies or is terminally ill
 hts.help-information.section.how-account-works.s9.p1=If someone with a Help to Save account has a terminal illness or dies we will pay them their bonus early. If you are diagnosed as terminally ill by your doctor, and you want to claim your bonus early, call us on: 0300 322 7093.
 
+hts.help-information.section.hmrc-app.title=Help to Save on the HMRC app
+hts.help-information.section.hmrc-app.benefits.title=Benefits of the app
+hts.help-information.section.hmrc-app.benefits.s1=The app has many more features that will help you get the most out of your Help to Save account:
+hts.help-information.section.hmrc-app.benefits.s2=App features:
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li1=easy access
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li2=greater convenience
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li3=savings goal-setting feature
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li4=encouraging milestone messages
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li5=savings calculator feature, and more
+
+hts.help-information.section.hmrc-app.get-the-app.title=Get the app
+hts.help-information.section.hmrc-app.get-the-app.s1=Download the free HMRC app from:
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.1=the
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.2=for iOS
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.1=the
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.link=Google PlayStore
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.2=for Android
+
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English
 language-switcher.english.hover=Use this account in English
