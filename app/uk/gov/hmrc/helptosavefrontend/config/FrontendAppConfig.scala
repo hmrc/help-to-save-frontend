@@ -38,6 +38,10 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val authUrl: String = servicesConfig.baseUrl("auth")
 
+  val appleAppUrl: String  = servicesConfig.getString("get-the-app.apple-app-store")
+
+  val androidAppUrl: String = servicesConfig.getString("get-the-app.google-play-store")
+
   val helpToSaveUrl: String = servicesConfig.baseUrl("help-to-save")
 
   val helpToSaveFrontendUrl: String = getUrlFor("help-to-save-frontend")
