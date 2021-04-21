@@ -451,6 +451,21 @@ hts.register.create_account.tandc-ul1-li2=eich bod wedi darllen a deall y <a hre
 hts.register.create_account.tandc-ul1-li4=eich bod yn creu cyfrif Cymorth i Gynilo am y tro cyntaf
 hts.register.create_account.agree-continue=Cytuno ac yn eich blaen
 
+hts.register.create_account.hmrc-app.benefits.s1=Mae gan yr ap lawer mwy o nodweddion a fydd yn eich helpu i fanteisio i’r eithaf ar eich cyfrif Cymorth i Gynilo:
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li1=mynediad hwylus
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li2=yn fwy cyfleus
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li3=nodwedd gosod targedau cynilo
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li4=negeseuon ysgogol ar gyfer cerrig milltir
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li5=nodwedd cyfrifo cynilion, a mwy
+
+hts.register.create_account.hmrc-app.get-the-app.s1=Lawrlwythwch ap CThEM yn rhad ac am ddim o’r mannau canlynol:
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.1=yr
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.2=ar gyfer iOS
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.1=y
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.2=ar gyfer Android
+
 # Privacy page
 hts.privacy.title.h1=Datganiad preifatrwydd Cymorth i Gynilo
 hts.privacy.p1=Mae’r ddogfen hon yn nodi sut y byddwn yn defnyddio’ch gwybodaeth i gyflwyno’r cynllun Cymorth i Gynilo.

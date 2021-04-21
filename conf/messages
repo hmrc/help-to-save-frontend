@@ -452,6 +452,28 @@ hts.register.create_account.tandc-ul1-li2=you have read and understood the <a hr
 hts.register.create_account.tandc-ul1-li4=you are creating a Help to Save account for the first time
 hts.register.create_account.agree-continue=Agree and continue
 
+# Push to App
+hts.register.create_account.hmrc-app.title=Access your account through the HMRC app
+hts.register.create_account.hmrc-app.benefits.s1=The app has many more features that will help you get the most out of your Help to Save account:
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li1=easy access
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li2=greater convenience
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li3=savings goal-setting feature
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li4=encouraging milestone messages
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li5=savings calculator feature, and more
+
+hts.register.create_account.hmrc-app.get-the-app.s1=Download the free HMRC app from:
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.1=the
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.2=for iOS
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.1=the
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.2=for Android
+
+hts.register.create_account.hmrc-app.get-the-app.apple.label=Download from the apple app store
+hts.register.create_account.hmrc-app.get-the-app.apple.alt=apple store logo
+hts.register.create_account.hmrc-app.get-the-app.android.label=Download from the google play store
+hts.register.create_account.hmrc-app.get-the-app.android.alt=google play store logo
+
 # Privacy page
 hts.privacy.title.h1=Help to Save privacy statement
 hts.privacy.p1=This document sets out how we will use your information to deliver the Help to Save scheme.
