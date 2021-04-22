@@ -664,6 +664,25 @@ hts.help-information.section.how-account-works.s8.p2=Os oes angen ichi gau eich 
 hts.help-information.section.how-account-works.s9.title=Os yw deiliad y cyfrif yn marw neu’n derfynol wael
 hts.help-information.section.how-account-works.s9.p1=Os oes salwch terfynol ar rywun sydd â chyfrif Cymorth i Gynilo, neu os yw’n marw, byddwn yn talu’i fonws iddo’n gynnar. Os cewch ddiagnosis gan eich meddyg eich bod yn derfynol wael, a’ch bod am hawlio’ch bonws yn gynnar, rhowch alwad i ni ar: 0300 200 1900
 
+hts.help-information.section.hmrc-app.title=Cymorth i Gynilo ar ap CThEM
+hts.help-information.section.hmrc-app.benefits.title=Manteision yr ap
+hts.help-information.section.hmrc-app.benefits.s1=Mae gan yr ap lawer mwy o nodweddion a fydd yn eich helpu i fanteisio i’r eithaf ar eich cyfrif Cymorth i Gynilo:
+hts.help-information.section.hmrc-app.benefits.s2=Nodweddion yr ap:
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li1=mynediad hwylus
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li2=yn fwy cyfleus
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li3=nodwedd gosod targedau cynilo
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li4=negeseuon ysgogol ar gyfer cerrig milltir
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li5=nodwedd cyfrifo cynilion, a mwy
+
+hts.help-information.section.hmrc-app.get-the-app.title=Cael yr ap
+hts.help-information.section.hmrc-app.get-the-app.s1=Lawrlwythwch ap CThEM yn rhad ac am ddim o’r mannau canlynol:
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.1=yr
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.2=ar gyfer iOS
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.1=y
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.2=ar gyfer Android
+
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English
 language-switcher.english.hover=Use this account in English
