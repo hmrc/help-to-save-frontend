@@ -766,7 +766,7 @@ class EmailController @Inject() (
     }(loginContinueURL = routes.EmailController.getEmailUpdated().url)
 
   def emailUpdatedSubmit: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request ⇒ _⇒
       checkSessionAndEnrolmentStatus(
         mayBeSession ⇒ {
           mayBeSession.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url))(

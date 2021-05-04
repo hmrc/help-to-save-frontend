@@ -519,7 +519,7 @@ class EligibilityCheckControllerSpec
         "redirect to the eligible page if there is no session data and the eligibilty check" +
           "indicates that the person is eligible" in {
           val eligibleWithUserInfo = randomEligibleWithUserInfo(validUserInfo)
-          val response = EligibilityCheckResult("eligible", 1, "wtc", 6)
+          EligibilityCheckResult("eligible", 1, "wtc", 6)
           inSequence {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
             mockSessionStoreGet(Right(None))

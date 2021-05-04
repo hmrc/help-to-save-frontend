@@ -57,7 +57,7 @@ object BankDetailsErrors {
   def getBankDetailsBackendErrorMessage(
     form: Form[_],
     key: String
-  )(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] =
+  )(implicit messages: Messages): Option[String] =
     if (form.sortCodeBackendInvalid(key)) {
       Some(messages("hts.bank_details.check_your_sortcode_is_correct"))
     } else if (form.accountNumberBackendInvalid(key)) {

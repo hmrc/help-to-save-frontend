@@ -54,7 +54,7 @@ class AccessAccountController @Inject() (
 ) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with Logging {
 
-  def getSignInPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+  def getSignInPage: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
     SeeOther("https://www.gov.uk/sign-in-help-to-save")
   }
 

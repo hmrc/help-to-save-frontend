@@ -406,7 +406,7 @@ class RegisterControllerSpec
 
       def doCreateAccountRequest(): Future[PlayResult] = csrfAddToken(controller.createAccount)(fakeRequest)
 
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 

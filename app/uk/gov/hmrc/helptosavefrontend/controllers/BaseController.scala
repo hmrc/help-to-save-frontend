@@ -22,7 +22,7 @@ import play.api.mvc.{MessagesControllerComponents, Request, RequestHeader, Resul
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.util.MaintenanceSchedule
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 @Singleton
@@ -42,7 +42,7 @@ class BaseController @Inject() (
   val Messages: MessagesApi = messagesApi
 
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier =
-    HeaderCarrierConverter.fromHeadersAndSessionAndRequest(rh.headers, Some(rh.session), Some(rh))
+    HeaderCarrierConverter.fromRequestAndSession(rh,rh.session)
 
   def internalServerError()(implicit request: Request[_]): Result =
     InternalServerError(errorHandler.internalServerErrorTemplate(request))

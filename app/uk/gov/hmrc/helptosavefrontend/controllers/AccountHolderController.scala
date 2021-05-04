@@ -292,7 +292,6 @@ class AccountHolderController @Inject() (
     implicit
     htsContext: HtsContextWithNINO,
     hc: HeaderCarrier,
-    request: Request[_]
   ): Future[Result] = {
     val enrolled: EitherT[Future, String, (EnrolmentStatus, Option[Email])] = for {
       enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()

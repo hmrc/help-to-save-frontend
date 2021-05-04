@@ -32,7 +32,7 @@ class CustomLanguageController @Inject() (
 )(
   implicit
   val frontendAppConfig: FrontendAppConfig
-) extends LanguageController(configuration, languageUtils, mcc) with I18nSupport {
+) extends LanguageController(languageUtils,mcc) with I18nSupport {
 
   val english: Lang = Lang("en")
   val welsh: Lang = Lang("cy")

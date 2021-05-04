@@ -18,9 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import java.time.LocalDate
 
-import cats.data.EitherT
-import cats.instances.int._
-import cats.syntax.eq._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
@@ -28,7 +25,6 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.Future
 
 // scalastyle:off magic.number
 class HelpToSaveReminderConnectorSpec
@@ -119,63 +115,6 @@ class HelpToSaveReminderConnectorSpec
       val result = connector.updateReminderEmail(updateReminderEmail)
       await(result.value) should equal(Right(()))
 
-    }
-  }
-
-  private def testCommon[E, A, B](
-    mockHttp: ⇒ Option[HttpResponse] ⇒ Unit,
-    result: () ⇒ EitherT[Future, E, A],
-    validBody: B,
-    testInvalidJSON: Boolean = true
-  )(
-    implicit
-    writes: Writes[B]
-  ): Unit = { // scalstyle:ignore method.length
-    "make a request to the help-to-save backend" in {
-      mockHttp(Some(HttpResponse(200, emptyBody)))
-      await(result().value)
-    }
-
-    "return an error" when {
-
-      if (testInvalidJSON) {
-        "the call comes back with a 200 and an unknown JSON format" in {
-          mockHttp(
-            Some(
-              HttpResponse(
-                200,
-                Json.parse(
-                    """
-                      |{
-                      |  "foo": "bar"
-                      |}
-              """.stripMargin
-                  ),
-                  emptyHeaders
-              )
-            )
-          )
-
-          await(result().value).isLeft shouldBe
-            true
-        }
-      }
-
-      "the call comes back with any other status other than 200" in {
-        forAll { status: Int ⇒
-          whenever(status =!= 200) {
-            // check we get an error even though there was valid JSON in the response
-            mockHttp(Some(HttpResponse(status, Json.toJson(validBody),emptyHeaders)))
-            await(result().value).isLeft shouldBe true
-
-          }
-        }
-      }
-
-      "the future fails" in {
-        mockHttp(None)
-        await(result().value).isLeft shouldBe true
-      }
     }
   }
 

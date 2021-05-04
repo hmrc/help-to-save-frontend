@@ -107,6 +107,12 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= appDependencies
   )
   .settings(scalaVersion := "2.12.11")
+  .settings(scalacOptions ++= List(
+    // Warn if an import selector is not referenced.
+//    "-P:silencer:globalFilters=Unused import",
+    "-P:silencer:pathFilters=html",
+    "-P:silencer:pathFilters=routes"
+  ))
   .settings(
     formatMessageQuotes := {
       import sys.process._
