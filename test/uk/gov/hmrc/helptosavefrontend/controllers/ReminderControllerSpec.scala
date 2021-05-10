@@ -715,7 +715,6 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if htsUser update fails in savings reminder  signup page " in {
-      //val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
       inSequence {
