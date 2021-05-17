@@ -9,7 +9,7 @@ object AppDependencies {
     hmrc                %% "govuk-template"             % "5.66.0-play-26",
     hmrc                %% "mongo-caching"              % "7.0.0-play-26",
     hmrc                %% "play-whitelist-filter"      % "3.4.0-play-26",
-    hmrc                %% "bootstrap-frontend-play-26" % "5.0.0",
+    hmrc                %% "bootstrap-frontend-play-26" % "5.3.0",
     hmrc                %% "play-ui"                    % "9.2.0-play-26",
     hmrc                %% "play-health"                % "3.16.0-play-26",
     hmrc                %% "play-language"              % "4.12.0-play-26",
