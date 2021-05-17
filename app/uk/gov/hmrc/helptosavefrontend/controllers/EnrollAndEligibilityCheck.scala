@@ -44,7 +44,6 @@ trait EnrollAndEligibilityCheck extends SessionBehaviour with EnrolmentCheckBeha
           _.fold[Future[Result]](
             { ineligibleReason ⇒
               val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
-              val threshold = ineligibleReason.value.threshold
 
               ineligibilityType.fold {
                 logger.warn(s"Could not parse ineligibility reason : $ineligibleReason")

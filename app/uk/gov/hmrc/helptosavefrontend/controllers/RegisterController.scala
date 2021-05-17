@@ -35,7 +35,6 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.{CreateAccountError, EligibleWithInfo}
-import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -78,7 +77,6 @@ class RegisterController @Inject() (
   cannotCheckDetailsView: cannot_check_details
 )(
   implicit val crypto: Crypto,
-  emailValidation: EmailValidation,
   val transformer: NINOLogMessageTransformer,
   val frontendAppConfig: FrontendAppConfig,
   val config: Configuration,

@@ -223,8 +223,7 @@ class EligibilityCheckController @Inject() (
 
   private def performEligibilityChecks(userInfo: UserInfo)(
     implicit
-    hc: HeaderCarrier,
-    htsContext: HtsContextWithNINOAndUserDetails
+    hc: HeaderCarrier
   ): EitherT[Future, String, EligibilityCheckResultType] =
     for {
       eligible ← helpToSaveService.checkEligibility()

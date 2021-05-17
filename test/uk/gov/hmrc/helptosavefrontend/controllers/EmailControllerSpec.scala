@@ -991,9 +991,8 @@ class EmailControllerSpec
 
     "handling emailConfirmed requests in reminder journey " must {
 
-      val email = "test@user.com"
       val userInfo = randomEligibleWithUserInfo(validUserInfo)
-      val userInfoWithInvalidEmail = randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail"))
+      randomEligibleWithUserInfo(validUserInfo).withEmail(Some("invalidEmail"))
 
       def emailConfirmed(encryptedEmail: String): Future[Result] =
         csrfAddToken(controller.emailConfirmed(encryptedEmail))(fakeRequest)

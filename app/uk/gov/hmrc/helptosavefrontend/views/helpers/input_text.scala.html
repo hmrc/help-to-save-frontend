@@ -26,7 +26,7 @@ labelClass: Option[String] = None,
 errorMessage: Option[Html] = None,
 describedByHint: Option[String] = None,
 describedByError: Option[String] = None
-)(implicit messages: Messages)
+)
 
 <div class="form-group @if(errorMessage.isDefined){form-group-error}">
     <label class="form-label @if(labelClass.nonEmpty){@labelClass}" for="@id">@label</label>

@@ -55,23 +55,23 @@ class IntroductionController @Inject() (
 
   private val baseUrl: String = frontendAppConfig.govUkURL
 
-  def getAboutHelpToSave: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+  def getAboutHelpToSave: Action[AnyContent] = unprotected { _ ⇒ _⇒
     SeeOther(baseUrl)
   }
 
-  def getEligibility: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+  def getEligibility: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
     SeeOther(s"$baseUrl/eligibility")
   }
 
-  def getHowTheAccountWorks: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+  def getHowTheAccountWorks: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
     SeeOther(baseUrl)
   }
 
-  def getHowWeCalculateBonuses: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+  def getHowWeCalculateBonuses: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
     SeeOther(s"$baseUrl/what-youll-get")
   }
 
-  def getApply: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+  def getApply: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
     SeeOther(s"$baseUrl/how-to-apply")
   }
 

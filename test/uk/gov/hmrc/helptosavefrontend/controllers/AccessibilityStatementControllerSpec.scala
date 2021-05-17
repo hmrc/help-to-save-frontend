@@ -28,8 +28,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class AccessibilityStatementControllerSpec
   extends ControllerSpecWithGuiceApp with CSRFSupport with SessionStoreBehaviourSupport with AuthSupport {
 
-  private val fakeRequest = FakeRequest("GET", "/")
-
   lazy val view = app.injector.instanceOf[accessibility_statement]
 
   lazy val controller = new AccessibilityStatementController(

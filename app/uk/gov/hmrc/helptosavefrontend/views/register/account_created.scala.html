@@ -26,8 +26,6 @@
 
 @(accountNumber: String, email: String, lastPayDateThisMonth: LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@areRemindersEnabled = @{appConfig.reminderServiceFeatureSwitch}
-
 @title = @{
   Messages("hts.account-created.title.h1")
 }

@@ -54,12 +54,12 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
   val htsAuth = new HtsAuth
 
   private def actionWithNoEnrols =
-    htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    htsAuth.authorisedForHts { _ ⇒ _⇒
       Future.successful(Ok(""))
     }(routes.EligibilityCheckController.getCheckEligibility().url)
 
   private def actionWithEnrols =
-    htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    htsAuth.authorisedForHtsWithInfo { _ ⇒ implicit htsContext ⇒
       htsContext.userDetails match {
         case Left(_) ⇒ Future.successful(InternalServerError(""))
         case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
