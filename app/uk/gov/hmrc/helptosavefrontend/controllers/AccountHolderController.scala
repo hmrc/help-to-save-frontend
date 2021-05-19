@@ -291,7 +291,7 @@ class AccountHolderController @Inject() (
   private def checkIfAlreadyEnrolled(ifEnrolled: Email ⇒ Future[Result], path: String)(
     implicit
     htsContext: HtsContextWithNINO,
-    hc: HeaderCarrier,
+    hc: HeaderCarrier
   ): Future[Result] = {
     val enrolled: EitherT[Future, String, (EnrolmentStatus, Option[Email])] = for {
       enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
