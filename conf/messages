@@ -473,6 +473,7 @@ hts.register.create_account.hmrc-app.get-the-app.apple.label=Download from the a
 hts.register.create_account.hmrc-app.get-the-app.apple.alt=apple store logo
 hts.register.create_account.hmrc-app.get-the-app.android.label=Download from the google play store
 hts.register.create_account.hmrc-app.get-the-app.android.alt=google play store logo
+hts.register.create_account.hmrc-app.get-the-app.new-tab=App store links open in new tab.
 
 # Privacy page
 hts.privacy.title.h1=Help to Save privacy statement
