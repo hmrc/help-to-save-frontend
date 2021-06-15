@@ -472,6 +472,8 @@ hts.register.create_account.hmrc-app.get-the-app.apple.label=Lawrlwythwch o siop
 hts.register.create_account.hmrc-app.get-the-app.apple.alt=logo siop apiau Apple
 hts.register.create_account.hmrc-app.get-the-app.android.label=Lawrlwythwch o siop apiau Google Play
 hts.register.create_account.hmrc-app.get-the-app.android.alt=logo siop apiau Google Play
+hts.register.create_account.hmrc-app.get-the-app.new-tab=Mae cysylltiadau’r Siop Apiau yn agor tab newydd.
+
 
 # Privacy page
 hts.privacy.title.h1=Datganiad preifatrwydd Cymorth i Gynilo

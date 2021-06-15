@@ -87,22 +87,15 @@ extraMeta = extraMeta) {
     <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li5")</li>
 </ul>
 
-@if(appConfig.pushToAppIcon){
-
-<a href='@appConfig.appleAppUrl' aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.label")'>
-    <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.alt")' src='@controllers.routes.Assets.versioned("images/apple-store.svg")'></a>
-
-<a href="@appConfig.androidAppUrl" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.label")'>
-    <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.alt")' src='@controllers.routes.Assets.versioned("images/android-store.svg")'></a>
-}else{
 <p>@Messages("hts.register.create_account.hmrc-app.get-the-app.s1")</p>
 
-<ul class="list list-bullet">
-    <li>@Messages("hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.1") <a href="@appConfig.appleAppUrl">@Messages("hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.link") </a>@Messages("hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.2")</li>
-    <li>@Messages("hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.1") <a href="@appConfig.androidAppUrl">@Messages("hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.link") </a>@Messages("hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.2")</li>
-</ul>
-}
-}
+<a href='@appConfig.appleAppUrl' target="_blank" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.label")'>
+    <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.alt")' src='@controllers.routes.Assets.versioned("images/apple-store.svg")'></a>
 
+<a href="@appConfig.androidAppUrl" target="_blank" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.label")'>
+    <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.alt")' src='@controllers.routes.Assets.versioned("images/android-store.svg")'></a>
+
+<p>@Messages("hts.register.create_account.hmrc-app.get-the-app.new-tab")</p>
+}
 
 }
