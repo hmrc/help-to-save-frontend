@@ -31,7 +31,7 @@ class Filters @Inject() (
 ) extends HttpFilters {
 
   val allowListFilterEnabled: Boolean =
-    configuration.underlying.get[List[String]]("http-header-ip-whitelist").value.nonEmpty
+    configuration.underlying.get[List[String]]("http-header-ip-allowlist").value.nonEmpty
 
   override val filters: Seq[EssentialFilter] =
     if (allowListFilterEnabled) {

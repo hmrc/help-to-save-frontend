@@ -31,7 +31,7 @@ class AllowListFilter @Inject() (configuration: Configuration, val mat: Material
     extends AkamaiAllowListFilter with Logging {
 
   override def allowlist: Seq[String] =
-    configuration.underlying.get[List[String]]("http-header-ip-whitelist").value
+    configuration.underlying.get[List[String]]("http-header-ip-allowlist").value
 
   override def excludedPaths: Seq[Call] = Seq(forbiddenCall, healthCheckCall)
 
