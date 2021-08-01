@@ -23,15 +23,15 @@ import play.api.Configuration
 import play.api.mvc.{Call, RequestHeader, Result, Results}
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.util.Logging
-import uk.gov.hmrc.whitelist.{AkamaiWhitelistFilter => AkamaiAllowListFilter}
+import uk.gov.hmrc.allowlist.{AkamaiAllowlistFilter => AkamaiAllowListFilter}
 
 import scala.concurrent.Future
 
 class AllowListFilter @Inject() (configuration: Configuration, val mat: Materializer)
     extends AkamaiAllowListFilter with Logging {
 
-  override def whitelist: Seq[String] =
-    configuration.underlying.get[List[String]]("http-header-ip-whitelist").value
+  override def allowlist: Seq[String] =
+    configuration.underlying.get[List[String]]("http-header-ip-allowlist").value
 
   override def excludedPaths: Seq[Call] = Seq(forbiddenCall, healthCheckCall)
 
@@ -50,7 +50,7 @@ class AllowListFilter @Inject() (configuration: Configuration, val mat: Material
 
   override def apply(f: (RequestHeader) ⇒ Future[Result])(rh: RequestHeader): Future[Result] = {
     rh.headers.get(trueClient).foreach { ip ⇒
-      if (!whitelist.contains(ip)) {
+      if (!allowlist.contains(ip)) {
         logger.warn(s"SuspiciousActivity: Received request from non-allowListed ip $ip")
       }
     }
