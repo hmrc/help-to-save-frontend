@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.ga_submit_button
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.yes_no
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
@@ -65,11 +66,15 @@ extraMeta = extraMeta) {
 
 <p>@Messages("hts.account-created.p4",DateUtils.toLocalisedString(lastPayDateThisMonth))</p>
 
-  @form(routes.AccessAccountController.accessAccount){
+  @form(routes.AccessAccountController.accessOrPayIn){
+
 <div class="form-group">
+    @yes_no("Do you want to pay in your first deposit now?",
+    noHint="Remember to pay in your first deposit by the date mentioned above to start earning a bonus."
+    )
       @ga_submit_button(
-        "continueToAccount",
-        "Continue to your account",
+        "accessAccountOrPayIn",
+        "Continue",
         "Account created page",
         Messages("hts.account-created.continue-button")
       )
