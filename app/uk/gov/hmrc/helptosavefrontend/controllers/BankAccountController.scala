@@ -66,7 +66,7 @@ class BankAccountController @Inject() (
       } else if (session.hasSelectedReminder) {
         routes.ReminderController.getApplySavingsReminderSignUpPage().url
       } else {
-        routes.EmailController.getGiveEmailPage().url
+        routes.ReminderController.getApplySavingsReminderPage().url
       }
     }
 
