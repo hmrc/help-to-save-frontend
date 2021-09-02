@@ -18,13 +18,12 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.time._
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
-import play.api.mvc.{Result => PlayResult}
+import play.api.mvc.{Session, Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
@@ -620,7 +619,7 @@ class RegisterControllerSpec
         status(result) shouldBe OK
         contentAsString(result) should include("Account created")
         contentAsString(result) should include(accountNumber)
-        contentAsString(result) should include("You have until 31 January 1970 to pay in this month")
+        contentAsString(result) should include("""You have until <span class="bold">31 January 1970</span> to pay in money this month""")
       }
 
       "redirect to check eligibility" when {
@@ -699,6 +698,63 @@ class RegisterControllerSpec
           val result = getAccountCreatedPage()
           checkIsTechnicalErrorPage(result)
         }
+
+      }
+
+    }
+
+    "handling accessOrPayIn" must {
+      def fRequest(payIn: String) =  fakeRequest.withFormUrlEncodedBody("payInNow" -> payIn)
+      def postAccessOrPayIn(payIn: String) = csrfAddToken(controller.accessOrPayIn())(fRequest(payIn))
+
+      "show errors on the page" in {
+        val accountNumber = UUID.randomUUID().toString
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
+          )
+        }
+
+        val result = postAccessOrPayIn("")
+        status(result) shouldBe OK
+        contentAsString(result) should include("There is a problem")
+        contentAsString(result) should include("Select whether you want to pay in your first deposit now")
+      }
+
+      "redirect to PayIn" in {
+        val accountNumber = UUID.randomUUID().toString
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
+          )
+        }
+
+        val result = postAccessOrPayIn("true")
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe(Some(routes.AccessAccountController.payIn().url))
+
+      }
+
+      "redirect to AccessAccount" in {
+        val accountNumber = UUID.randomUUID().toString
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
+          )
+        }
+
+        val result = postAccessOrPayIn("false")
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe(Some(routes.AccessAccountController.accessAccount().url))
 
       }
 

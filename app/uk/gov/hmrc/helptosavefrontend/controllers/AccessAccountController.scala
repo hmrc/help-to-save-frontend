@@ -31,7 +31,6 @@ import uk.gov.hmrc.helptosavefrontend.util.{Logging, MaintenanceSchedule, NINOLo
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.collection.mutable.ArrayBuffer
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -58,18 +57,6 @@ class AccessAccountController @Inject() (
   def getSignInPage: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
     SeeOther("https://www.gov.uk/sign-in-help-to-save")
   }
-
-  def accessOrPayIn: Action[AnyContent] =
-    authorisedForHtsWithNINO{implicit request ⇒ implicit htsContext ⇒
-      println(request.map(a =>println(a.toString)))
-
-      request.getQueryString("yes_no") match {
-        case Some("yes") => redirectToAccountHolderPage(appConfig.nsiPayInUrl)
-        case Some("no") => redirectToAccountHolderPage(appConfig.nsiManageAccountUrl)
-        case a => {println(a)
-          redirectToAccountHolderPage(appConfig.nsiPayInUrl)}
-      }
-    }(loginContinueURL = frontendAppConfig.accessAccountUrl)
 
   def accessAccount: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒

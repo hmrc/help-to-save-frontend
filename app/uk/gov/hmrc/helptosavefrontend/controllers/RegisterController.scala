@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.time.temporal.TemporalAdjusters
 import java.time.{Clock, LocalDate, LocalDateTime}
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
@@ -26,6 +25,9 @@ import cats.instances.string._
 import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.Inject
+import play.api.data.Form
+import play.api.data.Forms.{localTime, mapping, of}
+
 import javax.inject.Singleton
 import play.api.mvc._
 import play.api.{Configuration, Environment}
@@ -86,6 +88,55 @@ class RegisterController @Inject() (
     with SessionBehaviour with CapCheckBehaviour with Logging {
 
   val clock: Clock = Clock.systemUTC()
+
+
+  def accessOrPayIn: Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request ⇒
+      implicit htsContext ⇒
+        val result = for {
+          enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
+          session ← enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ ⇒
+            sessionStore.get
+          })
+        } yield session
+        result.fold(
+          { e ⇒
+            logger.warn(s"Could not get enrolment status or session: $e")
+            internalServerError()
+          }, { session ⇒
+            val accountNumberAndEmail: Option[(String, Email)] = for {
+              s ← session
+              a ← s.accountNumber
+              e ← s.confirmedEmail
+            } yield (a, e)
+
+            accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)) {
+              case (accountNumber, email) ⇒
+                val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
+                this.payNowForm
+                  .bindFromRequest()
+                  .fold( e =>{
+                    Ok(accountCreatedView(e, accountNumber, email, lastDayOfMonth))},
+                    payInNow =>
+                      if (payInNow) {
+                        SeeOther(routes.AccessAccountController.payIn().url)
+                      }
+                      else {
+                        SeeOther(routes.AccessAccountController.accessAccount().url)
+                      }
+                  )
+            }
+          }
+        )}(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
+
+
+  val payNowForm: Form[Boolean] = {
+    Form(
+      mapping(
+        "payInNow" -> of(BooleanFormatter.formatter)
+      )(identity)(Some(_))
+    )
+  }
 
   def getCreateAccountPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -279,7 +330,7 @@ class RegisterController @Inject() (
           accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)) {
             case (accountNumber, email) ⇒
               val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
-              Ok(accountCreatedView(accountNumber, email, lastDayOfMonth))
+              Ok(accountCreatedView(payNowForm,accountNumber, email, lastDayOfMonth))
           }
         }
       )

@@ -17,15 +17,22 @@
 @import java.time.LocalDate
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.form
+@import play.api.data.Form
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.ga_submit_button
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.yes_no
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
-@(accountNumber: String, email: String, lastPayDateThisMonth: LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+yesNo: uk.gov.hmrc.helptosavefrontend.views.html.helpers.yes_no,
+errorSummary: uk.gov.hmrc.helptosavefrontend.views.html.helpers.error_summary,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+)
+
+@(form: Form[Boolean], accountNumber: String, email: String, lastPayDateThisMonth: LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+
+@key = @{"payInNow"}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @title = @{
   Messages("hts.account-created.title.h1")
@@ -44,6 +51,10 @@ title = title,
 bodyClasses = None,
 extraMeta = extraMeta) {
 
+@if(hasErrors) {
+@errorSummary(form.errors)
+}
+
   <div class="govuk-box-highlight">
     <h1 class="heading-xlarge">@title</h1>
     <span class="heading-large">
@@ -52,32 +63,33 @@ extraMeta = extraMeta) {
     </span>
   </div>
 
-  <p>@Html(Messages("hts.account-created.p1-1")) @email@Html(Messages("hts.account-created.p1-2"))</p>
-  <p>@Html(Messages("hts.account-created.p2"))</p>
-  <h2 class="heading-medium">@Messages("hts.account-created.h2")</h2>
-  <p>@Messages("hts.account-created.p3")</p>
-  <ul class="list list-bullet">
-    <li>@Html(Messages("hts.account-created.ul1-li1"))</li>
-    <li>@Html(Messages("hts.account-created.ul1-li2"))</li>
-    <li>@Html(Messages("hts.account-created.ul1-li3"))</li>
-    <li>@Html(Messages("hts.account-created.ul1-li4"))</li>
-    <li>@Html(Messages("hts.account-created.ul1-li5"))</li>
-  </ul>
+  <p>@Html(Messages("hts.register.create_account.confirmation-info.p1")) @email@Html(Messages("hts.register.create_account.confirmation-info.p2"))</p>
 
-<p>@Messages("hts.account-created.p4",DateUtils.toLocalisedString(lastPayDateThisMonth))</p>
+<div class="form-group @if(hasErrors){form-group-error}">
+  <h2 class="heading-medium">@Messages("hts.register.create_account.what-you-need-to-do.title")</h2>
+    <p>@Messages("hts.register.create_account.what-you-need-to-do.p1")</p>
+    <p>@Messages("hts.register.create_account.what-you-need-to-do.p2")</p>
+    <p>@Messages("hts.register.create_account.what-you-need-to-do.p3.1") <span class="bold">@{DateUtils.toLocalisedString(lastPayDateThisMonth)}</span> @Messages("hts.register.create_account.what-you-need-to-do.p3.2")</p>
 
-  @form(routes.AccessAccountController.accessOrPayIn){
+  @formWrapper(routes.RegisterController.accessOrPayIn){
 
-<div class="form-group">
-    @yes_no("Do you want to pay in your first deposit now?",
-    noHint="Remember to pay in your first deposit by the date mentioned above to start earning a bonus."
+    @yesNo(
+    fieldId = key,
+    label = Html(messages("hts.register.create_account.payInNow.title")),
+    errorKey = form.error(key).map(e => e.message),
+    selected = form.value,
+    errorMessage =Some(messages(s"hts.$key.error")) ,
+    noContent = Some(Html(messages("hts.register.create_account.payInNow.noContent")))
     )
-      @ga_submit_button(
-        "accessAccountOrPayIn",
-        "Continue",
-        "Account created page",
-        Messages("hts.account-created.continue-button")
-      )
+
+</div>
+<div class="form-group">
+@ga_submit_button(
+"accessAccountOrPayIn",
+"Continue",
+"Account created page",
+Messages("hts.global.continue-button")
+)
 </div>
 }
 
@@ -102,5 +114,4 @@ extraMeta = extraMeta) {
 
 <p>@Messages("hts.register.create_account.hmrc-app.get-the-app.new-tab")</p>
 }
-
 }

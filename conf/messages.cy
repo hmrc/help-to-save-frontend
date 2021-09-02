@@ -474,6 +474,22 @@ hts.register.create_account.hmrc-app.get-the-app.android.label=Lawrlwythwch o si
 hts.register.create_account.hmrc-app.get-the-app.android.alt=logo siop apiau Google Play
 hts.register.create_account.hmrc-app.get-the-app.new-tab=Mae cysylltiadau’r Siop Apiau yn agor tab newydd.
 
+# Register PayInNow
+generic.yes=Iawn
+generic.no=Na
+
+hts.register.create_account.confirmation-info.p1=Rydym wedi anfon e-bost cadarnhau atoch yn:
+hts.register.create_account.confirmation-info.p2=. Mae’r e-bost yn rhoi manylion am sut mae’ch cyfrif yn gweithio.
+hts.register.create_account.what-you-need-to-do.title=Yr hyn y mae angen i chi ei wneud nesaf
+hts.register.create_account.what-you-need-to-do.p1=Mae’ch cyfrif 4 blynedd Cymorth i Gynilo wedi’i greu, felly mae’r cloc wedi cychwyn.
+hts.register.create_account.what-you-need-to-do.p2=Gallwch ddechrau cynilo ac ennill bonysau’n syth.
+hts.register.create_account.what-you-need-to-do.p3.1=Gallwch gynilo hyd at £50 bob mis calendr. Mae gennych tan
+hts.register.create_account.what-you-need-to-do.p3.2=i dalu arian i mewn y mis hwn er mwyn dechrau ennill bonws.
+hts.register.create_account.payInNow.title=A ydych am dalu’ch taliad cyntaf i mewn nawr?
+hts.register.create_account.payInNow.noContent=Cofiwch dalu’ch taliad cyntaf i mewn erbyn y dyddiad a nodir uchod i ddechrau ennill bonws.
+hts.register.create_account.payInNow.continue=Yn eich blaen
+
+hts.payInNow.error=Dewiswch a ydych am dalu eich taliad cyntaf i mewn nawr
 
 # Privacy page
 hts.privacy.title.h1=Datganiad preifatrwydd Cymorth i Gynilo

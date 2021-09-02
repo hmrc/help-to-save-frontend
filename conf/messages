@@ -475,6 +475,23 @@ hts.register.create_account.hmrc-app.get-the-app.android.label=Download from the
 hts.register.create_account.hmrc-app.get-the-app.android.alt=google play store logo
 hts.register.create_account.hmrc-app.get-the-app.new-tab=App store links open in new tab.
 
+# Register PayInNow
+generic.yes=Yes
+generic.no=No
+
+hts.register.create_account.confirmation-info.p1=We've sent a confirmation email to you at:
+hts.register.create_account.confirmation-info.p2=. The email gives you details on how your account works.
+hts.register.create_account.what-you-need-to-do.title=What you need to do next
+hts.register.create_account.what-you-need-to-do.p1=Your 4-year Help tp Save account has been created, so the clock has started.
+hts.register.create_account.what-you-need-to-do.p2=You can start saving and earning bonuses straight away.
+hts.register.create_account.what-you-need-to-do.p3.1=You can save up to £50 each calendar month. You have until
+hts.register.create_account.what-you-need-to-do.p3.2=to pay in money this month to start earning a bonus.
+hts.register.create_account.payInNow.title=Do you want to pay in your first deposit now?
+hts.register.create_account.payInNow.noContent=Remember to pay your first deposit by the date mentioned above to start earning a bonus.
+hts.register.create_account.payInNow.continue=Continue
+
+hts.payInNow.error=Select whether you want to pay in your first deposit now
+
 # Privacy page
 hts.privacy.title.h1=Help to Save privacy statement
 hts.privacy.p1=This document sets out how we will use your information to deliver the Help to Save scheme.

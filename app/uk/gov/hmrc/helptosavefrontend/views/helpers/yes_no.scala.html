@@ -14,54 +14,82 @@
  * limitations under the License.
  *@
 
-@(title: String,
-hint: String = "",
-id: String = "yes_no",
-yesHint: String = "",
-noHint: String = ""
+@import play.api.i18n.Messages
+@import play.twirl.api.Html
+
+@this(
+//errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline,
+//warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-<div class="govuk-form-group">
-    <fieldset class="govuk-fieldset" aria-describedby="changed-name-hint">
-        <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
-            <h1 class="heading-medium">
-                @title
-            </h1>
-        </legend>
-        @if(hint.nonEmpty){
-        <div id="changed-name-hint" class="form-hint">
-            @hint
-        </div>
-        }
-        <div class="govuk-radios govuk-radios--inline">
-            <div class="multiple-choice" @if(yesHint.nonEmpty){data-target="conditional-contact-yes"}>
-                <input class="govuk-radios__input" id="@id" name="@id" type="radio" value="yes">
-                <label class="govuk-label govuk-radios__label" for="@id">
-                    Yes
-                </label>
-            </div>
-            @if(yesHint.nonEmpty){
-            <div class="panel panel-border-narrow js-hidden" id="conditional-contact-yes">
-                <div class="govuk-form-group">
-                    <span id="yes-hint">@yesHint</span>
-                </div>
-            </div>
-            }
+@(
+fieldId: String,
+label: Html,
+helpText: Option[Html] = None,
+errorKey: Option[String] = None,
+selected: Option[Boolean] = None,
+yesContent: Option[Html] = None,
+noContent: Option[Html] = None,
+describedBy: Option[String] = None,
+errorMessage: Option[String] = None
+)(implicit messages: Messages)
 
-            <div class="multiple-choice" @if(noHint.nonEmpty){data-target="conditional-contact-no"}>
-                <input class="govuk-radios__input" id="@id-2" name="@id" type="radio" value="no">
-                <label class="govuk-label govuk-radios__label" for="@id-2">
-                    No
-                </label>
-            </div>
-            @if(noHint.nonEmpty){
-            <div class="panel panel-border-narrow js-hidden" id="conditional-contact-no">
-                <div class="govuk-form-group">
-                    <span id="no-hint">@noHint</span>
-                </div>
-            </div>
-            }
+
+@hintTextKey = @{s"${{fieldId}}-form-hint"}
+@errorId = @{s"${{fieldId}}-inline-error"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
+@describedByKeys = @{
+List(describedBy.map(a => a), hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+
+    <fieldset id="@fieldId" @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+        <legend class="heading-small">
+            @label
+        </legend>
+        @hintIdWithHintText.map { case (id, text) =>
+        <span id="@id" class="form-hint">
+        @text
+      </span>
+        }
+
+        @errorIdWithMessageKey.map { case (id, key) =>
+        @if(errorMessage.isDefined){
+        <legend class="error-message" id="@id">
+        @messages(errorMessage.getOrElse((s"$fieldId.$key")))
+        </legend>
+        }else{
+        <legend class="error-message" id="@id">  @messages(s"$fieldId.$key") </legend>
+        }
+        }
+
+
+        <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" }>
+            <input id="@{fieldId}-true"
+                   name="@fieldId"
+                   value="true"
+                   type="radio"
+                   @if(selected.contains(true)) { checked="checked" }
+            />
+            <label for="@{fieldId}-true">
+                @messages("generic.yes")
+            </label>
         </div>
-    </fieldset>
-</div>
+
+        @yesContent.map(content => Html(s"""<div id="yes-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
+
+        <div class="multiple-choice"@if(noContent.nonEmpty){ data-target="no-content" }>
+            <input id="@{fieldId}-false"
+                   name="@fieldId"
+                   value="false"
+                   type="radio"
+                   @if(selected.contains(false)) { checked="checked" }
+            />
+            <label for="@{fieldId}-false">
+                @messages("generic.no")
+            </label>
+        </div>
+
+        @noContent.map(content => Html(s"""<div id="no-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
+
+         </fieldset>
 
