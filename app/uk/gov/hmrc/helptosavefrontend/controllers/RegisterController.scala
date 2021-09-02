@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.time.temporal.TemporalAdjusters
 import java.time.{Clock, LocalDate, LocalDateTime}
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
@@ -27,7 +28,6 @@ import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
-
 import javax.inject.Singleton
 import play.api.mvc._
 import play.api.{Configuration, Environment}
@@ -88,7 +88,6 @@ class RegisterController @Inject() (
     with SessionBehaviour with CapCheckBehaviour with Logging {
 
   val clock: Clock = Clock.systemUTC()
-
 
   def accessOrPayIn: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒

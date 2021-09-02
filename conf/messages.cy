@@ -385,8 +385,8 @@ hts.account-creation-error.button.try-again=Rhowch gynnig arall arni
 hts.account-creation-error.exit-button=Gadael a mynd i GOV.UK
 
 # Account created
-hts.account-created.title.h1=Cyfrif Cymorth i Gynilo wedi ei greu
-hts.account-created.title.p1=Rhif eich cyfrif yw
+hts.account-created.title.h1=Cyfrif Cymorth i Gynilo wedi’i greu
+hts.account-created.title.p1=Eich rhif cyfrif yw
 hts.account-created.p1-1=Rydym wedi anfon e-bost o gadarnhad at
 hts.account-created.p1-2=.
 hts.account-created.p2=Mae gennych 4 blynedd yn dechrau nawr i ddefnyddio’ch cyfrif Cymorth i Gynilo.
