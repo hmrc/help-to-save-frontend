@@ -26,7 +26,7 @@ import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.data.Form
-import play.api.data.Forms.{localTime, mapping, of}
+import play.api.data.Forms.{mapping, of}
 
 import javax.inject.Singleton
 import play.api.mvc._
