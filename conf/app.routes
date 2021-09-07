@@ -40,6 +40,7 @@ GET        /link-expired                                    uk.gov.hmrc.helptosa
 GET        /create-account                                  uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountPage
 POST       /create-account                                  uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.createAccount
 GET        /account-created                                 uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getAccountCreatedPage
+POST       /account-created                                 uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.accessOrPayIn
 GET        /error-no-account                                uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorPage
 GET        /error-bank-details                              uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getCreateAccountErrorBankDetailsPage
 GET        /try-again-tomorrow                              uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.getDailyCapReachedPage
