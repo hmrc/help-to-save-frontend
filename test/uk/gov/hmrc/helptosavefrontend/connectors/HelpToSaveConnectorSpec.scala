@@ -225,10 +225,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
         }
 
 //      behave like testCommon(
-////        mockGet(enrolmentStatusURL),
-////        () ⇒ connector.getUserEnrolmentStatus(),
-////        EnrolmentStatus.NotEnrolled
-////      )
+//        mockGet(enrolmentStatusURL),
+//        () ⇒ connector.getUserEnrolmentStatus(),
+//        EnrolmentStatus.NotEnrolled
+//      )
 
       "return a Right if the call comes back with HTTP status 200 with " +
         "valid JSON in the body" in {

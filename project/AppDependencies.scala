@@ -25,21 +25,19 @@ object AppDependencies {
     hmrc                     %% "service-integration-test"    % "1.1.0-play-28"     % "test",
     hmrc                     %% "stub-data-generator"         % "0.5.3"             % "test",
     hmrc                     %% "reactivemongo-test"          % "5.0.0-play-28"     % "test",
-    "org.scalatest"          %% "scalatest"                   % "3.2.9"             % "test",
     "org.scalatestplus"      %% "scalatestplus-scalacheck"    % "3.1.0.0-RC2"       % "test",
     "org.scalatestplus"      %% "scalatestplus-mockito"       % "1.0.0-M2"          % "test",
     "org.scalamock"          %% "scalamock-scalatest-support" % "3.6.0"             % "test",
-    "org.scalatestplus.play" %% "scalatestplus-play"          % "5.1.0"             % "test",
-    "com.typesafe.play"      %% "play"                        % "2.8.7"             % "test",
+    "com.typesafe.play"      %% "play"                        % "2.8.8"             % "test",
     "com.miguno.akka"        %% "akka-mock-scheduler"         % "0.5.5"             % "test",
-    "com.vladsch.flexmark"    %  "flexmark-all"                 % "0.36.8"            % "test"
+    "uk.gov.hmrc"            %% "bootstrap-test-play-28"      % "5.16.0"            % "test"
   )
 
   def apply(): Seq[ModuleID] = compile ++ test
 
   val akka = "com.typesafe.akka"
-  val akkaVersion = "2.5.23"
-  val akkaHttpVersion = "10.0.15"
+  val akkaVersion = "2.6.15"
+  val akkaHttpVersion = "10.2.6"
   val overrides = Seq(
     akka %% "akka-stream"    % akkaVersion,
     akka %% "akka-protobuf"  % akkaVersion,

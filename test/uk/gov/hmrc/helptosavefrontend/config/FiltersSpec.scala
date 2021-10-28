@@ -16,13 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import akka.stream.Materializer
+import akka.stream.{ActorMaterializer, Materializer}
 import com.kenshoo.play.metrics.MetricsFilter
 import play.api.Configuration
 import play.api.mvc.EssentialFilter
 import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceAppPerTest
+import uk.gov.hmrc.integration.servicemanager.ServiceManagerClient.system
 import uk.gov.hmrc.play.bootstrap.filters._
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCryptoFilter
 import uk.gov.hmrc.play.bootstrap.frontend.filters.deviceid.DeviceIdFilter
@@ -33,11 +34,11 @@ class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
   // can't use scalamock for CacheControlFilter since a logging statement during class
   // construction requires a parameter from the CacheControlConfig. Using scalamock
   // reuslts in a NullPointerException since no CacheControlConfig is there
-  val mockCacheControllerFilter = new CacheControlFilter(CacheControlConfig(), mock[Materializer])
+  implicit val mat: ActorMaterializer = ActorMaterializer()
+  val mockCacheControllerFilter = new CacheControlFilter(CacheControlConfig(), mat)
 
   val mockMDCFilter = new MDCFilter(fakeApplication.materializer, fakeApplication.configuration, "")
   val mockWhiteListFilter = mock[uk.gov.hmrc.play.bootstrap.frontend.filters.AllowlistFilter]
-
   val mockSessionIdFilter = mock[SessionIdFilter]
 
   class TestableFrontendFilters

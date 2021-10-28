@@ -11,19 +11,13 @@ val appName = "help-to-save-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = Seq(ws) ++ AppDependencies.compile ++ AppDependencies.test
 
-dependencyOverrides ++= AppDependencies.overrides
-
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-libraryDependencies += "uk.gov.hmrc" %% "bootstrap-frontend-play-28" % "5.7.0"
-libraryDependencies += "uk.gov.hmrc" %% "play-ui" % "9.6.0-play-28"
-libraryDependencies += "uk.gov.hmrc" %% "govuk-template" % "5.68.0-play-28"
+val akkaVersion     = "2.6.15"
 
-val akkaVersion     = "2.5.4"
-
-val akkaHttpVersion = "10.0.15"
+val akkaHttpVersion = "10.2.6"
 
 dependencyOverrides += "com.typesafe.akka" %% "akka-stream"    % akkaVersion
 
