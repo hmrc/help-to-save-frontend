@@ -56,7 +56,7 @@
 
         <h1 class="heading-large">@title</h1>
         <p>@Html(Messages("hts.email-verification.intro"))</p>
-        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit(), 'class -> "group subsection--wide", 'novalidate → "") {
+        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit, 'class -> "group subsection--wide", 'novalidate → "") {
             <div class="panel panel-border-wide">
                 <p>@messages("hts.email-verification.note")</p>
             </div>

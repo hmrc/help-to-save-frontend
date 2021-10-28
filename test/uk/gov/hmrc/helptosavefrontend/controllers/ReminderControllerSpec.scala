@@ -941,7 +941,7 @@ class ReminderControllerSpec
 
       val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
     "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
@@ -954,7 +954,7 @@ class ReminderControllerSpec
 
       val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
   }
@@ -1014,7 +1014,7 @@ class ReminderControllerSpec
 
   def checkIsErrorPage(result: Future[Result]): Unit = {
     status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
   }
 
   "show user an in-eligible page if the session is found but user is not eligible" in {

@@ -30,6 +30,8 @@ import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
 // scalastyle:off magic.number
 class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
+  val logger: Logger = Logger(this.getClass)
+
   "EmailValidation" must {
 
     def genString(length: Int) = Gen.listOfN(length, Gen.alphaChar).map(_.mkString(""))
@@ -38,7 +40,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
       emailValidation: EmailValidation
     )(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
       val result: Either[Seq[FormError], String] = emailValidation.emailFormatter.bind("key", Map("key" → value))
-      if (log) Logger.error(value + ": " + result.toString)
+      if (log) logger.error(value + ": " + result.toString)
       result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
     }
 

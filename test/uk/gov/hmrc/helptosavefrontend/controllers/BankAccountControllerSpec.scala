@@ -285,7 +285,7 @@ class BankAccountControllerSpec
 
         val result = doRequest()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage.url)
       }
 
       "handle mongo session errors during storing bank details in session" in {
@@ -337,7 +337,7 @@ class BankAccountControllerSpec
 
       val result = doRequest()
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
     "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
@@ -349,7 +349,7 @@ class BankAccountControllerSpec
 
       val result = doRequest()
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
     "show user an in-eligible page if the session is found but user is not eligible" in {

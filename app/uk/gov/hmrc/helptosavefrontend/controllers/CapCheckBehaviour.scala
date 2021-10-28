@@ -39,11 +39,11 @@ trait CapCheckBehaviour {
           ifAllowed
         }, { userCapResponse ⇒
           if (userCapResponse.isTotalCapDisabled && userCapResponse.isDailyCapDisabled) {
-            SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+            SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
           } else if (userCapResponse.isTotalCapDisabled || userCapResponse.isTotalCapReached) {
-            SeeOther(routes.RegisterController.getTotalCapReachedPage().url)
+            SeeOther(routes.RegisterController.getTotalCapReachedPage.url)
           } else if (userCapResponse.isDailyCapDisabled || userCapResponse.isDailyCapReached) {
-            SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
+            SeeOther(routes.RegisterController.getDailyCapReachedPage.url)
           } else {
             ifAllowed
           }

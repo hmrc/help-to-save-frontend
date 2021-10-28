@@ -48,7 +48,7 @@
       <li>@Messages("hts.register.you-are-eligible.li2")</li>
     </ul>
 
-    @form(routes.EligibilityCheckController.youAreEligibleSubmit()) {
+    @form(routes.EligibilityCheckController.youAreEligibleSubmit) {
         @CSRF.formField(request)
         @submit('_buttonClass -> "", 'id → "start-creating-account") {
             @Messages("hts.global.continue-button")

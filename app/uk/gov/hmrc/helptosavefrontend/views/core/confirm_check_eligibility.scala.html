@@ -39,7 +39,7 @@
   <p>@Html(Messages("hts.no-account.p2"))</p>
 
   <div class="form-field form-field--submit">
-    @form(routes.EligibilityCheckController.getCheckEligibility()){
+    @form(routes.EligibilityCheckController.getCheckEligibility){
     @submit('_buttonClass -> "", 'id → "start-creating-account") {
       @Messages("hts.no-account.button-1")
     }

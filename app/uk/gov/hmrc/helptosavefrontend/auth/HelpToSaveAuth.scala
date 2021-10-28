@@ -240,7 +240,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       SeeOther(routes.RegisterController.getServiceOutagePage(endTime.toString).url)
 
     case _: UnsupportedAuthProvider ⇒
-      SeeOther(routes.RegisterController.getCannotCheckDetailsPage().url)
+      SeeOther(routes.RegisterController.getCannotCheckDetailsPage.url)
 
     case ex: AuthorisationException ⇒
       logger.warn(s"could not authenticate user due to: $ex ${timeString(time)}")

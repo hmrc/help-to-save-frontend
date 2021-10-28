@@ -17,7 +17,11 @@ lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used i
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-val akkaVersion     = "2.5.23"
+libraryDependencies += "uk.gov.hmrc" %% "bootstrap-frontend-play-28" % "5.7.0"
+libraryDependencies += "uk.gov.hmrc" %% "play-ui" % "9.6.0-play-28"
+libraryDependencies += "uk.gov.hmrc" %% "govuk-template" % "5.68.0-play-28"
+
+val akkaVersion     = "2.5.4"
 
 val akkaHttpVersion = "10.0.15"
 

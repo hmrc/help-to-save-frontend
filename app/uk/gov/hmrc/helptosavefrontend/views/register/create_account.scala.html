@@ -41,7 +41,7 @@ title = title,
 sidebarLinks = None,
 bodyClasses = None) {
 
-@navigate_back(Some(routes.BankAccountController.getBankDetailsPage().url))
+@navigate_back(Some(routes.BankAccountController.getBankDetailsPage.url))
 
   <h1>@title</h1>
 
@@ -51,7 +51,7 @@ bodyClasses = None) {
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.register.create_account.your-details.name"), eligibleWithUserInfo.userInfo.forename + " " + eligibleWithUserInfo.userInfo.surname,
       summary_section_change(
-        routes.RegisterController.getDetailsAreIncorrect().url,
+        routes.RegisterController.getDetailsAreIncorrect.url,
         Messages("hts.register.create_account.change-your-name"),
         "change-your-name"
       )
@@ -59,14 +59,14 @@ bodyClasses = None) {
     @summary_row(Messages("hts.register.create_account.your-details.dob"),
     DateUtils.toLocalisedString(eligibleWithUserInfo.userInfo.dateOfBirth),
       summary_section_change(
-        routes.RegisterController.getDetailsAreIncorrect().url,
+        routes.RegisterController.getDetailsAreIncorrect.url,
         Messages("hts.register.create_account.change-your-dob"),
         "change-your-dob"
       )
     )
     @summary_row(Messages("hts.register.create_account.your-details.nino"), display2CharFormat(eligibleWithUserInfo.userInfo.nino),
       summary_section_change(
-        routes.RegisterController.getDetailsAreIncorrect().url,
+        routes.RegisterController.getDetailsAreIncorrect.url,
         Messages("hts.register.create_account.change-your-nino"),
         "change-your-nino"
       )
@@ -77,7 +77,7 @@ bodyClasses = None) {
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.register.create_account.your-email.email"), email,
       summary_section_change(
-        routes.RegisterController.changeEmail().url,
+        routes.RegisterController.changeEmail.url,
         (Messages("hts.register.create_account.change") + " " + Messages("hts.register.create_account.your-email")),
         "change-email"
       )
@@ -86,7 +86,7 @@ bodyClasses = None) {
       @if(period.matches("none")) {
   @summary_row(Messages("hts.email-saving-remainders.title.h1"), Messages("hts.register.create_account.your-remainder.note"),
     summary_section_change(
-      routes.RegisterController.changeReminder().url,
+      routes.RegisterController.changeReminder.url,
       (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
       "change-reminder"
     ),true
@@ -96,7 +96,7 @@ bodyClasses = None) {
     PeriodUtils.getMessage(period)
     +" "+ Messages("hts.reminder-confirmation.title.p1-2"),
     summary_section_change(
-      routes.RegisterController.changeReminder().url,
+      routes.RegisterController.changeReminder.url,
       (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
       "change-reminder"
     ),true
@@ -109,14 +109,14 @@ bodyClasses = None) {
   <dl class="govuk-check-your-answers cya-questions-long">
     @summary_row(Messages("hts.register.create_account.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode.toString()),
       summary_section_change(
-        (routes.RegisterController.changeBankDetails().url + "#sortCode"),
+        (routes.RegisterController.changeBankDetails.url + "#sortCode"),
         Messages("hts.register.create_account.change-your-sort-code"),
         "change-your-sort-code"
       )
     )
     @summary_row(Messages("hts.register.create_account.your-bank-details.account-number"), bankDetails.accountNumber,
       summary_section_change(
-        (routes.RegisterController.changeBankDetails().url + "#accountNumber"),
+        (routes.RegisterController.changeBankDetails.url + "#accountNumber"),
         Messages("hts.register.create_account.change-your-account-number"),
         "change-your-account-number"
       )
@@ -124,7 +124,7 @@ bodyClasses = None) {
     @if(bankDetails.rollNumber.nonEmpty) {
       @summary_row(Messages("hts.register.create_account.your-bank-details.roll-number"), bankDetails.rollNumber.getOrElse(""),
         summary_section_change(
-          (routes.RegisterController.changeBankDetails().url + "#rollNumber"),
+          (routes.RegisterController.changeBankDetails.url + "#rollNumber"),
           Messages("hts.register.create_account.change-your-roll-number"),
           "change-your-roll-number"
         )
@@ -132,7 +132,7 @@ bodyClasses = None) {
     }
     @summary_row(Messages("hts.register.create_account.your-bank-details.account-name"), bankDetails.accountName,
       summary_section_change(
-        (routes.RegisterController.changeBankDetails().url + "#accountName"),
+        (routes.RegisterController.changeBankDetails.url + "#accountName"),
         Messages("hts.register.create_account.change-your-account-name"),
         "change-your-account-name"
       )

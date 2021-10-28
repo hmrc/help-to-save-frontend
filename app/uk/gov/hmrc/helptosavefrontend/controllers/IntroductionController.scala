@@ -85,7 +85,7 @@ class IntroductionController @Inject() (
         {
           // not enrolled
           () ⇒
-            SeeOther(routes.AccessAccountController.getNoAccountPage().url)
+            SeeOther(routes.AccessAccountController.getNoAccountPage.url)
         }, { e ⇒
           logger.warn(s"Could not check enrolment: $e", htsContext.nino)
           internalServerError()
@@ -104,5 +104,5 @@ class IntroductionController @Inject() (
             )
       )
 
-    }(routes.IntroductionController.getAboutHelpToSave().url)
+    }(routes.IntroductionController.getAboutHelpToSave.url)
 }

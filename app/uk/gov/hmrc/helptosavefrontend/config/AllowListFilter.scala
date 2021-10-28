@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import akka.stream.Materializer
+
+
 import com.google.inject.Inject
 import configs.syntax._
 import play.api.Configuration
@@ -27,7 +28,7 @@ import uk.gov.hmrc.allowlist.{AkamaiAllowlistFilter => AkamaiAllowListFilter}
 
 import scala.concurrent.Future
 
-class AllowListFilter @Inject() (configuration: Configuration, val mat: Materializer)
+abstract class AllowListFilter @Inject() (configuration: Configuration)
     extends AkamaiAllowListFilter with Logging {
 
   override def allowlist: Seq[String] =
@@ -44,7 +45,7 @@ class AllowListFilter @Inject() (configuration: Configuration, val mat: Material
     Future.successful(Results.Redirect(forbiddenCall))
   }
 
-  val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden().url)
+  val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden.url)
 
   val healthCheckCall: Call = Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url)
 
@@ -56,5 +57,4 @@ class AllowListFilter @Inject() (configuration: Configuration, val mat: Material
     }
     super.apply(f)(rh)
   }
-
 }
