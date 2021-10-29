@@ -7,7 +7,7 @@ resolvers += Resolver.jcenterRepo
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "3.5.0")
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-git-versioning" % "2.2.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-git-versioning" % "2.4.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-artifactory" % "2.0.0")
 

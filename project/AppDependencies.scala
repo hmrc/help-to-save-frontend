@@ -8,10 +8,8 @@ object AppDependencies {
   val compile = Seq(
     hmrc                %% "govuk-template"             % "5.72.0-play-28",
     hmrc                %% "mongo-caching"              % "7.0.0-play-28",
-    hmrc                %% "play-allowlist-filter"       % "1.0.0-play-28",
-    hmrc                %% "bootstrap-frontend-play-28" % "5.12.0",
-    hmrc                %% "play-ui"                    % "9.7.0-play-28",
-    hmrc                %% "play-health"                % "3.16.0-play-27",
+    hmrc                %% "bootstrap-frontend-play-28" % "5.3.0",
+    hmrc                %% "play-ui"                    % "9.5.0-play-28",
     hmrc                %% "play-language"              % "5.1.0-play-28",
     "com.github.kxbmap" %% "configs"                     % "0.4.4",
     "org.typelevel"     %% "cats-core"                  % "2.6.1",
@@ -30,13 +28,14 @@ object AppDependencies {
     "org.scalamock"          %% "scalamock-scalatest-support" % "3.6.0"             % "test",
     "com.typesafe.play"      %% "play"                        % "2.8.8"             % "test",
     "com.miguno.akka"        %% "akka-mock-scheduler"         % "0.5.5"             % "test",
-    "uk.gov.hmrc"            %% "bootstrap-test-play-28"      % "5.16.0"            % "test"
+    "uk.gov.hmrc"            %% "bootstrap-test-play-28"      % "5.16.0"            % "test",
+    "com.vladsch.flexmark"    %  "flexmark-all"                 % "0.35.10"           % "test"
   )
 
   def apply(): Seq[ModuleID] = compile ++ test
 
   val akka = "com.typesafe.akka"
-  val akkaVersion = "2.6.15"
+  val akkaVersion = "2.6.14"
   val akkaHttpVersion = "10.2.6"
   val overrides = Seq(
     akka %% "akka-stream"    % akkaVersion,

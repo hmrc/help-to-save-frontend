@@ -15,7 +15,7 @@ lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used i
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-val akkaVersion     = "2.6.15"
+val akkaVersion     = "2.6.14"
 
 val akkaHttpVersion = "10.2.6"
 

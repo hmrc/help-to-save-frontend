@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.util.UUID
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
