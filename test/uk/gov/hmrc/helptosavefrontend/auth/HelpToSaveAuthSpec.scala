@@ -157,7 +157,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       status(result) shouldBe Status.SEE_OTHER
       val redirectTo =
         redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
-      redirectTo should include("/mdtp/uplift")
+      redirectTo should include("/iv-stub/uplift")
     }
 
     "handle InsufficientConfidenceLevel exception and redirect user to IV Journey" in {
@@ -168,7 +168,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       status(result) shouldBe Status.SEE_OTHER
       val redirectTo =
         redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
-      redirectTo should include("/mdtp/uplift")
+      redirectTo should include("/iv-stub/uplift")
       redirectTo should include("continueURL")
     }
 
