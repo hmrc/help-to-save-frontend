@@ -29,7 +29,8 @@ object AppDependencies {
     "com.typesafe.play"      %% "play"                        % "2.8.8"             % "test",
     "com.miguno.akka"        %% "akka-mock-scheduler"         % "0.5.5"             % "test",
     "uk.gov.hmrc"            %% "bootstrap-test-play-28"      % "5.16.0"            % "test",
-    "com.vladsch.flexmark"    %  "flexmark-all"                 % "0.35.10"           % "test"
+    "com.vladsch.flexmark"    %  "flexmark-all"                 % "0.35.10"           % "test",
+
   )
 
   def apply(): Seq[ModuleID] = compile ++ test
