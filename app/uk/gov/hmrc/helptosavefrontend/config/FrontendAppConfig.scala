@@ -55,7 +55,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   val reminderServiceFeatureSwitch: Boolean = servicesConfig.getBoolean("reminder-feature-switch")
 
   val ivJourneyResultUrl: String =
-    s"${servicesConfig.baseUrl("identity-verification-journey-result")}iv-stub/mdtp/journey/journeyId"
+    s"${servicesConfig.baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
   val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"
 
