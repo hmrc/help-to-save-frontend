@@ -36,10 +36,10 @@ trait EnrollAndEligibilityCheck extends SessionBehaviour with EnrolmentCheckBeha
   ): Future[Result] =
     checkIfAlreadyEnrolled { () ⇒
       checkSession(
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       ) { session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
-          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         )(
           _.fold[Future[Result]](
             { ineligibleReason ⇒
@@ -49,7 +49,7 @@ trait EnrollAndEligibilityCheck extends SessionBehaviour with EnrolmentCheckBeha
                 logger.warn(s"Could not parse ineligibility reason : $ineligibleReason")
                 toFuture(internalServerError())
               } { i ⇒
-                toFuture(SeeOther(routes.EligibilityCheckController.getIsNotEligible().url))
+                toFuture(SeeOther(routes.EligibilityCheckController.getIsNotEligible.url))
               }
             },
             _ ⇒ ifNotEnrolled(session)

@@ -52,7 +52,7 @@
         <h1 class="heading-large">@title</h1>
         <p>@messages("hts.email-saving-remainders.intro")</p>
 
-          <form method="post" action=@routes.ReminderController.submitApplySavingsReminderPage() novalidate>
+          <form method="post" action=@routes.ReminderController.submitApplySavingsReminderPage novalidate>
               @CSRF.formField(request)
 
 

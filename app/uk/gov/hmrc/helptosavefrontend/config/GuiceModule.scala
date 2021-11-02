@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 
 class GuiceModule extends AbstractModule {
 
-  def configure(): Unit = {
+  override def configure(): Unit = {
     bind(classOf[ServicesConfig]).toProvider(classOf[ConfigModule])
     bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
     bind(classOf[SessionCookieCrypto]).toProvider(classOf[SessionCookieCryptoProvider])

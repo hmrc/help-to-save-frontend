@@ -128,7 +128,7 @@ class IntroductionControllerSpec
 
         val result = helpToSave.getHelpPage(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage.url)
       }
 
     }

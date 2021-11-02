@@ -159,7 +159,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
     }
 
@@ -173,7 +173,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
     }
 

@@ -109,7 +109,7 @@ class RegisterController @Inject() (
               e ← s.confirmedEmail
             } yield (a, e)
 
-            accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)) {
+            accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
               case (accountNumber, email) ⇒
                 val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
                 this.payNowForm
@@ -118,15 +118,15 @@ class RegisterController @Inject() (
                     Ok(accountCreatedView(e, accountNumber, email, lastDayOfMonth))},
                     payInNow =>
                       if (payInNow) {
-                        SeeOther(routes.AccessAccountController.payIn().url)
+                        SeeOther(routes.AccessAccountController.payIn.url)
                       }
                       else {
-                        SeeOther(routes.AccessAccountController.accessAccount().url)
+                        SeeOther(routes.AccessAccountController.accessAccount.url)
                       }
                   )
             }
           }
-        )}(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
+        )}(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
 
   val payNowForm: Form[Boolean] = {
@@ -167,29 +167,29 @@ class RegisterController @Inject() (
                             bankDetails
                           )
                         )
-                      case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                      case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage.url)
                     }
                   }
               }
             )
         }
       }
-    }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
+    }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   def getDailyCapReachedPage: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Ok(dailyCapReachedView())
-    }(loginContinueURL = routes.RegisterController.getDailyCapReachedPage().url)
+    }(loginContinueURL = routes.RegisterController.getDailyCapReachedPage.url)
 
   def getTotalCapReachedPage: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Ok(totalCapReachedView())
-    }(loginContinueURL = routes.RegisterController.getTotalCapReachedPage().url)
+    }(loginContinueURL = routes.RegisterController.getTotalCapReachedPage.url)
 
   def getServiceUnavailablePage: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", None))
-    }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage().url)
+    }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage.url)
 
   def getServiceOutagePage(end: String): Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
@@ -198,7 +198,7 @@ class RegisterController @Inject() (
   def getDetailsAreIncorrect: Action[AnyContent] =
     authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Ok(detailsAreIncorrectView())
-    }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility().url)
+    }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility.url)
 
   def createAccount: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -245,32 +245,32 @@ class RegisterController @Inject() (
                             nino
                           )
                           submissionFailure.errorMessageId
-                            .fold(SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)) { id ⇒
+                            .fold(SeeOther(routes.RegisterController.getCreateAccountErrorPage.url)) { id ⇒
                               if (id === "ZYRC0703" || id === "ZYRC0707") {
-                                SeeOther(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+                                SeeOther(routes.RegisterController.getCreateAccountErrorBankDetailsPage.url)
                               } else {
-                                SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
+                                SeeOther(routes.RegisterController.getCreateAccountErrorPage.url)
                               }
                             }
                       }, { error ⇒
                         logger.warn(s"Error while trying to create account: $error", nino)
-                        SeeOther(routes.RegisterController.getCreateAccountErrorPage().url)
+                        SeeOther(routes.RegisterController.getCreateAccountErrorPage.url)
                       }
                     )
                 }, {
                   _.accountNumber.fold(
                     SeeOther(frontendAppConfig.nsiManageAccountUrl)
-                  )(_ ⇒ SeeOther(routes.RegisterController.getAccountCreatedPage().url))
+                  )(_ ⇒ SeeOther(routes.RegisterController.getAccountCreatedPage.url))
                 }
               )
 
             case None ⇒
               logger.warn("no bank details found in session, redirect user to bank_details page")
-              SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+              SeeOther(routes.BankAccountController.getBankDetailsPage.url)
           }
         }
       }
-    }(loginContinueURL = routes.RegisterController.createAccount().url)
+    }(loginContinueURL = routes.RegisterController.createAccount.url)
 
   def processReminderServiceRequest(reminderDetails: Option[String], nino: String, eligibleWithInfo: EligibleWithInfo)(
     implicit request: Request[_]
@@ -297,12 +297,12 @@ class RegisterController @Inject() (
             internalServerError()
           }, { htsUser ⇒
             logger.info(s"reminder updated ${htsUser.nino}")
-            SeeOther(routes.RegisterController.getAccountCreatedPage().url)
+            SeeOther(routes.RegisterController.getAccountCreatedPage.url)
           }
         )
 
     } else {
-      SeeOther(routes.RegisterController.getAccountCreatedPage().url)
+      SeeOther(routes.RegisterController.getAccountCreatedPage.url)
     }
   }
 
@@ -326,14 +326,14 @@ class RegisterController @Inject() (
             e ← s.confirmedEmail
           } yield (a, e)
 
-          accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)) {
+          accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
             case (accountNumber, email) ⇒
               val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
               Ok(accountCreatedView(payNowForm,accountNumber, email, lastDayOfMonth))
           }
         }
       )
-    }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
+    }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   def getCreateAccountErrorPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -342,7 +342,7 @@ class RegisterController @Inject() (
           Ok(createAccountErrorView())
         }
       }
-    }(loginContinueURL = routes.RegisterController.getCreateAccountPage().url)
+    }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   def getCreateAccountErrorBankDetailsPage: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -351,16 +351,16 @@ class RegisterController @Inject() (
           Ok(createAccountErrorBankDetailsView())
         }
       }
-    }(loginContinueURL = routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+    }(loginContinueURL = routes.RegisterController.getCreateAccountErrorBankDetailsPage.url)
 
   def changeEmail: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       checkIfAlreadyEnrolled { () ⇒
         checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
-          startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.EmailController.getSelectEmailPage().url)
+          startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.EmailController.getSelectEmailPage.url)
         }
       }
-    }(loginContinueURL = routes.RegisterController.changeEmail().url)
+    }(loginContinueURL = routes.RegisterController.changeEmail.url)
 
   def changeBankDetails: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -368,11 +368,11 @@ class RegisterController @Inject() (
         checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
           startChangingDetailsAndRedirect(
             eligibleWithInfo.session,
-            routes.BankAccountController.getBankDetailsPage().url
+            routes.BankAccountController.getBankDetailsPage.url
           )
         }
       }
-    }(loginContinueURL = routes.RegisterController.changeBankDetails().url)
+    }(loginContinueURL = routes.RegisterController.changeBankDetails.url)
 
   def changeReminder: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -380,11 +380,11 @@ class RegisterController @Inject() (
         checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
           startChangingDetailsAndRedirect(
             eligibleWithInfo.session,
-            routes.ReminderController.getApplySavingsReminderPage().url
+            routes.ReminderController.getApplySavingsReminderPage.url
           )
         }
       }
-    }(loginContinueURL = routes.RegisterController.changeReminder().url)
+    }(loginContinueURL = routes.RegisterController.changeReminder.url)
 
   def getCannotCheckDetailsPage: Action[AnyContent] = Action { implicit request ⇒
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
@@ -415,19 +415,19 @@ class RegisterController @Inject() (
   ): Future[Result] =
     checkSession {
       // no session data => user has not gone through the journey this session => take them to eligibility checks
-      SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+      SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
     } { session ⇒
       session.eligibilityCheckResult.fold[Future[Result]](
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       )(
         _.fold(
           // user has gone through journey already this sessions and were found to be ineligible
-          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible().url),
+          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
           userInfo ⇒
             //by this time user should have gone through email journey and have verified/confirmed email stored in the session
             session.confirmedEmail
               .fold(
-                toFuture(SeeOther(routes.EmailController.getSelectEmailPage().url))
+                toFuture(SeeOther(routes.EmailController.getSelectEmailPage.url))
               )(email ⇒ ifEligibleWithInfo(EligibleWithInfo(userInfo, email, session)))
         )
       )

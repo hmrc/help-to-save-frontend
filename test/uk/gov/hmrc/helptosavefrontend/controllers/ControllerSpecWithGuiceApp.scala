@@ -17,8 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.util.UUID
-
-import akka.stream.Materializer
+import akka.stream.ActorMaterializer
 import akka.util.Timeout
 import com.codahale.metrics.{Counter, Timer}
 import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
@@ -38,6 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.SessionId
+import uk.gov.hmrc.integration.servicemanager.ServiceManagerClient.system
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -83,7 +83,7 @@ trait ControllerSpecWithGuiceApp extends ControllerSpecBase with GuiceOneAppPerS
   val commonDependencies = injector.instanceOf(classOf[CommonPlayDependencies])
   val csrfAddToken: CSRFAddToken = injector.instanceOf[play.filters.csrf.CSRFAddToken]
 
-  implicit val mat: Materializer = mock[Materializer]
+  implicit val mat: ActorMaterializer = ActorMaterializer()
 
   override val mockMetrics = new Metrics(stub[PlayMetrics]) {
     override def timer(name: String): Timer = new Timer()

@@ -56,7 +56,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
   private def actionWithNoEnrols =
     htsAuth.authorisedForHts { _ ⇒ _⇒
       Future.successful(Ok(""))
-    }(routes.EligibilityCheckController.getCheckEligibility().url)
+    }(routes.EligibilityCheckController.getCheckEligibility.url)
 
   private def actionWithEnrols =
     htsAuth.authorisedForHtsWithInfo { _ ⇒ implicit htsContext ⇒
@@ -64,7 +64,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
         case Left(_) ⇒ Future.successful(InternalServerError(""))
         case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
       }
-    }(routes.EligibilityCheckController.getCheckEligibility().url)
+    }(routes.EligibilityCheckController.getCheckEligibility.url)
 
   private def mockAuthWith(error: String) =
     mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString(error))
@@ -137,7 +137,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
           redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/bas-gateway/sign-in?continue_url=")
         redirectTo should include("accountType=individual")
-        redirectTo should include(urlEncode(routes.EligibilityCheckController.getCheckEligibility().url))
+        redirectTo should include(urlEncode(routes.EligibilityCheckController.getCheckEligibility.url))
       }
     }
     "handle MaintenancePeriodException exception and redirect user to outage page" in {
@@ -157,7 +157,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       status(result) shouldBe Status.SEE_OTHER
       val redirectTo =
         redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
-      redirectTo should include("/mdtp/uplift")
+      redirectTo should include("/iv-stub/uplift")
     }
 
     "handle InsufficientConfidenceLevel exception and redirect user to IV Journey" in {
@@ -168,7 +168,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       status(result) shouldBe Status.SEE_OTHER
       val redirectTo =
         redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
-      redirectTo should include("/mdtp/uplift")
+      redirectTo should include("/iv-stub/uplift")
       redirectTo should include("continueURL")
     }
 

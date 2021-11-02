@@ -31,6 +31,8 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class ReminderFrequencyValidationSpec
     extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks with ControllerSpecWithGuiceApp {
 
+  val logger: Logger = Logger(this.getClass)
+
   "ReminderFrequencyValidation" must {
 
     lazy val validation = new ReminderFrequencyValidation(
@@ -42,7 +44,7 @@ class ReminderFrequencyValidationSpec
     )(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
       val result: Either[Seq[FormError], String] =
         reminderFrequencyValidation.reminderFrequencyFormatter.bind("key", Map("key" → value))
-      if (log) Logger.error(value + ": " + result.toString)
+      if (log) logger.error(value + ": " + result.toString)
       result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
     }
 

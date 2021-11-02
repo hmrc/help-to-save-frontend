@@ -129,7 +129,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
             Some(HttpResponse(
               200,
               Json.toJson(EligibilityCheckResponse(response, Some(123.45))),
-                emptyHeaders))
+              emptyHeaders))
           )
 
           val result = connector.getEligibility()
@@ -226,8 +226,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       behave like testCommon(
         mockGet(enrolmentStatusURL),
-        () ⇒ connector.getUserEnrolmentStatus(),
-        EnrolmentStatus.NotEnrolled
+        () ⇒ connector.getUserEnrolmentStatus(), false
       )
 
       "return a Right if the call comes back with HTTP status 200 with " +
@@ -237,10 +236,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
             HttpResponse(
               200,
               Json.parse("""
-                                |{
-                                |  "enrolled"    : true,
-                                |  "itmpHtSFlag" : true
-                                |}
+                           |{
+                           |  "enrolled"    : true,
+                           |  "itmpHtSFlag" : true
+                           |}
             """.stripMargin),
               emptyHeaders
             )
@@ -254,10 +253,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
             HttpResponse(
               200,
               Json.parse("""
-                                |{
-                                |  "enrolled"    : true,
-                                |  "itmpHtSFlag" : false
-                                |}
+                           |{
+                           |  "enrolled"    : true,
+                           |  "itmpHtSFlag" : false
+                           |}
             """.stripMargin),
               emptyHeaders
             )
@@ -271,10 +270,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
             HttpResponse(
               200,
               Json.parse("""
-                                |{
-                                |  "enrolled" : false,
-                                |  "itmpHtSFlag" : false
-                                |}
+                           |{
+                           |  "enrolled" : false,
+                           |  "itmpHtSFlag" : false
+                           |}
             """.stripMargin),
               emptyHeaders
             )
@@ -440,14 +439,14 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
   }
 
   private def testCommon[E, A, B](
-    mockHttp: ⇒ Option[HttpResponse] ⇒ Unit,
-    result: () ⇒ EitherT[Future, E, A],
-    validBody: B,
-    testInvalidJSON: Boolean = true
-  )(
-    implicit
-    writes: Writes[B]
-  ): Unit = { // scalstyle:ignore method.length
+                                   mockHttp: ⇒ Option[HttpResponse] ⇒ Unit,
+                                   result: () ⇒ EitherT[Future, E, A],
+                                   validBody: B,
+                                   testInvalidJSON: Boolean = true
+                                 )(
+                                   implicit
+                                   writes: Writes[B]
+                                 ): Unit = { // scalstyle:ignore method.length
     "make a request to the help-to-save backend" in {
       mockHttp(Some(HttpResponse(200, "")))
       await(result().value)
@@ -461,11 +460,11 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
             Some(
               HttpResponse(
                 200,
-                  Json.parse(
-                    """
-                      |{
-                      |  "foo": "bar"
-                      |}
+                Json.parse(
+                  """
+                    |{
+                    |  "foo": "bar"
+                    |}
               """.stripMargin
                 ),
                 emptyHeaders

@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import akka.stream.Materializer
+
+
+import akka.stream.{ActorMaterializer, Materializer}
 import com.google.inject.Inject
 import configs.syntax._
 import play.api.Configuration
@@ -27,13 +29,13 @@ import uk.gov.hmrc.allowlist.{AkamaiAllowlistFilter => AkamaiAllowListFilter}
 
 import scala.concurrent.Future
 
-class AllowListFilter @Inject() (configuration: Configuration, val mat: Materializer)
+class AllowListFilter @Inject() (configuration: Configuration, val mat:ActorMaterializer)
     extends AkamaiAllowListFilter with Logging {
 
   override def allowlist: Seq[String] =
     configuration.underlying.get[List[String]]("http-header-ip-allowlist").value
 
-  override def excludedPaths: Seq[Call] = Seq(forbiddenCall, healthCheckCall)
+  override def excludedPaths: Seq[Call] = Seq(forbiddenCall)
 
   // This is the `Call` used in the `Redirect` when an IP is present in the header
   // of the HTTP request but is not in the allowList
@@ -44,9 +46,7 @@ class AllowListFilter @Inject() (configuration: Configuration, val mat: Material
     Future.successful(Results.Redirect(forbiddenCall))
   }
 
-  val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden().url)
-
-  val healthCheckCall: Call = Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url)
+  val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden.url)
 
   override def apply(f: (RequestHeader) ⇒ Future[Result])(rh: RequestHeader): Future[Result] = {
     rh.headers.get(trueClient).foreach { ip ⇒
@@ -56,5 +56,4 @@ class AllowListFilter @Inject() (configuration: Configuration, val mat: Material
     }
     super.apply(f)(rh)
   }
-
 }

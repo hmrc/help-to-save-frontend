@@ -11,15 +11,13 @@ val appName = "help-to-save-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = Seq(ws) ++ AppDependencies.compile ++ AppDependencies.test
 
-dependencyOverrides ++= AppDependencies.overrides
-
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-val akkaVersion     = "2.5.23"
+val akkaVersion     = "2.6.14"
 
-val akkaHttpVersion = "10.0.15"
+val akkaHttpVersion = "10.2.6"
 
 dependencyOverrides += "com.typesafe.akka" %% "akka-stream"    % akkaVersion
 
