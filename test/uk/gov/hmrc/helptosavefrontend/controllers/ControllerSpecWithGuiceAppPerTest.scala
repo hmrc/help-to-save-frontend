@@ -45,7 +45,7 @@ trait ControllerSpecWithGuiceAppPerTest extends ControllerSpecBase with GuiceOne
                                       | ]
                                       | mongodb.session.expireAfter = 5 seconds
           """.stripMargin)
-        ) ++ additionalConfig
+        ).withFallback(additionalConfig)
       )
       .build()
 

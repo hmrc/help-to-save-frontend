@@ -204,26 +204,6 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
     "getting enrolment status" must {
 
-      implicit val enrolmentStatusWrites: Writes[EnrolmentStatus] =
-        new Writes[EnrolmentStatus] {
-
-          case class EnrolledJSON(enrolled: Boolean = true, itmpHtSFlag: Boolean)
-
-          case class NotEnrolledJSON(enrolled: Boolean = false)
-
-          implicit val enrolledWrites: Writes[EnrolledJSON] =
-            Json.writes[EnrolledJSON]
-          implicit val notEnrolledFormat: Writes[NotEnrolledJSON] =
-            Json.writes[NotEnrolledJSON]
-
-          override def writes(o: EnrolmentStatus) = o match {
-            case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
-              Json.toJson(EnrolledJSON(itmpHtSFlag = itmpHtSFlag))
-            case EnrolmentStatus.NotEnrolled ⇒ Json.toJson(NotEnrolledJSON())
-          }
-
-        }
-
       behave like testCommon(
         mockGet(enrolmentStatusURL),
         () ⇒ connector.getUserEnrolmentStatus(), false
