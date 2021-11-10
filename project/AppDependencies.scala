@@ -11,11 +11,11 @@ object AppDependencies {
     hmrc                %% "bootstrap-frontend-play-28" % "5.3.0",
     hmrc                %% "play-ui"                    % "9.5.0-play-28",
     hmrc                %% "play-language"              % "5.1.0-play-28",
-    "com.github.kxbmap" %% "configs"                     % "0.4.4",
+    "com.github.kxbmap" %% "configs"                    % "0.4.4",
     "org.typelevel"     %% "cats-core"                  % "2.6.1",
     hmrc                %% "domain"                     % "6.2.0-play-28",
-    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.1" cross CrossVersion.full),
-    "com.github.ghik" % "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
+    compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.5" cross CrossVersion.full),
+    "com.github.ghik" % "silencer-lib" % "1.7.5" % Provided cross CrossVersion.full
 
   )
 
@@ -29,20 +29,9 @@ object AppDependencies {
     "com.typesafe.play"      %% "play"                        % "2.8.8"             % "test",
     "com.miguno.akka"        %% "akka-mock-scheduler"         % "0.5.5"             % "test",
     "uk.gov.hmrc"            %% "bootstrap-test-play-28"      % "5.16.0"            % "test",
-    "com.vladsch.flexmark"    %  "flexmark-all"                 % "0.35.10"           % "test"
+    "com.vladsch.flexmark"    %  "flexmark-all"               % "0.35.10"           % "test"
   )
 
   def apply(): Seq[ModuleID] = compile ++ test
-
-  val akka = "com.typesafe.akka"
-  val akkaVersion = "2.6.14"
-  val akkaHttpVersion = "10.2.6"
-  val overrides = Seq(
-    akka %% "akka-stream"    % akkaVersion,
-    akka %% "akka-protobuf"  % akkaVersion,
-    akka %% "akka-slf4j"     % akkaVersion,
-    akka %% "akka-actor"     % akkaVersion,
-    akka %% "akka-http-core" % "10.1.12"
-  )
 
 }
