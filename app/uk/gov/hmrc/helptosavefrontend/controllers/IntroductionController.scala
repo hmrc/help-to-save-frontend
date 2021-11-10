@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,7 @@ class IntroductionController @Inject() (
         {
           // not enrolled
           () ⇒
-            SeeOther(routes.AccessAccountController.getNoAccountPage().url)
+            SeeOther(routes.AccessAccountController.getNoAccountPage.url)
         }, { e ⇒
           logger.warn(s"Could not check enrolment: $e", htsContext.nino)
           internalServerError()
@@ -104,5 +104,5 @@ class IntroductionController @Inject() (
             )
       )
 
-    }(routes.IntroductionController.getAboutHelpToSave().url)
+    }(routes.IntroductionController.getAboutHelpToSave.url)
 }

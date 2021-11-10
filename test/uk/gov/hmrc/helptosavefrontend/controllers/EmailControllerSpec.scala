@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import java.util.Base64
 
 import cats.data.EitherT
 import cats.instances.future._
-import play.api.mvc.{AnyContentAsEmpty, Result}
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
@@ -37,8 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.AlreadyVerified
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, UpdateReminderEmail}
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
+import uk.gov.hmrc.helptosavefrontend.models.reminder.UpdateReminderEmail
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, NINO}
 import uk.gov.hmrc.helptosavefrontend.views.html.email._
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
@@ -160,7 +159,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle Digital(new applicant) users with an existing valid email from GG and already gone through eligibility checks" in {
@@ -198,7 +197,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage.url)
       }
 
       "use correct back link for digital applicants when they come from check details page" in {
@@ -273,7 +272,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage.url)
       }
 
       "handle DE users with NO email from GG" in {
@@ -286,7 +285,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage.url)
       }
 
       "handle DE users with an Missing UserInfo from Auth" in {
@@ -299,7 +298,7 @@ class EmailControllerSpec
 
         val result = getSelectEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage.url)
       }
 
       "handle unexpected errors during enrolment check" in {
@@ -348,7 +347,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(None)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle errors during session cache lookup in mongo" in {
@@ -398,7 +397,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(Some(testEmail))
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail.url)
       }
 
       "handle existing digital account holders and redirect them to nsi" in {
@@ -425,7 +424,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(None)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle DE users - throw server error if there is an existing session but no email" in {
@@ -470,7 +469,7 @@ class EmailControllerSpec
 
         val result = selectEmailSubmit(Some(testEmail))
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail.url)
       }
 
       "handle DE user who submitted form with errors" in {
@@ -513,7 +512,7 @@ class EmailControllerSpec
 
         val result = getGiveEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle Digital(new applicant) users with an existing valid email from GG and already gone through eligibility checks" in {
@@ -528,7 +527,7 @@ class EmailControllerSpec
 
         val result = getGiveEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
       }
 
       "handle Digital(new applicant) users with an existing INVALID email from GG and should display giveEmailPage" in {
@@ -609,7 +608,7 @@ class EmailControllerSpec
 
         val result = getGiveEmailPage()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
       }
 
       "DE users should not contain any Back link" in {
@@ -713,7 +712,7 @@ class EmailControllerSpec
 
         val result = giveEmailSubmit(email)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle errors during session cache lookup in mongo" in {
@@ -760,7 +759,7 @@ class EmailControllerSpec
 
         val result = giveEmailSubmit(email)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail.url)
       }
 
       "handle existing digital account holders and redirect them to nsi" in {
@@ -786,7 +785,7 @@ class EmailControllerSpec
 
         val result = giveEmailSubmit(email)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle DE user who submitted form with new-email" in {
@@ -800,7 +799,7 @@ class EmailControllerSpec
 
         val result = giveEmailSubmit(email)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmail.url)
       }
 
       "handle DE user who submitted form with errors" in {
@@ -837,7 +836,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks and no bank details in session" in {
@@ -853,7 +852,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
 
       "handle Digital(new applicant) users with an existing valid email from GG, already gone through eligibility checks but bank details are already in session" in {
@@ -897,7 +896,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage.url)
       }
 
       "handle Digital(new applicant) users with an existing INVALID email from GG and already gone through eligibility checks" in {
@@ -911,7 +910,7 @@ class EmailControllerSpec
 
         val result = emailConfirmed(encryptedEmail)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage.url)
       }
 
       "handle existing digital account holders and redirect them to nsi" in {
@@ -996,7 +995,7 @@ class EmailControllerSpec
         val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed.url)
 
       }
 
@@ -1020,7 +1019,7 @@ class EmailControllerSpec
         val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed.url)
 
       }
 
@@ -1054,7 +1053,7 @@ class EmailControllerSpec
         val result = emailConfirmedCallback("blah blah")
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
       }
 
       "handle Digital users who have not gone through eligibility checks and are eligible" in {
@@ -1085,7 +1084,7 @@ class EmailControllerSpec
         val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed.url)
       }
 
       "handle Digital users who have not gone through eligibility checks and not eligible" in {
@@ -1100,7 +1099,7 @@ class EmailControllerSpec
         val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
       }
 
       "handle unexpected errors during enrolment check" in {
@@ -1146,7 +1145,7 @@ class EmailControllerSpec
         val result = emailConfirmedCallback(encryptedParams)
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getEmailConfirmed.url)
       }
 
       "handle DE users and handle errors during updating email with NS&I" in {
@@ -1179,7 +1178,7 @@ class EmailControllerSpec
         val result = emailConfirmedCallback("blah blah")
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
       }
 
     }
@@ -1214,7 +1213,7 @@ class EmailControllerSpec
 
         val result = confirmEmail
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle Digital users who have already verified their email" in {
@@ -1386,7 +1385,7 @@ class EmailControllerSpec
 
         val result = confirmEmailErrorSubmit(true)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
       }
 
       "handle Digital users and redirect to the emailConfirmed endpoint if there is an email for the user and the user selects to continue" in {
@@ -1413,7 +1412,7 @@ class EmailControllerSpec
 
         val result = confirmEmailErrorSubmit(false)
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.IntroductionController.getAboutHelpToSave().url)
+        redirectLocation(result) shouldBe Some(routes.IntroductionController.getAboutHelpToSave.url)
       }
 
       "handle Digital users and show the verify email error page again if there is an error in the form" in {
@@ -1486,7 +1485,7 @@ class EmailControllerSpec
 
           val result = getEmailConfirmed
           status(result) shouldBe 303
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
       }
@@ -1502,7 +1501,7 @@ class EmailControllerSpec
 
           val result = getEmailConfirmed
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailError().url)
+          redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailError.url)
         }
 
         "there is no confirmed email in the session when there is no email for the user" in {
@@ -1524,7 +1523,7 @@ class EmailControllerSpec
 
           val result = getEmailConfirmed
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+          redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
         }
 
         "the call to session cache fails" in {
@@ -1585,7 +1584,7 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
 
       "handle Digital users and redirect to the checkDetailsPage if the user is in the process of changing details" in {
@@ -1612,7 +1611,7 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage.url)
       }
 
       "handle Digital users and redirect to the eligibilityCheck if session doesnt contain eligibility result" in {
@@ -1625,7 +1624,7 @@ class EmailControllerSpec
 
         val result = controller.emailUpdatedSubmit()(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "handle existing digital account holders and redirect them to NSI" in {

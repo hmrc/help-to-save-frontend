@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
 
   <h1 class="heading-large">@title</h1>
  
-  @form(routes.EmailController.emailUpdatedSubmit())(
+  @form(routes.EmailController.emailUpdatedSubmit)(
     Html("""<div class="form-group"><button id="continue-to-create-account" class="button" type="submit">""" + messages("hts.email-updated.continue_button") + """</button></div>""")
   )
 

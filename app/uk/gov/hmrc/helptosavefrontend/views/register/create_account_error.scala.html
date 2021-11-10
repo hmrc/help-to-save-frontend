@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@
   <p>@Html(Messages("hts.account-creation-error.p1"))</p>
   <p>@Html(Messages("hts.account-creation-error.p2"))</p>
   <p>@Html(Messages("hts.account-creation-error.p3"))</p>
-  <a class="button" role="button" href=@routes.RegisterController.getCreateAccountPage().url>@Messages("hts.account-creation-error.button.try-again")</a>
+  <a class="button" role="button" href=@routes.RegisterController.getCreateAccountPage.url>@Messages("hts.account-creation-error.button.try-again")</a>
   <p class="subsection"><a href="@appConfig.govUkURL">@Messages("hts.account-creation-error.exit-button")</a></p>
 
 }

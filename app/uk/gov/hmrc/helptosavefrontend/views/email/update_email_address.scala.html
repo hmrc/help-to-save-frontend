@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-@import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
@@ -57,7 +56,7 @@
 
         <h1 class="heading-large">@title</h1>
         <p>@Html(Messages("hts.email-verification.intro"))</p>
-        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit(), 'class -> "group subsection--wide", 'novalidate → "") {
+        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit, 'class -> "group subsection--wide", 'novalidate → "") {
             <div class="panel panel-border-wide">
                 <p>@messages("hts.email-verification.note")</p>
             </div>

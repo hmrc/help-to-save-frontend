@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,8 +47,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
     "get user enrolment status" must {
 
-      val nino = "WM123456C"
-
       "return a successful response" in {
 
         (htsConnector
@@ -62,8 +60,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
     }
 
     "set ITMPFlag" must {
-
-      val nino = "WM123456C"
 
       "return a successful response" in {
 
@@ -79,7 +75,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
     "store email" must {
 
-      val nino = "WM123456C"
       val email = "user@test.com"
 
       "return a successful response" in {
@@ -96,8 +91,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
     "get email" must {
 
-      val nino = "WM123456C"
-
       "return a successful response" in {
 
         (htsConnector
@@ -111,8 +104,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
     }
 
     "checking eligibility" must {
-
-      val nino = "WM123456C"
 
       "return a successful response if the connector returns a successful response" in {
 

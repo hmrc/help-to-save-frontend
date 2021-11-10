@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ class RegisterControllerSpec
 
       val result = doRequest
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+      redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
     }
 
   "The RegisterController" when {
@@ -379,7 +379,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
       }
 
       "handle the case when there are no bank details stored in the session" in {
@@ -396,7 +396,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
 
     }
@@ -436,7 +436,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage.url)
       }
 
       "indicate to the user that account creation was successful " +
@@ -463,7 +463,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage.url)
       }
 
       "not update user counts but enrol the user if the user already had an account" in {
@@ -508,7 +508,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
       }
 
       "redirect user to bank_details page if the session doesn't contain bank details" in {
@@ -520,7 +520,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
 
       "redirect to the create account error page" when {
@@ -536,7 +536,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage.url)
         }
 
         "there is an error writing to session" in {
@@ -562,7 +562,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage.url)
         }
       }
 
@@ -579,7 +579,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage.url)
         }
 
         "the errorMessageId received in the response from nsi is ZYRC0707" in {
@@ -594,7 +594,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage.url)
         }
       }
 
@@ -633,7 +633,7 @@ class RegisterControllerSpec
 
           val result = getAccountCreatedPage()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
         "there is no account number in session" in {
@@ -645,7 +645,7 @@ class RegisterControllerSpec
 
           val result = getAccountCreatedPage()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
         "the person is not enrolled to HTS" in {
@@ -656,7 +656,7 @@ class RegisterControllerSpec
 
           val result = getAccountCreatedPage()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
         "there is no email in the session" in {
@@ -670,7 +670,7 @@ class RegisterControllerSpec
 
           val result = getAccountCreatedPage()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
       }
@@ -792,7 +792,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
       }
 
       "handle the case when there are no bank details stored in the session" in {
@@ -808,7 +808,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
     }
 
@@ -830,7 +830,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
       }
 
     }
@@ -853,7 +853,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
 
     }
@@ -875,7 +875,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage().url)
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage.url)
       }
     }
 
@@ -901,7 +901,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage.url)
       }
 
     }

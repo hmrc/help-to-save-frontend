@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@
   serviceInfoContent = serviceInfoContent) {
 
     <h1 class="heading-large">@title</h1>
-    <p>@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail", email, routes.AccountHolderController.getUpdateYourEmailAddress().url))</p>
+    <p>@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail", email, routes.AccountHolderController.getUpdateYourEmailAddress.url))</p>
     
     <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.what-next")</h2>
     <p class="content">@Html(Messages("hts.email-verification.existing-user.check-your-email.content1"))</p>
@@ -51,7 +51,7 @@
     <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.h3")</h2>
 
     @{
-      helpers.form(routes.AccountHolderController.onSubmit())(
+      helpers.form(routes.AccountHolderController.onSubmit)(
         Html(
           s"""
           |<input type="hidden" name="new-email-address" value="$email">

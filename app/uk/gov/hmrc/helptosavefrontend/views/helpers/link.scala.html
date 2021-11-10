@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,5 +14,5 @@
  * limitations under the License.
  *@
 
-@(externalLink: String, message: String, category: String, action: String, label: String)(implicit messages: play.api.i18n.Messages)
+@(externalLink: String, message: String, category: String, action: String, label: String)
 <a href=@externalLink data-ga-event-category="@category" data-ga-event-action="@action" data-ga-event-label="@label" class="ga-track-event">@message</a>

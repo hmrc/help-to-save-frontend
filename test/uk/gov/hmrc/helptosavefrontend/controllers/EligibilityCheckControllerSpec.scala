@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,7 +126,7 @@ class EligibilityCheckControllerSpec
 
         val result = getIsEligible()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
       }
 
       "redirect to check eligibility if the session data indicates they have not done the eligibility checks yet" in {
@@ -138,7 +138,7 @@ class EligibilityCheckControllerSpec
 
         val result = getIsEligible()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
     }
 
@@ -171,7 +171,7 @@ class EligibilityCheckControllerSpec
 
         val result = getIsNotEligible()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
       }
 
       "redirect to check eligibility if the session data indicates they have not done the eligibility checks yet" in {
@@ -183,7 +183,7 @@ class EligibilityCheckControllerSpec
 
         val result = getIsNotEligible()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "show an error if the ineligibility reason cannot be parsed" in {
@@ -291,7 +291,7 @@ class EligibilityCheckControllerSpec
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
 
       }
 
@@ -305,7 +305,7 @@ class EligibilityCheckControllerSpec
 
         val result = controller.getThinkYouAreEligiblePage(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
       }
 
       "show the correct page if the session data indicates that the user is ineligible" in {
@@ -351,7 +351,7 @@ class EligibilityCheckControllerSpec
 
           val result = doCheckEligibilityRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
         }
 
         "show the you are not eligible page if the eligibility check indicates the user is ineligible" in {
@@ -367,7 +367,7 @@ class EligibilityCheckControllerSpec
 
           val result = doCheckEligibilityRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
         }
 
         "redirect to a previously attempted account page if the session indicates there was" +
@@ -484,7 +484,7 @@ class EligibilityCheckControllerSpec
 
           val result = doCheckEligibilityRequest()
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
         }
 
         "immediately redirect to the you are eligible page if they have session data " +
@@ -498,7 +498,7 @@ class EligibilityCheckControllerSpec
           }
           val result = doCheckEligibilityRequest()
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
         }
 
         "redirect to NS&I if the eligibility check indicates the user already has an account" in {
@@ -531,7 +531,7 @@ class EligibilityCheckControllerSpec
           val responseFuture: Future[PlayResult] = doCheckEligibilityRequest()
           val result = Await.result(responseFuture, 5.seconds)
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(responseFuture) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+          redirectLocation(responseFuture) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
         }
 
         "redirect to the not eligible page if there is no session data and the eligibilty check" +
@@ -547,7 +547,7 @@ class EligibilityCheckControllerSpec
 
             val result = doCheckEligibilityRequest()
             status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+            redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
           }
 
         }
@@ -563,7 +563,7 @@ class EligibilityCheckControllerSpec
 
           val result = Await.result(responseFuture, 5.seconds)
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(responseFuture) shouldBe Some(routes.EligibilityCheckController.getMissingInfoPage().url)
+          redirectLocation(responseFuture) shouldBe Some(routes.EligibilityCheckController.getMissingInfoPage.url)
         }
 
         "do the eligibility checks when the enable-early-cap-check config is set to true " +
@@ -583,7 +583,7 @@ class EligibilityCheckControllerSpec
 
           val result = controller.getCheckEligibility(FakeRequest())
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsEligible.url)
         }
 
         "show the TotalCapReached page when the enable-early-cap-check config is set to true " +
@@ -600,7 +600,7 @@ class EligibilityCheckControllerSpec
 
           val result = controller.getCheckEligibility(FakeRequest())
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getTotalCapReachedPage.url)
         }
 
         "show the DailyCapReached page when the enable-early-cap-check config is set to true " +
@@ -617,7 +617,7 @@ class EligibilityCheckControllerSpec
 
           val result = controller.getCheckEligibility(FakeRequest())
           status(result) shouldBe Status.SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getDailyCapReachedPage.url)
         }
 
         "return an error" when {
@@ -749,7 +749,7 @@ class EligibilityCheckControllerSpec
 
         val result = Await.result(response, 5.seconds)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(response) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(response) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
     }
@@ -770,7 +770,7 @@ class EligibilityCheckControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getGiveEmailPage.url)
       }
 
       "redirect to the select email page if the user has an email" in {
@@ -791,7 +791,7 @@ class EligibilityCheckControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
       }
 
       "redirect to the check eligibility page if the user has no session" in {
@@ -802,7 +802,7 @@ class EligibilityCheckControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "redirect to the check eligibility page if the user has no eligiblity check result in their session" in {
@@ -813,7 +813,7 @@ class EligibilityCheckControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "redirect to the not eligible page if the user is not eligible" in {
@@ -824,7 +824,7 @@ class EligibilityCheckControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
       }
 
     }

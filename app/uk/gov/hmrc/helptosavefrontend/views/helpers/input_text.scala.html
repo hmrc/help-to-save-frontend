@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,20 @@
  * limitations under the License.
  *@
 
-@(id: String,
-label: String,
-value: String = "",
-secondaryLabel: Option[String] = None,
-inputClass: Option[String] = None,
-hint: Option[String] = None,
-name: String = "value",
-inputType: String = "text",
-labelClass: Option[String] = None,
-errorMessage: Option[Html] = None,
-describedByHint: Option[String] = None,
-describedByError: Option[String] = None
-)(implicit messages: Messages)
+@(
+    id: String,
+    label: String,
+    value: String = "",
+    secondaryLabel: Option[String] = None,
+    inputClass: Option[String] = None,
+    hint: Option[String] = None,
+    name: String = "value",
+    inputType: String = "text",
+    labelClass: Option[String] = None,
+    errorMessage: Option[Html] = None,
+    describedByHint: Option[String] = None,
+    describedByError: Option[String] = None
+)
 
 <div class="form-group @if(errorMessage.isDefined){form-group-error}">
     <label class="form-label @if(labelClass.nonEmpty){@labelClass}" for="@id">@label</label>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,14 @@ import cats.syntax.either._
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.data.FormError
-import play.api.{Configuration, Logger}
+import play.api.{Configuration, Logging}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.ErrorMessages._
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 // scalastyle:off magic.number
-class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks with Logging {
 
   "EmailValidation" must {
 
@@ -38,7 +38,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
       emailValidation: EmailValidation
     )(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
       val result: Either[Seq[FormError], String] = emailValidation.emailFormatter.bind("key", Map("key" → value))
-      if (log) Logger.error(value + ": " + result.toString)
+      if (log) logger.error(s"$value :  ${result.toString}")
       result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
     }
 

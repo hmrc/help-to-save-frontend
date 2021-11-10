@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ object BankDetailsErrors {
   def getBankDetailsBackendErrorMessage(
     form: Form[_],
     key: String
-  )(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] =
+  )(implicit messages: Messages): Option[String] =
     if (form.sortCodeBackendInvalid(key)) {
       Some(messages("hts.bank_details.check_your_sortcode_is_correct"))
     } else if (form.accountNumberBackendInvalid(key)) {

@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
@@ -43,5 +42,5 @@
   <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.what-next")</h2>
   <p class="content">@Html(messages("hts.email-verification.check-your-email.content1"))</p>
   <h2 class="heading-medium">@messages("hts.email-verification.check-your-email.where-used-heading")</h2>
-  <p class="content">@Html(Messages("hts.email-verification.check-your-email.where-used", routes.EmailController.confirmEmail().url))</p>
+  <p class="content">@Html(Messages("hts.email-verification.check-your-email.where-used", routes.EmailController.confirmEmail.url))</p>
 }

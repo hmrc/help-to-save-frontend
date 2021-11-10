@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ object HttpClient {
 
   private val rawHttpReads = new RawHttpReads
 
-  implicit class HttpClientOps(val http: uk.gov.hmrc.play.bootstrap.http.HttpClient) extends AnyVal {
+  implicit class HttpClientOps(val http:HttpClient) extends AnyVal {
     def get(
       url: String,
       queryParams: Map[String, String] = Map.empty[String, String],

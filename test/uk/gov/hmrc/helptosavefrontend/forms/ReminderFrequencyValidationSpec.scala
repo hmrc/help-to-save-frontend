@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.forms
 
 import cats.syntax.either._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Logger
+import play.api.Logging
 import play.api.data.FormError
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
@@ -30,7 +30,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class ReminderFrequencyValidationSpec
-    extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks with ControllerSpecWithGuiceApp {
+    extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks with ControllerSpecWithGuiceApp with Logging {
 
   "ReminderFrequencyValidation" must {
 
@@ -43,7 +43,7 @@ class ReminderFrequencyValidationSpec
     )(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
       val result: Either[Seq[FormError], String] =
         reminderFrequencyValidation.reminderFrequencyFormatter.bind("key", Map("key" → value))
-      if (log) Logger.error(value + ": " + result.toString)
+      if (log) logger.error(s"$value :  ${result.toString}")
       result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
     }
 

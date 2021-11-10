@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class AccessAccountController @Inject() (
               { () ⇒
                 Ok(confirmCheckEligibility())
               }, { _ ⇒
-                SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+                SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
               },
               () ⇒
                 SeeOther(
@@ -93,7 +93,7 @@ class AccessAccountController @Inject() (
         )
       )
 
-    }(loginContinueURL = routes.AccessAccountController.getNoAccountPage().url)
+    }(loginContinueURL = routes.AccessAccountController.getNoAccountPage.url)
 
   private def redirectToAccountHolderPage(pageURL: String)(
     implicit
@@ -117,12 +117,12 @@ class AccessAccountController @Inject() (
       {
         // not enrolled
         () ⇒
-          storeAttemptedRedirectThenRedirect(routes.AccessAccountController.getNoAccountPage().url)
+          storeAttemptedRedirectThenRedirect(routes.AccessAccountController.getNoAccountPage.url)
       }, {
         // enrolment check error
         e ⇒
           logger.warn(s"Could not check enrolment ($e) - proceeding to check eligibility", htsContext.nino)
-          storeAttemptedRedirectThenRedirect(routes.EligibilityCheckController.getCheckEligibility().url)
+          storeAttemptedRedirectThenRedirect(routes.EligibilityCheckController.getCheckEligibility.url)
       }, { () ⇒
         // enrolled
         SeeOther(pageURL)

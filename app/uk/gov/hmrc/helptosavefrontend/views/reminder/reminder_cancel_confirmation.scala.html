@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
 
@@ -41,7 +39,7 @@
     </div>
             <h2 class="heading-medium">@Messages("hts.reminder-confirmation.h2")</h2>
 
-            <p>@Messages("hts.reminder-cancel-confirmation.p1-1") <a href=@routes.ReminderController.getEmailsavingsReminders().url>
+            <p>@Messages("hts.reminder-cancel-confirmation.p1-1") <a href=@routes.ReminderController.getEmailsavingsReminders.url>
             @Html(Messages("hts.reminder-cancel-confirmation.li-signup"))</a>
                 @Html(Messages("hts.reminder-cancel-confirmation.p1-2"))</p>
 

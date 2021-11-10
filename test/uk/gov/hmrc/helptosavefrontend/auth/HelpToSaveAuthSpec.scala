@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
   private def actionWithNoEnrols =
     htsAuth.authorisedForHts { implicit request ⇒ implicit htsContext ⇒
       Future.successful(Ok(""))
-    }(routes.EligibilityCheckController.getCheckEligibility().url)
+    }(routes.EligibilityCheckController.getCheckEligibility.url)
 
   private def actionWithEnrols =
     htsAuth.authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -64,7 +64,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
         case Left(_) ⇒ Future.successful(InternalServerError(""))
         case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
       }
-    }(routes.EligibilityCheckController.getCheckEligibility().url)
+    }(routes.EligibilityCheckController.getCheckEligibility.url)
 
   private def mockAuthWith(error: String) =
     mockAuthWithRetrievalsWithFail(AuthWithCL200)(fromString(error))
@@ -137,7 +137,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
           redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
         redirectTo should include("/gg/sign-in")
         redirectTo should include("accountType=individual")
-        redirectTo should include(urlEncode(routes.EligibilityCheckController.getCheckEligibility().url))
+        redirectTo should include(urlEncode(routes.EligibilityCheckController.getCheckEligibility.url))
       }
     }
     "handle MaintenancePeriodException exception and redirect user to outage page" in {

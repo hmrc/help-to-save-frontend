@@ -1,8 +1,6 @@
 import sbt.{Compile, taskKey, _}
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
-import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-import uk.gov.hmrc.versioning.SbtGitVersioning
 import wartremover.{WartRemover, Warts}
 
 import scala.language.postfixOps
@@ -10,8 +8,6 @@ import scala.language.postfixOps
 val appName = "help-to-save-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = Seq(ws) ++ AppDependencies.compile ++ AppDependencies.test
-
-dependencyOverrides ++= AppDependencies.overrides
 
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
 lazy val plugins: Seq[Plugins] = Seq.empty
@@ -22,7 +18,7 @@ lazy val scoverageSettings = {
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|views.*);.*(AuthService|BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimum := 92,
+    ScoverageKeys.coverageMinimumStmtTotal := 92,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     parallelExecution in Test := false
@@ -67,10 +63,13 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
 
 lazy val commonSettings = Seq(
   addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"),
-  majorVersion := 2,
   evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
   resolvers += Resolver.bintrayRepo("hmrc", "releases"),
-  scalacOptions ++= Seq("-Xcheckinit", "-feature")
+  scalacOptions ++= Seq(
+      "-Xcheckinit",
+      "-feature",
+      "-P:silencer:lineContentFilters=^\\w"    // Avoid '^\\w' warnings for Twirl template
+    )
 ) ++
   scalaSettings ++ publishingSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
 
@@ -85,14 +84,15 @@ lazy val microservice = Project(appName, file("."))
     )
   )
   .enablePlugins(
-    Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*
+    Seq(play.sbt.PlayScala, SbtDistributablesPlugin) ++ plugins: _*
   )
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(PlayKeys.playDefaultPort := 7000)
+  .settings(scalaVersion := "2.12.13")
   .settings(
+    majorVersion := 2,
     libraryDependencies ++= appDependencies
   )
-  .settings(scalaVersion := "2.12.11")
   .settings(
     formatMessageQuotes := {
       import sys.process._

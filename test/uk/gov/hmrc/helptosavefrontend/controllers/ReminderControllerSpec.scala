@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -242,7 +242,7 @@ class ReminderControllerSpec
 
     "should return the reminder setting page when asked for it" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      val bckLink = routes.ReminderController.getEmailsavingsReminders().url
+      val bckLink = routes.ReminderController.getEmailsavingsReminders.url
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -912,7 +912,7 @@ class ReminderControllerSpec
 
       val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
     "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
@@ -925,7 +925,7 @@ class ReminderControllerSpec
 
       val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
   }
@@ -985,7 +985,7 @@ class ReminderControllerSpec
 
   def checkIsErrorPage(result: Future[Result]): Unit = {
     status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
   }
 
   "show user an in-eligible page if the session is found but user is not eligible" in {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ class HTSAuditor @Inject() (val auditConnector: AuditConnector)(implicit transfo
 
   def sendEvent(event: HTSEvent, nino: NINO)(implicit ec: ExecutionContext): Unit = {
     val checkEventResult = auditConnector.sendExtendedEvent(event.value)
-    checkEventResult.onFailure {
+    checkEventResult.failed.foreach {
       case NonFatal(e) ⇒
         logger.warn(
           s"Unable to post audit event of type ${event.value.auditType} to audit connector - ${e.getMessage}",

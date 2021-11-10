@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,9 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO, ValidateBankDetailsRequest}
+import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, ValidateBankDetailsRequest}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{toFuture, _}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
 
@@ -60,16 +58,16 @@ class BankAccountController @Inject() (
   val isFeatureEnabled: Boolean = frontendAppConfig.reminderServiceFeatureSwitch
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
-      routes.RegisterController.getCreateAccountPage().url
+      routes.RegisterController.getCreateAccountPage.url
     } else {
       if (session.pendingEmail.isDefined) {
-        routes.EmailController.getEmailConfirmed().url
+        routes.EmailController.getEmailConfirmed.url
       } else if (!isFeatureEnabled) {
-        routes.EmailController.getSelectEmailPage().url
+        routes.EmailController.getSelectEmailPage.url
       } else if (session.hasSelectedReminder) {
-        routes.ReminderController.getApplySavingsReminderSignUpPage().url
+        routes.ReminderController.getApplySavingsReminderSignUpPage.url
       } else {
-        routes.EmailController.getGiveEmailPage().url
+        routes.EmailController.getGiveEmailPage.url
       }
     }
 
@@ -83,7 +81,7 @@ class BankAccountController @Inject() (
             Ok(bankAccountDetails(BankDetails.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
         )
       }
-    }(loginContinueURL = routes.BankAccountController.getBankDetailsPage().url)
+    }(loginContinueURL = routes.BankAccountController.getBankDetailsPage.url)
 
   def submitBankDetails(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -110,7 +108,7 @@ class BankAccountController @Inject() (
                             logger.warn(s"Could not update session with bank details: $error")
                             internalServerError()
                           },
-                          _ ⇒ SeeOther(routes.RegisterController.getCreateAccountPage().url)
+                          _ ⇒ SeeOther(routes.RegisterController.getCreateAccountPage.url)
                         )
                     } else {
                       val formWithErrors = if (result.isValid && !result.sortCodeExists) {
@@ -135,5 +133,5 @@ class BankAccountController @Inject() (
           )
       }
 
-    }(loginContinueURL = routes.BankAccountController.submitBankDetails().url)
+    }(loginContinueURL = routes.BankAccountController.submitBankDetails.url)
 }

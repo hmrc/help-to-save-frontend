@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,11 +39,11 @@ trait CapCheckBehaviour {
           ifAllowed
         }, { userCapResponse ⇒
           if (userCapResponse.isTotalCapDisabled && userCapResponse.isDailyCapDisabled) {
-            SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+            SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
           } else if (userCapResponse.isTotalCapDisabled || userCapResponse.isTotalCapReached) {
-            SeeOther(routes.RegisterController.getTotalCapReachedPage().url)
+            SeeOther(routes.RegisterController.getTotalCapReachedPage.url)
           } else if (userCapResponse.isDailyCapDisabled || userCapResponse.isDailyCapReached) {
-            SeeOther(routes.RegisterController.getDailyCapReachedPage().url)
+            SeeOther(routes.RegisterController.getDailyCapReachedPage.url)
           } else {
             ifAllowed
           }

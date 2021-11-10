@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ class WhitelistFilter @Inject() (configuration: Configuration, val mat: Material
     Future.successful(Results.Redirect(forbiddenCall))
   }
 
-  val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden().url)
+  val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden.url)
 
   val healthCheckCall: Call = Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url)
 

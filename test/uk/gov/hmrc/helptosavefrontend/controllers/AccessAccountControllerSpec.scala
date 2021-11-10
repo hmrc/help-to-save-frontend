@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ class AccessAccountControllerSpec
 
         val result = doRequest()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "redirect to a previously attempted redirect URL if the user is enrolled and the session indicates they were" +
@@ -188,7 +188,7 @@ class AccessAccountControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage.url)
       }
 
       "store the attempted redirect location and redirect to check eligibility if there is  an error" +
@@ -203,7 +203,7 @@ class AccessAccountControllerSpec
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
       }
 
       "show an error screen if there is an error storing the session data" in {

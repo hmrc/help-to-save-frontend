@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@
                     @Messages("hts.reminder-dashboard.t1-2")
                 </dd>
                 <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" href=@routes.ReminderController.getSelectedRendersPage().url>
+                    <a class="govuk-link" href=@routes.ReminderController.getSelectedRendersPage.url>
                     @Messages("hts.reminder-dashboard-change-cancel")
                     </a>
                 </dd>
@@ -61,7 +61,7 @@
                 @email
             </dd>
             <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href=@routes.AccountHolderController.getUpdateYourEmailAddress().url>
+                <a class="govuk-link" href=@routes.AccountHolderController.getUpdateYourEmailAddress.url>
                 @Messages("hts.reminder-dashboard-change")
                 </a>
             </dd>

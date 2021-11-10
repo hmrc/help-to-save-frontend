@@ -1,5 +1,5 @@
 @*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@
       <li>@Messages("hts.register.you-are-eligible.li2")</li>
     </ul>
 
-    @form(routes.EligibilityCheckController.youAreEligibleSubmit()) {
+    @form(routes.EligibilityCheckController.youAreEligibleSubmit) {
         @CSRF.formField(request)
         @submit('_buttonClass -> "", 'id → "start-creating-account") {
             @Messages("hts.global.continue-button")

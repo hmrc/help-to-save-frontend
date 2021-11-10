@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultT
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.testutil._
-import uk.gov.hmrc.smartstub.{AutoGen, _}
+import uk.gov.hmrc.smartstub.AutoGen
 import scala.language.implicitConversions
 
 object TestData {
