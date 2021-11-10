@@ -41,19 +41,19 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
   )
 
   Seq(
-    WartRemover.autoImport.wartremoverErrors in (Compile, compile) ++= Warts.allBut(excludedWarts: _*),
+     (Compile / compile / WartRemover.autoImport.wartremoverErrors) ++= Warts.allBut(excludedWarts: _*),
     // disable some wart remover checks in tests - (Any, Null, PublicInference) seems to struggle with
     // scalamock, (Equals) seems to struggle with stub generator AutoGen and (NonUnitStatements) is
     // imcompatible with a lot of WordSpec
-    WartRemover.autoImport.wartremoverErrors in (Test, compile) --= Seq(
+    (Test / compile / WartRemover.autoImport.wartremoverErrors) --= Seq(
       Wart.Any,
       Wart.Equals,
       Wart.Null,
       Wart.NonUnitStatements,
       Wart.PublicInference
     ),
-    wartremoverExcluded in (Compile, compile) ++=
-      routes.in(Compile).value ++
+    (Compile / compile / wartremoverExcluded) ++=
+      (Compile / routes).value ++
         ignoreFiles(baseDirectory.value) ++
         (baseDirectory.value ** "*.sc").get ++
         Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala") ++
