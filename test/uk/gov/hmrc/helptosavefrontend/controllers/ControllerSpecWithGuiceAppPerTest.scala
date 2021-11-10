@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.{Metrics ⇒ PlayMetrics}
+import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
 import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.guice.GuiceOneAppPerTest
 import play.api.i18n.{I18nSupport, MessagesApi}

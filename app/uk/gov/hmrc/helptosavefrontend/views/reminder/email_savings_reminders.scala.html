@@ -14,16 +14,10 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import views.html.helper.CSRF
-
-@import uk.gov.hmrc.helptosavefrontend.views.helpers.errorPrefix
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
@@ -45,6 +39,6 @@
     <p>@Html(Messages("hts.email-saving-remainders.intro"))</p>
     <p> @Html(Messages("hts.email-saving-remainders.note"))</p>
 
-    <p class="subsection--wide push--bottom"><a href=@routes.ReminderController.getSelectRendersPage().url class="button" role="button">@messages("hts.email-saving-remainders-button")</a></p>
+    <p class="subsection--wide push--bottom"><a href=@routes.ReminderController.getSelectRendersPage.url class="button" role="button">@messages("hts.email-saving-remainders-button")</a></p>
 
 }

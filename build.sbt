@@ -11,18 +11,30 @@ val appName = "help-to-save-frontend"
 
 lazy val appDependencies: Seq[ModuleID] = Seq(ws) ++ AppDependencies.compile ++ AppDependencies.test
 
-dependencyOverrides ++= AppDependencies.overrides
-
 lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used in all messages")
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
+
+val akkaVersion     = "2.6.14"
+
+val akkaHttpVersion = "10.2.6"
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-stream"    % akkaVersion
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-protobuf"  % akkaVersion
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-actor"     % akkaVersion
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|views.*);.*(AuthService|BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimum := 92,
+    ScoverageKeys.coverageMinimumStmtTotal := 92,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     parallelExecution in Test := false
@@ -93,6 +105,12 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= appDependencies
   )
   .settings(scalaVersion := "2.12.11")
+  .settings(scalacOptions ++= List(
+    // Warn if an import selector is not referenced.
+//    "-P:silencer:globalFilters=Unused import",
+    "-P:silencer:pathFilters=html",
+    "-P:silencer:pathFilters=routes"
+  ))
   .settings(
     formatMessageQuotes := {
       import sys.process._

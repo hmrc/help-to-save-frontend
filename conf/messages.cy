@@ -94,7 +94,7 @@ hts.register.bank-details.sort-code.label=Cod didoli
 hts.register.bank-details.sort-code.hint=Er enghraifft, 02 03 04
 hts.register.bank-details.accountNumber.label=Rhif y cyfrif
 hts.register.bank-details.accountNumber.hint=Er enghraifft, 12345678
-hts.register.bank-details.accountName.label=Enw pwy sydd ar y cyfrif
+hts.register.bank-details.accountName.label=Enw sydd ar y cyfrif
 hts.register.bank-details.rollNumber.label=Rhif rôl
 hts.register.bank-details.rollNumber.hint=Cymdeithasau adeiladu yn unig
 hts.bank_details.check_your_sortcode_is_correct=Gwiriwch fod eich cod didoli yn gywir
@@ -171,11 +171,11 @@ hts.register.think_you_are_eligible.p1-2=.
 hts.register.think_you_are_eligible.p2=Os ydych wedi gwneud hyn ac yn parhau i fod o’r farn eich bod yn gymwys am gyfrif, gallwch gysylltu â’r gwasanaeth Cymorth i Gynilo.
 hts.register.think_you_are_eligible.p3=Bydd angen eich rhif Yswiriant Gwladol arnoch pan fyddwch yn ffonio.
 hts.register.think_you_are_eligible.contact.service.telephone-header=Ffôn:
-hts.register.think_you_are_eligible.contact.service.telephone-number=0300 322 7093
+hts.register.think_you_are_eligible.contact.service.telephone-number=0300 200 1900
 hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-header=Y tu allan i’r DU:
-hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-number=+44 300 322 7093
+hts.register.think_you_are_eligible.contact.service.telephone-outsideuk-number=+44 300 200 1900
 hts.register.think_you_are_eligible.contact.service.opening-times.heading=Oriau agor:
-hts.register.think_you_are_eligible.contact.service.opening-times.open=10:00 i 18:00, dydd Llun i ddydd Gwener
+hts.register.think_you_are_eligible.contact.service.opening-times.open=08:00 i 16:00, dydd Llun i ddydd Gwener
 hts.register.think_you_are_eligible.contact.service.opening-times.closed=Ar gau ar benwythnosau a gwyliau’r banc
 hts.register.think_you_are_eligible.contact.find-out-about-call-charges=Gwybodaeth am gostau galwadau
 hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-1=Help i
@@ -188,9 +188,9 @@ hts.register.think_you_are_eligible.p5=Fel arfer, bydd angen i chi wneud hyn cyn
 hts.register.think_you_are_eligible.p6=Os ydych chi’n credu bod y penderfyniad yn anghywir, gallwch ofyn am adolygiad o’r penderfyniad a rhaid i chi wneud hyn ar bapur. Bydd angen i chi ddatgan yr hyn yr ydych yn anghytuno ag ef a pham.
 hts.register.think_you_are_eligible.h3=Dylech ysgrifennu at:
 hts.register.think_you_are_eligible.address1=Cymorth i Gynilo
-hts.register.think_you_are_eligible.address2=PO Box 1
-hts.register.think_you_are_eligible.address3=Newcastle
-hts.register.think_you_are_eligible.address4=NE88 1AA
+hts.register.think_you_are_eligible.address2=Gwasanaeth Cwsmeriaid Cymraeg CThEM
+hts.register.think_you_are_eligible.address3=HMRC
+hts.register.think_you_are_eligible.address4=BX9 1ST
 hts.register.think_you_are_eligible.review.disagree.heading=Os nad ydych yn cytuno â chanlyniad yr adolygiad
 hts.register.think_you_are_eligible.review.disagree.p1=Cewch apelio i’r Tribiwnlys Haen Gyntaf (Treth) os yw’r holl bethau hyn yn berthnasol i chi:
 hts.register.think_you_are_eligible.review.disagree.ul1-li1=ni chaniatawyd i chi agor cyfrif Cymorth i Gynilo
@@ -229,7 +229,7 @@ hts.iv.failed_matching.li3=rhif Yswiriant Gwladol
 hts.iv.insufficient_evidence.title.h1=Nid oeddem yn gallu cadarnhau pwy ydych
 hts.iv.insufficient_evidence.p1=Bydd angen i chi ein ffonio ac fe ofynnwn i chi am ragor o fanylion.
 hts.iv.insufficient_evidence.telephone-title=Ffôn:
-hts.iv.insufficient_evidence.telephone-number=0300 322 7093
+hts.iv.insufficient_evidence.telephone-number=0300 200 1900
 hts.iv.insufficient_evidence.h2=Beth sy’n digwydd nesaf?
 hts.iv.insufficient_evidence.p2=Byddwch yn gallu gwneud cais am gyfrif Cymorth i Gynilo dros y ffôn, ar ôl i ni allu cadarnhau pwy ydych.
 
@@ -385,8 +385,8 @@ hts.account-creation-error.button.try-again=Rhowch gynnig arall arni
 hts.account-creation-error.exit-button=Gadael a mynd i GOV.UK
 
 # Account created
-hts.account-created.title.h1=Cyfrif Cymorth i Gynilo wedi ei greu
-hts.account-created.title.p1=Rhif eich cyfrif yw
+hts.account-created.title.h1=Cyfrif Cymorth i Gynilo wedi’i greu
+hts.account-created.title.p1=Eich rhif cyfrif yw
 hts.account-created.p1-1=Rydym wedi anfon e-bost o gadarnhad at
 hts.account-created.p1-2=.
 hts.account-created.p2=Mae gennych 4 blynedd yn dechrau nawr i ddefnyddio’ch cyfrif Cymorth i Gynilo.
@@ -451,10 +451,50 @@ hts.register.create_account.tandc-ul1-li2=eich bod wedi darllen a deall y <a hre
 hts.register.create_account.tandc-ul1-li4=eich bod yn creu cyfrif Cymorth i Gynilo am y tro cyntaf
 hts.register.create_account.agree-continue=Cytuno ac yn eich blaen
 
+# Push to App
+hts.register.create_account.hmrc-app.title=Cael mynediad at eich cyfrif drwy ap CThEM
+hts.register.create_account.hmrc-app.benefits.s1=Mae gan yr ap lawer mwy o nodweddion a fydd yn eich helpu i fanteisio i’r eithaf ar eich cyfrif Cymorth i Gynilo:
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li1=mynediad hwylus
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li2=yn fwy cyfleus
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li3=nodwedd gosod targedau cynilo
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li4=negeseuon ysgogol ar gyfer cerrig milltir
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li5=nodwedd cyfrifo cynilion, a mwy
+
+hts.register.create_account.hmrc-app.get-the-app.s1=Lawrlwythwch ap CThEM yn rhad ac am ddim o’r mannau canlynol:
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.1=yr
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.2=ar gyfer iOS
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.1=y
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.2=ar gyfer Android
+
+hts.register.create_account.hmrc-app.get-the-app.apple.label=Lawrlwythwch o siop apiau Apple
+hts.register.create_account.hmrc-app.get-the-app.apple.alt=logo siop apiau Apple
+hts.register.create_account.hmrc-app.get-the-app.android.label=Lawrlwythwch o siop apiau Google Play
+hts.register.create_account.hmrc-app.get-the-app.android.alt=logo siop apiau Google Play
+hts.register.create_account.hmrc-app.get-the-app.new-tab=Mae cysylltiadau’r Siop Apiau yn agor tab newydd.
+
+# Register PayInNow
+generic.yes=Iawn
+generic.no=Na
+
+hts.register.create_account.confirmation-info.p1=Rydym wedi anfon e-bost cadarnhau atoch yn:
+hts.register.create_account.confirmation-info.p2=. Mae’r e-bost yn rhoi manylion am sut mae’ch cyfrif yn gweithio.
+hts.register.create_account.what-you-need-to-do.title=Yr hyn y mae angen i chi ei wneud nesaf
+hts.register.create_account.what-you-need-to-do.p1=Mae’ch cyfrif 4 blynedd Cymorth i Gynilo wedi’i greu, felly mae’r cloc wedi cychwyn.
+hts.register.create_account.what-you-need-to-do.p2=Gallwch ddechrau cynilo ac ennill bonysau’n syth.
+hts.register.create_account.what-you-need-to-do.p3.1=Gallwch gynilo hyd at £50 bob mis calendr. Mae gennych tan
+hts.register.create_account.what-you-need-to-do.p3.2=i dalu arian i mewn y mis hwn er mwyn dechrau ennill bonws.
+hts.register.create_account.payInNow.title=A ydych am dalu’ch taliad cyntaf i mewn nawr?
+hts.register.create_account.payInNow.noContent=Cofiwch dalu’ch taliad cyntaf i mewn erbyn y dyddiad a nodir uchod i ddechrau ennill bonws.
+hts.register.create_account.payInNow.continue=Yn eich blaen
+
+hts.payInNow.error=Dewiswch a ydych am dalu eich taliad cyntaf i mewn nawr
+
 # Privacy page
 hts.privacy.title.h1=Datganiad preifatrwydd Cymorth i Gynilo
 hts.privacy.p1=Mae’r ddogfen hon yn nodi sut y byddwn yn defnyddio’ch gwybodaeth i gyflwyno’r cynllun Cymorth i Gynilo.
-hts.privacy.p2=Mae Cyllid a Thollau EM yn Rheolwr Data o dan Ddeddf Diogelu Data 1998. Byddwn yn casglu ac yn defnyddio eich gwybodaeth bersonol i wirio eich cymhwystra ar gyfer Cymorth i Gynilo ac i wneud yn siŵr eich bod yn cael unrhyw fonws gan y llywodraeth sydd yn perthyn i chi o dan eich cyfrif Cymorth i Gynilo.
+hts.privacy.p2=Mae Cyllid a Thollau EM (CThEM) yn Rheolwr Data o dan Ddeddf Diogelu Data 1998. Byddwn yn casglu ac yn defnyddio eich gwybodaeth bersonol i wirio eich cymhwystra ar gyfer Cymorth i Gynilo ac i wneud yn siŵr eich bod yn cael unrhyw fonws gan y llywodraeth sydd yn perthyn i chi o dan eich cyfrif Cymorth i Gynilo.
 hts.privacy.p3=Fel rhan o’n gwiriadau cydymffurfio a phrosesu, efallai y byddwn yn:
 hts.privacy.ul1.li1=gwirio eich hawl i fudd-daliadau, Credyd Treth Gwaith, Credyd Treth Plant a Chredyd Cynhwysol
 hts.privacy.ul1.li2=cadarnhau eich statws cyflogaeth a’ch incwm
@@ -481,11 +521,11 @@ hts.close-account.warning=Os ydych chi’n cau eich cyfrif nawr, ni fyddwch yn g
 hts.close-account.p1=Os oes angen i chi gau eich cyfrif o hyd, gallwch gysylltu â’r gwasanaeth Cymorth i Gynilo.
 hts.close-account.p2=Bydd angen eich rhif Yswiriant Gwladol arnoch pan fyddwch yn ffonio.
 hts.close-account.contact.telephone=Ffôn:
-hts.close-account.contact.telephone.number=0300 322 7093
+hts.close-account.contact.telephone.number=0300 200 1900
 hts.close-account.contact.outside-uk=Y tu allan i’r DU:
-hts.close-account.contact.outside-uk.number=+44 300 322 7093
+hts.close-account.contact.outside-uk.number=+44 300 200 1900
 hts.close-account.h2=Oriau agor:
-hts.close-account.p3=10:00 i 18:00, dydd Llun i ddydd Gwener
+hts.close-account.p3=08:00 i 16:00, dydd Llun i ddydd Gwener
 hts.close-account.p4=Ar gau ar benwythnosau a gwyliau’r banc.
 hts.close-account.back=Yn ôl
 
@@ -647,7 +687,26 @@ hts.help-information.section.how-account-works.s8.p1=Gallwch gau’ch cyfrif Cym
 hts.help-information.section.how-account-works.s8.p2=Os oes angen ichi gau eich cyfrif ffoniwch 0300 200 1900.
 
 hts.help-information.section.how-account-works.s9.title=Os yw deiliad y cyfrif yn marw neu’n derfynol wael
-hts.help-information.section.how-account-works.s9.p1=Os oes gan rywun sydd â chyfrif Cymorth i Arbed salwch terfynol neu farw, byddwn yn talu eu bonws iddynt yn gynnar. Os cewch eich diagnosio fel salwch terfynol gan eich meddyg, a'ch bod am hawlio'ch bonws yn gynnar, ffoniwch ni ar: 0300 322 7093.
+hts.help-information.section.how-account-works.s9.p1=Os oes salwch terfynol ar rywun sydd â chyfrif Cymorth i Gynilo, neu os yw’n marw, byddwn yn talu’i fonws iddo’n gynnar. Os cewch ddiagnosis gan eich meddyg eich bod yn derfynol wael, a’ch bod am hawlio’ch bonws yn gynnar, rhowch alwad i ni ar: 0300 200 1900
+
+hts.help-information.section.hmrc-app.title=Cymorth i Gynilo ar ap CThEM
+hts.help-information.section.hmrc-app.benefits.title=Manteision yr ap
+hts.help-information.section.hmrc-app.benefits.s1=Mae gan yr ap lawer mwy o nodweddion a fydd yn eich helpu i fanteisio i’r eithaf ar eich cyfrif Cymorth i Gynilo:
+hts.help-information.section.hmrc-app.benefits.s2=Nodweddion yr ap:
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li1=mynediad hwylus
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li2=yn fwy cyfleus
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li3=nodwedd gosod targedau cynilo
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li4=negeseuon ysgogol ar gyfer cerrig milltir
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li5=nodwedd cyfrifo cynilion, a mwy
+
+hts.help-information.section.hmrc-app.get-the-app.title=Cael yr ap
+hts.help-information.section.hmrc-app.get-the-app.s1=Lawrlwythwch ap CThEM yn rhad ac am ddim o’r mannau canlynol:
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.1=yr
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.2=ar gyfer iOS
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.1=y
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.2=ar gyfer Android
 
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English
@@ -655,7 +714,7 @@ language-switcher.english.hover=Use this account in English
 language-switcher.welsh=Cymraeg
 language-switcher.welsh.hidden=Newid yr iaith i''r Gymraeg
 language-switcher.welsh.hover=Defnyddio''r cyfrif hwn yn Cymraeg
-language-switcher.nav=Language switcher
+language-switcher.nav=Newid yr iaith
 
 # Savings reminders
 hts.email-saving-remainders.title.h1=E-byst atgoffa ynghylch cynilion
@@ -673,6 +732,9 @@ hts.reminder-confirmation-set.title.p1=Byddwch bellach yn cael e-byst atgoffa mi
 hts.reminder-confirmation-update.title.h1=Nodynnau atgoffa ynghylch cynilion wedi’u newid
 hts.reminder-confirmation-update.title.p1=Mae gennych ddyddiadau newydd ar gyfer e-byst atgoffa misol
 hts.reminder-confirmation.title.p1-1=Byddwn yn anfon y nodynnau atgoffa atoch ar ddiwrnod
+hts.reminder-confirmation.frequency.1=1
+hts.reminder-confirmation.frequency.25=25
+hts.reminder-confirmation.frequency.both=1 a diwrnod 25
 hts.reminder-confirmation.title.p1-2=bob mis
 hts.reminder-confirmation.title.p1-3=Byddwn yn anfon eich nodynnau atgoffa at
 hts.reminder-confirmation.title.p1-4=Os hoffech i’ch nodynnau atgoffa fynd i rywle arall bydd angen i chi 
@@ -738,11 +800,11 @@ accessibility.statement.paragraph.nineteen = Ar y sgrin ‘Bwrw golwg dros eich 
 ####What to do if you have difficulty using this service#####
 
 accessibility.statement.paragraph.twentyOne = Gallwch
-accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEM os oes angen help arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille.
+accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEM os oes angen help arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille
 
 ####Reporting accessibility problems with this service#####
 accessibility.statement.paragraph.twentyThree= Rydym bob amser yn ceisio gwella hygyrchedd y gwasanaeth hwn. Os byddwch yn dod o hyd i unrhyw broblemau nad ydynt wedi’u rhestru ar y dudalen hon, neu os ydych o’r farn nad ydym yn bodloni gofynion hygyrchedd,
-accessibility.statement.paragraph.twentyThree.link= rhowch wybod am y broblem hygyrchedd (yn agor ffenestr neu dab newydd).
+accessibility.statement.paragraph.twentyThree.link= rhowch wybod am y broblem hygyrchedd (yn agor ffenestr neu dab newydd)
 
 #### What to do if you are not happy with how we respond to your complaint ####
 
@@ -756,7 +818,7 @@ accessibility.statement.paragraph.twentyFour.three = os ydych yn byw yng Ngogled
 accessibility.statement.paragraph.twentyFive = Rydym yn cynnig gwasanaeth ‘text relay’ os ydych yn fyddar, â nam ar eich clyw neu os oes gennych nam ar eich lleferydd.
 accessibility.statement.paragraph.twentySix = Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEM i’ch helpu i gwblhau’r gwasanaeth.
 accessibility.statement.paragraph.twentySeven = Gwybodaeth am sut i
-accessibility.statement.paragraph.twentySeven.link = gysylltu â ni.
+accessibility.statement.paragraph.twentySeven.link = gysylltu â ni
 
 #### Technical information about this service’s accessibility ####
 accessibility.statement.paragraph.twentyEight = Mae CThEM wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
@@ -802,6 +864,20 @@ accessibility.statement.heading.six = Cysylltu â ni dros y ffôn neu gael ymwel
 accessibility.statement.heading.seven = Gwybodaeth dechnegol am hygyrchedd y gwasanaeth hwn
 accessibility.statement.heading.eight = Sut gwnaethom brofi’r gwasanaeth hwn
 full.stop= .
+
+##Month Names##
+hts.month.January = Ionawr
+hts.month.February = Chwefror
+hts.month.March = Mawrth
+hts.month.April = Ebrill
+hts.month.May = Mai
+hts.month.June = Mehefin
+hts.month.July = Gorffennaf
+hts.month.August  = Awst
+hts.month.September = Medi
+hts.month.October = Hydref
+hts.month.November = Tachwedd
+hts.month.December = Rhagfyr
 
 ############################### Footer ###############################
 footer.links.accessibility.text = Hygyrchedd

@@ -452,6 +452,46 @@ hts.register.create_account.tandc-ul1-li2=you have read and understood the <a hr
 hts.register.create_account.tandc-ul1-li4=you are creating a Help to Save account for the first time
 hts.register.create_account.agree-continue=Agree and continue
 
+# Push to App
+hts.register.create_account.hmrc-app.title=Access your account through the HMRC app
+hts.register.create_account.hmrc-app.benefits.s1=The app has many more features that will help you get the most out of your Help to Save account:
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li1=easy access
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li2=greater convenience
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li3=savings goal-setting feature
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li4=encouraging milestone messages
+hts.register.create_account.hmrc-app.benefits.s1.ul1-li5=savings calculator feature, and more
+
+hts.register.create_account.hmrc-app.get-the-app.s1=Download the free HMRC app from:
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.1=the
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.2=for iOS
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.1=the
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
+hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li2.2=for Android
+
+hts.register.create_account.hmrc-app.get-the-app.apple.label=Download from the apple app store
+hts.register.create_account.hmrc-app.get-the-app.apple.alt=apple store logo
+hts.register.create_account.hmrc-app.get-the-app.android.label=Download from the google play store
+hts.register.create_account.hmrc-app.get-the-app.android.alt=google play store logo
+hts.register.create_account.hmrc-app.get-the-app.new-tab=App store links open in new tab.
+
+# Register PayInNow
+generic.yes=Yes
+generic.no=No
+
+hts.register.create_account.confirmation-info.p1=We’ve sent a confirmation email to you at:
+hts.register.create_account.confirmation-info.p2=. The email gives you details on how your account works.
+hts.register.create_account.what-you-need-to-do.title=What you need to do next
+hts.register.create_account.what-you-need-to-do.p1=Your 4-year Help to Save account has been created, so the clock has started.
+hts.register.create_account.what-you-need-to-do.p2=You can start saving and earning bonuses straight away.
+hts.register.create_account.what-you-need-to-do.p3.1=You can save up to £50 each calendar month. You have until
+hts.register.create_account.what-you-need-to-do.p3.2=to pay in money this month to start earning a bonus.
+hts.register.create_account.payInNow.title=Do you want to pay in your first deposit now?
+hts.register.create_account.payInNow.noContent=Remember to pay your first deposit by the date mentioned above to start earning a bonus.
+hts.register.create_account.payInNow.continue=Continue
+
+hts.payInNow.error=Select whether you want to pay in your first deposit now
+
 # Privacy page
 hts.privacy.title.h1=Help to Save privacy statement
 hts.privacy.p1=This document sets out how we will use your information to deliver the Help to Save scheme.
@@ -605,7 +645,7 @@ hts.help-information.section.bonuses.s7.video-title=Help to Save - Bonuses
 # Help/information: Withdrawals
 hts.help-information.section.withdrawals.title=Withdrawals
 hts.help-information.section.withdrawals.s1.title=Withdrawing money
-hts.help-information.section.withdrawals.s1.p1=You can withdraw some or all of your savings at any time. If you pay in money by debit card, you'll need to wait one working day before you can withdraw it.
+hts.help-information.section.withdrawals.s1.p1=You can withdraw some or all of your savings at any time. If you pay in money by debit card, you’ll need to wait one working day before you can withdraw it.
 hts.help-information.section.withdrawals.s1.p2=It takes up to 3 working days for the money to reach your bank account. Weekends and public holidays are not considered to be working days.
 hts.help-information.section.withdrawals.s1.p3=You can only pay in £50 each month, even if you make withdrawals.
 hts.help-information.section.withdrawals.s1.p4=If you need to withdraw some or all of your money, you should still keep your account open. This is because if you close your account early, before it matures, you will not get a bonus payment.
@@ -650,6 +690,25 @@ hts.help-information.section.how-account-works.s8.p2=If you need to close your a
 hts.help-information.section.how-account-works.s9.title=If the account holder dies or is terminally ill
 hts.help-information.section.how-account-works.s9.p1=If someone with a Help to Save account has a terminal illness or dies we will pay them their bonus early. If you are diagnosed as terminally ill by your doctor, and you want to claim your bonus early, call us on: 0300 322 7093.
 
+hts.help-information.section.hmrc-app.title=Help to Save on the HMRC app
+hts.help-information.section.hmrc-app.benefits.title=Benefits of the app
+hts.help-information.section.hmrc-app.benefits.s1=The app has many more features that will help you get the most out of your Help to Save account:
+hts.help-information.section.hmrc-app.benefits.s2=App features:
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li1=easy access
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li2=greater convenience
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li3=savings goal-setting feature
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li4=encouraging milestone messages
+hts.help-information.section.hmrc-app.benefits.s2.ul1-li5=savings calculator feature, and more
+
+hts.help-information.section.hmrc-app.get-the-app.title=Get the app
+hts.help-information.section.hmrc-app.get-the-app.s1=Download the free HMRC app from:
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.1=the
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.2=for iOS
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.1=the
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.link=Google Play Store
+hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.2=for Android
+
 language-switcher.english.hidden=Change the language to English
 language-switcher.english=English
 language-switcher.english.hover=Use this account in English
@@ -676,9 +735,12 @@ hts.reminder-confirmation-update.title.p1=You have new dates for monthly email r
 hts.reminder-confirmation.title.p1-1=We will send you reminders on the
 hts.reminder-confirmation.title.p1-2=day of each month
 hts.reminder-confirmation.title.p1-3=We will send your reminders to
-hts.reminder-confirmation.title.p1-4=If you want your reminders to go somewhere else you'll need to 
+hts.reminder-confirmation.title.p1-4=If you want your reminders to go somewhere else youll need to
 hts.reminder-confirmation.change-email.descriptive-link=change your email address.
 hts.reminder-confirmation.saving-reminders.descriptive-link=savings reminders
+hts.reminder-confirmation.frequency.1=1st
+hts.reminder-confirmation.frequency.25=25th
+hts.reminder-confirmation.frequency.both=1st day and 25th
 hts.reminder-confirmation.title.p1-5=You can change or cancel your email reminders at anytime. Go to
 hts.reminder-confirmation.title.p1-6=in your Help to Save account home.
 hts.reminder-confirmation.h2=What happens next
@@ -739,11 +801,11 @@ accessibility.statement.paragraph.nineteen = In the ‘View your transactions’
 ####What to do if you have difficulty using this service#####
 
 accessibility.statement.paragraph.twentyOne = You can
-accessibility.statement.paragraph.twentyOne.link = contact HMRC if you need help with filling in forms or getting a different format, like large print, audio recording or Braille.
+accessibility.statement.paragraph.twentyOne.link = contact HMRC if you need help with filling in forms or getting a different format, like large print, audio recording or Braille
 
 ####Reporting accessibility problems with this service#####
 accessibility.statement.paragraph.twentyThree= We are always looking to improve the accessibility of this service. If you find any problems that are not listed on this page or think we are not meeting accessibility requirements,
-accessibility.statement.paragraph.twentyThree.link= report the accessibility problem (opens in a new window or tab).
+accessibility.statement.paragraph.twentyThree.link= report the accessibility problem (opens in a new window or tab)
 
 #### What to do if you are not happy with how we respond to your complaint ####
 
@@ -803,6 +865,7 @@ accessibility.statement.heading.six = Contacting us by phone or getting a visit 
 accessibility.statement.heading.seven = Technical information about this service’s accessibility
 accessibility.statement.heading.eight = How we tested this service
 full.stop= .
+
 
 ############################### Footer ###############################
 footer.links.accessibility.text = Accessibility

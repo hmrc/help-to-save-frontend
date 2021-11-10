@@ -64,14 +64,14 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
       val htsUser =
         HtsUserSchedule(nino, "user@gmail.com", "Tyrion", "Lannister", true, Seq(1), LocalDate.parse("2000-01-01"))
 
-      def mockGetHtsUser(nino: String)(result: Either[String, HtsUserSchedule]): Unit =
+      def mockGetHtsUser(result: Either[String, HtsUserSchedule]): Unit =
         (htsReminderConnector
           .getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
           .expects(ninoNew, *, *)
           .returning(EitherT.fromEither[Future](result))
 
       "return a successful response" in {
-        mockGetHtsUser(ninoNew)(Right(htsUser))
+        mockGetHtsUser(Right(htsUser))
 
         val result = htsReminderService.getHtsUser(ninoNew)
         await(result.value) shouldBe (Right(htsUser))

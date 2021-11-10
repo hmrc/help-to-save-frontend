@@ -22,7 +22,6 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalamock.scalatest.MockFactory
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -130,7 +129,7 @@ class AccountHolderControllerSpec
 
   def checkIsErrorPage(result: Future[Result]): Unit = {
     status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
   }
 
   "The AccountHolderController" when {
@@ -188,7 +187,7 @@ class AccountHolderControllerSpec
         }
         val result = Future.successful(await(csrfAddToken(controller.onSubmit())(fakePostRequest)))
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.AccountHolderController.getCheckYourEmail().url)
+        redirectLocation(result) shouldBe Some(routes.AccountHolderController.getCheckYourEmail.url)
       }
 
       "return an AlreadyVerified status and redirect the user to email verified page," +
@@ -235,7 +234,7 @@ class AccountHolderControllerSpec
         }
         val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
       }
 
       "show an error page if the email verification fails" in {
@@ -250,7 +249,7 @@ class AccountHolderControllerSpec
         }
         val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
       }
 
       "redirect to the error page if the name retrieval fails" in {
@@ -258,7 +257,7 @@ class AccountHolderControllerSpec
 
         val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
       }
 
     }
@@ -554,7 +553,7 @@ class AccountHolderControllerSpec
 
       val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
+      redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage.url)
     }
 
     "throw an Internal Server Error if the enrolment check fails" in {

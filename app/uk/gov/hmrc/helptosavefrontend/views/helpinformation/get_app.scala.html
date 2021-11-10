@@ -1,0 +1,34 @@
+@*
+ * Copyright 2021 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+
+@()(implicit messages: play.api.i18n.Messages, appConfig: FrontendAppConfig)
+
+<p>@Messages("hts.help-information.section.hmrc-app.get-the-app.s1")</p>
+
+<ul class="list list-bullet">
+  <li>@Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.1")
+   <a href=@appConfig.appleAppUrl>
+    @Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.link")</a>
+   @Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.2")
+  </li>
+  <li>@Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.1")
+   <a href=@appConfig.androidAppUrl>
+    @Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.link")</a>
+   @Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.2")
+  </li>
+</ul>

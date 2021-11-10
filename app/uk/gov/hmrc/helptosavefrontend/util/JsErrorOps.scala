@@ -17,6 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.util
 
 import play.api.libs.json.JsError
+
 import scala.language.implicitConversions
 
 object JsErrorOps {

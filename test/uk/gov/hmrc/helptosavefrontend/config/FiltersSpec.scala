@@ -16,29 +16,30 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import akka.stream.Materializer
+import akka.stream.{ActorMaterializer, Materializer}
 import com.kenshoo.play.metrics.MetricsFilter
 import play.api.Configuration
 import play.api.mvc.EssentialFilter
 import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceAppPerTest
+import uk.gov.hmrc.integration.servicemanager.ServiceManagerClient.system
+import uk.gov.hmrc.play.bootstrap.filters._
 import uk.gov.hmrc.play.bootstrap.frontend.filters.crypto.SessionCookieCryptoFilter
 import uk.gov.hmrc.play.bootstrap.frontend.filters.deviceid.DeviceIdFilter
-import uk.gov.hmrc.play.bootstrap.frontend.filters.{FrontendAuditFilter, HeadersFilter, SessionIdFilter, SessionTimeoutFilter}
-import uk.gov.hmrc.play.bootstrap.filters._
+import uk.gov.hmrc.play.bootstrap.frontend.filters.{FrontendFilters, _}
 
 class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
 
   // can't use scalamock for CacheControlFilter since a logging statement during class
   // construction requires a parameter from the CacheControlConfig. Using scalamock
   // reuslts in a NullPointerException since no CacheControlConfig is there
-  val mockCacheControllerFilter = new CacheControlFilter(CacheControlConfig(), mock[Materializer])
+  implicit val mat: ActorMaterializer = ActorMaterializer()
+  val mockCacheControllerFilter = new CacheControlFilter(CacheControlConfig(), mat)
 
   val mockMDCFilter = new MDCFilter(fakeApplication.materializer, fakeApplication.configuration, "")
-  val mockWhiteListFilter = mock[uk.gov.hmrc.play.bootstrap.frontend.filters.WhitelistFilter]
-
-  val mockSessionIdFilter =mock[SessionIdFilter]
+  val mockWhiteListFilter = mock[uk.gov.hmrc.play.bootstrap.frontend.filters.AllowlistFilter]
+  val mockSessionIdFilter = mock[SessionIdFilter]
 
   class TestableFrontendFilters
       extends FrontendFilters(
@@ -62,21 +63,21 @@ class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
   }
 
   val frontendFilters = new TestableFrontendFilters
-  val whiteListFilter = mock[WhitelistFilter]
+  val allowListFilter = mock[AllowListFilter]
 
   "Filters" must {
 
-    "include the whitelist filter if the whitelist from config is non empty" in {
-      val config = Configuration("http-header-ip-whitelist" → List("1.2.3"))
+    "include the allowList filter if the allowList from config is non empty" in {
+      val config = Configuration("http-header-ip-allowlist" → List("1.2.3"))
 
-      val filters = new Filters(config, whiteListFilter, frontendFilters)
-      filters.filters shouldBe Seq(whiteListFilter)
+      val filters = new Filters(config, allowListFilter, frontendFilters)
+      filters.filters shouldBe Seq(allowListFilter)
     }
 
-    "not include the whitelist filter if the whitelist from config is empty" in {
-      val config = Configuration("http-header-ip-whitelist" → List())
+    "not include the allowList filter if the allowList from config is empty" in {
+      val config = Configuration("http-header-ip-allowlist" → List())
 
-      val filters = new Filters(config, whiteListFilter, frontendFilters)
+      val filters = new Filters(config, allowListFilter, frontendFilters)
       filters.filters shouldBe Seq()
     }
   }

@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.time.{Clock, Instant, LocalDate, LocalDateTime, ZoneId}
+import java.time._
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.http.Status
-import play.api.mvc.{Result => PlayResult}
+import play.api.mvc.{Session, Result => PlayResult}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.EligibleWithInfo
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
@@ -39,7 +39,6 @@ import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Eligible
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveReminderService
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.cannot_check_details
@@ -65,6 +64,7 @@ class RegisterControllerSpec
       mockSessionStore,
       mockAuthConnector,
       mockMetrics,
+      injector.instanceOf[HTSAuditor],
       testCpd,
       testMcc,
       testErrorHandler,
@@ -121,7 +121,7 @@ class RegisterControllerSpec
 
       val result = doRequest
       status(result) shouldBe Status.SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+      redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
     }
 
   "The RegisterController" when {
@@ -379,7 +379,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
       }
 
       "handle the case when there are no bank details stored in the session" in {
@@ -396,7 +396,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
 
     }
@@ -405,7 +405,7 @@ class RegisterControllerSpec
 
       def doCreateAccountRequest(): Future[PlayResult] = csrfAddToken(controller.createAccount)(fakeRequest)
 
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
 
@@ -436,7 +436,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage.url)
       }
 
       "indicate to the user that account creation was successful " +
@@ -463,7 +463,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage.url)
       }
 
       "not update user counts but enrol the user if the user already had an account" in {
@@ -508,7 +508,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe Status.SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
       }
 
       "redirect user to bank_details page if the session doesn't contain bank details" in {
@@ -520,7 +520,7 @@ class RegisterControllerSpec
 
         val result = doCreateAccountRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
 
       "redirect to the create account error page" when {
@@ -536,7 +536,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage.url)
         }
 
         "there is an error writing to session" in {
@@ -562,7 +562,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorPage.url)
         }
       }
 
@@ -579,7 +579,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage.url)
         }
 
         "the errorMessageId received in the response from nsi is ZYRC0707" in {
@@ -594,7 +594,7 @@ class RegisterControllerSpec
 
           val result = doCreateAccountRequest()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage().url)
+          redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountErrorBankDetailsPage.url)
         }
       }
 
@@ -619,7 +619,7 @@ class RegisterControllerSpec
         status(result) shouldBe OK
         contentAsString(result) should include("Account created")
         contentAsString(result) should include(accountNumber)
-        contentAsString(result) should include("You have until 31 January 1970 to pay in this month")
+        contentAsString(result) should include("""You have until <span class="bold">31 January 1970</span> to pay in money this month""")
       }
 
       "redirect to check eligibility" when {
@@ -633,7 +633,7 @@ class RegisterControllerSpec
 
           val result = getAccountCreatedPage()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
         "there is no account number in session" in {
@@ -645,7 +645,7 @@ class RegisterControllerSpec
 
           val result = getAccountCreatedPage()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
         "the person is not enrolled to HTS" in {
@@ -656,7 +656,7 @@ class RegisterControllerSpec
 
           val result = getAccountCreatedPage()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
         "there is no email in the session" in {
@@ -670,7 +670,7 @@ class RegisterControllerSpec
 
           val result = getAccountCreatedPage()
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
         }
 
       }
@@ -698,6 +698,63 @@ class RegisterControllerSpec
           val result = getAccountCreatedPage()
           checkIsTechnicalErrorPage(result)
         }
+
+      }
+
+    }
+
+    "handling accessOrPayIn" must {
+      def fRequest(payIn: String) =  fakeRequest.withFormUrlEncodedBody("payInNow" -> payIn)
+      def postAccessOrPayIn(payIn: String) = csrfAddToken(controller.accessOrPayIn())(fRequest(payIn))
+
+      "show errors on the page" in {
+        val accountNumber = UUID.randomUUID().toString
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
+          )
+        }
+
+        val result = postAccessOrPayIn("")
+        status(result) shouldBe OK
+        contentAsString(result) should include("There is a problem")
+        contentAsString(result) should include("Select whether you want to pay in your first deposit now")
+      }
+
+      "redirect to PayIn" in {
+        val accountNumber = UUID.randomUUID().toString
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
+          )
+        }
+
+        val result = postAccessOrPayIn("true")
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe(Some(routes.AccessAccountController.payIn.url))
+
+      }
+
+      "redirect to AccessAccount" in {
+        val accountNumber = UUID.randomUUID().toString
+
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockSessionStoreGet(
+            Right(Some(HTSSession(None, Some("email@gmail.com"), None, accountNumber = Some(accountNumber))))
+          )
+        }
+
+        val result = postAccessOrPayIn("false")
+        status(result) shouldBe 303
+        redirectLocation(result) shouldBe(Some(routes.AccessAccountController.accessAccount.url))
 
       }
 
@@ -792,7 +849,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible().url)
+        redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
       }
 
       "handle the case when there are no bank details stored in the session" in {
@@ -808,7 +865,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
     }
 
@@ -830,7 +887,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage().url)
+        redirectLocation(result) shouldBe Some(routes.EmailController.getSelectEmailPage.url)
       }
 
     }
@@ -853,7 +910,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage().url)
+        redirectLocation(result) shouldBe Some(routes.BankAccountController.getBankDetailsPage.url)
       }
 
     }
@@ -875,7 +932,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage().url)
+        redirectLocation(result) shouldBe Some(routes.ReminderController.getApplySavingsReminderPage.url)
       }
     }
 
@@ -901,7 +958,7 @@ class RegisterControllerSpec
         val result = doRequest()
 
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getAccountCreatedPage.url)
       }
 
     }

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.forms
 
 import cats.instances.string._
-import cats.syntax.either._
 import cats.syntax.eq._
 import play.api.data.Forms._
 import play.api.data._

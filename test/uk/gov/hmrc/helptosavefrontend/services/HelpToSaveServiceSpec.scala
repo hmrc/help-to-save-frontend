@@ -42,12 +42,12 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
   val htsConnector = mock[HelpToSaveConnector]
 
   val htsService = new HelpToSaveServiceImpl(htsConnector)
+  val emptyBody = ""
+  val emptyHeaders :Map[String, Seq[String]] = Map.empty
 
   "The HelpToSaveService" when {
 
     "get user enrolment status" must {
-
-      val nino = "WM123456C"
 
       "return a successful response" in {
 
@@ -63,8 +63,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
     "set ITMPFlag" must {
 
-      val nino = "WM123456C"
-
       "return a successful response" in {
 
         (htsConnector
@@ -79,7 +77,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
     "store email" must {
 
-      val nino = "WM123456C"
       val email = "user@test.com"
 
       "return a successful response" in {
@@ -96,8 +93,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
     "get email" must {
 
-      val nino = "WM123456C"
-
       "return a successful response" in {
 
         (htsConnector
@@ -111,8 +106,6 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
     }
 
     "checking eligibility" must {
-
-      val nino = "WM123456C"
 
       "return a successful response if the connector returns a successful response" in {
 
@@ -151,14 +144,14 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
           )
 
       "return a CREATED response along with the account number when a new account has been created" in {
-        mockCreateAccount(Some(HttpResponse(201, Some(Json.parse("""{"accountNumber" : "1234567890123"}""")))))
+        mockCreateAccount(Some(HttpResponse(201, Json.parse("""{"accountNumber" : "1234567890123"}"""),emptyHeaders)))
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue shouldBe Right(SubmissionSuccess(AccountNumber(Some("1234567890123"))))
 
       }
 
       "return a CONFLICT response with no Json when an account has already been created" in {
-        mockCreateAccount(Some(HttpResponse(409, None)))
+        mockCreateAccount(Some(HttpResponse(409, emptyBody)))
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue shouldBe Right(SubmissionSuccess(AccountNumber(None)))
       }
@@ -166,7 +159,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       "should handle a failure result" in {
 
         val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-        mockCreateAccount(Some(HttpResponse(400, Some(Json.toJson(submissionFailure)))))
+        mockCreateAccount(Some(HttpResponse(400, Json.toJson(submissionFailure),emptyHeaders)))
 
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue should be(Left(submissionFailure))
@@ -182,7 +175,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       }
 
       "create a SubmissionFailure when parsing the error response returns a Left" in {
-        mockCreateAccount(Some(HttpResponse(400, Some(Json.toJson("""{"name":"some_name"}""")))))
+        mockCreateAccount(Some(HttpResponse(400, Json.toJson("""{"name":"some_name"}"""),emptyHeaders)))
 
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue shouldBe
@@ -210,7 +203,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a success response" in {
 
-        mockUpdateEmail(Some(HttpResponse(200)))
+        mockUpdateEmail(Some(HttpResponse(200, emptyBody)))
 
         val result = htsService.updateEmail(nsiPayload)
         result.value.futureValue shouldBe Right(())
@@ -218,7 +211,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       }
 
       "handle failure response" in {
-        mockUpdateEmail(Some(HttpResponse(400)))
+        mockUpdateEmail(Some(HttpResponse(400, null)))
 
         val result = htsService.updateEmail(nsiPayload)
         result.value.futureValue shouldBe Left(
@@ -274,7 +267,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
         mockValidateBankDetails(request)(
-          HttpResponse(200, Some(Json.parse("""{"isValid":true, "sortCodeExists":true}""")))
+          HttpResponse(200, Json.parse("""{"isValid":true, "sortCodeExists":true}"""),emptyHeaders)
         )
 
         val result = htsService.validateBankDetails(request)
@@ -282,7 +275,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       }
 
       "handle failure response" in {
-        mockValidateBankDetails(request)(HttpResponse(500))
+        mockValidateBankDetails(request)(HttpResponse(500, emptyBody))
 
         val result = htsService.validateBankDetails(request)
         result.value.futureValue.isLeft shouldBe true

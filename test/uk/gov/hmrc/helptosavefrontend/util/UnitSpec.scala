@@ -17,17 +17,18 @@
 package uk.gov.hmrc.helptosavefrontend.util
 
 import java.nio.charset.Charset
+
 import akka.stream.Materializer
 import akka.util.ByteString
-import play.api.inject.guice.GuiceableModule
-import play.api.libs.json.{JsValue, Json}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.duration.{Duration, FiniteDuration}
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
-import scala.language.postfixOps
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.inject.guice.GuiceableModule
+import play.api.libs.json.{JsValue, Json}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.{Duration, FiniteDuration, _}
+import scala.concurrent.{Await, Future}
+import scala.language.postfixOps
 
 trait UnitSpec extends AnyWordSpec with Matchers {
 

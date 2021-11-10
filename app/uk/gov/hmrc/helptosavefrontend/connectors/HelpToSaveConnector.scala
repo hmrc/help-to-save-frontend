@@ -19,15 +19,13 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 import java.util.UUID
 
 import cats.data.EitherT
-import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnectorImpl._
 import uk.gov.hmrc.helptosavefrontend.http.HttpClient.HttpClientOps
 import uk.gov.hmrc.helptosavefrontend.models._
-import uk.gov.hmrc.helptosavefrontend.models.account.Account
-import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResultType}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{MissingUserInfo, NSIPayload}

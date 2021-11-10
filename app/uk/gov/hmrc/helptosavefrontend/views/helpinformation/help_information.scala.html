@@ -16,9 +16,7 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
@@ -142,4 +140,16 @@
     title = Messages("hts.help-information.section.how-account-works.s9.title"),
     body = death_terminal_illness()
   )
+
+@help_intro_section(heading = Messages("hts.help-information.section.hmrc-app.title"))
+
+@help_intro_section_detail(
+title = Messages("hts.help-information.section.hmrc-app.benefits.title"),
+body = app_benefits()
+)
+
+@help_intro_section_detail(
+title = Messages("hts.help-information.section.hmrc-app.get-the-app.title"),
+body = get_app()
+)
 }

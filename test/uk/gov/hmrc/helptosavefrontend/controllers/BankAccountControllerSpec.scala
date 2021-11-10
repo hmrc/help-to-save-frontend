@@ -17,9 +17,9 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
+import cats.instances.future._
 import play.api.http.Status
 import play.api.mvc.Result
-import cats.instances.future._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}
@@ -88,7 +88,7 @@ class BankAccountControllerSpec
 
       }
 
-      "display the page with correct Back link when they came from SelectEmail page" in {
+      "display the page with correct Back link when they came from applySavingsReminders page" in {
 
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -103,7 +103,7 @@ class BankAccountControllerSpec
         contentAsString(result) should include(
           "Enter the UK bank account details you want us to pay your bonuses and transfer withdrawals into"
         )
-        contentAsString(result) should include("/help-to-save/enter-email")
+        contentAsString(result) should include("/help-to-save/apply-savings-reminders")
       }
 
       "display the page with correct Back link when they came from emailVerified page" in {
@@ -285,7 +285,7 @@ class BankAccountControllerSpec
 
         val result = doRequest()
         status(result) shouldBe 303
-        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.RegisterController.getCreateAccountPage.url)
       }
 
       "handle mongo session errors during storing bank details in session" in {
@@ -337,7 +337,7 @@ class BankAccountControllerSpec
 
       val result = doRequest()
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
     "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
@@ -349,7 +349,7 @@ class BankAccountControllerSpec
 
       val result = doRequest()
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
     "show user an in-eligible page if the session is found but user is not eligible" in {

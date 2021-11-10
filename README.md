@@ -20,7 +20,7 @@ Table of Contents
    * [Access Account API](#access-account-api)
    * [Account Holder Update Email Address API](#account-holder-update-email-address-api)
    * [Close Account API](#close-account-api)
-   * [IP Whitelisting API](#ip-whitelisting-api)
+   * [IP AllowListing API](#ip-allowlisting-api)
    * [Privacy Statement](#privacy-statement)
 * [License](#license)
 
@@ -159,11 +159,11 @@ Close Account API
 
 
 
-IP Whitelisting API
+IP AllowListing API
 -------------------
 | Path                                                        | Method | Description  |
 | ------------------------------------------------------------| -------| ------------ |
-|/help-to-save/forbidden                                      |   GET  | Page shown if the user is not whitelisted if IP-whitelisting is enabled|
+|/help-to-save/forbidden                                      |   GET  | Page shown if the user is not allowListed if IP-allowListing is enabled|
 
 Privacy Statement
 -----------------

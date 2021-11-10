@@ -20,8 +20,8 @@ import java.net.URLEncoder
 
 import akka.http.scaladsl.model.Uri
 import javax.inject.Inject
-import play.api.{Configuration, Environment}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}

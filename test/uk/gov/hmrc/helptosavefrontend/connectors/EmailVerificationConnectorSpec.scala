@@ -65,7 +65,7 @@ class EmailVerificationConnectorSpec
       "return a success when given good json" in {
         mockEncrypt(nino + "#" + email)("")
         mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-          Some(HttpResponse(Status.OK))
+          Some(HttpResponse(Status.OK, ""))
         )
         await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Right(())
       }
@@ -73,7 +73,7 @@ class EmailVerificationConnectorSpec
       "indicate the email has already been verified when the email has already been verified" in {
         mockEncrypt(nino + "#" + email)("")
         mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-          Some(HttpResponse(Status.CONFLICT))
+          Some(HttpResponse(Status.CONFLICT, ""))
         )
         await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.AlreadyVerified)
       }
@@ -83,7 +83,7 @@ class EmailVerificationConnectorSpec
         "given bad json" in {
           mockEncrypt(nino + "#" + email)("")
           mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-            Some(HttpResponse(Status.BAD_REQUEST))
+            Some(HttpResponse(Status.BAD_REQUEST, ""))
           )
           await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
         }
@@ -91,7 +91,7 @@ class EmailVerificationConnectorSpec
         "the email verification service is down" in {
           mockEncrypt(nino + "#" + email)("")
           mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-            Some(HttpResponse(Status.SERVICE_UNAVAILABLE))
+            Some(HttpResponse(Status.SERVICE_UNAVAILABLE, ""))
           )
           await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(VerifyEmailError.OtherError)
         }
@@ -103,7 +103,7 @@ class EmailVerificationConnectorSpec
             whenever(!statuses.contains(status)) {
               mockEncrypt(nino + "#" + email)("")
               mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(
-                Some(HttpResponse(status))
+                Some(HttpResponse(status, ""))
               )
               await(connector.verifyEmail(nino, email, name, isNewApplicant)) shouldBe Left(OtherError)
             }

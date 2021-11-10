@@ -47,7 +47,6 @@ trait VerifyEmailBehaviour extends Logging {
   )(
     implicit request: Request[AnyContent],
     htsContext: HtsContextWithNINO,
-    crypto: Crypto,
     ec: ExecutionContext
   ): Future[Result] =
     emailVerificationConnector.verifyEmail(htsContext.nino, email, firstName, isNewApplicant).map {

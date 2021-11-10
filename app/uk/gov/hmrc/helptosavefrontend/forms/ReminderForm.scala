@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.forms
 
 import play.api.data.Form
-import play.api.data.Forms.{mapping, of, text}
+import play.api.data.Forms.{mapping, of}
 
 object ReminderForm {
   def giveRemindersDetailsForm()(implicit validation: ReminderFrequencyValidation): Form[ReminderForm] = Form(

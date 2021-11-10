@@ -17,7 +17,6 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
 
@@ -41,5 +40,5 @@
     <li>@Messages("hts.register.bank-details.error.ul1-li3")</li>
   </ul>
 
-  <a role="button" href="@routes.BankAccountController.getBankDetailsPage()" class="button">@Messages("hts.register.bank-details.error.button.try-again")</a>
+  <a role="button" href="@routes.BankAccountController.getBankDetailsPage" class="button">@Messages("hts.register.bank-details.error.button.try-again")</a>
 }

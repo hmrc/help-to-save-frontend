@@ -17,12 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import org.scalacheck.Arbitrary
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json.{JsSuccess, Json}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.userInfoGen
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
 
 class UserDetailsSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 

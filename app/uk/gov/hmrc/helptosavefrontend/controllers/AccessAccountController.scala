@@ -54,7 +54,7 @@ class AccessAccountController @Inject() (
 ) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with Logging {
 
-  def getSignInPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+  def getSignInPage: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
     SeeOther("https://www.gov.uk/sign-in-help-to-save")
   }
 
@@ -80,7 +80,7 @@ class AccessAccountController @Inject() (
               { () ⇒
                 Ok(confirmCheckEligibility())
               }, { _ ⇒
-                SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+                SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
               },
               () ⇒
                 SeeOther(
@@ -93,7 +93,7 @@ class AccessAccountController @Inject() (
         )
       )
 
-    }(loginContinueURL = routes.AccessAccountController.getNoAccountPage().url)
+    }(loginContinueURL = routes.AccessAccountController.getNoAccountPage.url)
 
   private def redirectToAccountHolderPage(pageURL: String)(
     implicit
@@ -117,12 +117,12 @@ class AccessAccountController @Inject() (
       {
         // not enrolled
         () ⇒
-          storeAttemptedRedirectThenRedirect(routes.AccessAccountController.getNoAccountPage().url)
+          storeAttemptedRedirectThenRedirect(routes.AccessAccountController.getNoAccountPage.url)
       }, {
         // enrolment check error
         e ⇒
           logger.warn(s"Could not check enrolment ($e) - proceeding to check eligibility", htsContext.nino)
-          storeAttemptedRedirectThenRedirect(routes.EligibilityCheckController.getCheckEligibility().url)
+          storeAttemptedRedirectThenRedirect(routes.EligibilityCheckController.getCheckEligibility.url)
       }, { () ⇒
         // enrolled
         SeeOther(pageURL)

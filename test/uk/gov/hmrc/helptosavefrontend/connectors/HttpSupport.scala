@@ -17,11 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.Writes
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
-import org.scalatest.matchers.should.Matchers
 
 trait HttpSupport { this: MockFactory with Matchers ⇒
 
@@ -33,9 +33,17 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
     response: Option[HttpResponse]
   ) =
     (mockHttp
-      .GET(_: String, _: Seq[(String, String)])(_: HttpReads[HttpResponse], _: HeaderCarrier, _: ExecutionContext))
+      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
+        _: HttpReads[HttpResponse],
+        _: HeaderCarrier,
+        _: ExecutionContext))
       .expects(where {
-        (u: String, q: Seq[(String, String)], _: HttpReads[HttpResponse], h: HeaderCarrier, _: ExecutionContext) ⇒
+        (u: String,
+         q: Seq[(String, String)],
+         _: Seq[(String, String)],
+         _: HttpReads[HttpResponse],
+         h: HeaderCarrier,
+         _: ExecutionContext) ⇒
           // use matchers here to get useful error messages when the following predicates
           // are not satisfied - otherwise it is difficult to tell in the logs what went wrong
           u shouldBe url
@@ -43,7 +51,9 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
           h.extraHeaders shouldBe headers.toSeq
           true
       })
-      .returning(response.fold(Future.failed[HttpResponse](new Exception("Test exception message")))(Future.successful))
+      .returning(
+        response.fold(Future.failed[HttpResponse](new Exception("Test exception message")))(Future.successful)
+      )
 
   def mockPut[A](url: String, body: A, headers: Map[String, String] = Map.empty[String, String])(
     result: Option[HttpResponse]

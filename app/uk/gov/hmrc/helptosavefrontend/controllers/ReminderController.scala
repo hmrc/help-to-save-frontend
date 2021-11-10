@@ -28,8 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
-import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
+import uk.gov.hmrc.helptosavefrontend.models.{HTSReminderAccount, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
@@ -37,7 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -74,12 +73,12 @@ class ReminderController @Inject() (
 
   private def backLinkFromSession(session: HTSSession): String =
     if (session.changingDetails) {
-      routes.RegisterController.getCreateAccountPage().url
+      routes.RegisterController.getCreateAccountPage.url
     } else {
-      routes.EmailController.getSelectEmailPage().url
+      routes.EmailController.getSelectEmailPage.url
     }
 
-  private def backLink: String = routes.AccessAccountController.accessAccount().url
+  private def backLink: String = routes.AccessAccountController.accessAccount.url
 
   def getEmailsavingsReminders(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -104,15 +103,15 @@ class ReminderController @Inject() (
           )
 
       } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
       }
 
-    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
   def getSelectRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
-        def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
+        def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
         Ok(
           reminderFrequencySet(
             ReminderForm.giveRemindersDetailsForm(),
@@ -122,9 +121,9 @@ class ReminderController @Inject() (
           )
         )
       } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
       }
-    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
   def selectRemindersSubmit(): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -163,6 +162,10 @@ class ReminderController @Inject() (
                             true,
                             daysToReceiveReminders
                           )
+                          auditor.sendEvent(
+                            HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                            userInfo.nino
+                          )
                           helpToSaveReminderService
                             .updateHtsUser(htsUserToBeUpdated)
                             .fold(
@@ -194,7 +197,7 @@ class ReminderController @Inject() (
                 }
             }
         )
-    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
   def getRendersConfirmPage(email: String, period: String, page: String): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -226,7 +229,7 @@ class ReminderController @Inject() (
           }
         }
       } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
       }
 
     }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period, "page").url)
@@ -234,7 +237,7 @@ class ReminderController @Inject() (
   def getSelectedRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
-        def bckLink: String = routes.ReminderController.getEmailsavingsReminders().url
+        def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
         helpToSaveReminderService
           .getHtsUser(htsContext.nino)
           .fold(
@@ -254,10 +257,10 @@ class ReminderController @Inject() (
             }
           )
       } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
       }
 
-    }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit().url)
+    }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit.url)
 
   def selectedRemindersSubmit(): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -287,6 +290,11 @@ class ReminderController @Inject() (
                       emailRetrieved match {
                         case Some(email) if !email.isEmpty ⇒ {
                           if (success.reminderFrequency === "cancel") {
+                            auditor.sendEvent(
+                              HtsReminderCancelledEvent(HtsReminderCancelled(
+                                userInfo.nino, email), request.uri),
+                              userInfo.nino
+                            )
                             val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
                             helpToSaveReminderService
                               .cancelHtsUserReminders(cancelHtsUserReminder)
@@ -297,7 +305,7 @@ class ReminderController @Inject() (
                                   )
                                   internalServerError()
                                 },
-                                _ ⇒ SeeOther(routes.ReminderController.getRendersCancelConfirmPage().url)
+                                _ ⇒ SeeOther(routes.ReminderController.getRendersCancelConfirmPage.url)
                               )
 
                           } else {
@@ -310,6 +318,10 @@ class ReminderController @Inject() (
                               userInfo.surname,
                               true,
                               daysToReceiveReminders
+                            )
+                            auditor.sendEvent(
+                              HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                              userInfo.nino
                             )
                             helpToSaveReminderService
                               .updateHtsUser(htsUserToBeUpdated)
@@ -341,16 +353,16 @@ class ReminderController @Inject() (
                 }
             }
         )
-    }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit().url)
+    }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit.url)
 
   def getRendersCancelConfirmPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
         Ok(reminderCancelConfirmation())
       } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
       }
-    }(loginContinueURL = routes.ReminderController.getRendersCancelConfirmPage().url)
+    }(loginContinueURL = routes.ReminderController.getRendersCancelConfirmPage.url)
 
   def getApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -365,9 +377,9 @@ class ReminderController @Inject() (
           )
         }
       } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
       }
-    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit().url)
+    }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
   def submitApplySavingsReminderPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
@@ -394,9 +406,9 @@ class ReminderController @Inject() (
                       internalServerError()
                     },
                     if (s.changingDetails) { _ ⇒
-                      SeeOther(routes.RegisterController.getCreateAccountPage().url)
+                      SeeOther(routes.RegisterController.getCreateAccountPage.url)
                     } else { _ ⇒
-                      SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                      SeeOther(routes.BankAccountController.getBankDetailsPage.url)
                     }
                   )
               } else {
@@ -406,20 +418,20 @@ class ReminderController @Inject() (
                     error ⇒ {
                       internalServerError()
                     },
-                    _ ⇒ SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage().url)
+                    _ ⇒ SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage.url)
                   )
 
               }
           )
       }
 
-    }(loginContinueURL = routes.ReminderController.submitApplySavingsReminderPage().url)
+    }(loginContinueURL = routes.ReminderController.submitApplySavingsReminderPage.url)
 
   def getApplySavingsReminderSignUpPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
         checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
-          def bckLink: String = routes.ReminderController.getApplySavingsReminderPage().url
+          def bckLink: String = routes.ReminderController.getApplySavingsReminderPage.url
 
           s.reminderDetails.fold(
             Ok(
@@ -443,9 +455,9 @@ class ReminderController @Inject() (
           )
         }
       } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage().url)
+        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
       }
-    }(loginContinueURL = routes.ReminderController.getApplySavingsReminderSignUpPage().url)
+    }(loginContinueURL = routes.ReminderController.getApplySavingsReminderSignUpPage.url)
 
   def submitApplySavingsReminderSignUpPage(): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
@@ -476,9 +488,9 @@ class ReminderController @Inject() (
                       internalServerError()
                     },
                     if (session.changingDetails) { _ ⇒
-                      SeeOther(routes.RegisterController.getCreateAccountPage().url)
+                      SeeOther(routes.RegisterController.getCreateAccountPage.url)
                     } else { _ ⇒
-                      SeeOther(routes.BankAccountController.getBankDetailsPage().url)
+                      SeeOther(routes.BankAccountController.getBankDetailsPage.url)
                     }
                   )
               } else {
@@ -487,6 +499,6 @@ class ReminderController @Inject() (
           )
       }
 
-    }(loginContinueURL = routes.ReminderController.submitApplySavingsReminderSignUpPage().url)
+    }(loginContinueURL = routes.ReminderController.submitApplySavingsReminderSignUpPage.url)
 
 }

@@ -38,6 +38,12 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val authUrl: String = servicesConfig.baseUrl("auth")
 
+  val appleAppUrl: String  = servicesConfig.getString("get-the-app.apple-app-store")
+
+  val androidAppUrl: String = servicesConfig.getString("get-the-app.google-play-store")
+
+  val pushToApp: Boolean = servicesConfig.getBoolean("push-to-app.toggle")
+
   val helpToSaveUrl: String = servicesConfig.baseUrl("help-to-save")
 
   val helpToSaveFrontendUrl: String = getUrlFor("help-to-save-frontend")
@@ -70,15 +76,15 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val maintenanceSchedule: String = servicesConfig.getString("scheduled-maintenance-times")
 
-  val caFrontendUrl: String = s"${getUrlFor("company-auth-frontend")}"
+  val basGatewayFrontendUrl: String = s"${getUrlFor("bas-gateway-frontend")}"
 
-  val ggLoginUrl: String = s"$caFrontendUrl/sign-in"
+  val ggLoginUrl: String = s"$basGatewayFrontendUrl/sign-in"
   val ggContinueUrlPrefix: String =
-    servicesConfig.getString("microservice.services.company-auth-frontend.continue-url-prefix")
+    servicesConfig.getString("microservice.services.bas-gateway-frontend.continue-url-prefix")
 
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
-  val signOutUrl: String = s"$caFrontendUrl/sign-out?continue=$feedbackSurveyUrl"
+  val signOutUrl: String = s"$basGatewayFrontendUrl/sign-out-without-state?continue=$feedbackSurveyUrl"
 
   val ggUserUrl: String =
     s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?" +
@@ -100,10 +106,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
   val nsiPayInUrl: String = getUrlFor("nsi.pay-in")
-
-  val analyticsToken: String = servicesConfig.getString("google-analytics.token")
-  val analyticsHost: String = servicesConfig.getString("google-analytics.host")
-  val analyticsGovUkToken: String = servicesConfig.getString("google-analytics.govuk-token")
 
   val contactFormServiceIdentifier: String = "HTS"
 

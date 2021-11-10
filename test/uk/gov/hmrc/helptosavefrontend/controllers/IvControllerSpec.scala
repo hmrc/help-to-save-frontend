@@ -124,7 +124,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
         }
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.IvController.getIVSuccessful().url)
+        redirectLocation(result) shouldBe Some(routes.IvController.getIVSuccessful.url)
       }
 
       "show an error page if the write to session cache is unsuccessful" in {
@@ -151,11 +151,11 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     }
 
     "handling incomplete responses" must {
-      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue().url, "Incomplete")
+      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue.url, "Incomplete")
     }
 
     "handling failed iv responses" must {
-      behave like sessionPutIVURLBehaviour(routes.IvController.getFailedIV().url, "FailedIV")
+      behave like sessionPutIVURLBehaviour(routes.IvController.getFailedIV.url, "FailedIV")
     }
 
     "handling failed matching responses" must {
@@ -166,37 +166,37 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     }
 
     "handling insufficient evidence responses" must {
-      behave like noSessionPutBehaviour(routes.IvController.getInsufficientEvidence().url, "InsufficientEvidence")
+      behave like noSessionPutBehaviour(routes.IvController.getInsufficientEvidence.url, "InsufficientEvidence")
     }
 
     "handling user aborted responses" must {
-      behave like sessionPutIVURLBehaviour(routes.IvController.getUserAborted().url, "UserAborted")
+      behave like sessionPutIVURLBehaviour(routes.IvController.getUserAborted.url, "UserAborted")
 
     }
 
     "handling locked out responses" must {
-      behave like noSessionPutBehaviour(routes.IvController.getLockedOut().url, "LockedOut")
+      behave like noSessionPutBehaviour(routes.IvController.getLockedOut.url, "LockedOut")
 
     }
 
     "handling precondition failed responses" must {
-      behave like noSessionPutBehaviour(routes.IvController.getPreconditionFailed().url, "PreconditionFailed")
+      behave like noSessionPutBehaviour(routes.IvController.getPreconditionFailed.url, "PreconditionFailed")
 
     }
 
     "handling technical issue responses" must {
-      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue().url, "TechnicalIssue")
+      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue.url, "TechnicalIssue")
 
     }
 
     "handling timeout responses" must {
-      behave like sessionPutIVURLBehaviour(routes.IvController.getTimedOut().url, "Timeout")
+      behave like sessionPutIVURLBehaviour(routes.IvController.getTimedOut.url, "Timeout")
 
     }
 
     "handling unknown responses" must {
 
-      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue().url, "???")
+      behave like sessionPutIVURLBehaviour(routes.IvController.getTechnicalIssue.url, "???")
 
     }
 
@@ -209,7 +209,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
         ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"), None)(FakeRequest())
 
       status(result) shouldBe SEE_OTHER
-      redirectLocation(result) shouldBe Some(routes.IvController.getTechnicalIssue().url)
+      redirectLocation(result) shouldBe Some(routes.IvController.getTechnicalIssue.url)
     }
   }
 

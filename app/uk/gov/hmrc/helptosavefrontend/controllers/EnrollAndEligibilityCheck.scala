@@ -19,9 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import play.api.mvc.{Request, Result}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINOLogMessageTransformer, toFuture}
-import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,21 +36,20 @@ trait EnrollAndEligibilityCheck extends SessionBehaviour with EnrolmentCheckBeha
   ): Future[Result] =
     checkIfAlreadyEnrolled { () ⇒
       checkSession(
-        SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+        SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       ) { session ⇒
         session.eligibilityCheckResult.fold[Future[Result]](
-          SeeOther(routes.EligibilityCheckController.getCheckEligibility().url)
+          SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         )(
           _.fold[Future[Result]](
             { ineligibleReason ⇒
               val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
-              val threshold = ineligibleReason.value.threshold
 
               ineligibilityType.fold {
                 logger.warn(s"Could not parse ineligibility reason : $ineligibleReason")
                 toFuture(internalServerError())
               } { i ⇒
-                toFuture(SeeOther(routes.EligibilityCheckController.getIsNotEligible().url))
+                toFuture(SeeOther(routes.EligibilityCheckController.getIsNotEligible.url))
               }
             },
             _ ⇒ ifNotEnrolled(session)

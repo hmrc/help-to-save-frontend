@@ -33,12 +33,13 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibi
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
-import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
+import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSReminderAccount, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
@@ -61,6 +62,21 @@ class ReminderControllerSpec
       .returning(EitherT.fromEither[Future](result))
 
   val mockedFeatureEnabled: Boolean = false
+
+  def mockCancelRemindersAuditEvent(nino: String, emailAddress :String) :Unit =
+    (mockAuditor.sendEvent(_: HtsReminderCancelledEvent,_:String)(_: ExecutionContext))
+      .expects(HtsReminderCancelledEvent(HtsReminderCancelled(nino,emailAddress),"/"), nino, *)
+      .returning(Future.successful(AuditResult.Success))
+
+  def mockUpdateRemindersAuditEvent(user: HTSReminderAccount) :Unit =
+    (mockAuditor.sendEvent(_: HtsReminderUpdatedEvent,_:String)(_: ExecutionContext))
+      .expects(HtsReminderUpdatedEvent(HtsReminderUpdated(user),"/"), nino, *)
+      .returning(Future.successful(AuditResult.Success))
+
+  def mockCreateRemindersAuditEvent(user: HTSReminderAccount) :Unit =
+    (mockAuditor.sendEvent(_: HtsReminderCreatedEvent,_:String)(_: ExecutionContext))
+      .expects(HtsReminderCreatedEvent(HtsReminderCreated(user),"/"), nino, *)
+      .returning(Future.successful(AuditResult.Success))
 
   def mockCancelHtsUserReminderPost(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveReminderService
@@ -118,27 +134,37 @@ class ReminderControllerSpec
 
     val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
-    def verifyHtsUserUpdate(params: HtsUserSchedule): Future[Result] =
-      csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
-    def verifiedHtsUserUpdate(params: HtsUserSchedule): Future[Result] =
+    def unused[T](arg: T): Unit = arg match { case _ => () }
+
+    def verifyHtsUserUpdate(params: HtsUserSchedule): Future[Result] = {
+      unused(params)
+    csrfAddToken(controller.selectRemindersSubmit())(fakeRequest)
+    }
+    def verifiedHtsUserUpdate(params: HtsUserSchedule): Future[Result] = {
+      unused(params)
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
-    def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] =
+    }
+    def cancelHtsUserReminders(params: CancelHtsUserReminder): Future[Result] = {
+      unused(params)
       csrfAddToken(controller.selectedRemindersSubmit())(fakeRequest)
-    def verifyHtsUser(params: HtsUserSchedule): Future[Result] =
-      csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequest)
+    }
+//    def verifyHtsUser(params: HtsUserSchedule): Future[Result] =
+//      csrfAddToken(controller.submitApplySavingsReminderPage())(fakeRequest)
 
     "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserToBeUpdated = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
-        mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+        mockCreateRemindersAuditEvent(hTSReminderAccount)
+        mockUpdateHtsUserPost(htsUserToBeUpdated)(Right(htsUserToBeUpdated))
         mockEncrypt("email")(encryptedEmail)
 
       }
 
-      val result = verifyHtsUserUpdate(htsUserForUpdate)
+      val result = verifyHtsUserUpdate(htsUserToBeUpdated)
       status(result) shouldBe Status.SEE_OTHER
 
     }
@@ -169,22 +195,23 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if htsUser update fails " in {
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserToBeUpdated = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
-        mockUpdateHtsUserPost(htsUserForUpdate)(Left("error occurred while updating htsUser"))
+        mockCreateRemindersAuditEvent(hTSReminderAccount)
+        mockUpdateHtsUserPost(htsUserToBeUpdated)(Left("error occurred while updating htsUser"))
 
       }
 
-      val result = verifyHtsUserUpdate(htsUserForUpdate)
+      val result = verifyHtsUserUpdate(htsUserToBeUpdated)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 
     }
 
     "should show the form validation errors when the user submits an HtsUser to update in the HTS Reminder backend service with nobody " in {
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
 
@@ -198,7 +225,6 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if user info is missing from the htsContext " in {
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
@@ -226,7 +252,6 @@ class ReminderControllerSpec
 
     }
     "should return the reminder frquency dashboard page when asked for it" in {
-      val getHtsUser = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
@@ -242,7 +267,6 @@ class ReminderControllerSpec
 
     "should return the reminder setting page when asked for it" in {
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
-      val bckLink = routes.ReminderController.getEmailsavingsReminders().url
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -306,7 +330,6 @@ class ReminderControllerSpec
 
     }
     "should return the internal error when selected reminderpage " in {
-      val getHtsUser = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
@@ -341,6 +364,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
+        mockCancelRemindersAuditEvent(ninoNew,"email")
         mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Right((())))
 
       }
@@ -370,6 +394,7 @@ class ReminderControllerSpec
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
+        mockCancelRemindersAuditEvent(ninoNew,"email")
         mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Left("error occurred while updating htsUser"))
 
       }
@@ -380,12 +405,14 @@ class ReminderControllerSpec
     "should show a success page if the user submits an CancelHtsUserReminder nextpage to cancel in the HTS Reminder backend service " in {
       val ninoNew = "AE123456D"
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserToBeUpdated = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
-        mockUpdateHtsUserPost(htsUserForUpdate)(Right(htsUserForUpdate))
+        mockUpdateRemindersAuditEvent(hTSReminderAccount)
+        mockUpdateHtsUserPost(htsUserToBeUpdated)(Right(htsUserToBeUpdated))
         mockEncrypt("email")(encryptedEmail)
       }
 
@@ -394,16 +421,19 @@ class ReminderControllerSpec
 
     }
     "should redirect to internal server error page if htsUser update fails in selected submit " in {
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val htsUserToBeUpdated = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)
+
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
         mockEmailGet()(Right(Some("email")))
-        mockUpdateHtsUserPost(htsUserForUpdate)(Left("error occurred while updating htsUser"))
+        mockUpdateRemindersAuditEvent(hTSReminderAccount)
+        mockUpdateHtsUserPost(htsUserToBeUpdated)(Left("error occurred while updating htsUser"))
 
       }
 
-      val result = verifiedHtsUserUpdate(htsUserForUpdate)
+      val result = verifiedHtsUserUpdate(htsUserToBeUpdated)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 
     }
@@ -685,7 +715,6 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if htsUser update fails in savings reminder  signup page " in {
-      val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
       val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
 
       inSequence {
@@ -912,7 +941,7 @@ class ReminderControllerSpec
 
       val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
     "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
@@ -925,7 +954,7 @@ class ReminderControllerSpec
 
       val result = csrfAddToken(controller.getApplySavingsReminderSignUpPage())(fakeRequestWithNoBody)
       status(result) shouldBe 303
-      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility().url)
+      redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getCheckEligibility.url)
     }
 
   }
@@ -985,7 +1014,7 @@ class ReminderControllerSpec
 
   def checkIsErrorPage(result: Future[Result]): Unit = {
     status(result) shouldBe SEE_OTHER
-    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater().url)
+    redirectLocation(result) shouldBe Some(routes.EmailController.confirmEmailErrorTryLater.url)
   }
 
   "show user an in-eligible page if the session is found but user is not eligible" in {

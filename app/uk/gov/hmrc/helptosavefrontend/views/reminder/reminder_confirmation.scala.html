@@ -14,11 +14,10 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
 
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
 
@@ -40,12 +39,12 @@
     </div>
 
             <h2 class="heading-medium">@Messages("hts.reminder-confirmation.h2")</h2>
-            <p>@Html(Messages("hts.reminder-confirmation.title.p1-1")) @period @Html(Messages("hts.reminder-confirmation.title.p1-2"))</p>
+            <p>@Html(Messages("hts.reminder-confirmation.title.p1-1")) @PeriodUtils.getMessage(period) @Html(Messages("hts.reminder-confirmation.title.p1-2"))</p>
             <p>@Html(Messages("hts.reminder-confirmation.title.p1-3")) <span class="bold">@email. </span>
                 @Html(Messages("hts.reminder-confirmation.title.p1-4"))
-                <a href=@routes.AccountHolderController.getUpdateYourEmailAddress().url>
+                <a href=@routes.AccountHolderController.getUpdateYourEmailAddress.url>
             @Html(Messages("hts.reminder-confirmation.change-email.descriptive-link"))</a></p>
-            <p>@Messages("hts.reminder-confirmation.title.p1-5") <a href=@routes.ReminderController.getEmailsavingsReminders().url>
+            <p>@Messages("hts.reminder-confirmation.title.p1-5") <a href=@routes.ReminderController.getEmailsavingsReminders.url>
             @Html(Messages("hts.reminder-confirmation.saving-reminders.descriptive-link"))</a>
                 @Html(Messages("hts.reminder-confirmation.title.p1-6"))</p>
 

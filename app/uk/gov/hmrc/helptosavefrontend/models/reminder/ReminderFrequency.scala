@@ -18,10 +18,9 @@ package uk.gov.hmrc.helptosavefrontend.models.reminder
 
 import java.time.LocalDate
 
-import play.api.libs.json.{Format, JsPath, JsString, Json, Reads, Writes}
-import uk.gov.hmrc.domain.Nino
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Format, JsPath, Json, Reads}
+import play.api.libs.json._
+import uk.gov.hmrc.domain.Nino
 case class ReminderFrequency(
   nino: Nino,
   email: String,

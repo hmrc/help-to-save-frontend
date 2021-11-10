@@ -22,11 +22,11 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -128,7 +128,7 @@ class IntroductionControllerSpec
 
         val result = helpToSave.getHelpPage(FakeRequest())
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage().url)
+        redirectLocation(result) shouldBe Some(routes.AccessAccountController.getNoAccountPage.url)
       }
 
     }

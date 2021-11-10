@@ -34,7 +34,7 @@
 
   <h1 class="heading-large">@title</h1>
  
-  @form(routes.EmailController.emailUpdatedSubmit())(
+  @form(routes.EmailController.emailUpdatedSubmit)(
     Html("""<div class="form-group"><button id="continue-to-create-account" class="button" type="submit">""" + messages("hts.email-updated.continue_button") + """</button></div>""")
   )
 
