@@ -94,8 +94,6 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= appDependencies
   )
   .settings(scalacOptions ++= List(
-    // Warn if an import selector is not referenced.
-    // "-P:silencer:globalFilters=Unused import",
     "-P:silencer:pathFilters=html",
     "-P:silencer:pathFilters=routes"
   ))
