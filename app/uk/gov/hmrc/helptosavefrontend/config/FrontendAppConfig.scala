@@ -56,7 +56,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val moneyHelper: String = servicesConfig.getString("money-helper.url")
 
-  val manageDetails: String = servicesConfig.getString("mange-details.url")
+  val manageDetails: String = servicesConfig.getString("manage-details.url")
 
   val ivJourneyResultUrl: String =
     s"${servicesConfig.baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
