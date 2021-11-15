@@ -31,6 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINOLogMessageT
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 
 @Singleton
@@ -91,17 +92,27 @@ class IntroductionController @Inject() (
           internalServerError()
         },
         () ⇒
-          // get account number
-          helpToSaveService
-            .getAccountNumber()
-            .fold(
-              e ⇒ {
+          for {
+            // get account
+            account <- helpToSaveService.getAccount(htsContext.nino,UUID.randomUUID()).fold(
+              e =>{
                 logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-                Ok(helpInformationView(None))
-              }, { accountNumber ⇒
-                Ok(helpInformationView(accountNumber.accountNumber))
-              }
-            )
+                None
+              },{account =>
+                Some(account)
+              })
+            //get account number
+            accountNumber <-helpToSaveService
+              .getAccountNumber()
+              .fold(
+                e ⇒ {
+                  logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+                  None
+                }, { accountNumber ⇒
+                  accountNumber.accountNumber
+                }
+              )
+          }yield Ok(helpInformationView(accountNumber,account))
       )
 
     }(routes.IntroductionController.getAboutHelpToSave.url)

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import cats.data.EitherT
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -23,16 +24,31 @@ import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class IntroductionControllerSpec
     extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with SessionStoreBehaviourSupport
     with EnrolmentAndEligibilityCheckBehaviour {
+
+  val account = Account(
+    isClosed = false,
+    blocked = Blocking(false),
+    balance = 123.45,
+    paidInThisMonth = 0,
+    canPayInThisMonth = 0,
+    maximumPaidInThisMonth = 0,
+    thisMonthEndDate = LocalDate.parse("1900-01-01"),
+    bonusTerms = List(BonusTerm(0, 0, LocalDate.parse("2019-01-01"), LocalDate.parse("2019-01-01"))),
+    closureDate = None,
+    closingBalance = None)
+
 
   val fakeRequest = FakeRequest("GET", "/")
   val helpToSave = new IntroductionController(
@@ -46,6 +62,12 @@ class IntroductionControllerSpec
     injector.instanceOf[privacy],
     injector.instanceOf[help_information]
   )
+
+  def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
+    (mockHelpToSaveService
+      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *, *)
+      .returning(EitherT.fromEither[Future](result))
 
   def mockAuthorise(loggedIn: Boolean) =
     (mockAuthConnector
@@ -100,6 +122,7 @@ class IntroductionControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockGetAccount(nino)(Right(account))
           mockGetAccountNumberFromService()(Right(AccountNumber(Some(accountNumber))))
         }
 
