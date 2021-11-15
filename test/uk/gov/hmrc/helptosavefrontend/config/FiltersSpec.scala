@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.ActorMaterializer
 import com.kenshoo.play.metrics.MetricsFilter
 import play.api.Configuration
 import play.api.mvc.EssentialFilter

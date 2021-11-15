@@ -1,8 +1,6 @@
 import sbt.{Compile, taskKey, _}
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
-import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
-import uk.gov.hmrc.versioning.SbtGitVersioning
 import wartremover.{WartRemover, Warts}
 
 import scala.language.postfixOps
@@ -15,20 +13,6 @@ lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used i
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-val akkaVersion     = "2.6.14"
-
-val akkaHttpVersion = "10.2.6"
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-stream"    % akkaVersion
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-protobuf"  % akkaVersion
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-actor"     % akkaVersion
-
-dependencyOverrides += "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
-
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys
   Seq(
@@ -37,7 +21,7 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageMinimumStmtTotal := 92,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in Test := false
+    Test / parallelExecution := false
   )
 }
 
@@ -57,19 +41,19 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
   )
 
   Seq(
-    WartRemover.autoImport.wartremoverErrors in (Compile, compile) ++= Warts.allBut(excludedWarts: _*),
+     (Compile / compile / WartRemover.autoImport.wartremoverErrors) ++= Warts.allBut(excludedWarts: _*),
     // disable some wart remover checks in tests - (Any, Null, PublicInference) seems to struggle with
     // scalamock, (Equals) seems to struggle with stub generator AutoGen and (NonUnitStatements) is
     // imcompatible with a lot of WordSpec
-    WartRemover.autoImport.wartremoverErrors in (Test, compile) --= Seq(
+    (Test / compile / WartRemover.autoImport.wartremoverErrors) --= Seq(
       Wart.Any,
       Wart.Equals,
       Wart.Null,
       Wart.NonUnitStatements,
       Wart.PublicInference
     ),
-    wartremoverExcluded in (Compile, compile) ++=
-      routes.in(Compile).value ++
+    (Compile / compile / wartremoverExcluded) ++=
+      (Compile / routes).value ++
         ignoreFiles(baseDirectory.value) ++
         (baseDirectory.value ** "*.sc").get ++
         Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala") ++
@@ -79,10 +63,12 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
 
 lazy val commonSettings = Seq(
   addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"),
-  majorVersion := 2,
-  evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false),
   resolvers += Resolver.bintrayRepo("hmrc", "releases"),
-  scalacOptions ++= Seq("-Xcheckinit", "-feature")
+  scalacOptions ++= Seq(
+    "-Xcheckinit",
+    "-feature",
+    "-P:silencer:lineContentFilters=^\\w"    // Avoid '^\\w' warnings for Twirl template
+  )
 ) ++
   scalaSettings ++ publishingSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
 
@@ -97,17 +83,16 @@ lazy val microservice = Project(appName, file("."))
     )
   )
   .enablePlugins(
-    Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) ++ plugins: _*
+    Seq(play.sbt.PlayScala, SbtDistributablesPlugin) ++ plugins: _*
   )
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(PlayKeys.playDefaultPort := 7000)
+  .settings(scalaVersion := "2.12.13")
   .settings(
+    majorVersion := 2,
     libraryDependencies ++= appDependencies
   )
-  .settings(scalaVersion := "2.12.11")
   .settings(scalacOptions ++= List(
-    // Warn if an import selector is not referenced.
-//    "-P:silencer:globalFilters=Unused import",
     "-P:silencer:pathFilters=html",
     "-P:silencer:pathFilters=routes"
   ))
@@ -123,5 +108,5 @@ lazy val microservice = Project(appName, file("."))
         logger.log(Level.Warn, "WARNING: could not replace quotes with smart quotes")
       }
     },
-    compile := ((compile in Compile) dependsOn formatMessageQuotes).value
+    compile := ((Compile / compile) dependsOn formatMessageQuotes).value
   )

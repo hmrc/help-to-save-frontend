@@ -16,9 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-
-
-import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.ActorMaterializer
 import com.google.inject.Inject
 import configs.syntax._
 import play.api.Configuration
