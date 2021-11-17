@@ -54,6 +54,10 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val reminderServiceFeatureSwitch: Boolean = servicesConfig.getBoolean("reminder-feature-switch")
 
+  val moneyHelper: String = servicesConfig.getString("money-helper.url")
+
+  val manageDetails: String = servicesConfig.getString("manage-details.url")
+
   val ivJourneyResultUrl: String =
     s"${servicesConfig.baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
