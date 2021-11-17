@@ -18,7 +18,6 @@
 
 @(maybeDate:Option[LocalDate])(implicit messages: play.api.i18n.Messages)
 
-<p>@Messages("hts.help-information.section.when-your-account-ends.s2.title")</p>
 @maybeDate match{
   case Some(date) =>{
    <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p1",date.getDayOfMonth.toString+" "+date.getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
