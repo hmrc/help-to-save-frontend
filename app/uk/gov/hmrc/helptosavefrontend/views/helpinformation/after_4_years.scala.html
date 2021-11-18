@@ -18,17 +18,10 @@
 
 @(maybeDate:Option[LocalDate])(implicit messages: play.api.i18n.Messages)
 
-@getNextMonth(date: LocalDate) = @{
-date.getMonthValue + 1 match {
-      case monthValue if monthValue > 12 => 1
-      case monthValue => monthValue
-    }
-}
-
 @maybeDate match{
   case Some(date) =>{
    <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p1",date.getDayOfMonth.toString+" "+date.getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
-   <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p2","10 "+date.withMonth(getNextMonth(date)).getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
+   <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p2","10 "+date.plusMonths(1).getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
  }
   case None =>{
    <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p1.error")</p>
