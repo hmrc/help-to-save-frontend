@@ -679,9 +679,6 @@ hts.help-information.section.how-account-works.s5.p5=Mae rhai eithriadau i hyn. 
 hts.help-information.section.how-account-works.s6.title=Os ydych yn rhoi’r gorau i hawlio budd-daliadau
 hts.help-information.section.how-account-works.s6.p1=Nid oes rhaid i chi roi gwybod i ni. Gallwch barhau i ddefnyddio’ch cyfrif Cymorth i Gynilo ac ennill bonysau.
 
-hts.help-information.section.how-account-works.s7.title=Yr hyn sy’n digwydd ar ôl 4 blynedd
-hts.help-information.section.how-account-works.s7.p1=Ar ôl 4 blynedd bydd eich cyfrif Cymorth i Gynilo yn cael ei gau. Byddwn yn talu unrhyw arian bonws rydych wedi’i ennill i mewn i’ch cyfrif banc yn y DU. Ni fyddwch yn gallu ailagor eich cyfrif Cymorth i Gynilo nac agor un arall.
-
 hts.help-information.section.how-account-works.s8.title=Os ydych yn cau’ch cyfrif yn gynnar
 hts.help-information.section.how-account-works.s8.p1=Gallwch gau’ch cyfrif Cymorth i Gynilo ar unrhyw adeg. Os byddwch yn cau’ch cyfrif yn gynnar, cyn iddo aeddfedu, ni fyddwch yn cael taliad bonws. Ni fyddwch yn gallu ailagor eich cyfrif Cymorth i Gynilo nac agor un arall.
 hts.help-information.section.how-account-works.s8.p2=Os oes angen ichi gau eich cyfrif ffoniwch 0300 200 1900.
