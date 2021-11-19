@@ -686,6 +686,31 @@ hts.help-information.section.how-account-works.s8.p2=Os oes angen ichi gau eich 
 hts.help-information.section.how-account-works.s9.title=Os yw deiliad y cyfrif yn marw neu’n derfynol wael
 hts.help-information.section.how-account-works.s9.p1=Os oes salwch terfynol ar rywun sydd â chyfrif Cymorth i Gynilo, neu os yw’n marw, byddwn yn talu’i fonws iddo’n gynnar. Os cewch ddiagnosis gan eich meddyg eich bod yn derfynol wael, a’ch bod am hawlio’ch bonws yn gynnar, rhowch alwad i ni ar: 0300 200 1900
 
+hts.help-information.section.when-your-account-ends.title=Pan fydd eich cyfrif yn cau
+hts.help-information.section.when-your-account-ends.s1.title=Cyn i’ch cyfrif gau
+hts.help-information.section.when-your-account-ends.s1.p1=Dylech wirio bod manylion eich cyfrif banc enwebedig yn gywir. Gallwch wneud hynny yn
+hts.help-information.section.when-your-account-ends.s1.p1.link=Rheoli manylion banc
+hts.help-information.section.when-your-account-ends.s1.p1.full-stop=.
+hts.help-information.section.when-your-account-ends.s1.p2=Os nad yw’r manylion yn gywir, bydd angen i chi eu newid cyn i’ch cyfrif cau ar {0}.
+hts.help-information.section.when-your-account-ends.s1.p2.error=
+hts.help-information.section.when-your-account-ends.s1.p3=Y rheswm dros hyn yw pan fydd eich cyfrif yn cau, byddwn yn symud unrhyw gynilion a bonws o’ch cyfrif Cymorth i Gynilo i’ch cyfrif banc yn y DU.
+hts.help-information.section.when-your-account-ends.s1.h1=Os oes gennych archeb sefydlog wedi’i sefydlu
+hts.help-information.section.when-your-account-ends.s1.p4=Mae’n rhaid i chi ganslo unrhyw archebion sefydlog sy’n gwneud taliadau i’ch cyfrif Cymorth i Gynilo
+hts.help-information.section.when-your-account-ends.s1.p5=Os na fyddwch yn canslo’ch archeb sefydlog a bod y taliad yn cael ei gymryd ar ôl i’ch cyfrif Cymorth i Gynilo gau, rhowch alwad i 0800 138 0555
+hts.help-information.section.when-your-account-ends.s2.title=Yr hyn sy’n digwydd ar ôl 4 blynedd
+hts.help-information.section.when-your-account-ends.s2.p1=Bydd eich cyfrif yn cau ar {0}
+hts.help-information.section.when-your-account-ends.s2.p2=Dylech gael taliad i’ch cyfrif banc yn y DU erbyn {0}
+hts.help-information.section.when-your-account-ends.s2.p1.error=
+hts.help-information.section.when-your-account-ends.s2.p2.error=
+hts.help-information.section.when-your-account-ends.s2.p3=Os nad ydych wedi cael taliad erbyn hynny, cysylltwch â ni ar 0800 138 0555
+hts.help-information.section.when-your-account-ends.s2.p4=Os ydych wedi ennill bonws terfynol a bod gennych rai cynilion yn eich cyfrif Cymorth i Gynilo, bydd y rhain yn cael eu talu i’ch cyfrif banc enwebedig yn y DU fel dau swm ar wahân.
+hts.help-information.section.when-your-account-ends.s2.p5=Byddwch yn gallu bwrw golwg dros eich cyfrif ar ôl iddo gau ond ni fyddwch yn gallu gwneud rhagor o daliadau i’ch cyfrif.
+hts.help-information.section.when-your-account-ends.s2.p6=Byddwch yn gallu bwrw golwg dros eich cyfrif caeedig a’ch hanes trafodion, a darllen eich negeseuon
+hts.help-information.section.when-your-account-ends.s3.title=Sut i barhau i gynilo ar ôl i’ch cyfrif gau
+hts.help-information.section.when-your-account-ends.s3.p1.start=Er na allwch agor cyfrif Cymorth i Gynilo arall, mae mannau eraill lle gallech barhau i gynilo. I gael rhagor o wybodaeth am barhau gyda’ch cynilion nawr neu yn y dyfodol,
+hts.help-information.section.when-your-account-ends.s3.p1.link=<a href="https://www.moneyhelper.org.uk/cy"> bwrw golwg dros y gwefan Cynorthwyydd Arian (Cynorthwyydd Arian) </a>
+hts.help-information.section.when-your-account-ends.s3.p1.end=neu rhowch alwad i 0800 138 7777
+
 hts.help-information.section.hmrc-app.title=Cymorth i Gynilo ar ap CThEM
 hts.help-information.section.hmrc-app.benefits.title=Manteision yr ap
 hts.help-information.section.hmrc-app.benefits.s1=Mae gan yr ap lawer mwy o nodweddion a fydd yn eich helpu i fanteisio i’r eithaf ar eich cyfrif Cymorth i Gynilo:

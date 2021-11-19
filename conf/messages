@@ -709,7 +709,7 @@ hts.help-information.section.when-your-account-ends.s2.p5=You will be able to vi
 hts.help-information.section.when-your-account-ends.s2.p6=You will be able to view your closed account, transactions history and read your messages.
 hts.help-information.section.when-your-account-ends.s3.title=How to carry on saving after your account closes
 hts.help-information.section.when-your-account-ends.s3.p1.start=Although you cannot open another Help to Save account, there are other places where you could continue to save. For further information on continuing with your savings now or in the future,
-hts.help-information.section.when-your-account-ends.s3.p1.link=check out the Money Helper website
+hts.help-information.section.when-your-account-ends.s3.p1.link=<a href="https://www.moneyhelper.org.uk/en"> check out the Money Helper website </a>
 hts.help-information.section.when-your-account-ends.s3.p1.end=or call 0800 138 7777.
 
 hts.help-information.section.hmrc-app.title=Help to Save on the HMRC app

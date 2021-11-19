@@ -14,12 +14,10 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-
-@()(implicit messages: play.api.i18n.Messages, appConfig: FrontendAppConfig)
+@()(implicit request: Request[_], messages: play.api.i18n.Messages)
 
 <p>
  @Messages("hts.help-information.section.when-your-account-ends.s3.p1.start")
- <a href=@appConfig.moneyHelper>@Messages("hts.help-information.section.when-your-account-ends.s3.p1.link")</a>
+ @Html(Messages("hts.help-information.section.when-your-account-ends.s3.p1.link"))
  @Messages("hts.help-information.section.when-your-account-ends.s3.p1.end")
 </p>
