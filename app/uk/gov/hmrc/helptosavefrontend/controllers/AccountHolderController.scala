@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.string._
@@ -29,10 +28,11 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.{EmailVerificationConnector, HelpToSaveReminderConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
@@ -47,6 +47,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AccountHolderController @Inject() (
+  val helpToSaveReminderConnector: HelpToSaveReminderConnector,
   val helpToSaveService: HelpToSaveService,
   val authConnector: AuthConnector,
   val emailVerificationConnector: EmailVerificationConnector,
@@ -198,6 +199,8 @@ class AccountHolderController @Inject() (
                 Ok(closeAccountAreYouSure(None))
               }, { account ⇒
                 if (account.isClosed) {
+                  val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
+                  helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)
                   SeeOther(appConfig.nsiManageAccountUrl)
                 } else {
                   Ok(closeAccountAreYouSure(Some(account)))
