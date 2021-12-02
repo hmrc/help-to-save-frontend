@@ -449,9 +449,9 @@ hts.register.create_account.tandc-title=Terms and conditions
 hts.register.create_account.tandc-p1=Before you create a Help to Save account you must agree that:
 hts.register.create_account.tandc-ul1-li1=your details, email address and bank details are correct
 hts.register.create_account.tandc-ul1-li2=you have read and understood the <a href={0}>eligibility criteria</a> on GOV.UK and are eligible for a Help to Save account
-hts.register.create_account.tandc-ul1-li4=you are creating a Help to Save account for the first time
-hts.register.create_account.tandc-ul1-li5=if you get Universal Credit, you will tell us each time you leave the UK for 4 weeks or more
-hts.register.create_account.tandc-ul1-li6=if you get tax credits, you will tell us each time you leave the UK for 8 weeks or more
+hts.register.create_account.tandc-ul1-li3=you are creating a Help to Save account for the first time
+hts.register.create_account.tandc-ul1-li4=if you get Universal Credit, you will tell us each time you leave the UK for 4 weeks or more
+hts.register.create_account.tandc-ul1-li5=if you get tax credits, you will tell us each time you leave the UK for 8 weeks or more
 hts.register.create_account.agree-continue=Agree and continue
 
 # Push to App

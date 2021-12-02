@@ -448,9 +448,9 @@ hts.register.create_account.tandc-title=Telerau ac amodau
 hts.register.create_account.tandc-p1=Cyn i chi greu cyfrif Cymorth i Gynilo, rhaid i chi gytuno:
 hts.register.create_account.tandc-ul1-li1=fod eich manylion, cyfeiriad ebost a manylion banc yn gywir
 hts.register.create_account.tandc-ul1-li2=eich bod wedi darllen a deall y <a href={0}>meini prawf cymhwystra</a> ar GOV.UK ac yn gymwys i gael cyfrif Cymorth i Gynilo
-hts.register.create_account.tandc-ul1-li4=eich bod yn creu cyfrif Cymorth i Gynilo am y tro cyntaf
-hts.register.create_account.tandc-ul1-li5=os ydych yn cael Credyd Cynhwysol, byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 4 wythnos neu fwy
-hts.register.create_account.tandc-ul1-li6=os ydych yn cael credydau treth, byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 8 wythnos neu fwy
+hts.register.create_account.tandc-ul1-li3=eich bod yn creu cyfrif Cymorth i Gynilo am y tro cyntaf
+hts.register.create_account.tandc-ul1-li4=os ydych yn cael Credyd Cynhwysol, byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 4 wythnos neu fwy
+hts.register.create_account.tandc-ul1-li5=os ydych yn cael credydau treth, byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 8 wythnos neu fwy
 hts.register.create_account.agree-continue=Cytuno ac yn eich blaen
 
 # Push to App

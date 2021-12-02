@@ -144,17 +144,9 @@ bodyClasses = None) {
   <ul class="list list-bullet">
     <li>@Messages("hts.register.create_account.tandc-ul1-li1")</li>
     <li>@Html(Messages("hts.register.create_account.tandc-ul1-li2", appConfig.govUkEligibilityInfoUrl))</li>
-    @eligibleWithUserInfo.eligible.value.eligibilityCheckResult.reasonCode match {
-      case 7 => {
-        <li>@{Messages("hts.register.create_account.condition-wtc")}</li>
-      }
-      case _ => {
-        <li>@{Messages("hts.register.create_account.condition-uc")}</li>
-      }
-    }
+    <li>@Messages("hts.register.create_account.tandc-ul1-li3")</li>
     <li>@Messages("hts.register.create_account.tandc-ul1-li4")</li>
     <li>@Messages("hts.register.create_account.tandc-ul1-li5")</li>
-    <li>@Messages("hts.register.create_account.tandc-ul1-li6")</li>
   </ul>
 
   @form(routes.RegisterController.createAccount){
