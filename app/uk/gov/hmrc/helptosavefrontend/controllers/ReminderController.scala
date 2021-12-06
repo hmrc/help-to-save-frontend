@@ -36,6 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
+import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
@@ -141,6 +142,15 @@ class ReminderController @Inject() (
                 internalServerError()
 
               case Right(userInfo) ⇒
+                helpToSaveService.getAccount(htsContext.nino, UUID.randomUUID()).value.flatMap{_.fold(
+                  noAccount =>{
+                    logger.warn(
+                      s"An error occurred while accessing get account  service for user: ${userInfo.nino} Exception : $noAccount"
+                    )
+                    internalServerError()
+                  },
+                  account =>
+                    {
                 helpToSaveService.getConfirmedEmail.value.flatMap {
                   _.fold(
                     noEmailError ⇒ {
@@ -155,15 +165,16 @@ class ReminderController @Inject() (
                           val daysToReceiveReminders =
                             DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
                           val htsUserToBeUpdated = HtsUserSchedule(
-                            Nino(htsContext.nino),
-                            email,
-                            userInfo.forename,
-                            userInfo.surname,
-                            true,
-                            daysToReceiveReminders
+                            nino = Nino(htsContext.nino),
+                            email = email,
+                            firstName = userInfo.forename,
+                            lastName = userInfo.surname,
+                            optInStatus = true,
+                            daysToReceive = daysToReceiveReminders,
+                            accountClosingDate = account.closureDate
                           )
                           auditor.sendEvent(
-                            HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                            HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)), request.uri),
                             userInfo.nino
                           )
                           helpToSaveReminderService
@@ -193,6 +204,9 @@ class ReminderController @Inject() (
                           internalServerError()
                         }
                       }
+                  )
+                }
+                    }
                   )
                 }
             }
@@ -312,15 +326,16 @@ class ReminderController @Inject() (
                             val daysToReceiveReminders =
                               DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
                             val htsUserToBeUpdated = HtsUserSchedule(
-                              Nino(htsContext.nino),
-                              email,
-                              userInfo.forename,
-                              userInfo.surname,
-                              true,
-                              daysToReceiveReminders
+                              nino = Nino(htsContext.nino),
+                              email = email,
+                              firstName = userInfo.forename,
+                              lastName = userInfo.surname,
+                              optInStatus = true,
+                              daysToReceive = daysToReceiveReminders
+
                             )
                             auditor.sendEvent(
-                              HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                              HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive,htsUserToBeUpdated.accountClosingDate)), request.uri),
                               userInfo.nino
                             )
                             helpToSaveReminderService

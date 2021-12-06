@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
+import java.time.LocalDate
 import play.api.libs.json.{Format, JsValue, Json}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.util.NINO
@@ -82,7 +83,13 @@ object SuspiciousActivity {
   private implicit val detailsFormat: Format[Details] = Json.format[Details]
 }
 
-case class HTSReminderAccount(nino : String, emailAddress: String, firstName: String, lastName: String, optInStatus: Boolean, daysToReceive: Seq[Int])
+case class HTSReminderAccount(nino : String,
+                              emailAddress: String,
+                              firstName: String,
+                              lastName: String,
+                              optInStatus: Boolean,
+                              daysToReceive: Seq[Int],
+                              accountClosingDate: Option[LocalDate])
 
 case class HtsReminderUpdated(account: HTSReminderAccount)
 

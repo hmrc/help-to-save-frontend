@@ -278,7 +278,7 @@ class RegisterController @Inject() (
     val daysToReceiveReminders = reminderDetails.getOrElse("None")
     if (daysToReceiveReminders =!= "None") {
       auditor.sendEvent(
-        HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(nino, eligibleWithInfo.email, eligibleWithInfo.userInfo.userInfo.forename, eligibleWithInfo.userInfo.userInfo.surname, true, DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq()))), request.uri),
+        HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(nino, eligibleWithInfo.email, eligibleWithInfo.userInfo.userInfo.forename, eligibleWithInfo.userInfo.userInfo.surname, true, DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq()), None)), request.uri),
         nino
       )
       helpToSaveReminderService
