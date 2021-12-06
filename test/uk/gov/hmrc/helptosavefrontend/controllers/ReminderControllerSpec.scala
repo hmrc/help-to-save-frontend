@@ -386,6 +386,7 @@ class ReminderControllerSpec
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockGetAccount(nino)(Right(account))
         mockEmailGet()(Right(Some("email")))
         mockCancelRemindersAuditEvent(ninoNew,"email")
         mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Right((())))
@@ -401,6 +402,7 @@ class ReminderControllerSpec
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockGetAccount(nino)(Right(account))
         mockEmailGet()(Left("error occurred while retrieving the email details"))
 
       }
@@ -416,6 +418,7 @@ class ReminderControllerSpec
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockGetAccount(nino)(Right(account))
         mockEmailGet()(Right(Some("email")))
         mockCancelRemindersAuditEvent(ninoNew,"email")
         mockCancelHtsUserReminderPost(cancelHtsUserReminder)(Left("error occurred while updating htsUser"))
@@ -433,6 +436,7 @@ class ReminderControllerSpec
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockGetAccount(nino)(Right(account))
         mockEmailGet()(Right(Some("email")))
         mockUpdateRemindersAuditEvent(hTSReminderAccount)
         mockUpdateHtsUserPost(htsUserToBeUpdated)(Right(htsUserToBeUpdated))
@@ -450,6 +454,7 @@ class ReminderControllerSpec
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockGetAccount(nino)(Right(account))
         mockEmailGet()(Right(Some("email")))
         mockUpdateRemindersAuditEvent(hTSReminderAccount)
         mockUpdateHtsUserPost(htsUserToBeUpdated)(Left("error occurred while updating htsUser"))
