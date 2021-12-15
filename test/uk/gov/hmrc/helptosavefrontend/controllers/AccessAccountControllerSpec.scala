@@ -16,16 +16,21 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import cats.data.EitherT
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking, BonusTerm}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 class AccessAccountControllerSpec
@@ -34,6 +39,7 @@ class AccessAccountControllerSpec
 
   lazy val controller = new AccessAccountController(
     mockHelpToSaveService,
+    mockHelpToSaveReminderService,
     mockAuthConnector,
     mockMetrics,
     mockSessionStore,
@@ -44,6 +50,43 @@ class AccessAccountControllerSpec
     injector.instanceOf[confirm_check_eligibility],
     injector.instanceOf[error_template]
   )
+
+  def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
+    (mockHelpToSaveService
+      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+
+  def mockCancelHtsUserReminderPost(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveReminderService
+      .cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(cancelHtsUserReminder, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  val account = Account(
+    isClosed = false,
+    blocked = Blocking(false),
+    balance = 123.45,
+    paidInThisMonth = 0,
+    canPayInThisMonth = 0,
+    maximumPaidInThisMonth = 0,
+    thisMonthEndDate = LocalDate.parse("1900-01-01"),
+    bonusTerms = List(BonusTerm(0, 0, LocalDate.parse("2019-01-01"), LocalDate.parse("2019-01-01"))),
+    closureDate = None,
+    closingBalance = None)
+
+  val accountClosed = Account(
+    isClosed = true,
+    blocked = Blocking(false),
+    balance = 123.45,
+    paidInThisMonth = 0,
+    canPayInThisMonth = 0,
+    maximumPaidInThisMonth = 0,
+    thisMonthEndDate = LocalDate.parse("1900-01-01"),
+    bonusTerms = List(BonusTerm(0, 0, LocalDate.parse("2019-01-01"), LocalDate.parse("2019-01-01"))),
+    closureDate = Some(LocalDate.now()),
+    closingBalance = Some(123.45))
 
   "The AccessAccountController" when {
 
@@ -67,10 +110,62 @@ class AccessAccountControllerSpec
       def doRequest(): Future[Result] =
         Future.successful(await(controller.accessAccount(FakeRequest())))
 
-      behave like commonBehaviour(doRequest, appConfig.nsiManageAccountUrl)
+      "should redirect to check if Account is Closed" in{
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+      }
+          val result = doRequest()
+          redirectLocation(result) shouldBe Some(appConfig.checkIfAccountIsClosedUrl)
+        }
+    }
+
+    "handling checkIfAccountIsClosed" must {
+      def doRequest(): Future[Result] =
+        Future.successful(await(controller.checkIfAccountIsClosed(FakeRequest())))
+
+      "should redirect to redirect access account if account is not closed" in{
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockGetAccount(nino)(Right(account))
+        }
+        val result = doRequest()
+        redirectLocation(result) shouldBe Some(appConfig.redirectAccessAccount)
+      }
+
+      "should redirect to delete reminder if account is closed" in{
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockGetAccount(nino)(Right(accountClosed))
+        }
+        val result = doRequest()
+        redirectLocation(result) shouldBe Some(appConfig.deleteReminderUrl)
+      }
 
     }
 
+    "handling deleteReminder" must {
+      def doRequest(): Future[Result] =
+        Future.successful(await(controller.deleteReminder(FakeRequest())))
+
+      "redirect to redirectAccessAccount" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockCancelHtsUserReminderPost(CancelHtsUserReminder(nino))(Right(()))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(appConfig.redirectAccessAccount)
+      }
+    }
+
+    "handling redirect access account" must
+      {
+        def doRequest(): Future[Result] =
+          Future.successful(await(controller.redirectAccessAccount(FakeRequest())))
+
+        behave like commonBehaviour(doRequest, appConfig.nsiManageAccountUrl)
+      }
     "handling payIn" must {
 
       def doRequest(): Future[Result] =

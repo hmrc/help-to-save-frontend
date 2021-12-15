@@ -36,6 +36,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
+import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
@@ -171,7 +172,7 @@ class ReminderController @Inject() (
                             lastName = userInfo.surname,
                             optInStatus = true,
                             daysToReceive = daysToReceiveReminders,
-                            accountClosingDate = account.closureDate
+                            accountClosingDate = account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
                           )
                           auditor.sendEvent(
                             HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)), request.uri),
@@ -340,7 +341,7 @@ class ReminderController @Inject() (
                                   lastName = userInfo.surname,
                                   optInStatus = true,
                                   daysToReceive = daysToReceiveReminders,
-                                  accountClosingDate = account.closureDate
+                                  accountClosingDate = account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
                                 )
                                 auditor.sendEvent(
                                   HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName, htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)), request.uri),
