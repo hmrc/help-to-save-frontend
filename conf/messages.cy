@@ -592,7 +592,7 @@ hts.help-information.section.payments.s3.p4=Os oes problem, holwch eich banc.
 
 # Help/information: Bonuses
 hts.help-information.section.bonuses.title=Bonysau
-hts.help-information.section.bonuses.s1.title=Pa fonysau y gallwch eu cael (fideo)
+hts.help-information.section.bonuses.s1.title=Pa fonysau y gallwch eu cael
 hts.help-information.section.bonuses.s1.p1=Gallwch ennill 2 fonws rhydd o dreth.
 hts.help-information.section.bonuses.s1.h1=Bonws cyntaf:
 hts.help-information.section.bonuses.s1.ul1-li1=enillwch hyd at £600
@@ -631,7 +631,7 @@ hts.help-information.section.bonuses.s5.p5=Mae mis calendr yn fis llawn o ddiwrn
 hts.help-information.section.bonuses.s6.title=Ble y telir eich bonws
 hts.help-information.section.bonuses.s6.p1=Telir unrhyw arian bonws a enillwch i mewn i’ch cyfrif banc, nid i’ch cyfrif Cymorth i Gynilo.
 
-hts.help-information.section.bonuses.s7.title=Sut mae tynnu arian allan yn effeithio ar eich bonysau (fideo)
+hts.help-information.section.bonuses.s7.title=Sut mae tynnu arian allan yn effeithio ar eich bonysau
 hts.help-information.section.bonuses.s7.p1=Gallwch dynnu arian allan ac fe fyddwch yn parhau i gael bonysau.
 hts.help-information.section.bonuses.s7.p2=Nid yw tynnu arian allan yn lleihau’r swm o arian bonws rydych wedi’i ennill eisoes. Mae tynnu arian allan yn ei gwneud yn anoddach i chi dyfu’ch balans uchaf a’ch bonws.
 hts.help-information.section.bonuses.s7.p3=Mae hyn oherwydd:
