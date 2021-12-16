@@ -37,19 +37,6 @@ class IntroductionControllerSpec
     extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with SessionStoreBehaviourSupport
     with EnrolmentAndEligibilityCheckBehaviour {
 
-  val account = Account(
-    isClosed = false,
-    blocked = Blocking(false),
-    balance = 123.45,
-    paidInThisMonth = 0,
-    canPayInThisMonth = 0,
-    maximumPaidInThisMonth = 0,
-    thisMonthEndDate = LocalDate.parse("1900-01-01"),
-    bonusTerms = List(BonusTerm(0, 0, LocalDate.parse("2019-01-01"), LocalDate.parse("2019-01-01"))),
-    closureDate = None,
-    closingBalance = None)
-
-
   val fakeRequest = FakeRequest("GET", "/")
   val helpToSave = new IntroductionController(
     mockAuthConnector,
@@ -62,12 +49,6 @@ class IntroductionControllerSpec
     injector.instanceOf[privacy],
     injector.instanceOf[help_information]
   )
-
-  def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
-    (mockHelpToSaveService
-      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, *, *, *)
-      .returning(EitherT.fromEither[Future](result))
 
   def mockAuthorise(loggedIn: Boolean) =
     (mockAuthConnector

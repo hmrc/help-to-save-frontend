@@ -25,13 +25,16 @@ import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
-import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
+import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EnrolmentAndEligibilityCheckBehaviour {
@@ -51,6 +54,30 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     .copy(nbaDetails = Some(bankDetails))
     .copy(version = "V2.0")
     .copy(systemId = "MDTP REGISTRATION")
+
+  val account = Account(
+    isClosed = false,
+    blocked = Blocking(false),
+    balance = 123.45,
+    paidInThisMonth = 0,
+    canPayInThisMonth = 0,
+    maximumPaidInThisMonth = 0,
+    thisMonthEndDate = LocalDate.parse("1900-01-01"),
+    bonusTerms = List(BonusTerm(0, 0, LocalDate.parse("2019-01-01"), LocalDate.parse("2019-01-01"))),
+    closureDate = None,
+    closingBalance = None)
+
+  val accountClosed = Account(
+    isClosed = true,
+    blocked = Blocking(false),
+    balance = 123.45,
+    paidInThisMonth = 0,
+    canPayInThisMonth = 0,
+    maximumPaidInThisMonth = 0,
+    thisMonthEndDate = LocalDate.parse("1900-01-01"),
+    bonusTerms = List(BonusTerm(0, 0, LocalDate.parse("2019-01-01"), LocalDate.parse("2019-01-01"))),
+    closureDate = Some(LocalDate.now()),
+    closingBalance = Some(123.45))
 
   val accountNumber = "1234567890123"
 
@@ -74,6 +101,12 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))
 
+  def mockCancelHtsUserReminderPost(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveReminderService
+      .cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(cancelHtsUserReminder, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
   def mockCreateAccount(
     createAccountRequest: CreateAccountRequest
   )(response: Either[SubmissionFailure, SubmissionSuccess]): Unit =
@@ -81,6 +114,12 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
       .expects(createAccountRequest, *, *)
       .returning(EitherT.fromEither[Future](response))
+
+  def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
+    (mockHelpToSaveService
+      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *, *)
+      .returning(EitherT.fromEither[Future](result))
 
   def mockGetAccountNumber()(result: Either[String, AccountNumber]): Unit =
     (mockHelpToSaveConnector

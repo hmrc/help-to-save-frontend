@@ -46,27 +46,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class ReminderControllerSpec
-    extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with SessionStoreBehaviourSupport {
+    extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with SessionStoreBehaviourSupport with EnrolmentAndEligibilityCheckBehaviour {
 
   override implicit val crypto: Crypto = mock[Crypto]
   implicit val reminderFrequencyValidation: ReminderFrequencyValidation = mock[ReminderFrequencyValidation]
   val encryptedEmail = "encrypted"
   val mockAuditor = mock[HTSAuditor]
-
-  val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
-  val mockHelpToSaveService = mock[HelpToSaveService]
-
-  val account = Account(
-    isClosed = false,
-    blocked = Blocking(false),
-    balance = 123.45,
-    paidInThisMonth = 0,
-    canPayInThisMonth = 0,
-    maximumPaidInThisMonth = 0,
-    thisMonthEndDate = LocalDate.parse("1900-01-01"),
-    bonusTerms = List(BonusTerm(0, 0, LocalDate.parse("2019-01-01"), LocalDate.parse("2019-01-01"))),
-    closureDate = None,
-    closingBalance = None)
 
   def mockUpdateHtsUserPost(htsUser: HtsUserSchedule)(result: Either[String, HtsUserSchedule]): Unit =
     (mockHelpToSaveReminderService
@@ -91,22 +76,10 @@ class ReminderControllerSpec
       .expects(HtsReminderCreatedEvent(HtsReminderCreated(user),"/"), nino, *)
       .returning(Future.successful(AuditResult.Success))
 
-  def mockCancelHtsUserReminderPost(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveReminderService
-      .cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(cancelHtsUserReminder, *, *)
-      .returning(EitherT.fromEither[Future](result))
-
   def mockGetHtsUser(nino: String)(result: Either[String, HtsUserSchedule]): Unit =
     (mockHelpToSaveReminderService
       .getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
       .expects(nino, *, *)
-      .returning(EitherT.fromEither[Future](result))
-
-  def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService
-      .getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockEmailGet()(result: Either[String, Option[String]]): Unit =
@@ -120,12 +93,6 @@ class ReminderControllerSpec
 
   def mockDecrypt(p: String)(result: String): Unit =
     (crypto.decrypt(_: String)).expects(p).returning(Try(result))
-
-  def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
-    (mockHelpToSaveService
-      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, *, *, *)
-      .returning(EitherT.fromEither[Future](result))
 
   def newController()(implicit crypto: Crypto, reminderFrequencyValidation: ReminderFrequencyValidation) =
     new ReminderController(

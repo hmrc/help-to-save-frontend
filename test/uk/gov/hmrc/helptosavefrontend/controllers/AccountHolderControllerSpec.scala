@@ -48,21 +48,14 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 class AccountHolderControllerSpec
-    extends ControllerSpecWithGuiceApp with CSRFSupport with SessionStoreBehaviourSupport with AuthSupport {
+    extends ControllerSpecWithGuiceApp with CSRFSupport with SessionStoreBehaviourSupport with AuthSupport with EnrolmentAndEligibilityCheckBehaviour {
 
   private val fakeRequest = FakeRequest("GET", "/")
-
-  val mockHelpToSaveService = mock[HelpToSaveService]
 
   val mockEmailVerificationConnector = mock[EmailVerificationConnector]
 
   val mockAuditor = mock[HTSAuditor]
 
-  def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService
-      .getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
-      .returning(EitherT.fromEither[Future](result))
 
   def mockEmailGet()(result: Either[String, Option[String]]): Unit =
     (mockHelpToSaveService
@@ -87,12 +80,6 @@ class AccountHolderControllerSpec
       .sendEvent(_: EmailChanged, _: NINO)(_: ExecutionContext))
       .expects(EmailChanged(nino, oldEmail, newEmail, false, path), nino, *)
       .returning(Future.successful(AuditResult.Success))
-
-  def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
-    (mockHelpToSaveService
-      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, *, *, *)
-      .returning(EitherT.fromEither[Future](result))
 
   lazy val controller = new AccountHolderController(
     mockHelpToSaveService,
