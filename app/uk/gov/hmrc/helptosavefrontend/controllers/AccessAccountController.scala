@@ -22,7 +22,9 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
@@ -31,11 +33,13 @@ import uk.gov.hmrc.helptosavefrontend.util.{Logging, MaintenanceSchedule, NINOLo
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AccessAccountController @Inject() (
   val helpToSaveService: HelpToSaveService,
+  val helpToSaveReminderConnector: HelpToSaveReminderConnector,
   val authConnector: AuthConnector,
   val metrics: Metrics,
   sessionStore: SessionStore,
@@ -58,8 +62,27 @@ class AccessAccountController @Inject() (
     SeeOther("https://www.gov.uk/sign-in-help-to-save")
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def accessAccount: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      (() =>
+        helpToSaveService
+          .getAccount(htsContext.nino, UUID.randomUUID())
+          .fold(
+            e => {
+              logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+            }, {account =>
+              if (account.isClosed) {
+                val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
+                helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder).onComplete(result =>
+                if(result.isSuccess) {
+                  logger.info("Reminders Canceled for Closed Account User on Login")
+                } else {
+                  logger.info("Reminders Failed to cancel for Closed Account User on Login")
+                })
+              }
+            }
+          )).apply()
       redirectToAccountHolderPage(appConfig.nsiManageAccountUrl)
     }(loginContinueURL = frontendAppConfig.accessAccountUrl)
 

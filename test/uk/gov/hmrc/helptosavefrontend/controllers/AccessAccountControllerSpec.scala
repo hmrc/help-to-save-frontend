@@ -22,10 +22,12 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class AccessAccountControllerSpec
@@ -34,6 +36,7 @@ class AccessAccountControllerSpec
 
   lazy val controller = new AccessAccountController(
     mockHelpToSaveService,
+    mockHelpToSaveReminderConnector,
     mockAuthConnector,
     mockMetrics,
     mockSessionStore,
@@ -66,8 +69,7 @@ class AccessAccountControllerSpec
 
       def doRequest(): Future[Result] =
         Future.successful(await(controller.accessAccount(FakeRequest())))
-
-      behave like commonBehaviour(doRequest, appConfig.nsiManageAccountUrl)
+      behave like commonBehaviour(doRequest, appConfig.nsiManageAccountUrl, true)
 
     }
 
@@ -152,10 +154,14 @@ class AccessAccountControllerSpec
 
     }
 
-    def commonBehaviour(doRequest: () ⇒ Future[Result], expectedRedirectURL: String): Unit = { // scalastyle:ignore
+    def commonBehaviour(doRequest: () ⇒ Future[Result], expectedRedirectURL: String, withRemindersRemoval: Boolean = false): Unit = { // scalastyle:ignore
+
+      val account = Account(true, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+
       "redirect to NS&I if the user is enrolled" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          if (withRemindersRemoval) mockGetAccount()(Right(account))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 
@@ -168,6 +174,7 @@ class AccessAccountControllerSpec
         "it hasn't already been set" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          if (withRemindersRemoval) mockGetAccount()(Right(account))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
           mockWriteITMPFlag(Right(()))
         }
@@ -180,6 +187,7 @@ class AccessAccountControllerSpec
       "redirect to the no-account page if the user is not enrolled to HTS" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          if (withRemindersRemoval) mockGetAccount()(Right(account))
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
             Right(())
@@ -195,6 +203,7 @@ class AccessAccountControllerSpec
         "checking the enrolment status" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          if (withRemindersRemoval) mockGetAccount()(Right(account))
           mockEnrolmentCheck()(Left("Oh no!"))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
             Right(())
@@ -209,6 +218,7 @@ class AccessAccountControllerSpec
       "show an error screen if there is an error storing the session data" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          if (withRemindersRemoval) mockGetAccount()(Right(account))
           mockEnrolmentCheck()(Left("Oh no!"))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
             Left("")
