@@ -32,6 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Logging, MaintenanceSchedule, NINOLo
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -81,15 +82,42 @@ class AccessAccountController @Inject() (
       )
     } yield {
       if (isClosed){ SeeOther(frontendAppConfig.deleteReminderUrl) }
-      else { SeeOther(frontendAppConfig.redirectAccessAccount) }
+      else { SeeOther(frontendAppConfig.updateEndDateUrl) }
     }
+  }(loginContinueURL = frontendAppConfig.accessAccountUrl)
+
+  def updateEndDate: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+      helpToSaveReminderService.getHtsUser(htsContext.nino).value.flatMap(_.fold(
+      e => {
+        logger.warn(s"An error occurred while accessing get HtsUser service for user: ${htsContext.nino} Exception : $e")
+        SeeOther(frontendAppConfig.redirectAccessAccount)},
+        htsUser =>  helpToSaveService.getAccount(htsContext.nino, UUID.randomUUID()).value.flatMap(_.fold(
+          e => {
+            logger.warn(s"An error occurred while accessing get account  service for user: ${htsContext.nino} Exception : $e")
+            SeeOther(frontendAppConfig.redirectAccessAccount)},
+          account =>{
+            val accountEndDate = account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
+              helpToSaveReminderService.updateHtsUser(
+                htsUser.copy(endDate = accountEndDate)).value.flatMap(_.fold(
+                e => {
+                  logger.warn(s"An error occurred while accessing update HtsUser service for user: ${htsContext.nino} Exception : $e")
+                  SeeOther(frontendAppConfig.redirectAccessAccount)
+                },
+                success => SeeOther(frontendAppConfig.redirectAccessAccount)
+              )
+              )
+          }
+        )
+      )
+      )
+      )
   }(loginContinueURL = frontendAppConfig.accessAccountUrl)
 
   def deleteReminder: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
     helpToSaveReminderService.cancelHtsUserReminders(CancelHtsUserReminder(htsContext.nino)).fold(
       e =>{
         logger.warn(s"An error occurred while accessing HTS Reminder service for user: ${htsContext.nino} Error: $e")
-        internalServerError()
+        SeeOther(frontendAppConfig.redirectAccessAccount)
       },
       success => SeeOther(frontendAppConfig.redirectAccessAccount)
     )

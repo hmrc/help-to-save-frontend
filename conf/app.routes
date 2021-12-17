@@ -15,6 +15,7 @@ GET        /access-account                                  uk.gov.hmrc.helptosa
 
 GET        /redirect-access-account                         uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
 GET        /check-if-account-is-closed                      uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.checkIfAccountIsClosed
+GET        /update-end-date                                 uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.updateEndDate
 GET        /delete-reminder                                 uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.deleteReminder
 
 GET        /pay-in                                          uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.payIn

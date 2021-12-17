@@ -21,12 +21,14 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class AccessAccountControllerSpec
@@ -82,13 +84,13 @@ class AccessAccountControllerSpec
       def doRequest(): Future[Result] =
         Future.successful(await(controller.checkIfAccountIsClosed(FakeRequest())))
 
-      "should redirect to redirect access account if account is not closed" in{
+      "should redirect to update end date if account is not closed" in{
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockGetAccount(nino)(Right(account))
         }
         val result = doRequest()
-        redirectLocation(result) shouldBe Some(appConfig.redirectAccessAccount)
+        redirectLocation(result) shouldBe Some(appConfig.updateEndDateUrl)
       }
 
       "should redirect to delete reminder if account is closed" in{
@@ -100,6 +102,36 @@ class AccessAccountControllerSpec
         redirectLocation(result) shouldBe Some(appConfig.deleteReminderUrl)
       }
 
+    }
+
+    "handling updateEndDate" must {
+      val htsUserSchedule = HtsUserSchedule(
+        nino = Nino(nino),
+        email = confirmedEmail,
+        firstName  = "",
+        lastName  = "",
+        optInStatus  = false,
+        daysToReceive  = Seq(),
+        nextSendDate  = LocalDate.now(),
+        callBackUrlRef  = "",
+        endDate = None
+      )
+
+      val updatedHtsUserSchedule = htsUserSchedule.copy(endDate = Some(LocalDate.parse("2019-01-01")))
+      def doRequest(): Future[Result] =
+        Future.successful(await(controller.updateEndDate(FakeRequest())))
+      "redirect to redirectAccessAccount" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockGetHtsUserReminderPost(nino)(Right(htsUserSchedule))
+          mockGetAccount(nino)(Right(account))
+          mockUpdateHtsUserReminderPost(updatedHtsUserSchedule)(Right(updatedHtsUserSchedule))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(appConfig.redirectAccessAccount)
+      }
     }
 
     "handling deleteReminder" must {

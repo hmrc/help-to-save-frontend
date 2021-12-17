@@ -89,7 +89,7 @@ case class HTSReminderAccount(nino : String,
                               lastName: String,
                               optInStatus: Boolean,
                               daysToReceive: Seq[Int],
-                              accountClosingDate: Option[LocalDate])
+                              endDate: Option[LocalDate])
 
 case class HtsReminderUpdated(account: HTSReminderAccount)
 

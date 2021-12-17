@@ -52,6 +52,8 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val checkIfAccountIsClosedUrl: String =s"${getUrlFor("help-to-save-frontend")}/check-if-account-is-closed"
 
+  val updateEndDateUrl:String = s"${getUrlFor("help-to-save-frontend")}/update-end-date"
+
   val deleteReminderUrl: String =s"${getUrlFor("help-to-save-frontend")}/delete-reminder}"
 
   val redirectAccessAccount: String =s"${getUrlFor("help-to-save-frontend")}/redirect-access-account"

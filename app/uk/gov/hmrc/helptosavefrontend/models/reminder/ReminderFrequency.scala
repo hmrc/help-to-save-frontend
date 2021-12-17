@@ -45,7 +45,7 @@ case class HtsUserSchedule(
   daysToReceive: Seq[Int] = Seq(),
   nextSendDate: LocalDate = LocalDate.now(),
   callBackUrlRef: String = "",
-  accountClosingDate: Option[LocalDate] = None
+  endDate: Option[LocalDate] = None
 )
 
 object HtsUserSchedule {

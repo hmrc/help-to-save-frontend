@@ -139,7 +139,7 @@ class ReminderControllerSpec
 
     "should show a success page if the user submits an HtsUser to update in the HTS Reminder backend service " in {
       val htsUserToBeUpdated = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now(), "", Some(LocalDate.parse("2019-01-01")))
-      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)
+      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.endDate)
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -184,7 +184,7 @@ class ReminderControllerSpec
 
     "should redirect to internal server error page if htsUser update fails " in {
       val htsUserToBeUpdated = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now(),"", Some(LocalDate.parse("2019-01-01")))
-      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)
+      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.endDate)
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -399,7 +399,7 @@ class ReminderControllerSpec
       val ninoNew = "AE123456D"
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
       val htsUserToBeUpdated = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now(), "", Some(LocalDate.parse("2019-01-01")))
-      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)
+      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.endDate)
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -416,7 +416,7 @@ class ReminderControllerSpec
     }
     "should redirect to internal server error page if htsUser update fails in selected submit " in {
       val htsUserToBeUpdated = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now(), "", Some(LocalDate.parse("2019-01-01")))
-      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)
+      val hTSReminderAccount = HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.endDate)
 
 
       inSequence {

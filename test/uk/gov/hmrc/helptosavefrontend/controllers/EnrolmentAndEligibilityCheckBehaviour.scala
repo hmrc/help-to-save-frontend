@@ -20,6 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import play.api.mvc.Result
 import play.api.test.Helpers._
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -27,7 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligible
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
@@ -78,7 +79,6 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     bonusTerms = List(BonusTerm(0, 0, LocalDate.parse("2019-01-01"), LocalDate.parse("2019-01-01"))),
     closureDate = Some(LocalDate.now()),
     closingBalance = Some(123.45))
-
   val accountNumber = "1234567890123"
 
   val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.eligibilityCheckResult.reasonCode)
@@ -105,6 +105,18 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     (mockHelpToSaveReminderService
       .cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
       .expects(cancelHtsUserReminder, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockGetHtsUserReminderPost(nino: String)(result: Either[String, HtsUserSchedule]): Unit =
+    (mockHelpToSaveReminderService
+      .getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockUpdateHtsUserReminderPost(htsUserSchedule: HtsUserSchedule)(result: Either[String, HtsUserSchedule]): Unit =
+    (mockHelpToSaveReminderService
+      .updateHtsUser(_: HtsUserSchedule)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(htsUserSchedule, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockCreateAccount(

@@ -172,10 +172,10 @@ class ReminderController @Inject() (
                             lastName = userInfo.surname,
                             optInStatus = true,
                             daysToReceive = daysToReceiveReminders,
-                            accountClosingDate = account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
+                            endDate = account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
                           )
                           auditor.sendEvent(
-                            HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)), request.uri),
+                            HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.endDate)), request.uri),
                             userInfo.nino
                           )
                           helpToSaveReminderService
@@ -341,10 +341,10 @@ class ReminderController @Inject() (
                                   lastName = userInfo.surname,
                                   optInStatus = true,
                                   daysToReceive = daysToReceiveReminders,
-                                  accountClosingDate = account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
+                                  endDate = account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
                                 )
                                 auditor.sendEvent(
-                                  HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName, htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.accountClosingDate)), request.uri),
+                                  HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName, htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive, htsUserToBeUpdated.endDate)), request.uri),
                                   userInfo.nino
                                 )
                                 helpToSaveReminderService
