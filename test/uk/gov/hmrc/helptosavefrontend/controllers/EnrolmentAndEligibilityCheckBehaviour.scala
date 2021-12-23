@@ -20,18 +20,19 @@ import cats.data.EitherT
 import cats.instances.future._
 import play.api.mvc.Result
 import play.api.test.Helpers._
-import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
+import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, HelpToSaveReminderConnector}
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
-import uk.gov.hmrc.helptosavefrontend.models.account.AccountNumber
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EnrolmentAndEligibilityCheckBehaviour {
@@ -42,6 +43,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val mockHelpToSaveConnector = mock[HelpToSaveConnector]
 
   val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
+
+  val mockHelpToSaveReminderConnector= mock[HelpToSaveReminderConnector]
+
 
   val confirmedEmail = "confirmed"
   val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")
@@ -55,6 +59,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val accountNumber = "1234567890123"
 
   val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.eligibilityCheckResult.reasonCode)
+
+
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
     (mockHelpToSaveService
@@ -70,6 +76,11 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         result
           .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r ⇒ EitherT.fromEither[Future](r))
       )
+  def mockGetAccount()(result: Either[String, Account]): Unit =
+    (mockHelpToSaveService
+      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *, *)
+      .returning(EitherT.fromEither[Future](result))
 
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))
