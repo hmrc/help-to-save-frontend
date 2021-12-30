@@ -24,7 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, HtsContextWithNINO}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
@@ -33,6 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Logging, MaintenanceSchedule, NINOLo
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -72,6 +73,20 @@ class AccessAccountController @Inject() (
             e => {
               logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
             }, {account =>
+              val accountEndDate: Future[LocalDate] = account.map(_.bonusTerms.last.endDate)
+              accountEndDate.map { updatedEndDate =>
+                val htsUserSchedule = helpToSaveReminderConnector.getHtsUser(htsContext.nino)
+                htsUserSchedule.map { htsUserScheduleToUpdate =>
+                  helpToSaveReminderConnector.updateHtsUser(
+                    htsUserScheduleToUpdate.copy(endDate = Some(updatedEndDate))).onComplete(result =>
+                    if(result.isSuccess) {
+                      logger.info(s"endDate field of htsUserSchedule updated to: $updatedEndDate")
+                    } else {
+                      logger.info("endDate field of htsUserSchedule not updated")
+                    }
+                  )
+                }
+              }
               if (account.isClosed) {
                 val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
                 helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder).onComplete(result =>
