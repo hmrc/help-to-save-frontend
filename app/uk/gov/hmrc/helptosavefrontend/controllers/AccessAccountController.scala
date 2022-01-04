@@ -73,7 +73,8 @@ class AccessAccountController @Inject() (
             e => {
               logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
             }, {account =>
-              val accountEndDate: Future[Option[LocalDate]] = account.map(_.bonusTerms.lastOption.map(_.endDate))
+              val accountEndDate: Future[Option[LocalDate]] =
+                account.map(_.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate)))
               accountEndDate.map { updatedEndDate =>
                 val htsUserSchedule = helpToSaveReminderConnector.getHtsUser(htsContext.nino)
                 htsUserSchedule.map { htsUserScheduleToUpdate =>
