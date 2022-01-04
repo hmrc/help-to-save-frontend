@@ -33,6 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Logging, MaintenanceSchedule, NINOLo
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -72,14 +73,29 @@ class AccessAccountController @Inject() (
             e => {
               logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
             }, {account =>
+              val accountEndDate: Future[Option[LocalDate]] =
+                account.map(_.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate)))
+              accountEndDate.map { updatedEndDate =>
+                val htsUserSchedule = helpToSaveReminderConnector.getHtsUser(htsContext.nino)
+                htsUserSchedule.map { htsUserScheduleToUpdate =>
+                  helpToSaveReminderConnector.updateHtsUser(
+                    htsUserScheduleToUpdate.copy(endDate = updatedEndDate)).onComplete(result =>
+                    if(result.isSuccess) {
+                      logger.info(s"endDate field of htsUserSchedule updated to: $updatedEndDate")
+                    } else {
+                      logger.info("endDate field of htsUserSchedule not updated")
+                    }
+                  )
+                }
+              }
               if (account.isClosed) {
                 val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
                 helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder).onComplete(result =>
-                if(result.isSuccess) {
-                  logger.info("Reminders Canceled for Closed Account User on Login")
-                } else {
-                  logger.info("Reminders Failed to cancel for Closed Account User on Login")
-                })
+                  if(result.isSuccess) {
+                    logger.info("Reminders Canceled for Closed Account User on Login")
+                  } else {
+                    logger.info("Reminders Failed to cancel for Closed Account User on Login")
+                  })
               }
             }
           )).apply()
