@@ -36,6 +36,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
 
 @Singleton
 class AccessAccountController @Inject() (
@@ -72,34 +73,40 @@ class AccessAccountController @Inject() (
           .fold(
             e => {
               logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+              internalServerError()
             }, {account =>
-              val accountEndDate: Future[Option[LocalDate]] =
-                account.map(_.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate)))
-              accountEndDate.map { updatedEndDate =>
-                val htsUserSchedule = helpToSaveReminderConnector.getHtsUser(htsContext.nino)
-                htsUserSchedule.map { htsUserScheduleToUpdate =>
-                  helpToSaveReminderConnector.updateHtsUser(
-                    htsUserScheduleToUpdate.copy(endDate = updatedEndDate)).onComplete(result =>
-                    if(result.isSuccess) {
-                      logger.info(s"endDate field of htsUserSchedule updated to: $updatedEndDate")
-                    } else {
-                      logger.info("endDate field of htsUserSchedule not updated")
-                    }
-                  )
-                }
-              }
               if (account.isClosed) {
                 val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
-                helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder).onComplete(result =>
-                  if(result.isSuccess) {
-                    logger.info("Reminders Canceled for Closed Account User on Login")
-                  } else {
+                helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder).fold(
+                  { _ =>
                     logger.info("Reminders Failed to cancel for Closed Account User on Login")
-                  })
+                    internalServerError()
+                  }, { _ =>
+                    logger.info("Reminders Canceled for Closed Account User on Login")
+                    redirectToAccountHolderPage(appConfig.nsiManageAccountUrl)
+                  }
+                )
+              } else {
+                val accountEndDate = account.map(
+                  _.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate)))
+                accountEndDate.map { updatedEndDate =>
+                  val htsUserSchedule = helpToSaveReminderConnector.getHtsUser(htsContext.nino)
+                  htsUserSchedule.map { htsUserScheduleToUpdate =>
+                    helpToSaveReminderConnector.updateHtsUser(
+                      htsUserScheduleToUpdate.copy(endDate = updatedEndDate)).fold(
+                      { _ =>
+                        logger.info(s"endDate field of htsUserSchedule updated to: $updatedEndDate")
+                        redirectToAccountHolderPage(appConfig.nsiManageAccountUrl)
+                      }, { _ =>
+                        logger.info("endDate field of htsUserSchedule not updated")
+                        redirectToAccountHolderPage(appConfig.nsiManageAccountUrl)
+                      }
+                    )
+                  }
+                }
               }
             }
           )).apply()
-      redirectToAccountHolderPage(appConfig.nsiManageAccountUrl)
     }(loginContinueURL = frontendAppConfig.accessAccountUrl)
 
   def payIn: Action[AnyContent] =
