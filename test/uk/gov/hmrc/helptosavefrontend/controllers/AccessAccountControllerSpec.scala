@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import org.mockito.Matchers.any
+import org.mockito.Mockito.when
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -70,6 +72,17 @@ class AccessAccountControllerSpec
       def doRequest(): Future[Result] =
         Future.successful(await(controller.accessAccount(FakeRequest())))
       behave like commonBehaviour(doRequest, appConfig.nsiManageAccountUrl, true)
+
+      "throw an Internal Server Error if the account details cannot be retrieved" in {
+
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+          mockGetAccount()(Left("Account details cannot be retrieved"))
+
+        val result = doRequest()
+        status(result) shouldBe 500
+
+      }
 
     }
 
