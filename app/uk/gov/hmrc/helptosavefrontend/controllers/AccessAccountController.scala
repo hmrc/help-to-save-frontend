@@ -72,7 +72,6 @@ class AccessAccountController @Inject() (
             .fold(
               e => {
                 logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-                internalServerError()
               }, { account =>
                 if (account.isClosed) {
                   val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
