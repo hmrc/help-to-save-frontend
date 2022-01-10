@@ -44,7 +44,8 @@ case class HtsUserSchedule(
   optInStatus: Boolean = false,
   daysToReceive: Seq[Int] = Seq(),
   nextSendDate: LocalDate = LocalDate.now(),
-  callBackUrlRef: String = ""
+  callBackUrlRef: String = "",
+  endDate: Option[LocalDate] = None
 )
 
 object HtsUserSchedule {
@@ -58,8 +59,9 @@ object HtsUserSchedule {
       (JsPath \ "optInStatus").read[Boolean] and
       (JsPath \ "daysToReceive").read[List[Int]] and
       (JsPath \ "nextSendDate").read[LocalDate] and
-      (JsPath \ "callBackUrlRef").read[String]
-  )(HtsUserSchedule.apply(_, _, _, _, _, _, _, _))
+      (JsPath \ "callBackUrlRef").read[String] and
+      (JsPath \ "endDate").readNullable[LocalDate]
+  )(HtsUserSchedule.apply(_, _, _, _, _, _, _, _, _))
 
 }
 
