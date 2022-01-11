@@ -63,7 +63,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
   val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.eligibilityCheckResult.reasonCode)
 
-  val  = CancelHtsUserReminder(nino2)
+  val cancelHtsUserReminder = CancelHtsUserReminder(nino2)
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
     (mockHelpToSaveService
