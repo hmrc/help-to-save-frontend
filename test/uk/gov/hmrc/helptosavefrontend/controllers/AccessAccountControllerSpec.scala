@@ -162,6 +162,7 @@ class AccessAccountControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) mockGetAccount()(Right(account))
+          mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 

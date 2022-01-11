@@ -27,6 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligible
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
+import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
@@ -58,9 +59,11 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
   val accountNumber = "1234567890123"
 
+  val nino2 = "WM123456C"
+
   val createAccountRequest = CreateAccountRequest(payload, userInfo.eligible.value.eligibilityCheckResult.reasonCode)
 
-
+  val  = CancelHtsUserReminder(nino2)
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
     (mockHelpToSaveService
@@ -103,6 +106,12 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     (mockHelpToSaveService
       .getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockCancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
+    (mockHelpToSaveReminderConnector
+      .cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(cancelHtsUserReminder, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def commonEnrolmentAndSessionBehaviour(
