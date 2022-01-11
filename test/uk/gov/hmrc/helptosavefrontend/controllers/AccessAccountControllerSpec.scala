@@ -161,8 +161,10 @@ class AccessAccountControllerSpec
       "redirect to NS&I if the user is enrolled" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) mockGetAccount()(Right(account))
-          mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
+          if (withRemindersRemoval) {
+            mockGetAccount()(Right(account))
+            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
+          }
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 
@@ -228,7 +230,6 @@ class AccessAccountControllerSpec
       "show an error screen if there is an error storing the session data" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) mockGetAccount()(Right(account))
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
             mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
