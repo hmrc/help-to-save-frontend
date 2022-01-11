@@ -175,8 +175,10 @@ class AccessAccountControllerSpec
         "it hasn't already been set" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) mockGetAccount()(Right(account))
-          mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
+          if (withRemindersRemoval) {
+            mockGetAccount()(Right(account))
+            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
+          }
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
           mockWriteITMPFlag(Right(()))
         }
@@ -189,7 +191,10 @@ class AccessAccountControllerSpec
       "redirect to the no-account page if the user is not enrolled to HTS" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) mockGetAccount()(Right(account))
+          if (withRemindersRemoval) {
+            mockGetAccount()(Right(account))
+            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
+          }
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
             Right(())
@@ -205,7 +210,10 @@ class AccessAccountControllerSpec
         "checking the enrolment status" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) mockGetAccount()(Right(account))
+          if (withRemindersRemoval) {
+            mockGetAccount()(Right(account))
+            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
+          }
           mockEnrolmentCheck()(Left("Oh no!"))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
             Right(())
@@ -221,6 +229,10 @@ class AccessAccountControllerSpec
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) mockGetAccount()(Right(account))
+          if (withRemindersRemoval) {
+            mockGetAccount()(Right(account))
+            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
+          }
           mockEnrolmentCheck()(Left("Oh no!"))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
             Left("")
