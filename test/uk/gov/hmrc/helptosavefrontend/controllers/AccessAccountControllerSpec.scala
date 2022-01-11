@@ -156,12 +156,25 @@ class AccessAccountControllerSpec
 
     def commonBehaviour(doRequest: () ⇒ Future[Result], expectedRedirectURL: String, withRemindersRemoval: Boolean = false): Unit = { // scalastyle:ignore
 
-      val account = Account(true, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+      val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+      val closedAccount = Account(true, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
       "redirect to NS&I if the user is enrolled" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) mockGetAccount()(Right(account))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirectURL)
+      }
+
+      "redirect to NS&I just the same if the user is enrolled even though account closed" in {
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          if (withRemindersRemoval) mockGetAccount()(Right(closedAccount))
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
 
