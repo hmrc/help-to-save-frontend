@@ -21,8 +21,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking, BonusTerm}
+import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -156,13 +158,15 @@ class AccessAccountControllerSpec
 
     def commonBehaviour(doRequest: () ⇒ Future[Result], expectedRedirectURL: String, withRemindersRemoval: Boolean = false): Unit = { // scalastyle:ignore
 
-      val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+      val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(BonusTerm(0,0,LocalDate.parse("1900-01-01"), LocalDate.parse("1900-01-01"))), None, None)
 
+      val schedule = HtsUserSchedule(Nino(nino2), "", "", "", false, List(), LocalDate.parse("1900-01-01"), "")
       "redirect to NS&I if the user is enrolled" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
+            mockGetHtsUserReminders(nino2)(Right(schedule))
           }
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
         }
@@ -194,6 +198,7 @@ class AccessAccountControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
+            mockGetHtsUserReminders(nino2)(Right(schedule))
           }
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
           mockWriteITMPFlag(Right(()))
@@ -209,6 +214,7 @@ class AccessAccountControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
+            mockGetHtsUserReminders(nino2)(Right(schedule))
           }
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
@@ -227,6 +233,7 @@ class AccessAccountControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
+            mockGetHtsUserReminders(nino2)(Right(schedule))
           }
           mockEnrolmentCheck()(Left("Oh no!"))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
@@ -244,6 +251,7 @@ class AccessAccountControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
+            mockGetHtsUserReminders(nino2)(Right(schedule))
           }
           mockEnrolmentCheck()(Left("Oh no!"))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
