@@ -156,13 +156,28 @@ class AccessAccountControllerSpec
 
     def commonBehaviour(doRequest: () ⇒ Future[Result], expectedRedirectURL: String, withRemindersRemoval: Boolean = false): Unit = { // scalastyle:ignore
 
-      val account = Account(true, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+      val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
       "redirect to NS&I if the user is enrolled" in {
         inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
+          }
+          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+        }
+
+        val result = doRequest()
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(expectedRedirectURL)
+      }
+
+      "redirect to NS&I if the user is enrolled even when account closed" in {
+        val closedAccount = account.copy(isClosed = true)
+        inSequence {
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          if (withRemindersRemoval) {
+            mockGetAccount()(Right(closedAccount))
             mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
           }
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
@@ -179,7 +194,6 @@ class AccessAccountControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
-            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
           }
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
           mockWriteITMPFlag(Right(()))
@@ -195,7 +209,6 @@ class AccessAccountControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
-            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
           }
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
@@ -214,7 +227,6 @@ class AccessAccountControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
-            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
           }
           mockEnrolmentCheck()(Left("Oh no!"))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
@@ -232,7 +244,6 @@ class AccessAccountControllerSpec
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           if (withRemindersRemoval) {
             mockGetAccount()(Right(account))
-            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
           }
           mockEnrolmentCheck()(Left("Oh no!"))
           mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
