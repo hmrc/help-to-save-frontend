@@ -27,7 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.randomEligible
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.reminder.CancelHtsUserReminder
+import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
@@ -106,6 +106,12 @@ trait EnrolmentAndEligibilityCheckBehaviour {
     (mockHelpToSaveService
       .getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
       .expects(*, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockGetHtsUserReminders(nino:String)(result: Either[String, HtsUserSchedule]): Unit =
+    (mockHelpToSaveReminderConnector
+      .getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockCancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
