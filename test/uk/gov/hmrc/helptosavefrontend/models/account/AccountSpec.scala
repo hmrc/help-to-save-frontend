@@ -36,7 +36,6 @@ class AccountSpec extends AnyWordSpec with Matchers {
 
       val account1 = Account(
         false,
-        Blocking(false),
         0,
         0,
         0,

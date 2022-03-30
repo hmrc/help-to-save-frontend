@@ -23,7 +23,7 @@ import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, Blocking, BonusTerm}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
@@ -158,7 +158,7 @@ class AccessAccountControllerSpec
 
     def commonBehaviour(doRequest: () ⇒ Future[Result], expectedRedirectURL: String, withRemindersRemoval: Boolean = false): Unit = { // scalastyle:ignore
 
-      val account = Account(false, Blocking(false), 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(BonusTerm(0,0,LocalDate.parse("1900-01-01"), LocalDate.parse("1900-01-01"))), None, None)
+      val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(BonusTerm(0,0,LocalDate.parse("1900-01-01"), LocalDate.parse("1900-01-01"))), None, None)
 
       val schedule = HtsUserSchedule(Nino(nino2), "", "", "", false, List(), LocalDate.parse("1900-01-01"), "")
       "redirect to NS&I if the user is enrolled" in {

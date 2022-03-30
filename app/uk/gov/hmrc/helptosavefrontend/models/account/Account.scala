@@ -32,15 +32,8 @@ object BonusTerm {
   implicit val writes: Format[BonusTerm] = Json.format[BonusTerm]
 }
 
-case class Blocking(unspecified: Boolean)
-
-object Blocking {
-  implicit val writes: Format[Blocking] = Json.format[Blocking]
-}
-
 case class Account(
   isClosed: Boolean,
-  blocked: Blocking,
   balance: BigDecimal,
   paidInThisMonth: BigDecimal,
   canPayInThisMonth: BigDecimal,
