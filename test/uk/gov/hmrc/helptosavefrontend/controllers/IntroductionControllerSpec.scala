@@ -24,7 +24,7 @@ import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
-import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Blocking, BonusTerm}
+import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
 import uk.gov.hmrc.http.HeaderCarrier
@@ -39,7 +39,6 @@ class IntroductionControllerSpec
 
   val account = Account(
     isClosed = false,
-    blocked = Blocking(false),
     balance = 123.45,
     paidInThisMonth = 0,
     canPayInThisMonth = 0,
