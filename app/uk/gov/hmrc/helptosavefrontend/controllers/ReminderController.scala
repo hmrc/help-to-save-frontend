@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
+import com.github.nscala_time.time.Imports.{LocalDate, LocalTime}
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, _}
 import play.api.{Configuration, Environment}
@@ -115,31 +116,33 @@ class ReminderController @Inject() (
 
     authorisedForHtsWithNINO { implicit request ⇒
       implicit htsContext ⇒
-        (()=>
-          helpToSaveService
-            .getAccount(htsContext.nino, UUID.randomUUID())
-            .fold(
-              e => {
-                logger.warn(s"error retrieving Account details from NS&I, error = $e")
-                Future.successful({})
-              },{ account => {
-                if(account.isClosed){
-                  Ok(accountClosed())
-                }
-                else if (isFeatureEnabled) {
-                  def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
-                  Future.successful(Ok(
-                    reminderFrequencySet(
-                      ReminderForm.giveRemindersDetailsForm(),
-                      "none",
-                      "account",
-                      Some(bckLink)
-                    )
-                  )
-                  )
-                } else {SeeOther(routes.RegisterController.getServiceUnavailablePage.url)}
+        helpToSaveService
+          .getAccount(htsContext.nino, UUID.randomUUID())
+          .fold(
+            e => {
+              logger.warn(s"error retrieving Account details from NS&I, error = $e")
+
+              internalServerError()
+            }, { account => {
+              if (account.isClosed) {
+                def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
+                Ok(accountClosed(Some(bckLink),account.closureDate))
               }
-              }))
+              else if (account.isClosed === false && isFeatureEnabled) {
+                def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
+                Ok(
+                  reminderFrequencySet(
+                    ReminderForm.giveRemindersDetailsForm(),
+                    "none",
+                    "account",
+                    Some(bckLink)
+                  )
+                )
+              } else {
+                SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
+              }
+            }
+            })
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
   }
 

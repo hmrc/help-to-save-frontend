@@ -378,6 +378,10 @@ hts.no-account.p2=If you select ‘Continue’ we’ll check if you’re eligibl
 hts.no-account.button-1=Continue
 hts.no-account.exit-message=Cancel and go to GOV.UK
 
+# Closed account
+hts.closed-account.title.h1=Account closed
+hts.closed-account.p1 = You can no longer change or set reminders as your account closed on {0}
+
 # Account creation error
 hts.account-creation-error.title.h1=Something went wrong
 hts.account-creation-error.p1=We cannot create a Help to Save account for you at the moment.
