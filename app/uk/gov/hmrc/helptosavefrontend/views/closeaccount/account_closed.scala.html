@@ -23,7 +23,7 @@
 @this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
 submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
-@(backLink: Option[String] = None, clsDate:Option[LocalDate])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(backLink: Option[String] = None, clsDate:LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
 Messages("hts.closed-account.title.h1")

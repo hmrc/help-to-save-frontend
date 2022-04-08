@@ -126,7 +126,7 @@ class ReminderController @Inject() (
             }, { account => {
               if (account.isClosed) {
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
-                Ok(accountClosed(Some(bckLink),account.closureDate))
+                Ok(accountClosed(Some(bckLink),account.closureDate.getOrElse(LocalDate.now())))
               }
               else if (account.isClosed === false && isFeatureEnabled) {
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
