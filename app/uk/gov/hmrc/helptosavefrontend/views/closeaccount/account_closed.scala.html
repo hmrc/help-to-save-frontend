@@ -1,0 +1,51 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+
+@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+
+@title = @{
+Messages("hts.no-account.title.h1")
+}
+
+@main(
+title = title
+) {
+<h1 class="heading-large">@title</h1>
+
+<p>@Html(Messages("hts.no-account.p1"))</p>
+
+<h2>@Html(Messages("hts.no-account.h2-1"))</h2>
+<p>@Html(Messages("hts.no-account.p2"))</p>
+
+<div class="form-field form-field--submit">
+  @form(routes.EligibilityCheckController.getCheckEligibility){
+  @submit('_buttonClass -> "", 'id → "start-creating-account") {
+  @Messages("hts.no-account.button-1")
+  }
+  }
+</div>
+
+<p><a href="@appConfig.govUkURL" id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a></p>
+
+}

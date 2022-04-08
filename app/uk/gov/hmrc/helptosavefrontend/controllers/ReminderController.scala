@@ -28,6 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
 import uk.gov.hmrc.helptosavefrontend.models.{HTSReminderAccount, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
@@ -36,7 +37,8 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 
-import scala.concurrent.ExecutionContext
+import java.util.UUID
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -57,6 +59,7 @@ class ReminderController @Inject() (
   reminderCancelConfirmation: reminder_cancel_confirmation,
   reminderDashboard: reminder_dashboard,
   applySavingsReminders: apply_savings_reminders,
+  accountClosed: account_closed,
   notEligible: not_eligible
 )(
   implicit val crypto: Crypto,
@@ -108,22 +111,37 @@ class ReminderController @Inject() (
 
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
-  def getSelectRendersPage(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      if (isFeatureEnabled) {
-        def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
-        Ok(
-          reminderFrequencySet(
-            ReminderForm.giveRemindersDetailsForm(),
-            "none",
-            "account",
-            Some(bckLink)
-          )
-        )
-      } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
-      }
+  def getSelectRendersPage(): Action[AnyContent] = {
+
+    authorisedForHtsWithNINO { implicit request ⇒
+      implicit htsContext ⇒
+        (()=>
+          helpToSaveService
+            .getAccount(htsContext.nino, UUID.randomUUID())
+            .fold(
+              e => {
+                logger.warn(s"error retrieving Account details from NS&I, error = $e")
+                Future.successful({})
+              },{ account => {
+                if(account.isClosed){
+                  Ok(accountClosed())
+                }
+                else if (isFeatureEnabled) {
+                  def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
+                  Future.successful(Ok(
+                    reminderFrequencySet(
+                      ReminderForm.giveRemindersDetailsForm(),
+                      "none",
+                      "account",
+                      Some(bckLink)
+                    )
+                  )
+                  )
+                } else {SeeOther(routes.RegisterController.getServiceUnavailablePage.url)}
+              }
+              }))
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
+  }
 
   def selectRemindersSubmit(): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
