@@ -256,31 +256,45 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period, "page").url)
 
   def getSelectedRendersPage(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      if (isFeatureEnabled) {
-        def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
-        helpToSaveReminderService
-          .getHtsUser(htsContext.nino)
+    authorisedForHtsWithNINO { implicit request ⇒
+      implicit htsContext ⇒
+        helpToSaveService
+          .getAccount(htsContext.nino, UUID.randomUUID())
           .fold(
-            e ⇒ {
-              logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
+            e => {
+              logger.warn(s"error retrieving Account details from NS&I, error = $e")
               internalServerError()
-            }, { htsUser ⇒
-              Ok(
-                reminderFrequencySet(
-                  ReminderForm.giveRemindersDetailsForm(),
-                  DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
-                  "cancel",
-                  Some(bckLink)
-                )
-              )
+            }, { account => {
+              if (account.isClosed) {
+                def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
 
+                Ok(accountClosed(Some(bckLink), account.closureDate.getOrElse(LocalDate.now())))
+              }
+              else if (isFeatureEnabled) {
+                def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
+
+                helpToSaveReminderService
+                  .getHtsUser(htsContext.nino)
+                  .fold(
+                    e ⇒ {
+                      logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
+                      internalServerError()
+                    }, { htsUser ⇒
+                      Ok(
+                        reminderFrequencySet(
+                          ReminderForm.giveRemindersDetailsForm(),
+                          DaysToDateMapper.reverseMapper.getOrElse(htsUser.daysToReceive, "String"),
+                          "cancel",
+                          Some(bckLink)
+                        )
+                      )
+                    }
+                  )
+              } else {
+                SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
+              }
             }
-          )
-      } else {
-        SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
-      }
-
+            })
     }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit.url)
 
   def selectedRemindersSubmit(): Action[AnyContent] =
