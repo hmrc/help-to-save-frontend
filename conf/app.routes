@@ -88,7 +88,7 @@ GET        /account-home/set-reminders                      uk.gov.hmrc.helptosa
 POST       /account-home/set-reminders                      uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectRemindersSubmit
 GET        /account-home/reminders-confirmation             uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getRendersConfirmPage(email: String,period: String,page: String)
 GET        /account-home/select-change-cancel-reminders     uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getSelectedRendersPage
-GET        /account-home/select-change-cancel-reminders     uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.accountOpengetSelectedRendersPage
+GET        /account-home/select-change-cancel-reminder      uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.accountOpengetSelectedRendersPage
 POST       /account-home/select-change-cancel-reminders     uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.selectedRemindersSubmit
 GET        /account-home/reminders-cancel-confirmation      uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getRendersCancelConfirmPage
 GET        /account-home/reminders-dashboard                uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getEmailsavingsReminders
