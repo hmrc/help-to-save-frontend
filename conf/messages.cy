@@ -376,6 +376,10 @@ hts.no-account.p2=Os dewiswch ‘Yn eich blaen’ byddwn yn gwirio a ydych yn gy
 hts.no-account.button-1=Yn eich blaen
 hts.no-account.exit-message=Canslo a mynd i GOV.UK
 
+# Closed account
+hts.closed-account.title.h1=Cyfrif wedi cau
+hts.closed-account.p1 =Ni allwch newid na gosod nodynnau atgoffa mwyach gan fod eich cyfrif wedi cau ar {0}
+
 # Account creation error
 hts.account-creation-error.title.h1=Aeth rhywbeth o’i le
 hts.account-creation-error.p1=Ni allwn greu cyfrif Cymorth i Gynilo i chi ar hyn o bryd.
