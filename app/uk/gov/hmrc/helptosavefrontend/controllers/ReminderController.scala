@@ -270,14 +270,14 @@ class ReminderController @Inject() (
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
                 Ok(accountClosed(Some(bckLink),account.closureDate.getOrElse(LocalDate.now())))
               } else {
-                SeeOther(routes.ReminderController.accountOpengetSelectedRendersPage.url)
+                SeeOther(routes.ReminderController.accountOpenGetSelectedRendersPage.url)
               }
             }
             })
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
   }
 
-  def accountOpengetSelectedRendersPage(): Action[AnyContent] =
+  def accountOpenGetSelectedRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
       if (isFeatureEnabled) {
         def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
