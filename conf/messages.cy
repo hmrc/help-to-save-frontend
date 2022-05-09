@@ -873,6 +873,7 @@ accessibility.statement.paragraph.fortySix.one = Adeiladwyd y gwasanaeth gan dde
 accessibility.statement.paragraph.fortySix.link = Ganolfan Hygyrchedd Digidol (Digital Accessibility Centre)
 accessibility.statement.paragraph.fortySix.two = . Profwyd y gwasanaeth llawn gan CThEM, ac roedd y gwaith o brofi’r gwasanaeth yn cynnwys defnyddwyr anabl.
 accessibility.statement.paragraph.fortySeven = Paratowyd y dudalen hon ar 9 Medi 2020. Cafodd ei diweddaru ddiwethaf ar 25 Ebrill 2020.
+accessibility.statement.paragraph.fortyEight = Mae CThEM wrthi’n trwsio rhannau’r gwasanaeth nad ydynt yn bodloni safon AA, Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Rydym yn bwriadu cyflawni hyn erbyn mis Mehefin 2023 a byddwn yn diweddaru’r dudalen hon pan fydd y problemau wedi’u datrys.
 
 accessibility.statement.listitem1 = newid lliwiau, lefelau cyferbyniad a ffontiau
 accessibility.statement.listitem2 = chwyddo’r sgrin hyd at 300% heb i’r testun ddisgyn oddi ar y sgrin
@@ -888,6 +889,7 @@ accessibility.statement.heading.five = Beth i’w wneud os nad ydych yn hapus â
 accessibility.statement.heading.six = Cysylltu â ni dros y ffôn neu gael ymweliad personol gennym
 accessibility.statement.heading.seven = Gwybodaeth dechnegol am hygyrchedd y gwasanaeth hwn
 accessibility.statement.heading.eight = Sut gwnaethom brofi’r gwasanaeth hwn
+accessibility.statement.heading.nine = Yr hyn rydym yn ei wneud i wella hygyrchedd
 full.stop= .
 
 ##Month Names##
