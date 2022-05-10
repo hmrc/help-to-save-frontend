@@ -94,7 +94,6 @@ class ReminderController @Inject() (
           .fold(
             e ⇒ {
               logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
-
               Ok(emailSavingsReminder(Some(backLink)))
             }, { htsUserSchedule ⇒
               Ok(
@@ -271,8 +270,7 @@ class ReminderController @Inject() (
           .fold(
             e => {
               logger.warn(s"error retrieving Account details from NS&I, error = $e")
-
-              internalServerError()
+              SeeOther(routes.ReminderController.accountOpenGetSelectedRendersPage.url)
             }, { account => {
               if (account.isClosed) {
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
