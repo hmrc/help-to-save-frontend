@@ -29,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
+import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
 import uk.gov.hmrc.helptosavefrontend.models.{HTSReminderAccount, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
@@ -121,8 +122,15 @@ class ReminderController @Inject() (
           .fold(
             e => {
               logger.warn(s"error retrieving Account details from NS&I, error = $e")
-
-              internalServerError()
+              def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
+              Ok(
+                reminderFrequencySet(
+                  ReminderForm.giveRemindersDetailsForm(),
+                  "none",
+                  "account",
+                  Some(bckLink)
+                )
+              )
             }, { account => {
               if (account.isClosed) {
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
