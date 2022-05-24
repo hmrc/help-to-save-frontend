@@ -17,7 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
@@ -31,16 +30,19 @@ import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrol
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
+import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSReminderAccount, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
+import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
+import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
@@ -105,6 +107,12 @@ class ReminderControllerSpec
   def mockEncrypt(p: String)(result: String): Unit =
     (crypto.encrypt(_: String)).expects(p).returning(result)
 
+  def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
+    (mockHelpToSaveService
+      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(nino, *, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
   def mockDecrypt(p: String)(result: String): Unit =
     (crypto.decrypt(_: String)).expects(p).returning(Try(result))
 
@@ -126,6 +134,7 @@ class ReminderControllerSpec
       injector.instanceOf[reminder_cancel_confirmation],
       injector.instanceOf[reminder_dashboard],
       injector.instanceOf[apply_savings_reminders],
+      injector.instanceOf[account_closed],
       injector.instanceOf[not_eligible]
     ) {}
   lazy val controller = newController()
@@ -266,15 +275,15 @@ class ReminderControllerSpec
     }
 
     "should return the reminder setting page when asked for it" in {
-      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+      val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockGetAccount(nino)(Right(account))
       }
 
-      val result = csrfAddToken(controller.getSelectRendersPage())(fakeRequestWithNoBody)
+      val result = csrfAddToken(controller.getSelectRendersPage())(FakeRequest())
       status(result) shouldBe Status.OK
-
     }
 
     "should redirect to an the internal server error page if email retrieveal is failed" in {
@@ -316,26 +325,24 @@ class ReminderControllerSpec
     }
 
     "should return the selected reminder   page when asked for it" in {
-      val getHtsUser = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
-
+      val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockGetHtsUser(nino)(Right(getHtsUser))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockGetAccount(nino)(Right(account))
       }
-
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.OK
 
     }
     "should return the internal error when selected reminderpage " in {
-
+      val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-        mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
+        mockGetAccount(nino)(Left("error occurred while getting htsUser"))
       }
 
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
