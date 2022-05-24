@@ -270,7 +270,7 @@ class ReminderController @Inject() (
           .fold(
             e => {
               logger.warn(s"error retrieving Account details from NS&I, error = $e")
-              SeeOther(routes.ReminderController.getSelectedRendersPage.url)
+              internalServerError()
             }, { account => {
               if (account.isClosed) {
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
