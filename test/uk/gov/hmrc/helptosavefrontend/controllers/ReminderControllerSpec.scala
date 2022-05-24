@@ -333,7 +333,7 @@ class ReminderControllerSpec
         mockGetAccount(nino)(Right(account))
       }
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
-      status(result) shouldBe Status.OK
+      status(result) shouldBe Status.SEE_OTHER
 
     }
     "should return the internal error when selected reminderpage " in {

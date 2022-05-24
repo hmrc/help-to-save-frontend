@@ -276,7 +276,7 @@ class ReminderController @Inject() (
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
                 Ok(accountClosed(Some(bckLink),account.closureDate.getOrElse(LocalDate.now())))
               } else {
-               Ok(routes.ReminderController.accountOpenGetSelectedRendersPage.url)
+               SeeOther(routes.ReminderController.accountOpenGetSelectedRendersPage.url)
               }
             }
             })
