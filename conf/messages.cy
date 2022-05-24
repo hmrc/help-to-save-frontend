@@ -765,7 +765,7 @@ hts.reminder-confirmation.frequency.25=25
 hts.reminder-confirmation.frequency.both=1 a diwrnod 25
 hts.reminder-confirmation.title.p1-2=bob mis
 hts.reminder-confirmation.title.p1-3=Byddwn yn anfon eich nodynnau atgoffa at
-hts.reminder-confirmation.title.p1-4=Os hoffech i’ch nodynnau atgoffa fynd i rywle arall bydd angen i chi 
+hts.reminder-confirmation.title.p1-4=Os hoffech i’ch nodynnau atgoffa fynd i rywle arall bydd angen i chi
 hts.reminder-confirmation.change-email.descriptive-link=newid eich cyfeiriad e-bost.
 hts.reminder-confirmation.saving-reminders.descriptive-link=nodynnau atgoffa ynghylch cynilion
 hts.reminder-confirmation.title.p1-5=Gallwch newid neu ganslo’ch e-byst atgoffa ar unrhyw adeg. Ewch i
@@ -807,8 +807,8 @@ accessibility.statement.paragraph.three.link = www.tax.service.gov.uk/help-to-sa
 accessibility.statement.paragraph.four = Math o gyfrif cynilo yw Cymorth i Gynilo. Mae wedi’i gefnogi gan y Llywodraeth sy’n golygu bod yr holl gynilion yn y cynllun yn ddiogel. Mae’n rhoi cyfle i rai pobl sydd ag hawl i gael Credyd Treth Gwaith, neu sy’n cael Credyd Cynhwysol, gael bonws o 50c am bob £1 y maent yn ei chynilo dros 4 blynedd.
 accessibility.statement.paragraph.six = Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EM (CThEM). Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
 accessibility.statement.paragraph.seven = Rydym hefyd wedi sicrhau bod y testun a ddefnyddir yn y gwasanaeth mor syml â phosibl i’w ddeall.
-accessibility.statement.paragraph.eight = gyngor ar wneud eich dyfais yn haws i’w defnyddio os oes gennych anabledd.
-accessibility.statement.paragraph.eight.link = Mae gan AbilityNet
+accessibility.statement.paragraph.eight = ar wneud eich dyfais yn haws i’w defnyddio os oes gennych anabledd.
+accessibility.statement.paragraph.eight.link = Mae gan AbilityNet gyngor
 
 ##### How accessible this service is #########
 accessibility.statement.paragraph.nine = Mae’r gwasanaeth hwn yn cydymffurfio’n rhannol â safon
@@ -828,11 +828,12 @@ accessibility.statement.paragraph.nineteen = Ar y sgrin ‘Bwrw golwg dros eich 
 ####What to do if you have difficulty using this service#####
 
 accessibility.statement.paragraph.twentyOne = Gallwch
-accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEM os oes angen help arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille
+accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEM os oes angen cymorth ychwanegol
+accessibility.statement.paragraph.twentyOne.two = arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille.
 
 ####Reporting accessibility problems with this service#####
 accessibility.statement.paragraph.twentyThree= Rydym bob amser yn ceisio gwella hygyrchedd y gwasanaeth hwn. Os byddwch yn dod o hyd i unrhyw broblemau nad ydynt wedi’u rhestru ar y dudalen hon, neu os ydych o’r farn nad ydym yn bodloni gofynion hygyrchedd,
-accessibility.statement.paragraph.twentyThree.link= rhowch wybod am y broblem hygyrchedd (yn agor ffenestr neu dab newydd)
+accessibility.statement.paragraph.twentyThree.link= rhowch wybod am y broblem hygyrchedd
 
 #### What to do if you are not happy with how we respond to your complaint ####
 
@@ -845,8 +846,8 @@ accessibility.statement.paragraph.twentyFour.three = os ydych yn byw yng Ngogled
 #### Contacting us by phone or getting a visit from us in person ######
 accessibility.statement.paragraph.twentyFive = Rydym yn cynnig gwasanaeth ‘text relay’ os ydych yn fyddar, â nam ar eich clyw neu os oes gennych nam ar eich lleferydd.
 accessibility.statement.paragraph.twentySix = Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEM i’ch helpu i gwblhau’r gwasanaeth.
-accessibility.statement.paragraph.twentySeven = Gwybodaeth am sut i
-accessibility.statement.paragraph.twentySeven.link = gysylltu â ni
+accessibility.statement.paragraph.twentySeven = Dysgwch
+accessibility.statement.paragraph.twentySeven.link = sut i gael cymorth ychwanegol oddi wrth CThEM
 
 #### Technical information about this service’s accessibility ####
 accessibility.statement.paragraph.twentyEight = Mae CThEM wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
@@ -871,11 +872,12 @@ accessibility.statement.paragraph.fortyThree = Ar y dudalen ‘Nodi manylion ban
 accessibility.statement.paragraph.fortyFour = Ar y sgrin ‘Bwrw golwg dros eich trafodion’ nid yw statws y canlyniadau chwilio sydd wedi’u hidlo wedi’i ddatgan. Mae hyn yn achosi problemau i ddefnyddwyr NVDA a VoiceOver. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.3 (Status Messages) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Byddai cynnwys neges statws o dan y cysylltiad ailosod, yn nodi faint o ganlyniadau sydd ar y dudalen, yn trwsio’r broblem hon. Rydym yn bwriadu datrys hyn erbyn mis Mehefin 2021.
 
 #### How we tested this service ####
-accessibility.statement.paragraph.fortyFive = Cafodd y gwasanaeth ei brofi ddiwethaf ar 8 Ionawr 2018 a gwiriwyd ei fod yn cydymffurfio â safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1.
+accessibility.statement.paragraph.fortyFive = Cafodd y gwasanaeth ei brofi ddiwethaf ar 8 Ionawr 2019 a gwiriwyd ei fod yn cydymffurfio â safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1.
 accessibility.statement.paragraph.fortySix.one = Adeiladwyd y gwasanaeth gan ddefnyddio rhannau a brofwyd gan y
 accessibility.statement.paragraph.fortySix.link = Ganolfan Hygyrchedd Digidol (Digital Accessibility Centre)
 accessibility.statement.paragraph.fortySix.two = . Profwyd y gwasanaeth llawn gan CThEM, ac roedd y gwaith o brofi’r gwasanaeth yn cynnwys defnyddwyr anabl.
-accessibility.statement.paragraph.fortySeven = Paratowyd y dudalen hon ar 9 Medi 2020. Cafodd ei diweddaru ddiwethaf ar 14 Medi 2020.
+accessibility.statement.paragraph.fortySeven = Paratowyd y dudalen hon ar 9 Medi 2020. Cafodd ei diweddaru ddiwethaf ar 25 Ebrill 2020.
+accessibility.statement.paragraph.fortyEight = Mae CThEM wrthi’n trwsio rhannau’r gwasanaeth nad ydynt yn bodloni safon AA, Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Rydym yn bwriadu cyflawni hyn erbyn mis Mehefin 2023 a byddwn yn diweddaru’r dudalen hon pan fydd y problemau wedi’u datrys.
 
 accessibility.statement.listitem1 = newid lliwiau, lefelau cyferbyniad a ffontiau
 accessibility.statement.listitem2 = chwyddo’r sgrin hyd at 300% heb i’r testun ddisgyn oddi ar y sgrin
@@ -891,6 +893,7 @@ accessibility.statement.heading.five = Beth i’w wneud os nad ydych yn hapus â
 accessibility.statement.heading.six = Cysylltu â ni dros y ffôn neu gael ymweliad personol gennym
 accessibility.statement.heading.seven = Gwybodaeth dechnegol am hygyrchedd y gwasanaeth hwn
 accessibility.statement.heading.eight = Sut gwnaethom brofi’r gwasanaeth hwn
+accessibility.statement.heading.nine = Yr hyn rydym yn ei wneud i wella hygyrchedd
 full.stop= .
 
 ##Month Names##
@@ -908,4 +911,4 @@ hts.month.November = Tachwedd
 hts.month.December = Rhagfyr
 
 ############################### Footer ###############################
-footer.links.accessibility.text = Hygyrchedd
+footer.links.accessibility.text = Datganiad hygyrchedd
