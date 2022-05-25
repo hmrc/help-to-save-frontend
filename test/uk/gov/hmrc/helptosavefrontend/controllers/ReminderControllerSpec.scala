@@ -286,6 +286,32 @@ class ReminderControllerSpec
       status(result) shouldBe Status.OK
     }
 
+    "should return acount closed page when account is closed" in {
+      val account = Account(true, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockGetAccount(nino)(Right(account))
+      }
+
+      val result = csrfAddToken(controller.getSelectRendersPage())(FakeRequest())
+      status(result) shouldBe Status.OK
+    }
+
+    "should return the reminder setting page when asked for " in {
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockGetAccount(nino)(Left("error occurred while getting htsUser"))
+      }
+
+      val result = csrfAddToken(controller.getSelectRendersPage())(FakeRequest())
+      status(result) shouldBe Status.OK
+    }
+
     "should redirect to an the internal server error page if email retrieveal is failed" in {
       val htsUserForUpdate = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
 
@@ -336,8 +362,21 @@ class ReminderControllerSpec
       status(result) shouldBe Status.SEE_OTHER
 
     }
+
+    "should return the account closed page when account is closed" in {
+      val account = Account(true, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+        mockGetAccount(nino)(Right(account))
+      }
+      val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+
+    }
+
     "should return the internal error when selected reminderpage " in {
-      val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
       val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
@@ -348,6 +387,31 @@ class ReminderControllerSpec
       val result = csrfAddToken(controller.getSelectedRendersPage())(fakeRequestWithNoBody)
       status(result) shouldBe Status.INTERNAL_SERVER_ERROR
 
+    }
+
+    "should return the selected reminder  page when asked for" in {
+      val getHtsUser = HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockGetHtsUser(nino)(Right(getHtsUser))
+      }
+
+      val result = csrfAddToken(controller.accountOpenGetSelectedRendersPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.OK
+    }
+
+
+    "should return the internal error when error retrieving account " in {
+      val fakeRequestWithNoBody = FakeRequest("GET", "/")
+      inSequence {
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockGetHtsUser(nino)(Left("error occurred while getting htsUser"))
+      }
+      val result = csrfAddToken(controller.accountOpenGetSelectedRendersPage())(fakeRequestWithNoBody)
+      status(result) shouldBe Status.INTERNAL_SERVER_ERROR
     }
 
     "should return the Cancel reminder   page when asked for it" in {
