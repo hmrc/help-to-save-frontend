@@ -21,7 +21,7 @@
 @maybeDate match{
   case Some(date) =>{
    <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p1",date.getDayOfMonth.toString+" "+date.getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
-   <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p2","10 "+date.plusMonths(1).getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
+   <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p2","14 "+date.plusMonths(1).getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
  }
   case None =>{
    <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p1.error")</p>
