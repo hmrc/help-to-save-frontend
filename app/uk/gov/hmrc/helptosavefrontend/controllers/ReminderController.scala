@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
-import com.github.nscala_time.time.Imports.{LocalDate, LocalTime}
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, _}
 import play.api.{Configuration, Environment}
@@ -29,7 +28,6 @@ import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
 import uk.gov.hmrc.helptosavefrontend.models.{HTSReminderAccount, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
@@ -38,8 +36,10 @@ import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpT
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
-
 import java.util.UUID
+
+import org.joda.time.LocalDate
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
