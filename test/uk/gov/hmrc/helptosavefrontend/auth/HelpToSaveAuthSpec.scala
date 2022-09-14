@@ -75,7 +75,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       firstName,
       lastName,
       nino,
-      toJavaDate(dob),
+      dob,
       Some(emailStr),
       Address(List(line1, line2, line3), Some(postCode), Some(countryCode))
     )
