@@ -22,7 +22,7 @@ import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.syntax.apply._
 import cats.syntax.option._
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -216,7 +216,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     val validation: ValidOrMissingUserInfo[UserInfo] =
       (givenNameValidation, surnameValidation, dateOfBirthValidation, addressValidation).mapN {
         case (givenName, surname, jodaDob, address) ⇒
-          UserInfo(givenName, surname, nino, toJavaDate(jodaDob), email.filter(_.nonEmpty), Address(address))
+          UserInfo(givenName, surname, nino, jodaDob, email.filter(_.nonEmpty), Address(address))
       }
 
     validation

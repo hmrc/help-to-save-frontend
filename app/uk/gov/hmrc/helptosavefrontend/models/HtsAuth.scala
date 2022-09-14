@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.{Name => CoreName, _}
