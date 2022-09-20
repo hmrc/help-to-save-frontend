@@ -19,6 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.config
 import akka.stream.ActorMaterializer
 import com.kenshoo.play.metrics.MetricsFilter
 import play.api.Configuration
+import play.api.http.DefaultHttpFilters
 import play.api.mvc.EssentialFilter
 import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
@@ -41,28 +42,8 @@ class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
   val mockWhiteListFilter = mock[uk.gov.hmrc.play.bootstrap.frontend.filters.AllowlistFilter]
   val mockSessionIdFilter = mock[SessionIdFilter]
 
-  class TestableFrontendFilters
-      extends FrontendFilters(
-        stub[Configuration],
-        stub[LoggingFilter],
-        stub[HeadersFilter],
-        stub[SecurityHeadersFilter],
-        stub[FrontendAuditFilter],
-        stub[MetricsFilter],
-        stub[DeviceIdFilter],
-        stub[CSRFFilter],
-        stub[SessionCookieCryptoFilter],
-        stub[SessionTimeoutFilter],
-        mockCacheControllerFilter,
-        mockMDCFilter,
-        mockWhiteListFilter,
-        mockSessionIdFilter
-      ) {
-    lazy val enableSecurityHeaderFilter: Boolean = false
-    override val filters: Seq[EssentialFilter] = Seq()
-  }
 
-  val frontendFilters = new TestableFrontendFilters
+  val frontendFilters = new DefaultHttpFilters()
   val allowListFilter = mock[AllowListFilter]
 
   "Filters" must {
