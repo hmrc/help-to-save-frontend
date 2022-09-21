@@ -31,20 +31,8 @@ import uk.gov.hmrc.play.bootstrap.frontend.filters.deviceid.DeviceIdFilter
 import uk.gov.hmrc.play.bootstrap.frontend.filters.{FrontendFilters, _}
 
 class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
-
-  // can't use scalamock for CacheControlFilter since a logging statement during class
-  // construction requires a parameter from the CacheControlConfig. Using scalamock
-  // reuslts in a NullPointerException since no CacheControlConfig is there
-  implicit val mat: ActorMaterializer = ActorMaterializer()
-  val mockCacheControllerFilter = new CacheControlFilter(CacheControlConfig(), mat)
-
-  val mockMDCFilter = new MDCFilter(fakeApplication.materializer, fakeApplication.configuration, "")
-  val mockWhiteListFilter = mock[uk.gov.hmrc.play.bootstrap.frontend.filters.AllowlistFilter]
-  val mockSessionIdFilter = mock[SessionIdFilter]
-
-
   val frontendFilters = new DefaultHttpFilters()
-  val allowListFilter = mock[AllowListFilter]
+  val allowListFilter: AllowListFilter = mock[AllowListFilter]
 
   "Filters" must {
 
