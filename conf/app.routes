@@ -97,4 +97,3 @@ POST       /apply-savings-reminders                         uk.gov.hmrc.helptosa
 GET        /apply-savings-reminders-signup                  uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getApplySavingsReminderSignUpPage
 POST       /apply-savings-reminders-signup                  uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.submitApplySavingsReminderSignUpPage
 
-GET        /accessibility-statement                         uk.gov.hmrc.helptosavefrontend.controllers.AccessibilityStatementController.get()
