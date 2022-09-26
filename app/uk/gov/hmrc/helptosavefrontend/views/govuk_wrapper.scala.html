@@ -115,11 +115,7 @@
 
 @footerTop = {}
 @footerLinks = {
-    @if(appConfig.accessibilityStatementToggle) {
-        @layoutsFooterLinks(accessibilityFooterUrl=Some(appConfig.accessibilityStatementUrl))
-    } else {
-        @layoutsFooterLinks()
-    }
+  @layoutsFooterLinks()
 }
 
 @serviceInfoHtml = {
