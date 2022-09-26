@@ -684,7 +684,7 @@ class EligibilityCheckControllerSpec
         def missingUserInfoRetrieval(
           name: Option[String],
           surname: Option[String],
-          dob: Option[org.joda.time.LocalDate],
+          dob: Option[LocalDate],
           address: ItmpAddress
         ) =
           new ~(Some(Name(name, surname)), email) and dob and Some(ItmpName(name, None, surname)) and dob and Some(
@@ -694,12 +694,12 @@ class EligibilityCheckControllerSpec
         def isAddressInvalid(address: ItmpAddress): Boolean =
           !(address.line1.nonEmpty && address.line2.nonEmpty) || address.postCode.isEmpty
         def isNameInvalid(name: Option[String]): Boolean = name.forall(_.isEmpty)
-        def isDobInvalid(dob: Option[org.joda.time.LocalDate]) = dob.isEmpty
+        def isDobInvalid(dob: Option[LocalDate]) = dob.isEmpty
 
         case class TestParameters(
           name: Option[String],
           surname: Option[String],
-          dob: Option[org.joda.time.LocalDate],
+          dob: Option[LocalDate],
           address: ItmpAddress
         )
 
@@ -713,7 +713,7 @@ class EligibilityCheckControllerSpec
 
         val names: List[Option[String]] = List(Some("name"), None, Some(""))
 
-        val dobs: List[Option[org.joda.time.LocalDate]] = List(Some(org.joda.time.LocalDate.now()), None)
+        val dobs: List[Option[LocalDate]] = List(Some(LocalDate.now()), None)
 
         val testParams: List[TestParameters] = for {
           name ← names

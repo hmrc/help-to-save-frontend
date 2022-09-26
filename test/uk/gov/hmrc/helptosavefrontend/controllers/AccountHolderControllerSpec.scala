@@ -166,10 +166,13 @@ class AccountHolderControllerSpec
       val email = "email@test.com"
 
       val fakePostRequest =
-        fakeRequest.withFormUrlEncodedBody("new-email-address" → email)
+        fakeRequest.withMethod("POST").withFormUrlEncodedBody("new-email-address" → email)
 
       def submit(email: String): Future[Result] =
-        controller.onSubmit()(FakeRequest().withFormUrlEncodedBody("new-email-address" → email))
+        controller.onSubmit()(
+          FakeRequest()
+            .withMethod("POST")
+            .withFormUrlEncodedBody("new-email-address" → email))
 
       behave like commonEnrolmentBehaviour(
         () ⇒ submit("email"),
@@ -225,7 +228,7 @@ class AccountHolderControllerSpec
 
       "show an error page if the write to session cache fails" in {
         val fakePostRequest =
-          FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
+          FakeRequest().withMethod("POST").withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))
@@ -239,7 +242,7 @@ class AccountHolderControllerSpec
 
       "show an error page if the email verification fails" in {
         val fakePostRequest =
-          FakeRequest().withFormUrlEncodedBody("new-email-address" → email)
+          FakeRequest().withMethod("POST").withFormUrlEncodedBody("new-email-address" → email)
         inSequence {
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))

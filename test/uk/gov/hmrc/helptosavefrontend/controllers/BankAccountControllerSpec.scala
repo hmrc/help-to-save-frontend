@@ -193,6 +193,7 @@ class BankAccountControllerSpec
     "handling submitBankDetails" must {
 
       val submitBankDetailsRequest = fakeRequest
+        .withMethod("POST")
         .withFormUrlEncodedBody(
           "sortCode" → "123456",
           "accountNumber" -> "12345678",
@@ -214,7 +215,8 @@ class BankAccountControllerSpec
         }
 
         val result =
-          csrfAddToken(controller.submitBankDetails())(fakeRequest.withFormUrlEncodedBody("rollNumber" → "a"))
+          csrfAddToken(controller.submitBankDetails())(
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("rollNumber" → "a"))
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Enter sort code")
         contentAsString(result) should include("Enter account number")

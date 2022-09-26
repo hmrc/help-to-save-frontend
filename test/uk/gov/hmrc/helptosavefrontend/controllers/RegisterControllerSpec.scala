@@ -704,7 +704,7 @@ class RegisterControllerSpec
     }
 
     "handling accessOrPayIn" must {
-      def fRequest(payIn: String) =  fakeRequest.withFormUrlEncodedBody("payInNow" -> payIn)
+      def fRequest(payIn: String) =  fakeRequest.withMethod("POST").withFormUrlEncodedBody("payInNow" -> payIn)
       def postAccessOrPayIn(payIn: String) = csrfAddToken(controller.accessOrPayIn())(fRequest(payIn))
 
       "show errors on the page" in {

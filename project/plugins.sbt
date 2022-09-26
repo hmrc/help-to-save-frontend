@@ -9,7 +9,7 @@ addSbtPlugin("uk.gov.hmrc" % "sbt-distributables" % "2.1.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-bobby" % "3.5.0")
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.8" exclude ("org.slf4j", "slf4j-simple"))
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.16" exclude ("org.slf4j", "slf4j-simple"))
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.8.0")
 

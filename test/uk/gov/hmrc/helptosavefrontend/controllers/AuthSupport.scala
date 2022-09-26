@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
@@ -76,7 +76,7 @@ trait AuthSupport extends MockFactory {
   val nsiPayload = NSIPayload(
     firstName,
     lastName,
-    toJavaDate(dob),
+    dob,
     nino,
     ContactDetails(
       line1,
