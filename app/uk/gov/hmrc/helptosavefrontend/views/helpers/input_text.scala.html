@@ -25,7 +25,9 @@ inputType: String = "text",
 labelClass: Option[String] = None,
 errorMessage: Option[Html] = None,
 describedByHint: Option[String] = None,
-describedByError: Option[String] = None
+describedByError: Option[String] = None,
+inputMode: Option[String] = None,
+spellCheck: Option[String] = None
 )
 
 <div class="form-group @if(errorMessage.isDefined){form-group-error}">
@@ -34,7 +36,7 @@ describedByError: Option[String] = None
     @if(hint.nonEmpty){
         <span class="form-hint" @if(describedByHint.nonEmpty){ id="@describedByHint" }>@hint</span>
     }
-    
+
     @errorMessage.map(e ⇒ Html(s"""<span class="error-message" ${describedByError.fold("")(id => s"""id ="$id"""")}>$e</span>""")).getOrElse(Html(""))
 
     <div class="form-control-wrapper" data-type="@secondaryLabel">
@@ -44,6 +46,8 @@ describedByError: Option[String] = None
           id="@id"
           name="@name"
           value="@value"
+          @if(inputMode.nonEmpty){ inputmode="@inputMode" }
+          @if(spellCheck.nonEmpty){ spellcheck="@spellCheck" }
           @if(describedByHint.nonEmpty || errorMessage.nonEmpty){ aria-describedBy="@describedByHint@if(errorMessage.nonEmpty){ @describedByError}"}
         />
     </div>
