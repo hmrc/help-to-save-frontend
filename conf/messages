@@ -773,7 +773,7 @@ hts.reminder-confirmation.title.p1-5=You can change or cancel your email reminde
 hts.reminder-confirmation.title.p1-6=in your Help to Save account home.
 hts.reminder-confirmation.h2=What happens next
 hts.reminder-frequency.select-an-option=Select an option for setting up reminders
-hts.reminder-frequency.error.missing=No reminder frequency option selected
+hts.reminder-frequency.error.missing=Select an option for setting up reminders
 
 hts.reminder-dashboard.title.h1=Reminders dashboard
 hts.reminder-dashboard.h2=Change or cancel email reminders
