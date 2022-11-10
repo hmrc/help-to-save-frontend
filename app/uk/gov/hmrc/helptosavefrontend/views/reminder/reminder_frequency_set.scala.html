@@ -40,20 +40,27 @@
 
         @{if(errorMessage.isDefined)
             <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
-            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.reminder-frequency.select-an-option")}</h2>
-            <ul class="error-summary-list">
-            <li><a href="#first">{Messages("hts.reminder-frequency.error.missing")}</a></li>
-            </ul>
+                <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.global.error-summary.title")}</h2>
+                    <ul class="error-summary-list">
+                        <li><a href="#first">{Messages("hts.reminder-frequency.error.missing")}</a></li>
+                    </ul>
             </div>
         }
 
-        <h1 class="heading-large">@Messages("hts.reminder-frequency.select")</h1>
+
 
         <form method="post" action= @if(screenFrom.matches("account")) { @routes.ReminderController.selectRemindersSubmit} else if(screenFrom.matches("registration")) {@routes.ReminderController.submitApplySavingsReminderSignUpPage} else if(screenFrom.matches("cancel")){@routes.ReminderController.selectedRemindersSubmit} novalidate >
+            <div class="@{"form-group" + {if(errorMessage.isDefined) " form-group-error" else "" }}">
+            <fieldset@if(errorMessage.isDefined){ aria-describedby="frequency-error"}>
 
-              @CSRF.formField(request)
+            <legend>
+                <h1 class="@{"heading-large" + {if(errorMessage.isDefined) " flush--top" else ""}}">@title</h1>
+            </legend>
 
-
+            @CSRF.formField(request)
+            @{if(errorMessage.isDefined)
+            <span id="frequency-error" class="error-message">{Messages("hts.reminder-frequency.error.missing")}</span>
+            }
             <div class="multiple-choice" data-target="collect-choice">
                     <input id="first" type="radio" name="reminderFrequency" value="1st" @if(period.matches("1st")) {checked}>
                     <label for="first">@messages("hts.reminder-frequency.first")</label>
@@ -78,6 +85,8 @@
                     <label for="cancel">@messages("hts.reminder-frequency.cancel")</label>
                 </div>
             }
+            </fieldset>
+            </div>
 
 
              <div class="form-field form-field--submit">

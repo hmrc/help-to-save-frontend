@@ -42,36 +42,44 @@
 
         @{if(errorMessage.isDefined)
             <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
-            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.reminder-frequency.select-an-option")}</h2>
-            <ul class="error-summary-list">
-            <li><a href="#first">{Messages("hts.reminder-select.error.missing")}</a></li>
-            </ul>
+                <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.global.error-summary.title")}</h2>
+                <ul class="error-summary-list">
+                    <li><a href="#yes">{Messages("hts.reminder-select.error.missing")}</a></li>
+                </ul>
             </div>
         }
 
         <h1 class="heading-large">@title</h1>
         <p>@messages("hts.email-saving-remainders.intro")</p>
 
-          <form method="post" action=@routes.ReminderController.submitApplySavingsReminderPage novalidate>
-              @CSRF.formField(request)
+        <form method="post" action=@routes.ReminderController.submitApplySavingsReminderPage novalidate>
+            @CSRF.formField(request)
+            <div class="@{"form-group" + {if(errorMessage.isDefined) " form-group-error" else "" }}">
+                <fieldset@if(errorMessage.isDefined){ aria-describedby="reminderFrequency-error"}>
+                    <legend class="visually-hidden">
+                        @title
+                    </legend>
+                    @{if(errorMessage.isDefined)
+                    <span id="reminderFrequency-error" class="error-message">{Messages("hts.reminder-select.error.missing")}</span>
+                    }
+                    <div class="multiple-choice" data-target="collect-choice">
+                        <input id="yes" type="radio" name="reminderFrequency" value="yes" @if(selection.matches("yes")) {checked}>
+                        <label for="yes">@messages("hts.reminder-frequency.yes")</label>
+                    </div>
 
+                    <div class="multiple-choice" data-target="collect-choice">
+                        <input id="no" type="radio" name="reminderFrequency" value="no" @if(selection.matches("no")) {checked}>
+                        <label for="no">@messages("hts.reminder-frequency.no")</label>
+                    </div>
+                </fieldset>
+            </div>
 
-            <div class="multiple-choice" data-target="collect-choice">
-                    <input id="yes" type="radio" name="reminderFrequency" value="yes" @if(selection.matches("yes")) {checked}>
-                    <label for="yes">@messages("hts.reminder-frequency.yes")</label>
-                </div>
-
-                <div class="multiple-choice" data-target="collect-choice">
-                    <input id="no" type="radio" name="reminderFrequency" value="no" @if(selection.matches("no")) {checked}>
-                    <label for="no">@messages("hts.reminder-frequency.no")</label>
-                </div>
-
-             <div class="form-field form-field--submit">
-      <button id="confirm-selection" class="button getSelectedChoice" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected reminder', 'Applicant select reminder frequency page');">
-        @messages("hts.global.continue-button")
-      </button>
-    </div>
-          </form>
+            <div class="form-field form-field--submit">
+                <button id="confirm-selection" class="button getSelectedChoice" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected reminder', 'Applicant select reminder frequency page');">
+                    @messages("hts.global.continue-button")
+                </button>
+            </div>
+        </form>
 
 
 
