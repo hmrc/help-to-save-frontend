@@ -76,15 +76,15 @@
           <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail || (newEmail.isDefined && newEmail.exists(_.nonEmpty))){ checked }>
           <label for="add-new-email">@messages("hts.select-email.select-new-address")</label>
         </div>
-        
+
         <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " panel-with-error" else ""}}" id="collect-new-email">
           <div class="@{"form-group" + {if(hasInvalidEmail) " form-group-error" else ""}}">
             <label class="form-label-bold" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
-            
+
             <span class="form-hint" id="new-email-hint">@Html(Messages("hts.select-email.enter-new-address-hint"))</span>
             @if(hasInvalidEmail) { <span class="error-message" id="new-email-error">@email_form_validation_error_message(form, "new-email")</span> }
-            
-            <input class="form-control @if(hasInvalidEmail){form-control-error}" name="new-email" type="email" id="new-email" aria-describedby="new-email-hint @if(hasInvalidEmail || hasNotSelected){ new-email-error}"  value=@{form.data.get("new-email")}>
+
+            <input class="form-control @if(hasInvalidEmail){form-control-error}" name="new-email" type="email" id="new-email" aria-describedby="new-email-hint @if(hasInvalidEmail || hasNotSelected){ new-email-error}" @if(form.data.get("new-email").nonEmpty){ value="@form.data.get("new-email")" } >
           </div>
           <p>@messages("hts.select-email.enter-new-address-body-text")</p>
         </div>
