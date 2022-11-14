@@ -131,6 +131,13 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   val youtubeHowWithdrawalsAffectBonuses: String =
     servicesConfig.getString("youtube-embeds.how-withdrawals-affect-bonuses")
 
+  object TimeoutConfig {
+    val timeoutSeconds: Int = servicesConfig.getInt("timeout.timeout-seconds")
+    val countdownSeconds: Int = servicesConfig.getInt("timeout.countdown-seconds")
+    val keepAliveUrl: String = servicesConfig.getString("timeout.keep-alive-url")
+    val timedOutUrl: String = servicesConfig.getString("timeout.timed-out-url")
+  }
+
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enableLanguageSwitching")
 
   val earlyCapCheckOn: Boolean = servicesConfig.getBoolean("enable-early-cap-check")
