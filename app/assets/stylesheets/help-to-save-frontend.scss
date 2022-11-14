@@ -62,12 +62,15 @@ input:focus, textarea:focus, select:focus, button:focus {
   }
 }
 
-/*
-* AF 3.9.0 uses inline-block for this which
-* creates double arrows in MS Edge
-*/
-.no-details details summary .arrow-closed {
-    display: none !important;
+// Add arrows back for details elements
+details summary {
+  display: list-item;             // Fixes missing arrows
+  width: -webkit-fit-content;     // Constrains active link to content
+  width: -moz-fit-content;
+  width: fit-content;
+}
+details summary .summary  {
+  display: inline-block;        // Prevents text wrapping when clicked (Android Chrome)
 }
 
 .pull-right {
