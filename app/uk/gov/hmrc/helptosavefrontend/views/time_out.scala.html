@@ -14,6 +14,10 @@
  * limitations under the License.
  *@
 
+@import play.api.i18n.Messages
+@import play.api.mvc.Request
+@import play.twirl.api.Html
+
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
@@ -22,43 +26,17 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.sign-in.title.h1")
-}
+@title = @{ Messages("hts.timeout.timeoutMessage") }
+
 @main(
 title = title,
 sidebarLinks = None,
 bodyClasses = None) {
 
+  <h2 class="heading-large">@messages("hts.timeout.timeoutMessage")</h2>
 
-  <h1 class="heading-large">@title</h1>
-  <p>@messages("hts.sign-in.p1")</p>
+  <p>@messages("hts.timed-out.p1")</p>
 
-  <ul class="list list-bullet">
-    <li>@messages("hts.sign-in.ul1-li1")</li>
-    <li>@messages("hts.sign-in.ul1-li2")</li>
-    <li>@Html(Messages("hts.sign-in.ul1-li3"))</li>
-    <li>@messages("hts.sign-in.ul1-li4")</li>
-  </ul>
-
-  <p>@Html(Messages("hts.sign-in.p2"))</p>
-
-  <a
-    class="button button-start ga-track-event"
-    role="button"
-    href="@routes.AccessAccountController.accessAccount.url"
-    data-ga-event-category="Sign in to your Help to Save account"
-    data-ga-event-action="button - click"
-    data-ga-event-label="Sign in"
-  >@messages("hts.global.sign-in-button")</a>
-
-  <h2 class="heading-medium">@messages("hts.sign-in.h2")</h2>
-
-  <p>@messages("hts.sign-in.p3")</p>
-
-  <ul class="list list-bullet">
-    <li>@messages("hts.sign-in.ul2-li1")</li>
-    <li>@messages("hts.sign-in.ul2-li2")</li>
-  </ul>
+  <p>@Html(messages("hts.timed-out.p2"))</p>
 
 }

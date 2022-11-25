@@ -30,6 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
+import uk.gov.hmrc.helptosavefrontend.views.html.time_out
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext
@@ -44,7 +45,8 @@ class IntroductionController @Inject() (
   errorHandler: ErrorHandler,
   maintenanceSchedule: MaintenanceSchedule,
   privacyView: privacy,
-  helpInformationView: help_information
+  helpInformationView: help_information,
+  timeOutView: time_out
 )(
   implicit val transformer: NINOLogMessageTransformer,
   val frontendAppConfig: FrontendAppConfig,
@@ -55,6 +57,16 @@ class IntroductionController @Inject() (
     with EnrolmentCheckBehaviour {
 
   private val baseUrl: String = frontendAppConfig.govUkURL
+
+  def timedOut(): Action[AnyContent] = unprotected{ implicit request ⇒
+    implicit htsContext ⇒
+      Ok(timeOutView())
+  }
+
+  def keepAlive(): Action[AnyContent] = unprotected { implicit request ⇒
+    implicit htsContext ⇒
+      Ok("")
+  }
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected { _ ⇒ _⇒
     SeeOther(baseUrl)

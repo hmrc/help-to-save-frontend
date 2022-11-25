@@ -804,6 +804,11 @@ hts.timeout.timeoutMinute = minute
 hts.timeout.timeoutSeconds = seconds
 hts.timeout.timeoutSecond = second
 
+hts.timed-out.p1=This was because you were inactive for too long.
+hts.timed-out.p2=To access your Help to Save account, you’ll need to sign in.
+hts.timed-out.button=Sign in
+
+
 accessibility.statement.title = Accessibility statement for Help to Save
 accessibility.statement.paragraph.one = This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
 accessibility.statement.paragraph.two.start = This service is part of the wider GOV.UK website. There is a separate

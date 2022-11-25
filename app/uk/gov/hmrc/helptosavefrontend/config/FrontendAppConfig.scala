@@ -22,6 +22,7 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.util.urlEncode
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
 import scala.concurrent.duration.Duration
 
@@ -86,7 +87,13 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
-  val signOutUrl: String = s"$basGatewayFrontendUrl/sign-out-without-state?continue=$feedbackSurveyUrl"
+  val signOutUri: String = s"$basGatewayFrontendUrl/sign-out-without-state"
+
+  val signOutUrl: String = s"$signOutUri?continue=$feedbackSurveyUrl"
+
+  val timeOutSignOutUrl: String = s"$signOutUri?continue=$helpToSaveFrontendUrl" + routes.IntroductionController.timedOut().url
+
+  val timeOutKeepAliveUrl: String = helpToSaveFrontendUrl + routes.IntroductionController.keepAlive().url
 
   val ggUserUrl: String =
     s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?" +
@@ -134,8 +141,8 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   object TimeoutConfig {
     val timeoutSeconds: Int = servicesConfig.getInt("timeout.timeout-seconds")
     val countdownSeconds: Int = servicesConfig.getInt("timeout.countdown-seconds")
-    val keepAliveUrl: String = servicesConfig.getString("timeout.keep-alive-url")
-    val timedOutUrl: String = servicesConfig.getString("timeout.timed-out-url")
+    val keepAliveUrl: String = timeOutKeepAliveUrl
+    val timedOutUrl: String = timeOutSignOutUrl
   }
 
   val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enableLanguageSwitching")
