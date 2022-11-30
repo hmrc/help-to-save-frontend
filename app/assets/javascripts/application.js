@@ -39,6 +39,7 @@ $(document).ready(function () {
       countdown: window.jsConfig.countdown,
       keepAliveUrl: window.jsConfig.keep_alive_url,
       signOutUrl: window.jsConfig.logout_url,
+      title: window.jsConfig.timeoutTitle,
       message: window.jsConfig.timeoutMessage,
       keepAliveButtonText: window.jsConfig.timeoutKeepAliveButtonText,
       signOutButtonText: window.jsConfig.timeoutSignOutButtonText,
