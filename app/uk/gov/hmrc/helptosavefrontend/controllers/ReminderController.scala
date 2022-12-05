@@ -437,7 +437,7 @@ class ReminderController @Inject() (
           .bindFromRequest()
           .fold(
             withErrors ⇒ {
-              Ok(applySavingsReminders(withErrors, "none"))
+              Ok(applySavingsReminders(withErrors, "none", Option(routes.EmailController.getSelectEmailPage.url)))
             },
             success ⇒
               if (success.reminderFrequency === "no") {
