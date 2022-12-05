@@ -480,7 +480,6 @@ class ReminderController @Inject() (
       if (isFeatureEnabled) {
         checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
           def bckLink: String = routes.ReminderController.getApplySavingsReminderPage.url
-
           s.reminderDetails.fold(
             Ok(
               reminderFrequencySet(
@@ -491,7 +490,7 @@ class ReminderController @Inject() (
               )
             )
           )(
-            reminderDetails ⇒
+            reminderDetails ⇒ {
               Ok(
                 reminderFrequencySet(
                   ReminderForm.giveRemindersDetailsForm(),
@@ -500,6 +499,7 @@ class ReminderController @Inject() (
                   Some(bckLink)
                 )
               )
+            }
           )
         }
       } else {
@@ -519,7 +519,8 @@ class ReminderController @Inject() (
                 reminderFrequencySet(
                   withErrors,
                   "none",
-                  "registration"
+                  "registration",
+                  Option(routes.EmailController.getSelectEmailPage.url)
                 )
               )
             },
