@@ -108,7 +108,9 @@ class EmailController @Inject() (
               }
               Ok(selectEmail(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
           },
-          { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage.url) }
+          { case _ ⇒
+            SeeOther(routes.EmailController.getGiveEmailPage.url)
+          }
         )(session)
       }
 
