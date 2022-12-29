@@ -1,0 +1,51 @@
+@*
+ * Copyright 2022 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
+@import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcAccessibleAutocompleteCss
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcAccessibleAutocompleteJavascript
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
+@this(
+    hmrcLayout: HmrcLayout,
+    standardBetaBanner: StandardBetaBanner,
+    appConfig: FrontendAppConfig,
+    hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
+    autcompleteCss: HmrcAccessibleAutocompleteCss,
+    autocompleteJavascript: HmrcAccessibleAutocompleteJavascript
+)
+
+@(title: String, pageScripts: Option[Html] = None, pageHeadBlock: Option[Html] = None)(contentBlock: Html)(implicit request : Request[_], messages: Messages, config: FrontendAppConfig)
+
+@content = {
+    @contentBlock
+    @hmrcReportTechnicalIssueHelper()
+}
+@pageTitle = @{
+    title + " - " + Messages("app.name") + " - " + "GOV.UK"
+}
+@hmrcLayout(
+    pageTitle = Some(pageTitle),
+    isWelshTranslationAvailable = false, /* or false if your service has not been translated */
+    //signOutUrl = Some(routes.SignOutController.signout.url),
+    displayHmrcBanner = true,
+    additionalHeadBlock = pageHeadBlock,
+    additionalScriptsBlock = pageScripts,
+    phaseBanner = Some(standardBetaBanner(url = appConfig.feedbackSurveyUrl))
+)(content)

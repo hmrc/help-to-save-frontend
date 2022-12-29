@@ -3,6 +3,7 @@ import sbt._
 object AppDependencies {
 
   val hmrc = "uk.gov.hmrc"
+  val playVersion = "play-28"
 
   val compile = Seq(
     hmrc                %% "govuk-template"             % "5.72.0-play-28",
@@ -14,7 +15,8 @@ object AppDependencies {
     "org.typelevel"     %% "cats-core"                  % "2.6.1",
     hmrc                %% "domain"                     % "6.2.0-play-28",
     compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.1" cross CrossVersion.full),
-    "com.github.ghik" % "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
+    "com.github.ghik" % "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full,
+    "uk.gov.hmrc"       %% "play-frontend-hmrc"          % s"3.34.0-$playVersion"
 
   )
 

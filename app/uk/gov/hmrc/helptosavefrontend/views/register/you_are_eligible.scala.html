@@ -20,23 +20,21 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.html.layout
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: layout,
       submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
 @(userInfo: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
+@pageTitle = @{
   Messages("hts.register.you-are-eligible.title.h1")
 }
 
-@main(
-  title = title,
-  sidebarLinks = None,
-  bodyClasses = None) {
+@layout(pageTitle) {
 
     <h1 class="heading-large">
-      @title
+      @pageTitle
     </h1>
 
     <p>
