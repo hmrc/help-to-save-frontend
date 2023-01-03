@@ -18,12 +18,13 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.html.layout
 
-@this(layout: layout,
-      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+@this(layout: layout, viewHelpers: ViewHelpers,
+submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
 @(userInfo: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -33,15 +34,15 @@
 
 @layout(pageTitle) {
 
-    <h1 class="heading-large">
+    <h1 class="govuk-heading-xl">
       @pageTitle
     </h1>
 
-    <p>
+    <p class="govuk-body">
       @Messages("hts.register.you-are-eligible.p1", userInfo.forename + " " + userInfo.surname)
     </p>
 
-    <ul class="bullets">
+    <ul class="govuk-list govuk-list--bullet">
       <li>@Messages("hts.register.you-are-eligible.li1")</li>
       <li>@Messages("hts.register.you-are-eligible.li2")</li>
     </ul>
@@ -52,5 +53,13 @@
             @Messages("hts.global.continue-button")
         }
     }
+<div class="govuk-form">
+    @viewHelpers.form(routes.EligibilityCheckController.youAreEligibleSubmit) {
+    <!--@CSRF.formField(request)-->
+    @viewHelpers.govukButton(Button(
+        content = text(Messages("hts.global.continue-button"))
+        ))
+    }
+</div>
 
 }
