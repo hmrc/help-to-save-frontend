@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -25,10 +25,8 @@
   Messages("hts.email-verified.title.h1")
 }
 
-@main(
-    title = title + " " + Messages("hts.global.title.section.email"),
-    sidebarLinks = None,
-    bodyClasses = None) {
+@layout(
+    title = title + " " + Messages("hts.global.title.section.email")) {
 
   <div class="govuk-box-highlight">
     <h1 class="heading-xlarge">@title</h1>

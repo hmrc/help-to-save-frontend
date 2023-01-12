@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.form
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -27,10 +27,7 @@
   Messages("hts.email-updated.title.h1")
 }
 
-@main(
-  title = title,
-  bodyClasses = None
-) {
+@layout(title) {
 
   <h1 class="heading-large">@title</h1>
  

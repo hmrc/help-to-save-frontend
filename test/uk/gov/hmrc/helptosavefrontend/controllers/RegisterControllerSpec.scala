@@ -197,7 +197,7 @@ class RegisterControllerSpec
         val result = controller.getDetailsAreIncorrect(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include("We need your correct details")
-        contentAsString(result) should include("""<a href=/help-to-save/create-account class="link-back">Back</a>""")
+        contentAsString(result) should include("""<a href=/help-to-save/create-account class="govuk-back-link">Back</a>""")
       }
     }
 
@@ -243,7 +243,7 @@ class RegisterControllerSpec
         status(result) shouldBe OK
         contentAsString(result) should include("Accept and create account")
         contentAsString(result) should include(
-          """<a href=/help-to-save/enter-uk-bank-details class="link-back">Back</a>"""
+          """<a href=/help-to-save/enter-uk-bank-details class="govuk-back-link">Back</a>"""
         )
       }
 

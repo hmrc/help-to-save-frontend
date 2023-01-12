@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -27,10 +27,7 @@
   Messages("hts.incorrect-details.title.h1")
 }
 
-@main(
-    title = title,
-    sidebarLinks = None,
-    bodyClasses = None) {
+@layout(title) {
 
     @navigate_back(Some(routes.RegisterController.getCreateAccountPage.url))
 

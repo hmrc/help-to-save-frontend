@@ -23,7 +23,7 @@
 @import java.time.LocalDate
 
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @(accountNumber: Option[String], maybeAccount: Option[Account])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -34,7 +34,7 @@
 
 @date =@{maybeAccount.fold[Option[LocalDate]](None)(account => account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate)))}
 
-@main(
+@layout(
   title = title + " " + Messages("hts.global.accountholder.title-suffix")
 ){
   @navigate_back(Some(appConfig.nsiManageAccountUrl))

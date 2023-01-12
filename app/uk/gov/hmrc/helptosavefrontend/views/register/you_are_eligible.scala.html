@@ -22,6 +22,7 @@
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.html.layout
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(layout: layout, viewHelpers: ViewHelpers,
 submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
@@ -47,17 +48,11 @@ submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
       <li>@Messages("hts.register.you-are-eligible.li2")</li>
     </ul>
 
-    @form(routes.EligibilityCheckController.youAreEligibleSubmit) {
-        @CSRF.formField(request)
-        @submit('_buttonClass -> "", 'id → "start-creating-account") {
-            @Messages("hts.global.continue-button")
-        }
-    }
 <div class="govuk-form">
     @viewHelpers.form(routes.EligibilityCheckController.youAreEligibleSubmit) {
-    <!--@CSRF.formField(request)-->
+    @CSRF.formField(request)
     @viewHelpers.govukButton(Button(
-        content = text(Messages("hts.global.continue-button"))
+        content = Text(Messages("hts.global.continue-button"))
         ))
     }
 </div>

@@ -122,7 +122,7 @@ hts.register.bank-details.error.ul1-li3=account number and sort code you entered
 hts.register.bank-details.error.button.try-again=Try again
 
 # Eligible
-hts.register.you-are-eligible.title.h1=You are eligible for a Help to Save account
+hts.register.you-are-eligible.title.h1=You’re eligible for a Help to Save account
 hts.register.you-are-eligible.p1={0}, before you can create an account, start saving and earn bonuses, you will need to:
 hts.register.you-are-eligible.li1=give us your email address
 hts.register.you-are-eligible.li2=enter your UK bank details
@@ -281,10 +281,10 @@ hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must h
 
 # Select email
 hts.select-email.title.h1=What email address do you want to use for your Help to Save account?
-hts.select-email.select-new-address=A new email address
+hts.select-email.select-new-address=a new email address
 hts.select-email.enter-new-address-body-text=The email addresses you use for other government services will not change.
-hts.select-email.enter-new-address-label=Email address
-hts.select-email.enter-new-address-hint=For example, name&#64;example.com
+hts.select-email.enter-new-address-label=Enter the new email address
+hts.select-email.enter-new-address-hint=For example, myname&#64;sample.com
 hts.select-email.select-an-option=Select the email address you want to use for your Help to Save account
 hts.select-email.select-one.error-summary.title=There is a problem
 hts.select-email.invalid-email.error-summary.title=There is a problem

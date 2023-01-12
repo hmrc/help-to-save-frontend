@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -26,10 +26,7 @@
   Messages("hts.register.bank-details.error.title.h1")
 }
 
-@main(
-  title = title,
-  sidebarLinks = None,
-  bodyClasses = None) {
+@layout(title) {
 
   <h1 class="heading-large">@title</h1>
   <p>@Messages("hts.register.bank-details.error.p1")</p>

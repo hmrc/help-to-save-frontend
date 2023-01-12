@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
       submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
 @(form: Form[GiveEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
@@ -31,11 +31,7 @@
 
 @defining(form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))){ errorMessage =>
 
-    @main(
-        title = title,
-        sidebarLinks = None,
-        bodyClasses = None,
-        isErrorPage = errorMessage.isDefined) {
+    @layout(title) {
 
         @{if(errorMessage.isDefined)
         <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">

@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.helptosavefrontend.forms.Continue
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
       submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
 @(backupEmail: String, form: Form[Continue], duringRegistrationJourney: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
@@ -32,11 +32,7 @@
 
   @hasErrors = @{form.error("radio-inline-group").isDefined}
 
-  @main(
-    title = title,
-    sidebarLinks = None,
-    bodyClasses = None,
-    isErrorPage = hasErrors) {
+  @layout(title) {
 
     @{if(hasErrors)
       <div class="error-summary" role="alert" aria-labelledby="error-summary-select-one-option" tabindex="-1">

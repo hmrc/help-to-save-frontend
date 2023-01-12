@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
 yesNo: uk.gov.hmrc.helptosavefrontend.views.html.helpers.yes_no,
 errorSummary: uk.gov.hmrc.helptosavefrontend.views.html.helpers.error_summary,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
@@ -45,10 +45,7 @@ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
   """))
 }
 
-@main(
-title = title,
-bodyClasses = None,
-extraMeta = extraMeta) {
+@layout(title) {
 
 @if(hasErrors) {
 @errorSummary(form.errors)

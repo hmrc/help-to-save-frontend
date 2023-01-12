@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @(backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -28,10 +28,7 @@
     Messages("hts.email-saving-remainders.title.h1")
 }
 
-    @main(
-        title = title,
-        bodyClasses = None
-    ) {
+    @layout(title) {
 
     @navigate_back(backLink)
 

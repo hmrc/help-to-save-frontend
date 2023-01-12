@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
 
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
 
 @(email: String,period :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -30,9 +30,7 @@
     Messages("hts.reminder-dashboard.title.h1")
 }
 
-@main(
-    title = title,
-    bodyClasses = None) {
+@layout(title) {
 
     @navigate_back(backLink)
 

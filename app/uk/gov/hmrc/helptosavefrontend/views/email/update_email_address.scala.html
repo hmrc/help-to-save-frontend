@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -38,12 +38,7 @@
 
 @defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
 
-    @main(
-        title = title + " " + Messages("hts.global.title.section.email"),
-        sidebarLinks = None,
-        bodyClasses = None,
-        isErrorPage = errorMessage.isDefined,
-        serviceInfoContent = serviceInfoContent) {
+    @layout(title = title + " " + Messages("hts.global.title.section.email")) {
 
         @{if(errorMessage.isDefined)
         <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">

@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
       zeroBalanceZeroBonus: zero_balance_zero_bonus,
       positiveBalancePositiveBonus: positive_balance_positive_bonus,
       zeroBalancePositiveBonus: zero_balance_positive_bonus,
@@ -46,11 +46,7 @@
   Messages("hts.close-account.title.h1")
 }
 
-@main(
-    title = title + " " + Messages("hts.global.accountholder.title-suffix"),
-    sidebarLinks = None,
-    bodyClasses = None,
-    serviceInfoContent = serviceInfoContent) {
+@layout(title = title + " " + Messages("hts.global.accountholder.title-suffix")) {
 
     <h1>@title</h1>
 

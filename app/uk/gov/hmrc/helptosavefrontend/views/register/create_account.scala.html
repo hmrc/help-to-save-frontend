@@ -24,7 +24,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
 
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @(eligibleWithUserInfo: EligibleWithUserInfo,period: String, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -36,10 +36,7 @@
   str.filterNot((x: Char) => x.isWhitespace || x.toString.matches("-")).grouped(2).mkString(" ")
 }
 
-@main(
-title = title,
-sidebarLinks = None,
-bodyClasses = None) {
+@layout(title) {
 
 @navigate_back(Some(routes.BankAccountController.getBankDetailsPage.url))
 

@@ -16,8 +16,9 @@
 
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import uk.gov.hmrc.helptosavefrontend.views.html.layout
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: layout)
 
 @(url: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -26,9 +27,7 @@
 }
 @header = {
 }
-@main(
-    title = title,
-    bodyClasses = None) {
+@layout(title) {
 
 <h1 class="heading-48">@Messages("accessibility.statement.title")</h1>
 <p class="lede">@Messages("accessibility.statement.paragraph.one")</p>

@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
       button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
 
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
@@ -36,11 +36,7 @@
   Messages("hts.email-verification.existing-user.check-your-email.title.h1")
 }
 
-@main(
-  title = title  + " " + Messages("hts.global.title.section.email"),
-  sidebarLinks = None,
-  bodyClasses = None,
-  serviceInfoContent = serviceInfoContent) {
+@layout(title = title  + " " + Messages("hts.global.title.section.email")) {
 
     <h1 class="heading-large">@title</h1>
     <p>@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail", email, routes.AccountHolderController.getUpdateYourEmailAddress.url))</p>

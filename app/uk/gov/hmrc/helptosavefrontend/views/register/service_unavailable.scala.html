@@ -19,7 +19,7 @@
 @import java.time.LocalDateTime
 @import uk.gov.hmrc.helptosavefrontend.util.LanguageUtils
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @(headMessage : String, end:Option[LocalDateTime])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -27,10 +27,7 @@
   Messages(headMessage)
 }
 
-@main(
-  title = title,
-  bodyClasses = None
-) {
+@layout(title) {
     <div class="grid-layout__column grid-layout__column-full">
         <header class="page-header text">
             <h1 class="heading-large" id="hts-not-eligible-title">@title</h1>

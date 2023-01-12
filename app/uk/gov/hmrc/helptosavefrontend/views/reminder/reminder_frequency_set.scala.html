@@ -22,7 +22,7 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import views.html.helper.CSRF
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @(form: Form[ReminderForm],period :String,screenFrom :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 @title = @{
@@ -30,11 +30,7 @@
 }
 @defining(form.error("reminderFrequency").map(_ ⇒ email_form_validation_error_message(form, "reminderFrequency"))){ errorMessage =>
 
-    @main(
-        title = title,
-        sidebarLinks = None,
-        bodyClasses = None,
-        isErrorPage = errorMessage.isDefined) {
+    @layout(title) {
 
         @navigate_back(backLink)
 

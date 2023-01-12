@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
 submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
 @(backLink: Option[String] = None, clsDate:LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
@@ -29,9 +29,7 @@ submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 Messages("hts.closed-account.title.h1")
 }
 
-@main(
-title = title
-) {
+@layout(title) {
 @navigate_back(backLink)
 <h1 class="heading-large">@title</h1>
 

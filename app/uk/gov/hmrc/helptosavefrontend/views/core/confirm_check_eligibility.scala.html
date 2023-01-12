@@ -18,25 +18,24 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.html.layout
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: layout,
       submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
+@pageTitle = @{
   Messages("hts.no-account.title.h1")
 }
 
-@main(
-  title = title
-) {
-  <h1 class="heading-large">@title</h1>
+@layout(pageTitle) {
+  <h1 class="heading-large">@pageTitle</h1>
 
-  <p>@Html(Messages("hts.no-account.p1"))</p>
+  <p>@Messages("hts.no-account.p1")</p>
 
-  <h2>@Html(Messages("hts.no-account.h2-1"))</h2>
-  <p>@Html(Messages("hts.no-account.p2"))</p>
+  <h2>@Messages("hts.no-account.h2-1")</h2>
+  <p>@Messages("hts.no-account.p2")</p>
 
   <div class="form-field form-field--submit">
     @form(routes.EligibilityCheckController.getCheckEligibility){
