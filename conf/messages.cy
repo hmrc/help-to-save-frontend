@@ -805,7 +805,7 @@ hts.timeout.timeoutSeconds = eiliad
 hts.timeout.timeoutSecond = eiliad
 
 hts.timed-out.p1=Roedd hyn oherwydd eich bod wedi bod yn segur am rhy hir.
-hts.timed-out.p2=Bydd yn rhaid i chi fewngofnodi er mwyn cael mynediad at eich cyfrif Cymorth i Gynilo ar eiddo yn y DU.
+hts.timed-out.p2=Bydd yn rhaid i chi fewngofnodi er mwyn cael mynediad at eich cyfrif Cymorth i Gynilo.
 hts.timed-out.button=Mewngofnodi
 
 accessibility.statement.title = Datganiad hygyrchedd ar gyfer Cymorth i Gynilo
