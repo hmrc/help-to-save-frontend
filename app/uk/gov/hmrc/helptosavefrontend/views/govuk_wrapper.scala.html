@@ -46,7 +46,8 @@
         serviceInfoContent: Html = HtmlFormat.empty,
         scriptElem: Option[Html] = None,
         extraMeta: Option[Html] = None,
-        enableSignOutLink: Boolean = true)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
+        enableSignOutLink: Boolean = true,
+        isSignedIn: Boolean = true)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 
 @linkElement = {
@@ -62,7 +63,7 @@
   <script src='@routes.Assets.versioned("javascripts/do-not-track.js")'></script>
   <script>
       window.jsConfig = window.jsConfig || {};
-      window.jsConfig.timeoutEnabled = true;
+      window.jsConfig.timeoutEnabled = @if(isSignedIn){ true } else {false};
       window.jsConfig.timeout = @{appConfig.TimeoutConfig.timeoutSeconds};
       window.jsConfig.countdown = @{appConfig.TimeoutConfig.countdownSeconds};
       window.jsConfig.keep_alive_url = "@{appConfig.TimeoutConfig.keepAliveUrl}";

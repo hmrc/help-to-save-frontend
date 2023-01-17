@@ -34,7 +34,8 @@
   extraMeta: Option[Html] = None,
   isErrorPage: Boolean = false,
   serviceInfoContent: Html = HtmlFormat.empty,
-  enableSignOutLink: Boolean = true)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
+  enableSignOutLink: Boolean = true,
+  isSignedIn: Boolean = true)(mainContent: Html)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @titleTemplate = @{
   Messages("hts.global.title", title, "", Messages("hts.global.title-suffix"))
@@ -60,5 +61,6 @@
   mainContentHtml = article(mainContent),
   scriptElem = scriptElem,
   extraMeta = extraMeta,
-  enableSignOutLink = enableSignOutLink
+  enableSignOutLink = enableSignOutLink,
+  isSignedIn = isSignedIn
 )
