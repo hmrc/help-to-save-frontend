@@ -31,4 +31,23 @@ $(document).ready(function () {
 
   setUpErrorSummary($('.error-summary'));
 
+  if (window.jsConfig && window.jsConfig.timeoutEnabled) {
+    timeoutDialog = GOVUK.timeoutDialog({
+      timeout: window.jsConfig.timeout,
+      countdown: window.jsConfig.countdown,
+      keepAliveUrl: window.jsConfig.keep_alive_url,
+      signOutUrl: window.jsConfig.logout_url,
+      title: window.jsConfig.timeoutTitle,
+      message: window.jsConfig.timeoutMessage,
+      keepAliveButtonText: window.jsConfig.timeoutKeepAliveButtonText,
+      signOutButtonText: window.jsConfig.timeoutSignOutButtonText,
+      properties: {
+        minutes: window.jsConfig.timeoutMinutes,
+        minute: window.jsConfig.timeoutMinute,
+        seconds: window.jsConfig.timeoutSeconds,
+        second: window.jsConfig.timeoutSecond
+      }
+    })
+  }
+
 })
