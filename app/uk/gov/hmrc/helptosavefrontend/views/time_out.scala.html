@@ -26,11 +26,11 @@
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
-@title = @{ Messages("hts.timeout.timeoutMessage") }
+@title = @{ Messages("hts.timeout.signedOutMessage") }
 
 @main(title = title, sidebarLinks = None, bodyClasses = None, enableSignOutLink = false) {
 
-<h2 class="heading-large">@messages("hts.timeout.timeoutMessage")</h2>
+<h2 class="heading-large">@messages("hts.timeout.signedOutMessage")</h2>
 
 <p>@messages("hts.timed-out.p1")</p>
 

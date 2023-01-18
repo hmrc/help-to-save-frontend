@@ -796,7 +796,9 @@ hts.reminder-select.error.missing=Dewiswch a ydych am drefnu e-byst atgoffa
 hts.register.create_account.your-remainder.note=Ni fyddwn yn anfon unrhyw nodynnau atgoffa atoch. Gallwch drefnu’r rhain yn nes ymlaen os ydych yn dymuno gwneud hynny.
 
 hts.timeout.timeoutTitle = Rydych ar fin cael eich allgofnodi
-hts.timeout.timeoutMessage = Er eich diogelwch, gwnaethom eich allgofnodi
+hts.timeout.signedOutMessage = Er eich diogelwch, gwnaethom eich allgofnodi
+hts.timeout.timeoutMessage = Er eich diogelwch, byddwn yn eich allgofnodi cyn pen
+
 hts.timeout.timeoutKeepAliveButtonText = Parhau i fod wedi’ch mewngofnodi
 hts.timeout.timeoutSignOutButtonText = Allgofnodi
 hts.timeout.timeoutMinutes = funud
