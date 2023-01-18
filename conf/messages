@@ -797,7 +797,7 @@ hts.reminder-select.error.missing=Select whether you want to set up email remind
 hts.register.create_account.your-remainder.note=We will not send you any reminders. You can set these up later if you wish.
 
 hts.timeout.timeoutTitle = You’re about to be signed out
-hts.timeout.timeoutMessage = For your security, we will sign you out in
+hts.timeout.timeoutMessage = For your security, we signed you out
 hts.timeout.timeoutKeepAliveButtonText = Stay signed in
 hts.timeout.timeoutSignOutButtonText = Sign out
 hts.timeout.timeoutMinutes = minutes
