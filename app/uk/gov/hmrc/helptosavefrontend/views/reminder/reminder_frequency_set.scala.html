@@ -35,9 +35,9 @@
         @navigate_back(backLink)
 
         @{if(errorMessage.isDefined)
-            <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
-                <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.global.error-summary.title")}</h2>
-                    <ul class="error-summary-list">
+            <div class="govuk-error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
+                <h2 class="govuk-heading-m govuk-error-summary-heading" id="error-summary-give-email">{Messages("hts.global.error-summary.title")}</h2>
+                    <ul class="govuk-list govuk-error-summary__list">
                         <li><a href="#first">{Messages("hts.reminder-frequency.error.missing")}</a></li>
                     </ul>
             </div>
@@ -46,47 +46,49 @@
 
 
         <form method="post" action= @if(screenFrom.matches("account")) { @routes.ReminderController.selectRemindersSubmit} else if(screenFrom.matches("registration")) {@routes.ReminderController.submitApplySavingsReminderSignUpPage} else if(screenFrom.matches("cancel")){@routes.ReminderController.selectedRemindersSubmit} novalidate >
-            <div class="@{"form-group" + {if(errorMessage.isDefined) " form-group-error" else "" }}">
-            <fieldset@if(errorMessage.isDefined){ aria-describedby="frequency-error"}>
+            <div class="@{"govuk-form-group" + {if(errorMessage.isDefined) " govuk-form-group--error" else "" }}">
+            <fieldset class="govuk-fieldset" @if(errorMessage.isDefined){ aria-describedby="frequency-error"}>
 
             <legend>
-                <h1 class="@{"heading-large" + {if(errorMessage.isDefined) " flush--top" else ""}}">@title</h1>
+                <h1 class="@{"govuk-heading-l" + {if(errorMessage.isDefined) " flush--top" else ""}}">@title</h1>
             </legend>
 
             @CSRF.formField(request)
             @{if(errorMessage.isDefined)
-            <span id="frequency-error" class="error-message">{Messages("hts.reminder-frequency.error.missing")}</span>
+            <span id="frequency-error" class="govuk-error-message">{Messages("hts.reminder-frequency.error.missing")}</span>
             }
-            <div class="multiple-choice" data-target="collect-choice">
-                    <input id="first" type="radio" name="reminderFrequency" value="1st" @if(period.matches("1st")) {checked}>
-                    <label for="first">@messages("hts.reminder-frequency.first")</label>
+                <div class="govuk-radios" data-module="govuk-radios">
+                    <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="first" type="radio" name="reminderFrequency" value="1st" @if(period.matches("1st")) {checked}>
+                    <label class="govuk-label govuk-radios__label" for="first">@messages("hts.reminder-frequency.first")</label>
                 </div>
 
-                <div class="multiple-choice" data-target="collect-choice">
-                    <input id="twentyfive" type="radio" name="reminderFrequency" value="25th" @if(period.matches("25th")) {checked}>
-                    <label for="twentyfive">@messages("hts.reminder-frequency.25")</label>
+                    <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="twentyfive" type="radio" name="reminderFrequency" value="25th" @if(period.matches("25th")) {checked}>
+                    <label class="govuk-label govuk-radios__label" for="twentyfive">@messages("hts.reminder-frequency.25")</label>
                 </div>
 
-                <div class="multiple-choice" data-target="collect-choice">
-                    <input id="both" type="radio" name="reminderFrequency" value="1st day and 25th" @if(period.matches("1st day and 25th")) {checked}>
-                    <label for="both">@messages("hts.reminder-frequency.both")</label>
+                    <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="both" type="radio" name="reminderFrequency" value="1st day and 25th" @if(period.matches("1st day and 25th")) {checked}>
+                    <label class="govuk-label govuk-radios__label" for="both">@messages("hts.reminder-frequency.both")</label>
                 </div>
             @if(screenFrom.matches("cancel")) {
                 <div class="multiple-choice">
                     <label>@messages("hts.reminder-frequency.or")</label>
                 </div>
 
-                <div class="multiple-choice" data-target="collect-choice">
-                    <input id="cancel" type="radio" name="reminderFrequency" value="cancel">
-                    <label for="cancel">@messages("hts.reminder-frequency.cancel")</label>
+                    <div class="govuk-radios__item">
+                    <input class="govuk-radios__input" id="cancel" type="radio" name="reminderFrequency" value="cancel">
+                    <label class="govuk-label govuk-radios__label" for="cancel">@messages("hts.reminder-frequency.cancel")</label>
                 </div>
             }
+                </div>
             </fieldset>
             </div>
 
 
              <div class="form-field form-field--submit">
-      <button id="confirm-selection" class="button getSelectedChoice" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected reminder', 'Applicant select reminder frequency page');">
+      <button id="confirm-selection" class="govuk-button getSelectedChoice" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected reminder', 'Applicant select reminder frequency page');">
         @messages("hts.global.continue-button")
       </button>
     </div>
