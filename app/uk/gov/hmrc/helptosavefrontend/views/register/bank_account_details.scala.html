@@ -85,7 +85,7 @@
     content = Text(messages("hts.register.bank-details.sort-code.label"))
     ),
     classes = "govuk-!-width-one-third",
-    value = Some(form.data.get("sort-code").getOrElse("")),
+    value = form.data.get("sortCode"),
     hint = Some(Hint(
     content = Text(Messages("hts.register.bank-details.sort-code.hint")),
     )),
@@ -103,7 +103,7 @@
     content = Text(messages("hts.register.bank-details.accountNumber.label"))
     ),
     classes = "govuk-!-width-one-third",
-    value = form.data.get("account-number"),
+    value = form.data.get("accountNumber"),
     hint = Some(Hint(
     content = Text(Messages("hts.register.bank-details.accountNumber.hint")),
     )),
@@ -121,9 +121,9 @@
     content = Text(messages("hts.register.bank-details.rollNumber.label"))
     ),
     classes = "govuk-!-width-one-third",
-    value = form.data.get("roll-number"),
+    value = form.data.get("rollNumber"),
     hint = Some(Hint(
-    content = Text(Messages("hts.register.bank-details.accountNumber.hint")),
+    content = Text(Messages("hts.register.bank-details.rollNumber.hint")),
     ))
     ))
 
@@ -136,7 +136,7 @@
     content = Text(messages("hts.register.bank-details.accountName.label"))
     ),
     classes = "govuk-!-width-one-third",
-    value = form.data.get("account-name"),
+    value = form.data.get("accountName"),
     errorMessage = if(accountNumberErrorMessage)Some(ErrorMessage(
     content = Text(messages("hts.account-name.empty"))
     )) else None,
