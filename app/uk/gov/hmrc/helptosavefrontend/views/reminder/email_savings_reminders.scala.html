@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
@@ -30,13 +29,11 @@
     Messages("hts.email-saving-remainders.title.h1")
 }
 
-@layout(title) {
-
-    @navigate_back(backLink)
+@layout(title, backLink) {
 
     <h1 class="govuk-heading--l">@title</h1>
-    <p class="govuk-body">@Html(Messages("hts.email-saving-remainders.intro"))</p>
-    <p class="govuk-body">@Html(Messages("hts.email-saving-remainders.note"))</p>
+    <p class="govuk-body">@messages("hts.email-saving-remainders.intro")</p>
+    <p class="govuk-body">@messages("hts.email-saving-remainders.note")</p>
 
     @ui.govukButton(Button(
       content = Text(messages("hts.email-saving-remainders-button")),
