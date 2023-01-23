@@ -28,7 +28,7 @@
 
 @layout(title) {
 
-  <h1 class="heading-large">@title</h1>
+  <h1 class="govuk-heading--l">@title</h1>
   
   @defining(
     oldEmail.fold(routes.EmailController.getGiveEmailPage)(_ => routes.EmailController.getSelectEmailPage)
