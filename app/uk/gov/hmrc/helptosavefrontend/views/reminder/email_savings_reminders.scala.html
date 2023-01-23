@@ -28,14 +28,16 @@
     Messages("hts.email-saving-remainders.title.h1")
 }
 
-    @layout(title) {
+@layout(title) {
 
     @navigate_back(backLink)
 
     <h1 class="govuk-heading--l">@title</h1>
-    <p>@Html(Messages("hts.email-saving-remainders.intro"))</p>
-    <p> @Html(Messages("hts.email-saving-remainders.note"))</p>
+    <p class="govuk-body">@Html(Messages("hts.email-saving-remainders.intro"))</p>
+    <p class="govuk-body">@Html(Messages("hts.email-saving-remainders.note"))</p>
 
-    <p class="subsection--wide push--bottom"><a href=@routes.ReminderController.getSelectRendersPage.url class="button" role="button">@messages("hts.email-saving-remainders-button")</a></p>
-
+    @govukButton(Button(
+      content = Text(messages("hts.email-saving-remainders-button")),
+      href = routes.ReminderController.getSelectRendersPage.url
+    ))
 }
