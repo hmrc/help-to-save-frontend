@@ -18,8 +18,10 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, ui: ViewHelpers)
 
 @(backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -36,8 +38,8 @@
     <p class="govuk-body">@Html(Messages("hts.email-saving-remainders.intro"))</p>
     <p class="govuk-body">@Html(Messages("hts.email-saving-remainders.note"))</p>
 
-    @govukButton(Button(
+    @ui.govukButton(Button(
       content = Text(messages("hts.email-saving-remainders-button")),
-      href = routes.ReminderController.getSelectRendersPage.url
+      href = Some(routes.ReminderController.getSelectRendersPage.url)
     ))
 }
