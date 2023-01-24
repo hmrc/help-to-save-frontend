@@ -22,6 +22,19 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.errormessage.ErrorMessage
 
 object FormErrorMessage {
+
+  def errorSummary(formName: String, form: Form[_])(
+      implicit messages: Messages): Option[GovukErrorSummary] = {
+    if(form.errors.nonEmpty) {
+      @ui.govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
+        ErrorLink(
+          href = Some(s"#${e.key}"),
+          content = Text(s"${messages(s"${formName}.${e.key}.${e.message}")}")
+        )
+      ),
+        title = Text(messages("hts.global.error-summary.title"))))
+    } else None
+  }
   def formErrorMessage(formName: String, form: Form[_], key: String)(
     implicit messages: Messages): Option[ErrorMessage] =
     form

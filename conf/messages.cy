@@ -265,8 +265,8 @@ hts.iv.try_again_button=Rhowch gynnig arall arni
 hts.iv.continue_button=Yn eich blaen
 
 # Email error
-reminder-select.email.error=Nodwch gyfeiriad e-bost dilys
-reminder-select.email.error.local-too-long=Rhaid i nifer y cymeriadau cyn yr ‘@’ fod yn 64 neu lai
+reminder-select.reminderFrequency.email.error=Nodwch gyfeiriad e-bost dilys
+reminder-selectd.email.error.local-too-long=Rhaid i nifer y cymeriadau cyn yr ‘@’ fod yn 64 neu lai
 reminder-select.email.error.domain-too-long=Rhaid i nifer y cymeriadau ar ôl yr ‘@’ fod yn 252 neu lai
 reminder-select.email.error.local-too-short=Rhaid i’ch cyfeiriad e-bost gael un cymeriad neu fwy cyn ac ar ôl yr ‘@’
 reminder-select.email.error.domain-too-short=Rhaid i’ch cyfeiriad e-bost gael un cymeriad neu fwy cyn ac ar ôl yr ‘@’
@@ -792,7 +792,7 @@ hts.reminder-cancel-confirmation.li-signup=gofrestru ar gyfer nodynnau atgoffa
 hts.reminder-frequency.yes=Iawn, trefnu e-byst atgoffa
 hts.reminder-frequency.no=Na, nid wyf am drefnu e-byst atgoffa nawr
 hts.reminder-apply-savings=A ydych am gael e-byst atgoffa ynghylch cynilion?
-hts.reminder-select.error.missing=Dewiswch a ydych am drefnu e-byst atgoffa
+reminder-select.reminderFrequency.error.missing=Dewiswch a ydych am drefnu e-byst atgoffa
 hts.register.create_account.your-remainder.note=Ni fyddwn yn anfon unrhyw nodynnau atgoffa atoch. Gallwch drefnu’r rhain yn nes ymlaen os ydych yn dymuno gwneud hynny.
 
 accessibility.statement.title = Datganiad hygyrchedd ar gyfer Cymorth i Gynilo

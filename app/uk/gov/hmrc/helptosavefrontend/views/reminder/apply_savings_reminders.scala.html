@@ -16,12 +16,11 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage.formErrorMessage
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage.{errorSummary, formErrorMessage}
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, ui: ViewHelpers)
 
@@ -32,6 +31,7 @@
 @key = @{"reminderFrequency"}
 
 @layout(title, backLink) {
+  @errorSummary(formName, form)
   @if(form.errors.nonEmpty) {
     @ui.govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
       ErrorLink(
