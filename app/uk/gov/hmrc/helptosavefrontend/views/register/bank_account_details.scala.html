@@ -23,9 +23,9 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage.formErrorMessage
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
 
 @(form: Form[BankDetails], backLink: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
@@ -43,6 +43,8 @@
 @accountNumberBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "accountNumber")}
 
 @layout(pageTitle, backLink = Some(backLink)) {
+
+  @errorHelpers.errorSummary(formName, form)
 
   @if(hasErrors) {
       @defining(List(
@@ -90,7 +92,7 @@
     hint = Some(Hint(
     content = Text(Messages("hts.register.bank-details.sort-code.hint")),
     )),
-    errorMessage = formErrorMessage(formName, form, "sortCode")
+    errorMessage = errorHelpers.formErrorMessage(formName, form, "sortCode")
     ))
 
     @viewHelpers.govukInput(Input(
@@ -106,7 +108,7 @@
     hint = Some(Hint(
     content = Text(Messages("hts.register.bank-details.accountNumber.hint")),
     )),
-    errorMessage = formErrorMessage(formName, form, "accountNumber")
+    errorMessage = errorHelpers.formErrorMessage(formName, form, "accountNumber")
     ))
 
     @viewHelpers.govukInput(Input(
@@ -123,7 +125,7 @@
       hint = Some(Hint(
           content = Text(Messages("hts.register.bank-details.rollNumber.hint"))
         )),
-      errorMessage = formErrorMessage(formName, form, "rollNumber")
+      errorMessage = errorHelpers.formErrorMessage(formName, form, "rollNumber")
     ))
 
     @viewHelpers.govukInput(Input(
@@ -135,7 +137,7 @@
     content = Text(messages("hts.register.bank-details.accountName.label"))
     ),
     value = form.data.get("accountName"),
-    errorMessage = formErrorMessage(formName, form, "accountName")
+    errorMessage = errorHelpers.formErrorMessage(formName, form, "accountName")
     ))
 
     @viewHelpers.govukButton(Button(

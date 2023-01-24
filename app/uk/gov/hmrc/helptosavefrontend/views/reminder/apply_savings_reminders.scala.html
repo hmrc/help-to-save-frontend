@@ -20,9 +20,9 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage.{errorSummary, formErrorMessage}
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, ui: ViewHelpers)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, ui: ViewHelpers, errorHelpers: FormErrorMessage)
 
 @(form: Form[ReminderForm],selection:String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -31,16 +31,8 @@
 @key = @{"reminderFrequency"}
 
 @layout(title, backLink) {
-  @errorSummary(formName, form)
-  @if(form.errors.nonEmpty) {
-    @ui.govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
-      ErrorLink(
-        href = Some(s"#${e.key}"),
-        content = Text(s"${messages(s"${formName}.${e.key}.${e.message}")}")
-      )
-    ),
-      title = Text(messages("hts.global.error-summary.title"))))
-  }
+
+  @errorHelpers.errorSummary(formName, form)
 
   @ui.form(action = routes.ReminderController.submitApplySavingsReminderPage) {
 
@@ -66,7 +58,7 @@
             value = Some("no")
           )
         ),
-        errorMessage = formErrorMessage(formName, form, key)
+        errorMessage = errorHelpers.formErrorMessage(formName, form, key)
       )
     )
 
