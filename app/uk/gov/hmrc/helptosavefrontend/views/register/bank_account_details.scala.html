@@ -23,12 +23,15 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage.formErrorMessage
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
+
 
 @(form: Form[BankDetails], backLink: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{messages("hts.register.bank-details.title.h1")}
+@formName = @{"bank-details"}
 @sortCodeErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "sortCode")}
 @accountNumberErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "accountNumber")}
 @rollNumberErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "rollNumber")}
@@ -39,9 +42,7 @@
 @sortCodeBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "sortCode")}
 @accountNumberBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "accountNumber")}
 
-@layout(pageTitle) {
-
-  @navigate_back(Some(backLink))
+@layout(pageTitle, backLink = Some(backLink)) {
 
   @if(hasErrors) {
       @defining(List(
@@ -71,7 +72,7 @@
       }
   }
 
-  <h1 class="govuk-heading--l">@title</h1>
+  <h1 class="govuk-heading-l">@title</h1>
 
   @helpers.form(routes.BankAccountController.submitBankDetails, 'id -> "bankDetailsForm") {
 
@@ -81,17 +82,15 @@
     name = "sortCode",
     label = Label(
     isPageHeading = false,
-    classes = "govuk-label--xs",
+    classes = "govuk-label--m",
     content = Text(messages("hts.register.bank-details.sort-code.label"))
     ),
-    classes = "govuk-!-width-one-third",
+    classes = "govuk-input--width-5",
     value = form.data.get("sortCode"),
     hint = Some(Hint(
     content = Text(Messages("hts.register.bank-details.sort-code.hint")),
     )),
-    errorMessage = if(sortCodeErrorMessage)Some(ErrorMessage(
-    content = Text(messages("hts.sort-code.empty"))
-    )) else None,
+    errorMessage = formErrorMessage(formName, form, "sortCode")
     ))
 
     @viewHelpers.govukInput(Input(
@@ -99,7 +98,7 @@
     name = "accountNumber",
     label = Label(
     isPageHeading = false,
-    classes = "govuk-label--xs",
+    classes = "govuk-label--m",
     content = Text(messages("hts.register.bank-details.accountNumber.label"))
     ),
     classes = "govuk-!-width-one-third",
@@ -107,24 +106,24 @@
     hint = Some(Hint(
     content = Text(Messages("hts.register.bank-details.accountNumber.hint")),
     )),
-    errorMessage = if(accountNumberErrorMessage)Some(ErrorMessage(
-    content = Text(messages("hts.account-number.empty"))
-    )) else None,
+    errorMessage = formErrorMessage(formName, form, "accountNumber")
     ))
 
     @viewHelpers.govukInput(Input(
-    id = "rollNumber",
-    name = "rollNumber",
-    label = Label(
-    isPageHeading = false,
-    classes = "govuk-label--xs",
-    content = Text(messages("hts.register.bank-details.rollNumber.label"))
-    ),
-    classes = "govuk-!-width-one-third",
-    value = form.data.get("rollNumber"),
-    hint = Some(Hint(
-    content = Text(Messages("hts.register.bank-details.rollNumber.hint")),
-    ))
+      id = "rollNumber",
+      name = "rollNumber",
+      label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text(messages("hts.register.bank-details.rollNumber.label")
+        )
+      ),
+      classes = "govuk-!-width-one-third",
+      value = form.data.get("rollNumber"),
+      hint = Some(Hint(
+          content = Text(Messages("hts.register.bank-details.rollNumber.hint"))
+        )),
+      errorMessage = formErrorMessage(formName, form, "rollNumber")
     ))
 
     @viewHelpers.govukInput(Input(
@@ -132,14 +131,11 @@
     name = "accountName",
     label = Label(
     isPageHeading = false,
-    classes = "govuk-label--xs",
+    classes = "govuk-label--m",
     content = Text(messages("hts.register.bank-details.accountName.label"))
     ),
-    classes = "govuk-!-width-one-third",
     value = form.data.get("accountName"),
-    errorMessage = if(accountNumberErrorMessage)Some(ErrorMessage(
-    content = Text(messages("hts.account-name.empty"))
-    )) else None,
+    errorMessage = formErrorMessage(formName, form, "accountName")
     ))
 
     @viewHelpers.govukButton(Button(

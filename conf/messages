@@ -267,17 +267,17 @@ hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
 
 # Email error
-hts.email.error=Enter a valid email address
-hts.email.error.local-too-long=The number of characters before the ‘@’ must be 64 or less
-hts.email.error.domain-too-long=The number of characters after the ‘@’ must be 252 or less
-hts.email.error.local-too-short=Your email address must have one character or more before and after the ‘@’
-hts.email.error.domain-too-short=Your email address must have one character or more before and after the ‘@’
-hts.email.error.total-too-long=Your email address must be 254 characters or less
-hts.email.error.blank=Enter the email address you want to use for your Help to Save account
-hts.email.error.no-at-symbol=Enter an email address in the correct format
-hts.email.error.no-dot-symbol=Your email address must have a ‘dot’
-hts.email.error.no-text-after-dot-symbol=Your email address must have characters before and after the ‘dot’
-hts.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the ‘dot’
+reminder-select.email.error=Enter a valid email address
+reminder-select.email.error.local-too-long=The number of characters before the ‘@’ must be 64 or less
+reminder-select.email.error.domain-too-long=The number of characters after the ‘@’ must be 252 or less
+reminder-select.email.error.local-too-short=Your email address must have one character or more before and after the ‘@’
+reminder-select.email.error.domain-too-short=Your email address must have one character or more before and after the ‘@’
+reminder-select.email.error.total-too-long=Your email address must be 254 characters or less
+reminder-select.email.error.blank=Enter the email address you want to use for your Help to Save account
+reminder-select.email.error.no-at-symbol=Enter an email address in the correct format
+reminder-select.email.error.no-dot-symbol=Your email address must have a ‘dot’
+reminder-select.email.error.no-text-after-dot-symbol=Your email address must have characters before and after the ‘dot’
+reminder-select.email.error.no-text-after-at-symbol-but-before-dot=Your email address must have characters before and after the ‘dot’
 
 # Select email
 hts.select-email.title.h1=What email address do you want to use for your Help to Save account?
@@ -793,7 +793,7 @@ hts.reminder-cancel-confirmation.li-signup=sign up for reminders
 hts.reminder-frequency.yes=Yes, set up email reminders
 hts.reminder-frequency.no=No, I do not want to set up email reminders now
 hts.reminder-apply-savings=Do you want to receive email savings reminders?
-hts.reminder-select.error.missing=Select whether you want to set up email reminders
+reminder-select.reminderFrequency.error.missing=Select whether you want to set up email reminders
 hts.register.create_account.your-remainder.note=We will not send you any reminders. You can set these up later if you wish.
 
 accessibility.statement.title = Accessibility statement for Help to Save

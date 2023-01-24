@@ -22,14 +22,14 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.errormessage.ErrorMessage
 
 object FormErrorMessage {
-  def formErrorMessage(form: Form[_], key: String, errorMessage: String)(
+  def formErrorMessage(formName: String, form: Form[_], key: String)(
     implicit messages: Messages): Option[ErrorMessage] =
     form
       .error(key)
       .map(
         e =>
           ErrorMessage(
-            content = Text(messages(errorMessage, e.args: _*)),
+            content = Text(messages(s"${formName}.${e.key}.${e.message}", e.args: _*)),
             visuallyHiddenText = Some(messages("generic.errorPrefix"))
         ))
 }
