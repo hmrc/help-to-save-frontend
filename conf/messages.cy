@@ -42,7 +42,7 @@ hts.core.not-eligible.wtc.p-2=Ewch i GOV.UK i gael gwybod am
 hts.core.not-eligible.wtc.link-1=gymhwystra ar gyfer Cymorth i Gynilo
 hts.core.not-eligible.wtc.p-2-2=.
 hts.core.not-eligible.wtc.h2-1=Os ydych wedi gwneud cais yn ddiweddar am Gredyd Treth Gwaith
-hts.core.not-eligible.wtc.p-3=Dylech aros nes eich bod wedi cael llythyr gan Gyllid a Thollau EM yn cadarnhau bod gennych hawl i Gredyd Treth Gwaith. Unwaith eich bod wedi cael y llythyr cewch geisio eto am gyfrif Cymorth i Gynilo.
+hts.core.not-eligible.wtc.p-3=Dylech aros nes eich bod wedi cael llythyr gan Gyllid a Thollau EF yn cadarnhau bod gennych hawl i Gredyd Treth Gwaith. Unwaith eich bod wedi cael y llythyr cewch geisio eto am gyfrif Cymorth i Gynilo.
 hts.core.not-eligible.wtc.h3=Os ydych o’r farn eich bod yn gymwys am gyfrif
 hts.core.not-eligible.wtc.p-4-1=Beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ac yn parhau
 hts.core.not-eligible.wtc.p-4-link-text=i fod o’r farn eich bod yn gymwys
@@ -500,7 +500,7 @@ hts.payInNow.error=Dewiswch a ydych am dalu eich taliad cyntaf i mewn nawr
 # Privacy page
 hts.privacy.title.h1=Datganiad preifatrwydd Cymorth i Gynilo
 hts.privacy.p1=Mae’r ddogfen hon yn nodi sut y byddwn yn defnyddio’ch gwybodaeth i gyflwyno’r cynllun Cymorth i Gynilo.
-hts.privacy.p2=Mae Cyllid a Thollau EM (CThEF) yn Rheolwr Data o dan Ddeddf Diogelu Data 1998. Byddwn yn casglu ac yn defnyddio eich gwybodaeth bersonol i wirio eich cymhwystra ar gyfer Cymorth i Gynilo ac i wneud yn siŵr eich bod yn cael unrhyw fonws gan y llywodraeth sydd yn perthyn i chi o dan eich cyfrif Cymorth i Gynilo.
+hts.privacy.p2=Mae Cyllid a Thollau EF (CThEF) yn Rheolwr Data o dan Ddeddf Diogelu Data 1998. Byddwn yn casglu ac yn defnyddio eich gwybodaeth bersonol i wirio eich cymhwystra ar gyfer Cymorth i Gynilo ac i wneud yn siŵr eich bod yn cael unrhyw fonws gan y llywodraeth sydd yn perthyn i chi o dan eich cyfrif Cymorth i Gynilo.
 hts.privacy.p3=Fel rhan o’n gwiriadau cydymffurfio a phrosesu, efallai y byddwn yn:
 hts.privacy.ul1.li1=gwirio eich hawl i fudd-daliadau, Credyd Treth Gwaith, Credyd Treth Plant a Chredyd Cynhwysol
 hts.privacy.ul1.li2=cadarnhau eich statws cyflogaeth a’ch incwm
@@ -805,7 +805,7 @@ accessibility.statement.paragraph.three.link = www.tax.service.gov.uk/help-to-sa
 
 ####Using This Service#####
 accessibility.statement.paragraph.four = Math o gyfrif cynilo yw Cymorth i Gynilo. Mae wedi’i gefnogi gan y Llywodraeth sy’n golygu bod yr holl gynilion yn y cynllun yn ddiogel. Mae’n rhoi cyfle i rai pobl sydd ag hawl i gael Credyd Treth Gwaith, neu sy’n cael Credyd Cynhwysol, gael bonws o 50c am bob £1 y maent yn ei chynilo dros 4 blynedd.
-accessibility.statement.paragraph.six = Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EM (CThEF). Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
+accessibility.statement.paragraph.six = Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EF (CThEF). Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
 accessibility.statement.paragraph.seven = Rydym hefyd wedi sicrhau bod y testun a ddefnyddir yn y gwasanaeth mor syml â phosibl i’w ddeall.
 accessibility.statement.paragraph.eight = ar wneud eich dyfais yn haws i’w defnyddio os oes gennych anabledd.
 accessibility.statement.paragraph.eight.link = Mae gan AbilityNet gyngor
