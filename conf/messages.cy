@@ -128,7 +128,7 @@ hts.register.you-are-eligible.li2=nodi eich manylion banc
 hts.register.missinguserinfo.title.h1=Rydym heb gael rhai o’ch manylion pwysig
 hts.register.missinguserinfo.p1=Ni allwn greu eich cyfrif nes bod gennym eich:
 hts.register.missinguserinfo.title2=Yr hyn sydd angen i chi ei wneud
-hts.register.missinguserinfo.next.step1=<a href={0}>Rhoi gwybod i CThEM am newidiadau i’ch manylion personol</a>.
+hts.register.missinguserinfo.next.step1=<a href={0}>Rhoi gwybod i CThEF am newidiadau i’ch manylion personol</a>.
 hts.register.missinguserinfo.next.step2=Pan fyddwn wedi diweddaru eich manylion, gwnewch gais am gyfrif Cymorth i Gynilo.
 hts.register.missinguserinfo.firstName=enw cyntaf
 hts.register.missinguserinfo.lastName=enw olaf
@@ -161,7 +161,7 @@ hts.register.service-outage.title.h1=Mae’n ddrwg gennym, nid yw’r gwasanaeth
 hts.register.service-outage.p1=Nid yw Cymorth i Gynilo ar gael ar hyn o bryd oherwydd bod gwaith cynnal a chadw wedi’i drefnu.
 hts.register.service-outage.p2=Byddwch yn gallu defnyddio’r gwasanaeth eto ar ôl {0} ar {1}
 hts.register.service-outage.p3=Os ydych am siarad â rhywun am eich cyfrif Cymorth i Gynilo
-hts.register.service-outage.p3.contact=cysylltwch â CThEM
+hts.register.service-outage.p3.contact=cysylltwch â CThEF
 
 # Think you are eligible
 hts.register.think_you_are_eligible.title.h1=Os ydych o’r farn eich bod yn gymwys am gyfrif Cymorth i Gynilo
@@ -179,7 +179,7 @@ hts.register.think_you_are_eligible.contact.service.opening-times.open=08:00 i 1
 hts.register.think_you_are_eligible.contact.service.opening-times.closed=Ar gau ar benwythnosau a gwyliau’r banc
 hts.register.think_you_are_eligible.contact.find-out-about-call-charges=Gwybodaeth am gostau galwadau
 hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-1=Help i
-hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-link-text=ddelio â CThEM os oes gennych anghenion ychwanegol
+hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-link-text=ddelio â CThEF os oes gennych anghenion ychwanegol
 hts.register.think_you_are_eligible.contact.get-help-additional-needs-p1-2=.
 
 hts.register.think_you_are_eligible.h2=Os ydych yn parhau o’r farn fod ein penderfyniad yn anghywir
@@ -188,7 +188,7 @@ hts.register.think_you_are_eligible.p5=Fel arfer, bydd angen i chi wneud hyn cyn
 hts.register.think_you_are_eligible.p6=Os ydych chi’n credu bod y penderfyniad yn anghywir, gallwch ofyn am adolygiad o’r penderfyniad a rhaid i chi wneud hyn ar bapur. Bydd angen i chi ddatgan yr hyn yr ydych yn anghytuno ag ef a pham.
 hts.register.think_you_are_eligible.h3=Dylech ysgrifennu at:
 hts.register.think_you_are_eligible.address1=Cymorth i Gynilo
-hts.register.think_you_are_eligible.address2=Gwasanaeth Cwsmeriaid Cymraeg CThEM
+hts.register.think_you_are_eligible.address2=Gwasanaeth Cwsmeriaid Cymraeg CThEF
 hts.register.think_you_are_eligible.address3=HMRC
 hts.register.think_you_are_eligible.address4=BX9 1ST
 hts.register.think_you_are_eligible.review.disagree.heading=Os nad ydych yn cytuno â chanlyniad yr adolygiad
@@ -417,7 +417,7 @@ hts.incorrect-details.listOne2=enw olaf
 hts.incorrect-details.listOne3=dyddiad geni
 hts.incorrect-details.listOne4=cyfeiriad
 hts.incorrect-details.h2=Yr hyn sydd angen i chi ei wneud
-hts.incorrect-details.listTwo1=<a href={0}>Rhoi gwybod i CThEM am newidiadau i’ch manylion personol</a>.
+hts.incorrect-details.listTwo1=<a href={0}>Rhoi gwybod i CThEF am newidiadau i’ch manylion personol</a>.
 hts.incorrect-details.listTwo2=Pan fyddwn wedi diweddaru eich manylion, gwnewch gais am gyfrif Cymorth i Gynilo.
 hts.incorrect-details.exit-button=Yn ôl
 
@@ -458,7 +458,7 @@ hts.register.create_account.tandc-ul1-li5=os ydych yn cael credydau treth, byddw
 hts.register.create_account.agree-continue=Cytuno ac yn eich blaen
 
 # Push to App
-hts.register.create_account.hmrc-app.title=Cael mynediad at eich cyfrif drwy ap CThEM
+hts.register.create_account.hmrc-app.title=Cael mynediad at eich cyfrif drwy ap CThEF
 hts.register.create_account.hmrc-app.benefits.s1=Mae gan yr ap lawer mwy o nodweddion a fydd yn eich helpu i fanteisio i’r eithaf ar eich cyfrif Cymorth i Gynilo:
 hts.register.create_account.hmrc-app.benefits.s1.ul1-li1=mynediad hwylus
 hts.register.create_account.hmrc-app.benefits.s1.ul1-li2=yn fwy cyfleus
@@ -466,7 +466,7 @@ hts.register.create_account.hmrc-app.benefits.s1.ul1-li3=nodwedd gosod targedau 
 hts.register.create_account.hmrc-app.benefits.s1.ul1-li4=negeseuon ysgogol ar gyfer cerrig milltir
 hts.register.create_account.hmrc-app.benefits.s1.ul1-li5=nodwedd cyfrifo cynilion, a mwy
 
-hts.register.create_account.hmrc-app.get-the-app.s1=Lawrlwythwch ap CThEM yn rhad ac am ddim o’r mannau canlynol:
+hts.register.create_account.hmrc-app.get-the-app.s1=Lawrlwythwch ap CThEF yn rhad ac am ddim o’r mannau canlynol:
 hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.1=yr
 hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
 hts.register.create_account.hmrc-app.get-the-app.s1.ul1-li1.2=ar gyfer iOS
@@ -500,7 +500,7 @@ hts.payInNow.error=Dewiswch a ydych am dalu eich taliad cyntaf i mewn nawr
 # Privacy page
 hts.privacy.title.h1=Datganiad preifatrwydd Cymorth i Gynilo
 hts.privacy.p1=Mae’r ddogfen hon yn nodi sut y byddwn yn defnyddio’ch gwybodaeth i gyflwyno’r cynllun Cymorth i Gynilo.
-hts.privacy.p2=Mae Cyllid a Thollau EM (CThEM) yn Rheolwr Data o dan Ddeddf Diogelu Data 1998. Byddwn yn casglu ac yn defnyddio eich gwybodaeth bersonol i wirio eich cymhwystra ar gyfer Cymorth i Gynilo ac i wneud yn siŵr eich bod yn cael unrhyw fonws gan y llywodraeth sydd yn perthyn i chi o dan eich cyfrif Cymorth i Gynilo.
+hts.privacy.p2=Mae Cyllid a Thollau EM (CThEF) yn Rheolwr Data o dan Ddeddf Diogelu Data 1998. Byddwn yn casglu ac yn defnyddio eich gwybodaeth bersonol i wirio eich cymhwystra ar gyfer Cymorth i Gynilo ac i wneud yn siŵr eich bod yn cael unrhyw fonws gan y llywodraeth sydd yn perthyn i chi o dan eich cyfrif Cymorth i Gynilo.
 hts.privacy.p3=Fel rhan o’n gwiriadau cydymffurfio a phrosesu, efallai y byddwn yn:
 hts.privacy.ul1.li1=gwirio eich hawl i fudd-daliadau, Credyd Treth Gwaith, Credyd Treth Plant a Chredyd Cynhwysol
 hts.privacy.ul1.li2=cadarnhau eich statws cyflogaeth a’ch incwm
@@ -508,17 +508,17 @@ hts.privacy.ul1.li3=gwirio a oes gennych hawl i gyfrif Cymorth i Gynilo ac unrhy
 hts.privacy.ul1.li4=gwirio a ydych wedi cael cyfrif Cymorth i Gynilo yn flaenorol
 hts.privacy.p4=Byddwn ond yn casglu’r data sydd ei angen arnom i gadarnhau’ch hawl i agor a chynnal cyfrif Cymorth i Gynilo.
 hts.privacy.p5=Y data yr ydym yn ei gasglu a’i ddefnyddio ar hyn o bryd i gyflawni hynny mewn perthynas â chwsmeriaid Credyd Treth Gwaith a Chredyd Cynhwysol fydd eich enw, rhif Yswiriant Gwladol, cyfeiriad, dyddiad geni a chyfeiriad e-bost. Byddwn yn casglu’r wybodaeth hon o’ch cyfrif Porth y Llywodraeth.
-hts.privacy.p6=Byddwn yn cadarnhau’ch hawl fel derbynnydd Credyd Treth Gwaith drwy wybodaeth a gedwir eisoes ar system Credydau Treth Cenedlaethol fewnol CThEM. Byddwn yn cadarnhau’ch hawl fel derbynnydd Credyd Cynhwysol yn seiliedig ar wybodaeth a gafwyd gan yr Adran Gwaith a Phensiynau (DWP).
+hts.privacy.p6=Byddwn yn cadarnhau’ch hawl fel derbynnydd Credyd Treth Gwaith drwy wybodaeth a gedwir eisoes ar system Credydau Treth Cenedlaethol fewnol CThEF. Byddwn yn cadarnhau’ch hawl fel derbynnydd Credyd Cynhwysol yn seiliedig ar wybodaeth a gafwyd gan yr Adran Gwaith a Phensiynau (DWP).
 hts.privacy.p7=Yr unig wybodaeth y byddwn yn gofyn amdani’n uniongyrchol, heblaw hyn, yw pan fo angen i chi roi gwybod bod eich cyfeiriad e-bost wedi newid.
 hts.privacy.p8=Byddwn yn rhannu’r holl wybodaeth hon gyda Chynilion a Buddsoddiadau Cenedlaethol (NS&I) sy’n helpu i weinyddu’r cynllun Cymorth i Gynilo.
 hts.privacy.p9=Byddwn ond yn rhannu eich gwybodaeth â thrydydd parti at ddibenion heblaw Cymorth i Gynilo os yw’r gyfraith yn caniatáu i ni wneud hynny ac, os felly, er mwyn:
 hts.privacy.ul2.li1=atal a chanfod troseddau
 hts.privacy.ul2.li2=diogelu arian cyhoeddus
-hts.privacy.h2-1=Staff CThEM yn trin eich gwybodaeth
-hts.privacy.p10=Mae staff CThEM wedi’u hyfforddi o ran trin gwybodaeth, ac maent yn deall pa mor bwysig yw diogelu gwybodaeth bersonol a gwybodaeth sensitif arall.
+hts.privacy.h2-1=Staff CThEF yn trin eich gwybodaeth
+hts.privacy.p10=Mae staff CThEF wedi’u hyfforddi o ran trin gwybodaeth, ac maent yn deall pa mor bwysig yw diogelu gwybodaeth bersonol a gwybodaeth sensitif arall.
 hts.privacy.h2-2=Gweld pa wybodaeth sydd gennym
-hts.privacy.p11.1=Gallwch ofyn i weld yr wybodaeth bersonol sydd ym meddiant CThEM amdanoch chi. Er mwyn helpu i ddod o hyd i’r wybodaeth yr ydych am ei gweld, ac i ddelio â’ch cais yn gyflymach, dylech anfon eich cais Deddf Diogelu Data i’r swyddfa CThEM yr ydych wedi bod yn delio â hi. Dylech gyfeirio’ch cais at y ’Swyddog Diogelu Data’. Ceir rhagor o wybodaeth am
-hts.privacy.p11.link-text=Polisi preifatrwydd CThEM
+hts.privacy.p11.1=Gallwch ofyn i weld yr wybodaeth bersonol sydd ym meddiant CThEF amdanoch chi. Er mwyn helpu i ddod o hyd i’r wybodaeth yr ydych am ei gweld, ac i ddelio â’ch cais yn gyflymach, dylech anfon eich cais Deddf Diogelu Data i’r swyddfa CThEF yr ydych wedi bod yn delio â hi. Dylech gyfeirio’ch cais at y ’Swyddog Diogelu Data’. Ceir rhagor o wybodaeth am
+hts.privacy.p11.link-text=Polisi preifatrwydd CThEF
 hts.privacy.p11.2=(bydd yn agor ffenestr newydd) ar wefan GOV.UK.
 
 # Close Account
@@ -661,10 +661,10 @@ hts.help-information.section.how-account-works.s1.title=Esboniad ar gynilion Cym
 
 hts.help-information.section.how-account-works.s2.title=Sut i fewngofnodi
 hts.help-information.section.how-account-works.s2.p1=Ewch i www.gov.uk/helptosave.
-hts.help-information.section.how-account-works.s2.p2=Gallwch hefyd fewngofnodi gan ddefnyddio ap CThEM, sy’n rhad ac am ddim. Ewch i <a href={0} target=""_blank"">www.gov.uk/hmrc/app</a> i gael rhagor o wybodaeth.
+hts.help-information.section.how-account-works.s2.p2=Gallwch hefyd fewngofnodi gan ddefnyddio ap CThEF, sy’n rhad ac am ddim. Ewch i <a href={0} target=""_blank"">www.gov.uk/hmrc/app</a> i gael rhagor o wybodaeth.
 
 hts.help-information.section.how-account-works.s3.title=Pam defnyddio’r ap
-hts.help-information.section.how-account-works.s3.h1=Gallwch ddefnyddio ap CThEM, sy’n rhad ac am ddim, i:
+hts.help-information.section.how-account-works.s3.h1=Gallwch ddefnyddio ap CThEF, sy’n rhad ac am ddim, i:
 hts.help-information.section.how-account-works.s3.ul1-li1=gwirio balans eich cyfrif a’ch bonws
 hts.help-information.section.how-account-works.s3.ul1-li2=cadw golwg ar eich cynilion
 hts.help-information.section.how-account-works.s3.ul1-li3=gweld faint y gallwch ei dalu i mewn o hyd ym mhob mis calendr
@@ -717,7 +717,7 @@ hts.help-information.section.when-your-account-ends.s3.p1.start=Er na allwch ago
 hts.help-information.section.when-your-account-ends.s3.p1.link=<a href="https://www.moneyhelper.org.uk/cy"> bwrw golwg dros y gwefan Cynorthwyydd Arian (Cynorthwyydd Arian) </a>
 hts.help-information.section.when-your-account-ends.s3.p1.end=neu rhowch alwad i 0800 138 7777
 
-hts.help-information.section.hmrc-app.title=Cymorth i Gynilo ar ap CThEM
+hts.help-information.section.hmrc-app.title=Cymorth i Gynilo ar ap CThEF
 hts.help-information.section.hmrc-app.benefits.title=Manteision yr ap
 hts.help-information.section.hmrc-app.benefits.s1=Mae gan yr ap lawer mwy o nodweddion a fydd yn eich helpu i fanteisio i’r eithaf ar eich cyfrif Cymorth i Gynilo:
 hts.help-information.section.hmrc-app.benefits.s2=Nodweddion yr ap:
@@ -728,7 +728,7 @@ hts.help-information.section.hmrc-app.benefits.s2.ul1-li4=negeseuon ysgogol ar g
 hts.help-information.section.hmrc-app.benefits.s2.ul1-li5=nodwedd cyfrifo cynilion, a mwy
 
 hts.help-information.section.hmrc-app.get-the-app.title=Cael yr ap
-hts.help-information.section.hmrc-app.get-the-app.s1=Lawrlwythwch ap CThEM yn rhad ac am ddim o’r mannau canlynol:
+hts.help-information.section.hmrc-app.get-the-app.s1=Lawrlwythwch ap CThEF yn rhad ac am ddim o’r mannau canlynol:
 hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.1=yr
 hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.link=App Store
 hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.2=ar gyfer iOS
@@ -805,7 +805,7 @@ accessibility.statement.paragraph.three.link = www.tax.service.gov.uk/help-to-sa
 
 ####Using This Service#####
 accessibility.statement.paragraph.four = Math o gyfrif cynilo yw Cymorth i Gynilo. Mae wedi’i gefnogi gan y Llywodraeth sy’n golygu bod yr holl gynilion yn y cynllun yn ddiogel. Mae’n rhoi cyfle i rai pobl sydd ag hawl i gael Credyd Treth Gwaith, neu sy’n cael Credyd Cynhwysol, gael bonws o 50c am bob £1 y maent yn ei chynilo dros 4 blynedd.
-accessibility.statement.paragraph.six = Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EM (CThEM). Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
+accessibility.statement.paragraph.six = Mae’r gwasanaeth hwn yn cael ei redeg gan Gyllid a Thollau EM (CThEF). Rydym am i gymaint o bobl â phosibl allu defnyddio’r gwasanaeth hwn. Mae hyn yn golygu y dylech allu:
 accessibility.statement.paragraph.seven = Rydym hefyd wedi sicrhau bod y testun a ddefnyddir yn y gwasanaeth mor syml â phosibl i’w ddeall.
 accessibility.statement.paragraph.eight = ar wneud eich dyfais yn haws i’w defnyddio os oes gennych anabledd.
 accessibility.statement.paragraph.eight.link = Mae gan AbilityNet gyngor
@@ -828,7 +828,7 @@ accessibility.statement.paragraph.nineteen = Ar y sgrin ‘Bwrw golwg dros eich 
 ####What to do if you have difficulty using this service#####
 
 accessibility.statement.paragraph.twentyOne = Gallwch
-accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEM os oes angen cymorth ychwanegol
+accessibility.statement.paragraph.twentyOne.link = gysylltu â CThEF os oes angen cymorth ychwanegol
 accessibility.statement.paragraph.twentyOne.two = arnoch i lenwi ffurflenni, neu i gael fformat gwahanol, megis print bras, recordiad sain neu Braille.
 
 ####Reporting accessibility problems with this service#####
@@ -845,12 +845,12 @@ accessibility.statement.paragraph.twentyFour.three = os ydych yn byw yng Ngogled
 
 #### Contacting us by phone or getting a visit from us in person ######
 accessibility.statement.paragraph.twentyFive = Rydym yn cynnig gwasanaeth ‘text relay’ os ydych yn fyddar, â nam ar eich clyw neu os oes gennych nam ar eich lleferydd.
-accessibility.statement.paragraph.twentySix = Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEM i’ch helpu i gwblhau’r gwasanaeth.
+accessibility.statement.paragraph.twentySix = Gallwn ddarparu dehonglydd Iaith Arwyddion Prydain (BSL), neu gallwch drefnu ymweliad gan ymgynghorydd CThEF i’ch helpu i gwblhau’r gwasanaeth.
 accessibility.statement.paragraph.twentySeven = Dysgwch
-accessibility.statement.paragraph.twentySeven.link = sut i gael cymorth ychwanegol oddi wrth CThEM
+accessibility.statement.paragraph.twentySeven.link = sut i gael cymorth ychwanegol oddi wrth CThEF
 
 #### Technical information about this service’s accessibility ####
-accessibility.statement.paragraph.twentyEight = Mae CThEM wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
+accessibility.statement.paragraph.twentyEight = Mae CThEF wedi ymrwymo i wneud y gwasanaeth hwn yn hygyrch, yn unol â Rheoliadau Hygyrchedd Cyrff Sector Cyhoeddus (Gwefannau a Chymwysiadau Symudol) (Rhif 2) 2018.
 accessibility.statement.paragraph.twentyNine.one = Mae’r gwasanaeth hwn yn cydymffurfio’n rhannol â safon
 accessibility.statement.paragraph.twentyNine.link = ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1
 accessibility.statement.paragraph.twentyNine.two = , oherwydd y diffyg cydymffurfio a restrir isod.
@@ -858,15 +858,15 @@ accessibility.statement.paragraph.twentyNine.two = , oherwydd y diffyg cydymffur
 accessibility.statement.paragraph.thirty = Cynnwys nad yw’n hygyrch
 accessibility.statement.paragraph.thirtyOne = Nid yw’r cynnwys a restrir isod yn hygyrch oherwydd y rhesymau canlynol.
 accessibility.statement.paragraph.thirtyTwo = Diffyg cydymffurfio â’r rheoliadau hygyrchedd
-accessibility.statement.paragraph.thirtyThree = Ar y sgrin taliadau mae cynnwys help ar gyfer ‘Beth yw cod diogelwch cerdyn?’, sy’n ymddangos fel sgrin naid. Mae defnyddwyr technoleg gynorthwyol yn gallu cyrchu cynnwys y tu ôl i’r neges naid, sy’n achosi problemau deall y cynnwys help, yn enwedig ar gyfer defnyddwyr dall a defnyddwyr sy’n dibynnu ar orchmynion bysellfwrdd. Nid yw hyn yn bodloni maen prawf llwyddiant 2.4.3 (Focus Order) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
-accessibility.statement.paragraph.thirtyFour= Ar yr un sgrin taliadau mae yna ddefnydd anghywir wedi bod o’r dechneg tabindex, sy’n golygu gall ddefnyddwyr fynd ar y neges naid ‘Beth yw cod diogelwch cerdyn?’ pan na ddylent fod yn gallu gwneud hynny. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.1 (Parsing) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Nid yw’r rhyngweithio bysellfwrdd yn yr achos hwn yn gywir a dylid ei osgoi. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
-accessibility.statement.paragraph.thirtyFive = Ar rai sgriniau taliadau Worldline, mae rhai meddalwedd darllenwyr sgrin hŷn yn nodi pennynau gwag. Gall hyn peri dryswch pan nad oes cynnwys wedi’i leoli o fewn y tag ac nid yw’n bodloni maen prawf llwyddiant 1.3.1 (Info and Relationships) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
-accessibility.statement.paragraph.thirtySix = Ar rai sgriniau taliadau Worldline, mae’r drefn y caiff gwybodaeth ei chyflwyno gan ddefnyddwyr technoleg gynorthwyol yn wahanol i’r drefn a ddangosir yn weledol ar y dudalen. Gall hyn peri dryswch i ddefnyddwyr golwg gwan sy’n defnyddio VoiceOver fel ffordd o lywio’r dudalen ac sydd ddim yn bodloni maen prawf llwyddiant 1.3.1 (Meaningful Sequence) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtyThree = Ar y sgrin taliadau mae cynnwys help ar gyfer ‘Beth yw cod diogelwch cerdyn?’, sy’n ymddangos fel sgrin naid. Mae defnyddwyr technoleg gynorthwyol yn gallu cyrchu cynnwys y tu ôl i’r neges naid, sy’n achosi problemau deall y cynnwys help, yn enwedig ar gyfer defnyddwyr dall a defnyddwyr sy’n dibynnu ar orchmynion bysellfwrdd. Nid yw hyn yn bodloni maen prawf llwyddiant 2.4.3 (Focus Order) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEF yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtyFour= Ar yr un sgrin taliadau mae yna ddefnydd anghywir wedi bod o’r dechneg tabindex, sy’n golygu gall ddefnyddwyr fynd ar y neges naid ‘Beth yw cod diogelwch cerdyn?’ pan na ddylent fod yn gallu gwneud hynny. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.1 (Parsing) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Nid yw’r rhyngweithio bysellfwrdd yn yr achos hwn yn gywir a dylid ei osgoi. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEF yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtyFive = Ar rai sgriniau taliadau Worldline, mae rhai meddalwedd darllenwyr sgrin hŷn yn nodi pennynau gwag. Gall hyn peri dryswch pan nad oes cynnwys wedi’i leoli o fewn y tag ac nid yw’n bodloni maen prawf llwyddiant 1.3.1 (Info and Relationships) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEF yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtySix = Ar rai sgriniau taliadau Worldline, mae’r drefn y caiff gwybodaeth ei chyflwyno gan ddefnyddwyr technoleg gynorthwyol yn wahanol i’r drefn a ddangosir yn weledol ar y dudalen. Gall hyn peri dryswch i ddefnyddwyr golwg gwan sy’n defnyddio VoiceOver fel ffordd o lywio’r dudalen ac sydd ddim yn bodloni maen prawf llwyddiant 1.3.1 (Meaningful Sequence) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEF yn atebol am ei hygyrchedd.
 accessibility.statement.paragraph.thirtySeven = Rydym yn defnyddio tablau yn y dangosfwrdd cyfrif er mwyn dangos gwybodaeth megis balansau cyfrif a bonysau. Mewn rhai mannau gallai’r ffordd y mae’r tabl wedi’i nodi peri dryswch i ddarllenwyr sgrin, er enghraifft yn ddelfrydol dylai cynnwys sydd wedi’i labelu’n bennyn tabl fod yn bennawd neu’n label. Nid yw hyn yn bodloni maen prawf llwyddiant 1.3.1 (Info and Relationships) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Byddai testun sydd wedi’i nodi’n benynnau tabl yn fwy defnyddiol pe byddai wedi’i nodi’n bennawd neu’n gapsiwn. Rydym yn bwriadu trwsio’r broblem erbyn mis Mehefin 2021.
 accessibility.statement.paragraph.thirtyEight = Ar y sgrin ‘Bwrw golwg dros eich trafodion’ mae yna dag maes ar goll sy’n golygu nad yw’r elfennau ‘hidlo’ wedi’u grwpio gyda’i gilydd yn gywir. Gall hyn peri dryswch i ddarllenwyr sgrin yn y ffordd y caiff cynnwys ei chyflwyno, a nid oedd adborth clywedol yn cyfnewid gwybodaeth yn gywir pan roedd y ffocws ar y botwm hidlo. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.1 (Parsing) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Dylai gwneud yr elfen gyntaf y tu mewn i’r maes yr allwedd briodoli drwsio’r broblem hon. Rydym yn bwriadu cyflawni hyn erbyn mis Mehefin 2021.
-accessibility.statement.paragraph.thirtyNine = Ar y dudalen manylion cerdyn talu mae yna elfen wedi’i nodi’n ‘+’ nad yw ei diben yn glir i ddefnyddwyr VoiceOver. Nodwyd hefyd nad yw’r elfen hon yn cynhyrchu cynnwys cudd pellach. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.2 (Name, Role, Value) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.thirtyNine = Ar y dudalen manylion cerdyn talu mae yna elfen wedi’i nodi’n ‘+’ nad yw ei diben yn glir i ddefnyddwyr VoiceOver. Nodwyd hefyd nad yw’r elfen hon yn cynhyrchu cynnwys cudd pellach. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.2 (Name, Role, Value) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEF yn atebol am ei hygyrchedd.
 accessibility.statement.paragraph.forty = Am resymau diogelwch, rydym yn defnyddio nodwedd terfyn amser sy’n allgofnodi defnyddwyr o’u cyfrifon ar ôl cyfnod o amser. Pan fo’r neges naid ar gyfer terfyn amser yn cael ei ddangos, bydd defnyddwyr technoleg gynorthwyol yn gallu cyrchu cynnwys y tu ôl i’r neges naid. Mae hyn yn achosi problemau deall y cynnwys help, yn enwedig ar gyfer defnyddwyr dall a defnyddwyr sy’n dibynnu ar orchmynion bysellfwrdd. Nid yw hyn yn bodloni maen prawf llwyddiant 2.4.3 (Focus Order) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Dylai gosod y cefndir fel ei bod wedi ei guddio datrys y broblem hon, ac rydym yn bwriadu cyflawni hyn erbyn mis Mehefin 2021.
-accessibility.statement.paragraph.fortyOne = Mae gan rai o’r botymau ar y tudalennau taliadau cerdyn gymarebau lliw isel, sy’n eu gwneud yn anodd i’w darllen, yn enwedig i ddefnyddwyr sydd â golwg gwan. Nid yw hyn yn bodloni maen prawf llwyddiant 1.4.3 (Contrast-minimum) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEM yn atebol am ei hygyrchedd.
+accessibility.statement.paragraph.fortyOne = Mae gan rai o’r botymau ar y tudalennau taliadau cerdyn gymarebau lliw isel, sy’n eu gwneud yn anodd i’w darllen, yn enwedig i ddefnyddwyr sydd â golwg gwan. Nid yw hyn yn bodloni maen prawf llwyddiant 1.4.3 (Contrast-minimum) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Caiff y cynnwys hwn ei reoli gan gwmni taliadau trydydd parti (Worldline) ac nid yw CThEF yn atebol am ei hygyrchedd.
 accessibility.statement.paragraph.fortyTwo = Mae gan gysylltiad ar ‘Cadarnhau eich cyfeiriad e-bost’ gymhareb lliw isel. Mae hyn yn broblem i ddefnyddwyr sydd â nam ar y golwg ac nid yw hyn yn bodloni maen prawf llwyddiant 1.4.3 (Contrast-minimum) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Bydd y cymarebau lliw yn cael eu newid er mwyn iddynt fodloni’r safonau gofynnol erbyn mis Mehefin 2021.
 accessibility.statement.paragraph.fortyThree = Ar y dudalen ‘Nodi manylion banc yn y DU’ mae yna gymhareb lliw isel ar gyfer y maes cod didoli. Mae hyn yn broblem i ddefnyddwyr sydd â nam ar y golwg ac nid yw hyn yn bodloni maen prawf llwyddiant 1.4.11 (Non-text contrast) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Bydd y cymarebau lliw yn cael eu newid er mwyn iddynt fodloni’r safonau gofynnol erbyn mis Mehefin 2021.
 accessibility.statement.paragraph.fortyFour = Ar y sgrin ‘Bwrw golwg dros eich trafodion’ nid yw statws y canlyniadau chwilio sydd wedi’u hidlo wedi’i ddatgan. Mae hyn yn achosi problemau i ddefnyddwyr NVDA a VoiceOver. Nid yw hyn yn bodloni maen prawf llwyddiant 4.1.3 (Status Messages) Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Byddai cynnwys neges statws o dan y cysylltiad ailosod, yn nodi faint o ganlyniadau sydd ar y dudalen, yn trwsio’r broblem hon. Rydym yn bwriadu datrys hyn erbyn mis Mehefin 2021.
@@ -875,9 +875,9 @@ accessibility.statement.paragraph.fortyFour = Ar y sgrin ‘Bwrw golwg dros eich
 accessibility.statement.paragraph.fortyFive = Cafodd y gwasanaeth ei brofi ddiwethaf ar 8 Ionawr 2019 a gwiriwyd ei fod yn cydymffurfio â safon ‘AA’ Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1.
 accessibility.statement.paragraph.fortySix.one = Adeiladwyd y gwasanaeth gan ddefnyddio rhannau a brofwyd gan y
 accessibility.statement.paragraph.fortySix.link = Ganolfan Hygyrchedd Digidol (Digital Accessibility Centre)
-accessibility.statement.paragraph.fortySix.two = . Profwyd y gwasanaeth llawn gan CThEM, ac roedd y gwaith o brofi’r gwasanaeth yn cynnwys defnyddwyr anabl.
+accessibility.statement.paragraph.fortySix.two = . Profwyd y gwasanaeth llawn gan CThEF, ac roedd y gwaith o brofi’r gwasanaeth yn cynnwys defnyddwyr anabl.
 accessibility.statement.paragraph.fortySeven = Paratowyd y dudalen hon ar 9 Medi 2020. Cafodd ei diweddaru ddiwethaf ar 25 Ebrill 2020.
-accessibility.statement.paragraph.fortyEight = Mae CThEM wrthi’n trwsio rhannau’r gwasanaeth nad ydynt yn bodloni safon AA, Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Rydym yn bwriadu cyflawni hyn erbyn mis Mehefin 2023 a byddwn yn diweddaru’r dudalen hon pan fydd y problemau wedi’u datrys.
+accessibility.statement.paragraph.fortyEight = Mae CThEF wrthi’n trwsio rhannau’r gwasanaeth nad ydynt yn bodloni safon AA, Canllawiau Hygyrchedd Cynnwys y We, fersiwn 2.1. Rydym yn bwriadu cyflawni hyn erbyn mis Mehefin 2023 a byddwn yn diweddaru’r dudalen hon pan fydd y problemau wedi’u datrys.
 
 accessibility.statement.listitem1 = newid lliwiau, lefelau cyferbyniad a ffontiau
 accessibility.statement.listitem2 = chwyddo’r sgrin hyd at 300% heb i’r testun ddisgyn oddi ar y sgrin
