@@ -617,9 +617,9 @@ class RegisterControllerSpec
 
         val result = getAccountCreatedPage()
         status(result) shouldBe OK
-        contentAsString(result) should include("Account created")
+        contentAsString(result) should include("Continue")
         contentAsString(result) should include(accountNumber)
-        contentAsString(result) should include("""You have until <span class="bold">31 January 1970</span> to pay in money this month""")
+        contentAsString(result) should include("""You have until <strong class="bold">31 January 1970</strong> to pay in money this month""")
       }
 
       "redirect to check eligibility" when {

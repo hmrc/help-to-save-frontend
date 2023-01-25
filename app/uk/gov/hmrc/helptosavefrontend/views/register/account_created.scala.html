@@ -27,7 +27,6 @@
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
 yesNo: uk.gov.hmrc.helptosavefrontend.views.html.helpers.yes_no,
 errorSummary: uk.gov.hmrc.helptosavefrontend.views.html.helpers.error_summary,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 viewHelpers: ViewHelpers
 )
 
@@ -48,7 +47,6 @@ viewHelpers: ViewHelpers
 }
 
 @layout(title) {
-    @viewHelpers.form(routes.RegisterController.accessOrPayIn){
         @if(form.errors.nonEmpty) {
             @viewHelpers.govukErrorSummary(ErrorSummary(errorList =
                 form.errors.map { error =>
@@ -74,6 +72,7 @@ viewHelpers: ViewHelpers
     <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p2")</p>
     <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p3.1") <strong class="bold">@{DateUtils.toLocalisedString(lastPayDateThisMonth)}</strong> @Messages("hts.register.create_account.what-you-need-to-do.p3.2")</p>
 
+@viewHelpers.form(routes.RegisterController.accessOrPayIn){
         @viewHelpers.govUkRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
@@ -90,13 +89,13 @@ viewHelpers: ViewHelpers
             items = Seq(
                 RadioItem(
                 content = Text(Messages("generic.yes")),
-                value = Some("yes"),
-                checked = form.data.values.toList.contains("yes")
+                value = Some("true"),
+                checked = form.data.values.toList.contains("true")
                 ),
                 RadioItem(
                 content = Text(Messages("generic.no")),
-                value = Some("no"),
-                checked = form.data.values.toList.contains("no"),
+                value = Some("false"),
+                checked = form.data.values.toList.contains("false"),
                 conditionalHtml = Some(Html("<p class=govuk-body>" + messages("hts.register.create_account.payInNow.noContent") + "</p>"))
             )
             )
