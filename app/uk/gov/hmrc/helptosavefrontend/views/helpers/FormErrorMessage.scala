@@ -35,19 +35,16 @@ class FormErrorMessage @Inject()(ui: ViewHelpers) {
   def govukErrorText(formName: String, e: FormError)(
     implicit messages: Messages): Text = Text(errorText(formName, e))
 
-  def errorSummary(formName: String, form: Form[_], customErrorFunction: Option[CustomCall] = None)(
+  def errorSummary(formName: String, form: Form[_], customErrorFunction: Option[(Form[_], String) => Option[String]] = None)(
       implicit messages: Messages): Option[HtmlFormat.Appendable] =
     if(form.errors.nonEmpty) {
       Some(ui.govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
         ErrorLink(
           href = Some(s"#${e.key}"),
-          content = customErrorFunction
-            .fold(
-              Text(errorText(formName, e))
-            )(
-              (f:CustomCall=>Option[String]) =>
-                Text(f.apply(form, e.key).getOrElse(errorText(formName, e)))
-            )
+          content = customErrorFunction match {
+            case None => Text(errorText(formName, e))
+            case Some(f) => Text(f.apply(form, e.key).getOrElse(errorText(formName, e)))
+          }
         )
       ),
         title = Text(messages("hts.global.error-summary.title")))))
@@ -60,11 +57,6 @@ class FormErrorMessage @Inject()(ui: ViewHelpers) {
         e =>
           ErrorMessage(
             content = Text(errorText(formName, e)),
-            visuallyHiddenText = Some(messages("generic.errorPrefix"))
+            visuallyHiddenText = Some(messages("hts.global.error.prefix"))
         ))
-}
-
-trait CustomCall {
-  def apply(form: Form[_], key: String): Option[String] = Option[String]
-
 }

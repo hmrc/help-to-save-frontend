@@ -20,7 +20,6 @@ import play.api.data.Form
 import play.api.i18n.Messages
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.FormOps
-import uk.gov.hmrc.helptosavefrontend.views.helpers.CustomCall
 
 object BankDetailsErrors {
 

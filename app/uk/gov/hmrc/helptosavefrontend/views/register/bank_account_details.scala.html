@@ -37,7 +37,7 @@
 
 @layout(pageTitle, Some(backLink)) {
 
-  @errorHelpers.errorSummary(formName, form, Some(getErrorMessage))
+  @errorHelpers.errorSummary(formName, form, Some(getErrorMessage _))
 
   <h1 class="govuk-heading-l">@title</h1>
 
@@ -60,7 +60,7 @@
       errorMessage = getErrorMessage(form, "sortCode").map(errorMsg =>
         ErrorMessage(
           content = Text(errorMsg),
-          visuallyHiddenText = Some(messages("generic.errorPrefix"))
+          visuallyHiddenText = Some(messages("hts.global.error.prefix"))
         ))
     ))
 
