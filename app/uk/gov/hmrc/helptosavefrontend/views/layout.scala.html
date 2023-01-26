@@ -49,7 +49,7 @@
     @hmrcReportTechnicalIssueHelper()
 }
 
-@gdsTitle = @{s"${if(hasErrors) { s"${messages("hts.global.error.prefix")}: "}}${title} - ${messages("app.name")} - GOV.UK"}
+@gdsTitle = @{s"""${if(hasErrors){ s"""${messages("hts.global.error.prefix")}: """} else ""}$title - ${messages("hts.global.title-suffix")} - GOV.UK"""}
 
 @hmrcLayout(
     pageTitle = Some(gdsTitle),
