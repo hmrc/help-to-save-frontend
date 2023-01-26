@@ -78,7 +78,7 @@
       errorMessage = getErrorMessage(form, "accountNumber").map(errorMsg =>
         ErrorMessage(
           content = Text(errorMsg),
-          visuallyHiddenText = Some(messages("generic.errorPrefix"))
+          visuallyHiddenText = Some(messages("hts.global.error.prefix"))
         ))
     ))
 
@@ -99,7 +99,7 @@
       errorMessage = getErrorMessage(form, "rollNumber").map(errorMsg =>
         ErrorMessage(
           content = Text(errorMsg),
-          visuallyHiddenText = Some(messages("generic.errorPrefix"))
+          visuallyHiddenText = Some(messages("hts.global.error.prefix"))
         ))
     ))
 
@@ -115,7 +115,7 @@
     errorMessage = getErrorMessage(form, "accountName").map(errorMsg =>
       ErrorMessage(
         content = Text(errorMsg),
-        visuallyHiddenText = Some(messages("generic.errorPrefix"))
+        visuallyHiddenText = Some(messages("hts.global.error.prefix"))
       ))
     ))
 
