@@ -61,7 +61,7 @@
   )
 }
 @cancelOption = @{
-  if (!screenFrom.matches("cancel")) {
+  if (screenFrom.matches("cancel")) {
     List(
       RadioItem(divider = Some("or")),
       RadioItem(

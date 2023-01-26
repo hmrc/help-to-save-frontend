@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.register.BankDetailsErrors.getErrorMessage
@@ -39,7 +38,7 @@
 
   <h1 class="govuk-heading-l">@title</h1>
 
-  @helpers.form(routes.BankAccountController.submitBankDetails, 'id -> "bankDetailsForm") {
+  @viewHelpers.form(routes.BankAccountController.submitBankDetails, 'id -> "bankDetailsForm") {
 
     @viewHelpers.govukInput(Input(
       id = "sortCode",

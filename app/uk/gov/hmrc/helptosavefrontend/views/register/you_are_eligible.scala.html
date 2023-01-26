@@ -35,7 +35,7 @@ submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
 @layout(pageTitle) {
 
-    <h1 class="govuk-heading--xl">
+    <h1 class="govuk-heading-xl">
       @pageTitle
     </h1>
 
@@ -48,13 +48,10 @@ submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
       <li>@Messages("hts.register.you-are-eligible.li2")</li>
     </ul>
 
-<div class="govuk-form">
     @viewHelpers.form(routes.EligibilityCheckController.youAreEligibleSubmit) {
-    @CSRF.formField(request)
     @viewHelpers.govukButton(Button(
         content = Text(Messages("hts.global.continue-button"))
         ))
     }
-</div>
 
 }
