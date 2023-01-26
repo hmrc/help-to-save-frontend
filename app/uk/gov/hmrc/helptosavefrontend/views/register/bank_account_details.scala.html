@@ -19,7 +19,6 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.register.BankDetailsErrors.getErrorMessage
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import uk.gov.hmrc.govukfrontend.views.html.components._
@@ -37,12 +36,11 @@
 
 @layout(pageTitle, Some(backLink)) {
 
-  @errorHelpers.errorSummary(formName, form, Some(getErrorMessage _))
+  @errorHelpers.errorSummary(formName, form, Some(Function: getErrorMessage))
 
   <h1 class="govuk-heading-l">@title</h1>
 
   @helpers.form(routes.BankAccountController.submitBankDetails, 'id -> "bankDetailsForm") {
-
 
     @viewHelpers.govukInput(Input(
       id = "sortCode",
