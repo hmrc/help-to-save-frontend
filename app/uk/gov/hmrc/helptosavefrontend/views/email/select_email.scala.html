@@ -31,9 +31,8 @@
 }
 
 @defining((form.error("email").isDefined, form.error("new-email").isDefined, form.data.get("new-email"))){ case (hasNotSelected, hasInvalidEmail, newEmail) =>
-  @layout(title) {
+  @layout(title, backLink) {
 
-  @navigate_back(backLink)
 
   @{if(hasNotSelected)
   <div class="govuk-error-summary" role="alert" aria-labelledby="error-summary-select-one-option" tabindex="-1">

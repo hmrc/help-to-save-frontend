@@ -32,7 +32,7 @@
     govukBackLink: GovukBackLink
 )
 
-@(title: String, backLink: Option[String] = None)(contentBlock: Html)(implicit request : Request[_], messages: Messages, config: FrontendAppConfig)
+@(title: String, backLink: Option[String] = None, hasErrors: Boolean = false)(contentBlock: Html)(implicit request : Request[_], messages: Messages, config: FrontendAppConfig)
 
 @beforeContentBlock = {
   <div class="govuk-!-display-none-print">
@@ -48,12 +48,12 @@
     @contentBlock
     @hmrcReportTechnicalIssueHelper()
 }
-@pageTitle = @{
-    title + " - " + Messages("app.name") + " - " + "GOV.UK"
-}
+
+@gdsTitle = @{s"${if(hasErrors) { s"${messages("hts.global.error.prefix")}: "}}${title} - ${messages("app.name")} - GOV.UK"}
+
 @hmrcLayout(
-    pageTitle = Some(pageTitle),
-    isWelshTranslationAvailable = false, /* or false if your service has not been translated */
+    pageTitle = Some(gdsTitle),
+    isWelshTranslationAvailable = false,
     displayHmrcBanner = true,
     beforeContentBlock = Some(beforeContentBlock),
     phaseBanner = Some(standardBetaBanner(url = appConfig.feedbackSurveyUrl))

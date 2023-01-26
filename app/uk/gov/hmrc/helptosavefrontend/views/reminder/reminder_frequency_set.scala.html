@@ -17,86 +17,82 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import views.html.helper.CSRF
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
+
 
 @(form: Form[ReminderForm],period :String,screenFrom :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
-@title = @{
-    Messages("hts.reminder-frequency.select")
+@title = @{messages("hts.reminder-frequency.select")}
+@key = @{"reminderFrequency"}
+@formName = @{"reminder-select"}
+@formAction = @{
+  if(screenFrom.matches("account")) {
+    routes.ReminderController.selectRemindersSubmit
+  } else if(screenFrom.matches("registration")) {
+    routes.ReminderController.submitApplySavingsReminderSignUpPage
+  } else if(screenFrom.matches("cancel")) {
+    routes.ReminderController.selectedRemindersSubmit
+  } else {
+    routes.ReminderController.selectRemindersSubmit
+  }
 }
-@defining(form.error("reminderFrequency").map(_ ⇒ email_form_validation_error_message(form, "reminderFrequency"))){ errorMessage =>
+@defaultOptions = @{
+  List(
+    RadioItem(
+      content = Text(messages("hts.reminder-frequency.first")),
+      value = Some("1st"),
+      checked = period.matches("1st")
+    ),
+    RadioItem(
+      content = Text(messages("hts.reminder-frequency.25")),
+      value = Some("25th"),
+      checked = period.matches("25th")
+    ),
+    RadioItem(
+      content = Text(messages("hts.reminder-frequency.both")),
+      value = Some("1st day and 25th"),
+      checked = period.matches("1st day and 25th")
+    )
+  )
+}
+@cancelOption = @{
+  if (!screenFrom.matches("cancel")) {
+    List(
+      RadioItem(divider = Some("or")),
+      RadioItem(
+        content = Text(messages("hts.reminder-frequency.cancel")),
+        value = Some("cancel")
+      )
+    )
+  } else List.empty
+}
 
-    @layout(title) {
+@layout(title, backLink, form.hasErrors) {
 
-        @navigate_back(backLink)
+  @errorHelpers.errorSummary[ReminderForm](formName, form)
 
-        @{if(errorMessage.isDefined)
-            <div class="govuk-error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
-                <h2 class="govuk-heading-m govuk-error-summary-heading" id="error-summary-give-email">{Messages("hts.global.error-summary.title")}</h2>
-                    <ul class="govuk-list govuk-error-summary__list">
-                        <li><a href="#first">{Messages("hts.reminder-frequency.error.missing")}</a></li>
-                    </ul>
-            </div>
-        }
-
-
-
-        <form method="post" action= @if(screenFrom.matches("account")) { @routes.ReminderController.selectRemindersSubmit} else if(screenFrom.matches("registration")) {@routes.ReminderController.submitApplySavingsReminderSignUpPage} else if(screenFrom.matches("cancel")){@routes.ReminderController.selectedRemindersSubmit} novalidate >
-            <div class="@{"govuk-form-group" + {if(errorMessage.isDefined) " govuk-form-group--error" else "" }}">
-            <fieldset class="govuk-fieldset" @if(errorMessage.isDefined){ aria-describedby="frequency-error"}>
-
-            <legend>
-                <h1 class="@{"govuk-heading-l" + {if(errorMessage.isDefined) " flush--top" else ""}}">@title</h1>
-            </legend>
-
-            @CSRF.formField(request)
-            @{if(errorMessage.isDefined)
-            <span id="frequency-error" class="govuk-error-message">{Messages("hts.reminder-frequency.error.missing")}</span>
-            }
-                <div class="govuk-radios" data-module="govuk-radios">
-                    <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="first" type="radio" name="reminderFrequency" value="1st" @if(period.matches("1st")) {checked}>
-                    <label class="govuk-label govuk-radios__label" for="first">@messages("hts.reminder-frequency.first")</label>
-                </div>
-
-                    <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="twentyfive" type="radio" name="reminderFrequency" value="25th" @if(period.matches("25th")) {checked}>
-                    <label class="govuk-label govuk-radios__label" for="twentyfive">@messages("hts.reminder-frequency.25")</label>
-                </div>
-
-                    <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="both" type="radio" name="reminderFrequency" value="1st day and 25th" @if(period.matches("1st day and 25th")) {checked}>
-                    <label class="govuk-label govuk-radios__label" for="both">@messages("hts.reminder-frequency.both")</label>
-                </div>
-            @if(screenFrom.matches("cancel")) {
-                <div class="multiple-choice">
-                    <label>@messages("hts.reminder-frequency.or")</label>
-                </div>
-
-                    <div class="govuk-radios__item">
-                    <input class="govuk-radios__input" id="cancel" type="radio" name="reminderFrequency" value="cancel">
-                    <label class="govuk-label govuk-radios__label" for="cancel">@messages("hts.reminder-frequency.cancel")</label>
-                </div>
-            }
-                </div>
-            </fieldset>
-            </div>
-
-
-             <div class="form-field form-field--submit">
-      <button id="confirm-selection" class="govuk-button getSelectedChoice" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected reminder', 'Applicant select reminder frequency page');">
-        @messages("hts.global.continue-button")
-      </button>
-    </div>
-          </form>
-
-
-
-
-
-    }
+  @viewHelpers.form(formAction) {
+    @viewHelpers.govukRadios(
+      Radios(
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--xl",
+            isPageHeading = true
+          ))
+        )),
+        hint = Some(Hint(content = Text(messages("hts.email-saving-remainders.intro")))),
+        idPrefix = Some(key),
+        name = key,
+        items = defaultOptions ::: cancelOption,
+        errorMessage = errorHelpers.formErrorMessage(formName, form, key)
+      )
+    )
+    @viewHelpers.govukButton(Button(content = Text(messages("hts.global.continue-button"))))
+  }
 }
