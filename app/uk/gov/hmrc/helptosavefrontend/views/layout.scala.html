@@ -28,23 +28,33 @@
     appConfig: FrontendAppConfig,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
     autcompleteCss: HmrcAccessibleAutocompleteCss,
-    autocompleteJavascript: HmrcAccessibleAutocompleteJavascript
+    autocompleteJavascript: HmrcAccessibleAutocompleteJavascript,
+    govukBackLink: GovukBackLink
 )
 
-@(title: String, pageScripts: Option[Html] = None, pageHeadBlock: Option[Html] = None)(contentBlock: Html)(implicit request : Request[_], messages: Messages, config: FrontendAppConfig)
+@(title: String, backLink: Option[String] = None, hasErrors: Boolean = false)(contentBlock: Html)(implicit request : Request[_], messages: Messages, config: FrontendAppConfig)
+
+@beforeContentBlock = {
+  <div class="govuk-!-display-none-print">
+  @{
+    backLink map { url =>
+      govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text("Back")))
+    }
+  }
+  </div>
+}
 
 @content = {
     @contentBlock
     @hmrcReportTechnicalIssueHelper()
 }
-@pageTitle = @{
-    title + " - " + Messages("app.name") + " - " + "GOV.UK"
-}
+
+@gdsTitle = @{s"""${if(hasErrors){ s"""${messages("hts.global.error.prefix")}: """} else ""}$title - ${messages("hts.global.title-suffix")} - GOV.UK"""}
+
 @hmrcLayout(
-    pageTitle = Some(pageTitle),
-    isWelshTranslationAvailable = false, /* or false if your service has not been translated */
+    pageTitle = Some(gdsTitle),
+    isWelshTranslationAvailable = false,
     displayHmrcBanner = true,
-    additionalHeadBlock = pageHeadBlock,
-    additionalScriptsBlock = pageScripts,
+    beforeContentBlock = Some(beforeContentBlock),
     phaseBanner = Some(standardBetaBanner(url = appConfig.feedbackSurveyUrl))
 )(content)

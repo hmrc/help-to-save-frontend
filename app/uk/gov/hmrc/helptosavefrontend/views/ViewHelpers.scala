@@ -23,7 +23,7 @@ import javax.inject.Inject
 class ViewHelpers @Inject()(
   val govukButton: GovukButton,
   val govukErrorSummary: GovukErrorSummary,
-  val govUkRadios: GovukRadios,
+  val govukRadios: GovukRadios,
   val govukDateInput: GovukDateInput,
   val govukInput: GovukInput,
   val govukFileUpload: GovukFileUpload,

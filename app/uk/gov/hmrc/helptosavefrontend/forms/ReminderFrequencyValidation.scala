@@ -58,7 +58,7 @@ object ReminderFrequencyValidation {
 
   object ErrorMessages {
 
-    val reminderFrequencyEmpty: String = "reminder_frequency_empty"
+    val reminderFrequencyEmpty: String = "error.missing"
 
   }
 

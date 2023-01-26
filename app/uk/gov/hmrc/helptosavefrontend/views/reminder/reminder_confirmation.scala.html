@@ -18,34 +18,38 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, ui: uk.gov.hmrc.helptosavefrontend.views.ViewHelpers)
 
-@(email: String,period :String,headMessage : String, paraMessage : String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(email: String, period :String, headMessage : String, paraMessage : String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 
-@title = @{
-        Messages(headMessage)
-     }
+@title = @{Messages(headMessage)}
 
-@layout(title = title) {
-    <div class="govuk-box-highlight">
-        <h1 class="govuk-heading--xl">@title</h1>
-        <span class="heading-large">
-            @Messages(paraMessage)
-        </span>
-    </div>
+@layout(title) {
 
-            <h2 class="heading-medium">@Messages("hts.reminder-confirmation.h2")</h2>
-            <p>@Html(Messages("hts.reminder-confirmation.title.p1-1")) @PeriodUtils.getMessage(period) @Html(Messages("hts.reminder-confirmation.title.p1-2"))</p>
-            <p>@Html(Messages("hts.reminder-confirmation.title.p1-3")) <span class="bold">@email. </span>
-                @Html(Messages("hts.reminder-confirmation.title.p1-4"))
-                <a href=@routes.AccountHolderController.getUpdateYourEmailAddress.url>
-            @Html(Messages("hts.reminder-confirmation.change-email.descriptive-link"))</a></p>
-            <p>@Messages("hts.reminder-confirmation.title.p1-5") <a href=@routes.ReminderController.getEmailsavingsReminders.url>
-            @Html(Messages("hts.reminder-confirmation.saving-reminders.descriptive-link"))</a>
-                @Html(Messages("hts.reminder-confirmation.title.p1-6"))</p>
+  @ui.govukPanel(Panel(
+    title = Text(title),
+    content = HtmlContent(messages(paraMessage))
+  ))
 
-            <p class="subsection--wide push--bottom"><a href=@{appConfig.nsiManageAccountUrl} class="button" role="button">@messages("hts.global.back-to-account")</a></p>
+  <h2 class="govuk-heading--m">
+    @Messages("hts.reminder-confirmation.h2")
+  </h2>
 
+  <p class="govuk-body">
+    @Messages("hts.reminder-confirmation.title.p1-1") @PeriodUtils.getMessage(period) @Messages("hts.reminder-confirmation.title.p1-2")</p>
+  <p class="govuk-body">@Messages("hts.reminder-confirmation.title.p1-3") <strong>@email</strong>.
+    @Messages("hts.reminder-confirmation.title.p1-4")
+    <a class="govuk-link" href=@routes.AccountHolderController.getUpdateYourEmailAddress.url>@Messages("hts.reminder-confirmation.change-email.descriptive-link")</a></p>
+  <p class="govuk-body">@Messages("hts.reminder-confirmation.title.p1-5") <a class="govuk-link" href=@routes.ReminderController.getEmailsavingsReminders.url>
+    @Messages("hts.reminder-confirmation.saving-reminders.descriptive-link")</a>
+      @Messages("hts.reminder-confirmation.title.p1-6")
+  </p>
+
+  @ui.govukButton(Button(
+    content = Text(messages("hts.global.back-to-account")),
+    href = Some(appConfig.nsiManageAccountUrl)
+  ))
 }

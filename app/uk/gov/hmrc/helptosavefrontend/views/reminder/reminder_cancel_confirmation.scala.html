@@ -17,8 +17,9 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, ui: uk.gov.hmrc.helptosavefrontend.views.ViewHelpers)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -29,18 +30,20 @@
 
 @layout(title) {
 
-    <div class="govuk-box-highlight">
-        <h1 class="govuk-heading--l">@title</h1>
-        <span class="heading-large">
-            @Messages("hts.reminder-cancel-confirmation.title.p1")
-        </span>
-    </div>
-            <h2 class="heading-medium">@Messages("hts.reminder-confirmation.h2")</h2>
+  @ui.govukPanel(Panel(
+    title = Text(title),
+    content = HtmlContent(messages("hts.reminder-cancel-confirmation.title.p1"))
+  ))
 
-            <p>@Messages("hts.reminder-cancel-confirmation.p1-1") <a href=@routes.ReminderController.getEmailsavingsReminders.url>
-            @Html(Messages("hts.reminder-cancel-confirmation.li-signup"))</a>
-                @Html(Messages("hts.reminder-cancel-confirmation.p1-2"))</p>
+  <h2 class="govuk-heading-m">@messages("hts.reminder-confirmation.h2")</h2>
 
-            <p class="subsection--wide push--bottom"><a href=@{appConfig.nsiManageAccountUrl} class="button" role="button">@messages("hts.global.back-to-account")</a></p>
+  <p class="govuk-body">
+    @messages("hts.reminder-cancel-confirmation.p1-1") <a class="govuk-body" href=@routes.ReminderController.getEmailsavingsReminders.url>
+    @messages("hts.reminder-cancel-confirmation.li-signup")</a> @(messages("hts.reminder-cancel-confirmation.p1-2"))
+  </p>
 
+  @ui.govukButton(Button(
+    content = Text(messages("hts.global.back-to-account")),
+    href = Some(appConfig.nsiManageAccountUrl)
+  ))
 }

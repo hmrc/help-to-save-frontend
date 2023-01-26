@@ -132,15 +132,15 @@ object EmailValidation {
 
   private[forms] object ErrorMessages {
 
-    val totalTooLong: String = "total_too_long"
+    val totalTooLong: String = "error.tooLong"
 
-    val localTooLong: String = "local_too_long"
+    val localTooLong: String = "error.tooLong"
 
-    val domainTooLong: String = "domain_too_long"
+    val domainTooLong: String = "error.tooLong"
 
-    val localTooShort: String = "local_too_short"
+    val localTooShort: String = "error.tooShort"
 
-    val domainTooShort: String = "domain_too_short"
+    val domainTooShort: String = "error.tooShort"
 
     val noAtSymbol: String = "no_@_symbol"
 

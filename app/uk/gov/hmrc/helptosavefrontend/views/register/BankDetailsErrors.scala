@@ -30,25 +30,29 @@ object BankDetailsErrors {
     def has(f: Form[_] ⇒ String ⇒ Boolean): Boolean = f(form)(key)
 
     if (has(_.sortCodeEmpty)) {
-      Some(messages("hts.sort-code.empty"))
+      Some(messages("bank-details.sortCode.error.required"))
     } else if (has(_.sortCodeIncorrectFormat)) {
-      Some(messages("hts.sort-code.incorrect-format", appConfig.BankDetailsConfig.sortCodeLength))
-    } else if (has(_.accountNumberEmpty)) {
-      Some(messages("hts.account-number.empty"))
-    } else if (has(_.accountNumberIncorrectFormat)) {
-      Some(messages("hts.account-number.incorrect-format", appConfig.BankDetailsConfig.accountNumberLength))
-    } else if (has(_.rollNumberTooShort)) {
-      Some(messages("hts.roll-number.too-short", appConfig.BankDetailsConfig.rollNumberMinLength))
+      Some(messages("bank-details.sortCode.error.pattern", appConfig.BankDetailsConfig.sortCodeLength))
+    } else if (form.error(key).nonEmpty && has(_.accountNumberEmpty)) {
+      Some(messages("bank-details.accountNumber.error.required"))
+    } else if (form.error(key).nonEmpty && has(_.accountNumberIncorrectFormat)) {
+      Some(messages("bank-details.accountNumber.error.pattern", appConfig.BankDetailsConfig.accountNumberLength))
+    } else if (form.error(key).nonEmpty && has(_.rollNumberTooShort)) {
+      Some(messages("bank-details.rollNumber.error.tooShort", appConfig.BankDetailsConfig.rollNumberMinLength))
     } else if (has(_.rollNumberTooLong)) {
-      Some(messages("hts.roll-number.too-long", appConfig.BankDetailsConfig.rollNumberMaxLength))
-    } else if (has(_.rollNumberIncorrectFormat)) {
-      Some(messages("hts.roll-number.invalid"))
+      Some(messages("bank-details.rollNumber.error.tooLong", appConfig.BankDetailsConfig.rollNumberMaxLength))
+    } else if (form.error(key).nonEmpty && has(_.rollNumberIncorrectFormat)) {
+      Some(messages("bank-details.rollNumber.error.invalid"))
     } else if (has(_.accountNameEmpty)) {
-      Some(messages("hts.account-name.empty"))
+      Some(messages("bank-details.accountName.error.required"))
     } else if (has(_.accountNameTooShort)) {
-      Some(messages("hts.account-name.too-short", appConfig.BankDetailsConfig.accountNameMinLength))
+      Some(messages("bank-details.accountName.error.tooShort", appConfig.BankDetailsConfig.accountNameMinLength))
     } else if (has(_.accountNameTooLong)) {
-      Some(messages("hts.account-name.too-long", appConfig.BankDetailsConfig.accountNameMaxLength))
+      Some(messages("bank-details.accountName.error.tooLong", appConfig.BankDetailsConfig.accountNameMaxLength))
+    } else if (form.sortCodeBackendInvalid(key)) {
+      Some(messages("bank-details.sortCode.error.invalid"))
+    } else if (form.accountNumberBackendInvalid(key)) {
+      Some(messages("bank-details.accountNumber.error.invalid"))
     } else {
       None
     }

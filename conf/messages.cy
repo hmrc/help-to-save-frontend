@@ -265,17 +265,17 @@ hts.iv.try_again_button=Rhowch gynnig arall arni
 hts.iv.continue_button=Yn eich blaen
 
 # Email error
-hts.email.error=Nodwch gyfeiriad e-bost dilys
-hts.email.error.local-too-long=Rhaid i nifer y cymeriadau cyn yr ‘@’ fod yn 64 neu lai
-hts.email.error.domain-too-long=Rhaid i nifer y cymeriadau ar ôl yr ‘@’ fod yn 252 neu lai
-hts.email.error.local-too-short=Rhaid i’ch cyfeiriad e-bost gael un cymeriad neu fwy cyn ac ar ôl yr ‘@’
-hts.email.error.domain-too-short=Rhaid i’ch cyfeiriad e-bost gael un cymeriad neu fwy cyn ac ar ôl yr ‘@’
-hts.email.error.total-too-long=Rhaid i’ch cyfeiriad e-bost fod yn 254 o gymeriadau neu lai
-hts.email.error.blank=Nodwch y cyfeiriad e-bost yr ydych am ei ddefnyddio ar gyfer eich cyfrif Cymorth i Gynilo
-hts.email.error.no-at-symbol=Nodwch gyfeiriad e-bost yn y fformat cywir
-hts.email.error.no-dot-symbol=Rhaid i’ch cyfeiriad e-bost gynnwys ‘dot’
-hts.email.error.no-text-after-dot-symbol=Rhaid i’ch cyfeiriad e-bost gynnwys cymeriadau cyn ac ar ôl y ‘dot’
-hts.email.error.no-text-after-at-symbol-but-before-dot=Rhaid i’ch cyfeiriad e-bost gynnwys cymeriadau cyn ac ar ôl y ‘dot’
+reminder-select.reminderFrequency.email.error=Nodwch gyfeiriad e-bost dilys
+reminder-selectd.email.error.local-too-long=Rhaid i nifer y cymeriadau cyn yr ‘@’ fod yn 64 neu lai
+reminder-select.email.error.domain-too-long=Rhaid i nifer y cymeriadau ar ôl yr ‘@’ fod yn 252 neu lai
+reminder-select.email.error.local-too-short=Rhaid i’ch cyfeiriad e-bost gael un cymeriad neu fwy cyn ac ar ôl yr ‘@’
+reminder-select.email.error.domain-too-short=Rhaid i’ch cyfeiriad e-bost gael un cymeriad neu fwy cyn ac ar ôl yr ‘@’
+reminder-select.email.error.total-too-long=Rhaid i’ch cyfeiriad e-bost fod yn 254 o gymeriadau neu lai
+reminder-select.email.error.blank=Nodwch y cyfeiriad e-bost yr ydych am ei ddefnyddio ar gyfer eich cyfrif Cymorth i Gynilo
+reminder-select.email.error.no-at-symbol=Nodwch gyfeiriad e-bost yn y fformat cywir
+reminder-select.email.error.no-dot-symbol=Rhaid i’ch cyfeiriad e-bost gynnwys ‘dot’
+reminder-select.email.error.no-text-after-dot-symbol=Rhaid i’ch cyfeiriad e-bost gynnwys cymeriadau cyn ac ar ôl y ‘dot’
+reminder-select.email.error.no-text-after-at-symbol-but-before-dot=Rhaid i’ch cyfeiriad e-bost gynnwys cymeriadau cyn ac ar ôl y ‘dot’
 
 # Select email
 hts.select-email.title.h1=Pa gyfeiriad e-bost ydych chi am ei ddefnyddio ar gyfer eich cyfrif Cymorth i Gynilo?
@@ -792,7 +792,7 @@ hts.reminder-cancel-confirmation.li-signup=gofrestru ar gyfer nodynnau atgoffa
 hts.reminder-frequency.yes=Iawn, trefnu e-byst atgoffa
 hts.reminder-frequency.no=Na, nid wyf am drefnu e-byst atgoffa nawr
 hts.reminder-apply-savings=A ydych am gael e-byst atgoffa ynghylch cynilion?
-hts.reminder-select.error.missing=Dewiswch a ydych am drefnu e-byst atgoffa
+reminder-select.reminderFrequency.error.missing=Dewiswch a ydych am drefnu e-byst atgoffa
 hts.register.create_account.your-remainder.note=Ni fyddwn yn anfon unrhyw nodynnau atgoffa atoch. Gallwch drefnu’r rhain yn nes ymlaen os ydych yn dymuno gwneud hynny.
 
 accessibility.statement.title = Datganiad hygyrchedd ar gyfer Cymorth i Gynilo
