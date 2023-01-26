@@ -30,7 +30,7 @@
 @formName = @{"reminder-select"}
 @key = @{"reminderFrequency"}
 
-@layout(title, backLink) {
+@layout(title, backLink, form.hasErrors) {
 
   @errorHelpers.errorSummary(formName, form)
 

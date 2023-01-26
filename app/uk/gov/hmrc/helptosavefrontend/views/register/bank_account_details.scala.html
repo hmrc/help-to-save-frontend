@@ -32,9 +32,8 @@
 @title = @{messages("hts.register.bank-details.title.h1")}
 @formName = @{"bank-details"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
 
-@layout(pageTitle, Some(backLink)) {
+@layout(title, Some(backLink), hasErrors) {
 
   @errorHelpers.errorSummary[BankDetails](formName, form, Some((a, b) => getErrorMessage(a, b)))
 
