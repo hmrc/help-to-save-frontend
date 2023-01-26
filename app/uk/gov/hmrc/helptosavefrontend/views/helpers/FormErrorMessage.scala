@@ -35,7 +35,7 @@ class FormErrorMessage @Inject()(ui: ViewHelpers) {
   def govukErrorText(formName: String, e: FormError)(
     implicit messages: Messages): Text = Text(errorText(formName, e))
 
-  def errorSummary(formName: String, form: Form[_], customErrorFunction: Option[(Form[_], String) => Option[String]] = None)(
+  def errorSummary[A](formName: String, form: Form[A], customErrorFunction: Option[(Form[A], String) => Option[String]] = None)(
       implicit messages: Messages): Option[HtmlFormat.Appendable] =
     if(form.errors.nonEmpty) {
       Some(ui.govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
