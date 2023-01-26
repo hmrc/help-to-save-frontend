@@ -43,12 +43,16 @@ object BankDetailsErrors {
       Some(messages("bank-details.rollNumber.error.tooLong", appConfig.BankDetailsConfig.rollNumberMaxLength))
     } else if (form.error(key).nonEmpty && has(_.rollNumberIncorrectFormat)) {
       Some(messages("bank-details.rollNumber.error.invalid"))
-    } else if (form.error(key).nonEmpty && has(_.accountNameEmpty)) {
+    } else if (has(_.accountNameEmpty)) {
       Some(messages("bank-details.accountName.error.required"))
-    } else if (form.error(key).nonEmpty && has(_.accountNameTooShort)) {
+    } else if (has(_.accountNameTooShort)) {
       Some(messages("bank-details.accountName.error.tooShort", appConfig.BankDetailsConfig.accountNameMinLength))
-    } else if (form.error(key).nonEmpty && has(_.accountNameTooLong)) {
+    } else if (has(_.accountNameTooLong)) {
       Some(messages("bank-details.accountName.error.tooLong", appConfig.BankDetailsConfig.accountNameMaxLength))
+    } else if (form.sortCodeBackendInvalid(key)) {
+      Some(messages("bank-details.sortCode.error.invalid"))
+    } else if (form.accountNumberBackendInvalid(key)) {
+      Some(messages("bank-details.accountNumber.error.invalid"))
     } else {
       None
     }
