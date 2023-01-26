@@ -36,7 +36,7 @@
 
 @layout(pageTitle, Some(backLink)) {
 
-  errorHelpers.errorSummary[BankDetails](formName, form, Some(getErrorMessage(_, _)))
+  @errorHelpers.errorSummary[BankDetails](formName, form, Some((a, b) => getErrorMessage(a, b)))
 
   <h1 class="govuk-heading-l">@title</h1>
 
