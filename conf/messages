@@ -100,18 +100,20 @@ hts.register.bank-details.accountNumber.hint=For example, 12345678
 hts.register.bank-details.accountName.label=Name on the account
 hts.register.bank-details.rollNumber.label=Roll number
 hts.register.bank-details.rollNumber.hint=Building societies only
-hts.bank_details.check_your_sortcode_is_correct=Check your sort code is correct
-hts.bank_details.check_your_account_number_is_correct=Check your account number is correct
-hts.sort-code.empty=Enter sort code
-hts.sort-code.incorrect-format=Sort code must be {0} numbers
-hts.account-number.empty=Enter account number
-hts.account-number.incorrect-format=Account number must be {0} numbers
-hts.roll-number.too-short=Roll number must be {0} characters or more
-hts.roll-number.too-long=Roll number must be {0} characters or less
-hts.roll-number.invalid=Roll number must only include letters a to z, numbers, hyphens, forward slashes and full stops
-hts.account-name.empty=Enter the name on the account
-hts.account-name.too-short=The name on the account name must be {0} characters or more
-hts.account-name.too-long=The name on the account must be {0} characters or less
+
+
+bank-details.sortCode.error.invalid = Check your sort code is correct
+bank-details.accountNumber.error.invalid = Check your account number is correct
+bank-details.sortCode.error.required = Enter sort code
+bank-details.sortCode.error.pattern = Sort code must be {0} numbers
+bank-details.accountNumber.error.required = Enter account number
+bank-details.accountNumber.error.pattern = Account number must be {0} numbers
+bank-details.rollNumber.error.tooShort = Roll number must be {0} characters or more
+bank-details.rollNumber.error.tooLong = Roll number must be {0} characters or less
+bank-details.rollNumber.error.pattern = Roll number must only include letters a to z, numbers, hyphens, forward slashes and full stops
+bank-details.accountName.error.required = Enter the name on the account
+bank-details.accountName.error.tooShort=The name on the account name must be {0} characters or more
+bank-details.accountName.error.tooLong=The name on the account must be {0} characters or less
 
 # Bank Details Error
 hts.register.bank-details.error.title.h1=There is a problem with your bank details

@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-@import uk.gov.hmrc.helptosavefrontend.views.register.BankDetailsErrors
+@import uk.gov.hmrc.helptosavefrontend.views.register.BankDetailsErrors.getErrorMessage
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
@@ -35,45 +35,53 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
 
-@layout(pageTitle, backLink = Some(backLink)) {
+@layout(pageTitle, Some(backLink)) {
 
-  @errorHelpers.errorSummary(formName, form)
-d
+  @errorHelpers.errorSummary(formName, form, Some(getErrorMessage))
+
   <h1 class="govuk-heading-l">@title</h1>
 
   @helpers.form(routes.BankAccountController.submitBankDetails, 'id -> "bankDetailsForm") {
 
 
     @viewHelpers.govukInput(Input(
-    id = "sortCode",
-    name = "sortCode",
-    label = Label(
-    isPageHeading = false,
-    classes = "govuk-label--m",
-    content = Text(messages("hts.register.bank-details.sort-code.label"))
-    ),
-    classes = "govuk-input--width-5",
-    value = form.data.get("sortCode"),
-    hint = Some(Hint(
-    content = Text(Messages("hts.register.bank-details.sort-code.hint")),
-    )),
-    errorMessage = errorHelpers.formErrorMessage(formName, form, "sortCode")
+      id = "sortCode",
+      name = "sortCode",
+      label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text(messages("hts.register.bank-details.sort-code.label"))
+      ),
+      classes = "govuk-input--width-5",
+      value = form.data.get("sortCode"),
+      hint = Some(Hint(
+      content = Text(Messages("hts.register.bank-details.sort-code.hint")),
+      )),
+      errorMessage = getErrorMessage(form, "sortCode").map(errorMsg =>
+        ErrorMessage(
+          content = Text(errorMsg),
+          visuallyHiddenText = Some(messages("generic.errorPrefix"))
+        ))
     ))
 
     @viewHelpers.govukInput(Input(
-    id = "accountNumber",
-    name = "accountNumber",
-    label = Label(
-    isPageHeading = false,
-    classes = "govuk-label--m",
-    content = Text(messages("hts.register.bank-details.accountNumber.label"))
-    ),
-    classes = "govuk-!-width-one-third",
-    value = form.data.get("accountNumber"),
-    hint = Some(Hint(
-    content = Text(Messages("hts.register.bank-details.accountNumber.hint")),
-    )),
-    errorMessage = errorHelpers.formErrorMessage(formName, form, "accountNumber")
+      id = "accountNumber",
+      name = "accountNumber",
+      label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text(messages("hts.register.bank-details.accountNumber.label"))
+      ),
+      classes = "govuk-!-width-one-third",
+      value = form.data.get("accountNumber"),
+      hint = Some(Hint(
+        content = Text(Messages("hts.register.bank-details.accountNumber.hint")),
+      )),
+      errorMessage = getErrorMessage(form, "accountNumber").map(errorMsg =>
+        ErrorMessage(
+          content = Text(errorMsg),
+          visuallyHiddenText = Some(messages("generic.errorPrefix"))
+        ))
     ))
 
     @viewHelpers.govukInput(Input(
@@ -90,7 +98,11 @@ d
       hint = Some(Hint(
           content = Text(Messages("hts.register.bank-details.rollNumber.hint"))
         )),
-      errorMessage = errorHelpers.formErrorMessage(formName, form, "rollNumber")
+      errorMessage = getErrorMessage(form, "rollNumber").map(errorMsg =>
+        ErrorMessage(
+          content = Text(errorMsg),
+          visuallyHiddenText = Some(messages("generic.errorPrefix"))
+        ))
     ))
 
     @viewHelpers.govukInput(Input(
@@ -102,7 +114,11 @@ d
     content = Text(messages("hts.register.bank-details.accountName.label"))
     ),
     value = form.data.get("accountName"),
-    errorMessage = errorHelpers.formErrorMessage(formName, form, "accountName")
+    errorMessage = getErrorMessage(form, "accountName").map(errorMsg =>
+      ErrorMessage(
+        content = Text(errorMsg),
+        visuallyHiddenText = Some(messages("generic.errorPrefix"))
+      ))
     ))
 
     @viewHelpers.govukButton(Button(

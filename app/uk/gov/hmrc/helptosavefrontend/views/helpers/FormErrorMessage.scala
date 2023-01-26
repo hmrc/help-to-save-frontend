@@ -16,24 +16,38 @@
 
 package uk.gov.hmrc.helptosavefrontend.views.helpers
 
-import play.api.data.Form
+import play.api.data.{Form, FormError}
 import play.api.i18n.Messages
 import play.twirl.api._
 import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.errormessage.ErrorMessage
 import uk.gov.hmrc.govukfrontend.views.html.components._
 import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+
 import javax.inject.Inject
 
 class FormErrorMessage @Inject()(ui: ViewHelpers) {
 
-  def errorSummary(formName: String, form: Form[_])(
+  def errorText(formName: String, e: FormError)(
+    implicit messages: Messages): String =
+    messages(s"${formName}.${e.key}.${e.message}", e.args: _*)
+
+  def govukErrorText(formName: String, e: FormError)(
+    implicit messages: Messages): Text = Text(errorText(formName, e))
+
+  def errorSummary(formName: String, form: Form[_], customErrorFunction: Option[CustomCall] = None)(
       implicit messages: Messages): Option[HtmlFormat.Appendable] =
     if(form.errors.nonEmpty) {
       Some(ui.govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
         ErrorLink(
           href = Some(s"#${e.key}"),
-          content = Text(s"${messages(s"${formName}.${e.key}.${e.message}")}")
+          content = customErrorFunction
+            .fold(
+              Text(errorText(formName, e))
+            )(
+              (f:CustomCall=>Option[String]) =>
+                Text(f.apply(form, e.key).getOrElse(errorText(formName, e)))
+            )
         )
       ),
         title = Text(messages("hts.global.error-summary.title")))))
@@ -45,7 +59,12 @@ class FormErrorMessage @Inject()(ui: ViewHelpers) {
       .map(
         e =>
           ErrorMessage(
-            content = Text(messages(s"${formName}.${e.key}.${e.message}", e.args: _*)),
+            content = Text(errorText(formName, e)),
             visuallyHiddenText = Some(messages("generic.errorPrefix"))
         ))
+}
+
+trait CustomCall {
+  def apply(form: Form[_], key: String): Option[String] = Option[String]
+
 }

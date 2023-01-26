@@ -146,29 +146,29 @@ object BankDetailsValidation {
 
   object ErrorMessages {
 
-    val sortCodeEmpty: String = "sort_code_empty"
+    val sortCodeEmpty: String = "error.required"
 
-    val sortCodeIncorrectFormat: String = "sort_code_incorrect_format"
+    val sortCodeIncorrectFormat: String = "error.pattern"
 
-    val accountNumberEmpty: String = "account_number_empty"
+    val accountNumberEmpty: String = "error.required"
 
-    val accountNumberIncorrectFormat: String = "account_number_incorrect_format"
+    val accountNumberIncorrectFormat: String = "error.pattern"
 
-    val rollNumberTooShort: String = "roll_number_too_short"
+    val rollNumberTooShort: String = "error.tooShort"
 
-    val rollNumberTooLong: String = "roll_number_too_long"
+    val rollNumberTooLong: String = "error.tooLong"
 
-    val rollNumberIncorrectFormat: String = "roll_number_incorrect_format"
+    val rollNumberIncorrectFormat: String = "error.pattern"
 
-    val accountNameEmpty: String = "account_name_empty"
+    val accountNameEmpty: String = "error.required"
 
-    val accountNameTooShort: String = "account_name_too_short"
+    val accountNameTooShort: String = "error.tooShort"
 
-    val accountNameTooLong: String = "account_name_too_long"
+    val accountNameTooLong: String = "error.tooLong"
 
-    val sortCodeBackendInvalid: String = "check_your_sortcode_is_correct"
+    val sortCodeBackendInvalid: String = "error.invalid"
 
-    val accountNumberBackendInvalid: String = "check_your_account_number_is_correct"
+    val accountNumberBackendInvalid: String = "error.invalid"
   }
 
   implicit class FormOps[A](val form: Form[A]) extends AnyVal {
