@@ -243,7 +243,7 @@ class RegisterControllerSpec
         status(result) shouldBe OK
         contentAsString(result) should include("Accept and create account")
         contentAsString(result) should include(
-          """<a href=/help-to-save/enter-uk-bank-details class="govuk-back-link">Back</a>"""
+          """<a href="/help-to-save/enter-uk-bank-details" class="govuk-back-link" id="back">Back</a>"""
         )
       }
 
@@ -617,9 +617,9 @@ class RegisterControllerSpec
 
         val result = getAccountCreatedPage()
         status(result) shouldBe OK
-        contentAsString(result) should include("Account created")
+        contentAsString(result) should include("account created")
         contentAsString(result) should include(accountNumber)
-        contentAsString(result) should include("""You have until <span class="bold">31 January 1970</span> to pay in money this month""")
+        contentAsString(result) should include("""You have until <strong class="bold">31 January 1970</strong> to pay in money this month""")
       }
 
       "redirect to check eligibility" when {
