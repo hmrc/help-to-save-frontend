@@ -39,9 +39,7 @@
   str.filterNot((x: Char) => x.isWhitespace || x.toString.matches("-")).grouped(2).mkString(" ")
 }
 
-@layout(title) {
-
-@navigate_back(Some(routes.BankAccountController.getBankDetailsPage.url))
+@layout(title, Some(routes.BankAccountController.getBankDetailsPage.url)) {
 
   <h1 class="govuk-heading-l">@title</h1>
 

@@ -243,7 +243,7 @@ class RegisterControllerSpec
         status(result) shouldBe OK
         contentAsString(result) should include("Accept and create account")
         contentAsString(result) should include(
-          """<a href=/help-to-save/enter-uk-bank-details class="govuk-back-link">Back</a>"""
+          """<a href="/help-to-save/enter-uk-bank-details" class="govuk-back-link" id="back">Back</a>"""
         )
       }
 
