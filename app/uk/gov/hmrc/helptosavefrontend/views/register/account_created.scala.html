@@ -58,13 +58,11 @@ viewHelpers: ViewHelpers
                 title = Text(messages("hts.global.error-summary.title"))
             ))
     }
-  <div class="govuk-panel govuk-panel--confirmation">
-    <h1 class="govuk-panel__title">@title</h1>
-    <div class="govuk-panel__body">
-      @Messages("hts.account-created.title.p1")
-      <strong>@accountNumber</strong>
-    </div>
-  </div>
+
+@viewHelpers.govukPanel(Panel(
+    title = Text(messages("hts.account-created.title.h1")),
+    content = HtmlContent(s"${messages("hts.account-created.title.p1")}<br><strong>${accountNumber}</strong>")
+))
 
     <p class="govuk-body">@Html(Messages("hts.register.create_account.confirmation-info.p1")) @email@Html(Messages("hts.register.create_account.confirmation-info.p2"))</p>
     <h2 class="govuk-heading-m">@Messages("hts.register.create_account.what-you-need-to-do.title")</h2>
@@ -73,7 +71,7 @@ viewHelpers: ViewHelpers
     <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p3.1") <strong class="bold">@{DateUtils.toLocalisedString(lastPayDateThisMonth)}</strong> @Messages("hts.register.create_account.what-you-need-to-do.p3.2")</p>
 
 @viewHelpers.form(routes.RegisterController.accessOrPayIn){
-        @viewHelpers.govUkRadios(Radios(
+        @viewHelpers.govukRadios(Radios(
         fieldset = Some(Fieldset(
             legend = Some(Legend(
             content = Text(messages("hts.register.create_account.payInNow.title")),

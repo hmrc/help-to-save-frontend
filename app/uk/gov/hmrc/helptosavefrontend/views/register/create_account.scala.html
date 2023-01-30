@@ -24,9 +24,10 @@
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.register.SummaryListRowsHelper
 
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, summaryRows: SummaryListRowsHelper)
 
 @(eligibleWithUserInfo: EligibleWithUserInfo,period: String, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -47,140 +48,22 @@
   <p class="govuk-body">@Html(Messages("hts.register.create_account.intro"))</p>
   <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-details")</h2>
   <dl class="govuk-check-your-answers cya-questions-long">
-
-    @viewHelpers.govukSummaryList(SummaryList(
-      rows = Seq(SummaryListRow(
-        key = Key(content = Text(Messages("hts.register.create_account.your-details.name"))),
-        value = Value(content = Text(eligibleWithUserInfo.userInfo.forename + " " + eligibleWithUserInfo.userInfo.surname)),
-        actions = Some(Actions(
-            items = Seq(ActionItem(
-              href = routes.RegisterController.getDetailsAreIncorrect.url,
-              content = Text(Messages("hts.register.create_account.change"))
-              ))
-          ))
-      ))))
-    @viewHelpers.govukSummaryList(SummaryList(
-    rows = Seq(SummaryListRow(
-      key = Key(content = Text(Messages("hts.register.create_account.your-details.dob"))),
-      value = Value(content = Text(DateUtils.toLocalisedString(eligibleWithUserInfo.userInfo.dateOfBirth))),
-      actions = Some(Actions(
-          items = Seq(ActionItem(
-            href = routes.RegisterController.getDetailsAreIncorrect.url,
-            content = Text(Messages("hts.register.create_account.change"))
-            ))
-        ))
-    ))))
-
-    @viewHelpers.govukSummaryList(SummaryList(
-    rows = Seq(SummaryListRow(
-      key = Key(content = Text(Messages("hts.register.create_account.your-details.nino"))),
-      value = Value(content = Text(display2CharFormat(eligibleWithUserInfo.userInfo.nino))),
-      actions = Some(Actions(
-          items = Seq(ActionItem(
-            href = routes.RegisterController.getDetailsAreIncorrect.url,
-            content = Text(Messages("hts.register.create_account.change"))
-            ))
-        ))
-    ))))
+      @viewHelpers.govukSummaryList(SummaryList(rows =
+      summaryRows.yourDetailsRow(eligibleWithUserInfo)
+      ))
   </dl>
-<h2 class="govuk-heading-m">@messages("hts.register.create_account.your-email")</h2>
+    <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-email")</h2>
   <dl class="govuk-check-your-answers cya-questions-long">
-
-    @viewHelpers.govukSummaryList(SummaryList(
-    rows = Seq(SummaryListRow(
-      key = Key(content = Text(Messages("hts.register.create_account.your-email.email"))),
-      value = Value(content = Text(email)),
-      actions = Some(Actions(
-        items = Seq(ActionItem(
-          href = routes.RegisterController.changeEmail.url,
-          content = Text(Messages("hts.register.create_account.change"))
-          ))
-        ))
-    ))))
-    @if(areRemindersEnabled) {
-    @if(period.matches("none")) {
-    @viewHelpers.govukSummaryList(SummaryList(
-    rows = Seq(SummaryListRow(
-      key = Key(content = Text(Messages("hts.email-saving-remainders.title.h1"))),
-          value = Value(content = Text(Messages("hts.register.create_account.your-remainder.note"))),
-          actions = Some(Actions(
-          items = Seq(ActionItem(
-          href = routes.RegisterController.changeEmail.url,
-          content = Text(Messages("hts.register.create_account.change"))
-          ))
-        ))
-    ))))
-    } else{
-        @viewHelpers.govukSummaryList(SummaryList(
-        rows = Seq(SummaryListRow(
-        key = Key(content = Text(Messages("hts.email-saving-remainders.title.h1"))),
-            value = Value(content = Text(Messages("hts.reminder-confirmation.title.p1-1") +" "+
-                  PeriodUtils.getMessage(period)
-                  +" "+ Messages("hts.reminder-confirmation.title.p1-2"))),
-            actions = Some(Actions(
-            items = Seq(ActionItem(
-              href = routes.RegisterController.changeEmail.url,
-              content = Text(Messages("hts.register.create_account.change"))
-              ))
-            ))
-        ))))
-      }
-    }
+      @viewHelpers.govukSummaryList(SummaryList(rows =
+      summaryRows.yourEmailDetailsRow(email,period,areRemindersEnabled)
+      ))
   </dl>
-
-<h2 class="govuk-heading-m">@messages("hts.register.create_account.your-bank-details")</h2>
+    <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-bank-details")</h2>
   <dl class="govuk-check-your-answers cya-questions-long">
-      @viewHelpers.govukSummaryList(SummaryList(
-      rows = Seq(SummaryListRow(
-      key = Key(content = Text(Messages("hts.register.create_account.your-bank-details.sort-code"))),
-      value = Value(content = Text(Messages(display2CharFormat(bankDetails.sortCode.toString())))),
-      actions = Some(Actions(
-      items = Seq(ActionItem(
-      href = routes.RegisterController.changeBankDetails.url + "#sortCode",
-      content = Text(Messages("hts.register.create_account.change"))
+      @viewHelpers.govukSummaryList(SummaryList(rows =
+      summaryRows.yourBankDetailsRow(bankDetails)
       ))
-      ))
-      ))))
-
-      @viewHelpers.govukSummaryList(SummaryList(
-      rows = Seq(SummaryListRow(
-      key = Key(content = Text(Messages("hts.register.create_account.your-bank-details.account-number"))),
-      value = Value(content = Text(Messages(bankDetails.accountNumber))),
-      actions = Some(Actions(
-      items = Seq(ActionItem(
-      href = routes.RegisterController.changeBankDetails.url + "#sortCode",
-      content = Text(Messages("hts.register.create_account.change"))
-      ))
-      ))
-      ))))
-
-    @if(bankDetails.rollNumber.nonEmpty) {
-      @viewHelpers.govukSummaryList(SummaryList(
-      rows = Seq(SummaryListRow(
-      key = Key(content = Text(Messages("hts.register.create_account.your-bank-details.roll-number"))),
-      value = Value(content = Text(Messages(bankDetails.rollNumber.getOrElse("")))),
-      actions = Some(Actions(
-      items = Seq(ActionItem(
-      href = routes.RegisterController.changeBankDetails.url + "#rollNumber",
-      content = Text(Messages("hts.register.create_account.change"))
-      ))
-      ))
-      ))))
-    }
-
-      @viewHelpers.govukSummaryList(SummaryList(
-      rows = Seq(SummaryListRow(
-      key = Key(content = Text(Messages("hts.register.create_account.your-bank-details.account-name"))),
-      value = Value(content = Text(Messages(bankDetails.accountName))),
-      actions = Some(Actions(
-      items = Seq(ActionItem(
-      href = routes.RegisterController.changeBankDetails.url + "#accountName",
-      content = Text(Messages("hts.register.create_account.change"))
-      ))
-      ))
-      ))))
   </dl>
-
   <h2 class="govuk-heading-m">@Messages("hts.register.create_account.tandc-title")</h2>
   <p class="govuk-body">@Html(Messages("hts.register.create_account.tandc-p1"))</p>
   <ul class="govuk-list govuk-list--bullet">
