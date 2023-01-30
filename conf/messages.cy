@@ -795,6 +795,21 @@ hts.reminder-apply-savings=A ydych am gael e-byst atgoffa ynghylch cynilion?
 hts.reminder-select.error.missing=Dewiswch a ydych am drefnu e-byst atgoffa
 hts.register.create_account.your-remainder.note=Ni fyddwn yn anfon unrhyw nodynnau atgoffa atoch. Gallwch drefnu’r rhain yn nes ymlaen os ydych yn dymuno gwneud hynny.
 
+hts.timeout.timeoutTitle = Rydych ar fin cael eich allgofnodi
+hts.timeout.signedOutMessage = Er eich diogelwch, gwnaethom eich allgofnodi
+hts.timeout.timeoutMessage = Er eich diogelwch, byddwn yn eich allgofnodi cyn pen
+
+hts.timeout.timeoutKeepAliveButtonText = Parhau i fod wedi’ch mewngofnodi
+hts.timeout.timeoutSignOutButtonText = Allgofnodi
+hts.timeout.timeoutMinutes = funud
+hts.timeout.timeoutMinute = funud
+hts.timeout.timeoutSeconds = eiliad
+hts.timeout.timeoutSecond = eiliad
+
+hts.timed-out.p1=Roedd hyn oherwydd eich bod wedi bod yn segur am rhy hir.
+hts.timed-out.p2=Bydd yn rhaid i chi fewngofnodi er mwyn cael mynediad at eich cyfrif Cymorth i Gynilo.
+hts.timed-out.button=Mewngofnodi
+
 accessibility.statement.title = Datganiad hygyrchedd ar gyfer Cymorth i Gynilo
 accessibility.statement.paragraph.one = Mae’r datganiad hygyrchedd hwn yn esbonio pa mor hygyrch yw’r gwasanaeth hwn, beth i’w wneud os ydych yn cael anhawster wrth ei ddefnyddio, a sut i roi gwybod am broblemau hygyrchedd gyda’r gwasanaeth.
 accessibility.statement.paragraph.two.start = Mae’r gwasanaeth hwn yn rhan o wefan ehangach GOV.UK. Mae

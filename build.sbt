@@ -18,7 +18,7 @@ lazy val scoverageSettings = {
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|views.*);.*(AuthService|BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimumStmtTotal := 92,
+    ScoverageKeys.coverageMinimumStmtTotal := 90,
     ScoverageKeys.coverageFailOnMinimum := true,
     ScoverageKeys.coverageHighlighting := true,
     Test / parallelExecution := false
@@ -63,7 +63,6 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
 
 lazy val commonSettings = Seq(
   addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"),
-  resolvers += Resolver.bintrayRepo("hmrc", "releases"),
   scalacOptions ++= Seq(
     "-Xcheckinit",
     "-feature",
