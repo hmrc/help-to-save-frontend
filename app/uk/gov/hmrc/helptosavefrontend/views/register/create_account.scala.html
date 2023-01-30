@@ -47,23 +47,17 @@
 
   <p class="govuk-body">@Html(Messages("hts.register.create_account.intro"))</p>
   <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-details")</h2>
-  <dl class="govuk-check-your-answers cya-questions-long">
       @viewHelpers.govukSummaryList(SummaryList(rows =
       summaryRows.yourDetailsRow(eligibleWithUserInfo)
       ))
-  </dl>
     <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-email")</h2>
-  <dl class="govuk-check-your-answers cya-questions-long">
       @viewHelpers.govukSummaryList(SummaryList(rows =
       summaryRows.yourEmailDetailsRow(email,period,areRemindersEnabled)
       ))
-  </dl>
     <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-bank-details")</h2>
-  <dl class="govuk-check-your-answers cya-questions-long">
       @viewHelpers.govukSummaryList(SummaryList(rows =
       summaryRows.yourBankDetailsRow(bankDetails)
       ))
-  </dl>
   <h2 class="govuk-heading-m">@Messages("hts.register.create_account.tandc-title")</h2>
   <p class="govuk-body">@Html(Messages("hts.register.create_account.tandc-p1"))</p>
   <ul class="govuk-list govuk-list--bullet">
