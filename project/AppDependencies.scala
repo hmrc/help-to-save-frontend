@@ -15,8 +15,8 @@ object AppDependencies {
     "org.typelevel"     %% "cats-core"                  % "2.6.1",
     hmrc                %% "domain"                     % "6.2.0-play-28",
     compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.5" cross CrossVersion.full),
-    "com.github.ghik" % "silencer-lib" % "1.7.5" % Provided cross CrossVersion.full
-    "uk.gov.hmrc"       %% "play-frontend-hmrc"          % s"3.34.0-$playVersion"
+    "com.github.ghik" % "silencer-lib" % "1.7.5" % Provided cross CrossVersion.full,
+    hmrc                %% "play-frontend-hmrc"         % s"3.34.0-$playVersion"
 
   )
 
