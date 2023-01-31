@@ -798,6 +798,21 @@ hts.reminder-apply-savings=Do you want to receive email savings reminders?
 reminder-select.reminderFrequency.error.missing=Select whether you want to set up email reminders
 hts.register.create_account.your-remainder.note=We will not send you any reminders. You can set these up later if you wish.
 
+hts.timeout.timeoutTitle = You’re about to be signed out
+hts.timeout.signedOutMessage = For your security, we signed you out
+hts.timeout.timeoutMessage = For your security, we will sign you out in
+
+hts.timeout.timeoutKeepAliveButtonText = Stay signed in
+hts.timeout.timeoutSignOutButtonText = Sign out
+hts.timeout.timeoutMinutes = minutes
+hts.timeout.timeoutMinute = minute
+hts.timeout.timeoutSeconds = seconds
+hts.timeout.timeoutSecond = second
+
+hts.timed-out.p1=This was because you were inactive for too long.
+hts.timed-out.p2=To access your Help to Save account, you’ll need to sign in.
+hts.timed-out.button=Sign in
+
 accessibility.statement.title = Accessibility statement for Help to Save
 accessibility.statement.paragraph.one = This accessibility statement explains how accessible this service is, what to do if you have difficulty using it, and how to report accessibility problems with the service.
 accessibility.statement.paragraph.two.start = This service is part of the wider GOV.UK website. There is a separate

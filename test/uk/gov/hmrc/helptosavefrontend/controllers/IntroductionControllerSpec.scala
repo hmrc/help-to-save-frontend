@@ -27,6 +27,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
+import uk.gov.hmrc.helptosavefrontend.views.html.time_out
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -59,7 +60,8 @@ class IntroductionControllerSpec
     testErrorHandler,
     testMaintenanceSchedule,
     injector.instanceOf[privacy],
-    injector.instanceOf[help_information]
+    injector.instanceOf[help_information],
+    injector.instanceOf[time_out]
   )
 
   def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =

@@ -56,19 +56,32 @@
     <![endif]-->
 }
 
-
-
 @pageScripts = {
   @scriptElem
   <script src='@routes.Assets.versioned("javascripts/show-hide-content.js")'></script>
   <script src='@routes.Assets.versioned("javascripts/do-not-track.js")'></script>
+  <script>
+      window.jsConfig = window.jsConfig || {};
+      window.jsConfig.timeoutEnabled = @{enableSignOutLink};
+      window.jsConfig.timeout = @{appConfig.TimeoutConfig.timeoutSeconds};
+      window.jsConfig.countdown = @{appConfig.TimeoutConfig.countdownSeconds};
+      window.jsConfig.keep_alive_url = "@{appConfig.TimeoutConfig.keepAliveUrl}";
+      window.jsConfig.logout_url = "@{appConfig.TimeoutConfig.timedOutUrl}";
+      window.jsConfig.timeoutTitle = "@messages("hts.timeout.timeoutTitle")"
+      window.jsConfig.timeoutMessage = "@messages("hts.timeout.timeoutMessage")"
+      window.jsConfig.timeoutKeepAliveButtonText = "@messages("hts.timeout.timeoutKeepAliveButtonText")"
+      window.jsConfig.timeoutSignOutButtonText = "@messages("hts.timeout.timeoutSignOutButtonText")"
+      window.jsConfig.timeoutMinutes = "@messages("hts.timeout.timeoutMinutes")"
+      window.jsConfig.timeoutMinute = "@messages("hts.timeout.timeoutMinute")"
+      window.jsConfig.timeoutSeconds = "@messages("hts.timeout.timeoutSeconds")"
+      window.jsConfig.timeoutSecond = "@messages("hts.timeout.timeoutSecond")"
+  </script>
   <script src='@routes.Assets.versioned("javascripts/application.js")'></script>
 }
 
 @headScripts = {
   <script src="https://cdn.optimizely.com/js/10428983306.js"></script>
 }
-
 
 @headHtml = {
   @headWithTrackingConsent(

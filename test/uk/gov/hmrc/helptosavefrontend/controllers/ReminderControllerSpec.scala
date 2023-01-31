@@ -288,7 +288,6 @@ class ReminderControllerSpec
 
     "should return acount closed page when account is closed" in {
       val account = Account(true, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
-      val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
@@ -300,8 +299,6 @@ class ReminderControllerSpec
     }
 
     "should return the reminder setting page when asked for " in {
-
-      val fakeRequestWithNoBody = FakeRequest("GET", "/")
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
