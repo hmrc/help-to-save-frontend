@@ -22,155 +22,89 @@
 @import uk.gov.hmrc.helptosavefrontend.models.account.BonusTerm
 @import java.time.LocalDate
 
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.DetailsHelper
+@import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
+@import uk.gov.hmrc.helptosavefrontend.views.register.SummaryListRowsHelper
+
+
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, detailsHelper: DetailsHelper, summaryRows: SummaryListRowsHelper)
 
 @(accountNumber: Option[String], maybeAccount: Option[Account])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @title = @{
   Messages("hts.help.information.title.h1")
 }
-
-
 @date =@{maybeAccount.fold[Option[LocalDate]](None)(account => account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate)))}
-
-@layout(
-  title = title + " " + Messages("hts.global.accountholder.title-suffix")
-){
-  @navigate_back(Some(appConfig.nsiManageAccountUrl))
-
-  <h1 class="govuk-heading--l">@title</h1>
-
-  @help_intro_section(heading = Messages("hts.help-information.section.payments.title"))
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.payments.s1.title"),
-    body = payments_how_much()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.payments.s2.title"),
-    body = setup_regular_payment(accountNumber)
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.payments.s3.title"),
-    body = when_will_payments_appear()
-  )
-
-  @help_intro_section(heading = Messages("hts.help-information.section.bonuses.title"))
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.bonuses.s1.title"),
-    body = what_bonuses()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.bonuses.s2.title"),
-    body = highest_balance()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.bonuses.s3.title"),
-    body = first_bonus()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.bonuses.s4.title"),
-    body = final_bonus()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.bonuses.s5.title"),
-    body = bonus_examples()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.bonuses.s6.title"),
-    body = bonus_paid()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.bonuses.s7.title"),
-    body = how_withdrawals_affect_bonuses()
-  )
-
-  @help_intro_section(heading = Messages("hts.help-information.section.withdrawals.title"))
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.withdrawals.s1.title"),
-    body = withdrawing_money()
-  )
-
-  @help_intro_section(heading = Messages("hts.help-information.section.how-account-works.title"))
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.how-account-works.s1.title"),
-    body = savings_explained()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.how-account-works.s2.title"),
-    body = how_sign_in()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.how-account-works.s3.title"),
-    body = why_use_app()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.how-account-works.s4.title"),
-    body = how_contact_you()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.how-account-works.s5.title"),
-    body = leave_uk()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.how-account-works.s6.title"),
-    body = stop_claiming_benefits()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.how-account-works.s8.title"),
-    body = close_account_early()
-  )
-
-  @help_intro_section_detail(
-    title = Messages("hts.help-information.section.how-account-works.s9.title"),
-    body = death_terminal_illness()
-  )
-
+@paymentDetailsList = @{detailsHelper.payment(
+    payments_how_much().toString,
+    setup_regular_payment(accountNumber).toString,
+    when_will_payments_appear().toString
+    )}
+@bonusesDetailsList = @{detailsHelper.bonuses(
+    what_bonuses().toString,
+    highest_balance().toString,
+    first_bonus().toString,
+    final_bonus().toString,
+    bonus_examples().toString,
+    bonus_paid().toString,
+    how_withdrawals_affect_bonuses().toString
+    )}
+@withdrawalsDetailsList = @{detailsHelper.withdrawals(
+    withdrawing_money().toString
+    )}
+@howAccountWorksDetailsList = @{detailsHelper.howAccountWorks(
+    savings_explained().toString,
+    how_sign_in().toString,
+    why_use_app().toString,
+    how_contact_you().toString,
+    leave_uk().toString,
+    stop_claiming_benefits().toString,
+    close_account_early().toString,
+    death_terminal_illness().toString
+    )}
+@whenYourAccountEndsList = @{detailsHelper.whenYourAccountEnds(
+    before_account_closes(date).toString,
+    after_4_years(date).toString,
+    savings_after_account_closes().toString
+    )}
+@hmrcAppList = @{detailsHelper.hmrcApp(
+    app_benefits().toString,
+    get_app().toString
+    )}
+@layout(title = title + " " + Messages("hts.global.accountholder.title-suffix"), Some(appConfig.nsiManageAccountUrl)){
+  <h1 class="govuk-heading-l">@title</h1>
+<!--payments-->
+@help_intro_section(heading = Messages("hts.help-information.section.payments.title"))
+        @for(detail <- paymentDetailsList) {
+        @viewHelpers.govUkDetails((detail))
+        }
+<!--bonuses-->
+@help_intro_section(heading = Messages("hts.help-information.section.bonuses.title"))
+    @for(detail <- bonusesDetailsList) {
+    @viewHelpers.govUkDetails((detail))
+    }
+<!--withdrawals-->
+@help_intro_section(heading = Messages("hts.help-information.section.withdrawals.title"))
+    @for(detail <- withdrawalsDetailsList) {
+    @viewHelpers.govUkDetails((detail))
+    }
+<!--how-account-works-->
+@help_intro_section(heading = Messages("hts.help-information.section.how-account-works.title"))
+    @for(detail <- howAccountWorksDetailsList) {
+    @viewHelpers.govUkDetails((detail))
+    }
+<!--when-your-account-ends-->
 @help_intro_section(heading = Messages("hts.help-information.section.when-your-account-ends.title"))
+    @for(detail <- whenYourAccountEndsList) {
+    @viewHelpers.govUkDetails((detail))
+    }
 
-@help_intro_section_detail(
-title = Messages("hts.help-information.section.when-your-account-ends.s1.title"),
-body = before_account_closes(date)
-)
-
-@help_intro_section_detail(
-title = Messages("hts.help-information.section.when-your-account-ends.s2.title"),
-body = after_4_years(date)
-)
-
-@help_intro_section_detail(
-title = Messages("hts.help-information.section.when-your-account-ends.s3.title"),
-body = savings_after_account_closes()
-)
-
-
+<!--hmrc-app-->
 @help_intro_section(heading = Messages("hts.help-information.section.hmrc-app.title"))
-
-@help_intro_section_detail(
-title = Messages("hts.help-information.section.hmrc-app.benefits.title"),
-body = app_benefits()
-)
-
-@help_intro_section_detail(
-title = Messages("hts.help-information.section.hmrc-app.get-the-app.title"),
-body = get_app()
-)
+    @for(detail <- hmrcAppList) {
+    @viewHelpers.govUkDetails((detail))
+    }
 }
