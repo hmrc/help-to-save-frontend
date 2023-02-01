@@ -14,47 +14,70 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcReportTechnicalIssueHelper
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcLayout
+@import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.hmrcfrontend.views.config.StandardBetaBanner
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcAccessibleAutocompleteCss
-@import uk.gov.hmrc.hmrcfrontend.views.html.helpers.HmrcAccessibleAutocompleteJavascript
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @this(
     hmrcLayout: HmrcLayout,
+    hmrcStandardHeader: HmrcStandardHeader,
     standardBetaBanner: StandardBetaBanner,
     appConfig: FrontendAppConfig,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
     autcompleteCss: HmrcAccessibleAutocompleteCss,
     autocompleteJavascript: HmrcAccessibleAutocompleteJavascript,
-    govukBackLink: GovukBackLink
+    govukBackLink: GovukBackLink,
+    hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
+    hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
+    hmrcHead: HmrcHead
 )
 
-@(title: String, backLink: Option[String] = None, hasErrors: Boolean = false)(contentBlock: Html)(implicit request : Request[_], messages: Messages, config: FrontendAppConfig)
+@(title: String, backLink: Option[String] = None, hasErrors: Boolean = false, enableSignOutLink: Boolean = true)(contentBlock: Html)(implicit htsContext: HtsContext, request : Request[_], messages: Messages, config: FrontendAppConfig)
 
+@serviceName = @{messages("hts.global.title-suffix")}
+
+@head = {
+  @if(enableSignOutLink && htsContext.isAuthorised) {
+    @hmrcTimeoutDialogHelper(
+      title = Some(messages("hts.timeout.timeoutTitle")),
+      signOutUrl = appConfig.signOutUrl,
+      timeoutUrl = Some(appConfig.TimeoutConfig.timedOutUrl),
+      countdown = Some(appConfig.TimeoutConfig.countdownSeconds),
+      timeout = Some(appConfig.TimeoutConfig.timeoutSeconds)
+    )
+  }
+}
 @beforeContentBlock = {
   <div class="govuk-!-display-none-print">
-  @{
-    backLink map { url =>
-      govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text("Back")))
+    @hmrcLanguageSelectHelper()
+    @{
+      backLink map { url =>
+        govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text("Back")))
+      }
     }
-  }
   </div>
 }
 
 @content = {
+  <div class="govuk-!-margin-bottom-6">
     @contentBlock
+  </div>
+  <div class="govuk-!-display-none-print">
     @hmrcReportTechnicalIssueHelper()
+  </div>
 }
 
-@gdsTitle = @{s"""${if(hasErrors){ s"""${messages("hts.global.error.prefix")}: """} else ""}$title - ${messages("hts.global.title-suffix")} - GOV.UK"""}
+@gdsTitle = @{s"""${if(hasErrors){ s"""${messages("hts.global.error.prefix")}: """} else ""}$title - ${serviceName} - GOV.UK"""}
 
 @hmrcLayout(
     pageTitle = Some(gdsTitle),
-    isWelshTranslationAvailable = false,
+    isWelshTranslationAvailable = true,
     displayHmrcBanner = true,
+    signOutUrl = if(enableSignOutLink) Some(appConfig.signOutUrl) else None,
+    additionalHeadBlock = Some(hmrcHead(headBlock = Some(head))),
     beforeContentBlock = Some(beforeContentBlock),
+    serviceName = Some(serviceName),
     phaseBanner = Some(standardBetaBanner(url = appConfig.feedbackSurveyUrl))
 )(content)
