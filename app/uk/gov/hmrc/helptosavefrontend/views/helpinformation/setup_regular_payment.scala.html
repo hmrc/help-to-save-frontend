@@ -18,19 +18,19 @@
 
 @accountNumber match {
     case None => {
-        <h3 class="heading-small">@Messages("hts.help-information.section.payments-info-not-available.s2.h1")</h3>
+        <h3 class="govuk-heading-s">@Messages("hts.help-information.section.payments-info-not-available.s2.h1")</h3>
 
-        <p>@Messages("hts.help-information.section.payments-info-not-available.s2.p1")</p>
+        <p class="govuk-body">@Messages("hts.help-information.section.payments-info-not-available.s2.p1")</p>
 
-        <p>@Messages("hts.help-information.section.payments-info-not-available.s2.p2")</p>
+        <p class="govuk-body">@Messages("hts.help-information.section.payments-info-not-available.s2.p2")</p>
 
     }
 
     case Some(acNumber) => {
 
-        <h3 class="heading-small">@Messages("hts.help-information.section.payments.s2.h1")</h3>
+        <h3 class="govuk-heading-s">@Messages("hts.help-information.section.payments.s2.h1")</h3>
 
-        <ol class="list list-number">
+        <ol class="govuk-list govuk-list--number">
          <li>@Messages("hts.help-information.section.payments.s2.ol1-li1")</li>
          <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li2"))</li>
          <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li3"))</li>
@@ -40,7 +40,7 @@
          <li>@Html(Messages("hts.help-information.section.payments.s2.ol1-li7"))</li>
         </ol>
 
-        <p>@Messages("hts.help-information.section.payments.s2.p1")</p>
+        <p class="govuk-body">@Messages("hts.help-information.section.payments.s2.p1")</p>
     }
 }
 
