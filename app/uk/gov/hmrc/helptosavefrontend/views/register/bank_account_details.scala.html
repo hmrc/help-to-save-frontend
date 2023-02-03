@@ -32,7 +32,7 @@
 @rollNumberErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "rollNumber")}
 @accountNameErrorMessage = @{BankDetailsErrors.getErrorMessage(form, "accountName")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + " " + title else title}
+@pageTitle = @{if(hasErrors) messages("hts.global.error.prefix") + ": " + title else title}
 
 @sortCodeBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "sortCode")}
 @accountNumberBackendErrorMessage = @{BankDetailsErrors.getBankDetailsBackendErrorMessage(form, "accountNumber")}

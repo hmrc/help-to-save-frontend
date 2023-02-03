@@ -41,7 +41,7 @@
 }
 
 @pageTitle = @{
-  if(isErrorPage) Messages("hts.global.error.prefix") + " " + titleTemplate else titleTemplate
+  if(isErrorPage) Messages("hts.global.error.prefix") + ": " + titleTemplate else titleTemplate
 }
 
 @sidebarHtml = {
