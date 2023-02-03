@@ -38,7 +38,7 @@
           @viewHelpers.govukErrorSummary(ErrorSummary(
             errorList = Seq(
               ErrorLink(
-                href = Some("#yes"),
+                href = Some(s"#$key"),
                 content = HtmlContent(messages("hts.reminder-select.error.missing"))
               )
             ),
