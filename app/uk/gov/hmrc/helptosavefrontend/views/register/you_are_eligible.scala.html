@@ -18,41 +18,40 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.html.layout
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
-      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+@this(layout: layout, viewHelpers: ViewHelpers,
+submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
 @(userInfo: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
+@pageTitle = @{
   Messages("hts.register.you-are-eligible.title.h1")
 }
 
-@main(
-  title = title,
-  sidebarLinks = None,
-  bodyClasses = None) {
+@layout(pageTitle) {
 
-    <h1 class="heading-large">
-      @title
+    <h1 class="govuk-heading-l">
+      @pageTitle
     </h1>
 
-    <p>
+    <p class="govuk-body">
       @Messages("hts.register.you-are-eligible.p1", userInfo.forename + " " + userInfo.surname)
     </p>
 
-    <ul class="bullets">
+    <ul class="govuk-list govuk-list--bullet">
       <li>@Messages("hts.register.you-are-eligible.li1")</li>
       <li>@Messages("hts.register.you-are-eligible.li2")</li>
     </ul>
 
-    @form(routes.EligibilityCheckController.youAreEligibleSubmit) {
-        @CSRF.formField(request)
-        @submit('_buttonClass -> "", 'id → "start-creating-account") {
-            @Messages("hts.global.continue-button")
-        }
+    @viewHelpers.form(routes.EligibilityCheckController.youAreEligibleSubmit) {
+    @viewHelpers.govukButton(Button(
+        content = Text(Messages("hts.global.continue-button"))
+        ))
     }
 
 }
