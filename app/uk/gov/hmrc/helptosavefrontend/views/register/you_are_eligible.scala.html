@@ -17,9 +17,7 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
-@import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.html.layout
 @import uk.gov.hmrc.govukfrontend.views.html.components._
@@ -50,6 +48,7 @@ submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
 
     @viewHelpers.form(routes.EligibilityCheckController.youAreEligibleSubmit) {
     @viewHelpers.govukButton(Button(
+        attributes = Map("id" -> "start_create_account"),
         content = Text(Messages("hts.global.continue-button"))
         ))
     }
