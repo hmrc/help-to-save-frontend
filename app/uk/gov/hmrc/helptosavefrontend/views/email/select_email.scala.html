@@ -15,89 +15,112 @@
  *@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.forms.SelectEmail
-@import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 
 @(email: String, form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.select-email.title.h1")
+@title = @{messages("hts.select-email.title.h1")}
+@key = @{"email"}
+@newEmailKey = @{"new-email"}
+@newEmailHtml = {
+  @viewHelpers.govukInput(Input(
+    id = newEmailKey,
+    name = newEmailKey,
+    inputType = "email",
+    label = Label(
+      content = Text(messages("hts.select-email.enter-new-address-label")),
+      classes = "govuk-label--s"
+    ),
+    hint = Some(Hint(
+      content = HtmlContent(messages("hts.select-email.enter-new-address-hint")))),
+    errorMessage = if(form.error(newEmailKey).isDefined) {
+      Some(ErrorMessage(
+        content = HtmlContent(email_form_validation_error_message(form, newEmailKey)),
+        visuallyHiddenText = Some(messages("hts.global.error.prefix"))
+      ))
+    } else None,
+    autocomplete = Some("email"),
+    spellcheck = Some(false),
+    value = form.data.get(newEmailKey)
+  ))
+  <p class="govuk-body govuk-!-margin-top-2">@messages("hts.select-email.enter-new-address-body-text")</p>
 }
 
 @defining((form.error("email").isDefined, form.error("new-email").isDefined, form.data.get("new-email"))){ case (hasNotSelected, hasInvalidEmail, newEmail) =>
-  @main(
-      title = title,
-      bodyClasses = None,
-      isErrorPage = hasNotSelected || hasInvalidEmail) {
+  @layout(title, backLink, hasErrors = hasNotSelected || hasInvalidEmail) {
 
-  @navigate_back(backLink)
+    @if(hasNotSelected) {
+      @viewHelpers.govukErrorSummary(ErrorSummary(
+        errorList = Seq(
+          ErrorLink(
+            href = Some(s"#$key"),
+            content = Text(messages("hts.select-email.select-an-option"))
+          )
+        ),
+        title = Text(messages("hts.global.error-summary.title"))
+      ))
+    }
 
-  @{if(hasNotSelected)
-  <div class="error-summary" role="alert" aria-labelledby="error-summary-select-one-option" tabindex="-1">
-    <h2 class="heading-medium error-summary-heading" id="error-summary-select-one-option">{Messages("hts.select-email.select-one.error-summary.title")}</h2>
-    <ul class="error-summary-list">
-      <li><a href="#select-one-option">{Messages("hts.select-email.select-an-option")}</a></li>
-    </ul>
-  </div>
+    @if(hasInvalidEmail) {
+        @viewHelpers.govukErrorSummary(ErrorSummary(
+          errorList = Seq(
+            ErrorLink(
+              href = Some(s"#$newEmailKey"),
+              content = HtmlContent(email_form_validation_error_message(form, "new-email"))
+            )
+          ),
+          title = Text(messages("hts.global.error-summary.title"))
+        ))
+    }
+
+  @viewHelpers.form(routes.EmailController.selectEmailSubmit) {
+    @viewHelpers.govukRadios(
+      Radios(
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(title),
+            classes = "govuk-fieldset__legend--l",
+            isPageHeading = true
+          ))
+        )),
+        hint = Some(Hint(content = Text(messages("hts.email-saving-remainders.intro")))),
+        idPrefix = Some(key),
+        name = key,
+        items = Seq(
+          RadioItem(
+            content = Text(email),
+            value = Some("Yes"),
+            checked = form.data.values.toList.contains("Yes")
+          ),
+          RadioItem(
+            content = Text(messages("hts.select-email.select-new-address")),
+            value = Some("No"),
+            checked = form.data.values.toList.contains("No"),
+            conditionalHtml = Some(newEmailHtml)
+          )
+        ),
+        errorMessage = if(hasNotSelected) {
+          Some(ErrorMessage(
+            content = Text(messages("hts.select-email.select-an-option")),
+            visuallyHiddenText = Some(messages("hts.global.error.prefix"))
+          ))
+        } else None
+      )
+    )
+
+    @viewHelpers.govukButton(Button(
+      attributes = Map(
+        "id" -> "confirm-selected-email",
+        "onclick" -> "ga('send', 'event', 'button', 'Applicant selected email', 'Applicant select email address page');"
+      ),
+      content = Text(messages("hts.global.continue-button"))
+    ))
   }
-
-  @if(hasInvalidEmail) {
-  <div class="error-summary" role="alert" aria-labelledby="error-summary-invalid-email" tabindex="-2">
-    <h2 class="heading-medium error-summary-heading" id="error-summary-invalid-email">@Messages("hts.select-email.invalid-email.error-summary.title")</h2>
-    <ul class="error-summary-list">
-      <li><a href="#collect-new-email">@email_form_validation_error_message(form, "new-email")</a></li>
-    </ul>
-  </div>
-  }
-
-  <form method="post" action=@routes.EmailController.selectEmailSubmit novalidate>
-    @CSRF.formField(request)
-
-    <div class="@{"form-group" + {if(hasNotSelected) " form-group-error" else "" }}" id="select-one-option">
-      <fieldset@if(hasNotSelected){ aria-describedby="select-email-error"}>
-        <legend>
-          <h1 class="@{"heading-large" + {if(hasNotSelected) " flush--top" else ""}}">@title</h1>
-        </legend>
-
-        @{if(hasNotSelected) <span class="error-message" id="select-email-error">{messages("hts.select-email.select-an-option")}</span> }
-
-        <div class="multiple-choice">
-          <input id="registered-email" type="radio" name="email" value="Yes" @if(!hasNotSelected && newEmail.isDefined && newEmail.exists(_.isEmpty)){ checked }>
-          <label for="registered-email">@email</label>
-        </div>
-
-        <div class="multiple-choice" data-target="collect-new-email">
-          <input id="add-new-email" type="radio" name="email" value="No" @if(hasInvalidEmail || (newEmail.isDefined && newEmail.exists(_.nonEmpty))){ checked }>
-          <label for="add-new-email">@messages("hts.select-email.select-new-address")</label>
-        </div>
-
-        <div class="@{"panel panel-border-narrow js-hidden" + {if(hasInvalidEmail) " panel-with-error" else ""}}" id="collect-new-email">
-          <div class="@{"form-group" + {if(hasInvalidEmail) " form-group-error" else ""}}">
-            <label class="form-label-bold" for="new-email">@messages("hts.select-email.enter-new-address-label")</label>
-
-            <span class="form-hint" id="new-email-hint">@Html(Messages("hts.select-email.enter-new-address-hint"))</span>
-            @if(hasInvalidEmail) { <span class="error-message" id="new-email-error">@email_form_validation_error_message(form, "new-email")</span> }
-
-            <input class="form-control @if(hasInvalidEmail){form-control-error}" name="new-email" type="email" id="new-email" aria-describedby="new-email-hint @if(hasInvalidEmail || hasNotSelected){ new-email-error}" @if(form.data.get("new-email").nonEmpty){ value="@form.data.get("new-email")" }>
-          </div>
-          <p>@messages("hts.select-email.enter-new-address-body-text")</p>
-        </div>
-
-      </fieldset>
-    </div>
-
-    <div class="form-field form-field--submit">
-      <button id="confirm-selected-email" class="button getSelectedEmail" type="submit" onclick="ga('send', 'event', 'button', 'Applicant selected email', 'Applicant select email address page');">
-        @messages("hts.global.continue-button")
-      </button>
-    </div>
-  </form>
-  }
-
-}
+}}
