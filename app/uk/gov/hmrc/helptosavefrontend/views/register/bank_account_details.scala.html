@@ -118,7 +118,13 @@
     ))
 
     @viewHelpers.govukButton(Button(
-    content = Text(Messages("hts.global.continue-button"))
+      attributes = Map(
+        "id" -> "bankDetailsSubmit",
+        "data-ga-event-category" -> "buttons",
+        "data-ga-event-action" -> "Applicant submitted bank account details",
+        "data-ga-event-label" -> title
+      ),
+      content = Text(Messages("hts.global.continue-button"))
     ))
   }
 }
