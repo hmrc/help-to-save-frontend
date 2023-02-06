@@ -49,6 +49,10 @@ object BankDetailsErrors {
       Some(messages("hts.account-name.too-short", appConfig.BankDetailsConfig.accountNameMinLength))
     } else if (has(_.accountNameTooLong)) {
       Some(messages("hts.account-name.too-long", appConfig.BankDetailsConfig.accountNameMaxLength))
+    } else if (form.sortCodeBackendInvalid(key)) {
+      Some(messages("hts.bank_details.check_your_sortcode_is_correct"))
+    } else if (form.accountNumberBackendInvalid(key)) {
+      Some(messages("hts.bank_details.check_your_account_number_is_correct"))
     } else {
       None
     }

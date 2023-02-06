@@ -14,31 +14,26 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 
 @(backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@title = @{messages("hts.email-saving-remainders.title.h1")}
 
-@title = @{
-    Messages("hts.email-saving-remainders.title.h1")
-}
+@layout(title, backLink) {
 
-    @main(
-        title = title,
-        bodyClasses = None
-    ) {
+    <h1 class="govuk-heading-l">@title</h1>
+    <p class="govuk-body">@messages("hts.email-saving-remainders.intro")</p>
+    <p class="govuk-body">@messages("hts.email-saving-remainders.note")</p>
 
-    @navigate_back(backLink)
-
-    <h1 class="heading-large">@title</h1>
-    <p>@Html(Messages("hts.email-saving-remainders.intro"))</p>
-    <p> @Html(Messages("hts.email-saving-remainders.note"))</p>
-
-    <p class="subsection--wide push--bottom"><a href=@routes.ReminderController.getSelectRendersPage.url class="button" role="button">@messages("hts.email-saving-remainders-button")</a></p>
-
+    @viewHelpers.govukButton(Button(
+      content = Text(messages("hts.email-saving-remainders-button")),
+      href = Some(routes.ReminderController.getSelectRendersPage.url)
+    ))
 }

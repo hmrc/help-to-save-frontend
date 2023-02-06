@@ -1,3 +1,6 @@
+# overrides
+footer.privacy.url = privacy-statement
+
 # Global
 hts.global.continue-button=Continue
 hts.global.sign-in-button=Sign in
