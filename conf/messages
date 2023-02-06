@@ -1,5 +1,5 @@
 # overrides
-footer.privacy.url = help-to-save/privacy-statement
+footer.privacy.url = privacy-statement
 
 # Global
 hts.global.continue-button=Continue

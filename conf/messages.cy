@@ -1,6 +1,6 @@
 Reference=Welsh text
 # overrides
-footer.privacy.url = help-to-save/privacy-statement
+footer.privacy.url = privacy-statement
 
 hts.global.continue-button=Yn eich blaen
 hts.global.sign-in-button=Mewngofnodi
