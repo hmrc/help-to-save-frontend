@@ -54,7 +54,7 @@
             <fieldset@if(errorMessage.isDefined){ aria-describedby="frequency-error"}>
 
             <legend>
-                <h1 class="@{"heading-large" + {if(errorMessage.isDefined) " flush--top" else ""}}">@title</h1>
+                <h1 class="@{"govuk-heading--l" + {if(errorMessage.isDefined) " flush--top" else ""}}">@title</h1>
             </legend>
 
             @CSRF.formField(request)
