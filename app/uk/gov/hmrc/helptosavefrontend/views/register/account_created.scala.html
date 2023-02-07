@@ -98,6 +98,12 @@ viewHelpers: ViewHelpers
         ))
 
         @viewHelpers.govukButton(Button(
+          attributes = Map(
+            "id" -> "accessAccountOrPayIn",
+            "data-ga-event-category" -> "buttons",
+            "data-ga-event-action" -> "Continue",
+            "data-ga-event-label" -> "Account created page"
+          ),
           content = Text(Messages("hts.register.create_account.payInNow.continue"))
         ))
     }
