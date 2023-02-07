@@ -43,7 +43,7 @@ viewHelpers: ViewHelpers
   """))
 }
 
-@layout(title, hasErrors = form.errors.nonEmpty) {
+@layout(title, hasErrors = form.errors.nonEmpty, extraMeta = extraMeta) {
 
     @if(form.errors.nonEmpty) {
       @viewHelpers.govukErrorSummary(ErrorSummary(errorList =
