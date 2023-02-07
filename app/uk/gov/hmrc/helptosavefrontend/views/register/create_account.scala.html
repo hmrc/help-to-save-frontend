@@ -68,7 +68,13 @@
 
   @viewHelpers.form(routes.RegisterController.createAccount){
     @viewHelpers.govukButton(Button(
-    content = Text(Messages("hts.register.create_account.accept-label"))
+      attributes = Map(
+        "id" -> "accept-and-create-account",
+        "data-ga-event-category" -> "buttons",
+        "data-ga-event-action" -> "Accept and create account",
+        "data-ga-event-label" -> "Create account page"
+      ),
+      content = Text(Messages("hts.register.create_account.accept-label"))
     ))
   }
 
