@@ -50,21 +50,21 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-details.name"),
         messages(eligibleWithUserInfo.userInfo.forename + " " + eligibleWithUserInfo.userInfo.surname),
         routes.RegisterController.getDetailsAreIncorrect,
-        messages("hts.register.create_account.change")
+        messages("hts.register.create_account.your-details.name")
       )
     val dob: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.dob"),
         messages(DateUtils.toLocalisedString(eligibleWithUserInfo.userInfo.dateOfBirth)),
         routes.RegisterController.getDetailsAreIncorrect,
-        messages("hts.register.create_account.change")
+        messages("hts.register.create_account.your-details.dob")
       )
     val nino: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.nino"),
         messages(display2CharFormat(eligibleWithUserInfo.userInfo.nino)),
         routes.RegisterController.getDetailsAreIncorrect,
-        messages("hts.register.create_account.change")
+        messages("hts.register.create_account.your-details.nino")
       )
     List(
       name,
@@ -80,7 +80,7 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-email.email"),
         messages(yourEmail),
         routes.RegisterController.changeEmail,
-        messages("hts.register.create_account.change")
+        messages("hts.register.create_account.your-email.email")
       )
 
     val emailReminder: SummaryListRow = {
@@ -89,7 +89,7 @@ class SummaryListRowsHelper {
           messages("hts.email-saving-remainders.title.h1"),
           messages("hts.register.create_account.your-remainder.note"),
           routes.RegisterController.changeReminder,
-          messages("hts.register.create_account.change") + " " + messages("hts.email-saving-remainders.title.h1")
+          messages("hts.email-saving-remainders.title.h1")
         )
       }
       else {
@@ -98,7 +98,7 @@ class SummaryListRowsHelper {
           messages("hts.reminder-confirmation.title.p1-1") + " " +
             PeriodUtils.getMessage(period) + " " + messages("hts.reminder-confirmation.title.p1-2"),
           routes.RegisterController.changeReminder,
-          messages("hts.register.create_account.change") + " " + messages("hts.email-saving-remainders.title.h1")
+          messages("hts.email-saving-remainders.title.h1")
         )
       }
     }
@@ -119,14 +119,14 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-bank-details.sort-code"),
         messages(display2CharFormat(bankDetails.sortCode.toString)),
         routes.RegisterController.changeBankDetails,
-        messages("hts.register.create_account.change")
+        messages("hts.register.create_account.your-bank-details.sort-code")
       )
     val accountNumber: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-bank-details.account-number"),
         messages(bankDetails.accountNumber),
         routes.RegisterController.changeBankDetails,
-        messages("hts.register.create_account.change")
+        messages("hts.register.create_account.your-bank-details.account-number")
       )
     val rollNumber: Option[SummaryListRow] = {
       if (bankDetails.rollNumber.nonEmpty) {
@@ -134,7 +134,7 @@ class SummaryListRowsHelper {
           messages("hts.register.create_account.your-bank-details.roll-number"),
           messages(bankDetails.rollNumber.getOrElse("")),
           routes.RegisterController.changeBankDetails,
-          messages("hts.register.create_account.change")
+          messages("hts.register.create_account.your-bank-details.roll-number")
         ))
       }
       else {
@@ -147,7 +147,7 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-bank-details.account-name"),
         messages(bankDetails.accountName),
         routes.RegisterController.changeBankDetails,
-        messages("hts.register.create_account.change")
+        messages("hts.register.create_account.your-bank-details.account-name")
       )
     List(
       Some(sortCode),
