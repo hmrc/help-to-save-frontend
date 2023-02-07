@@ -34,7 +34,13 @@
     hmrcHead: HmrcHead
 )
 
-@(title: String, backLink: Option[String] = None, hasErrors: Boolean = false, enableSignOutLink: Boolean = true)(contentBlock: Html)(implicit htsContext: HtsContext, request : Request[_], messages: Messages, config: FrontendAppConfig)
+@(
+  title: String,
+  backLink: Option[String] = None,
+  hasErrors: Boolean = false,
+  enableSignOutLink: Boolean = true,
+  extraMeta: Option[Html] = None
+)(contentBlock: Html)(implicit htsContext: HtsContext, request : Request[_], messages: Messages, config: FrontendAppConfig)
 
 @serviceName = @{messages("hts.global.title-suffix")}
 
@@ -48,6 +54,7 @@
       timeout = Some(appConfig.TimeoutConfig.timeoutSeconds)
     )
   }
+  @extraMeta.getOrElse(Html(""))
 }
 @beforeContentBlock = {
   <div class="govuk-!-display-none-print">

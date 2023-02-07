@@ -21,21 +21,19 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.ga_submit_button
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
 yesNo: uk.gov.hmrc.helptosavefrontend.views.html.helpers.yes_no,
 errorSummary: uk.gov.hmrc.helptosavefrontend.views.html.helpers.error_summary,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+viewHelpers: ViewHelpers
 )
 
 @(form: Form[Boolean], accountNumber: String, email: String, lastPayDateThisMonth: LocalDate)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
 @key = @{"payInNow"}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-
-@title = @{
-  Messages("hts.account-created.title.h1")
-}
+@title = @{messages("hts.account-created.title.h1")}
 
 @extraMeta = @{
   Some(Html(s"""
@@ -45,73 +43,91 @@ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
   """))
 }
 
-@main(
-title = title,
-bodyClasses = None,
-extraMeta = extraMeta) {
+@layout(title, hasErrors = form.errors.nonEmpty, extraMeta = extraMeta) {
 
-@if(hasErrors) {
-@errorSummary(form.errors)
-}
+    @if(form.errors.nonEmpty) {
+      @viewHelpers.govukErrorSummary(ErrorSummary(errorList =
+        form.errors.map { error =>
+          ErrorLink(
+            href = Some(s"#${error.key}"),
+            content = Text(messages("hts.payInNow.error"))
+          )
+        },
+        title = Text(messages("hts.global.error-summary.title"))
+      ))
+    }
 
-  <div class="govuk-box-highlight">
-    <h1 class="heading-xlarge">@title</h1>
-    <span class="heading-large">
-      @Messages("hts.account-created.title.p1")
-      <strong>@accountNumber</strong>
-    </span>
-  </div>
+    @viewHelpers.govukPanel(Panel(
+      title = Text(messages("hts.account-created.title.h1")),
+      content = HtmlContent(s"${messages("hts.account-created.title.p1")}<br><strong>${accountNumber}</strong>")
+    ))
 
-  <p>@Html(Messages("hts.register.create_account.confirmation-info.p1")) @email@Html(Messages("hts.register.create_account.confirmation-info.p2"))</p>
+    <p class="govuk-body">@Html(Messages("hts.register.create_account.confirmation-info.p1")) @email@Html(Messages("hts.register.create_account.confirmation-info.p2"))</p>
+    <h2 class="govuk-heading-m">@Messages("hts.register.create_account.what-you-need-to-do.title")</h2>
+    <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p1")</p>
+    <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p2")</p>
+    <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p3.1") <strong class="bold">@{DateUtils.toLocalisedString(lastPayDateThisMonth)}</strong> @Messages("hts.register.create_account.what-you-need-to-do.p3.2")</p>
 
-<div class="form-group @if(hasErrors){form-group-error}">
-  <h2 class="heading-medium">@Messages("hts.register.create_account.what-you-need-to-do.title")</h2>
-    <p>@Messages("hts.register.create_account.what-you-need-to-do.p1")</p>
-    <p>@Messages("hts.register.create_account.what-you-need-to-do.p2")</p>
-    <p>@Messages("hts.register.create_account.what-you-need-to-do.p3.1") <span class="bold">@{DateUtils.toLocalisedString(lastPayDateThisMonth)}</span> @Messages("hts.register.create_account.what-you-need-to-do.p3.2")</p>
+    @viewHelpers.form(routes.RegisterController.accessOrPayIn) {
+        @viewHelpers.govukRadios(Radios(
+          fieldset = Some(Fieldset(
+            legend = Some(Legend(
+              content = Text(messages("hts.register.create_account.payInNow.title")),
+              classes = "govuk-fieldset__legend--s",
+              isPageHeading = true
+            ))
+          )),
+            idPrefix = Some(key),
+            name = key,
+            errorMessage = if(form(key).hasErrors) {
+              Some(ErrorMessage(content = Text(messages("hts.payInNow.error"))))
+            } else None,
+            items = Seq(
+              RadioItem(
+                content = Text(Messages("generic.yes")),
+                value = Some("true"),
+                checked = form.data.values.toList.contains("true")
+              ),
+              RadioItem(
+                content = Text(Messages("generic.no")),
+                value = Some("false"),
+                checked = form.data.values.toList.contains("false"),
+                conditionalHtml = Some(Html("<p class=govuk-body>" + messages("hts.register.create_account.payInNow.noContent") + "</p>"))
+              )
+            )
+        ))
 
-  @formWrapper(routes.RegisterController.accessOrPayIn){
+        @viewHelpers.govukButton(Button(
+          attributes = Map(
+            "id" -> "accessAccountOrPayIn",
+            "data-ga-event-category" -> "buttons",
+            "data-ga-event-action" -> "Continue",
+            "data-ga-event-label" -> "Account created page"
+          ),
+          content = Text(Messages("hts.register.create_account.payInNow.continue"))
+        ))
+    }
 
-    @yesNo(
-    fieldId = key,
-    label = Html(messages("hts.register.create_account.payInNow.title")),
-    errorKey = form.error(key).map(e => e.message),
-    selected = form.value,
-    errorMessage =Some(messages(s"hts.$key.error")) ,
-    noContent = Some(Html(messages("hts.register.create_account.payInNow.noContent")))
-    )
+    @if(appConfig.pushToApp){
+      <h2 class="govuk-heading-m">@Messages("hts.register.create_account.hmrc-app.title")</h2>
+      <p class="govuk-body">@Messages("hts.register.create_account.hmrc-app.benefits.s1")</p>
+      <ul class="govuk-list govuk-list--bullet">
+          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li1")</li>
+          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li2")</li>
+          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li3")</li>
+          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li4")</li>
+          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li5")</li>
+      </ul>
 
-</div>
-<div class="form-group">
-@ga_submit_button(
-"accessAccountOrPayIn",
-"Continue",
-"Account created page",
-Messages("hts.register.create_account.payInNow.continue")
-)
-</div>
-}
+      <p class="govuk-body">@Messages("hts.register.create_account.hmrc-app.get-the-app.s1")</p>
 
-@if(appConfig.pushToApp){
-<h2 class="heading-medium">@Messages("hts.register.create_account.hmrc-app.title")</h2>
-<p>@Messages("hts.register.create_account.hmrc-app.benefits.s1")</p>
-<ul class="list list-bullet">
-    <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li1")</li>
-    <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li2")</li>
-    <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li3")</li>
-    <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li4")</li>
-    <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li5")</li>
-</ul>
+      <a href='@appConfig.appleAppUrl' target="_blank" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.label")'>
+          <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.alt")' src='@controllers.routes.Assets.versioned("images/apple-store.svg")'></a>
 
-<p>@Messages("hts.register.create_account.hmrc-app.get-the-app.s1")</p>
+      <a href="@appConfig.androidAppUrl" target="_blank" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.label")'>
+          <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.alt")' src='@controllers.routes.Assets.versioned("images/android-store.svg")'></a>
 
-<a href='@appConfig.appleAppUrl' target="_blank" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.label")'>
-    <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.alt")' src='@controllers.routes.Assets.versioned("images/apple-store.svg")'></a>
-
-<a href="@appConfig.androidAppUrl" target="_blank" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.label")'>
-    <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.alt")' src='@controllers.routes.Assets.versioned("images/android-store.svg")'></a>
-
-<p>@Messages("hts.register.create_account.hmrc-app.get-the-app.new-tab")</p>
-}
+      <p class="govuk-body">@Messages("hts.register.create_account.hmrc-app.get-the-app.new-tab")</p>
+    }
 
 }

@@ -22,9 +22,12 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.DateUtils
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.register.SummaryListRowsHelper
 
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, summaryRows: SummaryListRowsHelper)
 
 @(eligibleWithUserInfo: EligibleWithUserInfo,period: String, email: String, bankDetails: BankDetails)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -36,112 +39,26 @@
   str.filterNot((x: Char) => x.isWhitespace || x.toString.matches("-")).grouped(2).mkString(" ")
 }
 
-@main(
-title = title,
-sidebarLinks = None,
-bodyClasses = None) {
+@layout(title, Some(routes.BankAccountController.getBankDetailsPage.url)) {
 
-@navigate_back(Some(routes.BankAccountController.getBankDetailsPage.url))
+  <h1 class="govuk-heading-l">@title</h1>
 
-  <h1>@title</h1>
-
-  <p>@Html(Messages("hts.register.create_account.intro"))</p>
-
-  @summary_section_head(heading = Messages("hts.register.create_account.your-details"))
-  <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.register.create_account.your-details.name"), eligibleWithUserInfo.userInfo.forename + " " + eligibleWithUserInfo.userInfo.surname,
-      summary_section_change(
-        routes.RegisterController.getDetailsAreIncorrect.url,
-        Messages("hts.register.create_account.change-your-name"),
-        "change-your-name"
-      )
-    )
-    @summary_row(Messages("hts.register.create_account.your-details.dob"),
-    DateUtils.toLocalisedString(eligibleWithUserInfo.userInfo.dateOfBirth),
-      summary_section_change(
-        routes.RegisterController.getDetailsAreIncorrect.url,
-        Messages("hts.register.create_account.change-your-dob"),
-        "change-your-dob"
-      )
-    )
-    @summary_row(Messages("hts.register.create_account.your-details.nino"), display2CharFormat(eligibleWithUserInfo.userInfo.nino),
-      summary_section_change(
-        routes.RegisterController.getDetailsAreIncorrect.url,
-        Messages("hts.register.create_account.change-your-nino"),
-        "change-your-nino"
-      )
-    )
-  </dl>
-
-  @summary_section_head(heading = Messages("hts.register.create_account.your-email"))
-  <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.register.create_account.your-email.email"), email,
-      summary_section_change(
-        routes.RegisterController.changeEmail.url,
-        (Messages("hts.register.create_account.change") + " " + Messages("hts.register.create_account.your-email")),
-        "change-email"
-      )
-    )
-    @if(areRemindersEnabled) {
-      @if(period.matches("none")) {
-  @summary_row(Messages("hts.email-saving-remainders.title.h1"), Messages("hts.register.create_account.your-remainder.note"),
-    summary_section_change(
-      routes.RegisterController.changeReminder.url,
-      (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
-      "change-reminder"
-    ),true
-  )
-  } else{
-  @summary_row(Messages("hts.email-saving-remainders.title.h1"),Messages("hts.reminder-confirmation.title.p1-1") +" "+
-    PeriodUtils.getMessage(period)
-    +" "+ Messages("hts.reminder-confirmation.title.p1-2"),
-    summary_section_change(
-      routes.RegisterController.changeReminder.url,
-      (Messages("hts.register.create_account.change") + " " + Messages("hts.email-saving-remainders.title.h1")),
-      "change-reminder"
-    ),true
-  )
-    }
-      }
-  </dl>
-
-  @summary_section_head(heading = Messages("hts.register.create_account.your-bank-details"))
-  <dl class="govuk-check-your-answers cya-questions-long">
-    @summary_row(Messages("hts.register.create_account.your-bank-details.sort-code"), display2CharFormat(bankDetails.sortCode.toString()),
-      summary_section_change(
-        (routes.RegisterController.changeBankDetails.url + "#sortCode"),
-        Messages("hts.register.create_account.change-your-sort-code"),
-        "change-your-sort-code"
-      )
-    )
-    @summary_row(Messages("hts.register.create_account.your-bank-details.account-number"), bankDetails.accountNumber,
-      summary_section_change(
-        (routes.RegisterController.changeBankDetails.url + "#accountNumber"),
-        Messages("hts.register.create_account.change-your-account-number"),
-        "change-your-account-number"
-      )
-    )
-    @if(bankDetails.rollNumber.nonEmpty) {
-      @summary_row(Messages("hts.register.create_account.your-bank-details.roll-number"), bankDetails.rollNumber.getOrElse(""),
-        summary_section_change(
-          (routes.RegisterController.changeBankDetails.url + "#rollNumber"),
-          Messages("hts.register.create_account.change-your-roll-number"),
-          "change-your-roll-number"
-        )
-      )
-    }
-    @summary_row(Messages("hts.register.create_account.your-bank-details.account-name"), bankDetails.accountName,
-      summary_section_change(
-        (routes.RegisterController.changeBankDetails.url + "#accountName"),
-        Messages("hts.register.create_account.change-your-account-name"),
-        "change-your-account-name"
-      )
-    )
-  </dl>
-
-  <h2 class="heading-medium">@Messages("hts.register.create_account.tandc-title")</h2>
-  <p>@Html(Messages("hts.register.create_account.tandc-p1"))</p>
-  <ul class="list list-bullet">
+  <p class="govuk-body">@Html(Messages("hts.register.create_account.intro"))</p>
+  <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-details")</h2>
+      @viewHelpers.govukSummaryList(SummaryList(rows =
+      summaryRows.yourDetailsRow(eligibleWithUserInfo)
+      ))
+    <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-email")</h2>
+      @viewHelpers.govukSummaryList(SummaryList(rows =
+      summaryRows.yourEmailDetailsRow(email,period,areRemindersEnabled)
+      ))
+    <h2 class="govuk-heading-m">@messages("hts.register.create_account.your-bank-details")</h2>
+      @viewHelpers.govukSummaryList(SummaryList(rows =
+      summaryRows.yourBankDetailsRow(bankDetails)
+      ))
+  <h2 class="govuk-heading-m">@Messages("hts.register.create_account.tandc-title")</h2>
+  <p class="govuk-body">@Html(Messages("hts.register.create_account.tandc-p1"))</p>
+  <ul class="govuk-list govuk-list--bullet">
     <li>@Messages("hts.register.create_account.tandc-ul1-li1")</li>
     <li>@Html(Messages("hts.register.create_account.tandc-ul1-li2", appConfig.govUkEligibilityInfoUrl))</li>
     <li>@Messages("hts.register.create_account.tandc-ul1-li3")</li>
@@ -149,13 +66,16 @@ bodyClasses = None) {
     <li>@Messages("hts.register.create_account.tandc-ul1-li5")</li>
   </ul>
 
-  @form(routes.RegisterController.createAccount){
-    @ga_submit_button(
-      "accept-and-create-account",
-      "Accept and create account",
-      "Create account page",
-      Messages("hts.register.create_account.accept-label")
-    )
+  @viewHelpers.form(routes.RegisterController.createAccount){
+    @viewHelpers.govukButton(Button(
+      attributes = Map(
+        "id" -> "accept-and-create-account",
+        "data-ga-event-category" -> "buttons",
+        "data-ga-event-action" -> "Accept and create account",
+        "data-ga-event-label" -> "Create account page"
+      ),
+      content = Text(Messages("hts.register.create_account.accept-label"))
+    ))
   }
 
 }

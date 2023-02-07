@@ -87,6 +87,9 @@ class RegisterControllerSpec
 
   private val fakeRequest = FakeRequest("GET", "/")
 
+  def assetsFrontendBackLink(url: String): String = s"""<a href=${url} class="link-back">Back</a>"""
+  def govukBackLink(url: String): String = s"""<a href="${url}" class="govuk-back-link" id="back">Back</a>"""
+
   def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
     (mockHelpToSaveService
       .storeConfirmedEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
@@ -197,7 +200,7 @@ class RegisterControllerSpec
         val result = controller.getDetailsAreIncorrect(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include("We need your correct details")
-        contentAsString(result) should include("""<a href=/help-to-save/create-account class="link-back">Back</a>""")
+        contentAsString(result) should include(assetsFrontendBackLink("/help-to-save/create-account"))
       }
     }
 
@@ -242,9 +245,7 @@ class RegisterControllerSpec
         val result = doRequest()
         status(result) shouldBe OK
         contentAsString(result) should include("Accept and create account")
-        contentAsString(result) should include(
-          """<a href=/help-to-save/enter-uk-bank-details class="link-back">Back</a>"""
-        )
+        contentAsString(result) should include(govukBackLink("/help-to-save/enter-uk-bank-details"))
       }
 
       "show an error page if the eligibility reason cannot be parsed" in {
@@ -619,7 +620,7 @@ class RegisterControllerSpec
         status(result) shouldBe OK
         contentAsString(result) should include("Account created")
         contentAsString(result) should include(accountNumber)
-        contentAsString(result) should include("""You have until <span class="bold">31 January 1970</span> to pay in money this month""")
+        contentAsString(result) should include("""You have until <strong class="bold">31 January 1970</strong> to pay in money this month""")
       }
 
       "redirect to check eligibility" when {
