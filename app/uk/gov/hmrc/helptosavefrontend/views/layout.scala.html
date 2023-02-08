@@ -56,6 +56,14 @@
   }
   @extraMeta.getOrElse(Html(""))
 }
+
+@scripts = {
+  <script src='@routes.Assets.versioned("javascripts/do-not-track.js")'></script>
+  <script>
+          const DoNotTrackYouTube = new GOVUK.DoNotTrackYouTube();
+          DoNotTrackYouTube.init()
+  </script>
+}
 @beforeContentBlock = {
   <div class="govuk-!-display-none-print">
     @hmrcLanguageSelectHelper()
@@ -79,12 +87,13 @@
 @gdsTitle = @{s"""${if(hasErrors){ s"""${messages("hts.global.error.prefix")}: """} else ""}$title - ${serviceName} - GOV.UK"""}
 
 @hmrcLayout(
-    pageTitle = Some(gdsTitle),
-    isWelshTranslationAvailable = true,
-    displayHmrcBanner = false,
-    signOutUrl = if(enableSignOutLink) Some(appConfig.signOutUrl) else None,
-    additionalHeadBlock = Some(hmrcHead(headBlock = Some(head))),
-    beforeContentBlock = Some(beforeContentBlock),
-    serviceName = Some(serviceName),
-    phaseBanner = None
+  pageTitle = Some(gdsTitle),
+  isWelshTranslationAvailable = true,
+  displayHmrcBanner = false,
+  signOutUrl = if(enableSignOutLink) Some(appConfig.signOutUrl) else None,
+  additionalHeadBlock = Some(hmrcHead(headBlock = Some(head))),
+  beforeContentBlock = Some(beforeContentBlock),
+  serviceName = Some(serviceName),
+  phaseBanner = None,
+  additionalScriptsBlock = Some(scripts)
 )(content)

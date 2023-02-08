@@ -20,16 +20,15 @@
 
 @maybeDate match{
   case Some(date) =>{
-   <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p1",date.getDayOfMonth.toString+" "+date.getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
-   <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p2","14 "+date.plusMonths(1).getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
+   <p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p1",date.getDayOfMonth.toString+" "+date.getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
+   <p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p2","14 "+date.plusMonths(1).getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
  }
   case None =>{
-   <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p1.error")</p>
-   <p>@Messages("hts.help-information.section.when-your-account-ends.s2.p2.error")</p>
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p1.error")</p>
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p2.error")</p>
  }
 }
-<p>@Messages("hts.help-information.section.when-your-account-ends.s2.p3")</p>
-<p>@Messages("hts.help-information.section.when-your-account-ends.s2.p4")</p>
-<p>@Messages("hts.help-information.section.when-your-account-ends.s2.p5")</p>
-<p>@Messages("hts.help-information.section.when-your-account-ends.s2.p6")</p>
-
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p3")</p>
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p4")</p>
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p5")</p>
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p6")</p>

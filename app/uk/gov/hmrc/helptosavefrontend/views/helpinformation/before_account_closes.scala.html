@@ -19,14 +19,14 @@
 
 @(maybeDate:Option[LocalDate])(implicit messages: play.api.i18n.Messages, appConfig: FrontendAppConfig)
 
-<p>@Messages("hts.help-information.section.when-your-account-ends.s1.p1")
- <a href=@appConfig.manageDetails>@Messages("hts.help-information.section.when-your-account-ends.s1.p1.link")</a>@Messages("hts.help-information.section.when-your-account-ends.s1.p1.full-stop")
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s1.p1")
+ <a class="govuk-link" href=@appConfig.manageDetails>@Messages("hts.help-information.section.when-your-account-ends.s1.p1.link")</a>@Messages("hts.help-information.section.when-your-account-ends.s1.p1.full-stop")
 </p>
 @maybeDate match{
-  case Some(date) =>{ <p>@Messages("hts.help-information.section.when-your-account-ends.s1.p2", date.getDayOfMonth.toString+" "+date.getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>}
-  case None =>{<p>@Messages("hts.help-information.section.when-your-account-ends.s1.p2.error")</p>}
+  case Some(date) =>{ <p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s1.p2", date.getDayOfMonth.toString+" "+date.getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>}
+  case None =>{<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s1.p2.error")</p>}
 }
-<p>@Messages("hts.help-information.section.when-your-account-ends.s1.p3")</p>
-<h3 class="heading-small">@Messages("hts.help-information.section.when-your-account-ends.s1.h1")</h3>
-<p>@Messages("hts.help-information.section.when-your-account-ends.s1.p4")</p>
-<p>@Messages("hts.help-information.section.when-your-account-ends.s1.p5")</p>
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s1.p3")</p>
+<h3 class="govuk-heading-s">@Messages("hts.help-information.section.when-your-account-ends.s1.h1")</h3>
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s1.p4")</p>
+<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s1.p5")</p>

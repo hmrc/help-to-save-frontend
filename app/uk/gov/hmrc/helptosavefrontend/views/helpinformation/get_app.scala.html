@@ -18,16 +18,16 @@
 
 @()(implicit messages: play.api.i18n.Messages, appConfig: FrontendAppConfig)
 
-<p>@Messages("hts.help-information.section.hmrc-app.get-the-app.s1")</p>
+<p class="govuk-body">@Messages("hts.help-information.section.hmrc-app.get-the-app.s1")</p>
 
-<ul class="list list-bullet">
+<ul class="govuk-list govuk-list--bullet">
   <li>@Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.1")
-   <a href="@appConfig.appleAppUrl">
+   <a class="govuk-link" href="@appConfig.appleAppUrl">
     @Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.link")</a>
    @Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li1.2")
   </li>
   <li>@Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.1")
-   <a href="@appConfig.androidAppUrl">
+   <a class="govuk-link" href="@appConfig.androidAppUrl">
     @Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.link")</a>
    @Messages("hts.help-information.section.hmrc-app.get-the-app.s1.ul1-li2.2")
   </li>
