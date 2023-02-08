@@ -82,8 +82,9 @@
     }
 
     function createButton($iframe, intoId) {
-      var button = document.createElement('button')
-      button.className = 'dnt-embed__button'
+      const button = document.createElement('govuk-button')
+      button.className = 'dnt-embed__button govuk-button'
+      button.setAttribute('data-module', 'govuk-button')
       button.textContent = $iframe.dataset.dntDefaultParagraph
 
       // aria-describedby allows us to associate this button with the text, for more context.

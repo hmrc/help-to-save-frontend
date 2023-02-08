@@ -664,7 +664,7 @@ hts.help-information.section.how-account-works.s1.title=Esboniad ar gynilion Cym
 
 hts.help-information.section.how-account-works.s2.title=Sut i fewngofnodi
 hts.help-information.section.how-account-works.s2.p1=Ewch i www.gov.uk/helptosave.
-hts.help-information.section.how-account-works.s2.p2=Gallwch hefyd fewngofnodi gan ddefnyddio ap CThEF, sy’n rhad ac am ddim. Ewch i <a href={0} target=""_blank"">www.gov.uk/hmrc/app</a> i gael rhagor o wybodaeth.
+hts.help-information.section.how-account-works.s2.p2=Gallwch hefyd fewngofnodi gan ddefnyddio ap CThEF, sy’n rhad ac am ddim. Ewch i <a class="govuk-link" href={0} target=""_blank"">www.gov.uk/hmrc/app</a> i gael rhagor o wybodaeth.
 
 hts.help-information.section.how-account-works.s3.title=Pam defnyddio’r ap
 hts.help-information.section.how-account-works.s3.h1=Gallwch ddefnyddio ap CThEF, sy’n rhad ac am ddim, i:
@@ -673,7 +673,7 @@ hts.help-information.section.how-account-works.s3.ul1-li2=cadw golwg ar eich cyn
 hts.help-information.section.how-account-works.s3.ul1-li3=gweld faint y gallwch ei dalu i mewn o hyd ym mhob mis calendr
 hts.help-information.section.how-account-works.s3.ul1-li4=gosod nodiadau atgoffa i’ch hun
 hts.help-information.section.how-account-works.s3.ul1-li5=gweld eich taliadau a thyniadau
-hts.help-information.section.how-account-works.s3.p1=Ewch i <a href={0} target=""_blank"">www.gov.uk/hmrc/app</a> i gael rhagor o wybodaeth.
+hts.help-information.section.how-account-works.s3.p1=Ewch i <a class="govuk-link" href={0} target=""_blank"">www.gov.uk/hmrc/app</a> i gael rhagor o wybodaeth.
 
 hts.help-information.section.how-account-works.s4.title=Sut y byddwn yn cysylltu â chi
 hts.help-information.section.how-account-works.s4.p1=Byddwn yn anfon e-bost atoch i roi gwybod i chi pan fyddwn yn danfon neges i’r adran ‘Eich negeseuon’ yn eich cyfrif. Ewch i ‘Eich negeseuon’ i ddarllen yr e-bost.
@@ -717,7 +717,7 @@ hts.help-information.section.when-your-account-ends.s2.p5=Byddwch yn gallu bwrw 
 hts.help-information.section.when-your-account-ends.s2.p6=Byddwch yn gallu bwrw golwg dros eich cyfrif caeedig a’ch hanes trafodion, a darllen eich negeseuon
 hts.help-information.section.when-your-account-ends.s3.title=Sut i barhau i gynilo ar ôl i’ch cyfrif gau
 hts.help-information.section.when-your-account-ends.s3.p1.start=Er na allwch agor cyfrif Cymorth i Gynilo arall, mae mannau eraill lle gallech barhau i gynilo. I gael rhagor o wybodaeth am barhau gyda’ch cynilion nawr neu yn y dyfodol,
-hts.help-information.section.when-your-account-ends.s3.p1.link=<a href="https://www.moneyhelper.org.uk/cy"> bwrw golwg dros y gwefan Cynorthwyydd Arian (Cynorthwyydd Arian) </a>
+hts.help-information.section.when-your-account-ends.s3.p1.link=<a class="govuk-link" href="https://www.moneyhelper.org.uk/cy"> bwrw golwg dros y gwefan Cynorthwyydd Arian (Cynorthwyydd Arian) </a>
 hts.help-information.section.when-your-account-ends.s3.p1.end=neu rhowch alwad i 0800 138 7777
 
 hts.help-information.section.hmrc-app.title=Cymorth i Gynilo ar ap CThEF
