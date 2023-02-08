@@ -775,7 +775,7 @@ hts.reminder-confirmation.title.p1-5=Gallwch newid neu ganslo’ch e-byst atgoff
 hts.reminder-confirmation.title.p1-6=yn hafan eich cyfrif Cymorth i Gynilo.
 hts.reminder-confirmation.h2=Beth sy’n digwydd nesaf
 hts.reminder-frequency.select-an-option=Dewiswch opsiwn ar gyfer trefnu nodynnau atgoffa
-hts.reminder-frequency.error.missing=Dewiswch opsiwn ar gyfer trefnu nodynnau atgoffa
+reminder-select.reminderFrequency.reminder_frequency_empty=Dewiswch opsiwn ar gyfer trefnu nodynnau atgoffa
 
 hts.reminder-dashboard.title.h1=Dangosfwrdd nodynnau atgoffa
 hts.reminder-dashboard.h2=Newid neu ganslo e-byst atgoffa
