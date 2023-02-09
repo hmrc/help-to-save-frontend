@@ -21,8 +21,9 @@
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage
 
-@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
 @(email: String, form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
@@ -69,15 +70,15 @@
     }
 
     @if(hasInvalidEmail) {
-        @viewHelpers.govukErrorSummary(ErrorSummary(
-          errorList = Seq(
-            ErrorLink(
-              href = Some(s"#$newEmailKey"),
-              content = HtmlContent(email_form_validation_error_message(form, "new-email"))
-            )
-          ),
+      @errorHelpers.emailErrorTypesToString(form, newEmailKey).map(e =>
+      viewHelpers.govukErrorSummary(ErrorSummary(
+        errorList = Seq(ErrorLink(
+            href = Some(s"#$newEmailKey"),
+            content = Text(e)
+          )),
           title = Text(messages("hts.global.error-summary.title"))
         ))
+      )
     }
 
   @viewHelpers.form(routes.EmailController.selectEmailSubmit) {
@@ -116,10 +117,7 @@
     )
 
     @viewHelpers.govukButton(Button(
-      attributes = Map(
-        "id" -> "confirm-selected-email",
-        "onclick" -> "ga('send', 'event', 'button', 'Applicant selected email', 'Applicant select email address page');"
-      ),
+      attributes = Map("id" -> "confirm-selected-email"),
       content = Text(messages("hts.global.continue-button"))
     ))
   }

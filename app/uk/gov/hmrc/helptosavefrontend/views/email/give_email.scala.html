@@ -14,57 +14,56 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.GiveEmail
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
-      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
 @(form: Form[GiveEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.give-email.title.h1")
-}
+@title = @{messages("hts.give-email.title.h1")}
+@key = @{"email"}
+@formName = @{"hts.give-email"}
 
-@defining(form.error("email").map(_ ⇒ email_form_validation_error_message(form, "email"))){ errorMessage =>
+@layout(title, backLink, hasErrors = form.hasErrors) {
 
-    @main(
-        title = title,
-        sidebarLinks = None,
-        bodyClasses = None,
-        isErrorPage = errorMessage.isDefined) {
+  @if(form.hasErrors) {
+    @errorHelpers.errorSummary[GiveEmail](formName, form, Some((a, b) => errorHelpers.emailErrorTypesToString(a, b)))
+  }
 
-        @{if(errorMessage.isDefined)
-        <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
-            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.give-email.error-title")}</h2>
-            <ul class="error-summary-list">
-                <li><a href="#email">{Messages("hts.give-email.error-link-description")}</a></li>
-            </ul>
-        </div>
-        }
+  @viewHelpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.EmailController.giveEmailSubmit) {
+    @viewHelpers.govukInput(Input(
+      id = key,
+      name = key,
+      inputType = "email",
+      label = Label(
+        content = Text(title),
+        isPageHeading = true,
+        classes = "govuk-label--l"
+      ),
+      hint = Some(Hint(
+        content = HtmlContent(messages("hts.give-email-address.p")))),
+      errorMessage = errorHelpers.emailErrorTypesToString(form, key).map(e => ErrorMessage(
+        content = Text(e),
+        visuallyHiddenText = Some(messages("hts.global.error.prefix"))
+      )),
+      autocomplete = Some("email"),
+      spellcheck = Some(false),
+      value = form.data.get(key)
+    ))
 
-        @navigate_back(backLink)
-
-        <h1 class="heading-large">@title</h1>
-
-        <p>@Html(Messages("hts.give-email-address.p"))</p>
-
-        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.EmailController.giveEmailSubmit) {
-            @helpers.input_text(
-                id = "email",
-                name = "email",
-                label = messages("hts.give-email-address.label"),
-                describedByError = Some("give-email-error"),
-                errorMessage = errorMessage
-            )
-
-          <section class="subsection">
-            @submit('_buttonClass -> "", 'id → "continue", '_onclick -> "ga('send', 'event', 'buttons', 'Confirmed given email', 'Applicant gives email address page');") { @messages("hts.global.continue-button") }
-          </section>
-        }
-
-    }
+    @viewHelpers.govukButton(Button(
+      attributes = Map(
+        "id" -> "continue",
+        "data-ga-event-category" -> "buttons",
+        "data-ga-event-action" -> "Applicant gives email address page",
+        "data-ga-event-label" -> title
+      ),
+      content = Text(messages("hts.global.continue-button"))
+    ))
+  }
 }
