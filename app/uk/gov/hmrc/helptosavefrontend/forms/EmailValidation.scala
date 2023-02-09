@@ -28,7 +28,7 @@ import play.api.data.Forms.text
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation._
-import uk.gov.hmrc.helptosavefrontend.util.Validation.{ValidOrErrorStrings, _}
+import uk.gov.hmrc.helptosavefrontend.util.Validation._
 
 import scala.annotation.tailrec
 
