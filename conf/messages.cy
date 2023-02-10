@@ -306,11 +306,11 @@ hts.email-verification.input.hint=Er enghraifft, enw@enghraifft.com
 hts.email-verification.submit.text=Dilysu’ch e-bost
 
 hts.email-verification.check-your-email.title.h1=Mae gennych 30 munud i gadarnhau’r cyfeiriad e-bost
-hts.email-verification.check-your-email.we-have-sent-mail=Rydym wedi anfon e-bost at {0}. <a href={1}>Defnyddiwch gyfeiriad e-bost gwahanol</a>.
+hts.email-verification.check-your-email.we-have-sent-mail=Rydym wedi anfon e-bost at {0}. <a class="govuk-link" href={1}>Defnyddiwch gyfeiriad e-bost gwahanol</a>.
 hts.email-verification.check-your-email.what-next=Yr hyn y mae’n rhaid i chi ei wneud
 hts.email-verification.check-your-email.content1=Ewch i’r cyfrif e-bost hwnnw a dewiswch y cysylltiad yn y neges a anfonwyd atoch chi.
 hts.email-verification.check-your-email.where-used-heading=Os na chyrhaeddodd yr e-bost
-hts.email-verification.check-your-email.where-used=Gallwch ddweud wrthym am <a href={0}>ail-anfon yr e-bost</a> at y cyfrif e-bost hwnnw.
+hts.email-verification.check-your-email.where-used=Gallwch ddweud wrthym am <a class="govuk-link" href={0}>ail-anfon yr e-bost</a> at y cyfrif e-bost hwnnw.
 
 hts.email-verification.error-title=Mae problem wedi codi
 hts.email-verification.error-link-description=Nodwch gyfeiriad e-bost dilys

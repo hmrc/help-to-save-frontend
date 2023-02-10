@@ -308,11 +308,11 @@ hts.email-verification.input.hint=For example, name@example.com
 hts.email-verification.submit.text=Verify your email
 
 hts.email-verification.check-your-email.title.h1=You have 30 minutes to confirm the email address
-hts.email-verification.check-your-email.we-have-sent-mail=We’ve sent an email to {0}. <a href={1}>Use a different email address</a>.
+hts.email-verification.check-your-email.we-have-sent-mail=We’ve sent an email to {0}. <a class="govuk-link" href={1}>Use a different email address</a>.
 hts.email-verification.check-your-email.what-next=What you must do
 hts.email-verification.check-your-email.content1=Go to that email account and select the link in the message we sent you.
 hts.email-verification.check-your-email.where-used-heading=If the email did not arrive
-hts.email-verification.check-your-email.where-used=You can tell us to <a href={0}>resend the email</a> to that email account.
+hts.email-verification.check-your-email.where-used=You can tell us to <a class="govuk-link" href={0}>resend the email</a> to that email account.
 
 hts.email-verification.error-title=There is a problem
 hts.email-verification.error-link-description=Enter a valid email address
