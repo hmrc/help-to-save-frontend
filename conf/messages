@@ -289,6 +289,7 @@ hts.select-email.enter-new-address-body-text=The email addresses you use for oth
 hts.select-email.enter-new-address-label=Email address
 hts.select-email.enter-new-address-hint=For example, name&#64;example.com
 hts.select-email.select-an-option=Select the email address you want to use for your Help to Save account
+hts.select-email.error.required=Select the email address you want to use for your Help to Save account
 hts.select-email.select-one.error-summary.title=There is a problem
 hts.select-email.invalid-email.error-summary.title=There is a problem
 

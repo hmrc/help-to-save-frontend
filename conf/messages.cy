@@ -287,6 +287,7 @@ hts.select-email.enter-new-address-body-text=Ni fydd y cyfeiriadau e-bost a ddef
 hts.select-email.enter-new-address-label=Cyfeiriad e-bost
 hts.select-email.enter-new-address-hint=Er enghraifft, enw&#64;enghraifft.com
 hts.select-email.select-an-option=Dewiswch y cyfeiriad e-bost rydych chi am ei ddefnyddio ar gyfer eich cyfrif Cymorth i Gynilo
+hts.select-email.error.required=Dewiswch y cyfeiriad e-bost rydych chi am ei ddefnyddio ar gyfer eich cyfrif Cymorth i Gynilo
 hts.select-email.select-one.error-summary.title=Mae problem wedi codi
 hts.select-email.invalid-email.error-summary.title=Mae problem wedi codi
 
