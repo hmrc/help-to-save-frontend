@@ -32,6 +32,8 @@
   <p class="govuk-body">@Html(Messages("hts.iv.we_ve_confirmed_your_identity.p2"))</p>
 
     @viewHelpers.govukButton(Button(
+    attributes = Map(
+    "id" -> "continue"),
     content = Text(messages("hts.iv.continue_button")),
     href = Some(continueUrl)
     ))
