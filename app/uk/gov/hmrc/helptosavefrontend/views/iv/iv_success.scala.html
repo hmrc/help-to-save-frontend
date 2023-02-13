@@ -16,22 +16,23 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 
 @(continueUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.iv.we_ve_confirmed_your_identity.title.h1")
-}
+@title = @{Messages("hts.iv.we_ve_confirmed_your_identity.title.h1")}
 
-@main(
-  title = title
-) {
+@layout(title) {
+  <h1 class="govuk-heading-l">@Html(title)</h1>
+  <p class="govuk-body">@Messages("hts.iv.we_ve_confirmed_your_identity.p1")</p>
+  <h2 class="govuk-heading-m">@Messages("hts.iv.you_now_access_hts_account")</h2>
+  <p class="govuk-body">@Html(Messages("hts.iv.we_ve_confirmed_your_identity.p2"))</p>
 
-  <h1 class="heading-large">@Html(title)</h1>
-  <p>@Messages("hts.iv.we_ve_confirmed_your_identity.p1")</p>
-  <h2>@Messages("hts.iv.you_now_access_hts_account")</h2>
-  <p class="subsection--wide push--top">@Html(Messages("hts.iv.we_ve_confirmed_your_identity.p2"))</p>
-  <a href="@continueUrl" class="button" id="continue" role="button">@Messages("hts.iv.continue_button")</a>
+    @viewHelpers.govukButton(Button(
+    content = Text(messages("hts.iv.continue_button")),
+    href = Some(continueUrl)
+    ))
 }
