@@ -82,9 +82,13 @@ class FormErrorMessage @Inject()(ui: ViewHelpers) {
     } else if (form.emailHasNoTextAfterAtSymbolButBeforeDot(key)) {
       "hts.email.error.no-text-after-at-symbol-but-before-dot"
     } else {
-      "none"
+      ""
     }
 
-    if(!messagesKey.matches("none")) {  Some(messages(messagesKey)) } else { None }
+    if(!messagesKey.isEmpty) {
+      Some(messages(messagesKey))
+    } else {
+      None
+    }
   }
 }
