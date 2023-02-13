@@ -152,7 +152,7 @@ object EmailValidation {
 
     val noTextAfterAtSymbolButBeforeDot: String = "no_text_after_@_but_before_."
 
-    val blankEmailAddress = "blank_email_address"
+    val blankEmailAddress = "error.required"
   }
 
   implicit class FormOps[A](val form: Form[A]) extends AnyVal {

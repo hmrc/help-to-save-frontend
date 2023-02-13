@@ -14,71 +14,74 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers.email_form_validation_error_message
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
 @(form: Form[UpdateEmail])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@serviceInfoContent = {
-  <div class="breadcrumbs">
-    <ol>
-      <li><a href=@{appConfig.nsiManageAccountUrl}>@messages("hts.global.breadcrumb.account.home")</a></li>
-    </ol>
+@beforeContentBlock = {
+  @viewHelpers.govukBreadcrumbs(Breadcrumbs(
+    items = Seq(
+    BreadcrumbsItem(
+      content = Text(messages("hts.global.breadcrumb.account.home")),
+      href = Some(appConfig.nsiManageAccountUrl)
+    ))
+  ))
+}
+
+@title = @{messages("hts.email-verification.title.h1")}
+@formName = @{"hts.email-verification"}
+@key = @{"new-email-address"}
+
+@layout(
+  title = title + " " + Messages("hts.global.title.section.email"),
+  hasErrors = form.hasErrors,
+  beforeContent = Some(beforeContentBlock)
+) {
+
+  @if(form.hasErrors) {
+    @errorHelpers.errorSummary[UpdateEmail](formName, form, Some((a, b) => errorHelpers.emailErrorTypesToString(a, b)))
+  }
+
+  <h1 class="govuk-heading-l">@title</h1>
+  <p class="govuk-body">@Html(messages("hts.email-verification.intro"))</p>
+  <div class="govuk-inset-text">
+    @messages("hts.email-verification.note")
   </div>
-}
-
-@title = @{
-  Messages("hts.email-verification.title.h1")
-}
-
-@defining(form.error("new-email-address").map(_ ⇒ email_form_validation_error_message(form, "new-email-address"))){ errorMessage =>
-
-    @main(
-        title = title + " " + Messages("hts.global.title.section.email"),
-        sidebarLinks = None,
-        bodyClasses = None,
-        isErrorPage = errorMessage.isDefined,
-        serviceInfoContent = serviceInfoContent) {
-
-        @{if(errorMessage.isDefined)
-        <div class="error-summary" role="alert" aria-labelledby="error-summary-give-email" tabindex="-1">
-            <h2 class="heading-medium error-summary-heading" id="error-summary-give-email">{Messages("hts.email-verification.error-title")}</h2>
-            <ul class="error-summary-list">
-                <li><a href="#new-email-address">{Messages("hts.email-verification.error-link-description")}</a></li>
-            </ul>
-        </div>
-        }
-
-        <h1 class="heading-large">@title</h1>
-        <p>@Html(Messages("hts.email-verification.intro"))</p>
-        @helpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit, 'class -> "group subsection--wide", 'novalidate → "") {
-            <div class="panel panel-border-wide">
-                <p>@messages("hts.email-verification.note")</p>
-            </div>
-            @helpers.input_text(
-                id = "new-email-address",
-                name = "new-email-address",
-                label = messages("hts.email-verification.input.label"),
-                labelClass = Some("form-label-bold"),
-                inputType = "email",
-                hint = Some(messages("hts.email-verification.input.hint")),
-                describedByHint = Some("new-email-address-hint"),
-                describedByError = Some("new-email-address-error"),
-                errorMessage = errorMessage
-            )
-
-
-        @helpers.ga_submit_button("apply-button",
-            "Account holder confirmed update",
-            "Account holder update email address page",
-            Messages("hts.global.continue-button"),
-            None
-        )
-        }
-    }
+  @viewHelpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit) {
+    @viewHelpers.govukInput(Input(
+      id = key,
+      name = key,
+      inputType = "email",
+      label = Label(
+        content = Text(messages("hts.select-email.enter-new-address-label")),
+        classes = "govuk-label--s"
+      ),
+      hint = Some(Hint(
+        content = HtmlContent(messages("hts.select-email.enter-new-address-hint")))),
+      errorMessage = errorHelpers.emailErrorTypesToString(form, key).map(e => ErrorMessage(
+        content = Text(e),
+        visuallyHiddenText = Some(messages("hts.global.error.prefix"))
+      )),
+      autocomplete = Some("email"),
+      spellcheck = Some(false),
+      value = form.data.get(key)
+    ))
+    @viewHelpers.govukButton(Button(
+      attributes = Map(
+        "id" -> "apply-button",
+        "data-ga-event-category" -> "buttons",
+        "data-ga-event-action" -> "Account holder confirmed update",
+        "data-ga-event-label" -> "Account holder update email address page"
+      ),
+      content = Text(messages("hts.global.continue-button"))
+    ))
+  }
 }
