@@ -32,6 +32,8 @@
   <p class="govuk-body">@Html(Messages("hts.iv.were_unable_to_confirm_your_identity.p2"))</p>
   <p class="govuk-body">@Messages("hts.iv.were_unable_to_confirm_your_identity.p3")</p>
   @viewHelpers.govukButton(Button(
+  attributes = Map(
+  "id" -> "continue"),
   content = Text(messages("hts.iv.try_again_button")),
   href = Some(retryUrl)
   ))
