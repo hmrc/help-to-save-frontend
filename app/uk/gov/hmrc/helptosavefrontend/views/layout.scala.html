@@ -26,8 +26,6 @@
     standardBetaBanner: StandardBetaBanner,
     appConfig: FrontendAppConfig,
     hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-    autcompleteCss: HmrcAccessibleAutocompleteCss,
-    autocompleteJavascript: HmrcAccessibleAutocompleteJavascript,
     govukBackLink: GovukBackLink,
     hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
     hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
@@ -39,7 +37,8 @@
   backLink: Option[String] = None,
   hasErrors: Boolean = false,
   enableSignOutLink: Boolean = true,
-  extraMeta: Option[Html] = None
+  extraMeta: Option[Html] = None,
+  beforeContent: Option[Html] = None
 )(contentBlock: Html)(implicit htsContext: HtsContext, request : Request[_], messages: Messages, config: FrontendAppConfig)
 
 @serviceName = @{messages("hts.global.title-suffix")}
@@ -69,9 +68,10 @@
     @hmrcLanguageSelectHelper()
     @{
       backLink map { url =>
-        govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text("Back")))
+        govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text(messages("hts.global.link.back"))))
       }
     }
+    @beforeContent.getOrElse(Html(""))
   </div>
 }
 

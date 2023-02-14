@@ -17,50 +17,55 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-
 @import uk.gov.hmrc.helptosavefrontend.util.Email
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 
 @(returningUser: Boolean, accountEmail: Option[Email])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.cannot-change-email-try-later.title.h1")
-}
+@title = @{messages("hts.cannot-change-email-try-later.title.h1")}
 
-@main(
-title = title,
-sidebarLinks = None,
-bodyClasses = None) {
-  @if(returningUser){
+@layout(title) {
+  <h1 class="govuk-heading-l">@title</h1>
+  <p class="govuk-body">@Html(messages("hts.cannot-change-email-try-later.p1"))</p>
+
+  @if(returningUser) {
 
     @accountEmail match {
         case None => {
-            <h1 class="heading-large">@title</h1>
-            <p>@Html(Messages("hts.cannot-change-email-try-later.p1"))</p>
-            <a href=@routes.EmailController.getGiveEmailPage class="button" role="button">@messages("hts.cannot-change-email-try-later.try_later_button")</a>
-
-            <p class="subsection--wide push--bottom">
-                <a href=@routes.IntroductionController.getAboutHelpToSave.url id="exit-without-creating-account"
-                   class="font-xsmall">@Messages("hts.cannot-change-email-try-later.back_button")</a>
+            @viewHelpers.govukButton(
+              Button(
+                href = Some(routes.EmailController.getGiveEmailPage.url),
+                content = Text(messages("hts.cannot-change-email-try-later.try_later_button"))
+              )
+            )
+            <p class="govuk-body">
+              <a id="exit-without-creating-account" class="govuk-link govuk-!-font-size-16" href=@routes.IntroductionController.getAboutHelpToSave.url>@messages("hts.cannot-change-email-try-later.back_button")</a>
             </p>
         }
 
         case _ => {
-            <h1 class="heading-large">@title</h1>
-            <p>@Messages("hts.cannot-change-email-try-later.returning.p1")</p>
-            <p>@Html(Messages("hts.cannot-change-email-try-later.returning.p2"))</p>
-            <p class="subsection--wide"><a href=@{appConfig.nsiManageAccountUrl}>@Messages("hts.cannot-change-email-try-later.returning.button")</a></p>
+          <p class="govuk-body">@Html(messages("hts.cannot-change-email-try-later.returning.p2"))</p>
+          <p class="govuk-body">
+            <a class="govuk-link" href=@{appConfig.nsiManageAccountUrl}>@messages("hts.cannot-change-email-try-later.returning.button")</a>
+          </p>
         }
     }
 
   } else {
-    <h1 class="heading-large">@title</h1>
-    <p>@Html(Messages("hts.cannot-change-email-try-later.p1"))</p>
-    <a href=@routes.EmailController.getGiveEmailPage class="button" role="button">@messages("hts.cannot-change-email-try-later.try_later_button")</a>
+    @viewHelpers.govukButton(
+      Button(
+        href = Some(routes.EmailController.getGiveEmailPage.url),
+        content = Text(messages("hts.cannot-change-email-try-later.try_later_button"))
+      )
+    )
 
-    <p class="subsection--wide push--bottom">
-      <a href=@appConfig.govUkURL id="exit-without-creating-account">@Messages("hts.cannot-change-email-try-later.back_button")</a>
+    <p class="govuk-body">
+      <a class="govuk-link" id="exit-without-creating-account" href=@{appConfig.govUkURL}>
+        @messages("hts.cannot-change-email-try-later.back_button")
+      </a>
     </p>
   }
 }

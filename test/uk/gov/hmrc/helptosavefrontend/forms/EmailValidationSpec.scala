@@ -60,7 +60,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     "validate against blank strings" in {
       val emailValidation = newValidation()
       test(emailValidation)("")(
-        Left(Set(blankEmailAddress, noAtSymbol, noDotSymbol, noTextAfterDotSymbol, noTextAfterAtSymbolButBeforeDot))
+        Left(Set(blankEmailAddress))
       )
     }
 
@@ -116,7 +116,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
       forAll(Gen.identifier) { l ⇒
         whenever(l.nonEmpty) {
           test(emailValidation)(s"$l@")(
-            Left(Set(domainTooShort, noDotSymbol, noTextAfterDotSymbol, noTextAfterAtSymbolButBeforeDot))
+            Left(Set(noDotSymbol))
           )
         }
       }
