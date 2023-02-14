@@ -17,39 +17,30 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.incorrect-details.title.h1")
-}
+@title = @{messages("hts.incorrect-details.title.h1")}
 
-@main(
-    title = title,
-    sidebarLinks = None,
-    bodyClasses = None) {
+@layout(title, backLink = Some(routes.RegisterController.getCreateAccountPage.url)) {
 
-    @navigate_back(Some(routes.RegisterController.getCreateAccountPage.url))
+    <h1 class="govuk-heading-l">@title</h1>
+    <p class="govuk-body">@Html(messages("hts.incorrect-details.p1"))</p>
 
-    <h1 class="heading-large">@title</h1>
-    <p>@Html(Messages("hts.incorrect-details.p1"))</p>
-
-    <ul class="list list-bullet">
-        <li>@Messages("hts.incorrect-details.listOne1")</li>
-        <li>@Messages("hts.incorrect-details.listOne2")</li>
-        <li>@Messages("hts.incorrect-details.listOne3")</li>
-        <li>@Messages("hts.incorrect-details.listOne4")</li>
+    <ul class="govuk-list govuk-list--bullet">
+        <li>@messages("hts.incorrect-details.listOne1")</li>
+        <li>@messages("hts.incorrect-details.listOne2")</li>
+        <li>@messages("hts.incorrect-details.listOne3")</li>
+        <li>@messages("hts.incorrect-details.listOne4")</li>
     </ul>
 
-    <h2>@Messages("hts.incorrect-details.h2")</h2>
+    <h2 class="govuk-heading-m">@messages("hts.incorrect-details.h2")</h2>
 
-    <ol class="list list-number">
-        <li>@Html(Messages("hts.incorrect-details.listTwo1", "https://www.gov.uk/tell-hmrc-change-of-details"))</li>
-        <li>@Html(Messages("hts.incorrect-details.listTwo2"))</li>
+    <ol class="govuk-list govuk-list--number">
+        <li>@Html(messages("hts.incorrect-details.listTwo1", "https://www.gov.uk/tell-hmrc-change-of-details"))</li>
+        <li>@Html(messages("hts.incorrect-details.listTwo2"))</li>
     </ol>
 
 }
-
