@@ -16,81 +16,70 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers
-@import views.html.helper.CSRF
 @import uk.gov.hmrc.helptosavefrontend.forms.Continue
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.FormErrorMessage
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
-      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
 @(backupEmail: String, form: Form[Continue], duringRegistrationJourney: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-  @title = @{
-    Messages("hts.cannot-change-email.title.h1")
+@title = @{messages("hts.cannot-change-email.title.h1")}
+@key = @{"radio-inline-group"}
+@formName = @{"hts.select-email"}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@layout(title, None, hasErrors) {
+
+  @if(hasErrors) {
+    @errorHelpers.errorSummary[Continue](formName, form)
   }
 
-  @hasErrors = @{form.error("radio-inline-group").isDefined}
+  <h1 class="govuk-heading-l">@title</h1>
+  <p class="govuk-body">@messages("hts.cannot-change-email.p1")</p>
 
-  @main(
-    title = title,
-    sidebarLinks = None,
-    bodyClasses = None,
-    isErrorPage = hasErrors) {
+  @if(duringRegistrationJourney){
+    <p class="govuk-body">@Html(messages("hts.cannot-change-email.registration.p2"))</p>
+    <p class="govuk-body">@messages("hts.cannot-change-email.registration.p3")</p>
+  } else {
+    <p class="govuk-body">@Html(messages("hts.cannot-change-email.de.to.digital.p2"))</p>
+    <p class="govuk-body">@messages("hts.cannot-change-email.de.to.digital.p3")</p>
+  }
 
-    @{if(hasErrors)
-      <div class="error-summary" role="alert" aria-labelledby="error-summary-select-one-option" tabindex="-1">
-        <h2 class="heading-medium error-summary-heading" id="error-summary-select-one-option">{Messages("hts.cannot-change-email.error-summary.title")}</h2>
-        <ul class="error-summary-list">
-          <li><a href="#select-email">{Messages("hts.cannot-change-email.error-summary.descriptive-link")}</a></li>
-        </ul>
-      </div>
-    }
+  @viewHelpers.form(routes.EmailController.confirmEmailErrorSubmit) {
+    @viewHelpers.govukRadios(
+      Radios(
+        fieldset = Some(Fieldset(
+          legend = Some(Legend(
+            content = Text(messages("hts.cannot-change-email.header1")),
+            classes = "govuk-fieldset__legend--m",
+            isPageHeading = false
+          ))
+        )),
+        hint = Some(Hint(content = Text(messages("hts.cannot-change-email.p4")))),
+        idPrefix = Some(key),
+        name = key,
+        items = Seq(
+          RadioItem(
+            content = Text(messages("hts.cannot-change-email.opt1", backupEmail)),
+            value = Some("true"),
+            checked = form.data.values.toList.contains("true")
+          ),
+          RadioItem(
+            content = Text(messages("hts.cannot-change-email.opt2")),
+            value = Some("false"),
+            checked = form.data.values.toList.contains("false")
+          )
+        ),
+        errorMessage = errorHelpers.formErrorMessage(formName, form, key)
+      )
+    )
 
-    <h1 class="heading-large">@title</h1>
-    <p>@Messages("hts.cannot-change-email.p1")</p>
-
-    @if(duringRegistrationJourney){
-      <p>@Html(Messages("hts.cannot-change-email.registration.p2"))</p>
-      <p>@Messages("hts.cannot-change-email.registration.p3")</p>
-    } else {
-      <p>@Html(Messages("hts.cannot-change-email.de.to.digital.p2"))</p>
-      <p>@Messages("hts.cannot-change-email.de.to.digital.p3")</p>
-    }
-
-    @helpers.form(routes.EmailController.confirmEmailErrorSubmit){
-      @CSRF.formField(request)
-
-      <fieldset>
-        <legend>
-          <h2 class="heading-medium">@Messages("hts.cannot-change-email.header1")</h2>
-          <span class="body-text">@Messages("hts.cannot-change-email.p4")</span>
-        </legend>
-
-        <div class="@{"form-group" + { if(hasErrors) " form-group-error" else "" }}" id="select-email">
-                @{if(hasErrors) <span class="error-message">{Messages("hts.cannot-change-email.select-option")}</span> }
-
-                <div class="multiple-choice">
-                    <input id="radio-inline-1" type="radio" name="radio-inline-group" value=true>
-                    <label for="radio-inline-1">
-                    @Html(Messages("hts.cannot-change-email.opt1", backupEmail))
-                    </label>
-                </div>
-
-                <div class="multiple-choice">
-                    <input id="radio-inline-2" type="radio" name="radio-inline-group" value=false>
-                    <label for="radio-inline-2">
-                    @Messages("hts.cannot-change-email.opt2")
-                    </label>
-                </div>
-
-            </div>
-        </fieldset>
-
-
-
-        @submit('_buttonClass -> "", 'id → "email-error-continue"){ @Messages("hts.cannot-change-email.continue-button") }
-
-    }
-
+    @viewHelpers.govukButton(Button(
+      attributes = Map("id" -> "email-error-continue"),
+      content = Text(messages("hts.cannot-change-email.continue-button"))
+    ))
+  }
 }

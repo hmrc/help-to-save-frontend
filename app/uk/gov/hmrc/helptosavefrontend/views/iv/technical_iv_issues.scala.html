@@ -16,25 +16,21 @@
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 
 @(retryUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.iv.there_s_a_technical_issues.title.h1")
-}
+@title = @{Messages("hts.iv.there_s_a_technical_issues.title.h1")}
 
-@main(
-  title = title
-) {
-
-  <h1 class="heading-large">@title</h1>
-
-  <p class="margin-bottom">@Html(Messages("hts.iv.there_s_a_technical_issues.p1"))</p>
-  <p class="margin-botton">@Html(Messages("hts.iv.there_s_a_technical_issues.p2"))</p>
-
-  <section class="subsection--wide">
-    <a href="@retryUrl" class="button" role="button">@Messages("hts.iv.try_again_button")</a>
-  </section>
+@layout(title) {
+  <h1 class="govuk-heading-l">@title</h1>
+  <p class="govuk-body">@Html(Messages("hts.iv.there_s_a_technical_issues.p1"))</p>
+  <p class="govuk-body">@Html(Messages("hts.iv.there_s_a_technical_issues.p2"))</p>
+  @viewHelpers.govukButton(Button(
+  content = Text(messages("hts.iv.try_again_button")),
+  href = Some(retryUrl)
+  ))
 }

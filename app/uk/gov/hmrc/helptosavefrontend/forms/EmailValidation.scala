@@ -118,8 +118,10 @@ class EmailValidation @Inject() (configuration: Configuration) {
 
       val validation: Validated[NonEmptyList[String], String] =
         data.get(key).fold(invalid[String](ErrorMessages.blankEmailAddress))(validate)
-
-      validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
+      // previously this was returning a list of multiple errors on the same field
+      // now the hierarchy of which single error to return is determined by the order
+      // of the list returned by validate method
+      validation.toEither.leftMap(_.map(e ⇒ List(FormError(key, e))).head)
     }
 
     override def unbind(key: String, value: String): Map[String, String] =

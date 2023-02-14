@@ -17,27 +17,20 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.iv.insufficient_evidence.title.h1")
-}
+@title = @{Messages("hts.iv.insufficient_evidence.title.h1")}
 
-@main(
-  title = title
-) {
-
-    <h1 class="heading-large">@title</h1>
-    <p>@Html(Messages("hts.iv.insufficient_evidence.p1"))</p>
-    <p>
+@layout(title) {
+    <h1 class="govuk-heading-l">@title</h1>
+    <p class="govuk-body">@Html(Messages("hts.iv.insufficient_evidence.p1"))</p>
+    <p class="govuk-body">
         @Messages("hts.iv.insufficient_evidence.telephone-title")
         <br />
-        <span class="bold">@Messages("hts.iv.insufficient_evidence.telephone-number")</span>
+        <strong class="bold">@Messages("hts.iv.insufficient_evidence.telephone-number")</strong>
     </p>
-    <section class="subsection">
         <h2>@Messages("hts.iv.insufficient_evidence.h2")</h2>
-        <p>@Html(Messages("hts.iv.insufficient_evidence.p2"))</p>
-    </section>
+        <p class="govuk-body">@Html(Messages("hts.iv.insufficient_evidence.p2"))</p>
 }

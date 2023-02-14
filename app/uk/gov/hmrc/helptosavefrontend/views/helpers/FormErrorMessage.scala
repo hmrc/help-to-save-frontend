@@ -23,7 +23,7 @@ import uk.gov.hmrc.govukfrontend.views.Aliases.Text
 import uk.gov.hmrc.govukfrontend.views.viewmodels.errormessage.ErrorMessage
 import uk.gov.hmrc.govukfrontend.views.html.components._
 import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
-
+import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
 import javax.inject.Inject
 
 class FormErrorMessage @Inject()(ui: ViewHelpers) {
@@ -59,4 +59,36 @@ class FormErrorMessage @Inject()(ui: ViewHelpers) {
             content = Text(errorText(formName, e)),
             visuallyHiddenText = Some(messages("hts.global.error.prefix"))
         ))
+
+  def emailErrorTypesToString(form: Form[_], key: String)(implicit messages: play.api.i18n.Messages): Option[String] = {
+    val messagesKey: String = if (form.emailIsBlank(key)) {
+      "hts.email.error.blank"
+    } else if (form.emailLocalLengthTooShort(key)) {
+      "hts.email.error.local-too-short"
+    } else if (form.emailDomainLengthTooShort(key)) {
+      "hts.email.error.domain-too-short"
+    } else if (form.emailLocalLengthTooLong(key)) {
+      "hts.email.error.local-too-long"
+    } else if (form.emailDomainLengthTooLong(key)) {
+      "hts.email.error.domain-too-long"
+    } else if (form.emailTotalLengthTooLong(key)) {
+      "hts.email.error.total-too-long"
+    } else if (form.emailHasNoAtSymbol(key)) {
+      "hts.email.error.no-at-symbol"
+    } else if (form.emailHasNoDotSymbol(key)) {
+      "hts.email.error.no-dot-symbol"
+    } else if (form.emailHasNoTextAfterDotSymbol(key)) {
+      "hts.email.error.no-text-after-dot-symbol"
+    } else if (form.emailHasNoTextAfterAtSymbolButBeforeDot(key)) {
+      "hts.email.error.no-text-after-at-symbol-but-before-dot"
+    } else {
+      ""
+    }
+
+    if(!messagesKey.isEmpty) {
+      Some(messages(messagesKey))
+    } else {
+      None
+    }
+  }
 }
