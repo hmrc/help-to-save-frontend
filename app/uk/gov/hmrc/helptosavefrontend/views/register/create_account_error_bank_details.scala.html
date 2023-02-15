@@ -17,28 +17,29 @@
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.register.bank-details.error.title.h1")
-}
+@title = @{messages("hts.register.bank-details.error.title.h1")}
 
-@main(
-  title = title,
-  sidebarLinks = None,
-  bodyClasses = None) {
+@layout(title) {
 
-  <h1 class="heading-large">@title</h1>
-  <p>@Messages("hts.register.bank-details.error.p1")</p>
+  <h1 class="govuk-heading-l">@title</h1>
+  <p class="govuk-body">@messages("hts.register.bank-details.error.p1")</p>
 
-  <ul class="list list-bullet">
-    <li>@Messages("hts.register.bank-details.error.ul1-li1")</li>
-    <li>@Messages("hts.register.bank-details.error.ul1-li2")</li>
-    <li>@Messages("hts.register.bank-details.error.ul1-li3")</li>
+  <ul class="govuk-list govuk-list--bullet">
+    <li>@messages("hts.register.bank-details.error.ul1-li1")</li>
+    <li>@messages("hts.register.bank-details.error.ul1-li2")</li>
+    <li>@messages("hts.register.bank-details.error.ul1-li3")</li>
   </ul>
 
-  <a role="button" href="@routes.BankAccountController.getBankDetailsPage" class="button">@Messages("hts.register.bank-details.error.button.try-again")</a>
+  @viewHelpers.govukButton(Button(
+    href = Some(routes.BankAccountController.getBankDetailsPage.url),
+    content = Text(Messages("hts.register.bank-details.error.button.try-again"))
+  ))
+
 }
