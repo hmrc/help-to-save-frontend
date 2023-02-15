@@ -86,8 +86,7 @@ class RegisterControllerSpec
   lazy val controller: RegisterController = newController(earlyCapCheck = false)(crypto)
 
   private val fakeRequest = FakeRequest("GET", "/")
-
-  def assetsFrontendBackLink(url: String): String = s"""<a href=${url} class="link-back">Back</a>"""
+  
   def govukBackLink(url: String): String = s"""<a href="${url}" class="govuk-back-link" id="back">Back</a>"""
 
   def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
@@ -200,7 +199,7 @@ class RegisterControllerSpec
         val result = controller.getDetailsAreIncorrect(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include("We need your correct details")
-        contentAsString(result) should include(assetsFrontendBackLink("/help-to-save/create-account"))
+        contentAsString(result) should include(govukBackLink("/help-to-save/create-account"))
       }
     }
 
