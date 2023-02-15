@@ -86,7 +86,7 @@ class RegisterControllerSpec
   lazy val controller: RegisterController = newController(earlyCapCheck = false)(crypto)
 
   private val fakeRequest = FakeRequest("GET", "/")
-  
+
   def govukBackLink(url: String): String = s"""<a href="${url}" class="govuk-back-link" id="back">Back</a>"""
 
   def mockEmailUpdate(email: String)(result: Either[String, Unit]): Unit =
