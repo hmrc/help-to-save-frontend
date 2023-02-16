@@ -17,51 +17,42 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.privacy.title.h1")
-}
+@title = @{Messages("hts.privacy.title.h1")}
 
-@main(
-  title = title,
-  enableSignOutLink = false
-) {
+@layout(title = title, enableSignOutLink = false) {
+  <h1 class="govuk-heading-l">@title</h1>
+  <p class="govuk-body">@messages("hts.privacy.p1")</p>
+  <p class="govuk-body">@messages("hts.privacy.p2")</p>
+  <p class="govuk-body">@messages("hts.privacy.p3")</p>
 
-
-  <h1 class="heading-large">@title</h1>
-
-  <p>@messages("hts.privacy.p1")</p>
-
-  <p>@messages("hts.privacy.p2")</p>
-  <p>@messages("hts.privacy.p3")</p>
-
-  <ul class="bullets">
+  <ul class="govuk-list govuk-list--bullet">
     <li>@messages("hts.privacy.ul1.li1")</li>
     <li>@messages("hts.privacy.ul1.li2")</li>
     <li>@Html(Messages("hts.privacy.ul1.li3"))</li>
     <li>@messages("hts.privacy.ul1.li4")</li>
   </ul>
 
-  <p>@messages("hts.privacy.p4")</p>
-  <p>@messages("hts.privacy.p5")</p>
-  <p>@Html(Messages("hts.privacy.p6"))</p>
-  <p>@messages("hts.privacy.p7")</p>
-  <p>@Html(Messages("hts.privacy.p8"))</p>
-  <p>@messages("hts.privacy.p9")</p>
+  <p class="govuk-body">@messages("hts.privacy.p4")</p>
+  <p class="govuk-body">@messages("hts.privacy.p5")</p>
+  <p class="govuk-body">@Html(Messages("hts.privacy.p6"))</p>
+  <p class="govuk-body">@messages("hts.privacy.p7")</p>
+  <p class="govuk-body">@Html(Messages("hts.privacy.p8"))</p>
+  <p class="govuk-body">@messages("hts.privacy.p9")</p>
 
 
-  <ul class="bullets">
+  <ul class="govuk-list govuk-list--bullet">
     <li>@messages("hts.privacy.ul2.li1")</li>
     <li>@messages("hts.privacy.ul2.li2")</li>
   </ul>
 
-  <h2>@messages("hts.privacy.h2-1")</h2>
-  <p>@Html(Messages("hts.privacy.p10"))</p>
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-1")</h2>
+  <p class="govuk-body">@Html(Messages("hts.privacy.p10"))</p>
 
-  <h2>@messages("hts.privacy.h2-2")</h2>
-  <p>@Html(Messages("hts.privacy.p11.1")) <a href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" target="_blank">@Html(Messages("hts.privacy.p11.link-text"))</a> @messages("hts.privacy.p11.2")</p>
+  <h2 class="govuk-heading-m">@messages("hts.privacy.h2-2")</h2>
+  <p class="govuk-body">@Html(Messages("hts.privacy.p11.1")) <a class="govuk-link" href="https://www.gov.uk/government/publications/data-protection-act-dpa-information-hm-revenue-and-customs-hold-about-you" target="_blank">@Html(Messages("hts.privacy.p11.link-text"))</a> @messages("hts.privacy.p11.2")</p>
 
 }
