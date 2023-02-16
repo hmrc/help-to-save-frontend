@@ -131,7 +131,7 @@ hts.register.you-are-eligible.li2=nodi eich manylion banc
 hts.register.missinguserinfo.title.h1=Rydym heb gael rhai o’ch manylion pwysig
 hts.register.missinguserinfo.p1=Ni allwn greu eich cyfrif nes bod gennym eich:
 hts.register.missinguserinfo.title2=Yr hyn sydd angen i chi ei wneud
-hts.register.missinguserinfo.next.step1=<a href={0}>Rhoi gwybod i CThEF am newidiadau i’ch manylion personol</a>.
+hts.register.missinguserinfo.next.step1=<a class="govuk-link" href={0}>Rhoi gwybod i CThEF am newidiadau i’ch manylion personol</a>.
 hts.register.missinguserinfo.next.step2=Pan fyddwn wedi diweddaru eich manylion, gwnewch gais am gyfrif Cymorth i Gynilo.
 hts.register.missinguserinfo.firstName=enw cyntaf
 hts.register.missinguserinfo.lastName=enw olaf
@@ -201,7 +201,7 @@ hts.register.think_you_are_eligible.review.disagree.ul1-li2=rydych wedi gofyn am
 hts.register.think_you_are_eligible.review.disagree.ul1-li3=daeth eich adolygiad o’r penderfyniad i law yn ystod y mis diwethaf
 hts.register.think_you_are_eligible.review.disagree.ul1-li4=rydych am herio’r penderfyniad i beidio â chaniatáu i chi agor cyfrif Cymorth i Gynilo
 hts.register.think_you_are_eligible.review.disagree.p2=Mae’r tribiwnlys yn annibynnol ar y llywodraeth. Bydd yn gwrando ar y naill ochr a’r llall cyn gwneud penderfyniad.
-hts.register.think_you_are_eligible.review.disagree.p3=Ewch i GOV.UK i gael gwybod sut i <a href={0}>apelio i’r tribiwnlys treth</a>.
+hts.register.think_you_are_eligible.review.disagree.p3=Ewch i GOV.UK i gael gwybod sut i <a class="govuk-link" href={0}>apelio i’r tribiwnlys treth</a>.
 
 # IV Locked Out
 hts.iv.locked_out.title.h1=Nid oeddem yn gallu cadarnhau pwy ydych
@@ -326,7 +326,7 @@ hts.email-verified.p2=Nid yw eich e-bost wedi cael ei ddiweddaru ar gyfer gwasan
 
 # Existing Account - Verify your email address
 hts.email-verification.existing-user.check-your-email.title.h1=Mae gennych 30 munud i gadarnhau’r cyfeiriad e-bost
-hts.email-verification.existing-user.check-your-email.we-have-sent-mail=Rydym wedi anfon e-bost at {0}. <a href={1}>Defnyddiwch gyfeiriad e-bost gwahanol</a>.
+hts.email-verification.existing-user.check-your-email.we-have-sent-mail=Rydym wedi anfon e-bost at {0}. <a class="govuk-link" href={1}>Defnyddiwch gyfeiriad e-bost gwahanol</a>.
 hts.email-verification.existing-user.check-your-email.what-next=Yr hyn y mae’n rhaid i chi ei wneud
 hts.email-verification.existing-user.check-your-email.content1=Ewch i’r cyfrif e-bost hwnnw a dewiswch y cysylltiad yn y neges a anfonwyd atoch chi.
 hts.email-verification.existing-user.check-your-email.h3=Os na chyrhaeddodd yr e-bost
@@ -421,7 +421,7 @@ hts.incorrect-details.listOne2=enw olaf
 hts.incorrect-details.listOne3=dyddiad geni
 hts.incorrect-details.listOne4=cyfeiriad
 hts.incorrect-details.h2=Yr hyn sydd angen i chi ei wneud
-hts.incorrect-details.listTwo1=<a href={0}>Rhoi gwybod i CThEF am newidiadau i’ch manylion personol</a>.
+hts.incorrect-details.listTwo1=<a class="govuk-link" href={0}>Rhoi gwybod i CThEF am newidiadau i’ch manylion personol</a>.
 hts.incorrect-details.listTwo2=Pan fyddwn wedi diweddaru eich manylion, gwnewch gais am gyfrif Cymorth i Gynilo.
 hts.incorrect-details.exit-button=Yn ôl
 
@@ -455,7 +455,7 @@ hts.register.create_account.your-bank-details.account-name=Enw’r cyfrif
 hts.register.create_account.tandc-title=Telerau ac amodau
 hts.register.create_account.tandc-p1=Cyn i chi greu cyfrif Cymorth i Gynilo, rhaid i chi gytuno:
 hts.register.create_account.tandc-ul1-li1=fod eich manylion, cyfeiriad ebost a manylion banc yn gywir
-hts.register.create_account.tandc-ul1-li2=eich bod wedi darllen a deall y <a href={0}>meini prawf cymhwystra</a> ar GOV.UK ac yn gymwys i gael cyfrif Cymorth i Gynilo
+hts.register.create_account.tandc-ul1-li2=eich bod wedi darllen a deall y <a class="govuk-link" href={0}>meini prawf cymhwystra</a> ar GOV.UK ac yn gymwys i gael cyfrif Cymorth i Gynilo
 hts.register.create_account.tandc-ul1-li3=eich bod yn creu cyfrif Cymorth i Gynilo am y tro cyntaf
 hts.register.create_account.tandc-ul1-li4=os ydych yn cael Credyd Cynhwysol, byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 4 wythnos neu fwy
 hts.register.create_account.tandc-ul1-li5=os ydych yn cael credydau treth, byddwch yn rhoi gwybod i ni bob tro y byddwch yn gadael y DU am 8 wythnos neu fwy
