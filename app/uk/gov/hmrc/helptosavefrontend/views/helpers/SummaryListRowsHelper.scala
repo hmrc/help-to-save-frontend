@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.helptosavefrontend.views.register
+package uk.gov.hmrc.helptosavefrontend.views.helpers
 
 import play.api.i18n.Messages
 import play.api.mvc.Call
@@ -22,11 +22,15 @@ import uk.gov.hmrc.govukfrontend.views.html.components._
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
-import uk.gov.hmrc.helptosavefrontend.views.helpers.{DateUtils, PeriodUtils}
 
 class SummaryListRowsHelper {
-  private def summaryListRow(question: String, answer: String, changeLocation: Call, changeScreenReaderText: String)
-                            (implicit messages: Messages): SummaryListRow =
+  def summaryListRow(
+    question: String,
+    answer: String,
+    changeLocation: Call,
+    changeScreenReaderText: String,
+    changeLabel: Option[String] = None
+  )(implicit messages: Messages): SummaryListRow =
     SummaryListRow(
       key = Key(content = Text(question), classes = "govuk-!-width-one-third"),
       value = Value(content = Text(answer)),
@@ -35,7 +39,7 @@ class SummaryListRowsHelper {
           items = Seq(
             ActionItem(
               href = changeLocation.url,
-              content = Text(messages("hts.register.create_account.change")),
+              content = Text(changeLabel.getOrElse(messages("hts.register.create_account.change"))),
               visuallyHiddenText = Some(changeScreenReaderText)
             )
           )
