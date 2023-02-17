@@ -53,6 +53,7 @@
       timeout = Some(appConfig.TimeoutConfig.timeoutSeconds)
     )
   }
+  <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/application.css")' />
   @extraMeta.getOrElse(Html(""))
 }
 
