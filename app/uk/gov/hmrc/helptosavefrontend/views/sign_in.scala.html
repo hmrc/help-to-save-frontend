@@ -17,46 +17,45 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.SummaryListRowsHelper
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, summaryRows: SummaryListRowsHelper)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.sign-in.title.h1")
-}
+@title = @{messages("hts.sign-in.title.h1")}
 
-@main(
-  title = title,
-  sidebarLinks = None,
-  bodyClasses = None) {
+@layout(title) {
 
   <h1 class="heading-large">@title</h1>
-  <p>@messages("hts.sign-in.p1")</p>
+  <p class="govuk-body">@messages("hts.sign-in.p1")</p>
 
-  <ul class="list list-bullet">
+  <ul class="govuk-list govuk-list--bullet">
     <li>@messages("hts.sign-in.ul1-li1")</li>
     <li>@messages("hts.sign-in.ul1-li2")</li>
-    <li>@Html(Messages("hts.sign-in.ul1-li3"))</li>
+    <li>@messages("hts.sign-in.ul1-li3"))</li>
     <li>@messages("hts.sign-in.ul1-li4")</li>
   </ul>
 
-  <p>@Html(Messages("hts.sign-in.p2"))</p>
+  <p class="govuk-body">@messages("hts.sign-in.p2"))</p>
 
-  <a
-    class="button button-start ga-track-event"
-    role="button"
-    href="@routes.AccessAccountController.accessAccount.url"
-    data-ga-event-category="Sign in to your Help to Save account"
-    data-ga-event-action="button - click"
-    data-ga-event-label="Sign in"
-  >@messages("hts.global.sign-in-button")</a>
+  @viewHelpers.govukButton(Button(
+    href = Some(routes.AccessAccountController.accessAccount.url),
+    content = Text(messages("hts.global.sign-in-button")),
+    attributes = Map(
+      "data-ga-event-category" -> "Sign in to your Help to Save account",
+      "data-ga-event-action" -> "button - click",
+      "data-ga-event-label" -> "Sign in"
+    )
+  ))
 
-  <h2 class="heading-medium">@messages("hts.sign-in.h2")</h2>
+  <h2 class="govuk-heading-m">@messages("hts.sign-in.h2")</h2>
 
-  <p>@messages("hts.sign-in.p3")</p>
+  <p class="govuk-body">@messages("hts.sign-in.p3")</p>
 
-  <ul class="list list-bullet">
+  <ul class="govuk-list govuk-list--bullet">
     <li>@messages("hts.sign-in.ul2-li1")</li>
     <li>@messages("hts.sign-in.ul2-li2")</li>
   </ul>
