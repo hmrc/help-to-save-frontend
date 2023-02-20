@@ -522,8 +522,8 @@ hts.privacy.h2-1=Staff CThEF yn trin eich gwybodaeth
 hts.privacy.p10=Mae staff CThEF wedi’u hyfforddi o ran trin gwybodaeth, ac maent yn deall pa mor bwysig yw diogelu gwybodaeth bersonol a gwybodaeth sensitif arall.
 hts.privacy.h2-2=Gweld pa wybodaeth sydd gennym
 hts.privacy.p11.1=Gallwch ofyn i weld yr wybodaeth bersonol sydd ym meddiant CThEF amdanoch chi. Er mwyn helpu i ddod o hyd i’r wybodaeth yr ydych am ei gweld, ac i ddelio â’ch cais yn gyflymach, dylech anfon eich cais Deddf Diogelu Data i’r swyddfa CThEF yr ydych wedi bod yn delio â hi. Dylech gyfeirio’ch cais at y ’Swyddog Diogelu Data’. Ceir rhagor o wybodaeth am
-hts.privacy.p11.link-text=Polisi preifatrwydd CThEF
-hts.privacy.p11.2=(bydd yn agor ffenestr newydd) ar wefan GOV.UK.
+hts.privacy.p11.link-text=Polisi preifatrwydd CThEF (yn agor tab newydd)
+hts.privacy.p11.2=ar wefan GOV.UK.
 
 # Close Account
 hts.close-account.title.h1=A ydych yn siŵr eich bod am gau eich cyfrif?
