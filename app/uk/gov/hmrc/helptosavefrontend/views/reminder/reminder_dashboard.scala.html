@@ -14,61 +14,41 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
-@import uk.gov.hmrc.helptosavefrontend.views.helpers.PeriodUtils
+@import uk.gov.hmrc.helptosavefrontend.views.helpers.{PeriodUtils, SummaryListRowsHelper, FormErrorMessage}
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage, summaryRowHelper: SummaryListRowsHelper)
 
 @(email: String,period :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@title = @{messages("hts.reminder-dashboard.title.h1")}
 
-@title = @{
-    Messages("hts.reminder-dashboard.title.h1")
+@layout(title, backLink) {
+
+  <h1 class="govuk-heading-l">@messages("hts.reminder-dashboard.h2")</h1>
+
+  @viewHelpers.govukSummaryList(
+    SummaryList(
+      rows = Seq(
+        summaryRowHelper.summaryListRow(
+          messages("hts.reminder-dashboard.t1"),
+          s"""${messages("hts.reminder-dashboard.t1-1")} ${PeriodUtils.getMessage(period)} ${messages("hts.reminder-dashboard.t1-2")}""".stripMargin,
+          routes.ReminderController.getSelectedRendersPage,
+          messages("hts.reminder-dashboard.t1"),
+          Some(messages("hts.reminder-dashboard-change-cancel"))
+        ),
+        summaryRowHelper.summaryListRow(
+          messages("hts.reminder-dashboard.t2"),
+          email,
+          routes.AccountHolderController.getUpdateYourEmailAddress,
+          messages("hts.reminder-dashboard.t2"),
+          Some(messages("hts.reminder-dashboard-change"))
+        ),
+      )
+    )
+  )
 }
-
-@main(
-    title = title,
-    bodyClasses = None) {
-
-    @navigate_back(backLink)
-
-
-    <h1 class="heading-large">@Messages("hts.reminder-dashboard.h2")</h1>
-    <dl class="govuk-check-your-answers cya-questions-long">
-       <div class="govuk-summary-list__row">
-                <dt class="cya-question">
-                @Messages("hts.reminder-dashboard.t1")
-                </dt>
-                <dd class="govuk-summary-list__value">
-                    @Messages("hts.reminder-dashboard.t1-1")  @PeriodUtils.getMessage(period)
-                    @Messages("hts.reminder-dashboard.t1-2")
-                </dd>
-                <dd class="govuk-summary-list__actions">
-                    <a class="govuk-link" href=@routes.ReminderController.getSelectedRendersPage.url>
-                    @Messages("hts.reminder-dashboard-change-cancel")
-                    </a>
-                </dd>
-            </div>
-
-        <div class="govuk-summary-list__row">
-            <dt class="cya-question">
-            @Messages("hts.reminder-dashboard.t2")
-            </dt>
-            <dd class="govuk-summary-list__value">
-                @email
-            </dd>
-            <dd class="govuk-summary-list__actions">
-                <a class="govuk-link" href=@routes.AccountHolderController.getUpdateYourEmailAddress.url>
-                @Messages("hts.reminder-dashboard-change")
-                </a>
-            </dd>
-
-        </div>
-
-    }
-    </dl>
-
