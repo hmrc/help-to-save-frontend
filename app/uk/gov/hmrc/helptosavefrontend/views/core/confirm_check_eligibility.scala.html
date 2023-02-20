@@ -18,34 +18,27 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
-      submit: uk.gov.hmrc.helptosavefrontend.views.html.helpers.submit)
+@this(viewHelpers: ViewHelpers, layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@title = @{
-  Messages("hts.no-account.title.h1")
-}
+@title = @{Messages("hts.no-account.title.h1")}
 
-@main(
-  title = title
-) {
-  <h1 class="heading-large">@title</h1>
-
-  <p>@Html(Messages("hts.no-account.p1"))</p>
-
-  <h2>@Html(Messages("hts.no-account.h2-1"))</h2>
-  <p>@Html(Messages("hts.no-account.p2"))</p>
-
-  <div class="form-field form-field--submit">
-    @form(routes.EligibilityCheckController.getCheckEligibility){
-    @submit('_buttonClass -> "", 'id → "start-creating-account") {
-      @Messages("hts.no-account.button-1")
+@layout(title) {
+  <h1 class="govuk-heading-l">@title</h1>
+  <p class="govuk-body">@Html(Messages("hts.no-account.p1"))</p>
+  <h2 class="govuk-heading-m">@Html(Messages("hts.no-account.h2-1"))</h2>
+  <p class="govuk-body">@Html(Messages("hts.no-account.p2"))</p>
+    @viewHelpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.EligibilityCheckController.getCheckEligibility) {
+        @viewHelpers.govukButton(Button(
+        attributes = Map(
+        "id" -> "start-creating-account"
+        ),
+        content = Text(messages("hts.no-account.button-1"))
+        ))
     }
-  }
-  </div>
-
-  <p><a href="@appConfig.govUkURL" id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a></p>
-
+  <p class="govuk-body"><a class="govuk-link" href="@appConfig.govUkURL" id="exit-without-creating-account">@Messages("hts.no-account.exit-message")</a></p>
 }
