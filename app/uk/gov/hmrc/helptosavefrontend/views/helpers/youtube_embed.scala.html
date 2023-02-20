@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@(embedCode: String, maybeTitle: Option[String])(implicit request: Request[_], messages: play.api.i18n.Messages)
+@(embedCode: String, maybeTitle: Option[String])(implicit messages: play.api.i18n.Messages)
     <div class="videoWrapper">
         <iframe
         data-dnt-embed
@@ -24,10 +24,12 @@
         data-dnt-default-buttontext-left="@Messages("hts.global.dnt.default.button.with.title.text.left")"
         data-dnt-default-buttontext-right="@Messages("hts.global.dnt.default.button.with.title.text.right")"
         @maybeTitle.map{title => title="@title" }
+        style="border:0;"
         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         <noscript>
             <iframe
             src="https://www.youtube.com/embed/@{embedCode}"
+            style="border:0;"
             allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
         </noscript>
     </div>
