@@ -14,8 +14,6 @@
  * limitations under the License.
  *@
 
-@import views.html.helper.CSPNonce
-
 @(embedCode: String, maybeTitle: Option[String])(implicit request: Request[_], messages: play.api.i18n.Messages)
     <div class="videoWrapper">
         <iframe
