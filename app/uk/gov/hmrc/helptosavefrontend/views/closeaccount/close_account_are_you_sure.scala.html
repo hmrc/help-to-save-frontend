@@ -95,10 +95,9 @@
     <p class="govuk-body">@messages("hts.close-account.p3")</p>
     <p class="govuk-body">@messages("hts.close-account.p4")</p>
 
-@viewHelpers.govukBackLink(BackLink(
-    href = appConfig.nsiManageAccountUrl,
-    attributes = Map("data-ga-event-category" -> "link - click",
-                "data-ga-event-action" -> "Are you sure you want to close your account"),
-    content = Text(messages("hts.global.link.back"))))
+    <a class= "govuk-link" href=@{appConfig.nsiManageAccountUrl}
+    data-ga-event-category="link - click"
+    data-ga-event-action="Are you sure you want to close your account"
+    data-ga-event-label="Back">@messages("hts.close-account.back")</a>
 }
 
