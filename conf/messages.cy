@@ -550,7 +550,7 @@ hts.we-cannot-check-details.create-gg-account=Creu cyfrif newydd Porth y Llywodr
 hts.we-cannot-check-details.h3=Os oes gennych gyfrif Cymorth i Gynilo eisoes
 hts.we-cannot-check-details.title.p3=I fewngofnodi, nodwch y ‘Dynodydd Defnyddiwr (ID)’ a’r ‘cyfrinair’ ar gyfer cyfrif Porth y Llywodraeth a ddefnyddiwyd gennych i greu eich cyfrif Cymorth i Gynilo.
 
-hts.close-account.positive-balance.positive-bonus.warning=Os ydych yn cau eich cyfrif nawr, ni fyddwch yn cael eich taliad bonws cyntaf o &pound;{0} neu fonws terfynol. Ni fyddwch yn gallu agor cyfrif Cymorth i Gynilo arall.
+hts.close-account.positive-balance.positive-bonus.warning=Os ydych yn cau eich cyfrif nawr, ni fyddwch yn cael eich taliad bonws cyntaf o £{0} neu fonws terfynol. Ni fyddwch yn gallu agor cyfrif Cymorth i Gynilo arall.
 hts.close-account.positive-balance.positive-bonus.withdraw.p1=Gallwch
 hts.close-account.positive-balance.positive-bonus.withdraw.p2=dynnu’ch holl arian allan
 hts.close-account.positive-balance.positive-bonus.withdraw.p3=ar unrhyw adeg heb gau eich cyfrif.

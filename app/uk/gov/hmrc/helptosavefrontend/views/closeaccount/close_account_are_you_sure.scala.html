@@ -20,39 +20,42 @@
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account._
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
       zeroBalanceZeroBonus: zero_balance_zero_bonus,
       positiveBalancePositiveBonus: positive_balance_positive_bonus,
       zeroBalancePositiveBonus: zero_balance_positive_bonus,
-      balanceUnknown: balance_unknown)
+      balanceUnknown: balance_unknown, viewHelpers: ViewHelpers)
 
 @(maybeAccount: Option[Account])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
-@serviceInfoContent = {
-    <div class="breadcrumbs">
-        <ol>
-            <li><a
-            href=@{appConfig.nsiManageAccountUrl}
-            class="ga-track-event"
-            data-ga-event-category="link - click"
-            data-ga-event-action="Are you sure you want to close your account"
-            data-ga-event-label="Help to Save account home">@messages("hts.global.breadcrumb.account.home")</a></li>
-        </ol>
-    </div>
+@beforeContentBlock = {
+    @viewHelpers.govukBreadcrumbs(Breadcrumbs(
+        items = Seq(
+        BreadcrumbsItem(
+        content = Text(messages("hts.global.breadcrumb.account.home")),
+        href = Some(appConfig.nsiManageAccountUrl)
+        )),
+        classes = "ga-track-event",
+        attributes = Map(
+        "data-ga-event-category" -> "link - click",
+        "data-ga-event-action" -> "Are you sure you want to close your account",
+        "data-ga-event-label" -> "Help to Save account home"
+        )
+    ))
 }
 
 @title = @{
   Messages("hts.close-account.title.h1")
 }
 
-@main(
+@layout(
     title = title + " " + Messages("hts.global.accountholder.title-suffix"),
-    sidebarLinks = None,
-    bodyClasses = None,
-    serviceInfoContent = serviceInfoContent) {
+    beforeContent = Some(beforeContentBlock)) {
 
-    <h1>@title</h1>
+    <h1 class="govuk-heading-l">@title</h1>
 
     @{
       maybeAccount -> maybeAccount.flatMap(_.currentBonusTerm.map(_.bonusEstimate)) match {
@@ -77,25 +80,22 @@
     }
 
 
-    <p>@messages("hts.close-account.p1")</p>
-    <p>@Html(Messages("hts.close-account.p2"))</p>
+    <p class="govuk-body">@messages("hts.close-account.p1")</p>
+    <p class="govuk-body">@Html(Messages("hts.close-account.p2"))</p>
 
-    <div class="panel panel-border-narrow">
-        <p>
-            @messages("hts.close-account.contact.telephone")<br/>
-            <strong class="bold">@messages("hts.close-account.contact.telephone.number")</strong>
-        </p>
-        <p>
-            @messages("hts.close-account.contact.outside-uk")<br/>
-            <strong class="bold">@messages("hts.close-account.contact.outside-uk.number")</strong>
-        </p>
-    </div>
+@viewHelpers.govukInsetText(InsetText(
+    content = HtmlContent("<p class=\"govuk-body\">"+s"${messages("hts.close-account.contact.telephone")}" +
+            "<br/><strong>"+s"${messages("hts.close-account.contact.telephone.number")}</strong></p>" +
+            "<p class=\"govuk-body\">"+s"${messages("hts.close-account.contact.outside-uk")}" +
+            "<br/><strong>"+s"${messages("hts.close-account.contact.outside-uk.number")}</strong></p>"
+    )
+))
 
-    <h2 class="heading-small">@messages("hts.close-account.h2")</h2>
-    <p>@messages("hts.close-account.p3")</p>
-    <p>@messages("hts.close-account.p4")</p>
+    <h2 class="govuk-heading-s">@messages("hts.close-account.h2")</h2>
+    <p class="govuk-body">@messages("hts.close-account.p3")</p>
+    <p class="govuk-body">@messages("hts.close-account.p4")</p>
 
-    <a href=@{appConfig.nsiManageAccountUrl}
+    <a class= "govuk-link" href=@{appConfig.nsiManageAccountUrl}
     data-ga-event-category="link - click"
     data-ga-event-action="Are you sure you want to close your account"
     data-ga-event-label="Back">@messages("hts.close-account.back")</a>
