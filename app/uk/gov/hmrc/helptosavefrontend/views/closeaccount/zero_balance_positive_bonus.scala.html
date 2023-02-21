@@ -16,16 +16,14 @@
 
 @import cats.syntax.show._
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account._
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this()
+@this(viewHelpers: ViewHelpers)
 
 @(bonusEstimate: BigDecimal)(implicit messages: play.api.i18n.Messages)
 
-<div class="notice">
-  <i class="icon icon-important">
-    <span class="visually-hidden">Warning</span>
-  </i>
-  <p>
-    <strong class="bold-small">@Html(messages("hts.close-account.positive-balance.positive-bonus.warning", bonusEstimate.show))</strong>
-  </p>
-</div>
+@viewHelpers.govukWarningText(WarningText(
+  iconFallbackText = messages("hts.global.hidden-icon-text.warning"),
+  content = Text(Messages("hts.close-account.positive-balance.positive-bonus.warning", bonusEstimate.show))
+))

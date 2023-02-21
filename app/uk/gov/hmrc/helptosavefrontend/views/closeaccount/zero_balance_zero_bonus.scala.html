@@ -14,13 +14,14 @@
  * limitations under the License.
  *@
 
-@this()
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+
+@this(viewHelpers: ViewHelpers)
 
 @()(implicit messages: play.api.i18n.Messages)
 
-<div class="notice">
-  <i class="icon icon-important">
-    <span class="visually-hidden">Warning</span>
-  </i>
-  <p><strong class="bold-small">@messages("hts.close-account.warning")</strong></p>
-</div>
+@viewHelpers.govukWarningText(WarningText(
+  iconFallbackText = messages("hts.global.hidden-icon-text.warning"),
+  content = Text(Messages("hts.close-account.warning"))
+))
