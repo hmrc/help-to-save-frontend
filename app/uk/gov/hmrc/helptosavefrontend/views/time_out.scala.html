@@ -19,21 +19,21 @@
 @import play.twirl.api.Html
 
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
-@import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
 @title = @{ Messages("hts.timeout.signedOutMessage") }
 
-@main(title = title, sidebarLinks = None, bodyClasses = None, enableSignOutLink = false) {
+@layout(title, enableSignOutLink = false) {
 
-<h2 class="heading-large">@messages("hts.timeout.signedOutMessage")</h2>
+ <h2 class="govuk-heading-l">@title</h2>
 
-<p>@messages("hts.timed-out.p1")</p>
+ <p class="govuk-body">@messages("hts.timed-out.p1")</p>
 
-<p>@Html(messages("hts.timed-out.p2"))</p>
+ <p class="govuk-body">@Html(messages("hts.timed-out.p2"))</p>
 
 }
