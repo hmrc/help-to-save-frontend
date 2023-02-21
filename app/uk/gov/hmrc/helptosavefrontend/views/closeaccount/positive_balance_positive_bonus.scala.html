@@ -18,22 +18,18 @@
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account._
 
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this()
+@this(viewHelpers: ViewHelpers)
 
 @(bonusEstimate: BigDecimal)(implicit messages: play.api.i18n.Messages, appConfig: FrontendAppConfig)
 
-<div class="notice">
-  <i class="icon icon-important">
-    <span class="visually-hidden">Warning</span>
-  </i>
-  <p>
-    <strong class="bold-small">
-      @Html(messages("hts.close-account.positive-balance.positive-bonus.warning", bonusEstimate.show))
-    </strong>
-  </p>
-</div>
+@viewHelpers.govukWarningText(WarningText(
+  iconFallbackText = messages("hts.global.hidden-icon-text.warning"),
+  content = Text(Messages("hts.close-account.positive-balance.positive-bonus.warning", bonusEstimate.show))
+))
 
-<p>@messages("hts.close-account.positive-balance.positive-bonus.withdraw.p1")
-  <a href=@{appConfig.nsiManageAccountUrl}>@messages("hts.close-account.positive-balance.positive-bonus.withdraw.p2")</a>
+<p class="govuk-body">@messages("hts.close-account.positive-balance.positive-bonus.withdraw.p1")
+  <a class="govuk-link" href=@{appConfig.nsiManageAccountUrl}>@messages("hts.close-account.positive-balance.positive-bonus.withdraw.p2")</a>
   @messages("hts.close-account.positive-balance.positive-bonus.withdraw.p3")</p>

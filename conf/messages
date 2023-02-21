@@ -551,7 +551,7 @@ hts.we-cannot-check-details.create-gg-account=Create a new Government Gateway ac
 hts.we-cannot-check-details.h3=If you already have a Help to Save account
 hts.we-cannot-check-details.title.p3=To sign in, enter the ‘user ID’ and ‘password’ for the Government Gateway account you used to create your Help to Save account.
 
-hts.close-account.positive-balance.positive-bonus.warning=If you close your account now you will not get your &pound;{0} first bonus payment or a final bonus. You will not be able to open another Help to Save account.
+hts.close-account.positive-balance.positive-bonus.warning=If you close your account now you will not get your £{0} first bonus payment or a final bonus. You will not be able to open another Help to Save account.
 hts.close-account.positive-balance.positive-bonus.withdraw.p1=You can
 hts.close-account.positive-balance.positive-bonus.withdraw.p2=withdraw all of your money
 hts.close-account.positive-balance.positive-bonus.withdraw.p3=at any time without closing your account.
