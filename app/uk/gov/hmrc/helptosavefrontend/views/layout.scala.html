@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
+@import views.html.helper.CSPNonce
 
 @this(
     hmrcLayout: HmrcLayout,
@@ -53,13 +54,13 @@
       timeout = Some(appConfig.TimeoutConfig.timeoutSeconds)
     )
   }
-  <link rel="stylesheet" href='@routes.Assets.versioned("stylesheets/application.css")' />
-  @extraMeta.getOrElse(Html(""))
+@Html(s"""<link rel="stylesheet" media="screen" href="${routes.Assets.versioned("stylesheets/application.css")}" ${CSPNonce.attr}>""")
+@extraMeta.getOrElse(Html(""))
 }
 
 @scripts = {
-  <script src='@routes.Assets.versioned("javascripts/do-not-track.js")'></script>
-  <script>
+  @Html(s"""<script src="${routes.Assets.versioned("javascripts/do-not-track.js")}" ${CSPNonce.attr}></script>""")
+  <script @CSPNonce.attr>
           const DoNotTrackYouTube = new GOVUK.DoNotTrackYouTube();
           DoNotTrackYouTube.init()
   </script>
@@ -92,9 +93,10 @@
   isWelshTranslationAvailable = true,
   displayHmrcBanner = false,
   signOutUrl = if(enableSignOutLink) Some(appConfig.signOutUrl) else None,
-  additionalHeadBlock = Some(hmrcHead(headBlock = Some(head))),
+  additionalHeadBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = Some(head))),
   beforeContentBlock = Some(beforeContentBlock),
   serviceName = Some(serviceName),
   phaseBanner = None,
-  additionalScriptsBlock = Some(scripts)
+  additionalScriptsBlock = Some(scripts),
+  nonce = CSPNonce.get
 )(content)
