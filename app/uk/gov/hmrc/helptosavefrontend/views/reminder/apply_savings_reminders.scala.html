@@ -83,7 +83,9 @@
         @viewHelpers.govukButton(Button(
           attributes = Map(
             "id" -> "confirm-selected-email",
-            "onclick" -> "ga('send', 'event', 'button', 'Applicant selected email', 'Applicant select email address page');"
+            "data-ga-event-category" -> "buttons",
+            "data-ga-event-action" -> "Applicant selected email",
+            "data-ga-event-label" -> "Applicant select email address page"
           ),
           content = Text(messages("hts.global.continue-button"))
         ))
