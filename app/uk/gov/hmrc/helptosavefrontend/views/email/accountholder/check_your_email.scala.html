@@ -18,52 +18,58 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.html.helpers
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.forms.UpdateEmail
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers,
       button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
 
 @(email: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
 
-@serviceInfoContent = {
-  <div class="breadcrumbs">
-    <ol>
-      <li><a href=@{frontendAppConfig.nsiManageAccountUrl}>@messages("hts.global.breadcrumb.account.home")</a></li>
-    </ol>
-  </div>
+@beforeContentBlock = {
+    @viewHelpers.govukBreadcrumbs(Breadcrumbs(
+        items = Seq(
+        BreadcrumbsItem(
+        content = Text(messages("hts.global.breadcrumb.account.home")),
+        href = Some(frontendAppConfig.nsiManageAccountUrl)
+        ))
+    ))
 }
 
 @title = @{
   Messages("hts.email-verification.existing-user.check-your-email.title.h1")
 }
 
-@main(
+@layout(
   title = title  + " " + Messages("hts.global.title.section.email"),
-  sidebarLinks = None,
-  bodyClasses = None,
-  serviceInfoContent = serviceInfoContent) {
+        beforeContent = Some(beforeContentBlock)) {
 
-    <h1 class="heading-large">@title</h1>
-    <p>@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail", email, routes.AccountHolderController.getUpdateYourEmailAddress.url))</p>
+    <h1 class="govuk-heading-l">@title</h1>
+    <p class="govuk-body">@Html(Messages("hts.email-verification.existing-user.check-your-email.we-have-sent-mail", email, routes.AccountHolderController.getUpdateYourEmailAddress.url))</p>
     
-    <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.what-next")</h2>
-    <p class="content">@Html(Messages("hts.email-verification.existing-user.check-your-email.content1"))</p>
+    <h2 class="govuk-heading-m">@messages("hts.email-verification.existing-user.check-your-email.what-next")</h2>
+    <p class="govuk-body">@Html(Messages("hts.email-verification.existing-user.check-your-email.content1"))</p>
 
-    <h2 class="heading-medium">@messages("hts.email-verification.existing-user.check-your-email.h3")</h2>
+    <h2 class="govuk-heading-m">@messages("hts.email-verification.existing-user.check-your-email.h3")</h2>
 
-    @{
-      helpers.form(routes.AccountHolderController.onSubmit)(
-        Html(
-          s"""
-          |<input type="hidden" name="new-email-address" value="$email">
-          |<p>${Messages("hts.email-verification.existing-user.check-your-email.resend-1")}
-          |${button('_modifierClass -> "button button--link soft push--right", 'role -> "link", 'id → "resend-verification")(Html(messages("hts.email-verification.existing-user.check-your-email.resend-button-text")))}
-          |${Messages("hts.email-verification.existing-user.check-your-email.resend-2")}</p>
-          |""".stripMargin
-        )
-      )
-    }
+@viewHelpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit) {
+<p class="govuk-body">@Messages("hts.email-verification.existing-user.check-your-email.resend-1")
+    <input type="hidden" name="new-email-address" value="@{email}">
+    @viewHelpers.govukButton(
+    Button(
+    attributes = Map("id" -> "resend-verification"),
+    classes="govuk-button--secondary",
+    content = Text(messages("hts.email-verification.existing-user.check-your-email.resend-button-text"))
+    )
+    )
+    @Messages("hts.email-verification.existing-user.check-your-email.resend-2")</p>
+}
     
-    <p class="subsection--wide push--bottom"><a href=@{frontendAppConfig.nsiManageAccountUrl} class="button" role="button">@messages("hts.global.back-to-account")</a></p>
-
-  
+    <p class="govuk-body">
+        @viewHelpers.govukButton(Button(
+        content = Text(messages("hts.global.back-to-account")),
+        href = Some(frontendAppConfig.nsiManageAccountUrl)
+        ))
+    </p>
 }

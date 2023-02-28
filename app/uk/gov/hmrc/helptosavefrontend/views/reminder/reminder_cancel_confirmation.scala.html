@@ -17,32 +17,27 @@
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
+@import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
+@import uk.gov.hmrc.govukfrontend.views.html.components._
 
-@this(main: uk.gov.hmrc.helptosavefrontend.views.html.main_template,button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
+@this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, button: uk.gov.hmrc.helptosavefrontend.views.html.helpers.button)
 
 @()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
 
+@title = @{Messages("hts.reminder-cancel-confirmation.title.h1")}
 
-@title = @{
-    Messages("hts.reminder-cancel-confirmation.title.h1")
-}
+@layout(title) {
+    @viewHelpers.govukPanel(Panel(
+    title = Text(title),
+    content = Text(messages("hts.reminder-cancel-confirmation.title.p1"))
+    ))
 
-@main(
-    title = title,
-    bodyClasses = None) {
+    <h2 class="govuk-heading-m">@Messages("hts.reminder-confirmation.h2")</h2>
 
-    <div class="govuk-box-highlight">
-        <h1 class="heading-xlarge">@title</h1>
-        <span class="heading-large">
-            @Messages("hts.reminder-cancel-confirmation.title.p1")
-        </span>
-    </div>
-            <h2 class="heading-medium">@Messages("hts.reminder-confirmation.h2")</h2>
+    <p class="govuk-body">@Messages("hts.reminder-cancel-confirmation.p1-1") <a class="govuk-link" href=@routes.ReminderController.getEmailsavingsReminders.url>
+    @Messages("hts.reminder-cancel-confirmation.li-signup")</a>
+        @Messages("hts.reminder-cancel-confirmation.p1-2")</p>
 
-            <p>@Messages("hts.reminder-cancel-confirmation.p1-1") <a href=@routes.ReminderController.getEmailsavingsReminders.url>
-            @Html(Messages("hts.reminder-cancel-confirmation.li-signup"))</a>
-                @Html(Messages("hts.reminder-cancel-confirmation.p1-2"))</p>
-
-            <p class="subsection--wide push--bottom"><a class="button govuk-button" role="button" href=@{appConfig.nsiManageAccountUrl}>@messages("hts.global.back-to-account")</a></p>
+    <p class="govuk-body"><a class="govuk-link" href=@{appConfig.nsiManageAccountUrl}>@messages("hts.global.back-to-account")</a></p>
 
 }
