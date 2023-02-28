@@ -55,15 +55,21 @@
 
 @viewHelpers.form(uk.gov.hmrc.helptosavefrontend.controllers.routes.AccountHolderController.onSubmit) {
 <p class="govuk-body">@Messages("hts.email-verification.existing-user.check-your-email.resend-1")
-
+    <input type="hidden" name="new-email-address" value="@{email}">
     @viewHelpers.govukButton(
     Button(
     attributes = Map("id" -> "resend-verification"),
+    classes="govuk-button--secondary",
     content = Text(messages("hts.email-verification.existing-user.check-your-email.resend-button-text"))
     )
     )
     @Messages("hts.email-verification.existing-user.check-your-email.resend-2")</p>
 }
     
-    <p class="govuk-body"><a class="govuk-link" href=@{frontendAppConfig.nsiManageAccountUrl}>@messages("hts.global.back-to-account")</a></p>
+    <p class="govuk-body">
+        @viewHelpers.govukButton(Button(
+        content = Text(messages("hts.global.back-to-account")),
+        href = Some(frontendAppConfig.nsiManageAccountUrl)
+        ))
+    </p>
 }
