@@ -34,9 +34,9 @@
 
     <h2 class="govuk-heading-m">@Messages("hts.reminder-confirmation.h2")</h2>
 
-    <p class="govuk-body">@Html(Messages("hts.reminder-cancel-confirmation.p1-1")) <a class="govuk-link" href=@routes.ReminderController.getEmailsavingsReminders.url>
-    @Html(Messages("hts.reminder-cancel-confirmation.li-signup"))</a>
-        @Html(Messages("hts.reminder-cancel-confirmation.p1-2"))</p>
+    <p class="govuk-body">@Messages("hts.reminder-cancel-confirmation.p1-1") <a class="govuk-link" href=@routes.ReminderController.getEmailsavingsReminders.url>
+    @Messages("hts.reminder-cancel-confirmation.li-signup")</a>
+        @Messages("hts.reminder-cancel-confirmation.p1-2")</p>
 
     <p class="govuk-body"><a class="govuk-link" href=@{appConfig.nsiManageAccountUrl}>@messages("hts.global.back-to-account")</a></p>
 
