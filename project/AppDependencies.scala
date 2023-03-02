@@ -9,7 +9,6 @@ object AppDependencies {
     hmrc                %% "govuk-template"             % "5.72.0-play-28",
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"         % "0.68.0",
     hmrc                %% "bootstrap-frontend-play-28" % "5.24.0",
-    hmrc                %% "play-ui"                    % "9.5.0-play-28",
     hmrc                %% "play-language"              % "5.1.0-play-28",
     "com.github.kxbmap" %% "configs"                    % "0.4.4",
     "org.typelevel"     %% "cats-core"                  % "2.6.1",
