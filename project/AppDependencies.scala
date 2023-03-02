@@ -6,16 +6,14 @@ object AppDependencies {
   val playVersion = "play-28"
 
   val compile = Seq(
-    hmrc                %% "govuk-template"             % "5.72.0-play-28",
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"         % "0.68.0",
     hmrc                %% "bootstrap-frontend-play-28" % "5.24.0",
-    hmrc                %% "play-language"              % "5.1.0-play-28",
     "com.github.kxbmap" %% "configs"                    % "0.4.4",
     "org.typelevel"     %% "cats-core"                  % "2.6.1",
     hmrc                %% "domain"                     % "6.2.0-play-28",
     compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.5" cross CrossVersion.full),
     "com.github.ghik" % "silencer-lib" % "1.7.5" % Provided cross CrossVersion.full,
-    hmrc                %% "play-frontend-hmrc"         % s"3.34.0-$playVersion"
+    hmrc                %% "play-frontend-hmrc"         % s"6.7.0-$playVersion"
 
   )
 
