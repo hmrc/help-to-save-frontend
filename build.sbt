@@ -98,13 +98,15 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     formatMessageQuotes := {
       import sys.process._
-      val rightQuoteReplace =
-        List("sed", "-i", s"""s/&rsquo;\\|''/’/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !
-      val leftQuoteReplace =
-        List("sed", "-i", s"""s/&lsquo;/‘/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !
+      if (!System.getProperty("os.name").startsWith("Windows")) {
+        val rightQuoteReplace =
+          List("sed", "-i", s"""s/&rsquo;\\|''/’/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !
+        val leftQuoteReplace =
+          List("sed", "-i", s"""s/&lsquo;/‘/g""", s"${baseDirectory.value.getAbsolutePath}/conf/messages") !
 
-      if (rightQuoteReplace != 0 || leftQuoteReplace != 0) {
-        logger.log(Level.Warn, "WARNING: could not replace quotes with smart quotes")
+        if (rightQuoteReplace != 0 || leftQuoteReplace != 0) {
+          logger.log(Level.Warn, "WARNING: could not replace quotes with smart quotes")
+        }
       }
     },
     compile := ((Compile / compile) dependsOn formatMessageQuotes).value
