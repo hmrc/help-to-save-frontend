@@ -93,7 +93,7 @@
   isWelshTranslationAvailable = true,
   displayHmrcBanner = false,
   signOutUrl = if(enableSignOutLink) Some(appConfig.signOutUrl) else None,
-  additionalHeadBlock = Some(hmrcHead(nonce = CSPNonce.get, headBlock = Some(head))),
+  additionalHeadBlock = Some(head),
   beforeContentBlock = Some(beforeContentBlock),
   serviceName = Some(serviceName),
   phaseBanner = None,
