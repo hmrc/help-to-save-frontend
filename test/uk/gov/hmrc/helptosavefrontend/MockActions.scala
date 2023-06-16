@@ -34,9 +34,9 @@ trait MockActions extends MockFactory {
   implicit val mockEmailValidation: EmailValidation =
     new EmailValidation(
       Configuration(
-        "email-validation.max-total-length" → Int.MaxValue,
-        "email-validation.max-local-length" → Int.MaxValue,
-        "email-validation.max-domain-length" → Int.MaxValue
+        "email-validation.max-total-length" -> Int.MaxValue,
+        "email-validation.max-local-length" -> Int.MaxValue,
+        "email-validation.max-domain-length" -> Int.MaxValue
       )
     )
 

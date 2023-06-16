@@ -84,8 +84,8 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
     override def writes(o: Unit) = JsNull
 
     override def reads(json: JsValue) = json match {
-      case JsNull ⇒ JsSuccess(())
-      case _ ⇒ JsError("JSON was not null")
+      case JsNull => JsSuccess(())
+      case _ => JsError("JSON was not null")
     }
   }
 
@@ -95,16 +95,16 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
   val eligibleResponseGen: Gen[EligibilityCheckResult] =
     for {
-      result ← Gen.alphaStr
-      reasonCode ← Gen.choose(6, 8)
-      reason ← Gen.alphaStr
+      result <- Gen.alphaStr
+      reasonCode <- Gen.choose(6, 8)
+      reason <- Gen.alphaStr
     } yield EligibilityCheckResult(result, 1, reason, reasonCode)
 
   val ineligibleResponseGen: Gen[EligibilityCheckResult] =
     for {
-      result ← Gen.alphaStr
-      reasonCode ← Gen.choose(2, 5)
-      reason ← Gen.alphaStr
+      result <- Gen.alphaStr
+      reasonCode <- Gen.choose(2, 5)
+      reason <- Gen.alphaStr
     } yield EligibilityCheckResult(result, 2, reason, reasonCode)
 
   "The HelpToSaveConnectorImpl" when {
@@ -115,13 +115,13 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       behave like testCommon(
         mockGet(eligibilityURL),
-        () ⇒ connector.getEligibility(),
+        () => connector.getEligibility(),
         EligibilityCheckResult("eligible!", 1, "???", 6)
       )
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result " +
         "and a valid reason" in {
-        forAll(eligibleResponseGen) { response ⇒
+        forAll(eligibleResponseGen) { response =>
           val reason =
             Eligible(EligibilityCheckResponse(response, Some(123.45)))
 
@@ -139,7 +139,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       "return an EligibilityResult if the call comes back with a 200 status with a negative result " +
         "and a valid reason" in {
-        forAll(ineligibleResponseGen) { response ⇒
+        forAll(ineligibleResponseGen) { response =>
           val reason =
             Ineligible(EligibilityCheckResponse(response, Some(123.45)))
 
@@ -192,7 +192,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
         }
 
         "the call comes back with a 200 and an unknown result code" in {
-          forAll { resultCode: Int ⇒
+          forAll { resultCode: Int =>
             whenever(!(1 to 3).contains(resultCode)) {
               testError(resultCode)
             }
@@ -206,7 +206,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       behave like testCommon(
         mockGet(enrolmentStatusURL),
-        () ⇒ connector.getUserEnrolmentStatus(), false
+        () => connector.getUserEnrolmentStatus(), false
       )
 
       "return a Right if the call comes back with HTTP status 200 with " +
@@ -269,7 +269,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       behave like testCommon(
         mockGet(setITMPFlagURL),
-        () ⇒ connector.setITMPFlagAndUpdateMongo(),
+        () => connector.setITMPFlagAndUpdateMongo(),
         (),
         testInvalidJSON = false
       )
@@ -289,7 +289,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
       val encodedEmail = new String(Base64.getEncoder.encode(email.getBytes()))
       behave like testCommon(
         mockGet(storeEmailURL, Map("email" -> encodedEmail)),
-        () ⇒ connector.storeEmail(email),
+        () => connector.storeEmail(email),
         (),
         testInvalidJSON = false
       )
@@ -308,7 +308,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       behave like testCommon(
         mockGet(getEmailURL),
-        () ⇒ connector.getEmail(),
+        () => connector.getEmail(),
         GetEmailResponse(None),
         false
       )
@@ -334,7 +334,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
     "getting account-creation-allowed response" must {
       behave like testCommon(
         mockGet(accountCreateAllowedURL),
-        () ⇒ connector.isAccountCreationAllowed(),
+        () => connector.isAccountCreationAllowed(),
         Json.toJson(true),
         true
       )
@@ -354,12 +354,12 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       val correlationId = UUID.randomUUID()
       val url = s"$helpToSaveUrl/help-to-save/$nino/account"
-      val queryParameters = Map("correlationId" → correlationId.toString, "systemId" → "help-to-save-frontend")
+      val queryParameters = Map("correlationId" -> correlationId.toString, "systemId" -> "help-to-save-frontend")
       val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
       behave like testCommon(
         mockGet(url, queryParameters),
-        () ⇒ connector.getAccount(nino, correlationId),
+        () => connector.getAccount(nino, correlationId),
         account,
         false
       )
@@ -419,8 +419,8 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
   }
 
   private def testCommon[E, A, B](
-                                   mockHttp: ⇒ Option[HttpResponse] ⇒ Unit,
-                                   result: () ⇒ EitherT[Future, E, A],
+                                   mockHttp: => Option[HttpResponse] => Unit,
+                                   result: () => EitherT[Future, E, A],
                                    validBody: B,
                                    testInvalidJSON: Boolean = true
                                  )(
@@ -458,7 +458,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
       }
 
       "the call comes back with any other status other than 200" in {
-        forAll { status: Int ⇒
+        forAll { status: Int =>
           whenever(status =!= 200) {
             // check we get an error even though there was valid JSON in the response
             mockHttp(Some(HttpResponse(status, Json.toJson(validBody), emptyHeaders)))

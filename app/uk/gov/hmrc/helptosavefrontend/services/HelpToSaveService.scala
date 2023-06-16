@@ -94,25 +94,25 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
     EitherT(
       helpToSaveConnector
         .createAccount(createAccountRequest)
-        .map[Either[SubmissionFailure, SubmissionSuccess]] { response ⇒
+        .map[Either[SubmissionFailure, SubmissionSuccess]] { response =>
           response.status match {
-            case Status.CREATED ⇒
+            case Status.CREATED =>
               response
                 .parseJSON[AccountNumber]()
                 .fold[Either[SubmissionFailure, SubmissionSuccess]](
-                  e ⇒ Left(SubmissionFailure(None, "Couldn't parse account number JSON", e)),
-                  account ⇒ Right(SubmissionSuccess(account))
+                  e => Left(SubmissionFailure(None, "Couldn't parse account number JSON", e)),
+                  account => Right(SubmissionSuccess(account))
                 )
 
-            case Status.CONFLICT ⇒
+            case Status.CONFLICT =>
               Right(SubmissionSuccess(AccountNumber(None)))
 
-            case _ ⇒
+            case _ =>
               Left(handleError(response))
           }
         }
         .recover {
-          case e ⇒
+          case e =>
             Left(SubmissionFailure(None, "Encountered error while trying to create account", e.getMessage))
         }
     )
@@ -127,12 +127,12 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
     EitherT(
       helpToSaveConnector
         .updateEmail(userInfo)
-        .map[Either[String, Unit]] { response ⇒
+        .map[Either[String, Unit]] { response =>
           response.status match {
-            case Status.OK ⇒
+            case Status.OK =>
               Right(())
 
-            case other ⇒
+            case other =>
               Left(
                 s"Received unexpected status $other from NS&I proxy while trying to update email. Body was ${maskNino(response.body)}"
               )
@@ -140,7 +140,7 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
           }
         }
         .recover {
-          case e ⇒
+          case e =>
             Left(s"Encountered error while trying to update email: ${e.getMessage}")
         }
     )
@@ -148,11 +148,11 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
   override def validateBankDetails(
     request: ValidateBankDetailsRequest
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult] =
-    EitherT(helpToSaveConnector.validateBankDetails(request).map[Either[String, ValidateBankDetailsResult]] { response ⇒
+    EitherT(helpToSaveConnector.validateBankDetails(request).map[Either[String, ValidateBankDetailsResult]] { response =>
       response.status match {
-        case Status.OK ⇒
+        case Status.OK =>
           response.parseJSON[ValidateBankDetailsResult]()
-        case other ⇒
+        case other =>
           Left(s"Received unexpected status $other from /validate-bank-details. Body was ${maskNino(response.body)}")
       }
     })
@@ -162,8 +162,8 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
 
   private def handleError(response: HttpResponse): SubmissionFailure =
     response.parseJSON[SubmissionFailure]() match {
-      case Right(submissionFailure) ⇒ submissionFailure
-      case Left(error) ⇒ SubmissionFailure(None, "", error)
+      case Right(submissionFailure) => submissionFailure
+      case Left(error) => SubmissionFailure(None, "", error)
     }
 }
 

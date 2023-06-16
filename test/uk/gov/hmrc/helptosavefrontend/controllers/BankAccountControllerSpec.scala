@@ -195,7 +195,7 @@ class BankAccountControllerSpec
       val submitBankDetailsRequest = fakeRequest
         .withMethod("POST")
         .withFormUrlEncodedBody(
-          "sortCode" → "123456",
+          "sortCode" -> "123456",
           "accountNumber" -> "12345678",
           "rollNumber"    -> "",
           "accountName"   -> "test user name"
@@ -216,7 +216,7 @@ class BankAccountControllerSpec
 
         val result =
           csrfAddToken(controller.submitBankDetails())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("rollNumber" → "a"))
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("rollNumber" -> "a"))
         status(result) shouldBe Status.OK
         contentAsString(result) should include("Enter sort code")
         contentAsString(result) should include("Enter account number")
@@ -329,7 +329,7 @@ class BankAccountControllerSpec
     }
   }
 
-  private def doCommonChecks(doRequest: () ⇒ Future[Result]): Unit = {
+  private def doCommonChecks(doRequest: () => Future[Result]): Unit = {
     "redirect user to eligibility checks if there is no session found" in {
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)

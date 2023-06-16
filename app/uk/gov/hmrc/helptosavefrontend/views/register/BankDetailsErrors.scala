@@ -27,7 +27,7 @@ object BankDetailsErrors {
     form: Form[_], // scalastyle:ignore cyclomatic.complexity
     key: String
   )(implicit messages: Messages, appConfig: FrontendAppConfig): Option[String] = {
-    def has(f: Form[_] ⇒ String ⇒ Boolean): Boolean = f(form)(key)
+    def has(f: Form[_] => String => Boolean): Boolean = f(form)(key)
 
     if (has(_.sortCodeEmpty)) {
       Some(messages("hts.sort-code.empty"))

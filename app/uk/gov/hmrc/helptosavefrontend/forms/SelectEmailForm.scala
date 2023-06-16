@@ -29,11 +29,11 @@ object SelectEmailForm {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
         data.get("email") match {
           // if "No" make sure that we have a new email
-          case Some("No") ⇒ emailValidation.emailFormatter.bind(key, data).map(Some(_))
+          case Some("No") => emailValidation.emailFormatter.bind(key, data).map(Some(_))
 
           // the value for "email" should be "Yes" or "No" - this will get picked up in the mapping in the form below.
           // if the value is "Yes" ignore any new email that has been entered
-          case _ ⇒ Right(None)
+          case _ => Right(None)
         }
 
       override def unbind(key: String, value: Option[String]): Map[String, String] =
@@ -42,8 +42,8 @@ object SelectEmailForm {
 
     Form(
       mapping(
-        "email" → text.verifying(l ⇒ l === "Yes" || l === "No"),
-        "new-email" → of(emailFormatter)
+        "email" -> text.verifying(l => l === "Yes" || l === "No"),
+        "new-email" -> of(emailFormatter)
       )(SelectEmail.apply)(SelectEmail.unapply)
     )
   }

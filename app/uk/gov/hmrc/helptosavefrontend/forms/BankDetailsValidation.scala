@@ -35,7 +35,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 
   import configuration.BankDetailsConfig._
 
-  private val rollNoRegex: String ⇒ Matcher =
+  private val rollNoRegex: String => Matcher =
     (s"^([0-9a-zA-Z\\/.-]{$rollNumberMinLength,$rollNumberMaxLength})" + "$").r.pattern.matcher _
 
   val sortCodeFormatter: Formatter[SortCode] = new Formatter[SortCode] {
@@ -47,7 +47,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
         data
           .get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
-          .fold(invalid[SortCode](ErrorMessages.sortCodeEmpty)) { s ⇒
+          .fold(invalid[SortCode](ErrorMessages.sortCodeEmpty)) { s =>
             val p = s.filterNot(allowedSeparators.contains)
             if (p.length === sortCodeLength && p.forall(_.isDigit)) {
               SortCode(p.map(_.asDigit))
@@ -60,7 +60,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
           }
 
       validation.toEither
-        .leftMap(_.map(e ⇒ FormError(key, e)).toList)
+        .leftMap(_.map(e => FormError(key, e)).toList)
     }
 
     override def unbind(key: String, value: SortCode): Map[String, String] =
@@ -74,15 +74,15 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
         data
           .get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
-          .fold(invalid[String](ErrorMessages.accountNumberEmpty)) { s ⇒
-            validatedFromBoolean(s)(s ⇒ s.length === accountNumberLength && s.forall(_.isDigit), if (s.isEmpty) {
+          .fold(invalid[String](ErrorMessages.accountNumberEmpty)) { s =>
+            validatedFromBoolean(s)(s => s.length === accountNumberLength && s.forall(_.isDigit), if (s.isEmpty) {
               ErrorMessages.accountNumberEmpty
             } else {
               ErrorMessages.accountNumberIncorrectFormat
             })
           }
 
-      validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
+      validation.toEither.leftMap(_.map(e => FormError(key, e)).toList)
     }
 
     override def unbind(key: String, value: String): Map[String, String] =
@@ -96,7 +96,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
         data
           .get(key)
           .filter(_.nonEmpty)
-          .fold[ValidOrErrorStrings[Option[String]]](Valid(None)) { s ⇒
+          .fold[ValidOrErrorStrings[Option[String]]](Valid(None)) { s =>
             if (rollNoRegex(s).matches()) {
               Valid(Some(s))
             } else if (s.length < rollNumberMinLength) {
@@ -107,7 +107,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
               invalid(ErrorMessages.rollNumberIncorrectFormat)
             }
           }
-      validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
+      validation.toEither.leftMap(_.map(e => FormError(key, e)).toList)
     }
 
     override def unbind(key: String, value: Option[String]): Map[String, String] =
@@ -121,7 +121,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
         data
           .get(key)
           .map(_.cleanupSpecialCharacters.trim)
-          .fold(invalid[String](ErrorMessages.accountNameEmpty)) { s ⇒
+          .fold(invalid[String](ErrorMessages.accountNameEmpty)) { s =>
             if (s.isEmpty) {
               invalid(ErrorMessages.accountNameEmpty)
             } else if (s.length < accountNameMinLength) {
@@ -133,7 +133,7 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
             }
           }
 
-      validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
+      validation.toEither.leftMap(_.map(e => FormError(key, e)).toList)
     }
 
     override def unbind(key: String, value: String): Map[String, String] =

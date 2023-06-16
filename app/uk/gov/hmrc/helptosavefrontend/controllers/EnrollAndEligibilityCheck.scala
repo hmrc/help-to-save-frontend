@@ -25,34 +25,34 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EnrollAndEligibilityCheck extends SessionBehaviour with EnrolmentCheckBehaviour {
-  this: BaseController ⇒
+  this: BaseController =>
 
-  def checkIfAlreadyEnrolledAndDoneEligibilityChecks(ifNotEnrolled: HTSSession ⇒ Future[Result])(
+  def checkIfAlreadyEnrolledAndDoneEligibilityChecks(ifNotEnrolled: HTSSession => Future[Result])(
     implicit htsContext: HtsContextWithNINO,
     hc: HeaderCarrier,
     transformer: NINOLogMessageTransformer,
     ec: ExecutionContext,
     request: Request[_]
   ): Future[Result] =
-    checkIfAlreadyEnrolled { () ⇒
+    checkIfAlreadyEnrolled { () =>
       checkSession(
         SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
-      ) { session ⇒
+      ) { session =>
         session.eligibilityCheckResult.fold[Future[Result]](
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         )(
           _.fold[Future[Result]](
-            { ineligibleReason ⇒
+            { ineligibleReason =>
               val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
 
               ineligibilityType.fold {
                 logger.warn(s"Could not parse ineligibility reason : $ineligibleReason")
                 toFuture(internalServerError())
-              } { i ⇒
+              } { i =>
                 toFuture(SeeOther(routes.EligibilityCheckController.getIsNotEligible.url))
               }
             },
-            _ ⇒ ifNotEnrolled(session)
+            _ => ifNotEnrolled(session)
           )
         )
       }

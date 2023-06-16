@@ -59,13 +59,13 @@ class AccessAccountController @Inject() (
 ) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) with HelpToSaveAuth with EnrolmentCheckBehaviour
     with Logging {
 
-  def getSignInPage: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
+  def getSignInPage: Action[AnyContent] = unprotected { _ => _ =>
     SeeOther("https://www.gov.uk/sign-in-help-to-save")
   }
 
   def accessAccount: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒
-      implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request =>
+      implicit htsContext =>
         (() =>
           helpToSaveService
             .getAccount(htsContext.nino, UUID.randomUUID())
@@ -107,25 +107,25 @@ class AccessAccountController @Inject() (
     }(loginContinueURL = frontendAppConfig.accessAccountUrl)
 
   def payIn: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       redirectToAccountHolderPage(appConfig.nsiPayInUrl)
     }(loginContinueURL = frontendAppConfig.accessAccountUrl)
 
   def getNoAccountPage: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       sessionStore.get.value.flatMap(
         _.fold(
-          { e ⇒
+          { e =>
             logger.warn(s"Could not get session data: $e")
             internalServerError()
-          }, { session ⇒
+          }, { session =>
             checkIfEnrolled(
-              { () ⇒
+              { () =>
                 Ok(confirmCheckEligibility())
-              }, { _ ⇒
+              }, { _ =>
                 SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
               },
-              () ⇒
+              () =>
                 SeeOther(
                   session
                     .flatMap(_.attemptedAccountHolderPageURL)
@@ -150,23 +150,23 @@ class AccessAccountController @Inject() (
         .store(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(pageURL)))
         .value
         .map {
-          _.fold[Result]({ e ⇒
+          _.fold[Result]({ e =>
             logger.warn(s"Could not store session data: $e")
             internalServerError()
-          }, _ ⇒ SeeOther(redirectTo))
+          }, _ => SeeOther(redirectTo))
         }
 
     checkIfEnrolled(
       {
         // not enrolled
-        () ⇒
+        () =>
           storeAttemptedRedirectThenRedirect(routes.AccessAccountController.getNoAccountPage.url)
       }, {
         // enrolment check error
-        e ⇒
+        e =>
           logger.warn(s"Could not check enrolment ($e) - proceeding to check eligibility", htsContext.nino)
           storeAttemptedRedirectThenRedirect(routes.EligibilityCheckController.getCheckEligibility.url)
-      }, { () ⇒
+      }, { () =>
         // enrolled
         SeeOther(pageURL)
       }

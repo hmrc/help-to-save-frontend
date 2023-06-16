@@ -39,15 +39,15 @@ class AllowListFilter @Inject() (configuration: Configuration, val mat:ActorMate
   // of the HTTP request but is not in the allowList
   override def destination: Call = forbiddenCall
 
-  override def noHeaderAction(f: (RequestHeader) ⇒ Future[Result], rh: RequestHeader): Future[Result] = {
+  override def noHeaderAction(f: (RequestHeader) => Future[Result], rh: RequestHeader): Future[Result] = {
     logger.warn("SuspiciousActivity: No client IP found in http request header")
     Future.successful(Results.Redirect(forbiddenCall))
   }
 
   val forbiddenCall: Call = Call("GET", routes.ForbiddenController.forbidden.url)
 
-  override def apply(f: (RequestHeader) ⇒ Future[Result])(rh: RequestHeader): Future[Result] = {
-    rh.headers.get(trueClient).foreach { ip ⇒
+  override def apply(f: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
+    rh.headers.get(trueClient).foreach { ip =>
       if (!allowlist.contains(ip)) {
         logger.warn(s"SuspiciousActivity: Received request from non-allowListed ip $ip")
       }

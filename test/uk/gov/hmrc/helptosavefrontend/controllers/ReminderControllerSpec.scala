@@ -141,7 +141,7 @@ class ReminderControllerSpec
 
   "The Reminder Controller" must {
 
-    val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+    val fakeRequest = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
 
     def unused[T](arg: T): Unit = arg match { case _ => () }
 
@@ -222,7 +222,7 @@ class ReminderControllerSpec
 
     "should show the form validation errors when the user submits an HtsUser to update in the HTS Reminder backend service with nobody " in {
 
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -235,7 +235,7 @@ class ReminderControllerSpec
 
     "should redirect to internal server error page if user info is missing from the htsContext " in {
 
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
@@ -427,7 +427,7 @@ class ReminderControllerSpec
     "should show a success page if the user submits an CancelHtsUserReminder to cancel in the HTS Reminder backend service " in {
       val ninoNew = "WM123456C"
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "cancel")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -457,7 +457,7 @@ class ReminderControllerSpec
     "should show a error page if the user submits an CancelHtsUserReminder to cancel in the HTS Reminder backend service " in {
       val ninoNew = "WM123456C"
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "cancel")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -508,7 +508,7 @@ class ReminderControllerSpec
 
     "should redirect to internal server error page if user info is missing from the htsContext in selected submit" in {
 
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
@@ -521,7 +521,7 @@ class ReminderControllerSpec
 
     "should show the form validation errors when the user submits an Cancel Reminders to cancel in the HTS Reminder backend service with nobody " in {
 
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -533,7 +533,7 @@ class ReminderControllerSpec
     }
     "should show the form validation errors when the user submits no selection in the HTS Reminder " in {
 
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "")
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -591,7 +591,7 @@ class ReminderControllerSpec
 
     }
     "should show a success page if the user submits an ApplySavingsReminderPage with No  " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "no")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "no")
 
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -605,7 +605,7 @@ class ReminderControllerSpec
     }
 
     "should show a success page if the user submits an ApplySavingsReminderPage with no  " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "no")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "no")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -652,7 +652,7 @@ class ReminderControllerSpec
       status(result) shouldBe SEE_OTHER
     }
     "should show a success page if the user submits an ApplySavingsReminderPage with out option  " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "yes")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "yes")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -694,7 +694,7 @@ class ReminderControllerSpec
       status(result) shouldBe SEE_OTHER
     }
     "should show a success page if the user submits an ApplySavingsReminderPage with yes  " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -740,7 +740,7 @@ class ReminderControllerSpec
 
     "should redirect to internal server error page if user info is missing from the htsContext in savings reminder  signup page" in {
 
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
@@ -754,7 +754,7 @@ class ReminderControllerSpec
 
     "should show the form validation errors when the user submits an savings reminder  signup page in the HTS Reminder backend service with nobody " in {
 
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -768,7 +768,7 @@ class ReminderControllerSpec
 
     }
     "should redirect to an the internal server error page if email retrieveal is failed in savings reminder  signup page" in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -783,7 +783,7 @@ class ReminderControllerSpec
     }
 
     "should redirect to internal server error page if htsUser update fails in savings reminder  signup page " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
 
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -798,7 +798,7 @@ class ReminderControllerSpec
     }
 
     "should show a success page if the user submits an submitApplySavingsReminderSignUpPage with no  " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -845,7 +845,7 @@ class ReminderControllerSpec
       status(result) shouldBe SEE_OTHER
     }
     "should show a success page if the user submits an submitApplySavingsReminderSignUpPage with out option  " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "cancel")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "cancel")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -882,7 +882,7 @@ class ReminderControllerSpec
       status(result) shouldBe SEE_OTHER
     }
     "should show a success page if the user submits an submitApplySavingsReminderSignUpPage with cancel  " in {
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "")
       val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
       inSequence {
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -1028,9 +1028,9 @@ class ReminderControllerSpec
   }
 
   def commonEnrolmentBehaviour(
-    getResult: () ⇒ Future[Result],
-    mockSuccessfulAuth: () ⇒ Unit,
-    mockNoNINOAuth: () ⇒ Unit
+    getResult: () => Future[Result],
+    mockSuccessfulAuth: () => Unit,
+    mockNoNINOAuth: () => Unit
   ): Unit =
     "return an error" when {
 
@@ -1126,7 +1126,7 @@ class ReminderControllerSpec
     checkIsTechnicalErrorPage(result)
   }
   "should show a success create account page if the user submits an submitApplySavingsReminderSignUpPage with no  " in {
-    val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+    val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
     val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
     inSequence {
       mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)

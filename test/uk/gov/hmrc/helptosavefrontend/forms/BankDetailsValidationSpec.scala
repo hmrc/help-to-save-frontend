@@ -27,12 +27,12 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
   val bankValidationConfig = Configuration(
-    "bank-details-validation.sort-code.length" → 6,
-    "bank-details-validation.account-number.length" → 8,
-    "bank-details-validation.roll-number.min-length" → 4,
-    "bank-details-validation.roll-number.max-length" → 18,
-    "bank-details-validation.account-name.min-length" → 3,
-    "bank-details-validation.account-name.max-length" → 4
+    "bank-details-validation.sort-code.length" -> 6,
+    "bank-details-validation.account-number.length" -> 8,
+    "bank-details-validation.roll-number.min-length" -> 4,
+    "bank-details-validation.roll-number.max-length" -> 18,
+    "bank-details-validation.account-name.min-length" -> 3,
+    "bank-details-validation.account-name.max-length" -> 4
   )
 
   lazy val validation = new BankDetailsValidation(
@@ -44,15 +44,15 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
   type Key = String
 
   def test[A, B](
-    f: (String, Map[String, String]) ⇒ Either[Seq[FormError], A],
-    insert: (Key, Option[B]) ⇒ Map[String, String]
+    f: (String, Map[String, String]) => Either[Seq[FormError], A],
+    insert: (Key, Option[B]) => Map[String, String]
   )(value: Option[B])(expectedResult: Either[Set[String], A]): Unit = {
     val result: Either[Seq[FormError], A] = f("key", insert("key", value))
-    result.leftMap(_.toSet) shouldBe expectedResult.leftMap(_.map(s ⇒ FormError("key", s)))
+    result.leftMap(_.toSet) shouldBe expectedResult.leftMap(_.map(s => FormError("key", s)))
   }
 
   def insertString(k: Key, v: Option[String]): Map[String, String] =
-    v.fold(Map.empty[String, String])(v ⇒ Map(k → v))
+    v.fold(Map.empty[String, String])(v => Map(k -> v))
 
   "BankDetailsValidation" when afterWord("validating") {
 
@@ -122,7 +122,7 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
         }
 
         "have numbers separated by non-supported characters" in {
-          List(',', '.', '&', '*', '/', '_').foreach { c ⇒
+          List(',', '.', '&', '*', '/', '_').foreach { c =>
             withClue(s"For char $c: ") {
               testSortCode(Some(s"12${c}34${c}56"))(Left(Set(ErrorMessages.sortCodeIncorrectFormat)))
             }
@@ -185,7 +185,7 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
       def testRollNumber(value: Option[String])(expectedResult: Either[Set[String], Option[String]]): Unit =
         test[Option[String], Option[String]](validation.rollNumberFormatter.bind, {
-          case (k, o) ⇒ insertString(k, o.flatten)
+          case (k, o) => insertString(k, o.flatten)
         })(Some(value))(expectedResult)
 
       "allow inputs" which {
@@ -286,7 +286,7 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
         import TestForm._
         import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.FormOps
 
-        def test(formHasError: Form[TestData] ⇒ String ⇒ Boolean, message: String): Unit = {
+        def test(formHasError: Form[TestData] => String => Boolean, message: String): Unit = {
           formHasError(testForm)(TestForm.key) shouldBe false
           formHasError(testFormWithErrorMessage("error"))(TestForm.key) shouldBe false
           formHasError(testFormWithErrorMessage(message))(TestForm.key) shouldBe true

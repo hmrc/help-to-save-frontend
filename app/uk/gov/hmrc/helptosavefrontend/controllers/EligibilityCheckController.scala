@@ -69,7 +69,7 @@ class EligibilityCheckController @Inject() (
   val earlyCapCheckOn: Boolean = frontendAppConfig.earlyCapCheckOn
 
   def getCheckEligibility: Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒ // scalastyle:ignore
+    authorisedForHtsWithInfo { implicit request => implicit htsContext => // scalastyle:ignore
       def eligibilityAction(session: Option[HTSSession]): Future[PlayResult] =
         if (earlyCapCheckOn) {
           logger.info("Checking pre-eligibility cap for nino", htsContext.nino)
@@ -83,17 +83,17 @@ class EligibilityCheckController @Inject() (
         enrolmentStatus: Option[EnrolmentStatus]
       ): Future[PlayResult] =
         (maybeSession, enrolmentStatus) match {
-          case (s, Some(EnrolmentStatus.Enrolled(itmpHtSFlag))) ⇒
+          case (s, Some(EnrolmentStatus.Enrolled(itmpHtSFlag))) =>
             if (!itmpHtSFlag) {
               setItmpFlag(htsContext.nino)
             }
             SeeOther(s.flatMap(_.attemptedAccountHolderPageURL).getOrElse(appConfig.nsiManageAccountUrl))
 
-          case (s, _) ⇒
+          case (s, _) =>
             s.flatMap(_.eligibilityCheckResult).fold(eligibilityAction(s)) {
               _.fold(
-                _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url), // user is not eligible
-                _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible.url) // user is eligible
+                _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url), // user is not eligible
+                _ => SeeOther(routes.EligibilityCheckController.getIsEligible.url) // user is eligible
               )
             }
         }
@@ -102,7 +102,7 @@ class EligibilityCheckController @Inject() (
         helpToSaveService
           .getUserEnrolmentStatus()
           .bimap(
-            { e ⇒
+            { e =>
               logger.warn(s"Could not check enrolment status: $e")
               None: Option[EnrolmentStatus]
             },
@@ -111,15 +111,15 @@ class EligibilityCheckController @Inject() (
           .merge
 
       val result = for {
-        session ← sessionStore.get
-        enrolmentStatus ← EitherT.liftF(getEnrolmentStatus)
-        eligibilityResult ← EitherT.liftF[Future, String, PlayResult](
+        session <- sessionStore.get
+        enrolmentStatus <- EitherT.liftF(getEnrolmentStatus)
+        eligibilityResult <- EitherT.liftF[Future, String, PlayResult](
                              handleSessionAndEnrolmentStatus(session, enrolmentStatus)
                            )
       } yield eligibilityResult
 
       result
-        .leftMap[PlayResult]({ e ⇒
+        .leftMap[PlayResult]({ e =>
           logger.warn(s"Could not check eligibility: $e")
           internalServerError()
         })
@@ -127,53 +127,53 @@ class EligibilityCheckController @Inject() (
     }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility.url)
 
   def getIsNotEligible: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolled { () ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolled { () =>
         checkHasDoneEligibilityChecks {
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         } {
           _.eligibilityResult.fold(
-            { ineligibleReason ⇒
+            { ineligibleReason =>
               val ineligibilityType = IneligibilityReason.fromIneligible(ineligibleReason)
               val threshold = ineligibleReason.value.threshold
               ineligibilityType.fold {
                 logger.warn(s"Could not parse ineligibility reason: $ineligibleReason", htsContext.nino)
                 internalServerError()
-              } { i ⇒
+              } { i =>
                 Ok(notEligible(i, threshold))
               }
             },
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible.url)
+            _ => SeeOther(routes.EligibilityCheckController.getIsEligible.url)
           )
         }
       }
     }(loginContinueURL = routes.EligibilityCheckController.getIsNotEligible.url)
 
   def getIsEligible: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolled { () ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolled { () =>
         checkHasDoneEligibilityChecks {
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         } {
           _.eligibilityResult.fold(
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
-            eligibleWithUserInfo ⇒ Ok(youAreEligible(eligibleWithUserInfo.userInfo))
+            _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
+            eligibleWithUserInfo => Ok(youAreEligible(eligibleWithUserInfo.userInfo))
           )
         }
       }
     }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility.url)
 
   def youAreEligibleSubmit: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkHasDoneEligibilityChecks {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       } {
         _.eligibilityResult.fold(
-          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url), { userInfo ⇒
+          _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url), { userInfo =>
             val url = userInfo.userInfo.email
               .fold(
                 routes.EmailController.getGiveEmailPage
-              )(_ ⇒ routes.EmailController.getSelectEmailPage)
+              )(_ => routes.EmailController.getSelectEmailPage)
               .url
             SeeOther(url)
           }
@@ -182,21 +182,21 @@ class EligibilityCheckController @Inject() (
     }(loginContinueURL = routes.EligibilityCheckController.youAreEligibleSubmit.url)
 
   def getMissingInfoPage: Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       htsContext.userDetails.fold(
-        missingInfo ⇒ Ok(missingUserInfo(missingInfo.missingInfo)),
-        _ ⇒ SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
+        missingInfo => Ok(missingUserInfo(missingInfo.missingInfo)),
+        _ => SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       )
     }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility.url)
 
   def getThinkYouAreEligiblePage: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkHasDoneEligibilityChecks {
         SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       } {
         _.eligibilityResult.fold(
-          _ ⇒ Ok(thinkYouAreEligible()),
-          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible.url)
+          _ => Ok(thinkYouAreEligible()),
+          _ => SeeOther(routes.EligibilityCheckController.getIsEligible.url)
         )
       }
     }(loginContinueURL = routes.EligibilityCheckController.getThinkYouAreEligiblePage.url)
@@ -207,12 +207,12 @@ class EligibilityCheckController @Inject() (
     request: Request[AnyContent]
   ): Future[PlayResult] =
     htsContext.userDetails.fold[Future[PlayResult]](
-      { missingUserInfo ⇒
+      { missingUserInfo =>
         logger.warn(s"User has missing information: ${missingUserInfo.missingInfo.mkString(",")}", missingUserInfo.nino)
         SeeOther(routes.EligibilityCheckController.getMissingInfoPage.url)
-      }, { userInfo ⇒
+      }, { userInfo =>
         performEligibilityChecks(userInfo).fold(
-          { e ⇒
+          { e =>
             logger.warn(e, htsContext.nino)
             internalServerError()
           },
@@ -226,16 +226,16 @@ class EligibilityCheckController @Inject() (
     hc: HeaderCarrier
   ): EitherT[Future, String, EligibilityCheckResultType] =
     for {
-      eligible ← helpToSaveService.checkEligibility()
+      eligible <- helpToSaveService.checkEligibility()
       session = {
         val result = eligible.fold[Option[Either[Ineligible, EligibleWithUserInfo]]](
-          e ⇒ Some(Right(EligibleWithUserInfo(Eligible(e), userInfo))),
-          ineligible ⇒ Some(Left(Ineligible(ineligible))),
-          _ ⇒ None
+          e => Some(Right(EligibleWithUserInfo(Eligible(e), userInfo))),
+          ineligible => Some(Left(Ineligible(ineligible))),
+          _ => None
         )
-        result.map(r ⇒ HTSSession(Some(r), None, None))
+        result.map(r => HTSSession(Some(r), None, None))
       }
-      _ ← session.map(sessionStore.store).traverse[Result, Unit](identity)
+      _ <- session.map(sessionStore.store).traverse[Result, Unit](identity)
     } yield eligible
 
   private def handleEligibilityResult(
@@ -244,14 +244,14 @@ class EligibilityCheckController @Inject() (
   )(implicit htsContext: HtsContextWithNINOAndUserDetails, hc: HeaderCarrier): PlayResult = {
     val nino = htsContext.nino
     result.fold(
-      _ ⇒ SeeOther(routes.EligibilityCheckController.getIsEligible.url),
-      _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
-      _ ⇒ {
+      _ => SeeOther(routes.EligibilityCheckController.getIsEligible.url),
+      _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
+      _ => {
         helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
-          case Failure(e) ⇒
+          case Failure(e) =>
             logger.warn(s"error in setting ITMP flag and updating mongo, future failed: ${e.getMessage}", nino)
-          case Success(Left(e)) ⇒ logger.warn(s"error in setting ITMP flag and updating mongo: $e", nino)
-          case Success(Right(_)) ⇒ logger.info(s"Successfully set ITMP flag and updated mongo for user", nino)
+          case Success(Left(e)) => logger.warn(s"error in setting ITMP flag and updating mongo: $e", nino)
+          case Success(Right(_)) => logger.info(s"Successfully set ITMP flag and updated mongo for user", nino)
         }
 
         val redirectTo =
@@ -262,18 +262,18 @@ class EligibilityCheckController @Inject() (
   }
 
   private def checkHasDoneEligibilityChecks(
-    noSession: ⇒ Future[PlayResult]
-  )(hasDoneChecks: SessionWithEligibilityCheck ⇒ Future[PlayResult])(
+    noSession: => Future[PlayResult]
+  )(hasDoneChecks: SessionWithEligibilityCheck => Future[PlayResult])(
     implicit
     htsContext: HtsContextWithNINO,
     hc: HeaderCarrier,
     request: Request[AnyContent],
     transformer: NINOLogMessageTransformer
   ): Future[PlayResult] =
-    checkSession(noSession) { session ⇒
+    checkSession(noSession) { session =>
       session.eligibilityCheckResult.fold[Future[PlayResult]](
         SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
-      )(result ⇒ hasDoneChecks(SessionWithEligibilityCheck(result, session.pendingEmail, session.confirmedEmail)))
+      )(result => hasDoneChecks(SessionWithEligibilityCheck(result, session.pendingEmail, session.confirmedEmail)))
     }
 
 }

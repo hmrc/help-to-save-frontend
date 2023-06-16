@@ -25,7 +25,7 @@ object Validation {
 
   def invalid[A](message: String): ValidatedNel[String, A] = Invalid(NonEmptyList.one(message))
 
-  def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): ValidatedNel[String, A] =
+  def validatedFromBoolean[A](a: A)(predicate: A => Boolean, ifFalse: => String): ValidatedNel[String, A] =
     if (predicate(a)) Valid(a) else invalid(ifFalse)
 
 }

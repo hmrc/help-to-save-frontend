@@ -68,44 +68,44 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
   override def cancelHtsUserReminders(
     cancelHtsUserReminder: CancelHtsUserReminder
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handlePostCancel(cancelHtsReminderURL, cancelHtsUserReminder, _ ⇒ Right(()), "cancel reminder", identity)
+    handlePostCancel(cancelHtsReminderURL, cancelHtsUserReminder, _ => Right(()), "cancel reminder", identity)
 
   private def handlePost[A, B](
     url: String,
     body: HtsUserSchedule,
-    ifHTTP200: HttpResponse ⇒ Either[B, A],
-    description: ⇒ String,
-    toError: String ⇒ B
+    ifHTTP200: HttpResponse => Either[B, A],
+    description: => String,
+    toError: String => B
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(http.post(url, body), ifHTTP200, description, toError)
 
   private def handlePostCancel[A, B](
     url: String,
     body: CancelHtsUserReminder,
-    ifHTTP200: HttpResponse ⇒ Either[B, A],
-    description: ⇒ String,
-    toError: String ⇒ B
+    ifHTTP200: HttpResponse => Either[B, A],
+    description: => String,
+    toError: String => B
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(http.post(url, body), ifHTTP200, description, toError)
 
   private def handleGet[A, B](
     url: String,
     queryParameters: Map[String, String],
-    ifHTTP200: HttpResponse ⇒ Either[B, A],
-    description: ⇒ String,
-    toError: String ⇒ B
+    ifHTTP200: HttpResponse => Either[B, A],
+    description: => String,
+    toError: String => B
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(http.get(url, queryParameters), ifHTTP200, description, toError)
 
   private def handle[A, B](
     resF: Future[HttpResponse],
-    ifHTTP200: HttpResponse ⇒ Either[B, A],
-    description: ⇒ String,
-    toError: String ⇒ B
+    ifHTTP200: HttpResponse => Either[B, A],
+    description: => String,
+    toError: String => B
   )(implicit ec: ExecutionContext) =
     EitherT(
       resF
-        .map { response ⇒
+        .map { response =>
           if (response.status == Status.OK || response.status == Status.NOT_FOUND) {
             ifHTTP200(response)
           } else {
@@ -113,21 +113,21 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
           }
         }
         .recover {
-          case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
+          case NonFatal(t) => Left(toError(s"Call to $description failed: ${t.getMessage}"))
         }
     )
 
   override def updateReminderEmail(
     updateReminderEmail: UpdateReminderEmail
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handlePostEmailUpdate(emailUpdateHtsReminderURL, updateReminderEmail, _ ⇒ Right(()), "update email", identity)
+    handlePostEmailUpdate(emailUpdateHtsReminderURL, updateReminderEmail, _ => Right(()), "update email", identity)
 
   private def handlePostEmailUpdate[A, B](
     url: String,
     body: UpdateReminderEmail,
-    ifHTTP200: HttpResponse ⇒ Either[B, A],
-    description: ⇒ String,
-    toError: String ⇒ B
+    ifHTTP200: HttpResponse => Either[B, A],
+    description: => String,
+    toError: String => B
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(http.post(url, body), ifHTTP200, description, toError)
 

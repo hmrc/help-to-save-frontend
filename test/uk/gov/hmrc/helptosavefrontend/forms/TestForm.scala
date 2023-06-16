@@ -27,7 +27,7 @@ object TestForm {
 
   val testForm: Form[TestData] = Form(
     mapping(
-      key → text
+      key -> text
     )(TestData.apply)(TestData.unapply)
   )
 

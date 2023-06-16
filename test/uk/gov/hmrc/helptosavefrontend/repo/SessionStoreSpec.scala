@@ -61,19 +61,19 @@ class SessionStoreSpec
   class TestApparatus {
 
     implicit val eligibleWithUserInfoGen: Gen[EligibleWithUserInfo] = for {
-      userInfo ← TestData.UserData.userInfoGen
+      userInfo <- TestData.UserData.userInfoGen
     } yield EligibleWithUserInfo(TestData.Eligibility.randomEligibility(), userInfo)
 
     implicit val htsSessionGen: Gen[HTSSession] =
       for {
-        result ← Gen.option(
+        result <- Gen.option(
                   Gen.oneOf[Either[Ineligible, EligibleWithUserInfo]](
                     TestData.Eligibility.ineligibilityGen.map(Left(_)),
                     eligibleWithUserInfoGen.map(Right(_))
                   )
                 )
-        email ← Gen.option(Gen.alphaStr)
-        pendingEmail ← Gen.option(Gen.alphaStr)
+        email <- Gen.option(Gen.alphaStr)
+        pendingEmail <- Gen.option(Gen.alphaStr)
       } yield HTSSession(result, email, pendingEmail)
 
     implicit val htsSessionArb: Arbitrary[HTSSession] = Arbitrary(htsSessionGen)
@@ -85,7 +85,7 @@ class SessionStoreSpec
 
     "be able to insert and read a new HTSSession into mongo" in new TestApparatus {
 
-      forAll(htsSessionGen) { htsSession ⇒
+      forAll(htsSessionGen) { htsSession =>
         val hc: HeaderCarrier =
           HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
         val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
@@ -99,7 +99,7 @@ class SessionStoreSpec
 
     "handle the case where there is no sessionId in the HeaderCarrier" in new TestApparatus {
 
-      htsSessionGen.sample.foreach { htsSession ⇒
+      htsSessionGen.sample.foreach { htsSession =>
         val hc: HeaderCarrier = HeaderCarrier(sessionId = None)
         val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
 
@@ -110,7 +110,7 @@ class SessionStoreSpec
 
     "be able to update an existing HTSSession against the same user sessionId" in new TestApparatus {
 
-      forAll(htsSessionGen) { htsSession ⇒
+      forAll(htsSessionGen) { htsSession =>
         val ivUrl = "/some/iv/url"
         val ivSuccessUrl = "/some/iv/successUrl"
 

@@ -90,27 +90,27 @@ class RegisterController @Inject() (
   val clock: Clock = Clock.systemUTC()
 
   def accessOrPayIn: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒
-      implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request =>
+      implicit htsContext =>
         val result = for {
-          enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
-          session ← enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ ⇒
+          enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
+          session <- enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ =>
             sessionStore.get
           })
         } yield session
         result.fold(
-          { e ⇒
+          { e =>
             logger.warn(s"Could not get enrolment status or session: $e")
             internalServerError()
-          }, { session ⇒
+          }, { session =>
             val accountNumberAndEmail: Option[(String, Email)] = for {
-              s ← session
-              a ← s.accountNumber
-              e ← s.confirmedEmail
+              s <- session
+              a <- s.accountNumber
+              e <- s.confirmedEmail
             } yield (a, e)
 
             accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
-              case (accountNumber, email) ⇒
+              case (accountNumber, email) =>
                 val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
                 this.payNowForm
                   .bindFromRequest()
@@ -138,15 +138,15 @@ class RegisterController @Inject() (
   }
 
   def getCreateAccountPage: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolled { () =>
+        checkIfDoneEligibilityChecks { eligibleWithInfo =>
           sessionStore
             .store(eligibleWithInfo.session.copy(changingDetails = false))
             .fold(
-              { e ⇒
+              { e =>
                 internalServerError()
-              }, { _ ⇒
+              }, { _ =>
                 EligibilityReason
                   .fromEligible(eligibleWithInfo.userInfo.eligible)
                   .fold {
@@ -155,10 +155,10 @@ class RegisterController @Inject() (
                       eligibleWithInfo.userInfo.userInfo.nino
                     )
                     internalServerError()
-                  } { reason ⇒
+                  } { reason =>
                     val period = eligibleWithInfo.session.reminderDetails.getOrElse("noValue")
                     eligibleWithInfo.session.bankDetails match {
-                      case Some(bankDetails) ⇒
+                      case Some(bankDetails) =>
                         Ok(
                           createAccountView(
                             eligibleWithInfo.userInfo,
@@ -167,7 +167,7 @@ class RegisterController @Inject() (
                             bankDetails
                           )
                         )
-                      case None ⇒ SeeOther(routes.BankAccountController.getBankDetailsPage.url)
+                      case None => SeeOther(routes.BankAccountController.getBankDetailsPage.url)
                     }
                   }
               }
@@ -177,36 +177,36 @@ class RegisterController @Inject() (
     }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   def getDailyCapReachedPage: Action[AnyContent] =
-    authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHts { implicit request => implicit htsContext =>
       Ok(dailyCapReachedView())
     }(loginContinueURL = routes.RegisterController.getDailyCapReachedPage.url)
 
   def getTotalCapReachedPage: Action[AnyContent] =
-    authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHts { implicit request => implicit htsContext =>
       Ok(totalCapReachedView())
     }(loginContinueURL = routes.RegisterController.getTotalCapReachedPage.url)
 
   def getServiceUnavailablePage: Action[AnyContent] =
-    authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHts { implicit request => implicit htsContext =>
       Ok(serviceUnavailableView("hts.register.service-unavailable.title.h1", None))
     }(loginContinueURL = routes.RegisterController.getServiceUnavailablePage.url)
 
-  def getServiceOutagePage(end: String): Action[AnyContent] = Action { implicit request ⇒
+  def getServiceOutagePage(end: String): Action[AnyContent] = Action { implicit request =>
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
     Ok(serviceUnavailableView("hts.register.service-outage.title.h1", Some(LocalDateTime.parse(end))))
   }
   def getDetailsAreIncorrect: Action[AnyContent] =
-    authorisedForHts { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHts { implicit request => implicit htsContext =>
       Ok(detailsAreIncorrectView())
     }(loginContinueURL = routes.EligibilityCheckController.getCheckEligibility.url)
 
   def createAccount: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       val nino = htsContext.nino
-      checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+      checkIfAlreadyEnrolled { () =>
+        checkIfDoneEligibilityChecks { eligibleWithInfo =>
           eligibleWithInfo.session.bankDetails match {
-            case Some(bankDetails) ⇒
+            case Some(bankDetails) =>
               val payload =
                 NSIPayload(
                   eligibleWithInfo.userInfo.userInfo,
@@ -221,38 +221,38 @@ class RegisterController @Inject() (
               )
 
               val result = for {
-                submissionSuccess ← helpToSaveService
+                submissionSuccess <- helpToSaveService
                                      .createAccount(createAccountRequest)
-                                     .leftMap(s ⇒ CreateAccountError(Left(s)))
-                r ← EitherT.liftF(
+                                     .leftMap(s => CreateAccountError(Left(s)))
+                r <- EitherT.liftF(
                      processReminderServiceRequest(eligibleWithInfo.session.reminderDetails, nino, eligibleWithInfo)
                    )
-                _ ← {
+                _ <- {
                   val update = submissionSuccess.accountNumber.accountNumber
-                    .map(a ⇒ sessionStore.store(eligibleWithInfo.session.copy(accountNumber = Some(a))))
-                  update.traverse[util.Result, Unit](identity).leftMap(s ⇒ CreateAccountError(Right(s)))
+                    .map(a => sessionStore.store(eligibleWithInfo.session.copy(accountNumber = Some(a))))
+                  update.traverse[util.Result, Unit](identity).leftMap(s => CreateAccountError(Right(s)))
                 }
               } yield submissionSuccess.accountNumber
 
               result.fold[Result](
                 {
-                  case CreateAccountError(e) ⇒
+                  case CreateAccountError(e) =>
                     e.fold(
                       {
-                        submissionFailure ⇒
+                        submissionFailure =>
                           logger.warn(
                             s"Error while trying to create account: ${submissionFailureToString(submissionFailure)}",
                             nino
                           )
                           submissionFailure.errorMessageId
-                            .fold(SeeOther(routes.RegisterController.getCreateAccountErrorPage.url)) { id ⇒
+                            .fold(SeeOther(routes.RegisterController.getCreateAccountErrorPage.url)) { id =>
                               if (id === "ZYRC0703" || id === "ZYRC0707") {
                                 SeeOther(routes.RegisterController.getCreateAccountErrorBankDetailsPage.url)
                               } else {
                                 SeeOther(routes.RegisterController.getCreateAccountErrorPage.url)
                               }
                             }
-                      }, { error ⇒
+                      }, { error =>
                         logger.warn(s"Error while trying to create account: $error", nino)
                         SeeOther(routes.RegisterController.getCreateAccountErrorPage.url)
                       }
@@ -260,11 +260,11 @@ class RegisterController @Inject() (
                 }, {
                   _.accountNumber.fold(
                     SeeOther(frontendAppConfig.nsiManageAccountUrl)
-                  )(_ ⇒ SeeOther(routes.RegisterController.getAccountCreatedPage.url))
+                  )(_ => SeeOther(routes.RegisterController.getAccountCreatedPage.url))
                 }
               )
 
-            case None ⇒
+            case None =>
               logger.warn("no bank details found in session, redirect user to bank_details page")
               SeeOther(routes.BankAccountController.getBankDetailsPage.url)
           }
@@ -293,9 +293,9 @@ class RegisterController @Inject() (
           )
         )
         .fold(
-          { htsError ⇒
+          { htsError =>
             internalServerError()
-          }, { htsUser ⇒
+          }, { htsUser =>
             logger.info(s"reminder updated ${htsUser.nino}")
             SeeOther(routes.RegisterController.getAccountCreatedPage.url)
           }
@@ -307,27 +307,27 @@ class RegisterController @Inject() (
   }
 
   def getAccountCreatedPage: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       val result = for {
-        enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
-        session ← enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ ⇒
+        enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
+        session <- enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ =>
                    sessionStore.get
                  })
       } yield session
 
       result.fold(
-        { e ⇒
+        { e =>
           logger.warn(s"Could not get enrolment status or session: $e")
           internalServerError()
-        }, { session ⇒
+        }, { session =>
           val accountNumberAndEmail: Option[(String, Email)] = for {
-            s ← session
-            a ← s.accountNumber
-            e ← s.confirmedEmail
+            s <- session
+            a <- s.accountNumber
+            e <- s.confirmedEmail
           } yield (a, e)
 
           accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
-            case (accountNumber, email) ⇒
+            case (accountNumber, email) =>
               val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
               Ok(accountCreatedView(payNowForm,accountNumber, email, lastDayOfMonth))
           }
@@ -336,36 +336,36 @@ class RegisterController @Inject() (
     }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   def getCreateAccountErrorPage: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks { _ ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolled { () =>
+        checkIfDoneEligibilityChecks { _ =>
           Ok(createAccountErrorView())
         }
       }
     }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   def getCreateAccountErrorBankDetailsPage: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks { _ ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolled { () =>
+        checkIfDoneEligibilityChecks { _ =>
           Ok(createAccountErrorBankDetailsView())
         }
       }
     }(loginContinueURL = routes.RegisterController.getCreateAccountErrorBankDetailsPage.url)
 
   def changeEmail: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolled { () =>
+        checkIfDoneEligibilityChecks { eligibleWithInfo =>
           startChangingDetailsAndRedirect(eligibleWithInfo.session, routes.EmailController.getSelectEmailPage.url)
         }
       }
     }(loginContinueURL = routes.RegisterController.changeEmail.url)
 
   def changeBankDetails: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolled { () =>
+        checkIfDoneEligibilityChecks { eligibleWithInfo =>
           startChangingDetailsAndRedirect(
             eligibleWithInfo.session,
             routes.BankAccountController.getBankDetailsPage.url
@@ -375,9 +375,9 @@ class RegisterController @Inject() (
     }(loginContinueURL = routes.RegisterController.changeBankDetails.url)
 
   def changeReminder: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolled { () ⇒
-        checkIfDoneEligibilityChecks { eligibleWithInfo ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolled { () =>
+        checkIfDoneEligibilityChecks { eligibleWithInfo =>
           startChangingDetailsAndRedirect(
             eligibleWithInfo.session,
             routes.ReminderController.getApplySavingsReminderPage.url
@@ -386,7 +386,7 @@ class RegisterController @Inject() (
       }
     }(loginContinueURL = routes.RegisterController.changeReminder.url)
 
-  def getCannotCheckDetailsPage: Action[AnyContent] = Action { implicit request ⇒
+  def getCannotCheckDetailsPage: Action[AnyContent] = Action { implicit request =>
     implicit val htsContext: HtsContext = HtsContext(authorised = false)
     Ok(cannotCheckDetailsView())
   }
@@ -397,9 +397,9 @@ class RegisterController @Inject() (
   )(implicit request: Request[_], hc: HeaderCarrier): Future[Result] =
     sessionStore
       .store(session.copy(changingDetails = true))
-      .fold({ e ⇒
+      .fold({ e =>
         internalServerError()
-      }, _ ⇒ SeeOther(redirectTo))
+      }, _ => SeeOther(redirectTo))
 
   /**
     * Checks the HTSSession data from mongo - if the is no session the user has not done the eligibility
@@ -407,7 +407,7 @@ class RegisterController @Inject() (
     * that they are not eligible show the user the 'you are not eligible page'. Otherwise, perform the
     * given action if the the session data indicates that they are eligible
     */
-  private def checkIfDoneEligibilityChecks(ifEligibleWithInfo: EligibleWithInfo ⇒ Future[Result])(
+  private def checkIfDoneEligibilityChecks(ifEligibleWithInfo: EligibleWithInfo => Future[Result])(
     implicit
     htsContext: HtsContextWithNINO,
     hc: HeaderCarrier,
@@ -416,19 +416,19 @@ class RegisterController @Inject() (
     checkSession {
       // no session data => user has not gone through the journey this session => take them to eligibility checks
       SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
-    } { session ⇒
+    } { session =>
       session.eligibilityCheckResult.fold[Future[Result]](
         SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
       )(
         _.fold(
           // user has gone through journey already this sessions and were found to be ineligible
-          _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
-          userInfo ⇒
+          _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
+          userInfo =>
             //by this time user should have gone through email journey and have verified/confirmed email stored in the session
             session.confirmedEmail
               .fold(
                 toFuture(SeeOther(routes.EmailController.getSelectEmailPage.url))
-              )(email ⇒ ifEligibleWithInfo(EligibleWithInfo(userInfo, email, session)))
+              )(email => ifEligibleWithInfo(EligibleWithInfo(userInfo, email, session)))
         )
       )
     }

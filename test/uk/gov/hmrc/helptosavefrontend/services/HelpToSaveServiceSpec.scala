@@ -140,7 +140,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
           .createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
           .expects(createAccountRequest, *, *)
           .returning(
-            response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r ⇒ Future.successful(r))
+            response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
           )
 
       "return a CREATED response along with the account number when a new account has been created" in {
@@ -198,7 +198,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
           .updateEmail(_: NSIPayload)(_: HeaderCarrier, _: ExecutionContext))
           .expects(nsiPayload, *, *)
           .returning(
-            response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r ⇒ Future.successful(r))
+            response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
           )
 
       "return a success response" in {

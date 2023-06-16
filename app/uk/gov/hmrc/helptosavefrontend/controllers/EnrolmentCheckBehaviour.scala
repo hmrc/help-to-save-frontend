@@ -29,12 +29,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait EnrolmentCheckBehaviour extends Logging {
-  this: BaseController ⇒
+  this: BaseController =>
 
   val frontendAppConfig: FrontendAppConfig
   val helpToSaveService: HelpToSaveService
 
-  def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result], handleEnrolmentServiceError: String ⇒ Future[Result])(
+  def checkIfAlreadyEnrolled(ifNotEnrolled: () => Future[Result], handleEnrolmentServiceError: String => Future[Result])(
     implicit htsContext: HtsContextWithNINO,
     hc: HeaderCarrier,
     transformer: NINOLogMessageTransformer,
@@ -44,25 +44,25 @@ trait EnrolmentCheckBehaviour extends Logging {
 
     helpToSaveService
       .getUserEnrolmentStatus()
-      .leftSemiflatMap { error ⇒
+      .leftSemiflatMap { error =>
         logger.warn(s"Error while trying to check if user was already enrolled to HtS: $error", nino)
         handleEnrolmentServiceError(error)
       }
       .semiflatMap {
-        case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
+        case EnrolmentStatus.Enrolled(itmpHtSFlag) =>
           if (!itmpHtSFlag) {
             setItmpFlag(nino)
           }
 
           SeeOther(frontendAppConfig.nsiManageAccountUrl)
 
-        case EnrolmentStatus.NotEnrolled ⇒
+        case EnrolmentStatus.NotEnrolled =>
           ifNotEnrolled()
       }
       .merge
   }
 
-  def checkIfAlreadyEnrolled(ifNotEnrolled: () ⇒ Future[Result])(
+  def checkIfAlreadyEnrolled(ifNotEnrolled: () => Future[Result])(
     implicit
     htsContext: HtsContextWithNINO,
     hc: HeaderCarrier,
@@ -70,12 +70,12 @@ trait EnrolmentCheckBehaviour extends Logging {
     transformer: NINOLogMessageTransformer,
     ec: ExecutionContext
   ): Future[Result] =
-    checkIfAlreadyEnrolled(ifNotEnrolled, _ ⇒ internalServerError())
+    checkIfAlreadyEnrolled(ifNotEnrolled, _ => internalServerError())
 
   def checkIfEnrolled(
-    ifNotEnrolled: () ⇒ Future[Result],
-    handleEnrolmentServiceError: String ⇒ Future[Result],
-    ifEnrolled: () ⇒ Future[Result]
+    ifNotEnrolled: () => Future[Result],
+    handleEnrolmentServiceError: String => Future[Result],
+    ifEnrolled: () => Future[Result]
   )(
     implicit htsContext: HtsContextWithNINO,
     hc: HeaderCarrier,
@@ -86,18 +86,18 @@ trait EnrolmentCheckBehaviour extends Logging {
 
     helpToSaveService
       .getUserEnrolmentStatus()
-      .leftSemiflatMap { error ⇒
+      .leftSemiflatMap { error =>
         logger.warn(s"Error while trying to check if user was already enrolled to HtS: $error", nino)
         handleEnrolmentServiceError(error)
       }
       .semiflatMap {
-        case EnrolmentStatus.Enrolled(itmpHtSFlag) ⇒
+        case EnrolmentStatus.Enrolled(itmpHtSFlag) =>
           if (!itmpHtSFlag) {
             setItmpFlag(nino)
           }
           ifEnrolled()
 
-        case EnrolmentStatus.NotEnrolled ⇒
+        case EnrolmentStatus.NotEnrolled =>
           ifNotEnrolled()
       }
       .merge
@@ -107,9 +107,9 @@ trait EnrolmentCheckBehaviour extends Logging {
     nino: NINO
   )(implicit ec: ExecutionContext, hc: HeaderCarrier, transformer: NINOLogMessageTransformer): Unit =
     helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
-      case Failure(e) ⇒ logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
-      case Success(Left(e)) ⇒ logger.warn(s"Could not start process to set ITMP flag: $e", nino)
-      case Success(Right(_)) ⇒ logger.info(s"Process started to set ITMP flag", nino)
+      case Failure(e) => logger.warn(s"Could not start process to set ITMP flag, future failed: $e", nino)
+      case Success(Left(e)) => logger.warn(s"Could not start process to set ITMP flag: $e", nino)
+      case Success(Right(_)) => logger.info(s"Process started to set ITMP flag", nino)
     }
 
 }

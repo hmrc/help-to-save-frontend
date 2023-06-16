@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait SessionStoreBehaviourSupport { this: MockFactory ⇒
+trait SessionStoreBehaviourSupport { this: MockFactory =>
 
   val mockSessionStore: SessionStore = mock[SessionStore]
 
@@ -35,7 +35,7 @@ trait SessionStoreBehaviourSupport { this: MockFactory ⇒
     (mockSessionStore
       .store(_: HTSSession)(_: Writes[HTSSession], _: HeaderCarrier))
       .expects(expectedSession, *, *)
-      .returning(EitherT.fromEither[Future](result.map(_ ⇒ ())))
+      .returning(EitherT.fromEither[Future](result.map(_ => ())))
 
   def mockSessionStoreGet(result: Either[String, Option[HTSSession]]): Unit =
     (mockSessionStore

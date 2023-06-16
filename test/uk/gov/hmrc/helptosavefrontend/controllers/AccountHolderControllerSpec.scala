@@ -140,9 +140,9 @@ class AccountHolderControllerSpec
         csrfAddToken(controller.getUpdateYourEmailAddress())(fakeRequest)
 
       behave like commonEnrolmentBehaviour(
-        () ⇒ getUpdateYourEmailAddress(),
-        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
-        () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None)
+        () => getUpdateYourEmailAddress(),
+        () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
+        () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None)
       )
 
       "show a page which allows the user to change their email if they are already " +
@@ -166,18 +166,18 @@ class AccountHolderControllerSpec
       val email = "email@test.com"
 
       val fakePostRequest =
-        fakeRequest.withMethod("POST").withFormUrlEncodedBody("new-email-address" → email)
+        fakeRequest.withMethod("POST").withFormUrlEncodedBody("new-email-address" -> email)
 
       def submit(email: String): Future[Result] =
         controller.onSubmit()(
           FakeRequest()
             .withMethod("POST")
-            .withFormUrlEncodedBody("new-email-address" → email))
+            .withFormUrlEncodedBody("new-email-address" -> email))
 
       behave like commonEnrolmentBehaviour(
-        () ⇒ submit("email"),
-        () ⇒ mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval),
-        () ⇒ mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrievalMissingNino)
+        () => submit("email"),
+        () => mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval),
+        () => mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrievalMissingNino)
       )
 
       "return the check your email page with a status of Ok, given a valid email address " in {
@@ -211,24 +211,24 @@ class AccountHolderControllerSpec
           .getOrElse(fail("Could not find redirect location"))
           .split('=')
           .toList match {
-          case _ :: param :: Nil ⇒
+          case _ :: param :: Nil =>
             EmailVerificationParams.decode(URLDecoder.decode(param, "UTF-8")) match {
-              case Success(params) ⇒
+              case Success(params) =>
                 params.nino shouldBe nino
                 params.email shouldBe email
 
-              case Failure(e) ⇒
+              case Failure(e) =>
                 fail(s"Could not decode email verification parameters string: $param", e)
             }
 
-          case _ ⇒ fail(s"Unexpected redirect location found: $redirectURL")
+          case _ => fail(s"Unexpected redirect location found: $redirectURL")
         }
 
       }
 
       "show an error page if the write to session cache fails" in {
         val fakePostRequest =
-          FakeRequest().withMethod("POST").withFormUrlEncodedBody("new-email-address" → email)
+          FakeRequest().withMethod("POST").withFormUrlEncodedBody("new-email-address" -> email)
         inSequence {
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))
@@ -242,7 +242,7 @@ class AccountHolderControllerSpec
 
       "show an error page if the email verification fails" in {
         val fakePostRequest =
-          FakeRequest().withMethod("POST").withFormUrlEncodedBody("new-email-address" → email)
+          FakeRequest().withMethod("POST").withFormUrlEncodedBody("new-email-address" -> email)
         inSequence {
           mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
           mockEnrolmentCheck()(Right(enrolled))
@@ -274,9 +274,9 @@ class AccountHolderControllerSpec
         controller.emailVerifiedCallback(params)(FakeRequest())
 
       behave like commonEnrolmentBehaviour(
-        () ⇒ verifyEmail(emailVerificationParams.encode()),
-        () ⇒ mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals),
-        () ⇒ mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
+        () => verifyEmail(emailVerificationParams.encode()),
+        () => mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals),
+        () => mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingNinoEnrolment)
       )
 
       "show a success page if the NINO in the URL matches the NINO from auth, the update with " +
@@ -572,9 +572,9 @@ class AccountHolderControllerSpec
   }
 
   def commonEnrolmentBehaviour(
-    getResult: () ⇒ Future[Result],
-    mockSuccessfulAuth: () ⇒ Unit,
-    mockNoNINOAuth: () ⇒ Unit
+    getResult: () => Future[Result],
+    mockSuccessfulAuth: () => Unit,
+    mockNoNINOAuth: () => Unit
   ): Unit = // scalastyle:ignore method.length
     "return an error" when {
 

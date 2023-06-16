@@ -50,7 +50,7 @@ case class HtsUserSchedule(
 
 object HtsUserSchedule {
   implicit val htsUserFormat: Format[HtsUserSchedule] = Json.format[HtsUserSchedule]
-  implicit val writes: Writes[HtsUserSchedule] = Writes[HtsUserSchedule](s ⇒ JsString(s.toString))
+  implicit val writes: Writes[HtsUserSchedule] = Writes[HtsUserSchedule](s => JsString(s.toString))
   implicit val reads: Reads[HtsUserSchedule] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(Nino.apply(_)) and
       (JsPath \ "email").read[String] and //.orElse((JsPath \ "nino").read[String]).map(Email.apply(_)) and
@@ -71,7 +71,7 @@ object DateToDaysMapper {
 }
 
 object DaysToDateMapper {
-  val reverseMapper: Map[Seq[Int], String] = for ((k, v) ← DateToDaysMapper.d2dMapper) yield (v, k)
+  val reverseMapper: Map[Seq[Int], String] = for ((k, v) <- DateToDaysMapper.d2dMapper) yield (v, k)
 
 }
 
@@ -79,7 +79,7 @@ case class CancelHtsUserReminder(nino: String)
 
 object CancelHtsUserReminder {
   implicit val htsUserCancelFormat: Format[CancelHtsUserReminder] = Json.format[CancelHtsUserReminder]
-  implicit val writes: Writes[CancelHtsUserReminder] = Writes[CancelHtsUserReminder](s ⇒ JsString(s.toString))
+  implicit val writes: Writes[CancelHtsUserReminder] = Writes[CancelHtsUserReminder](s => JsString(s.toString))
   implicit val reads: Reads[CancelHtsUserReminder] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]).map(CancelHtsUserReminder.apply(_))
   )
@@ -90,7 +90,7 @@ object UpdateReminderEmail {
 
   implicit val htsUpdateEmailFormat: Format[UpdateReminderEmail] = Json.format[UpdateReminderEmail]
 
-  implicit val writes: Writes[UpdateReminderEmail] = Writes[UpdateReminderEmail](s ⇒ JsString(s.toString))
+  implicit val writes: Writes[UpdateReminderEmail] = Writes[UpdateReminderEmail](s => JsString(s.toString))
 
   implicit val reads: Reads[UpdateReminderEmail] = (
     (JsPath \ "nino").read[String].orElse((JsPath \ "nino").read[String]) and

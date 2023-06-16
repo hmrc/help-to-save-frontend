@@ -20,9 +20,9 @@ import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 
 sealed trait EnrolmentStatus {
-  def fold[T](ifNotEnrolled: ⇒ T, ifEnrolled: Boolean ⇒ T): T = this match {
-    case e: Enrolled ⇒ ifEnrolled(e.itmpHtSFlag)
-    case NotEnrolled ⇒ ifNotEnrolled
+  def fold[T](ifNotEnrolled: => T, ifEnrolled: Boolean => T): T = this match {
+    case e: Enrolled => ifEnrolled(e.itmpHtSFlag)
+    case NotEnrolled => ifNotEnrolled
   }
 }
 
@@ -39,7 +39,7 @@ object EnrolmentStatus {
     implicit val enrolmentStatusJSONReads: Reads[EnrolmentStatusJSON] = Json.reads[EnrolmentStatusJSON]
 
     override def reads(json: JsValue): JsResult[EnrolmentStatus] =
-      Json.fromJson[EnrolmentStatusJSON](json).map { result ⇒
+      Json.fromJson[EnrolmentStatusJSON](json).map { result =>
         if (result.enrolled) {
           EnrolmentStatus.Enrolled(result.itmpHtSFlag)
         } else {

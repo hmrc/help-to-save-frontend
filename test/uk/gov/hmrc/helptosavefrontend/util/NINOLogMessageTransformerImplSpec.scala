@@ -25,12 +25,12 @@ class NINOLogMessageTransformerImplSpec extends AnyWordSpec with Matchers {
   "NINOLogMessageTransformerImpl" must {
 
     "attach the NINO in the prefix of a message if configured" in {
-      val transformer = new NINOLogMessageTransformerImpl(Configuration("nino-logging.enabled" → true))
+      val transformer = new NINOLogMessageTransformerImpl(Configuration("nino-logging.enabled" -> true))
       transformer.transform("Hello", "NINO") shouldBe "For NINO [NINO]: Hello"
     }
 
     "not attach the NINO in the prefix of a message if not configured" in {
-      val transformer = new NINOLogMessageTransformerImpl(Configuration("nino-logging.enabled" → false))
+      val transformer = new NINOLogMessageTransformerImpl(Configuration("nino-logging.enabled" -> false))
       transformer.transform("Hello", "NINO") shouldBe "Hello"
     }
 

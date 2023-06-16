@@ -74,48 +74,48 @@ class AccountHolderController @Inject() (
   import AccountHolderController._
 
   def getUpdateYourEmailAddress(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkIfAlreadyEnrolled(
-        _ ⇒ Ok(updateEmailAddress(UpdateEmailForm.verifyEmailForm)),
+        _ => Ok(updateEmailAddress(UpdateEmailForm.verifyEmailForm)),
         routes.AccountHolderController.getUpdateYourEmailAddress.url
       )
     }(loginContinueURL = routes.AccountHolderController.getUpdateYourEmailAddress.url)
 
   def onSubmit(): Action[AnyContent] =
-    authorisedForHtsWithNINOAndName { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINOAndName { implicit request => implicit htsContext =>
       htsContext.firstName.fold[Future[Result]](
         SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
-      ) { name ⇒
+      ) { name =>
         checkIfAlreadyEnrolled(
-          _ ⇒
+          _ =>
             UpdateEmailForm.verifyEmailForm
               .bindFromRequest()
               .fold(
-                formWithErrors ⇒ {
+                formWithErrors => {
                   BadRequest(updateEmailAddress(formWithErrors))
                 },
-                (details: UpdateEmail) ⇒
+                (details: UpdateEmail) =>
                   emailValidation.validate(details.email).toEither match {
-                    case Right(validEmail) ⇒
+                    case Right(validEmail) =>
                       sessionStore
                         .store(HTSSession(None, None, Some(validEmail)))
                         .semiflatMap(
-                          _ ⇒
+                          _ =>
                             sendEmailVerificationRequest(
                               validEmail,
                               name,
                               SeeOther(routes.AccountHolderController.getCheckYourEmail.url),
-                              params ⇒ routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
-                              _ ⇒ SeeOther(routes.EmailController.confirmEmailErrorTryLater.url),
+                              params => routes.AccountHolderController.emailVerifiedCallback(params.encode()).url,
+                              _ => SeeOther(routes.EmailController.confirmEmailErrorTryLater.url),
                               isNewApplicant = false
                             )
                         )
-                        .leftMap { e ⇒
+                        .leftMap { e =>
                           logger.warn(s"Could not write pending email to session cache: $e")
                           SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
                         }
                         .merge
-                    case Left(e) ⇒
+                    case Left(e) =>
                       logger.warn(s"Given email address failed validation, errors: $e")
                       SeeOther(routes.AccountHolderController.getUpdateYourEmailAddress.url)
                   }
@@ -126,17 +126,17 @@ class AccountHolderController @Inject() (
     }(loginContinueURL = routes.AccountHolderController.onSubmit.url)
 
   def getCheckYourEmail: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       val result: EitherT[Future, String, Email] = for {
-        maybeSession ← sessionStore.get
-        pendingEmail ← EitherT.fromEither[Future](getEmailFromSession(maybeSession)(_.pendingEmail, "pending email"))
+        maybeSession <- sessionStore.get
+        pendingEmail <- EitherT.fromEither[Future](getEmailFromSession(maybeSession)(_.pendingEmail, "pending email"))
       } yield pendingEmail
 
       result.fold(
-        { e ⇒
+        { e =>
           logger.warn(s"Could not get pending email: $e", htsContext.nino)
           SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
-        }, { pendingEmail ⇒
+        }, { pendingEmail =>
           Ok(checkYourEmail(pendingEmail))
         }
       )
@@ -144,18 +144,18 @@ class AccountHolderController @Inject() (
 
   def emailVerifiedCallback(emailVerificationParams: String): Action[AnyContent] = {
     val path = routes.AccountHolderController.emailVerifiedCallback(emailVerificationParams).url
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       withEmailVerificationParameters(
         emailVerificationParams,
-        params ⇒
+        params =>
           EitherT.right(
             checkIfAlreadyEnrolled(
-              oldEmail ⇒ handleEmailVerified(params, oldEmail, path),
+              oldEmail => handleEmailVerified(params, oldEmail, path),
               routes.AccountHolderController.getUpdateYourEmailAddress.url
             )
           ),
         EitherT.right(toFuture(SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)))
-      )(path).leftMap { e ⇒
+      )(path).leftMap { e =>
         logger.warn(e)
         internalServerError()
       }.merge
@@ -163,39 +163,39 @@ class AccountHolderController @Inject() (
   }
 
   def getEmailVerified: Action[AnyContent] =
-    authorisedForHts { implicit request ⇒ implicit htsContext: HtsContext ⇒
+    authorisedForHts { implicit request => implicit htsContext: HtsContext =>
       val result: EitherT[Future, String, String] = for {
-        session ← sessionStore.get
-        email ← EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
+        session <- sessionStore.get
+        email <- EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
       } yield email
 
       result.fold(
-        { e ⇒
+        { e =>
           logger.warn(s"Could not find confirmed email: $e")
           SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
         },
-        email ⇒ Ok(weUpdatedYourEmail(email))
+        email => Ok(weUpdatedYourEmail(email))
       )
     }(loginContinueURL = routes.AccountHolderController.getEmailVerified.url)
 
   def getCloseAccountPage: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkIfEnrolled(
         { // not enrolled
-          () ⇒
+          () =>
             SeeOther(routes.AccessAccountController.getNoAccountPage.url)
-        }, { e ⇒
+        }, { e =>
           logger.warn(s"Could not check enrolment during call to close account page ($e)", htsContext.nino)
           internalServerError()
         },
-        () ⇒
+        () =>
           helpToSaveService
             .getAccount(htsContext.nino, UUID.randomUUID())
             .fold(
-              e ⇒ {
+              e => {
                 logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
                 Ok(closeAccountAreYouSure(None))
-              }, { account ⇒
+              }, { account =>
                 if (account.isClosed) {
                   SeeOther(appConfig.nsiManageAccountUrl)
                 } else {
@@ -226,7 +226,7 @@ class AccountHolderController @Inject() (
     } else {
       htsContext.userDetails match {
 
-        case Left(missingUserInfos) ⇒
+        case Left(missingUserInfos) =>
           logger.warn(
             "Email was verified but missing some user info " +
               s"(${missingUserInfos.missingInfo.mkString(",")}",
@@ -234,9 +234,9 @@ class AccountHolderController @Inject() (
           )
           SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
 
-        case Right(userInfo) ⇒
+        case Right(userInfo) =>
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
-            _ ← helpToSaveService
+            _ <- helpToSaveService
                  .updateEmail(
                    NSIPayload(
                      userInfo,
@@ -246,10 +246,10 @@ class AccountHolderController @Inject() (
                    )
                  )
                  .leftMap(UpdateEmailError.NSIError)
-            _ ← helpToSaveService
+            _ <- helpToSaveService
                  .storeConfirmedEmail(emailVerificationParams.email)
                  .leftMap(UpdateEmailError.EmailMongoError)
-            _ ← sessionStore
+            _ <- sessionStore
                  .store(HTSSession(None, Some(emailVerificationParams.email), None))
                  .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
           } yield ()
@@ -258,23 +258,23 @@ class AccountHolderController @Inject() (
             EmailChanged(nino, oldEmail, emailVerificationParams.email, duringRegistrationJourney = false, path)
           result.fold(
             {
-              case UpdateEmailError.NSIError(e) ⇒
+              case UpdateEmailError.NSIError(e) =>
                 logger.warn(s"Could not update email with NS&I: $e", nino)
                 SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
 
-              case UpdateEmailError.SessionCacheError(e) ⇒
+              case UpdateEmailError.SessionCacheError(e) =>
                 logger.warn(s"Could not write to session cache: $e", nino)
                 auditor.sendEvent(auditEvent, nino)
                 SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
 
-              case UpdateEmailError.EmailMongoError(e) ⇒
+              case UpdateEmailError.EmailMongoError(e) =>
                 logger.warn(
                   "Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I",
                   nino
                 )
                 auditor.sendEvent(auditEvent, nino)
                 SeeOther(frontendAppConfig.nsiManageAccountUrl)
-            }, { _ ⇒
+            }, { _ =>
               logger.info("Successfully updated email with NS&I", nino)
               auditor.sendEvent(auditEvent, nino)
               SeeOther(routes.AccountHolderController.getEmailVerified.url)
@@ -287,40 +287,40 @@ class AccountHolderController @Inject() (
   /**
     * Use the enrolment store and email store to see if the user is enrolled
     */
-  private def checkIfAlreadyEnrolled(ifEnrolled: Email ⇒ Future[Result], path: String)(
+  private def checkIfAlreadyEnrolled(ifEnrolled: Email => Future[Result], path: String)(
     implicit
     htsContext: HtsContextWithNINO,
     hc: HeaderCarrier
   ): Future[Result] = {
     val enrolled: EitherT[Future, String, (EnrolmentStatus, Option[Email])] = for {
-      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
-      maybeEmail ← helpToSaveService.getConfirmedEmail()
+      enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
+      maybeEmail <- helpToSaveService.getConfirmedEmail()
     } yield (enrolmentStatus, maybeEmail)
 
     enrolled
-      .leftMap { error ⇒
+      .leftMap { error =>
         logger.warn(s"Could not check enrolment status: $error")
         SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
       }
       .semiflatMap {
-        case (enrolmentStatus, maybeEmail) ⇒
+        case (enrolmentStatus, maybeEmail) =>
           val nino = htsContext.nino
 
           (enrolmentStatus, maybeEmail) match {
-            case (EnrolmentStatus.NotEnrolled, _) ⇒
+            case (EnrolmentStatus.NotEnrolled, _) =>
               // user is not enrolled in this case
               logger.warn("SuspiciousActivity: missing HtS enrolment record for user", nino)
               auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_enrolment", path), nino)
               SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
 
-            case (EnrolmentStatus.Enrolled(_), None) ⇒
+            case (EnrolmentStatus.Enrolled(_), None) =>
               // this should never happen since we cannot have created an account
               // without a successful write to our email store
               logger.warn("SuspiciousActivity: user is enrolled but the HtS email record does not exist", nino)
               auditor.sendEvent(SuspiciousActivity(Some(nino), "missing_email_record", path), nino)
               SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
 
-            case (EnrolmentStatus.Enrolled(_), Some(email)) ⇒
+            case (EnrolmentStatus.Enrolled(_), Some(email)) =>
               ifEnrolled(email)
           }
       }
@@ -329,7 +329,7 @@ class AccountHolderController @Inject() (
 
   private def getEmailFromSession(
     session: Option[HTSSession]
-  )(getEmail: HTSSession ⇒ Option[Email], description: String): Either[String, Email] =
+  )(getEmail: HTSSession => Option[Email], description: String): Either[String, Email] =
     session.fold[Either[String, Email]](
       Left("Could not find session")
     )(getEmail(_).fold[Either[String, Email]](Left(s"Could not find $description in session"))(Right(_)))

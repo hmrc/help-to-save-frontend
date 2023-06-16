@@ -36,7 +36,7 @@ class IneligibilityTypeSpec extends AnyWordSpec with Matchers with ScalaCheckDri
       IneligibilityReason.fromIneligible(ineligible(5)) shouldBe Some(NotEntitledToWTCAndUCInsufficient)
       IneligibilityReason.fromIneligible(ineligible(9)) shouldBe Some(NotEntitledToWTCAndNoUC)
 
-      forAll { reasonCode: Int ⇒
+      forAll { reasonCode: Int =>
         whenever(!Set(2, 3, 4, 5, -1, 9).contains(reasonCode)) {
           IneligibilityReason.fromIneligible(ineligible(reasonCode)) shouldBe None
         }
@@ -54,15 +54,15 @@ class IneligibilityTypeSpec extends AnyWordSpec with Matchers with ScalaCheckDri
 
       val uniquePairs: List[(IneligibilityReason, IneligibilityReason)] =
         list.combinations(2).toList.flatMap(_.permutations.toList).map {
-          case a :: b :: Nil ⇒ a → b
-          case other ⇒ sys.error(s"Expected two elements but got $other")
+          case a :: b :: Nil => a -> b
+          case other => sys.error(s"Expected two elements but got $other")
         }
 
       val samePairs: List[(IneligibilityReason, IneligibilityReason)] =
         list.zip(list)
 
       val equalityPairs = (uniquePairs ::: samePairs).filter {
-        case (a, b) ⇒ IneligibilityReason.ineligibilityTypeEq.eqv(a, b)
+        case (a, b) => IneligibilityReason.ineligibilityTypeEq.eqv(a, b)
       }
 
       equalityPairs shouldBe samePairs

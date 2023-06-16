@@ -156,7 +156,7 @@ class AccessAccountControllerSpec
 
     }
 
-    def commonBehaviour(doRequest: () ⇒ Future[Result], expectedRedirectURL: String, withRemindersRemoval: Boolean = false): Unit = { // scalastyle:ignore
+    def commonBehaviour(doRequest: () => Future[Result], expectedRedirectURL: String, withRemindersRemoval: Boolean = false): Unit = { // scalastyle:ignore
 
       val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(BonusTerm(0,0,LocalDate.parse("1900-01-01"), LocalDate.parse("1900-01-01"))), None, None)
 

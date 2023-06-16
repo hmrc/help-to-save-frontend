@@ -39,7 +39,7 @@ class EmailVerificationConnectorSpec
       "hts_verification_email",
       "PT2H",
       if (isNewApplicant) s"${appConfig.newApplicantContinueURL}?p=" else s"${appConfig.accountHolderContinueURL}?p=",
-      Map("name" → name)
+      Map("name" -> name)
     )
 
   lazy val connector: EmailVerificationConnectorImpl =
@@ -99,7 +99,7 @@ class EmailVerificationConnectorSpec
         "the call comes back with an unexpected status" in {
           val statuses = Set(Status.OK, Status.CREATED, Status.BAD_REQUEST, Status.CONFLICT, Status.SERVICE_UNAVAILABLE)
 
-          forAll { status: Int ⇒
+          forAll { status: Int =>
             whenever(!statuses.contains(status)) {
               mockEncrypt(nino + "#" + email)("")
               mockPost(appConfig.verifyEmailURL, Map.empty[String, String], verificationRequest)(

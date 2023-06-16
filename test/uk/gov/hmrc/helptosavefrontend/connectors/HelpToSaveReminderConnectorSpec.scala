@@ -49,8 +49,8 @@ class HelpToSaveReminderConnectorSpec
     override def writes(o: Unit) = JsNull
 
     override def reads(json: JsValue) = json match {
-      case JsNull ⇒ JsSuccess(())
-      case _ ⇒ JsError("JSON was not null")
+      case JsNull => JsSuccess(())
+      case _ => JsError("JSON was not null")
     }
   }
 

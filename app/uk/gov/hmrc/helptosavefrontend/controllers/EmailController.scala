@@ -90,46 +90,46 @@ class EmailController @Inject() (
     }
 
   def getSelectEmailPage: Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-      def ifDigitalNewApplicant = { session: Option[HTSSession] ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
+      def ifDigitalNewApplicant = { session: Option[HTSSession] =>
         withEligibleSession(
           {
-            case (s, eligibleWithEmail) ⇒
+            case (s, eligibleWithEmail) =>
               val emailFormWithData = if (s.changingDetails) {
-                SelectEmailForm.selectEmailForm.copy(data = Map("new-email" → ""))
+                SelectEmailForm.selectEmailForm.copy(data = Map("new-email" -> ""))
               } else {
                 if (!s.hasSelectedEmail) {
                   SelectEmailForm.selectEmailForm
                 } else {
                   SelectEmailForm.selectEmailForm.copy(
-                    data = s.pendingEmail.fold(Map("new-email" → ""))(e ⇒ Map("new-email" → e))
+                    data = s.pendingEmail.fold(Map("new-email" -> ""))(e => Map("new-email" -> e))
                   )
                 }
               }
               Ok(selectEmail(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
           },
-          { case _ ⇒
+          { case _ =>
             SeeOther(routes.EmailController.getGiveEmailPage.url)
           }
         )(session)
       }
 
-      def ifDE = { _: Option[HTSSession] ⇒
+      def ifDE = { _: Option[HTSSession] =>
         htsContext.userDetails.fold[Future[Result]](
-          _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage.url),
-          userInfo ⇒
+          _ => SeeOther(routes.EmailController.getGiveEmailPage.url),
+          userInfo =>
             userInfo.email.fold[Future[Result]](
               SeeOther(routes.EmailController.getGiveEmailPage.url)
             )(
-              email ⇒
+              email =>
                 emailValidation.validate(email).toEither match {
-                  case Right(validEmail) ⇒
+                  case Right(validEmail) =>
                     updateSessionAndReturnResult(
                       HTSSession(None, None, Some(validEmail)),
                       Ok(selectEmail(validEmail, SelectEmailForm.selectEmailForm))
                     )
 
-                  case Left(_) ⇒
+                  case Left(_) =>
                     updateSessionAndReturnResult(
                       HTSSession(None, None, None),
                       SeeOther(routes.EmailController.getGiveEmailPage.url)
@@ -150,17 +150,17 @@ class EmailController @Inject() (
     selectEmailSubmitter(routes.EmailController.selectEmailSubmitReminder().url)
 
   def selectEmailSubmitter(URI: String): Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       def handleForm(email: String, backLink: Option[String], session: HTSSession): Future[Result] =
         SelectEmailForm.selectEmailForm
           .bindFromRequest()
           .fold(
-            withErrors ⇒ Ok(selectEmail(email, withErrors, backLink)), { form ⇒
+            withErrors => Ok(selectEmail(email, withErrors, backLink)), { form =>
               val (updatedSession, result) = form.newEmail.fold {
-                session.copy(hasSelectedEmail = true) →
+                session.copy(hasSelectedEmail = true) ->
                   SeeOther(routes.EmailController.emailConfirmed(crypto.encrypt(email)).url)
-              } { newEmail ⇒
-                session.copy(pendingEmail = Some(newEmail), confirmedEmail = None, hasSelectedEmail = true) →
+              } { newEmail =>
+                session.copy(pendingEmail = Some(newEmail), confirmedEmail = None, hasSelectedEmail = true) ->
                   SeeOther(routes.EmailController.confirmEmail.url)
               }
 
@@ -172,26 +172,26 @@ class EmailController @Inject() (
             }
           )
 
-      def ifDigitalNewApplicant = { maybeSession: Option[HTSSession] ⇒
+      def ifDigitalNewApplicant = { maybeSession: Option[HTSSession] =>
         withEligibleSession(
           {
-            case (session, eligibleWithEmail) ⇒
+            case (session, eligibleWithEmail) =>
               val backLink = backLinkFromSession(session)
               handleForm(eligibleWithEmail.email, Some(backLink), session)
           }, {
-            case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage.url)
+            case _ => SeeOther(routes.EmailController.getGiveEmailPage.url)
           }
         )(maybeSession)
       }
 
-      def ifDE = { maybeSession: Option[HTSSession] ⇒
+      def ifDE = { maybeSession: Option[HTSSession] =>
         maybeSession.fold[Future[Result]](
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
-        ) { session ⇒
+        ) { session =>
           session.pendingEmail.fold[Future[Result]] {
             logger.warn("Could not find pending email for select email submit")
             internalServerError()
-          } { email ⇒
+          } { email =>
             handleForm(email, None, session)
           }
         }
@@ -203,30 +203,30 @@ class EmailController @Inject() (
 
 
   def getGiveEmailPage: Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-      def ifDigitalNewApplicant = { session: Option[HTSSession] ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
+      def ifDigitalNewApplicant = { session: Option[HTSSession] =>
         withEligibleSession({
-          case _ ⇒ SeeOther(routes.EmailController.getSelectEmailPage.url)
+          case _ => SeeOther(routes.EmailController.getSelectEmailPage.url)
         }, {
-          case (s, _) ⇒
+          case (s, _) =>
             Ok(giveEmail(GiveEmailForm.giveEmailForm, Some(backLinkFromSession(s))))
         })(session)
       }
 
-      def ifDE = { _: Option[HTSSession] ⇒
+      def ifDE = { _: Option[HTSSession] =>
         htsContext.userDetails.toOption
           .flatMap(_.email)
           .fold {
             updateSessionAndReturnResult(HTSSession(None, None, None), Ok(giveEmail(GiveEmailForm.giveEmailForm)))
-          } { email ⇒
+          } { email =>
             emailValidation.validate(email).toEither match {
-              case Right(validEmail) ⇒
+              case Right(validEmail) =>
                 updateSessionAndReturnResult(
                   HTSSession(None, None, Some(validEmail)),
                   SeeOther(routes.EmailController.getSelectEmailPage.url)
                 )
 
-              case Left(_) ⇒
+              case Left(_) =>
                 updateSessionAndReturnResult(HTSSession(None, None, None), Ok(giveEmail(GiveEmailForm.giveEmailForm)))
             }
           }
@@ -237,13 +237,13 @@ class EmailController @Inject() (
     }(loginContinueURL = routes.EmailController.getGiveEmailPage.url)
 
   def giveEmailSubmit(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       def handleForm(session: HTSSession): Future[Result] =
         GiveEmailForm.giveEmailForm
           .bindFromRequest()
           .fold[Future[Result]](
-            withErrors ⇒ Ok(giveEmail(withErrors, Some(backLinkFromSession(session)))),
-            form ⇒ {
+            withErrors => Ok(giveEmail(withErrors, Some(backLinkFromSession(session)))),
+            form => {
               val updatedSession = session.copy(confirmedEmail = None, pendingEmail = Some(form.email))
               if (session =!= updatedSession) {
                 updateSessionAndReturnResult(updatedSession, SeeOther(routes.EmailController.confirmEmail.url))
@@ -255,20 +255,20 @@ class EmailController @Inject() (
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession({
-          case (s, _) ⇒ handleForm(s)
+          case (s, _) => handleForm(s)
         }, {
-          case (s, _) ⇒ handleForm(s)
+          case (s, _) => handleForm(s)
         })(session)
 
-      def ifDE = { htsSession: Option[HTSSession] ⇒
+      def ifDE = { htsSession: Option[HTSSession] =>
         htsSession.fold[Future[Result]](
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
-        ) { _ ⇒
+        ) { _ =>
           GiveEmailForm.giveEmailForm
             .bindFromRequest()
             .fold[Future[Result]](
-              withErrors ⇒ Ok(giveEmail(withErrors)),
-              form ⇒
+              withErrors => Ok(giveEmail(withErrors)),
+              form =>
                 updateSessionAndReturnResult(
                   HTSSession(None, None, Some(form.email)),
                   SeeOther(routes.EmailController.confirmEmail.url)
@@ -282,20 +282,20 @@ class EmailController @Inject() (
     }(loginContinueURL = routes.EmailController.getGiveEmailPage.url)
 
   def emailConfirmed(email: String): Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       val nino = htsContext.nino
       val decryptedEmailEither = EitherT.fromEither[Future](decryptEmail(email))
 
-      def doUpdate(hTSSession: HTSSession)(ifSuccess: ⇒ Future[Result]): Future[Result] = {
+      def doUpdate(hTSSession: HTSSession)(ifSuccess: => Future[Result]): Future[Result] = {
         val result: EitherT[Future, String, Result] = for {
-          e ← decryptedEmailEither
-          _ ← sessionStore.store(hTSSession.copy(confirmedEmail = Some(e)))
-          _ ← helpToSaveService.storeConfirmedEmail(e)
-          r ← EitherT.liftF(ifSuccess)
+          e <- decryptedEmailEither
+          _ <- sessionStore.store(hTSSession.copy(confirmedEmail = Some(e)))
+          _ <- helpToSaveService.storeConfirmedEmail(e)
+          r <- EitherT.liftF(ifSuccess)
         } yield r
 
         result.fold(
-          { e ⇒
+          { e =>
             logger.warn(s"Could not write confirmed email: $e", nino)
             internalServerError()
           },
@@ -306,7 +306,7 @@ class EmailController @Inject() (
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession(
           {
-            case (session, _) ⇒
+            case (session, _) =>
               doUpdate(session.copy(confirmedEmail = None, pendingEmail = None)) {
                 //once email is confirmed and , if we were in the process of changing details then we should redirect user to check_details page
                 if (session.changingDetails) {
@@ -318,21 +318,21 @@ class EmailController @Inject() (
                 }
               }
           },
-          { case _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage.url) }
+          { case _ => SeeOther(routes.EmailController.getGiveEmailPage.url) }
         )(session)
 
-      def ifDE = { session: Option[HTSSession] ⇒
-        withSession(session) { _ ⇒
+      def ifDE = { session: Option[HTSSession] =>
+        withSession(session) { _ =>
           doUpdate(HTSSession(None, None, None)) {
             htsContext.userDetails.fold[Future[Result]](
-              missingInfo ⇒ {
+              missingInfo => {
                 logger.warn(s"DE user missing infos, missing = ${missingInfo.missingInfo.mkString(",")}")
                 internalServerError()
               },
-              userInfo ⇒ {
+              userInfo => {
                 val result = for {
-                  e ← decryptedEmailEither
-                  _ ← helpToSaveService.updateEmail(
+                  e <- decryptedEmailEither
+                  _ <- helpToSaveService.updateEmail(
                        NSIPayload(
                          userInfo.copy(email = Some(e)),
                          e,
@@ -340,8 +340,8 @@ class EmailController @Inject() (
                          frontendAppConfig.systemId
                        )
                      )
-                  r ← EitherT.liftF(toFuture(SeeOther(frontendAppConfig.nsiManageAccountUrl)))
-                  _ ← {
+                  r <- EitherT.liftF(toFuture(SeeOther(frontendAppConfig.nsiManageAccountUrl)))
+                  _ <- {
                     val auditEvent = EmailChanged(
                       htsContext.nino,
                       "",
@@ -355,7 +355,7 @@ class EmailController @Inject() (
                 } yield r
 
                 result.fold[Result](
-                  errors ⇒ {
+                  errors => {
                     logger.warn(s"error during update email, error = $errors")
                     internalServerError()
                   },
@@ -372,18 +372,18 @@ class EmailController @Inject() (
     }(loginContinueURL = routes.EmailController.emailConfirmed(email).url)
 
   def emailConfirmedCallback(emailVerificationParams: String): Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       val result: EitherT[Future, String, Result] =
         for {
-          s ← helpToSaveService.getUserEnrolmentStatus()
-          r ← handleCallback(
+          s <- helpToSaveService.getUserEnrolmentStatus()
+          r <- handleCallback(
                s,
                emailVerificationParams,
                routes.EmailController.emailConfirmedCallback(emailVerificationParams).url
              )
         } yield r
 
-      result.leftMap { e ⇒
+      result.leftMap { e =>
         logger.warn(e)
         internalServerError()
       }.merge
@@ -397,7 +397,7 @@ class EmailController @Inject() (
   ): EitherT[Future, String, Result] =
     status.fold[EitherT[Future, String, Result]](
       handleCallBackForDigital(emailVerificationParams, path),
-      _ ⇒ handleCallBackForDE(emailVerificationParams, path)
+      _ => handleCallBackForDE(emailVerificationParams, path)
     )
 
   private def handleCallBackForDigital(emailVerificationParams: String, path: String)(
@@ -406,16 +406,16 @@ class EmailController @Inject() (
     request: Request[AnyContent]
   ): EitherT[Future, String, Result] =
     withEmailVerificationParameters(
-      emailVerificationParams, { params ⇒
+      emailVerificationParams, { params =>
         def handleResult(result: Either[CannotCreateAccountReason, (Option[String], UserInfo)]): Result =
           result.fold(
-            { createAccountVoid ⇒
+            { createAccountVoid =>
               createAccountVoid.result.fold(
-                _ ⇒ SeeOther(routes.EmailController.getLinkExpiredPage.url),
-                _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url)
+                _ => SeeOther(routes.EmailController.getLinkExpiredPage.url),
+                _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url)
               )
             }, {
-              case (oldEmail, updatedUserInfo) ⇒
+              case (oldEmail, updatedUserInfo) =>
                 val auditEvent = EmailChanged(
                   updatedUserInfo.nino,
                   oldEmail.getOrElse(""),
@@ -429,9 +429,9 @@ class EmailController @Inject() (
           )
 
         for {
-          session ← sessionStore.get
-          updateSessionResult ← updateSession(session, params)
-          result ← EitherT.pure[Future, String](handleResult(updateSessionResult))
+          session <- sessionStore.get
+          updateSessionResult <- updateSession(session, params)
+          result <- EitherT.pure[Future, String](handleResult(updateSessionResult))
         } yield result
 
       },
@@ -444,16 +444,16 @@ class EmailController @Inject() (
     request: Request[AnyContent]
   ): EitherT[Future, String, Result] =
     htsContext.userDetails.fold[EitherT[Future, String, Result]](
-      missingInfo ⇒ {
+      missingInfo => {
         logger.warn(s"DE user missing infos, missing = ${missingInfo.missingInfo.mkString(",")}")
         EitherT.pure[Future, String](internalServerError())
       },
-      userInfo ⇒ {
+      userInfo => {
         withEmailVerificationParameters(
           emailVerificationParams,
-          params ⇒ {
+          params => {
             for {
-              _ ← helpToSaveService.updateEmail(
+              _ <- helpToSaveService.updateEmail(
                    NSIPayload(
                      userInfo.copy(email = Some(params.email)),
                      params.email,
@@ -461,8 +461,8 @@ class EmailController @Inject() (
                      frontendAppConfig.systemId
                    )
                  )
-              _ ← helpToSaveService.storeConfirmedEmail(params.email)
-              _ ← {
+              _ <- helpToSaveService.storeConfirmedEmail(params.email)
+              _ <- {
                 if (isFeatureEnabled) {
                   helpToSaveReminderService.updateReminderEmail(
                     UpdateReminderEmail(htsContext.nino, params.email, userInfo.forename, userInfo.surname)
@@ -471,13 +471,13 @@ class EmailController @Inject() (
                   EitherT.pure[Future, String](())
                 }
               }
-              r ← EitherT.liftF(
+              r <- EitherT.liftF(
                    updateSessionAndReturnResult(
                      HTSSession(None, Some(params.email), None),
                      SeeOther(routes.EmailController.getEmailConfirmed.url)
                    )
                  )
-              _ ← {
+              _ <- {
                 val auditEvent = EmailChanged(params.nino, "", params.email, duringRegistrationJourney = false, path)
                 auditor.sendEvent(auditEvent, params.nino)
                 EitherT.pure[Future, String](())
@@ -493,16 +493,16 @@ class EmailController @Inject() (
 
   private def updateSessionAndReturnResult(
     session: HTSSession,
-    ifSuccessful: ⇒ Result
+    ifSuccessful: => Result
   )(implicit hc: HeaderCarrier, request: Request[AnyContent]): Future[Result] =
     sessionStore
       .store(session)
       .fold[Result](
-        e ⇒ {
+        e => {
           logger.warn(s"error updating the session, error = $e")
           internalServerError()
         },
-        _ ⇒ ifSuccessful
+        _ => ifSuccessful
       )
 
   /** Return `None` if user is ineligible */
@@ -511,9 +511,9 @@ class EmailController @Inject() (
     htsContext: HtsContextWithNINOAndUserDetails,
     hc: HeaderCarrier
   ): EitherT[Future, String, Either[CannotCreateAccountReason, (Option[String], UserInfo)]] =
-    getEligibleUserInfo(session).flatMap { e ⇒
+    getEligibleUserInfo(session).flatMap { e =>
       val result: Either[CannotCreateAccountReason, EitherT[Future, String, (Option[String], UserInfo)]] = e.map {
-        eligibleWithUserInfo ⇒
+        eligibleWithUserInfo =>
           if (eligibleWithUserInfo.userInfo.nino =!= params.nino) {
             EitherT.fromEither[Future](Left("NINO in confirm details parameters did not match NINO from auth"))
           } else {
@@ -530,9 +530,9 @@ class EmailController @Inject() (
               session.exists(_.changingDetails)
             )
             for {
-              _ ← sessionStore.store(newSession)
-              _ ← helpToSaveService.storeConfirmedEmail(params.email)
-            } yield eligibleWithUserInfo.userInfo.email → newInfo
+              _ <- sessionStore.store(newSession)
+              _ <- helpToSaveService.storeConfirmedEmail(params.email)
+            } yield eligibleWithUserInfo.userInfo.email -> newInfo
           }
       }
       result.traverse[EitherTResult, CannotCreateAccountReason, (Option[String], UserInfo)](identity)
@@ -546,25 +546,25 @@ class EmailController @Inject() (
   ): EitherT[Future, String, Either[CannotCreateAccountReason, EligibleWithUserInfo]] =
     session.flatMap(_.eligibilityCheckResult) match {
 
-      case Some(eligibilityCheckResult) ⇒
+      case Some(eligibilityCheckResult) =>
         EitherT.fromEither[Future](
           eligibilityCheckResult.fold[Either[String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
-            r ⇒ Right(Left(CannotCreateAccountReason(r))), // IMPOSSIBLE - this means they are ineligible
-            e ⇒ Right(Right(e))
+            r => Right(Left(CannotCreateAccountReason(r))), // IMPOSSIBLE - this means they are ineligible
+            e => Right(Right(e))
           )
         )
 
-      case None ⇒
+      case None =>
         htsContext.userDetails.fold[EitherT[Future, String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
-          missingInfos ⇒ EitherT.fromEither[Future](Left(s"Missing user info: ${missingInfos.missingInfo}")),
-          userInfo ⇒
+          missingInfos => EitherT.fromEither[Future](Left(s"Missing user info: ${missingInfos.missingInfo}")),
+          userInfo =>
             EitherT(
               helpToSaveService.checkEligibility().value.map {
                 _.fold[Either[String, Either[CannotCreateAccountReason, EligibleWithUserInfo]]](
                   Left(_), {
-                    case e: Eligible ⇒ Right(Right(EligibleWithUserInfo(e, userInfo)))
-                    case i: Ineligible ⇒ Right(Left(CannotCreateAccountReason(i)))
-                    case a: AlreadyHasAccount ⇒ Right(Left(CannotCreateAccountReason(a)))
+                    case e: Eligible => Right(Right(EligibleWithUserInfo(e, userInfo)))
+                    case i: Ineligible => Right(Left(CannotCreateAccountReason(i)))
+                    case a: AlreadyHasAccount => Right(Left(CannotCreateAccountReason(a)))
                   }
                 )
               }
@@ -573,17 +573,17 @@ class EmailController @Inject() (
     }
 
   def confirmEmail: Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       def sendVerificationRequest(pendingEmail: String, userInfo: UserInfo) =
         sendEmailVerificationRequest(
           pendingEmail,
           userInfo.forename,
           Ok(checkYourEmail(pendingEmail, userInfo.email)),
-          params ⇒ routes.EmailController.emailConfirmedCallback(params.encode()).url,
-          _ ⇒
+          params => routes.EmailController.emailConfirmedCallback(params.encode()).url,
+          _ =>
             SeeOther(
               userInfo.email.fold(routes.EmailController.confirmEmailErrorTryLater.url)(
-                _ ⇒ routes.EmailController.confirmEmailError.url
+                _ => routes.EmailController.confirmEmailError.url
               )
             ),
           isNewApplicant = true
@@ -591,27 +591,27 @@ class EmailController @Inject() (
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession({
-          case (s, eligibleWithEmail) ⇒
+          case (s, eligibleWithEmail) =>
             s.pendingEmail.fold[Future[Result]](
               internalServerError()
-            ) { pendingEmail ⇒
+            ) { pendingEmail =>
               sendVerificationRequest(pendingEmail, eligibleWithEmail.userInfo)
             }
         })(session)
 
-      def ifDE = { session: Option[HTSSession] ⇒
+      def ifDE = { session: Option[HTSSession] =>
         {
           session
             .flatMap(_.pendingEmail)
             .fold[Future[Result]](
               internalServerError()
-            ) { pendingEmail ⇒
+            ) { pendingEmail =>
               htsContext.userDetails.fold[Future[Result]](
-                missingInfo ⇒ {
+                missingInfo => {
                   logger.warn(s"user missing infos, missing = ${missingInfo.missingInfo.mkString(",")}")
                   internalServerError()
                 },
-                userInfo ⇒ {
+                userInfo => {
                   sendVerificationRequest(pendingEmail, userInfo)
                 }
               )
@@ -623,14 +623,14 @@ class EmailController @Inject() (
     }(loginContinueURL = routes.EmailController.confirmEmail.url)
 
   def confirmEmailError: Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession {
-          case (_, eligible) ⇒
+          case (_, eligible) =>
             eligible.userInfo.email.fold(
               SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
             )(
-              email ⇒
+              email =>
                 Ok(
                   cannotChangeEmail(
                     email,
@@ -641,14 +641,14 @@ class EmailController @Inject() (
             )
         }(session)
 
-      def ifDE = { _: Option[HTSSession] ⇒
+      def ifDE = { _: Option[HTSSession] =>
         {
           htsContext.userDetails.toOption
             .flatMap(_.email)
             .fold[Future[Result]](
               SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
             )(
-              email ⇒
+              email =>
                 Ok(
                   cannotChangeEmail(
                     email,
@@ -665,13 +665,13 @@ class EmailController @Inject() (
     }(loginContinueURL = routes.EmailController.confirmEmailError.url)
 
   def confirmEmailErrorTryLater: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkSessionAndEnrolmentStatus(
-        { _ ⇒
+        { _ =>
           Ok(cannotChangeEmailTryLater(returningUser = false, None))
-        }, { _ ⇒
+        }, { _ =>
           Ok(cannotChangeEmailTryLater(returningUser = true, None))
-        }, { (_, email) ⇒
+        }, { (_, email) =>
           Ok(cannotChangeEmailTryLater(returningUser = true, Some(email)))
         }
       )
@@ -679,16 +679,16 @@ class EmailController @Inject() (
     }(loginContinueURL = routes.EmailController.confirmEmailErrorTryLater.url)
 
   def confirmEmailErrorSubmit: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       def handleForm(email: Option[String], duringRegistrationJourney: Boolean) =
         email.fold[Future[Result]](
           SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
         )(
-          e ⇒
+          e =>
             EmailVerificationErrorContinueForm.continueForm
               .bindFromRequest()
               .fold(
-                form ⇒ Ok(cannotChangeEmail(e, form, duringRegistrationJourney)), { continue ⇒
+                form => Ok(cannotChangeEmail(e, form, duringRegistrationJourney)), { continue =>
                   if (continue.value) {
                     SeeOther(routes.EmailController.emailConfirmed(crypto.encrypt(e)).url)
                   } else {
@@ -700,79 +700,79 @@ class EmailController @Inject() (
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession {
-          case (_, eligible) ⇒
+          case (_, eligible) =>
             handleForm(eligible.userInfo.email, true)
         }(session)
 
       def ifDE =
-        (session: Option[HTSSession]) ⇒ handleForm(session.flatMap(_.confirmedEmail), false)
+        (session: Option[HTSSession]) => handleForm(session.flatMap(_.confirmedEmail), false)
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
     }(loginContinueURL = routes.EmailController.confirmEmailError.url)
 
-  val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+  val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request => implicit htsContext =>
     Ok(linkExpired())
   }(loginContinueURL = routes.EmailController.getLinkExpiredPage.url)
 
   def getEmailConfirmed: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession {
-          case (s, eligible) ⇒
+          case (s, eligible) =>
             s.confirmedEmail.fold[Future[Result]] {
               logger.warn("Could not find confirmed email", htsContext.nino)
               val url = eligible.userInfo.email.fold(routes.EmailController.confirmEmailErrorTryLater.url)(
-                _ ⇒ routes.EmailController.confirmEmailError.url
+                _ => routes.EmailController.confirmEmailError.url
               )
               toFuture(SeeOther(url))
-            }(_ ⇒ Ok(emailUpdated()))
+            }(_ => Ok(emailUpdated()))
         }(session)
 
       def ifDE = SeeOther(routes.EmailController.getGiveEmailPage.url)
 
-      def ifDigitalAccountHolder = { (session: Option[HTSSession], _: Email) ⇒
+      def ifDigitalAccountHolder = { (session: Option[HTSSession], _: Email) =>
         withSession(session) {
           _.confirmedEmail.fold[Future[Result]] {
             logger.warn("Could not find confirmed email in the session for DE user", htsContext.nino)
             internalServerError()
-          }(_ ⇒ Ok(emailUpdated()))
+          }(_ => Ok(emailUpdated()))
         }
       }
 
-      checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ ⇒ ifDE, ifDigitalAccountHolder)
+      checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ => ifDE, ifDigitalAccountHolder)
 
     }(loginContinueURL = routes.EmailController.getEmailConfirmed.url)
 
   def getEmailUpdated: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       def handle(email: Option[String]) =
-        email.fold[Future[Result]](SeeOther(routes.EmailController.getGiveEmailPage.url))(_ ⇒ Ok(emailUpdated()))
+        email.fold[Future[Result]](SeeOther(routes.EmailController.getGiveEmailPage.url))(_ => Ok(emailUpdated()))
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession {
-          case (_, eligible) ⇒
+          case (_, eligible) =>
             handle(eligible.userInfo.email)
         }(session)
 
       def ifDE = SeeOther(routes.EmailController.getGiveEmailPage.url)
 
-      def ifDigitalAccountHolder = { (session: Option[HTSSession], _: Email) ⇒
-        withSession(session) { s ⇒
+      def ifDigitalAccountHolder = { (session: Option[HTSSession], _: Email) =>
+        withSession(session) { s =>
           handle(s.confirmedEmail)
         }
       }
 
-      checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ ⇒ ifDE, ifDigitalAccountHolder)
+      checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ => ifDE, ifDigitalAccountHolder)
 
     }(loginContinueURL = routes.EmailController.getEmailUpdated().url)
 
   def emailUpdatedSubmit: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ _⇒
+    authorisedForHtsWithNINO { implicit request => _=>
       checkSessionAndEnrolmentStatus(
-        mayBeSession ⇒ {
+        mayBeSession => {
           mayBeSession.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url))(
-            session ⇒
+            session =>
               if (session.changingDetails) {
                 SeeOther(routes.RegisterController.getCreateAccountPage.url)
               } else {
@@ -780,50 +780,50 @@ class EmailController @Inject() (
               }
           )
         },
-        _ ⇒ SeeOther(routes.EmailController.getGiveEmailPage.url)
+        _ => SeeOther(routes.EmailController.getGiveEmailPage.url)
       )
     }(loginContinueURL = routes.EmailController.emailUpdatedSubmit.url)
 
-  private def withSession(session: Option[HTSSession])(f: HTSSession ⇒ Future[Result]): Future[Result] =
+  private def withSession(session: Option[HTSSession])(f: HTSSession => Future[Result]): Future[Result] =
     session.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility.url))(f)
 
   private def withEligibleSession(
-    ifEligible: (HTSSession, EligibleWithUserInfo) ⇒ Future[Result]
+    ifEligible: (HTSSession, EligibleWithUserInfo) => Future[Result]
   )(session: Option[HTSSession]): Future[Result] =
     session.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility.url))(
-      s ⇒
+      s =>
         s.eligibilityCheckResult.fold[Future[Result]](
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         ) {
           _.fold(
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
-            eligible ⇒ ifEligible(s, eligible)
+            _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
+            eligible => ifEligible(s, eligible)
           )
         }
     )
 
   private def withEligibleSession(
-    ifEligibleWithEmail: (HTSSession, EligibleWithEmail) ⇒ Future[Result],
-    ifEligibleWithNoEmail: (HTSSession, EligibleWithNoEmail) ⇒ Future[Result]
+    ifEligibleWithEmail: (HTSSession, EligibleWithEmail) => Future[Result],
+    ifEligibleWithNoEmail: (HTSSession, EligibleWithNoEmail) => Future[Result]
   )(session: Option[HTSSession]): Future[Result] =
     session.fold[Future[Result]](SeeOther(routes.EligibilityCheckController.getCheckEligibility.url))(
-      s ⇒
+      s =>
         s.eligibilityCheckResult.fold[Future[Result]](
           SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)
         ) {
           _.fold(
-            _ ⇒ SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
-            eligible ⇒
+            _ => SeeOther(routes.EligibilityCheckController.getIsNotEligible.url),
+            eligible =>
               eligible.userInfo.email.fold(
                 ifEligibleWithNoEmail(s, EligibleWithNoEmail(eligible.userInfo, eligible.eligible, s.bankDetails))
               )(
-                email ⇒
+                email =>
                   emailValidation.validate(email).toEither match {
-                    case Left(e) ⇒
+                    case Left(e) =>
                       logger.warn(s"GG email was invalid: $e")
                       ifEligibleWithNoEmail(s, EligibleWithNoEmail(eligible.userInfo, eligible.eligible, s.bankDetails))
 
-                    case Right(e) ⇒
+                    case Right(e) =>
                       ifEligibleWithEmail(
                         s,
                         EligibleWithEmail(eligible.userInfo, e, s.confirmedEmail, eligible.eligible, s.bankDetails)
@@ -836,36 +836,36 @@ class EmailController @Inject() (
     )
 
   private def checkSessionAndEnrolmentStatus(
-    ifDuringRegistrationJourney: Option[HTSSession] ⇒ Future[Result],
-    ifDE: Option[HTSSession] ⇒ Future[Result],
-    ifDigitalAccountHolder: (Option[HTSSession], Email) ⇒ Future[Result] = {
-      case _ ⇒ SeeOther(frontendAppConfig.nsiManageAccountUrl)
+    ifDuringRegistrationJourney: Option[HTSSession] => Future[Result],
+    ifDE: Option[HTSSession] => Future[Result],
+    ifDigitalAccountHolder: (Option[HTSSession], Email) => Future[Result] = {
+      case _ => SeeOther(frontendAppConfig.nsiManageAccountUrl)
     }
   )(implicit hc: HeaderCarrier, request: Request[_]): Future[Result] = {
     val result = for {
-      session ← sessionStore.get
-      enrolmentStatus ← helpToSaveService.getUserEnrolmentStatus()
-    } yield session → enrolmentStatus
+      session <- sessionStore.get
+      enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
+    } yield session -> enrolmentStatus
 
     result
-      .leftSemiflatMap { e ⇒
+      .leftSemiflatMap { e =>
         logger.warn(s"Could not get session or enrolment status: $e")
         internalServerError
       }
       .semiflatMap {
-        case (session, enrolmentStatus) ⇒
+        case (session, enrolmentStatus) =>
           enrolmentStatus.fold(
-            ifDuringRegistrationJourney(session), { _ ⇒
+            ifDuringRegistrationJourney(session), { _ =>
               helpToSaveService.getConfirmedEmail
-                .leftSemiflatMap { e ⇒
+                .leftSemiflatMap { e =>
                   logger.warn(s"Could not get confirmed email: $e")
                   internalServerError()
                 }
                 .semiflatMap {
                   // Digital account holder
-                  case Some(email) ⇒ ifDigitalAccountHolder(session, email)
+                  case Some(email) => ifDigitalAccountHolder(session, email)
                   // DE account holder
-                  case None ⇒ ifDE(session)
+                  case None => ifDE(session)
                 }
                 .merge
 
@@ -877,8 +877,8 @@ class EmailController @Inject() (
 
   private def decryptEmail(encryptedEmail: String): Either[String, String] =
     crypto.decrypt(encryptedEmail) match {
-      case Success(value) ⇒ Right(value)
-      case Failure(e) ⇒ Left(s"Could not decode email: ${e.getMessage}")
+      case Success(value) => Right(value)
+      case Failure(e) => Left(s"Could not decode email: ${e.getMessage}")
     }
 }
 

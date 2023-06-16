@@ -69,27 +69,27 @@ object HTSSession {
 
       override def writes(o: Either[A, B]): JsValue =
         o.fold(
-          a ⇒ JsObject(Seq("l" → Json.toJson(a))),
-          b ⇒ JsObject(Seq("r" → Json.toJson(b)))
+          a => JsObject(Seq("l" -> Json.toJson(a))),
+          b => JsObject(Seq("r" -> Json.toJson(b)))
         )
     }
 
   implicit val htsSessionReads: Reads[HTSSession] = new Reads[HTSSession] {
     override def reads(json: JsValue): JsResult[HTSSession] =
       for {
-        eligibilityCheckResult ← (json \ "eligibilityCheckResult").validateOpt[Either[Ineligible, EligibleWithUserInfo]]
-        confirmedEmail ← (json \ "confirmedEmail").validateOpt[Email]
-        pendingEmail ← (json \ "pendingEmail").validateOpt[Email]
-        ivURL ← (json \ "ivURL").validateOpt[String]
-        ivSuccessURL ← (json \ "ivSuccessURL").validateOpt[String]
-        bankDetails ← (json \ "bankDetails").validateOpt[BankDetails]
-        reminderDetails ← (json \ "reminderDetails").validateOpt[String]
-        reminderValue ← (json \ "reminderValue").validateOpt[String]
-        changingDetails ← (json \ "changingDetails").validateOpt[Boolean]
-        accountNumber ← (json \ "accountNumber").validateOpt[String]
-        hasSelectedEmail ← (json \ "hasSelectedEmail").validateOpt[Boolean]
-        hasSelectedReminder ← (json \ "hasSelectedReminder").validateOpt[Boolean]
-        attemptedAccountHolderPageURL ← (json \ "attemptedAccountHolderPageURL").validateOpt[String]
+        eligibilityCheckResult <- (json \ "eligibilityCheckResult").validateOpt[Either[Ineligible, EligibleWithUserInfo]]
+        confirmedEmail <- (json \ "confirmedEmail").validateOpt[Email]
+        pendingEmail <- (json \ "pendingEmail").validateOpt[Email]
+        ivURL <- (json \ "ivURL").validateOpt[String]
+        ivSuccessURL <- (json \ "ivSuccessURL").validateOpt[String]
+        bankDetails <- (json \ "bankDetails").validateOpt[BankDetails]
+        reminderDetails <- (json \ "reminderDetails").validateOpt[String]
+        reminderValue <- (json \ "reminderValue").validateOpt[String]
+        changingDetails <- (json \ "changingDetails").validateOpt[Boolean]
+        accountNumber <- (json \ "accountNumber").validateOpt[String]
+        hasSelectedEmail <- (json \ "hasSelectedEmail").validateOpt[Boolean]
+        hasSelectedReminder <- (json \ "hasSelectedReminder").validateOpt[Boolean]
+        attemptedAccountHolderPageURL <- (json \ "attemptedAccountHolderPageURL").validateOpt[String]
 
       } yield HTSSession(
         eligibilityCheckResult,

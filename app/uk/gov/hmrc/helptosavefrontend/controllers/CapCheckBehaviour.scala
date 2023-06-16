@@ -25,19 +25,19 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 trait CapCheckBehaviour {
-  this: FrontendController with Logging ⇒
+  this: FrontendController with Logging =>
 
   val helpToSaveService: HelpToSaveService
 
   def checkIfAccountCreateAllowed(
-    ifAllowed: ⇒ Future[Result]
+    ifAllowed: => Future[Result]
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Result] =
     helpToSaveService.isAccountCreationAllowed().value.flatMap {
       _.fold(
-        error ⇒ {
+        error => {
           logger.warn(s"Could not check if account create is allowed, due to: $error")
           ifAllowed
-        }, { userCapResponse ⇒
+        }, { userCapResponse =>
           if (userCapResponse.isTotalCapDisabled && userCapResponse.isDailyCapDisabled) {
             SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
           } else if (userCapResponse.isTotalCapDisabled || userCapResponse.isTotalCapReached) {

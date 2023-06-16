@@ -388,9 +388,9 @@ class EligibilityCheckControllerSpec
         "redirect to a previously attempted account page if the session indicates there was" +
           "such an attempt previously even if setting the ITMP flag fails if the person already has an account" in {
           List(
-            () ⇒ mockWriteITMPFlag(Left("")),
-            () ⇒ mockWriteITMPFlag(None)
-          ).foreach { mockWriteFailure ⇒
+            () => mockWriteITMPFlag(Left("")),
+            () => mockWriteITMPFlag(None)
+          ).foreach { mockWriteFailure =>
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
@@ -441,9 +441,9 @@ class EligibilityCheckControllerSpec
         "redirect to a previously attempted account page if the session indicates there was" +
           "such an attempt previously even if setting the ITMP flag fails if the person already has an account" in {
           List(
-            () ⇒ mockWriteITMPFlag(Left("")),
-            () ⇒ mockWriteITMPFlag(None)
-          ).foreach { mockWriteFailure ⇒
+            () => mockWriteITMPFlag(Left("")),
+            () => mockWriteITMPFlag(None)
+          ).foreach { mockWriteFailure =>
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
@@ -536,7 +536,7 @@ class EligibilityCheckControllerSpec
 
         "redirect to the not eligible page if there is no session data and the eligibilty check" +
           "indicates that the person is ineligible" in {
-          forAll(ineligibilityGen) { ineligibility: Ineligible ⇒
+          forAll(ineligibilityGen) { ineligibility: Ineligible =>
             inSequence {
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockSessionStoreGet(Right(None))
@@ -627,7 +627,7 @@ class EligibilityCheckControllerSpec
 
           // test if the given mock actions result in an error when `confirm_details` is called
           // on the controller
-          def test(mockActions: ⇒ Unit): Unit = {
+          def test(mockActions: => Unit): Unit = {
             mockActions
             val result = doCheckEligibilityRequest()
             isError(result) shouldBe true
@@ -649,7 +649,7 @@ class EligibilityCheckControllerSpec
           }
 
           "the eligibility check call returns with an error" in {
-            forAll { checkError: String ⇒
+            forAll { checkError: String =>
               test(
                 inSequence {
                   mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -716,13 +716,13 @@ class EligibilityCheckControllerSpec
         val dobs: List[Option[LocalDate]] = List(Some(LocalDate.now()), None)
 
         val testParams: List[TestParameters] = for {
-          name ← names
-          surname ← names
-          dob ← dobs
-          address ← itmpAddresses
+          name <- names
+          surname <- names
+          dob <- dobs
+          address <- itmpAddresses
         } yield TestParameters(name, surname, dob, address)
 
-        testParams.foreach { params ⇒
+        testParams.foreach { params =>
           if (isNameInvalid(params.name) || isNameInvalid(params.surname) || isDobInvalid(params.dob) || isAddressInvalid(
                 params.address
               )) {

@@ -31,7 +31,7 @@ class HttpResponseOps(val response: HttpResponse) extends AnyVal {
 
   def parseJSON[A](path: Option[String] = None)(implicit reads: Reads[A]): Either[String, A] =
     Try(path.fold[JsLookupResult](JsDefined(response.json))(response.json \ _)) match {
-      case Success(jsLookupResult) ⇒
+      case Success(jsLookupResult) =>
         // use Option here to filter out null values
         jsLookupResult.toOption
           .flatMap(Option(_))
@@ -39,7 +39,7 @@ class HttpResponseOps(val response: HttpResponse) extends AnyVal {
             Left("No JSON found in body of http response")
           )(
             _.validate[A].fold[Either[String, A]](
-              errors ⇒
+              errors =>
                 // there was JSON in the response but we couldn't read it
                 Left(
                   s"Could not parse http response JSON: ${JsError(errors).prettyPrint()}. Response body was ${maskNino(response.body)}}"
@@ -47,7 +47,7 @@ class HttpResponseOps(val response: HttpResponse) extends AnyVal {
               Right(_)
             )
           )
-      case Failure(error) ⇒
+      case Failure(error) =>
         // response.json failed in this case - there was no JSON in the response
         Left(s"Could not read http response as JSON: ${error.getMessage}. Response body was ${maskNino(response.body)}")
     }

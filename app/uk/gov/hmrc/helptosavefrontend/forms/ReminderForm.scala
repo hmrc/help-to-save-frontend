@@ -22,7 +22,7 @@ import play.api.data.Forms.{mapping, of}
 object ReminderForm {
   def giveRemindersDetailsForm()(implicit validation: ReminderFrequencyValidation): Form[ReminderForm] = Form(
     mapping(
-      "reminderFrequency" → of(validation.reminderFrequencyFormatter)
+      "reminderFrequency" -> of(validation.reminderFrequencyFormatter)
     )(ReminderForm.apply)(ReminderForm.unapply)
   )
 }

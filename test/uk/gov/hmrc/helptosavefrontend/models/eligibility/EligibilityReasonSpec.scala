@@ -35,7 +35,7 @@ class EligibilityTypeSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
       EligibilityReason.fromEligible(eligible(7)) shouldBe Some(EntitledToWTC(false))
       EligibilityReason.fromEligible(eligible(8)) shouldBe Some(EntitledToWTC(true))
 
-      forAll { reasonCode: Int ⇒
+      forAll { reasonCode: Int =>
         whenever(!Set(6, 7, 8).contains(reasonCode)) {
           EligibilityReason.fromEligible(eligible(reasonCode)) shouldBe None
         }

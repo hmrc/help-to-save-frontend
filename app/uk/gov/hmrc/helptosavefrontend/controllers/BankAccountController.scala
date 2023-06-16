@@ -71,43 +71,43 @@ class BankAccountController @Inject() (
     }
 
   def getBankDetailsPage(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks { s =>
         s.bankDetails.fold(
           Ok(bankAccountDetails(BankDetails.giveBankDetailsForm(), backLinkFromSession(s)))
         )(
-          bankDetails ⇒
+          bankDetails =>
             Ok(bankAccountDetails(BankDetails.giveBankDetailsForm().fill(bankDetails), backLinkFromSession(s)))
         )
       }
     }(loginContinueURL = routes.BankAccountController.getBankDetailsPage.url)
 
   def submitBankDetails(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks { session ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks { session =>
         BankDetails
           .giveBankDetailsForm()
           .bindFromRequest()
           .fold(
-            withErrors ⇒ Ok(bankAccountDetails(withErrors, backLinkFromSession(session))), { bankDetails ⇒
+            withErrors => Ok(bankAccountDetails(withErrors, backLinkFromSession(session))), { bankDetails =>
               helpToSaveService
                 .validateBankDetails(
                   ValidateBankDetailsRequest(htsContext.nino, bankDetails.sortCode.toString, bankDetails.accountNumber)
                 )
                 .fold[Future[PlayResult]](
-                  error ⇒ {
+                  error => {
                     logger.warn(s"Could not validate bank details due to : $error")
                     internalServerError()
-                  }, { result ⇒
+                  }, { result =>
                     if (result.isValid && result.sortCodeExists) {
                       sessionStore
                         .store(session.copy(bankDetails = Some(bankDetails)))
                         .fold(
-                          error ⇒ {
+                          error => {
                             logger.warn(s"Could not update session with bank details: $error")
                             internalServerError()
                           },
-                          _ ⇒ SeeOther(routes.RegisterController.getCreateAccountPage.url)
+                          _ => SeeOther(routes.RegisterController.getCreateAccountPage.url)
                         )
                     } else {
                       val formWithErrors = if (result.isValid && !result.sortCodeExists) {
