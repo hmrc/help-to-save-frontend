@@ -103,9 +103,10 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
   val ineligibleResponseGen: Gen[EligibilityCheckResult] =
     for {
       result <- Gen.alphaStr
+      resultCode <- Gen.oneOf(Seq(2, 4))
       reasonCode <- Gen.choose(2, 5)
       reason <- Gen.alphaStr
-    } yield EligibilityCheckResult(result, 2, reason, reasonCode)
+    } yield EligibilityCheckResult(result, resultCode, reason, reasonCode)
 
   "The HelpToSaveConnectorImpl" when {
 
@@ -185,10 +186,6 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
           val result = connector.getEligibility()
           await(result.value).isLeft shouldBe true
-        }
-
-        "the call comes back with a 200 and result code 4" in {
-          testError(4)
         }
 
         "the call comes back with a 200 and an unknown result code" in {
