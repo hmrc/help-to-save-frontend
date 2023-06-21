@@ -72,8 +72,8 @@ class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with S
         val result = ivConnector.getJourneyStatus(journeyId)
 
         result.futureValue match {
-          case Some(IvErrorResponse(_)) ⇒ ()
-          case other ⇒ fail(s"Expected IvErrorResponse but got $other")
+          case Some(IvErrorResponse(_)) => ()
+          case other => fail(s"Expected IvErrorResponse but got $other")
         }
       }
 

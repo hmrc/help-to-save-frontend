@@ -41,7 +41,7 @@ class HTSAuditorSpec extends ControllerSpecWithGuiceApp {
             "source",
             "type",
             "id",
-            Map("tag" → "value"),
+            Map("tag" -> "value"),
             Json.parse("""{ "detail": "value" }""")
           )
 

@@ -86,16 +86,16 @@ class ReminderController @Inject() (
   private def backLink: String = routes.AccessAccountController.accessAccount.url
 
   def getEmailsavingsReminders(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       if (isFeatureEnabled) {
         // get optin status
         helpToSaveReminderService
           .getHtsUser(htsContext.nino)
           .fold(
-            e ⇒ {
+            e => {
               logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
               Ok(emailSavingsReminder(Some(backLink)))
-            }, { htsUserSchedule ⇒
+            }, { htsUserSchedule =>
               Ok(
                 reminderDashboard(
                   htsUserSchedule.email,
@@ -114,8 +114,8 @@ class ReminderController @Inject() (
 
   def getSelectRendersPage(): Action[AnyContent] = {
 
-    authorisedForHtsWithNINO { implicit request ⇒
-      implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request =>
+      implicit htsContext =>
         helpToSaveService
           .getAccount(htsContext.nino, UUID.randomUUID())
           .fold(
@@ -154,32 +154,32 @@ class ReminderController @Inject() (
   }
 
   def selectRemindersSubmit(): Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       ReminderForm
         .giveRemindersDetailsForm()
         .bindFromRequest()
         .fold(
-          withErrors ⇒ {
+          withErrors => {
             Ok(reminderFrequencySet(withErrors, "none", "account"))
           },
-          success ⇒
+          success =>
             htsContext.userDetails match {
-              case Left(missingUserInfos) ⇒
+              case Left(missingUserInfos) =>
                 logger.warn(s"Email was verified but missing some user info $missingUserInfos")
                 internalServerError()
 
-              case Right(userInfo) ⇒
+              case Right(userInfo) =>
                 helpToSaveService.getConfirmedEmail.value.flatMap {
                   _.fold(
-                    noEmailError ⇒ {
+                    noEmailError => {
                       logger.warn(
                         s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : $noEmailError"
                       )
                       internalServerError()
                     },
-                    emailRetrieved ⇒
+                    emailRetrieved =>
                       emailRetrieved match {
-                        case Some(email) if !email.isEmpty ⇒ {
+                        case Some(email) if !email.isEmpty => {
                           val daysToReceiveReminders =
                             DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
                           val htsUserToBeUpdated = HtsUserSchedule(
@@ -197,13 +197,13 @@ class ReminderController @Inject() (
                           helpToSaveReminderService
                             .updateHtsUser(htsUserToBeUpdated)
                             .fold(
-                              htsError ⇒ {
+                              htsError => {
                                 logger.warn(
                                   s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
                                 )
                                 internalServerError()
                               },
-                              htsUser ⇒
+                              htsUser =>
                                 SeeOther(
                                   routes.ReminderController
                                     .getRendersConfirmPage(
@@ -216,7 +216,7 @@ class ReminderController @Inject() (
                             )
 
                         }
-                        case Some(_) ⇒ {
+                        case Some(_) => {
                           logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
                           internalServerError()
                         }
@@ -228,10 +228,10 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
   def getRendersConfirmPage(email: String, period: String, page: String): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       if (isFeatureEnabled) {
         crypto.decrypt(email) match {
-          case Success(value) ⇒
+          case Success(value) =>
             if (page === "Set") {
               Ok(
                 reminderConfirmation(
@@ -252,7 +252,7 @@ class ReminderController @Inject() (
               )
             }
 
-          case Failure(e) ⇒ {
+          case Failure(e) => {
             internalServerError()
           }
         }
@@ -263,8 +263,8 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period, "page").url)
 
   def getSelectedRendersPage(): Action[AnyContent] = {
-    authorisedForHtsWithNINO { implicit request ⇒
-      implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request =>
+      implicit htsContext =>
         helpToSaveService
           .getAccount(htsContext.nino, UUID.randomUUID())
           .fold(
@@ -284,16 +284,16 @@ class ReminderController @Inject() (
   }
 
   def accountOpenGetSelectedRendersPage(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       if (isFeatureEnabled) {
         def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
         helpToSaveReminderService
           .getHtsUser(htsContext.nino)
           .fold(
-            e ⇒ {
+            e => {
               logger.warn(s"error retrieving Hts User details from reminder${htsContext.nino}")
               internalServerError()
-            }, { htsUser ⇒
+            }, { htsUser =>
               Ok(
                 reminderFrequencySet(
                   ReminderForm.giveRemindersDetailsForm(),
@@ -311,32 +311,32 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit.url)
 
   def selectedRemindersSubmit(): Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       ReminderForm
         .giveRemindersDetailsForm()
         .bindFromRequest()
         .fold(
-          withErrors ⇒ {
+          withErrors => {
             Ok(reminderFrequencySet(withErrors, "none", "cancel"))
           },
-          success ⇒
+          success =>
             htsContext.userDetails match {
-              case Left(missingUserInfos) ⇒
+              case Left(missingUserInfos) =>
                 logger.warn(s"Email was verified but missing some user info $missingUserInfos")
                 internalServerError()
 
-              case Right(userInfo) ⇒
+              case Right(userInfo) =>
                 helpToSaveService.getConfirmedEmail.value.flatMap {
                   _.fold(
-                    noEmailError ⇒ {
+                    noEmailError => {
                       logger.warn(
                         s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : $noEmailError"
                       )
                       internalServerError()
                     },
-                    emailRetrieved ⇒
+                    emailRetrieved =>
                       emailRetrieved match {
-                        case Some(email) if !email.isEmpty ⇒ {
+                        case Some(email) if !email.isEmpty => {
                           if (success.reminderFrequency === "cancel") {
                             auditor.sendEvent(
                               HtsReminderCancelledEvent(HtsReminderCancelled(
@@ -347,13 +347,13 @@ class ReminderController @Inject() (
                             helpToSaveReminderService
                               .cancelHtsUserReminders(cancelHtsUserReminder)
                               .fold(
-                                htsservError ⇒ {
+                                htsservError => {
                                   logger.warn(
                                     s"An error occurred while accessing HTS Reminder service for user: ${htsContext.nino} Error: $htsservError"
                                   )
                                   internalServerError()
                                 },
-                                _ ⇒ SeeOther(routes.ReminderController.getRendersCancelConfirmPage.url)
+                                _ => SeeOther(routes.ReminderController.getRendersCancelConfirmPage.url)
                               )
 
                           } else {
@@ -374,13 +374,13 @@ class ReminderController @Inject() (
                             helpToSaveReminderService
                               .updateHtsUser(htsUserToBeUpdated)
                               .fold(
-                                htsError ⇒ {
+                                htsError => {
                                   logger.warn(
                                     s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
                                   )
                                   internalServerError()
                                 },
-                                htsUser ⇒
+                                htsUser =>
                                   SeeOther(
                                     routes.ReminderController
                                       .getRendersConfirmPage(
@@ -393,7 +393,7 @@ class ReminderController @Inject() (
                               )
                           }
                         }
-                        case Some(_) ⇒ {
+                        case Some(_) => {
                           internalServerError()
                         }
                       }
@@ -404,7 +404,7 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.selectedRemindersSubmit.url)
 
   def getRendersCancelConfirmPage(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       if (isFeatureEnabled) {
         Ok(reminderCancelConfirmation())
       } else {
@@ -413,9 +413,9 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.getRendersCancelConfirmPage.url)
 
   def getApplySavingsReminderPage(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       if (isFeatureEnabled) {
-        checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
+        checkIfAlreadyEnrolledAndDoneEligibilityChecks { s =>
           Ok(
             applySavingsReminders(
               ReminderForm.giveRemindersDetailsForm(),
@@ -430,16 +430,16 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
   def submitApplySavingsReminderPage(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks { s =>
         ReminderForm
           .giveRemindersDetailsForm()
           .bindFromRequest()
           .fold(
-            withErrors ⇒ {
+            withErrors => {
               Ok(applySavingsReminders(withErrors, "none", Option(routes.EmailController.getSelectEmailPage.url)))
             },
-            success ⇒
+            success =>
               if (success.reminderFrequency === "no") {
                 sessionStore
                   .store(
@@ -450,12 +450,12 @@ class ReminderController @Inject() (
                     )
                   )
                   .fold(
-                    error ⇒ {
+                    error => {
                       internalServerError()
                     },
-                    if (s.changingDetails) { _ ⇒
+                    if (s.changingDetails) { _ =>
                       SeeOther(routes.RegisterController.getCreateAccountPage.url)
-                    } else { _ ⇒
+                    } else { _ =>
                       SeeOther(routes.BankAccountController.getBankDetailsPage.url)
                     }
                   )
@@ -463,10 +463,10 @@ class ReminderController @Inject() (
                 sessionStore
                   .store(s.copy(reminderValue = Some(success.reminderFrequency), hasSelectedReminder = true))
                   .fold(
-                    error ⇒ {
+                    error => {
                       internalServerError()
                     },
-                    _ ⇒ SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage.url)
+                    _ => SeeOther(routes.ReminderController.getApplySavingsReminderSignUpPage.url)
                   )
 
               }
@@ -476,9 +476,9 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.submitApplySavingsReminderPage.url)
 
   def getApplySavingsReminderSignUpPage(): Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       if (isFeatureEnabled) {
-        checkIfAlreadyEnrolledAndDoneEligibilityChecks { s ⇒
+        checkIfAlreadyEnrolledAndDoneEligibilityChecks { s =>
           def bckLink: String = routes.ReminderController.getApplySavingsReminderPage.url
           s.reminderDetails.fold(
             Ok(
@@ -490,7 +490,7 @@ class ReminderController @Inject() (
               )
             )
           )(
-            reminderDetails ⇒ {
+            reminderDetails => {
               Ok(
                 reminderFrequencySet(
                   ReminderForm.giveRemindersDetailsForm(),
@@ -508,13 +508,13 @@ class ReminderController @Inject() (
     }(loginContinueURL = routes.ReminderController.getApplySavingsReminderSignUpPage.url)
 
   def submitApplySavingsReminderSignUpPage(): Action[AnyContent] =
-    authorisedForHtsWithInfo { implicit request ⇒ implicit htsContext ⇒
-      checkIfAlreadyEnrolledAndDoneEligibilityChecks { session ⇒
+    authorisedForHtsWithInfo { implicit request => implicit htsContext =>
+      checkIfAlreadyEnrolledAndDoneEligibilityChecks { session =>
         ReminderForm
           .giveRemindersDetailsForm()
           .bindFromRequest()
           .fold(
-            withErrors ⇒ {
+            withErrors => {
               Ok(
                 reminderFrequencySet(
                   withErrors,
@@ -524,7 +524,7 @@ class ReminderController @Inject() (
                 )
               )
             },
-            success ⇒
+            success =>
               if (success.reminderFrequency.nonEmpty) {
                 sessionStore
                   .store(if (success.reminderFrequency === "cancel") {
@@ -533,12 +533,12 @@ class ReminderController @Inject() (
                     session.copy(reminderDetails = Some(success.reminderFrequency))
                   })
                   .fold(
-                    error ⇒ {
+                    error => {
                       internalServerError()
                     },
-                    if (session.changingDetails) { _ ⇒
+                    if (session.changingDetails) { _ =>
                       SeeOther(routes.RegisterController.getCreateAccountPage.url)
-                    } else { _ ⇒
+                    } else { _ =>
                       SeeOther(routes.BankAccountController.getBankDetailsPage.url)
                     }
                   )

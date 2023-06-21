@@ -37,7 +37,7 @@ class ReminderFrequencyValidation @Inject() (configuration: FrontendAppConfig) {
         data
           .get(key)
           .map(_.cleanupSpecialCharacters.trim)
-          .fold(invalid[String](ErrorMessages.reminderFrequencyEmpty)) { s ⇒
+          .fold(invalid[String](ErrorMessages.reminderFrequencyEmpty)) { s =>
             if (s.isEmpty) {
               invalid(ErrorMessages.reminderFrequencyEmpty)
             } else {
@@ -46,7 +46,7 @@ class ReminderFrequencyValidation @Inject() (configuration: FrontendAppConfig) {
           }
       }
 
-      validation.toEither.leftMap(_.map(e ⇒ FormError(key, e)).toList)
+      validation.toEither.leftMap(_.map(e => FormError(key, e)).toList)
     }
 
     override def unbind(key: String, value: String): Map[String, String] =

@@ -53,11 +53,11 @@ object Account {
     def currentBonusTerm(): Option[BonusTerm] = {
       val dateNow = LocalDate.now(clock)
       account.bonusTerms
-        .sortWith((t1, t2) ⇒ t1.endDate.isBefore(t2.endDate))
+        .sortWith((t1, t2) => t1.endDate.isBefore(t2.endDate))
         .find(_.endDate.isAfter(dateNow))
     }
   }
 
-  implicit val currencyValueShows: Show[BigDecimal] = Show.show[BigDecimal](d ⇒ f"$d%.2f")
+  implicit val currencyValueShows: Show[BigDecimal] = Show.show[BigDecimal](d => f"$d%.2f")
 
 }

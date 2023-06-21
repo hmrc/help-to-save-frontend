@@ -32,7 +32,7 @@ object Address {
       itmpAddress.line3,
       itmpAddress.line4,
       itmpAddress.line5
-    ).collect { case Some(s) if s.nonEmpty ⇒ s },
+    ).collect { case Some(s) if s.nonEmpty => s },
     itmpAddress.postCode,
     itmpAddress.countryCode
   )

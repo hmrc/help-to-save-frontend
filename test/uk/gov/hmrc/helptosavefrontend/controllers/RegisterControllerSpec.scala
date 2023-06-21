@@ -113,7 +113,7 @@ class RegisterControllerSpec
       .expects(htsUser, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def checkRedirectIfNoEmailInSession(doRequest: ⇒ Future[PlayResult]): Unit =
+  def checkRedirectIfNoEmailInSession(doRequest: => Future[PlayResult]): Unit =
     "redirect to the give email page if the session data does not contain an email for the user" in {
       inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -214,7 +214,7 @@ class RegisterControllerSpec
       def doRequest(): Future[PlayResult] =
         csrfAddToken(controller.getCreateAccountPage())(fakeRequest)
 
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+      behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       checkRedirectIfNoEmailInSession(doRequest())
 
@@ -808,7 +808,7 @@ class RegisterControllerSpec
 
       def doRequest(): Future[PlayResult] = csrfAddToken(controller.getCreateAccountPage())(fakeRequest)
 
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+      behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       checkRedirectIfNoEmailInSession(doRequest())
 
@@ -872,7 +872,7 @@ class RegisterControllerSpec
     "handling changeEmail" must {
       def doRequest(): Future[PlayResult] = controller.changeEmail()(FakeRequest())
 
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+      behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       "write a new session and redirect to the select email page" in {
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
@@ -895,7 +895,7 @@ class RegisterControllerSpec
     "handling changeBankDetails" must {
       def doRequest(): Future[PlayResult] = controller.changeBankDetails()(FakeRequest())
 
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+      behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       "write a new session and redirect to bank details page" in {
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
@@ -917,7 +917,7 @@ class RegisterControllerSpec
     "handling changeReminders" must {
       def doRequest(): Future[PlayResult] = controller.changeReminder()(FakeRequest())
 
-      behave like commonEnrolmentAndSessionBehaviour(() ⇒ doRequest())
+      behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       "write a new session and redirect to bank details page" in {
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
@@ -943,7 +943,7 @@ class RegisterControllerSpec
         "email",
         HTSSession(eligibilityResult, Some("valid@email.com"), None)
       )
-      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" → "1st")
+      val fakeRequestWithNoBody = FakeRequest("POST", "/").withFormUrlEncodedBody("reminderFrequency" -> "1st")
 
       def doRequest(): Future[PlayResult] =
         controller.processReminderServiceRequest(Some("1st"), eligibilityInfo.userInfo.userInfo.nino, eligibilityInfo)(

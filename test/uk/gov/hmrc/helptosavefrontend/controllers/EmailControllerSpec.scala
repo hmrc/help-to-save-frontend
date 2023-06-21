@@ -331,10 +331,10 @@ class EmailControllerSpec
       def selectEmailSubmit(newEmail: Option[String]): Future[Result] =
         newEmail.fold(
           csrfAddToken(controller.selectEmailSubmit())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" → "Yes"))
-        ) { e ⇒
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes"))
+        ) { e =>
           csrfAddToken(controller.selectEmailSubmit())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" → "No", "new-email" → e)
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "No", "new-email" -> e)
           )
         }
 
@@ -504,10 +504,10 @@ class EmailControllerSpec
 
       def selectEmailSubmitReminder(newEmail: Option[String]): Future[Result] =
         newEmail.fold(
-          csrfAddToken(controller.selectEmailSubmitReminder())(fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" → "Yes"))
-        ) { e ⇒
+          csrfAddToken(controller.selectEmailSubmitReminder())(fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes"))
+        ) { e =>
           csrfAddToken(controller.selectEmailSubmitReminder())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" → "No", "new-email" → e)
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "No", "new-email" -> e)
           )
         }
 
@@ -874,7 +874,7 @@ class EmailControllerSpec
       val email = "email@test.com"
 
       def giveEmailSubmit(email: String): Future[Result] =
-        csrfAddToken(controller.giveEmailSubmit())(fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" → email))
+        csrfAddToken(controller.giveEmailSubmit())(fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> email))
 
       "handle Digital(new applicant) users with no valid session in mongo" in {
 
@@ -1568,7 +1568,7 @@ class EmailControllerSpec
 
       def confirmEmailErrorSubmit(continue: Boolean): Future[Result] =
         csrfAddToken(controller.confirmEmailErrorSubmit())(
-          fakeRequest.withMethod("POST").withFormUrlEncodedBody("radio-inline-group" → continue.toString)
+          fakeRequest.withMethod("POST").withFormUrlEncodedBody("radio-inline-group" -> continue.toString)
         )
 
       "handle Digital users and redirect to the email verify error page try later if there is no email for the user" in {

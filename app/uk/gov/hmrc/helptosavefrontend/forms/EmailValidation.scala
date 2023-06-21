@@ -44,10 +44,10 @@ class EmailValidation @Inject() (configuration: Configuration) {
   private def charactersBeforeAndAfterChar(c: Char)(s: String): Option[(Int, Int)] = {
     @tailrec
     def loop(chars: List[Char], count: Int): Option[(Int, Int)] = chars match {
-      case Nil ⇒ None
-      case h :: t ⇒
+      case Nil => None
+      case h :: t =>
         if (h === c) {
-          Some(count → t.length)
+          Some(count -> t.length)
         } else {
           loop(t, count + 1)
         }
@@ -73,14 +73,14 @@ class EmailValidation @Inject() (configuration: Configuration) {
       validatedFromBoolean(domainPart)(_.contains('.'), ErrorMessages.noDotSymbol)
 
     val hasTextAfterAtSymbolButBeforeDotCheck: ValidOrErrorStrings[String] = validatedFromBoolean(domainPart)(
-      { text ⇒
+      { text =>
         text.contains('.') && text.substring(0, text.indexOf('.')).length > 0
       },
       ErrorMessages.noTextAfterAtSymbolButBeforeDot
     )
 
     val hasTextAfterDotCheck: ValidOrErrorStrings[String] = validatedFromBoolean(domainPart)(
-      { text ⇒
+      { text =>
         text.contains('.') && text.substring(text.lastIndexOf('.') + 1).length > 0
       },
       ErrorMessages.noTextAfterDotSymbol
@@ -109,7 +109,7 @@ class EmailValidation @Inject() (configuration: Configuration) {
       domainLengthCheck,
       localBlankCheck,
       domainBlankCheck
-    ).mapN { case _ ⇒ trimmed }
+    ).mapN { case _ => trimmed }
   }
 
   val emailFormatter: Formatter[String] = new Formatter[String] {
@@ -121,7 +121,7 @@ class EmailValidation @Inject() (configuration: Configuration) {
       // previously this was returning a list of multiple errors on the same field
       // now the hierarchy of which single error to return is determined by the order
       // of the list returned by validate method
-      validation.toEither.leftMap(_.map(e ⇒ List(FormError(key, e))).head)
+      validation.toEither.leftMap(_.map(e => List(FormError(key, e))).head)
     }
 
     override def unbind(key: String, value: String): Map[String, String] =

@@ -35,16 +35,16 @@ object TestData {
 
     implicit val eligibilityCheckResponseGen: Gen[EligibilityCheckResponse] =
       for {
-        result ← AutoGen[EligibilityCheckResult]
-        threshold ← Gen.option(Gen.posNum[Double])
+        result <- AutoGen[EligibilityCheckResult]
+        threshold <- Gen.option(Gen.posNum[Double])
       } yield EligibilityCheckResponse(result, threshold)
 
     implicit val eligibilityGen: Gen[Eligible] = for {
-      reasonCode ← Gen.oneOf(6, 7, 8)
+      reasonCode <- Gen.oneOf(6, 7, 8)
     } yield Eligible(EligibilityCheckResponse(EligibilityCheckResult("", 1, "", reasonCode), Some(134.45)))
 
     implicit val ineligibilityGen: Gen[Ineligible] = for {
-      reasonCode ← Gen.oneOf(3, 4, 5, 9)
+      reasonCode <- Gen.oneOf(3, 4, 5, 9)
     } yield Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", reasonCode), Some(134.45)))
 
     implicit val ineligibilityReason5: Ineligible =
@@ -55,7 +55,7 @@ object TestData {
 
     implicit def ineligibilityReason4or9Gen(threshold: Option[Double]): Gen[Ineligible] =
       for {
-        reasonCode ← Gen.oneOf(4, 9)
+        reasonCode <- Gen.oneOf(4, 9)
       } yield Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", reasonCode), threshold))
 
     def randomEligibilityResponse() = sample(eligibilityCheckResponseGen)
@@ -90,7 +90,7 @@ object TestData {
       * Valid user details which will pass NSI validation checks
       */
     val (validUserInfo, nsiValidContactDetails, validNSIPayload) = {
-      val (forename, surname) = "Tyrion" → "Lannister"
+      val (forename, surname) = "Tyrion" -> "Lannister"
       val dateOfBirth = LocalDate.ofEpochDay(0L)
       val addressLine1 = "Casterly Rock"
       val addressLine2 = "The Westerlands"

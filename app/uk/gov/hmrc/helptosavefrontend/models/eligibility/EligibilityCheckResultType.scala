@@ -40,13 +40,13 @@ object EligibilityCheckResultType {
 
   implicit class Ops(val result: EligibilityCheckResultType) extends AnyVal {
     def fold[A](
-      ifEligible: EligibilityCheckResponse ⇒ A,
-      ifIneligible: EligibilityCheckResponse ⇒ A,
-      ifAlreadyHasAccount: EligibilityCheckResponse ⇒ A
+      ifEligible: EligibilityCheckResponse => A,
+      ifIneligible: EligibilityCheckResponse => A,
+      ifAlreadyHasAccount: EligibilityCheckResponse => A
     ): A = result match {
-      case Eligible(reason) ⇒ ifEligible(reason)
-      case Ineligible(reason) ⇒ ifIneligible(reason)
-      case AlreadyHasAccount(reason) ⇒ ifAlreadyHasAccount(reason)
+      case Eligible(reason) => ifEligible(reason)
+      case Ineligible(reason) => ifIneligible(reason)
+      case AlreadyHasAccount(reason) => ifAlreadyHasAccount(reason)
     }
   }
 

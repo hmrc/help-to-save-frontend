@@ -30,7 +30,7 @@ class UserDetailsSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPro
     "have a JSON Format instance" in {
       implicit val userInfoArb: Arbitrary[UserInfo] = Arbitrary(userInfoGen)
 
-      forAll { user: UserInfo ⇒
+      forAll { user: UserInfo =>
         val json = Json.toJson(user)
         Json.fromJson[UserInfo](json) shouldBe JsSuccess(user)
       }

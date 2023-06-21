@@ -46,11 +46,11 @@ class NSIPayloadSpec extends AnyWordSpec with Matchers {
         (json1 \ "dateOfBirth").get shouldBe JsString("12340506")
 
         // check the read will fail if the date is in the wrong format
-        val json2 = json1.as[JsObject] ++ Json.obj("dateOfBirth" → JsString("not a date"))
+        val json2 = json1.as[JsObject] ++ Json.obj("dateOfBirth" -> JsString("not a date"))
         Json.fromJson[NSIPayload](json2).isError shouldBe true
 
         // check that read will fail if the date is not a string
-        val json3 = json1.as[JsObject] ++ Json.obj("dateOfBirth" → JsNumber(0))
+        val json3 = json1.as[JsObject] ++ Json.obj("dateOfBirth" -> JsNumber(0))
         Json.fromJson[NSIPayload](json3).isError shouldBe true
       }
     }
@@ -180,7 +180,7 @@ class NSIPayloadSpec extends AnyWordSpec with Matchers {
         }
 
         "filters out country codes equal to the string 'other'" in {
-          Set("other", "OTHER", "Other").foreach { other ⇒
+          Set("other", "OTHER", "Other").foreach { other =>
             val ui: UserInfo = validUserInfo.copy(address = validUserInfo.address.copy(country = Some(other)))
             NSIPayload(ui, email, version, systemId).contactDetails.countryCode shouldBe None
           }

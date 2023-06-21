@@ -59,16 +59,16 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
 
   override def get(implicit reads: Reads[HTSSession], hc: HeaderCarrier): Result[Option[HTSSession]] =
     EitherT(hc.sessionId.map(_.value) match {
-      case Some(sessionId) ⇒
+      case Some(sessionId) =>
         val timerContext = metrics.sessionReadTimer.time()
         cacheRepository
           .findById(sessionId)
           .map {
-            maybeCache ⇒
+            maybeCache =>
               val response: OptionT[EitherStringOr, HTSSession] = for {
-                cache ← OptionT.fromOption[EitherStringOr](maybeCache)
-                data ← OptionT.fromOption[EitherStringOr][JsObject](Some(cache.data))
-                result ← OptionT.liftF[EitherStringOr, HTSSession](
+                cache <- OptionT.fromOption[EitherStringOr](maybeCache)
+                data <- OptionT.fromOption[EitherStringOr][JsObject](Some(cache.data))
+                result <- OptionT.liftF[EitherStringOr, HTSSession](
                           (data \ "htsSession")
                             .validate[HTSSession]
                             .asEither
@@ -83,13 +83,13 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
 
           }
           .recover {
-            case e ⇒
+            case e =>
               val _ = timerContext.stop()
               metrics.sessionReadErrorCounter.inc()
               Left(e.getMessage)
           }
 
-      case None ⇒
+      case None =>
         Left("can't query mongo dueto no sessionId in the HeaderCarrier")
     })
 
@@ -97,12 +97,12 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
 
     def doUpdate(newSession: HTSSession, oldSession: Option[HTSSession]): Future[Either[String, Unit]] =
       hc.sessionId.map(_.value) match {
-        case Some(sessionId) ⇒
+        case Some(sessionId) =>
           val timerContext = metrics.sessionStoreWriteTimer.time()
           val sessionToStore = oldSession.fold(
             newSession
           )(
-            existing ⇒
+            existing =>
               HTSSession(
                 eligibilityCheckResult = newSession.eligibilityCheckResult.orElse(existing.eligibilityCheckResult),
                 confirmedEmail = newSession.confirmedEmail.orElse(existing.confirmedEmail),
@@ -128,19 +128,19 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
                 Right(())
               }
             .recover {
-              case e ⇒
+              case e =>
                 val _ = timerContext.stop()
                 metrics.sessionStoreWriteErrorCounter.inc()
                 Left(e.getMessage)
             }
 
-        case None ⇒
+        case None =>
           Left("can't store HTSSession in mongo dueto no sessionId in the HeaderCarrier")
       }
 
     for {
-      oldSession ← get
-      result ← EitherT(doUpdate(newSession, oldSession))
+      oldSession <- get
+      result <- EitherT(doUpdate(newSession, oldSession))
     } yield result
 
   }

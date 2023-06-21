@@ -33,20 +33,20 @@ object IneligibilityReason {
 
   def fromIneligible(ineligible: Ineligible): Option[IneligibilityReason] =
     ineligible.value.eligibilityCheckResult.reasonCode match {
-      case 3 ⇒ Some(EntitledToWTCNoTCAndNoUC) // scalastyle:ignore magic.number
-      case 4 ⇒ Some(EntitledToWTCNoTCAndInsufficientUC) // scalastyle:ignore magic.number
-      case 5 ⇒ Some(NotEntitledToWTCAndUCInsufficient) // scalastyle:ignore magic.number
-      case 9 ⇒ Some(NotEntitledToWTCAndNoUC) // scalastyle:ignore magic.number
-      case _ ⇒ None
+      case 3 => Some(EntitledToWTCNoTCAndNoUC) // scalastyle:ignore magic.number
+      case 4 => Some(EntitledToWTCNoTCAndInsufficientUC) // scalastyle:ignore magic.number
+      case 5 => Some(NotEntitledToWTCAndUCInsufficient) // scalastyle:ignore magic.number
+      case 9 => Some(NotEntitledToWTCAndNoUC) // scalastyle:ignore magic.number
+      case _ => None
     }
 
   implicit val ineligibilityTypeEq: Eq[IneligibilityReason] = new Eq[IneligibilityReason] {
     override def eqv(x: IneligibilityReason, y: IneligibilityReason) = (x, y) match {
-      case (EntitledToWTCNoTCAndNoUC, EntitledToWTCNoTCAndNoUC) ⇒ true
-      case (EntitledToWTCNoTCAndInsufficientUC, EntitledToWTCNoTCAndInsufficientUC) ⇒ true
-      case (NotEntitledToWTCAndNoUC, NotEntitledToWTCAndNoUC) ⇒ true
-      case (NotEntitledToWTCAndUCInsufficient, NotEntitledToWTCAndUCInsufficient) ⇒ true
-      case _ ⇒ false
+      case (EntitledToWTCNoTCAndNoUC, EntitledToWTCNoTCAndNoUC) => true
+      case (EntitledToWTCNoTCAndInsufficientUC, EntitledToWTCNoTCAndInsufficientUC) => true
+      case (NotEntitledToWTCAndNoUC, NotEntitledToWTCAndNoUC) => true
+      case (NotEntitledToWTCAndUCInsufficient, NotEntitledToWTCAndUCInsufficient) => true
+      case _ => false
     }
   }
 

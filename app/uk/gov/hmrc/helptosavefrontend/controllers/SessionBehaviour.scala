@@ -29,11 +29,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait SessionBehaviour {
-  this: BaseController with Logging ⇒
+  this: BaseController with Logging =>
 
   val sessionStore: SessionStore
 
-  def checkSession(noSession: ⇒ Future[Result])(whenSession: HTSSession ⇒ Future[Result])(
+  def checkSession(noSession: => Future[Result])(whenSession: HTSSession => Future[Result])(
     implicit
     htsContext: HtsContextWithNINO,
     hc: HeaderCarrier,
@@ -43,7 +43,7 @@ trait SessionBehaviour {
   ): Future[Result] =
     sessionStore.get
       .semiflatMap(_.fold(noSession)(whenSession))
-      .leftMap { e ⇒
+      .leftMap { e =>
         logger.warn(s"Could not read sessions data from mongo due to : $e", htsContext.nino)
         internalServerError()
       }

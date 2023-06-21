@@ -38,7 +38,7 @@ object Logging {
     def warn(message: String, nino: NINO)(implicit transformer: NINOLogMessageTransformer): Unit =
       logger.warn(transformer.transform(message, nino))
 
-    def warn(message: String, e: ⇒ Throwable, nino: NINO)(implicit transformer: NINOLogMessageTransformer): Unit =
+    def warn(message: String, e: => Throwable, nino: NINO)(implicit transformer: NINOLogMessageTransformer): Unit =
       logger.warn(transformer.transform(message, nino), e)
   }
 }
@@ -51,10 +51,10 @@ trait NINOLogMessageTransformer {
 @Singleton
 class NINOLogMessageTransformerImpl @Inject() (configuration: Configuration) extends NINOLogMessageTransformer {
 
-  private val loggingPrefix: NINO ⇒ String =
-    if (configuration.underlying.getBoolean("nino-logging.enabled")) { nino ⇒
+  private val loggingPrefix: NINO => String =
+    if (configuration.underlying.getBoolean("nino-logging.enabled")) { nino =>
       s"For NINO [$nino]: "
-    } else { _ ⇒
+    } else { _ =>
       ""
     }
 

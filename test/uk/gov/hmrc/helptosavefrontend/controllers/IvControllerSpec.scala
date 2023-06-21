@@ -75,7 +75,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
 
   "GET /iv/journey-result" when {
 
-    def noSessionPutBehaviour(expectedRedirectURL: ⇒ String, ivServiceResponse: String): Unit =
+    def noSessionPutBehaviour(expectedRedirectURL: => String, ivServiceResponse: String): Unit =
       "redirect to the correct URL" in {
         inSequence {
           mockAuthWithNoRetrievals(AuthProvider)
@@ -87,7 +87,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
         redirectLocation(result) shouldBe Some(expectedRedirectURL)
       }
 
-    def sessionPutIVURLBehaviour(expectedRedirectURL: ⇒ String, ivServiceResponse: String): Unit = {
+    def sessionPutIVURLBehaviour(expectedRedirectURL: => String, ivServiceResponse: String): Unit = {
 
       "redirect to the correct URL if the write to session cache is successful" in {
         inSequence {
@@ -217,17 +217,17 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
 
     def testIndividualPage(
       name: String, // scalastyle:ignore method.length
-      getResult: () ⇒ Future[Result],
-      mockSessionCacheBehaviour: Option[() ⇒ Unit],
+      getResult: () => Future[Result],
+      mockSessionCacheBehaviour: Option[() => Unit],
       expectedUrl: Option[String],
       defaultUrl: Option[String]
-    )(successChecks: (Option[String], Future[Result]) ⇒ Unit): Unit =
+    )(successChecks: (Option[String], Future[Result]) => Unit): Unit =
       s"handling $name" must {
 
         s"show the correct $name page" in {
           mockSessionCacheBehaviour.fold(
             mockAuthWithNoRetrievals(AuthProvider)
-          ) { behaviour ⇒
+          ) { behaviour =>
             inSequence {
               mockAuthWithNoRetrievals(AuthProvider)
               behaviour()
@@ -278,93 +278,93 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
 
     testIndividualPage(
       "IV successful",
-      () ⇒ ivController.getIVSuccessful()(FakeRequest()),
-      Some(() ⇒ mockSessionStoreGet(Right(Some(HTSSession(None, None, None, None, Some(url)))))),
+      () => ivController.getIVSuccessful()(FakeRequest()),
+      Some(() => mockSessionStoreGet(Right(Some(HTSSession(None, None, None, None, Some(url)))))),
       Some(url),
       Some(ivController.eligibilityUrl)
-    ) { (maybeUrl, result) ⇒
+    ) { (maybeUrl, result) =>
       status(result) shouldBe OK
-      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      maybeUrl.foreach(u => contentAsStringWithAmpersandsEscaped(result) should include(u))
       contentAsString(result) should include("ve verified your identity")
     }
 
     testIndividualPage(
       "failed iv",
-      () ⇒ ivController.getFailedIV()(FakeRequest()),
-      Some(() ⇒ mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      () => ivController.getFailedIV()(FakeRequest()),
+      Some(() => mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
-    ) { (maybeUrl, result) ⇒
+    ) { (maybeUrl, result) =>
       status(result) shouldBe OK
-      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      maybeUrl.foreach(u => contentAsStringWithAmpersandsEscaped(result) should include(u))
       contentAsString(result) should include("You did not answer all the questions correctly")
     }
 
     testIndividualPage(
       "insufficient evidence",
-      () ⇒ ivController.getInsufficientEvidence()(FakeRequest()),
+      () => ivController.getInsufficientEvidence()(FakeRequest()),
       None,
       None,
       None
-    ) { (_, result) ⇒
+    ) { (_, result) =>
       status(result) shouldBe OK
       contentAsString(result) should include("be able to apply for a Help to Save account by phone, after")
     }
 
     testIndividualPage(
       "locked out",
-      () ⇒ ivController.getLockedOut()(FakeRequest()),
+      () => ivController.getLockedOut()(FakeRequest()),
       None,
       None,
       None
-    ) { (_, result) ⇒
+    ) { (_, result) =>
       status(result) shouldBe OK
       contentAsString(result) should include("You have tried to verify your identity too many times")
     }
 
     testIndividualPage(
       "user aborted",
-      () ⇒ ivController.getUserAborted()(FakeRequest()),
-      Some(() ⇒ mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      () => ivController.getUserAborted()(FakeRequest()),
+      Some(() => mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
-    ) { (maybeUrl, result) ⇒
+    ) { (maybeUrl, result) =>
       status(result) shouldBe OK
-      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      maybeUrl.foreach(u => contentAsStringWithAmpersandsEscaped(result) should include(u))
       contentAsString(result) should include("You have not provided enough information")
     }
 
     testIndividualPage(
       "timed out",
-      () ⇒ ivController.getTimedOut()(FakeRequest()),
-      Some(() ⇒ mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      () => ivController.getTimedOut()(FakeRequest()),
+      Some(() => mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
-    ) { (maybeUrl, result) ⇒
+    ) { (maybeUrl, result) =>
       status(result) shouldBe OK
-      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      maybeUrl.foreach(u => contentAsStringWithAmpersandsEscaped(result) should include(u))
       contentAsString(result) should include("Your session has ended")
     }
 
     testIndividualPage(
       "technical issue",
-      () ⇒ ivController.getTechnicalIssue()(FakeRequest()),
-      Some(() ⇒ mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
+      () => ivController.getTechnicalIssue()(FakeRequest()),
+      Some(() => mockSessionStoreGet(Right(Some(HTSSession(None, None, None, Some(url), None))))),
       Some(url),
       Some(ivController.defaultIVUrl)
-    ) { (maybeUrl, result) ⇒
+    ) { (maybeUrl, result) =>
       status(result) shouldBe OK
-      maybeUrl.foreach(u ⇒ contentAsStringWithAmpersandsEscaped(result) should include(u))
+      maybeUrl.foreach(u => contentAsStringWithAmpersandsEscaped(result) should include(u))
       contentAsString(result) should include("Something went wrong")
     }
 
     testIndividualPage(
       "precondition failed",
-      () ⇒ ivController.getPreconditionFailed()(FakeRequest()),
+      () => ivController.getPreconditionFailed()(FakeRequest()),
       None,
       None,
       None
-    ) { (_, result) ⇒
+    ) { (_, result) =>
       status(result) shouldBe OK
       contentAsString(result) should include("not able to use this service")
     }

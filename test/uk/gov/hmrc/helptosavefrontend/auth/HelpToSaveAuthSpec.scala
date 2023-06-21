@@ -54,15 +54,15 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
   val htsAuth = new HtsAuth
 
   private def actionWithNoEnrols =
-    htsAuth.authorisedForHts { _ ⇒ _⇒
+    htsAuth.authorisedForHts { _ => _=>
       Future.successful(Ok(""))
     }(routes.EligibilityCheckController.getCheckEligibility.url)
 
   private def actionWithEnrols =
-    htsAuth.authorisedForHtsWithInfo { _ ⇒ implicit htsContext ⇒
+    htsAuth.authorisedForHtsWithInfo { _ => implicit htsContext =>
       htsContext.userDetails match {
-        case Left(_) ⇒ Future.successful(InternalServerError(""))
-        case Right(userInfo) ⇒ Future.successful(Ok(Json.toJson(userInfo)))
+        case Left(_) => Future.successful(InternalServerError(""))
+        case Right(userInfo) => Future.successful(Ok(Json.toJson(userInfo)))
       }
     }(routes.EligibilityCheckController.getCheckEligibility.url)
 
@@ -116,7 +116,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
         ItmpAddress(Some("l1"), None, None, None, None, Some("postcode"), None, None),
         ItmpAddress(Some("l1"), Some("l2"), None, None, None, Some(""), None, None),
         ItmpAddress(Some("l1"), Some("l2"), None, None, None, None, None, None)
-      ).foreach { address ⇒
+      ).foreach { address =>
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(retrieval(address))
 
         val result = Await.result(actionWithEnrols(FakeRequest()), 5.seconds)
@@ -129,7 +129,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
       val exceptions = List("BearerTokenExpired", "MissingBearerToken", "InvalidBearerToken", "SessionRecordNotFound")
 
-      exceptions.foreach { error ⇒
+      exceptions.foreach { error =>
         mockAuthResultWithFail(fromString(error))
         val result = actionWithNoEnrols(FakeRequest())
         status(result) shouldBe Status.SEE_OTHER

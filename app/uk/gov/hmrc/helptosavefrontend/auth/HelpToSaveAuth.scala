@@ -43,12 +43,12 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging {
-  this: FrontendController ⇒
+  this: FrontendController =>
 
   val metrics: Metrics
   val appConfig: FrontendAppConfig
   implicit val transformer: NINOLogMessageTransformer
-  private type HtsAction[A <: HtsContext] = Request[AnyContent] ⇒ A ⇒ Future[Result]
+  private type HtsAction[A <: HtsContext] = Request[AnyContent] => A => Future[Result]
   private type RelativeURL = String
 
   def authorisedForHtsWithNINO(
@@ -57,8 +57,8 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino) {
-      case (mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, time) { nino ⇒
+      case (mayBeNino, request, time) =>
+        withNINO(mayBeNino, time) { nino =>
           action(request)(HtsContextWithNINO(authorised = true, nino))
         }(request)
     }(loginContinueURL)
@@ -69,8 +69,8 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Name and V2ItmpName and V2Nino) {
-      case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, time) { nino ⇒
+      case (maybeName ~ maybeItmpName ~ mayBeNino, request, time) =>
+        withNINO(mayBeNino, time) { nino =>
           val name = maybeItmpName.flatMap(_.givenName).orElse(maybeName.flatMap(_.name))
           action(request)(HtsContextWithNINOAndFirstName(authorised = true, nino, name))
         }(request)
@@ -82,17 +82,17 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(UserInfoRetrievals and V2Nino) {
-      case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, time) { nino ⇒
+      case (name ~ email ~ dateOfBirth ~ itmpName ~ itmpDateOfBirth ~ itmpAddress ~ mayBeNino, request, time) =>
+        withNINO(mayBeNino, time) { nino =>
           val userDetails = getUserInfo(nino, name, email, dateOfBirth, itmpName, itmpDateOfBirth, itmpAddress)
 
           userDetails.fold(
-            m ⇒
+            m =>
               logger.warn(
                 s"User details retrieval failed, missing details [${m.missingInfo.mkString(", ")}] ${timeString(time)}",
                 nino
               ),
-            _ ⇒ logger.debug(s"Successfully retrieved NINO and user details ${timeString(time)}", nino)
+            _ => logger.debug(s"Successfully retrieved NINO and user details ${timeString(time)}", nino)
           )
 
           action(request)(HtsContextWithNINOAndUserDetails(authorised = true, nino, userDetails))
@@ -105,7 +105,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(EmptyRetrieval, AuthProvider) {
-      case (_, request, _) ⇒
+      case (_, request, _) =>
         action(request)(HtsContext(authorised = true))
     }(loginContinueURL)
 
@@ -115,32 +115,32 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     loginContinueURL: RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
     authorised(V2Nino, AuthProvider) {
-      case (mayBeNino, request, time) ⇒
-        withNINO(mayBeNino, time) { nino ⇒
+      case (mayBeNino, request, time) =>
+        withNINO(mayBeNino, time) { nino =>
           action(request)(HtsContextWithNINO(authorised = true, nino))
         }(request)
     }(loginContinueURL)
 
   def unprotected(action: HtsAction[HtsContext])(implicit ec: ExecutionContext): Action[AnyContent] =
-    Action.async { implicit request ⇒
+    Action.async { implicit request =>
       authorised() {
         action(request)(HtsContext(authorised = true))
       }.recoverWith {
-        case _ ⇒
+        case _ =>
           action(request)(HtsContext(authorised = false))
       }
     }
 
   private def authorised[A](retrieval: Retrieval[A], predicate: Predicate = AuthWithCL200)(
-    toResult: (A, Request[AnyContent], Long) ⇒ Future[Result]
+    toResult: (A, Request[AnyContent], Long) => Future[Result]
   )(
-    loginContinueURL: ⇒ RelativeURL
+    loginContinueURL: => RelativeURL
   )(implicit maintenanceSchedule: MaintenanceSchedule, ec: ExecutionContext): Action[AnyContent] =
-    Action.async { implicit request ⇒
+    Action.async { implicit request =>
       val timer = metrics.authTimer.time()
 
       authorised(predicate)
-        .retrieve(retrieval) { a ⇒
+        .retrieve(retrieval) { a =>
           val time = timer.stop()
           maintenanceSchedule.endOfMaintenance() match {
             case Some(endMaintenance) => Future.failed(MaintenancePeriodException(endMaintenance))
@@ -154,7 +154,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     }
 
   private def withNINO[A](mayBeNino: Option[String], nanos: Long)(
-    action: NINO ⇒ Future[Result]
+    action: NINO => Future[Result]
   )(implicit request: Request[_]): Future[Result] =
     mayBeNino.fold {
       logger.warn(s"NINO retrieval failed ${timeString(nanos)}")
@@ -196,12 +196,12 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     val addressValidation: ValidOrMissingUserInfo[ItmpAddress] = {
       val missingContactDetails = Invalid(NonEmptyList.of(MissingUserInfo.Contact))
 
-      itmpAddress.fold[ValidOrMissingUserInfo[ItmpAddress]](missingContactDetails) { a ⇒
+      itmpAddress.fold[ValidOrMissingUserInfo[ItmpAddress]](missingContactDetails) { a =>
         val lineCount =
           List(a.line1, a.line2, a.line3, a.line4, a.line5)
             .map(_.map(_.trim))
             .filter(_.nonEmpty)
-            .collect { case Some(_) ⇒ () }
+            .collect { case Some(_) => () }
             .length
 
         if (lineCount < 2 || !a.postCode.exists(_.trim.nonEmpty)) {
@@ -215,12 +215,12 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
 
     val validation: ValidOrMissingUserInfo[UserInfo] =
       (givenNameValidation, surnameValidation, dateOfBirthValidation, addressValidation).mapN {
-        case (givenName, surname, jodaDob, address) ⇒
+        case (givenName, surname, jodaDob, address) =>
           UserInfo(givenName, surname, nino, jodaDob, email.filter(_.nonEmpty), Address(address))
       }
 
     validation
-      .leftMap(m ⇒ MissingUserInfos(m.toList.toSet, nino))
+      .leftMap(m => MissingUserInfos(m.toList.toSet, nino))
       .toEither
   }
 
@@ -230,19 +230,19 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
   def handleAuthFailure(loginContinueURL: RelativeURL, time: Long)(
     implicit request: Request[_]
   ): PartialFunction[Throwable, Result] = {
-    case _: NoActiveSession ⇒
+    case _: NoActiveSession =>
       toGGLogin(loginContinueURL)
 
-    case _: InsufficientConfidenceLevel | _: InsufficientEnrolments ⇒
+    case _: InsufficientConfidenceLevel | _: InsufficientEnrolments =>
       SeeOther(appConfig.ivUrl(loginContinueURL))
 
-    case MaintenancePeriodException(endTime: LocalDateTime) ⇒
+    case MaintenancePeriodException(endTime: LocalDateTime) =>
       SeeOther(routes.RegisterController.getServiceOutagePage(endTime.toString).url)
 
-    case _: UnsupportedAuthProvider ⇒
+    case _: UnsupportedAuthProvider =>
       SeeOther(routes.RegisterController.getCannotCheckDetailsPage.url)
 
-    case ex: AuthorisationException ⇒
+    case ex: AuthorisationException =>
       logger.warn(s"could not authenticate user due to: $ex ${timeString(time)}")
       internalServerError()
   }

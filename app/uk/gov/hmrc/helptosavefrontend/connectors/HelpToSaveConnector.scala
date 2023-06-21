@@ -112,7 +112,7 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   private def getAccountUrl(nino: String) = s"$helpToSaveUrl/help-to-save/$nino/account"
 
   private def getAccountQueryParams(correlationId: UUID): Map[String, String] =
-    Map("correlationId" → correlationId.toString, "systemId" → "help-to-save-frontend")
+    Map("correlationId" -> correlationId.toString, "systemId" -> "help-to-save-frontend")
 
   private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
 
@@ -138,13 +138,13 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
     )
 
   def enrolUser()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(enrolUserURL, emptyQueryParameters, _ ⇒ Right(()), "enrol users", identity)
+    handleGet(enrolUserURL, emptyQueryParameters, _ => Right(()), "enrol users", identity)
 
   def setITMPFlagAndUpdateMongo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(setITMPFlagURL, emptyQueryParameters, _ ⇒ Right(()), "set ITMP flag and update mongo", identity)
+    handleGet(setITMPFlagURL, emptyQueryParameters, _ => Right(()), "set ITMP flag and update mongo", identity)
 
   def storeEmail(email: Email)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handleGet(storeEmailURL, Map("email" -> new String(base64Encode(email))), _ ⇒ Right(()), "store email", identity)
+    handleGet(storeEmailURL, Map("email" -> new String(base64Encode(email))), _ => Right(()), "store email", identity)
 
   def getEmail()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Option[String]] =
     handleGet(getEmailURL, emptyQueryParameters, _.parseJSON[GetEmailResponse]().map(_.email), "get email", identity)
@@ -173,21 +173,21 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   private def handleGet[A, B](
     url: String,
     queryParameters: Map[String, String],
-    ifHTTP200: HttpResponse ⇒ Either[B, A],
-    description: ⇒ String,
-    toError: String ⇒ B
+    ifHTTP200: HttpResponse => Either[B, A],
+    description: => String,
+    toError: String => B
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
     handle(http.get(url, queryParameters), ifHTTP200, description, toError)
 
   private def handle[A, B](
     resF: Future[HttpResponse],
-    ifHTTP200: HttpResponse ⇒ Either[B, A],
-    description: ⇒ String,
-    toError: String ⇒ B
+    ifHTTP200: HttpResponse => Either[B, A],
+    description: => String,
+    toError: String => B
   )(implicit ec: ExecutionContext) =
     EitherT(
       resF
-        .map { response ⇒
+        .map { response =>
           if (response.status == 200) {
             ifHTTP200(response)
           } else {
@@ -199,22 +199,17 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
           }
         }
         .recover {
-          case NonFatal(t) ⇒ Left(toError(s"Call to $description failed: ${t.getMessage}"))
+          case NonFatal(t) => Left(toError(s"Call to $description failed: ${t.getMessage}"))
         }
     )
 
   // scalastyle:off magic.number
   private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResultType] =
     response.eligibilityCheckResult.resultCode match {
-      case 1 ⇒ Right(EligibilityCheckResultType.Eligible(response))
-      case 2 ⇒ Right(EligibilityCheckResultType.Ineligible(response))
-      case 3 ⇒ Right(EligibilityCheckResultType.AlreadyHasAccount(response))
-      case 4 ⇒
-        Left(
-          s"Error while checking eligibility. Received result code 4 ${response.eligibilityCheckResult.result}) " +
-            s"with reason code ${response.eligibilityCheckResult.reasonCode} (${response.eligibilityCheckResult.reason})"
-        )
-      case other ⇒ Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
+      case 1 => Right(EligibilityCheckResultType.Eligible(response))
+      case 2 | 4 => Right(EligibilityCheckResultType.Ineligible(response))
+      case 3 => Right(EligibilityCheckResultType.AlreadyHasAccount(response))
+      case other => Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
     }
 
   override def createAccount(

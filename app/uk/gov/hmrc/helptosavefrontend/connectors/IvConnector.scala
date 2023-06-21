@@ -46,11 +46,11 @@ class IvConnectorImpl @Inject() (http: HttpClient)(implicit val frontendAppConfi
       .get(frontendAppConfig.ivJourneyResultUrl(journeyId))
       .flatMap {
 
-        case r if r.status === OK ⇒
+        case r if r.status === OK =>
           val result = (r.json \ "result").as[String]
           IvSuccessResponse.fromString(result)
 
-        case r ⇒
+        case r =>
           logger.warn(
             s"Unexpected ${r.status} response getting IV journey status from identity-verification-frontend-service"
           )
@@ -58,7 +58,7 @@ class IvConnectorImpl @Inject() (http: HttpClient)(implicit val frontendAppConfi
 
       }
       .recoverWith {
-        case e: Exception ⇒
+        case e: Exception =>
           logger.warn("Error getting IV journey status from identity-verification-frontend-service", e)
           Some(IvErrorResponse(e))
       }

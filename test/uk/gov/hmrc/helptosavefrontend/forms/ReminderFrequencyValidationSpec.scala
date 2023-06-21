@@ -43,9 +43,9 @@ class ReminderFrequencyValidationSpec
       reminderFrequencyValidation: ReminderFrequencyValidation
     )(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
       val result: Either[Seq[FormError], String] =
-        reminderFrequencyValidation.reminderFrequencyFormatter.bind("key", Map("key" → value))
+        reminderFrequencyValidation.reminderFrequencyFormatter.bind("key", Map("key" -> value))
       if (log) logger.error(value + ": " + result.toString)
-      result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
+      result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s => FormError("key", s)), _ => value)
     }
 
     "validate against blank" in {

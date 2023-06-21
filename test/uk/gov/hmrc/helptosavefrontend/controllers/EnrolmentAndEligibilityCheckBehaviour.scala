@@ -37,7 +37,7 @@ import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
 
 trait EnrolmentAndEligibilityCheckBehaviour {
-  this: ControllerSpecWithGuiceApp with AuthSupport with SessionStoreBehaviourSupport ⇒
+  this: ControllerSpecWithGuiceApp with AuthSupport with SessionStoreBehaviourSupport =>
 
   val mockHelpToSaveService = mock[HelpToSaveService]
 
@@ -77,7 +77,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .expects(*, *)
       .returning(
         result
-          .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r ⇒ EitherT.fromEither[Future](r))
+          .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r => EitherT.fromEither[Future](r))
       )
   def mockGetAccount()(result: Either[String, Account]): Unit =
     (mockHelpToSaveService
@@ -121,9 +121,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .returning(EitherT.fromEither[Future](result))
 
   def commonEnrolmentAndSessionBehaviour(
-    getResult: () ⇒ Future[Result], // scalastyle:ignore method.length
-    mockSuccessfulAuth: () ⇒ Unit = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
-    mockNoNINOAuth: () ⇒ Unit = () ⇒ mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None),
+    getResult: () => Future[Result], // scalastyle:ignore method.length
+    mockSuccessfulAuth: () => Unit = () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval),
+    mockNoNINOAuth: () => Unit = () => mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(None),
     testRedirectOnNoSession: Boolean = true,
     testEnrolmentCheckError: Boolean = true,
     testRedirectOnNoEligibilityCheckResult: Boolean = true
@@ -155,7 +155,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     "redirect to NS&I if the user is already enrolled even if there is an " +
       "setting the ITMP flag" in {
-      def test(mockActions: ⇒ Unit): Unit = {
+      def test(mockActions: => Unit): Unit = {
         mockActions
         val result = getResult()
         status(result) shouldBe SEE_OTHER

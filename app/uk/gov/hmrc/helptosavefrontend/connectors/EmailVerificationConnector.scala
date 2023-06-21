@@ -68,30 +68,30 @@ class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metri
       templateId,
       Duration.ofMinutes(frontendAppConfig.linkTTLMinutes).toString,
       continueUrlWithParams,
-      Map("name" → firstName)
+      Map("name" -> firstName)
     )
 
     val timerContext = metrics.emailVerificationTimer.time()
 
     http
       .post[EmailVerificationRequest](frontendAppConfig.verifyEmailURL, verificationRequest)
-      .map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) ⇒
+      .map[Either[VerifyEmailError, Unit]] { (response: HttpResponse) =>
         val time = timerContext.stop()
 
         response.status match {
-          case OK | CREATED ⇒
+          case OK | CREATED =>
             logger.info(
               s"Email verification successfully triggered, received status ${response.status} " +
                 s"(round-trip time: ${nanosToPrettyString(time)})",
               nino
             )
             Right(())
-          case other ⇒
+          case other =>
             handleErrorStatus(other, response, time, nino)
         }
       }
       .recover {
-        case NonFatal(e) ⇒
+        case NonFatal(e) =>
           val time = timerContext.stop()
           metrics.emailVerificationErrorCounter.inc()
 
@@ -112,11 +112,11 @@ class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metri
     metrics.emailVerificationErrorCounter.inc()
 
     status match {
-      case BAD_REQUEST ⇒
+      case BAD_REQUEST =>
         logger.warn(s"Received status 400 (Bad Request) (round-trip time: ${nanosToPrettyString(time)})", nino)
         Left(OtherError)
 
-      case CONFLICT ⇒
+      case CONFLICT =>
         logger.info(
           "Email address already verified, received status 409 (Conflict) " +
             s"(round-trip time: ${nanosToPrettyString(time)})",
@@ -124,11 +124,11 @@ class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metri
         )
         Left(AlreadyVerified)
 
-      case SERVICE_UNAVAILABLE ⇒
+      case SERVICE_UNAVAILABLE =>
         logger.warn(s"Received status 503 (Service Unavailable) (round-trip time: ${nanosToPrettyString(time)})", nino)
         Left(OtherError)
 
-      case other ⇒
+      case other =>
         logger.warn(
           s"Received unexpected status $other from email verification" +
             s" body = ${maskNino(response.body)} (round-trip time: ${nanosToPrettyString(time)})",

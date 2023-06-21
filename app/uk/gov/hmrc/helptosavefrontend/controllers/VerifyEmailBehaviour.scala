@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
 trait VerifyEmailBehaviour extends Logging {
-  this: BaseController ⇒
+  this: BaseController =>
 
   val emailVerificationConnector: EmailVerificationConnector
 
@@ -40,9 +40,9 @@ trait VerifyEmailBehaviour extends Logging {
   def sendEmailVerificationRequest(
     email: String,
     firstName: String,
-    ifSuccess: ⇒ Result,
-    ifAlreadyVerifiedURL: EmailVerificationParams ⇒ String,
-    ifFailure: VerifyEmailError ⇒ Result,
+    ifSuccess: => Result,
+    ifAlreadyVerifiedURL: EmailVerificationParams => String,
+    ifFailure: VerifyEmailError => Result,
     isNewApplicant: Boolean
   )(
     implicit request: Request[AnyContent],
@@ -50,15 +50,15 @@ trait VerifyEmailBehaviour extends Logging {
     ec: ExecutionContext
   ): Future[Result] =
     emailVerificationConnector.verifyEmail(htsContext.nino, email, firstName, isNewApplicant).map {
-      case Right(_) ⇒ ifSuccess
-      case Left(AlreadyVerified) ⇒ SeeOther(ifAlreadyVerifiedURL(EmailVerificationParams(htsContext.nino, email)))
-      case Left(e) ⇒ ifFailure(e)
+      case Right(_) => ifSuccess
+      case Left(AlreadyVerified) => SeeOther(ifAlreadyVerifiedURL(EmailVerificationParams(htsContext.nino, email)))
+      case Left(e) => ifFailure(e)
     }
 
   def withEmailVerificationParameters(
     emailVerificationParams: String,
-    ifValid: EmailVerificationParams ⇒ EitherT[Future, String, Result],
-    ifInvalid: ⇒ EitherT[Future, String, Result]
+    ifValid: EmailVerificationParams => EitherT[Future, String, Result],
+    ifInvalid: => EitherT[Future, String, Result]
   )(path: String)(
     implicit request: Request[AnyContent],
     htsContext: HtsContextWithNINOAndUserDetails,
@@ -69,7 +69,7 @@ trait VerifyEmailBehaviour extends Logging {
   ): EitherT[Future, String, Result] =
     EmailVerificationParams.decode(emailVerificationParams) match {
 
-      case Failure(e) ⇒
+      case Failure(e) =>
         val nino = htsContext.nino
         logger.warn(
           "SuspiciousActivity: malformed redirect from email verification service back to HtS, " +
@@ -80,7 +80,7 @@ trait VerifyEmailBehaviour extends Logging {
         auditor.sendEvent(SuspiciousActivity(Some(nino), "malformed_redirect", path), nino)
         ifInvalid
 
-      case Success(params) ⇒
+      case Success(params) =>
         ifValid(params)
     }
 

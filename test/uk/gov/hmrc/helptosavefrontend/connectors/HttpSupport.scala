@@ -23,7 +23,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait HttpSupport { this: MockFactory with Matchers ⇒
+trait HttpSupport { this: MockFactory with Matchers =>
 
   val mockHttp: HttpClient = mock[HttpClient]
 
@@ -43,7 +43,7 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
          _: Seq[(String, String)],
          _: HttpReads[HttpResponse],
          h: HeaderCarrier,
-         _: ExecutionContext) ⇒
+         _: ExecutionContext) =>
           // use matchers here to get useful error messages when the following predicates
           // are not satisfied - otherwise it is difficult to tell in the logs what went wrong
           u shouldBe url
@@ -74,7 +74,7 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
           _: HttpReads[HttpResponse],
           h: HeaderCarrier,
           _: ExecutionContext
-        ) ⇒
+        ) =>
           u shouldBe url
           a shouldBe body
           h.extraHeaders shouldBe headers.toSeq

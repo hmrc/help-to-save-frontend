@@ -39,9 +39,9 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     def test(
       emailValidation: EmailValidation
     )(value: String)(expectedResult: Either[Set[String], Unit], log: Boolean = false): Unit = {
-      val result: Either[Seq[FormError], String] = emailValidation.emailFormatter.bind("key", Map("key" → value))
+      val result: Either[Seq[FormError], String] = emailValidation.emailFormatter.bind("key", Map("key" -> value))
       if (log) logger.error(value + ": " + result.toString)
-      result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s ⇒ FormError("key", s)), _ ⇒ value)
+      result.leftMap(_.toSet) shouldBe expectedResult.bimap(_.map(s => FormError("key", s)), _ => value)
     }
 
     def newValidation(
@@ -51,9 +51,9 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     ): EmailValidation =
       new EmailValidation(
         Configuration(
-          "email-validation.max-total-length" → maxTotalLength,
-          "email-validation.max-local-length" → maxLocalLength,
-          "email-validation.max-domain-length" → maxDomainLength
+          "email-validation.max-total-length" -> maxTotalLength,
+          "email-validation.max-local-length" -> maxLocalLength,
+          "email-validation.max-domain-length" -> maxDomainLength
         )
       )
 
@@ -67,7 +67,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     "validate against the configured max total length" in {
       val emailValidation = newValidation(maxTotalLength = 5)
 
-      forAll(genString(5), genString(5), genString(3)) { (l, d, c) ⇒
+      forAll(genString(5), genString(5), genString(3)) { (l, d, c) =>
         test(emailValidation)(s"$l@$d.$c")(Left(Set(totalTooLong)))
       }
     }
@@ -75,7 +75,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     "validate against the configured max local length" in {
       val emailValidation = newValidation(maxLocalLength = 5)
 
-      forAll(genString(6), genString(5), genString(3)) { (l, d, c) ⇒
+      forAll(genString(6), genString(5), genString(3)) { (l, d, c) =>
         test(emailValidation)(s"$l@$d.$c")(Left(Set(localTooLong)))
       }
     }
@@ -83,7 +83,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     "validate against the configured max domain length" in {
       val emailValidation = newValidation(maxDomainLength = 5)
 
-      forAll(genString(5), genString(6), genString(3)) { (l, d, c) ⇒
+      forAll(genString(5), genString(6), genString(3)) { (l, d, c) =>
         test(emailValidation)(s"$l@$d.$c")(Left(Set(domainTooLong)))
       }
     }
@@ -93,7 +93,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
 
       // test when there is no @ symbol
       forAll(Gen.identifier, Gen.identifier, Gen.identifier) {
-        case (l, d, c) ⇒
+        case (l, d, c) =>
           whenever(l.nonEmpty && d.nonEmpty && c.nonEmpty) {
             test(emailValidation)(s"$l$d.$c")(Left(Set(noAtSymbol)))
           }
@@ -103,7 +103,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     "validate against no characters before the '@' symbol" in {
       val emailValidation = newValidation()
 
-      forAll(Gen.identifier) { d ⇒
+      forAll(Gen.identifier) { d =>
         whenever(d.nonEmpty) {
           test(emailValidation)(s"@$d.com")(Left(Set(localTooShort)))
         }
@@ -113,7 +113,7 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     "validate against no characters after the '@' symbol" in {
       val emailValidation = newValidation()
 
-      forAll(Gen.identifier) { l ⇒
+      forAll(Gen.identifier) { l =>
         whenever(l.nonEmpty) {
           test(emailValidation)(s"$l@")(
             Left(Set(noDotSymbol))

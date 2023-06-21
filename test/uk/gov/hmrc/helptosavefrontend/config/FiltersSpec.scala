@@ -27,14 +27,14 @@ class FiltersSpec extends ControllerSpecWithGuiceAppPerTest {
   "Filters" must {
 
     "include the allowList filter if the allowList from config is non empty" in {
-      val config = Configuration("http-header-ip-allowlist" → List("1.2.3"))
+      val config = Configuration("http-header-ip-allowlist" -> List("1.2.3"))
 
       val filters = new Filters(config, allowListFilter, frontendFilters)
       filters.filters shouldBe Seq(allowListFilter)
     }
 
     "not include the allowList filter if the allowList from config is empty" in {
-      val config = Configuration("http-header-ip-allowlist" → List())
+      val config = Configuration("http-header-ip-allowlist" -> List())
 
       val filters = new Filters(config, allowListFilter, frontendFilters)
       filters.filters shouldBe Seq()

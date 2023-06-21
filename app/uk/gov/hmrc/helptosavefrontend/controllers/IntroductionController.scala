@@ -58,52 +58,52 @@ class IntroductionController @Inject() (
 
   private val baseUrl: String = frontendAppConfig.govUkURL
 
-  def timedOut(): Action[AnyContent] = unprotected{ implicit request ⇒
-    implicit htsContext ⇒
+  def timedOut(): Action[AnyContent] = unprotected{ implicit request =>
+    implicit htsContext =>
       Ok(timeOutView())
   }
 
-  def keepAlive(): Action[AnyContent] = unprotected { implicit request ⇒
-    implicit htsContext ⇒
+  def keepAlive(): Action[AnyContent] = unprotected { implicit request =>
+    implicit htsContext =>
       Ok("")
   }
 
-  def getAboutHelpToSave: Action[AnyContent] = unprotected { _ ⇒ _⇒
+  def getAboutHelpToSave: Action[AnyContent] = unprotected { _ => _=>
     SeeOther(baseUrl)
   }
 
-  def getEligibility: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
+  def getEligibility: Action[AnyContent] = unprotected { _ => _ =>
     SeeOther(s"$baseUrl/eligibility")
   }
 
-  def getHowTheAccountWorks: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
+  def getHowTheAccountWorks: Action[AnyContent] = unprotected { _ => _ =>
     SeeOther(baseUrl)
   }
 
-  def getHowWeCalculateBonuses: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
+  def getHowWeCalculateBonuses: Action[AnyContent] = unprotected { _ => _ =>
     SeeOther(s"$baseUrl/what-youll-get")
   }
 
-  def getApply: Action[AnyContent] = unprotected { _ ⇒ _ ⇒
+  def getApply: Action[AnyContent] = unprotected { _ => _ =>
     SeeOther(s"$baseUrl/how-to-apply")
   }
 
-  def showPrivacyPage: Action[AnyContent] = unprotected { implicit request ⇒ implicit htsContext ⇒
+  def showPrivacyPage: Action[AnyContent] = unprotected { implicit request => implicit htsContext =>
     Ok(privacyView())
   }
 
   def getHelpPage: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request ⇒ implicit htsContext ⇒
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       checkIfEnrolled(
         {
           // not enrolled
-          () ⇒
+          () =>
             SeeOther(routes.AccessAccountController.getNoAccountPage.url)
-        }, { e ⇒
+        }, { e =>
           logger.warn(s"Could not check enrolment: $e", htsContext.nino)
           internalServerError()
         },
-        () ⇒
+        () =>
           for {
             // get account
             account <- helpToSaveService.getAccount(htsContext.nino,UUID.randomUUID()).fold(
@@ -117,10 +117,10 @@ class IntroductionController @Inject() (
             accountNumber <-helpToSaveService
               .getAccountNumber()
               .fold(
-                e ⇒ {
+                e => {
                   logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
                   None
-                }, { accountNumber ⇒
+                }, { accountNumber =>
                   accountNumber.accountNumber
                 }
               )
