@@ -69,7 +69,7 @@ lazy val commonSettings = Seq(
     "-P:silencer:lineContentFilters=^\\w"    // Avoid '^\\w' warnings for Twirl template
   )
 ) ++
-  scalaSettings ++ publishingSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
+  scalaSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
 
 lazy val microservice = Project(appName, file("."))
   .settings(commonSettings: _*)

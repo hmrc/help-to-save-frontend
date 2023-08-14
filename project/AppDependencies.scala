@@ -24,7 +24,7 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"      %% "hmrc-mongo-test-play-28"     % "0.68.0"                           % "test",
     "org.scalatestplus"      %% "scalatestplus-scalacheck"    % "3.1.0.0-RC2"                      % "test",
     "org.scalatestplus"      %% "scalatestplus-mockito"       % "1.0.0-M2"                         % "test",
-    "org.scalamock"          %% "scalamock-scalatest-support" % "3.6.0"                            % "test",
+    "org.scalamock"          %% "scalamock"                   % "5.2.0"                            % "test",
     "com.miguno.akka"        %% "akka-mock-scheduler"         % "0.5.5"                            % "test",
     "uk.gov.hmrc"            %% "bootstrap-test-play-28"      % bootstrapBackendVersion            % "test",
     "com.vladsch.flexmark"    % "flexmark-all"                % "0.35.10"                          % "test"
