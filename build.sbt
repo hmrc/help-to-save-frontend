@@ -62,7 +62,6 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
 }
 
 lazy val commonSettings = Seq(
-  addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"),
   scalacOptions ++= Seq(
     "-Xcheckinit",
     "-feature",
