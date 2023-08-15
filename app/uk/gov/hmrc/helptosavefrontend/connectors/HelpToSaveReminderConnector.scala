@@ -68,20 +68,21 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
   override def cancelHtsUserReminders(
     cancelHtsUserReminder: CancelHtsUserReminder
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handlePostCancel(cancelHtsReminderURL, cancelHtsUserReminder, _ => Right(()), "cancel reminder", identity)
+    for {
+      response <-
+        EitherT(
+          http.post(cancelHtsReminderURL, cancelHtsUserReminder)
+            .map(Right(_))
+            .recover { case NonFatal(t) => Left(s"Call to 'cancel reminder' failed: ${t.getMessage}") })
+      result <- response.status match {
+        case Status.OK | Status.NOT_MODIFIED => EitherT.rightT[Future, String]()
+        case _ => EitherT.leftT[Future, Unit](s"Call to 'cancel reminder' came back with status ${response.status}. Body was ${response.body}")
+      }
+    } yield result
 
   private def handlePost[A, B](
     url: String,
     body: HtsUserSchedule,
-    ifHTTP200: HttpResponse => Either[B, A],
-    description: => String,
-    toError: String => B
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): EitherT[Future, B, A] =
-    handle(http.post(url, body), ifHTTP200, description, toError)
-
-  private def handlePostCancel[A, B](
-    url: String,
-    body: CancelHtsUserReminder,
     ifHTTP200: HttpResponse => Either[B, A],
     description: => String,
     toError: String => B
