@@ -17,4 +17,4 @@ addSbtPlugin("org.irundaia.sbt" % "sbt-sassify" % "1.5.1")
 
 addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.0")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.4.10")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "3.1.3")

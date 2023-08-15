@@ -65,9 +65,6 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-Xcheckinit",
     "-feature",
-    "-P:silencer:lineContentFilters=^\\w"  ,    // Avoid '^\\w' warnings for Twirl template
-    "-Wconf:cat=unused-imports&src=html/.*:s",  // Silence import warnings in Twirl files
-    "-Wconf:src=routes/.*:s"                    // Silence all warnings in generated routes
   )
 ) ++
   scalaSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
@@ -93,8 +90,8 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= appDependencies
   )
   .settings(scalacOptions ++= List(
-    "-P:silencer:pathFilters=html",
-    "-P:silencer:pathFilters=routes"
+    "-Wconf:cat=unused-imports&src=html/.*:s", // Silence import warnings in Twirl files
+    "-Wconf:src=routes/.*:s" // Silence all warnings in generated routes
   ))
   .settings(
     formatMessageQuotes := {
