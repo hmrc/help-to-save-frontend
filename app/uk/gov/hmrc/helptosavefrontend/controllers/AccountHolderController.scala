@@ -41,6 +41,7 @@ import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
 import uk.gov.hmrc.helptosavefrontend.views.html.email.{update_email_address, we_updated_your_email}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 

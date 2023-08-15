@@ -30,6 +30,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import javax.inject.Singleton
 import play.api.mvc._
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino

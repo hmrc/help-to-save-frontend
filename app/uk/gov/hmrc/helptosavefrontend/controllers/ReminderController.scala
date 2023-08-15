@@ -37,6 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 import java.util.UUID
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import org.joda.time.LocalDate
 
