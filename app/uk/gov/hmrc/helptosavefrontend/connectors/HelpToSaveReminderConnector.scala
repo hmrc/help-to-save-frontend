@@ -81,13 +81,13 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private def handle[B](
     resF: Future[HttpResponse],
-    ifHTTP200: HttpResponse => Either[String, B],
+    ifHTTP200or404: HttpResponse => Either[String, B],
     description: => String
   )(implicit ec: ExecutionContext) =
     for {
       response <- toEitherT(description, resF)
       result <- response.status match {
-        case Status.OK | Status.NOT_FOUND => EitherT.fromEither[Future](ifHTTP200(response))
+        case Status.OK | Status.NOT_FOUND => EitherT.fromEither[Future](ifHTTP200or404(response))
         case _ => EitherT.leftT[Future, B](s"Call to $description came back with status ${response.status}. Body was ${response.body}")
       }
     } yield result
