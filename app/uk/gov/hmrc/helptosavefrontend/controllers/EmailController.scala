@@ -45,6 +45,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationPara
 import uk.gov.hmrc.helptosavefrontend.views.html.email._
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -93,24 +94,21 @@ class EmailController @Inject() (
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       def ifDigitalNewApplicant = { session: Option[HTSSession] =>
         withEligibleSession(
-          {
-            case (s, eligibleWithEmail) =>
-              val emailFormWithData = if (s.changingDetails) {
-                SelectEmailForm.selectEmailForm.copy(data = Map("new-email" -> ""))
+          (s, eligibleWithEmail) => {
+            val emailFormWithData = if (s.changingDetails) {
+              SelectEmailForm.selectEmailForm.copy(data = Map("new-email" -> ""))
+            } else {
+              if (!s.hasSelectedEmail) {
+                SelectEmailForm.selectEmailForm
               } else {
-                if (!s.hasSelectedEmail) {
-                  SelectEmailForm.selectEmailForm
-                } else {
-                  SelectEmailForm.selectEmailForm.copy(
-                    data = s.pendingEmail.fold(Map("new-email" -> ""))(e => Map("new-email" -> e))
-                  )
-                }
+                SelectEmailForm.selectEmailForm.copy(
+                  data = s.pendingEmail.fold(Map("new-email" -> ""))(e => Map("new-email" -> e))
+                )
               }
-              Ok(selectEmail(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
+            }
+            Ok(selectEmail(eligibleWithEmail.email, emailFormWithData, Some(backLinkFromSession(s))))
           },
-          { case _ =>
-            SeeOther(routes.EmailController.getGiveEmailPage.url)
-          }
+          (_,_) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(session)
       }
 
@@ -174,13 +172,11 @@ class EmailController @Inject() (
 
       def ifDigitalNewApplicant = { maybeSession: Option[HTSSession] =>
         withEligibleSession(
-          {
-            case (session, eligibleWithEmail) =>
+          (session, eligibleWithEmail) => {
               val backLink = backLinkFromSession(session)
               handleForm(eligibleWithEmail.email, Some(backLink), session)
-          }, {
-            case _ => SeeOther(routes.EmailController.getGiveEmailPage.url)
-          }
+          },
+          (_, _) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(maybeSession)
       }
 
@@ -205,12 +201,10 @@ class EmailController @Inject() (
   def getGiveEmailPage: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
       def ifDigitalNewApplicant = { session: Option[HTSSession] =>
-        withEligibleSession({
-          case _ => SeeOther(routes.EmailController.getSelectEmailPage.url)
-        }, {
-          case (s, _) =>
-            Ok(giveEmail(GiveEmailForm.giveEmailForm, Some(backLinkFromSession(s))))
-        })(session)
+        withEligibleSession(
+          (_, _) => SeeOther(routes.EmailController.getSelectEmailPage.url),
+          (s, _) => Ok(giveEmail(GiveEmailForm.giveEmailForm, Some(backLinkFromSession(s))))
+        )(session)
       }
 
       def ifDE = { _: Option[HTSSession] =>
@@ -254,11 +248,10 @@ class EmailController @Inject() (
           )
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
-        withEligibleSession({
-          case (s, _) => handleForm(s)
-        }, {
-          case (s, _) => handleForm(s)
-        })(session)
+        withEligibleSession(
+          (s, _) => handleForm(s),
+          (s, _) => handleForm(s)
+        )(session)
 
       def ifDE = { htsSession: Option[HTSSession] =>
         htsSession.fold[Future[Result]](
@@ -305,8 +298,7 @@ class EmailController @Inject() (
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession(
-          {
-            case (session, _) =>
+          (session, _) =>
               doUpdate(session.copy(confirmedEmail = None, pendingEmail = None)) {
                 //once email is confirmed and , if we were in the process of changing details then we should redirect user to check_details page
                 if (session.changingDetails) {
@@ -316,9 +308,8 @@ class EmailController @Inject() (
                 }  else {
                   SeeOther(routes.BankAccountController.getBankDetailsPage.url)
                 }
-              }
-          },
-          { case _ => SeeOther(routes.EmailController.getGiveEmailPage.url) }
+              },
+          (_,_) => SeeOther(routes.EmailController.getGiveEmailPage.url)
         )(session)
 
       def ifDE = { session: Option[HTSSession] =>
@@ -590,14 +581,14 @@ class EmailController @Inject() (
         )
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
-        withEligibleSession({
-          case (s, eligibleWithEmail) =>
+        withEligibleSession(
+          (s, eligibleWithEmail) =>
             s.pendingEmail.fold[Future[Result]](
               internalServerError()
             ) { pendingEmail =>
               sendVerificationRequest(pendingEmail, eligibleWithEmail.userInfo)
             }
-        })(session)
+        )(session)
 
       def ifDE = { session: Option[HTSSession] =>
         {
@@ -620,13 +611,12 @@ class EmailController @Inject() (
       }
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
-    }(loginContinueURL = routes.EmailController.confirmEmail.url)
+    }(routes.EmailController.confirmEmail.url)
 
   def confirmEmailError: Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
-      def ifDigitalNewApplicant(session: Option[HTSSession]) =
-        withEligibleSession {
-          case (_, eligible) =>
+      def ifDigitalNewApplicant(session: Option[HTSSession])=
+        withEligibleSession ((_, eligible) =>
             eligible.userInfo.email.fold(
               SeeOther(routes.EmailController.confirmEmailErrorTryLater.url)
             )(
@@ -639,7 +629,7 @@ class EmailController @Inject() (
                   )
                 )
             )
-        }(session)
+          )(session)
 
       def ifDE = { _: Option[HTSSession] =>
         {
@@ -662,7 +652,7 @@ class EmailController @Inject() (
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-    }(loginContinueURL = routes.EmailController.confirmEmailError.url)
+    }(routes.EmailController.confirmEmailError.url)
 
   def confirmEmailErrorTryLater: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
@@ -699,17 +689,17 @@ class EmailController @Inject() (
         )
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
-        withEligibleSession {
-          case (_, eligible) =>
+        withEligibleSession (
+          (_, eligible) =>
             handleForm(eligible.userInfo.email, true)
-        }(session)
+        )(session)
 
       def ifDE =
         (session: Option[HTSSession]) => handleForm(session.flatMap(_.confirmedEmail), false)
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
-    }(loginContinueURL = routes.EmailController.confirmEmailError.url)
+    }(routes.EmailController.confirmEmailError.url)
 
   val getLinkExpiredPage: Action[AnyContent] = authorisedForHtsWithNINO { implicit request => implicit htsContext =>
     Ok(linkExpired())
@@ -718,8 +708,7 @@ class EmailController @Inject() (
   def getEmailConfirmed: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
-        withEligibleSession {
-          case (s, eligible) =>
+        withEligibleSession ((s, eligible) =>
             s.confirmedEmail.fold[Future[Result]] {
               logger.warn("Could not find confirmed email", htsContext.nino)
               val url = eligible.userInfo.email.fold(routes.EmailController.confirmEmailErrorTryLater.url)(
@@ -727,7 +716,7 @@ class EmailController @Inject() (
               )
               toFuture(SeeOther(url))
             }(_ => Ok(emailUpdated()))
-        }(session)
+      )(session)
 
       def ifDE = SeeOther(routes.EmailController.getGiveEmailPage.url)
 
@@ -742,7 +731,7 @@ class EmailController @Inject() (
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ => ifDE, ifDigitalAccountHolder)
 
-    }(loginContinueURL = routes.EmailController.getEmailConfirmed.url)
+    }(routes.EmailController.getEmailConfirmed.url)
 
   def getEmailUpdated: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
@@ -750,10 +739,10 @@ class EmailController @Inject() (
         email.fold[Future[Result]](SeeOther(routes.EmailController.getGiveEmailPage.url))(_ => Ok(emailUpdated()))
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
-        withEligibleSession {
-          case (_, eligible) =>
+        withEligibleSession (
+          (_, eligible) =>
             handle(eligible.userInfo.email)
-        }(session)
+        )(session)
 
       def ifDE = SeeOther(routes.EmailController.getGiveEmailPage.url)
 
@@ -765,7 +754,7 @@ class EmailController @Inject() (
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ => ifDE, ifDigitalAccountHolder)
 
-    }(loginContinueURL = routes.EmailController.getEmailUpdated().url)
+    }(routes.EmailController.getEmailUpdated().url)
 
   def emailUpdatedSubmit: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => _=>
