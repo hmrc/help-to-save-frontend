@@ -1,8 +1,7 @@
-import sbt.{Compile, taskKey, _}
+import sbt.{Compile, taskKey, *}
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.*
 import wartremover.{WartRemover, Warts}
-
 import scala.language.postfixOps
 
 val appName = "help-to-save-frontend"
@@ -37,7 +36,18 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
     Wart.Nothing,
     Wart.Overloading,
     Wart.ToString,
-    Wart.Var
+    Wart.Var,
+    Wart.ListAppend,
+    Wart.AsInstanceOf,
+    Wart.PlatformDefault,
+    Wart.NonUnitStatements,
+    Wart.Equals,
+    Wart.JavaSerializable,
+    Wart.StringPlusAny,
+    Wart.SeqApply,
+    Wart.Any,
+    Wart.Product,
+    Wart.Serializable
   )
 
   Seq(
