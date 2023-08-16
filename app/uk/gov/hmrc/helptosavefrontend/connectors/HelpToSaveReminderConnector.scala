@@ -57,8 +57,6 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private val emailUpdateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-email"
 
-  private val emptyQueryParameters: Map[String, String] = Map.empty[String, String]
-
   override def updateHtsUser(htsUser: HtsUserSchedule)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
     handle(http.post(updateHtsReminderURL, htsUser), _.parseJSON[HtsUserSchedule](), "update htsUser")
 
