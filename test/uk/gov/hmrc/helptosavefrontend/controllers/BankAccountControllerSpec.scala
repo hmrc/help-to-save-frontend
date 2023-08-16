@@ -21,7 +21,7 @@ import cats.instances.future._
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}

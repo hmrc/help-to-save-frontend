@@ -33,7 +33,7 @@ class MaintenanceSchedule @Inject() (implicit frontendAppConfig: FrontendAppConf
 case class Schedule(times: Seq[Maintenance]) {
   def endOfMaintenance(now: LocalDateTime): Option[LocalDateTime] = {
     val current = times.filter(m => now.isAfter(m.start) && now.isBefore(m.end))
-    current.map(_.end).minByOption(-_.atZone(Schedule.londonZone).toEpochSecond)
+    current.map(_.end).maxByOption(_.atZone(Schedule.londonZone).toEpochSecond)
   }
 }
 
