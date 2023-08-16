@@ -63,8 +63,10 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
   override def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUserSchedule] =
     handle(http.get(getHtsReminderUserURL(nino)), _.parseJSON[HtsUserSchedule](), "get hts user")
 
-  private def toEitherT[T](endpoint : String, future : Future[T])(implicit ec : ExecutionContext): EitherT[Future, String, T] =
-    EitherT(future.map(Right(_)).recover { case NonFatal(t) => Left(s"Call to $endpoint failed: ${t.getMessage}") })
+  override def updateReminderEmail(
+      updateReminderEmail: UpdateReminderEmail
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
+    handle(http.post(emailUpdateHtsReminderURL, updateReminderEmail), _ => Right(()), "update email")
 
   override def cancelHtsUserReminders(
     cancelHtsUserReminder: CancelHtsUserReminder
@@ -76,6 +78,9 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
         case _ => EitherT.leftT[Future, Unit](s"Call to 'cancel reminder' came back with status ${response.status}. Body was ${response.body}")
       }
     } yield result
+
+  private def toEitherT[T](endpoint : String, future : Future[T])(implicit ec : ExecutionContext): EitherT[Future, String, T] =
+    EitherT(future.map(Right(_)).recover { case NonFatal(t) => Left(s"Call to $endpoint failed: ${t.getMessage}") })
 
   private def handle[B](
     resF: Future[HttpResponse],
@@ -89,10 +94,5 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
         case _ => EitherT.leftT[Future, B](s"Call to $description came back with status ${response.status}. Body was ${response.body}")
       }
     } yield result
-
-  override def updateReminderEmail(
-    updateReminderEmail: UpdateReminderEmail
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
-    handle(http.post(emailUpdateHtsReminderURL, updateReminderEmail), _ => Right(()), "update email")
 
 }
