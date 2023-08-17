@@ -58,7 +58,7 @@ class AccessAccountControllerSpec
         (mockAuthConnector
           .authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
           .expects(EmptyPredicate, EmptyRetrieval, *, *)
-          .returning(Future.successful(Unit))
+          .returning(Future.successful())
 
         val result = controller.getSignInPage()(FakeRequest())
         status(result) shouldBe SEE_OTHER

@@ -68,7 +68,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
         (htsConnector
           .setITMPFlagAndUpdateMongo()(_: HeaderCarrier, _: ExecutionContext))
           .expects(*, *)
-          .returning(EitherT.pure(Unit))
+          .returning(EitherT.pure())
 
         val result = htsService.setITMPFlagAndUpdateMongo()
         result.value.futureValue.isRight should be(true)
@@ -84,7 +84,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
         (htsConnector
           .storeEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
           .expects(email, *, *)
-          .returning(EitherT.pure(Unit))
+          .returning(EitherT.pure())
 
         val result = htsService.storeConfirmedEmail(email)
         result.value.futureValue.isRight should be(true)
