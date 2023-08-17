@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.mockito.ArgumentMatchersSugar.*
 import play.api.mvc.Result
 import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.connectors.{HelpToSaveConnector, HelpToSaveReminderConnector}
@@ -31,10 +32,8 @@ import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, Ht
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
-import uk.gov.hmrc.http.HeaderCarrier
 
-import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 trait EnrolmentAndEligibilityCheckBehaviour {
   this: ControllerSpecWithGuiceApp with AuthSupport with SessionStoreBehaviourSupport =>
@@ -66,24 +65,14 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val cancelHtsUserReminder = CancelHtsUserReminder(nino2)
 
   def mockEnrolmentCheck()(result: Either[String, EnrolmentStatus]): Unit =
-    (mockHelpToSaveService
-      .getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
-      .returning(EitherT.fromEither[Future](result))
+    mockHelpToSaveService.getUserEnrolmentStatus()(*, *) returns (EitherT.fromEither[Future](result))
 
   def mockWriteITMPFlag(result: Option[Either[String, Unit]]): Unit =
-    (mockHelpToSaveService
-      .setITMPFlagAndUpdateMongo()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
-      .returning(
-        result
-          .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r => EitherT.fromEither[Future](r))
-      )
+    mockHelpToSaveService.setITMPFlagAndUpdateMongo()(*, *) returns result
+      .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r => EitherT.fromEither[Future](r))
+
   def mockGetAccount()(result: Either[String, Account]): Unit =
-    (mockHelpToSaveService
-      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, *, *, *)
-      .returning(EitherT.fromEither[Future](result))
+    mockHelpToSaveService.getAccount(nino, *)( *, *) returns EitherT.fromEither[Future](result)
 
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))
@@ -91,34 +80,19 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   def mockCreateAccount(
     createAccountRequest: CreateAccountRequest
   )(response: Either[SubmissionFailure, SubmissionSuccess]): Unit =
-    (mockHelpToSaveService
-      .createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(createAccountRequest, *, *)
-      .returning(EitherT.fromEither[Future](response))
+    mockHelpToSaveService.createAccount(createAccountRequest)(*, *) returns EitherT.fromEither[Future](response)
 
   def mockGetAccountNumber()(result: Either[String, AccountNumber]): Unit =
-    (mockHelpToSaveConnector
-      .getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
-      .returning(EitherT.fromEither[Future](result))
+    mockHelpToSaveConnector.getAccountNumber()(*, *) returns (EitherT.fromEither[Future](result))
 
   def mockGetAccountNumberFromService()(result: Either[String, AccountNumber]): Unit =
-    (mockHelpToSaveService
-      .getAccountNumber()(_: HeaderCarrier, _: ExecutionContext))
-      .expects(*, *)
-      .returning(EitherT.fromEither[Future](result))
+    mockHelpToSaveService.getAccountNumber()(*, *) returns EitherT.fromEither[Future](result)
 
   def mockGetHtsUserReminders(nino:String)(result: Either[String, HtsUserSchedule]): Unit =
-    (mockHelpToSaveReminderConnector
-      .getHtsUser(_: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, *, *)
-      .returning(EitherT.fromEither[Future](result))
+    mockHelpToSaveReminderConnector.getHtsUser(nino)(*, *) returns EitherT.fromEither[Future](result)
 
   def mockCancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
-    (mockHelpToSaveReminderConnector
-      .cancelHtsUserReminders(_: CancelHtsUserReminder)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(cancelHtsUserReminder, *, *)
-      .returning(EitherT.fromEither[Future](result))
+    mockHelpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)(*, *) returns EitherT.fromEither[Future](result)
 
   def commonEnrolmentAndSessionBehaviour(
     getResult: () => Future[Result], // scalastyle:ignore method.length
@@ -130,10 +104,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   ): Unit = {
 
     "redirect to NS&I if the user is already enrolled" in {
-      inSequence {
         mockSuccessfulAuth()
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = true)))
-      }
 
       val result = getResult()
       status(result) shouldBe SEE_OTHER
@@ -142,11 +114,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     "redirect to NS&I if the user is already enrolled and set the ITMP flag " +
       "if it has not already been set" in {
-      inSequence {
         mockSuccessfulAuth()
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
         mockWriteITMPFlag(Right(()))
-      }
 
       val result = getResult()
       status(result) shouldBe SEE_OTHER
@@ -162,13 +132,13 @@ trait EnrolmentAndEligibilityCheckBehaviour {
         redirectLocation(result) shouldBe Some(appConfig.nsiManageAccountUrl)
       }
 
-      test(inSequence {
+      test({
         mockSuccessfulAuth()
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
         mockWriteITMPFlag(Left(""))
       })
 
-      test(inSequence {
+      test({
         mockSuccessfulAuth()
         mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
         mockWriteITMPFlag(None)
@@ -177,11 +147,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     if (testRedirectOnNoSession) {
       "redirect to the eligibility checks if there is no session data for the user" in {
-        inSequence {
           mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(None))
-        }
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
@@ -191,11 +159,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     if (testRedirectOnNoEligibilityCheckResult) {
       "redirect to the eligibility checks if there is no eligibility check result in the session data for the user" in {
-        inSequence {
           mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
-        }
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
@@ -207,10 +173,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
       if (testEnrolmentCheckError) {
         "there is an error getting the enrolment status" in {
-          inSequence {
             mockSuccessfulAuth()
             mockEnrolmentCheck()(Left(""))
-          }
           checkIsTechnicalErrorPage(getResult())
         }
       }
@@ -222,11 +186,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       }
 
       "there is an error getting the session data" in {
-        inSequence {
           mockSuccessfulAuth()
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Left(""))
-        }
 
         checkIsTechnicalErrorPage(getResult())
       }

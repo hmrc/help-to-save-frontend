@@ -18,8 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.util.UUID
 import akka.util.Timeout
-import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
 import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.INTERNAL_SERVER_ERROR
@@ -32,11 +30,9 @@ import play.api.test.Helpers.contentAsString
 import play.api.{Application, Configuration, Environment}
 import play.filters.csrf.CSRFAddToken
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
-import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.SessionId
-import uk.gov.hmrc.integration.servicemanager.ServiceManagerClient.system
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -81,12 +77,6 @@ trait ControllerSpecWithGuiceApp extends ControllerSpecBase with GuiceOneAppPerS
 
   val commonDependencies = injector.instanceOf(classOf[CommonPlayDependencies])
   val csrfAddToken: CSRFAddToken = injector.instanceOf[play.filters.csrf.CSRFAddToken]
-
-  override val mockMetrics = new Metrics(stub[PlayMetrics]) {
-    override def timer(name: String): Timer = new Timer()
-
-    override def counter(name: String): Counter = new Counter()
-  }
 
   private lazy val technicalErrorPageContent: String =
     injector.instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body

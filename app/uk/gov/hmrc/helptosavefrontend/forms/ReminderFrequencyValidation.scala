@@ -20,15 +20,13 @@ import cats.data.Validated.Valid
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
-import com.google.inject.Inject
 import play.api.data.Forms.text
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.ReminderFrequencyValidation.{ErrorMessages, StringOps}
 import uk.gov.hmrc.helptosavefrontend.util.Validation.{ValidOrErrorStrings, invalid}
 
-class ReminderFrequencyValidation @Inject() (configuration: FrontendAppConfig) {
+class ReminderFrequencyValidation {
 
   val reminderFrequencyFormatter: Formatter[String] = new Formatter[String] {
 

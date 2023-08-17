@@ -5,6 +5,7 @@ import wartremover.{WartRemover, Warts}
 import scala.language.postfixOps
 
 val appName = "help-to-save-frontend"
+val silencerVersion = "1.7.13"
 
 lazy val appDependencies: Seq[ModuleID] = Seq(ws) ++ AppDependencies.compile ++ AppDependencies.test
 
@@ -64,12 +65,7 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
       Wart.PublicInference
     ),
     (Compile / compile / wartremoverExcluded) ++=
-      (Compile / routes).value ++
-        ignoreFiles(baseDirectory.value) ++
-        (baseDirectory.value ** "*.sc").get ++
-        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala") ++
-        (baseDirectory.value / "app" / "uk" / "gov" / "hmrc" / "helptosavefrontend" / "config").get
-  )
+      (Compile / routes).value)
 }
 
 lazy val commonSettings = Seq(
@@ -101,9 +97,13 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies ++= appDependencies
   )
   .settings(scalacOptions ++= List(
-    "-Wconf:cat=unused-imports&src=html/.*:s", // Silence import warnings in Twirl files
-    "-Wconf:src=routes/.*:s" // Silence all warnings in generated routes
-  ))
+    "-P:silencer:pathFilters=routes;views"
+  ),
+    libraryDependencies ++= Seq(
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    )
+  )
   .settings(
     formatMessageQuotes := {
       import sys.process._

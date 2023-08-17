@@ -16,11 +16,9 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
-import java.time.LocalDate
-import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
+import org.mockito.ArgumentMatchersSugar.*
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
@@ -30,11 +28,13 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validNSIPayload
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber}
 import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
-import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.{SubmissionFailure, SubmissionSuccess}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.time.LocalDate
+import java.util.UUID
+import scala.concurrent.Future
+import scala.language.postfixOps
 
 // scalastyle:off magic.number
 class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures {
@@ -51,10 +51,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
 
-        (htsConnector
-          .getUserEnrolmentStatus()(_: HeaderCarrier, _: ExecutionContext))
-          .expects(*, *)
-          .returning(EitherT.pure(EnrolmentStatus.Enrolled(true)))
+        htsConnector.getUserEnrolmentStatus()(*, *) returns EitherT.pure(EnrolmentStatus.Enrolled(true))
 
         val result = htsService.getUserEnrolmentStatus()
         result.value.futureValue should be(Right(EnrolmentStatus.Enrolled(true)))
@@ -65,10 +62,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
 
-        (htsConnector
-          .setITMPFlagAndUpdateMongo()(_: HeaderCarrier, _: ExecutionContext))
-          .expects(*, *)
-          .returning(EitherT.pure())
+        htsConnector.setITMPFlagAndUpdateMongo()(*, *) returns EitherT.pure()
 
         val result = htsService.setITMPFlagAndUpdateMongo()
         result.value.futureValue.isRight should be(true)
@@ -81,10 +75,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
 
-        (htsConnector
-          .storeEmail(_: String)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(email, *, *)
-          .returning(EitherT.pure())
+        htsConnector.storeEmail(email)(*, *) returns EitherT.pure()
 
         val result = htsService.storeConfirmedEmail(email)
         result.value.futureValue.isRight should be(true)
@@ -95,10 +86,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
 
-        (htsConnector
-          .getEmail()(_: HeaderCarrier, _: ExecutionContext))
-          .expects(*, *)
-          .returning(EitherT.pure(None))
+        htsConnector.getEmail()(*, *) returns EitherT.pure(None)
 
         val result = htsService.getConfirmedEmail()
         result.value.futureValue.isRight should be(true)
@@ -111,20 +99,14 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
         val eligibilityCheckResult = randomEligibility()
 
-        (htsConnector
-          .getEligibility()(_: HeaderCarrier, _: ExecutionContext))
-          .expects(*, *)
-          .returning(EitherT.pure(eligibilityCheckResult))
+        htsConnector.getEligibility()(*, *) returns EitherT.pure(eligibilityCheckResult)
 
         val result = htsService.checkEligibility()
         result.value.futureValue should be(Right(eligibilityCheckResult))
       }
 
       "return an unsuccessful response if the connector returns an unsuccessful response" in {
-        (htsConnector
-          .getEligibility()(_: HeaderCarrier, _: ExecutionContext))
-          .expects(*, *)
-          .returning(EitherT.fromEither[Future](Left("uh oh")))
+        htsConnector.getEligibility()(*, *) returns EitherT.fromEither[Future](Left("uh oh"))
 
         val result = htsService.checkEligibility()
         result.value.futureValue should be(Left("uh oh"))
@@ -136,12 +118,9 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       val createAccountRequest = CreateAccountRequest(validNSIPayload, 7)
 
       def mockCreateAccount(response: Option[HttpResponse]) =
-        (htsConnector
-          .createAccount(_: CreateAccountRequest)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(createAccountRequest, *, *)
-          .returning(
+        htsConnector.createAccount(createAccountRequest)(*, *) returns
             response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
-          )
+
 
       "return a CREATED response along with the account number when a new account has been created" in {
         mockCreateAccount(Some(HttpResponse(201, Json.parse("""{"accountNumber" : "1234567890123"}"""),emptyHeaders)))
@@ -194,12 +173,8 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       val nsiPayload = validNSIPayload
 
       def mockUpdateEmail(response: Option[HttpResponse]) =
-        (htsConnector
-          .updateEmail(_: NSIPayload)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(nsiPayload, *, *)
-          .returning(
-            response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
-          )
+        htsConnector.updateEmail(nsiPayload)(*, *) returns response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
+
 
       "return a success response" in {
 
@@ -229,10 +204,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
     "checking if isAccountCreationAllowed" must {
       "return user cap response" in {
-        (htsConnector
-          .isAccountCreationAllowed()(_: HeaderCarrier, _: ExecutionContext))
-          .expects(*, *)
-          .returning(EitherT.pure(UserCapResponse()))
+        htsConnector.isAccountCreationAllowed()(*, *) returns EitherT.pure(UserCapResponse())
 
         val result = htsService.isAccountCreationAllowed()
         result.value.futureValue should be(Right(UserCapResponse()))
@@ -246,10 +218,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
         val account =
           Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
-        (htsConnector
-          .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(nino, correlationId, *, *)
-          .returning(EitherT.pure(account))
+        htsConnector.getAccount(nino, correlationId)(*, *) returns EitherT.pure(account)
 
         val result = htsService.getAccount(nino, correlationId)
         result.value.futureValue should be(Right(account))
@@ -260,10 +229,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       val request = ValidateBankDetailsRequest("AE123456C", "123456", "01023456")
 
       def mockValidateBankDetails(request: ValidateBankDetailsRequest)(response: HttpResponse) =
-        (htsConnector
-          .validateBankDetails(_: ValidateBankDetailsRequest)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(request, *, *)
-          .returning(Future.successful(response))
+        htsConnector.validateBankDetails(request)(*, *) returns Future.successful(response)
 
       "return a successful response" in {
         mockValidateBankDetails(request)(

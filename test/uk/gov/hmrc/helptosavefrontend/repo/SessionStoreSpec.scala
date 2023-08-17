@@ -32,8 +32,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.repo
 
-import java.util.UUID
-
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -41,12 +39,10 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.Ineligible
-import uk.gov.hmrc.helptosavefrontend.repo.SessionStoreImpl
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.test.MongoSupport
 
+import java.util.UUID
 import scala.concurrent.duration._
 
 class SessionStoreSpec
@@ -82,7 +78,7 @@ class SessionStoreSpec
   }
 
   "The SessionStore" should {
-
+    //toedit
     "be able to insert and read a new HTSSession into mongo" in new TestApparatus {
 
       forAll(htsSessionGen) { htsSession =>
@@ -96,7 +92,7 @@ class SessionStoreSpec
         getResult.value.futureValue should be(Right(Some(htsSession)))
       }
     }
-
+    //toedit
     "handle the case where there is no sessionId in the HeaderCarrier" in new TestApparatus {
 
       htsSessionGen.sample.foreach { htsSession =>
@@ -107,7 +103,7 @@ class SessionStoreSpec
 
       }
     }
-
+//toedit
     "be able to update an existing HTSSession against the same user sessionId" in new TestApparatus {
 
       forAll(htsSessionGen) { htsSession =>
