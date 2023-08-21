@@ -93,12 +93,23 @@ class HelpToSaveReminderConnectorSpec
     val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
 
     "return http response as it is to the caller" in {
-      val response =
-        HttpResponse(200, emptyBody)
+      val response = HttpResponse(200, emptyBody)
       mockPost(cancelHtsReminderURL, Map.empty, cancelHtsUserReminder)(Some(response))
       val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
       await(result.value) should equal(Right(()))
 
+    }
+    "return http response as it is to the caller when not modified" in {
+      val response = HttpResponse(304, emptyBody)
+      mockPost(cancelHtsReminderURL, Map.empty, cancelHtsUserReminder)(Some(response))
+      val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
+      await(result.value) should equal(Right(()))
+    }
+    "fail when unexpected response received" in {
+      val response = HttpResponse(400, emptyBody)
+      mockPost(cancelHtsReminderURL, Map.empty, cancelHtsUserReminder)(Some(response))
+      val result = connector.cancelHtsUserReminders(cancelHtsUserReminder)
+      await(result.value).isLeft should equal(true)
     }
   }
 
