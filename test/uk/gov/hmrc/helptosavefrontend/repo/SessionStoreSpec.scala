@@ -78,7 +78,6 @@ class SessionStoreSpec
   }
 
   "The SessionStore" should {
-    //toedit
     "be able to insert and read a new HTSSession into mongo" in new TestApparatus {
 
       forAll(htsSessionGen) { htsSession =>
@@ -92,7 +91,6 @@ class SessionStoreSpec
         getResult.value.futureValue should be(Right(Some(htsSession)))
       }
     }
-    //toedit
     "handle the case where there is no sessionId in the HeaderCarrier" in new TestApparatus {
 
       htsSessionGen.sample.foreach { htsSession =>
@@ -103,7 +101,6 @@ class SessionStoreSpec
 
       }
     }
-//toedit
     "be able to update an existing HTSSession against the same user sessionId" in new TestApparatus {
 
       forAll(htsSessionGen) { htsSession =>
