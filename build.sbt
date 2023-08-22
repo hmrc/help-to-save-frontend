@@ -49,7 +49,8 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
     Wart.Any,
     Wart.Product,
     Wart.Serializable,
-    Wart.GlobalExecutionContext
+    Wart.GlobalExecutionContext,
+    Wart.Throw,
   )
 
   Seq(

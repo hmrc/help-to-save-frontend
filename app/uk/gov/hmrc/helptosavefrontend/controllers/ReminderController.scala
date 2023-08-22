@@ -19,6 +19,7 @@ import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
+import org.joda.time.LocalDate
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -26,22 +27,20 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.forms.{ReminderForm, ReminderFrequencyValidation}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
-import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
-import uk.gov.hmrc.helptosavefrontend.models.{HTSReminderAccount, HTSSession, HtsReminderCancelled, HtsReminderCancelledEvent, HtsReminderCreated, HtsReminderCreatedEvent, HtsReminderUpdated, HtsReminderUpdatedEvent}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, DateToDaysMapper, DaysToDateMapper, HtsUserSchedule}
+import uk.gov.hmrc.helptosavefrontend.models._
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util._
+import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
+
 import java.util.UUID
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
-
-import org.joda.time.LocalDate
-
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 @Singleton
@@ -178,50 +177,49 @@ class ReminderController @Inject() (
                       )
                       internalServerError()
                     },
-                    emailRetrieved =>
-                      emailRetrieved match {
-                        case Some(email) if !email.isEmpty => {
-                          val daysToReceiveReminders =
-                            DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
-                          val htsUserToBeUpdated = HtsUserSchedule(
-                            Nino(htsContext.nino),
-                            email,
-                            userInfo.forename,
-                            userInfo.surname,
-                            true,
-                            daysToReceiveReminders
+                    {
+                      case Some(email) if email.nonEmpty => {
+                        val daysToReceiveReminders =
+                          DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
+                        val htsUserToBeUpdated = HtsUserSchedule(
+                          Nino(htsContext.nino),
+                          email,
+                          userInfo.forename,
+                          userInfo.surname,
+                          optInStatus = true,
+                          daysToReceiveReminders
+                        )
+                        auditor.sendEvent(
+                          HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName, htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                          userInfo.nino
+                        )
+                        helpToSaveReminderService
+                          .updateHtsUser(htsUserToBeUpdated)
+                          .fold(
+                            htsError => {
+                              logger.warn(
+                                s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
+                              )
+                              internalServerError()
+                            },
+                            htsUser =>
+                              SeeOther(
+                                routes.ReminderController
+                                  .getRendersConfirmPage(
+                                    crypto.encrypt(htsUser.email),
+                                    success.reminderFrequency,
+                                    "Set"
+                                  )
+                                  .url
+                              )
                           )
-                          auditor.sendEvent(
-                            HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
-                            userInfo.nino
-                          )
-                          helpToSaveReminderService
-                            .updateHtsUser(htsUserToBeUpdated)
-                            .fold(
-                              htsError => {
-                                logger.warn(
-                                  s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
-                                )
-                                internalServerError()
-                              },
-                              htsUser =>
-                                SeeOther(
-                                  routes.ReminderController
-                                    .getRendersConfirmPage(
-                                      crypto.encrypt(htsUser.email),
-                                      success.reminderFrequency,
-                                      "Set"
-                                    )
-                                    .url
-                                )
-                            )
 
-                        }
-                        case Some(_) => {
-                          logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
-                          internalServerError()
-                        }
                       }
+                      case _ => {
+                        logger.warn(s"Empty email retrieved for user: ${userInfo.nino}")
+                        internalServerError()
+                      }
+                    }
                   )
                 }
             }
@@ -335,69 +333,66 @@ class ReminderController @Inject() (
                       )
                       internalServerError()
                     },
-                    emailRetrieved =>
-                      emailRetrieved match {
-                        case Some(email) if !email.isEmpty => {
-                          if (success.reminderFrequency === "cancel") {
-                            auditor.sendEvent(
-                              HtsReminderCancelledEvent(HtsReminderCancelled(
-                                userInfo.nino, email), request.uri),
-                              userInfo.nino
+                    {
+                      case Some(email) if email.nonEmpty => {
+                        if (success.reminderFrequency === "cancel") {
+                          auditor.sendEvent(
+                            HtsReminderCancelledEvent(HtsReminderCancelled(
+                              userInfo.nino, email), request.uri),
+                            userInfo.nino
+                          )
+                          val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
+                          helpToSaveReminderService
+                            .cancelHtsUserReminders(cancelHtsUserReminder)
+                            .fold(
+                              htsservError => {
+                                logger.warn(
+                                  s"An error occurred while accessing HTS Reminder service for user: ${htsContext.nino} Error: $htsservError"
+                                )
+                                internalServerError()
+                              },
+                              _ => SeeOther(routes.ReminderController.getRendersCancelConfirmPage.url)
                             )
-                            val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
-                            helpToSaveReminderService
-                              .cancelHtsUserReminders(cancelHtsUserReminder)
-                              .fold(
-                                htsservError => {
-                                  logger.warn(
-                                    s"An error occurred while accessing HTS Reminder service for user: ${htsContext.nino} Error: $htsservError"
-                                  )
-                                  internalServerError()
-                                },
-                                _ => SeeOther(routes.ReminderController.getRendersCancelConfirmPage.url)
-                              )
 
-                          } else {
-                            val daysToReceiveReminders =
-                              DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
-                            val htsUserToBeUpdated = HtsUserSchedule(
-                              Nino(htsContext.nino),
-                              email,
-                              userInfo.forename,
-                              userInfo.surname,
-                              true,
-                              daysToReceiveReminders
+                        } else {
+                          val daysToReceiveReminders =
+                            DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
+                          val htsUserToBeUpdated = HtsUserSchedule(
+                            Nino(htsContext.nino),
+                            email,
+                            userInfo.forename,
+                            userInfo.surname,
+                            optInStatus = true,
+                            daysToReceiveReminders
+                          )
+                          auditor.sendEvent(
+                            HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName, htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                            userInfo.nino
+                          )
+                          helpToSaveReminderService
+                            .updateHtsUser(htsUserToBeUpdated)
+                            .fold(
+                              htsError => {
+                                logger.warn(
+                                  s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
+                                )
+                                internalServerError()
+                              },
+                              htsUser =>
+                                SeeOther(
+                                  routes.ReminderController
+                                    .getRendersConfirmPage(
+                                      crypto.encrypt(htsUser.email),
+                                      success.reminderFrequency,
+                                      "Update"
+                                    )
+                                    .url
+                                )
                             )
-                            auditor.sendEvent(
-                              HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName,htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
-                              userInfo.nino
-                            )
-                            helpToSaveReminderService
-                              .updateHtsUser(htsUserToBeUpdated)
-                              .fold(
-                                htsError => {
-                                  logger.warn(
-                                    s"An error occurred while accessing HTS Reminder service for user: ${userInfo.nino} Error: $htsError"
-                                  )
-                                  internalServerError()
-                                },
-                                htsUser =>
-                                  SeeOther(
-                                    routes.ReminderController
-                                      .getRendersConfirmPage(
-                                        crypto.encrypt(htsUser.email),
-                                        success.reminderFrequency,
-                                        "Update"
-                                      )
-                                      .url
-                                  )
-                              )
-                          }
-                        }
-                        case Some(_) => {
-                          internalServerError()
                         }
                       }
+                      case _ => internalServerError()
+                    }
                   )
                 }
             }
