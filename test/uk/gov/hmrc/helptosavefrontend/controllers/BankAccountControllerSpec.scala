@@ -21,7 +21,7 @@ import cats.instances.future._
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.helptosavefrontend.forms.{BankDetails, BankDetailsValidation, SortCode}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.TestData.Eligibility.{randomEligibility, randomEligibleWithUserInfo, randomIneligibility}
@@ -29,9 +29,8 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, ValidateBankDetailsRequest, ValidateBankDetailsResult}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.{ExecutionContext, Future}
+import org.mockito.ArgumentMatchersSugar.*
+import scala.concurrent.Future
 
 class BankAccountControllerSpec
     extends ControllerSpecWithGuiceApp with CSRFSupport with AuthSupport with EnrolmentAndEligibilityCheckBehaviour
@@ -42,10 +41,7 @@ class BankAccountControllerSpec
   def mockValidateBankDetails(
     request: ValidateBankDetailsRequest
   )(response: Either[String, ValidateBankDetailsResult]) =
-    (mockHelpToSaveService
-      .validateBankDetails(_: ValidateBankDetailsRequest)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(request, *, *)
-      .returning(EitherT.fromEither[Future](response))
+    mockHelpToSaveService.validateBankDetails(request)(*, *) returns EitherT.fromEither[Future](response)
 
   val controller = new BankAccountController(
     mockHelpToSaveService,
@@ -72,13 +68,11 @@ class BankAccountControllerSpec
 
       "handle the request and display the page" in {
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
           )
-        }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
@@ -90,13 +84,11 @@ class BankAccountControllerSpec
 
       "display the page with correct Back link when they came from applySavingsReminders page" in {
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, None)))
           )
-        }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
@@ -108,13 +100,11 @@ class BankAccountControllerSpec
 
       "display the page with correct Back link when they came from emailVerified page" in {
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
             Right(Some(HTSSession(Some(Right(randomEligibleWithUserInfo(validUserInfo))), None, Some("pendingEmail"))))
           )
-        }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
@@ -126,7 +116,6 @@ class BankAccountControllerSpec
 
       "display the page with correct Back link when they came from check details page" in {
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
@@ -146,7 +135,6 @@ class BankAccountControllerSpec
               )
             )
           )
-        }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
@@ -159,7 +147,6 @@ class BankAccountControllerSpec
 
       "send already stored bank details in the session back to the UI" in {
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(
@@ -176,7 +163,6 @@ class BankAccountControllerSpec
               )
             )
           )
-        }
 
         val result = doRequest()
         status(result) shouldBe Status.OK
@@ -208,11 +194,9 @@ class BankAccountControllerSpec
       "handle form errors during submit" in {
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
-        }
 
         val result =
           csrfAddToken(controller.submitBankDetails())(
@@ -227,14 +211,12 @@ class BankAccountControllerSpec
       "handle cases when the backend bank details check mark the details as valid" in {
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
           mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(
             Right(ValidateBankDetailsResult(false, true))
           )
-        }
 
         val result = doRequest()
         status(result) shouldBe 200
@@ -246,14 +228,12 @@ class BankAccountControllerSpec
       "handle cases when the backend bank details check mark the sort code as non-existent" in {
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
           mockValidateBankDetails(ValidateBankDetailsRequest(nino, "123456", "12345678"))(
             Right(ValidateBankDetailsResult(true, false))
           )
-        }
 
         val result = doRequest()
         status(result) shouldBe 200
@@ -266,7 +246,6 @@ class BankAccountControllerSpec
 
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
@@ -283,7 +262,6 @@ class BankAccountControllerSpec
               Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))
             )
           )(Right(()))
-        }
 
         val result = doRequest()
         status(result) shouldBe 303
@@ -294,7 +272,6 @@ class BankAccountControllerSpec
 
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))
 
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
           mockSessionStoreGet(Right(Some(HTSSession(eligibilityResult, None, None))))
@@ -311,17 +288,14 @@ class BankAccountControllerSpec
               Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))
             )
           )(Left("error"))
-        }
 
         val result = doRequest()
         checkIsTechnicalErrorPage(result)
       }
 
       "handle the case when the request comes from already enrolled user" in {
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
           mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
-        }
 
         val result = doRequest()
         status(result) shouldBe 303
@@ -331,11 +305,9 @@ class BankAccountControllerSpec
 
   private def doCommonChecks(doRequest: () => Future[Result]): Unit = {
     "redirect user to eligibility checks if there is no session found" in {
-      inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(None))
-      }
 
       val result = doRequest()
       status(result) shouldBe 303
@@ -343,11 +315,9 @@ class BankAccountControllerSpec
     }
 
     "redirect user to eligibility checks if there is a session but no eligibility result found in the session" in {
-      inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
-      }
 
       val result = doRequest()
       status(result) shouldBe 303
@@ -356,11 +326,9 @@ class BankAccountControllerSpec
 
     "show user an in-eligible page if the session is found but user is not eligible" in {
 
-      inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(Right(Some(HTSSession(Some(Left(randomIneligibility())), None, None))))
-      }
 
       val result = doRequest()
       status(result) shouldBe SEE_OTHER
@@ -368,7 +336,6 @@ class BankAccountControllerSpec
 
     "show user an error page if the session is found but user is not eligible and in-eligibility reason can't be parsed" in {
       val eligibilityCheckResult = randomIneligibility().value.eligibilityCheckResult.copy(reasonCode = 999)
-      inSequence {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
         mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
         mockSessionStoreGet(
@@ -388,7 +355,6 @@ class BankAccountControllerSpec
             )
           )
         )
-      }
 
       val result = doRequest()
       checkIsTechnicalErrorPage(result)

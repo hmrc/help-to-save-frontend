@@ -32,6 +32,7 @@ import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 

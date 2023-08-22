@@ -31,6 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINOLogMessageT
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
 import uk.gov.hmrc.helptosavefrontend.views.html.time_out
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import java.util.UUID
 import scala.concurrent.ExecutionContext

@@ -15,7 +15,6 @@
  */
 
 package uk.gov.hmrc.helptosavefrontend.connectors
-
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
@@ -45,8 +44,7 @@ class EmailVerificationConnectorSpec
   lazy val connector: EmailVerificationConnectorImpl =
     new EmailVerificationConnectorImpl(mockHttp, mockMetrics)
 
-  def mockEncrypt(expected: String)(result: String): Unit =
-    (crypto.encrypt(_: String)).expects(expected).returning(result)
+  def mockEncrypt(expected: String)(result: String): Unit = crypto.encrypt(expected) returns result
 
   "verifyEmail" when {
 

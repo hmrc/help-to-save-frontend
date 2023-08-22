@@ -19,25 +19,20 @@ package uk.gov.hmrc.helptosavefrontend.forms
 import cats.syntax.either._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Logger
 import play.api.data.FormError
-import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.forms.ReminderFrequencyValidation.{ErrorMessages, FormOps}
 import uk.gov.hmrc.helptosavefrontend.forms.TestForm.{testForm, testFormWithErrorMessage}
-import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 class ReminderFrequencyValidationSpec
-    extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks with ControllerSpecWithGuiceApp {
+    extends AnyWordSpec with Matchers with ControllerSpecWithGuiceApp {
 
   val logger: Logger = Logger(this.getClass)
 
   "ReminderFrequencyValidation" must {
 
-    lazy val validation = new ReminderFrequencyValidation(
-      new FrontendAppConfig(new ServicesConfig(fakeApplication.configuration))
-    )
+    lazy val validation = new ReminderFrequencyValidation()
 
     def test(
       reminderFrequencyValidation: ReminderFrequencyValidation

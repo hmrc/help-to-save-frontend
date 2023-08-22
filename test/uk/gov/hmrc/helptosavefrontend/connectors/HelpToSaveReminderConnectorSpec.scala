@@ -17,8 +17,6 @@
 package uk.gov.hmrc.helptosavefrontend.connectors
 
 import java.time.LocalDate
-
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
@@ -28,7 +26,7 @@ import uk.gov.hmrc.http.HttpResponse
 
 // scalastyle:off magic.number
 class HelpToSaveReminderConnectorSpec
-    extends ControllerSpecWithGuiceApp with HttpSupport with ScalaCheckDrivenPropertyChecks {
+    extends ControllerSpecWithGuiceApp with HttpSupport  {
 
   lazy val connector: HelpToSaveReminderConnector = new HelpToSaveReminderConnectorImpl(mockHttp)
 

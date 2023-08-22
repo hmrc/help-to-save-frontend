@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import org.scalamock.scalatest.MockFactory
+import org.mockito.ArgumentMatchersSugar.*
+import org.mockito.IdiomaticMockito
 import org.scalatest.matchers.should.Matchers
-import play.api.libs.json.Writes
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{HttpClient, HttpResponse}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-trait HttpSupport { this: MockFactory with Matchers =>
+trait HttpSupport { this: IdiomaticMockito with Matchers =>
 
   val mockHttp: HttpClient = mock[HttpClient]
 
@@ -32,69 +32,16 @@ trait HttpSupport { this: MockFactory with Matchers =>
   def mockGet(url: String, queryParams: Map[String, String] = emptyMap, headers: Map[String, String] = emptyMap)(
     response: Option[HttpResponse]
   ) =
-    (mockHttp
-      .GET(_: String, _: Seq[(String, String)], _: Seq[(String, String)])(
-        _: HttpReads[HttpResponse],
-        _: HeaderCarrier,
-        _: ExecutionContext))
-      .expects(where {
-        (u: String,
-         q: Seq[(String, String)],
-         _: Seq[(String, String)],
-         _: HttpReads[HttpResponse],
-         h: HeaderCarrier,
-         _: ExecutionContext) =>
-          // use matchers here to get useful error messages when the following predicates
-          // are not satisfied - otherwise it is difficult to tell in the logs what went wrong
-          u shouldBe url
-          q shouldBe queryParams.toSeq
-          h.extraHeaders shouldBe headers.toSeq
-          true
-      })
-      .returning(
-        response.fold(Future.failed[HttpResponse](new Exception("Test exception message")))(Future.successful)
-      )
+    mockHttp.GET[HttpResponse](url, queryParams.toSeq, headers.toSeq)(*, *, *) returns response.fold(Future.failed[HttpResponse](new Exception("Test exception message")))(Future.successful)
+
 
   def mockPut[A](url: String, body: A, headers: Map[String, String] = Map.empty[String, String])(
     result: Option[HttpResponse]
   ): Unit =
-    (mockHttp
-      .PUT(_: String, _: A, _: Seq[(String, String)])(
-        _: Writes[A],
-        _: HttpReads[HttpResponse],
-        _: HeaderCarrier,
-        _: ExecutionContext
-      ))
-      .expects(where {
-        (
-          u: String,
-          a: A,
-          _: Seq[(String, String)],
-          _: Writes[A],
-          _: HttpReads[HttpResponse],
-          h: HeaderCarrier,
-          _: ExecutionContext
-        ) =>
-          u shouldBe url
-          a shouldBe body
-          h.extraHeaders shouldBe headers.toSeq
-          true
-      })
-      .returning(
-        result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
-      )
+    mockHttp.PUT[A,HttpResponse](url, body, headers.toSeq)(*, *, *, *) returns result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
+
 
   def mockPost[A](url: String, headers: Map[String, String], body: A)(result: Option[HttpResponse]): Unit =
-    (mockHttp
-      .POST(_: String, _: A, _: Seq[(String, String)])(
-        _: Writes[A],
-        _: HttpReads[HttpResponse],
-        _: HeaderCarrier,
-        _: ExecutionContext
-      ))
-      .expects(url, body, headers.toSeq, *, *, *, *)
-      .returning(
-        result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
-      )
+    mockHttp.POST[A,HttpResponse](url, body, headers.toSeq)(*, *, *, *) returns result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
 
 }

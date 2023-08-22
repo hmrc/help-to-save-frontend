@@ -28,8 +28,9 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.{HTSSession, ValidateBankDetailsRequest}
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{toFuture, _}
+import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 

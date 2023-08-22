@@ -17,10 +17,11 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
+import org.mockito.ArgumentMatchersSugar.*
 import play.api.http.Status
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.helptosavefrontend.models.EnrolmentStatus.{Enrolled, NotEnrolled}
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -28,11 +29,9 @@ import uk.gov.hmrc.helptosavefrontend.models.account.{Account, AccountNumber, Bo
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
 import uk.gov.hmrc.helptosavefrontend.views.html.time_out
-import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
-import java.util.UUID
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class IntroductionControllerSpec
     extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with SessionStoreBehaviourSupport
@@ -65,16 +64,10 @@ class IntroductionControllerSpec
   )
 
   def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
-    (mockHelpToSaveService
-      .getAccount(_: String, _: UUID)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(nino, *, *, *)
-      .returning(EitherT.fromEither[Future](result))
+    mockHelpToSaveService.getAccount(nino, *)(*, *) returns EitherT.fromEither[Future](result)
 
   def mockAuthorise(loggedIn: Boolean) =
-    (mockAuthConnector
-      .authorise(_: Predicate, _: EmptyRetrieval.type)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(EmptyPredicate, EmptyRetrieval, *, *)
-      .returning(if (loggedIn) Future.successful(()) else Future.failed(new Exception("")))
+    mockAuthConnector.authorise(EmptyPredicate, EmptyRetrieval)(*, *) returns (if (loggedIn) Future.successful(()) else Future.failed(new Exception("")))
 
   "the about help to save page" should {
     "redirect to correct GOV.UK page" in {
@@ -120,12 +113,10 @@ class IntroductionControllerSpec
     "getHelpPage" should {
 
       "show the help page content if the user is logged in and has a HTS account" in {
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockGetAccount(nino)(Right(account))
           mockGetAccountNumberFromService()(Right(AccountNumber(Some(accountNumber))))
-        }
 
         val result = helpToSave.getHelpPage(FakeRequest())
         status(result) shouldBe OK
@@ -135,20 +126,16 @@ class IntroductionControllerSpec
       }
 
       "show an error page if the user's enrolment status cannot be checked" in {
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Left(""))
-        }
 
         val result = helpToSave.getHelpPage(FakeRequest())
         checkIsTechnicalErrorPage(result)
       }
 
       "show the no-account page if the user does not have a HTS account" in {
-        inSequence {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
           mockEnrolmentCheck()(Right(NotEnrolled))
-        }
 
         val result = helpToSave.getHelpPage(FakeRequest())
         status(result) shouldBe SEE_OTHER

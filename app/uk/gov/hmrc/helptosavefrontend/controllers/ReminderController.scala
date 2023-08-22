@@ -19,7 +19,7 @@ import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, _}
+import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
@@ -37,6 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
 import java.util.UUID
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import org.joda.time.LocalDate
 

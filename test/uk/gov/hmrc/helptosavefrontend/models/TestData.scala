@@ -17,15 +17,15 @@
 package uk.gov.hmrc.helptosavefrontend.models
 
 import java.time.LocalDate
-
 import org.scalacheck.Gen
+import org.scalacheck.Gen.alphaStr
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultType.{Eligible, Ineligible}
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckResponse, EligibilityCheckResult}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.testutil._
-import uk.gov.hmrc.smartstub.AutoGen
+import uk.gov.hmrc.smartstub.{Addresses, AdvGen, AutoGen, Enumerable}
 
 import scala.language.implicitConversions
 
@@ -58,23 +58,23 @@ object TestData {
         reasonCode <- Gen.oneOf(4, 9)
       } yield Ineligible(EligibilityCheckResponse(EligibilityCheckResult("", 2, "", reasonCode), threshold))
 
-    def randomEligibilityResponse() = sample(eligibilityCheckResponseGen)
+    def randomEligibilityResponse(): EligibilityCheckResponse = sample(eligibilityCheckResponseGen)
 
-    def randomEligibility() = sample(eligibilityGen)
+    def randomEligibility(): Eligible = sample(eligibilityGen)
 
-    def randomIneligibility() = sample(ineligibilityGen)
+    def randomIneligibility(): Ineligible = sample(ineligibilityGen)
 
-    def notEntitledToWTCAndUCInsufficient() = ineligibilityReason5
+    def notEntitledToWTCAndUCInsufficient(): Ineligible = ineligibilityReason5
 
-    def notEntitledToWTCAndUCInsufficientWithNoThreshold() = ineligibilityReason5WithNoThreshold
+    def notEntitledToWTCAndUCInsufficientWithNoThreshold(): Ineligible = ineligibilityReason5WithNoThreshold
 
-    def ineligibilityReason4or9() = sample(ineligibilityReason4or9Gen(Some(123.45)))
+    def ineligibilityReason4or9(): Ineligible = sample(ineligibilityReason4or9Gen(Some(123.45)))
 
-    def ineligibilityReason4or9WithNoThreshold() = sample(ineligibilityReason4or9Gen(None))
+    def ineligibilityReason4or9WithNoThreshold(): Ineligible = sample(ineligibilityReason4or9Gen(None))
 
-    def randomEligibleWithUserInfo(userInfo: UserInfo) = EligibleWithUserInfo(randomEligibility(), userInfo)
+    def randomEligibleWithUserInfo(userInfo: UserInfo): EligibleWithUserInfo = EligibleWithUserInfo(randomEligibility(), userInfo)
 
-    def eligibleSpecificReasonCodeWithUserInfo(userInfo: UserInfo, reasonCode: Int) =
+    def eligibleSpecificReasonCodeWithUserInfo(userInfo: UserInfo, reasonCode: Int): EligibleWithUserInfo =
       EligibleWithUserInfo(
         Eligible(EligibilityCheckResponse(EligibilityCheckResult("", 1, "", reasonCode), Some(134.45))),
         userInfo
@@ -82,7 +82,22 @@ object TestData {
   }
 
   object UserData {
-    implicit val userInfoGen: Gen[UserInfo] = AutoGen[UserInfo]
+    implicit val addressGen: Gen[Address]  =
+      for {
+        lines <- Gen.ukAddress
+        postcode <- Gen.option(Gen.postcode)
+        country <-  Gen.option(alphaStr)
+      } yield Address(lines, postcode, country)
+
+    implicit val userInfoGen: Gen[UserInfo] =
+      for {
+        forename <- Gen.forename
+        surname <- Gen.surname
+        nino <- Enumerable.instances.ninoEnum.gen
+        dateOfBirth <- Gen.date
+        email <- Gen.option(alphaStr)
+        address <- addressGen
+      } yield UserInfo(forename, surname, nino, dateOfBirth, email, address)
 
     def randomUserInfo(): UserInfo = sample(userInfoGen)
 

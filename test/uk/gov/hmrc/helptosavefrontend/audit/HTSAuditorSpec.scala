@@ -22,6 +22,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
+import org.mockito.ArgumentMatchersSugar.*
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -49,11 +50,8 @@ class HTSAuditorSpec extends ControllerSpecWithGuiceApp {
           override val value = dataEvent
         }
 
-        (mockAuditConnector
-          .sendExtendedEvent(_: ExtendedDataEvent)(_: HeaderCarrier, _: ExecutionContext))
-          .expects(dataEvent, *, *)
-          .returning(Future.failed(new Exception))
-
+        mockAuditConnector
+          .sendExtendedEvent(dataEvent)(*, *) returns Future.failed(new Exception)
         auditor.sendEvent(htsEvent, "nino")
       }
 

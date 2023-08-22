@@ -17,15 +17,14 @@
 package uk.gov.hmrc.helptosavefrontend
 
 import com.codahale.metrics.{Counter, Timer}
-import com.kenshoo.play.metrics.{Metrics => PlayMetrics}
-import org.scalamock.scalatest.MockFactory
+import org.mockito.IdiomaticMockito
 import play.api.Configuration
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 
-trait MockActions extends MockFactory {
+trait MockActions extends IdiomaticMockito {
 
-  val mockMetrics = new Metrics(stub[PlayMetrics]) {
+  val mockMetrics = new Metrics(mock[com.kenshoo.play.metrics.Metrics]) {
     override def timer(name: String): Timer = new Timer()
 
     override def counter(name: String): Counter = new Counter()

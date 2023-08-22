@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.connectors
 
 import java.time.LocalDate
 import java.util.{Base64, UUID}
-
 import cats.data.EitherT
 import cats.instances.int._
 import cats.syntax.eq._
@@ -122,7 +121,7 @@ class HelpToSaveConnectorSpec extends ControllerSpecWithGuiceApp with HttpSuppor
 
       "return an EligibilityResult if the call comes back with a 200 status with a positive result " +
         "and a valid reason" in {
-        forAll(eligibleResponseGen) { response =>
+        forAll (eligibleResponseGen) { response =>
           val reason =
             Eligible(EligibilityCheckResponse(response, Some(123.45)))
 

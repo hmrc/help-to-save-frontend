@@ -1,11 +1,11 @@
-import sbt.{Compile, taskKey, _}
+import sbt.{Compile, taskKey, *}
 import uk.gov.hmrc.DefaultBuildSettings.{defaultSettings, scalaSettings}
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.*
 import wartremover.{WartRemover, Warts}
-
 import scala.language.postfixOps
 
 val appName = "help-to-save-frontend"
+val silencerVersion = "1.7.13"
 
 lazy val appDependencies: Seq[ModuleID] = Seq(ws) ++ AppDependencies.compile ++ AppDependencies.test
 
@@ -37,7 +37,19 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
     Wart.Nothing,
     Wart.Overloading,
     Wart.ToString,
-    Wart.Var
+    Wart.Var,
+    Wart.ListAppend,
+    Wart.AsInstanceOf,
+    Wart.PlatformDefault,
+    Wart.NonUnitStatements,
+    Wart.Equals,
+    Wart.JavaSerializable,
+    Wart.StringPlusAny,
+    Wart.SeqApply,
+    Wart.Any,
+    Wart.Product,
+    Wart.Serializable,
+    Wart.GlobalExecutionContext
   )
 
   Seq(
@@ -53,23 +65,16 @@ def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File])
       Wart.PublicInference
     ),
     (Compile / compile / wartremoverExcluded) ++=
-      (Compile / routes).value ++
-        ignoreFiles(baseDirectory.value) ++
-        (baseDirectory.value ** "*.sc").get ++
-        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala") ++
-        (baseDirectory.value / "app" / "uk" / "gov" / "hmrc" / "helptosavefrontend" / "config").get
-  )
+      (Compile / routes).value)
 }
 
 lazy val commonSettings = Seq(
-  addCompilerPlugin("org.psywerx.hairyfotr" %% "linter" % "0.1.17"),
   scalacOptions ++= Seq(
     "-Xcheckinit",
     "-feature",
-    "-P:silencer:lineContentFilters=^\\w"    // Avoid '^\\w' warnings for Twirl template
   )
 ) ++
-  scalaSettings ++ publishingSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
+  scalaSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
 
 lazy val microservice = Project(appName, file("."))
   .settings(commonSettings: _*)
@@ -86,15 +91,19 @@ lazy val microservice = Project(appName, file("."))
   )
   .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(PlayKeys.playDefaultPort := 7000)
-  .settings(scalaVersion := "2.12.13")
+  .settings(scalaVersion := "2.13.8")
   .settings(
     majorVersion := 2,
     libraryDependencies ++= appDependencies
   )
   .settings(scalacOptions ++= List(
-    "-P:silencer:pathFilters=html",
-    "-P:silencer:pathFilters=routes"
-  ))
+    "-P:silencer:pathFilters=routes;views"
+  ),
+    libraryDependencies ++= Seq(
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    )
+  )
   .settings(
     formatMessageQuotes := {
       import sys.process._
