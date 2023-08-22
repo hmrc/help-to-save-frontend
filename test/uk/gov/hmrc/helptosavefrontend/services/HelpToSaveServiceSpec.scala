@@ -34,7 +34,6 @@ import uk.gov.hmrc.http.HttpResponse
 import java.time.LocalDate
 import java.util.UUID
 import scala.concurrent.Future
-import scala.language.postfixOps
 
 // scalastyle:off magic.number
 class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures {

@@ -26,10 +26,8 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserInfoRetrievals
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
-import uk.gov.hmrc.helptosavefrontend.util.toJavaDate
-import uk.gov.hmrc.http.HeaderCarrier
 import org.mockito.ArgumentMatchersSugar.*
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 object AuthSupport {
 

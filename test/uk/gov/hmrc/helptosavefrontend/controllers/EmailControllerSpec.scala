@@ -40,7 +40,6 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.email._
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import java.util.Base64
 import scala.concurrent.Future

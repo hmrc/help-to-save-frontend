@@ -19,7 +19,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import org.mockito.ArgumentMatchersSugar.*
-import play.api.data.format.Formatter
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -40,7 +39,6 @@ import uk.gov.hmrc.helptosavefrontend.util.Crypto
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.account_closed
 import uk.gov.hmrc.helptosavefrontend.views.html.register.not_eligible
 import uk.gov.hmrc.helptosavefrontend.views.html.reminder._
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 
 import java.time.LocalDate
 import scala.concurrent.Future
