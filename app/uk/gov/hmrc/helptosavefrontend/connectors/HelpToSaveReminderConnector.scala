@@ -74,7 +74,7 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
     for {
       response <- toEitherT("cancel reminder", http.post(cancelHtsReminderURL, cancelHtsUserReminder))
       result <- response.status match {
-        case Status.OK | Status.NOT_MODIFIED => EitherT.rightT[Future, String]()
+        case Status.OK | Status.NOT_MODIFIED => EitherT.rightT[Future, String](())
         case _ => EitherT.leftT[Future, Unit](s"Call to 'cancel reminder' came back with status ${response.status}. Body was ${response.body}")
       }
     } yield result

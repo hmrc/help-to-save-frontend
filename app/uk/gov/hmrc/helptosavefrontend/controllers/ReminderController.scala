@@ -170,7 +170,7 @@ class ReminderController @Inject() (
                 internalServerError()
 
               case Right(userInfo) =>
-                helpToSaveService.getConfirmedEmail.value.flatMap {
+                helpToSaveService.getConfirmedEmail().value.flatMap {
                   _.fold(
                     noEmailError => {
                       logger.warn(
@@ -327,7 +327,7 @@ class ReminderController @Inject() (
                 internalServerError()
 
               case Right(userInfo) =>
-                helpToSaveService.getConfirmedEmail.value.flatMap {
+                helpToSaveService.getConfirmedEmail().value.flatMap {
                   _.fold(
                     noEmailError => {
                       logger.warn(

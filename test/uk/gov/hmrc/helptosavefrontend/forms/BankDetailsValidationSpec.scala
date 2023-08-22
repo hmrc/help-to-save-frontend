@@ -37,7 +37,7 @@ class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
   lazy val validation = new BankDetailsValidation(
     new FrontendAppConfig(
-      new ServicesConfig(bankValidationConfig.withFallback(fakeApplication.configuration))
+      new ServicesConfig(bankValidationConfig.withFallback(fakeApplication().configuration))
     )
   )
 

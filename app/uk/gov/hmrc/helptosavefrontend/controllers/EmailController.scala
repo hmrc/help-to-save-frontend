@@ -839,13 +839,13 @@ class EmailController @Inject() (
     result
       .leftSemiflatMap { e =>
         logger.warn(s"Could not get session or enrolment status: $e")
-        internalServerError
+        internalServerError()
       }
       .semiflatMap {
         case (session, enrolmentStatus) =>
           enrolmentStatus.fold(
             ifDuringRegistrationJourney(session), { _ =>
-              helpToSaveService.getConfirmedEmail
+              helpToSaveService.getConfirmedEmail()
                 .leftSemiflatMap { e =>
                   logger.warn(s"Could not get confirmed email: $e")
                   internalServerError()

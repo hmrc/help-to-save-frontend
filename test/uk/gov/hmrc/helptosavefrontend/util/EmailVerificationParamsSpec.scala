@@ -38,7 +38,7 @@ class EmailVerificationParamsSpec extends UnitSpec {
     "have a decode method that is the inverse of the encode method" in {
       implicit val crypto: Crypto = successfulCrypto()
       val result = EmailVerificationParams
-        .decode(params.encode)
+        .decode(params.encode())
         .getOrElse(fail("Could not decode email verification params"))
       result.email shouldBe email
       result.nino shouldBe nino
@@ -52,7 +52,7 @@ class EmailVerificationParamsSpec extends UnitSpec {
           override def decrypt(s: String): Try[String] = Failure(new Exception)
         }
 
-        EmailVerificationParams.decode(params.encode).isFailure shouldBe true
+        EmailVerificationParams.decode(params.encode()).isFailure shouldBe true
       }
 
       "the parameters do not contain a hash symbol" in {

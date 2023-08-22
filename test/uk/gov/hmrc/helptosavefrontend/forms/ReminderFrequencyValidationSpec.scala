@@ -52,7 +52,7 @@ class ReminderFrequencyValidationSpec
     "validate against not blank" in {
       val reminderFrequencyValidation = validation
 
-      test(reminderFrequencyValidation)("1st")(Right(Set(ErrorMessages.reminderFrequencyEmpty))).equals(false)
+      test(reminderFrequencyValidation)("1st")(Right(Set(ErrorMessages.reminderFrequencyEmpty)))
     }
 
     "informs if the frequency choice is empty" in {

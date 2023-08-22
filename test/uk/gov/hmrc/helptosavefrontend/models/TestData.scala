@@ -91,7 +91,7 @@ object TestData {
 
     implicit val userInfoGen: Gen[UserInfo] =
       for {
-        forename <- Gen.forename
+        forename <- Gen.forename()
         surname <- Gen.surname
         nino <- Enumerable.instances.ninoEnum.gen
         dateOfBirth <- Gen.date
