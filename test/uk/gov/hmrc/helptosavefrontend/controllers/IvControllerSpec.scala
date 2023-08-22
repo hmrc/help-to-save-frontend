@@ -248,7 +248,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     val url = "my-url"
 
     def contentAsStringWithAmpersandsEscaped(result: Future[Result]): String =
-      contentAsString(result).replaceAllLiterally("&amp;", "&")
+      contentAsString(result).replaceAll("&amp;", "&")
 
     testIndividualPage(
       "IV successful",

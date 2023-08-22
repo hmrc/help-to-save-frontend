@@ -48,9 +48,9 @@ trait ControllerSpecWithGuiceAppPerTest extends ControllerSpecBase with GuiceOne
       )
       .build()
 
-  override def fakeApplication = buildFakeApplication(additionalConfig)
+  override def fakeApplication(): Application = buildFakeApplication(additionalConfig)
 
-  lazy val injector: Injector = fakeApplication.injector
+  private lazy val injector: Injector = fakeApplication().injector
 
   implicit lazy val ec: ExecutionContext = injector.instanceOf[ExecutionContext]
 

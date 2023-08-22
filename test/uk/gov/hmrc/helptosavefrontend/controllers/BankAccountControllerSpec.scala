@@ -64,7 +64,7 @@ class BankAccountControllerSpec
 
       def doRequest() = csrfAddToken(controller.getBankDetailsPage())(fakeRequest)
 
-      doCommonChecks(doRequest)
+      doCommonChecks(() => doRequest())
 
       "handle the request and display the page" in {
 
@@ -189,7 +189,7 @@ class BankAccountControllerSpec
 
       def doRequest() = csrfAddToken(controller.submitBankDetails())(submitBankDetailsRequest)
 
-      doCommonChecks(doRequest)
+      doCommonChecks(() => doRequest())
 
       "handle form errors during submit" in {
         val eligibilityResult = Some(Right(randomEligibleWithUserInfo(validUserInfo)))

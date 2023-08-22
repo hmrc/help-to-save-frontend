@@ -55,7 +55,7 @@ class AccessAccountControllerSpec
     "handling getSignInPage" must {
 
       "redirect to the govuk sign in page" in {
-        mockAuthConnector.authorise(EmptyPredicate, EmptyRetrieval)(*, *) returns Future.successful()
+        mockAuthConnector.authorise(EmptyPredicate, EmptyRetrieval)(*, *) returns Future.successful(())
 
         val result = controller.getSignInPage()(FakeRequest())
         status(result) shouldBe SEE_OTHER
@@ -66,18 +66,18 @@ class AccessAccountControllerSpec
 
     "handling accessAccount" must {
 
-      def doRequest(): Future[Result] =
-        Future.successful(await(controller.accessAccount(FakeRequest())))
-      behave like commonBehaviour(doRequest, appConfig.nsiManageAccountUrl, true)
+      behave like commonBehaviour(
+        () => Future.successful(await(controller.accessAccount(FakeRequest()))),
+        appConfig.nsiManageAccountUrl,
+        withRemindersRemoval = true)
 
     }
 
     "handling payIn" must {
 
-      def doRequest(): Future[Result] =
-        Future.successful(await(controller.payIn(FakeRequest())))
-
-      behave like commonBehaviour(doRequest, appConfig.nsiPayInUrl)
+      behave like commonBehaviour(
+        () => Future.successful(await(controller.payIn(FakeRequest()))),
+        appConfig.nsiPayInUrl)
 
     }
 

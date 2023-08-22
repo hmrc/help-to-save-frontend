@@ -376,9 +376,9 @@ class RegisterControllerSpec
 
       def doCreateAccountRequest(): Future[PlayResult] = csrfAddToken(controller.createAccount)(fakeRequest)
 
-      HtsUserSchedule(Nino(nino), "email", firstName, lastName, true, Seq(1), LocalDate.now())
+      HtsUserSchedule(Nino(nino), "email", firstName, lastName, optInStatus = true, Seq(1), LocalDate.now())
 
-      behave like commonEnrolmentAndSessionBehaviour(doCreateAccountRequest)
+      behave like commonEnrolmentAndSessionBehaviour(() => doCreateAccountRequest())
 
       checkRedirectIfNoEmailInSession(doCreateAccountRequest())
 
@@ -696,7 +696,7 @@ class RegisterControllerSpec
 
       def doRequest(): Future[PlayResult] = controller.getCreateAccountErrorPage(FakeRequest())
 
-      behave like commonEnrolmentAndSessionBehaviour(doRequest)
+      behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       "show the error page" in {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -715,7 +715,7 @@ class RegisterControllerSpec
 
       def doRequest(): Future[PlayResult] = controller.getCreateAccountErrorBankDetailsPage(FakeRequest())
 
-      behave like commonEnrolmentAndSessionBehaviour(doRequest)
+      behave like commonEnrolmentAndSessionBehaviour(() => doRequest())
 
       "show the error page" in {
           mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
