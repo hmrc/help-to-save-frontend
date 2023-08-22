@@ -72,7 +72,8 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-Xcheckinit",
     "-feature",
-  )
+  ),
+  Compile / scalacOptions -= "utf8",
 ) ++
   scalaSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
 
