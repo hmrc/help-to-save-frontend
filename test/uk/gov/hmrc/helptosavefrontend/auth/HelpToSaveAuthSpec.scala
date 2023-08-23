@@ -31,7 +31,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.{AuthSupport, BaseController, 
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, UserInfo}
-import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, toJavaDate, urlEncode}
+import uk.gov.hmrc.helptosavefrontend.util.{NINOLogMessageTransformer, urlEncode}
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}

@@ -19,7 +19,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthWithCL200
@@ -27,11 +27,10 @@ import uk.gov.hmrc.helptosavefrontend.models.account.{Account, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
-import uk.gov.hmrc.http.HeaderCarrier
 import org.mockito.ArgumentMatchersSugar.*
 
 import java.time.LocalDate
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class AccessAccountControllerSpec
     extends ControllerSpecWithGuiceApp with EnrolmentAndEligibilityCheckBehaviour with SessionStoreBehaviourSupport
@@ -56,7 +55,7 @@ class AccessAccountControllerSpec
     "handling getSignInPage" must {
 
       "redirect to the govuk sign in page" in {
-        mockAuthConnector.authorise(EmptyPredicate, EmptyRetrieval)(*, *) returns Future.successful()
+        mockAuthConnector.authorise(EmptyPredicate, EmptyRetrieval)(*, *) returns Future.successful(())
 
         val result = controller.getSignInPage()(FakeRequest())
         status(result) shouldBe SEE_OTHER
@@ -67,18 +66,18 @@ class AccessAccountControllerSpec
 
     "handling accessAccount" must {
 
-      def doRequest(): Future[Result] =
-        Future.successful(await(controller.accessAccount(FakeRequest())))
-      behave like commonBehaviour(doRequest, appConfig.nsiManageAccountUrl, true)
+      behave like commonBehaviour(
+        () => Future.successful(await(controller.accessAccount(FakeRequest()))),
+        appConfig.nsiManageAccountUrl,
+        withRemindersRemoval = true)
 
     }
 
     "handling payIn" must {
 
-      def doRequest(): Future[Result] =
-        Future.successful(await(controller.payIn(FakeRequest())))
-
-      behave like commonBehaviour(doRequest, appConfig.nsiPayInUrl)
+      behave like commonBehaviour(
+        () => Future.successful(await(controller.payIn(FakeRequest()))),
+        appConfig.nsiPayInUrl)
 
     }
 

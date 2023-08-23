@@ -80,7 +80,7 @@ class EligibilityCheckControllerSpec
 
       def getIsEligible(): Future[PlayResult] = csrfAddToken(controller.getIsEligible)(fakeRequest)
 
-      behave like commonEnrolmentAndSessionBehaviour(getIsEligible)
+      behave like commonEnrolmentAndSessionBehaviour(() => getIsEligible())
 
       "show the you are eligible page if session data indicates that they are eligible" in {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
@@ -132,7 +132,7 @@ class EligibilityCheckControllerSpec
 
       def getIsNotEligible(): Future[PlayResult] = controller.getIsNotEligible(FakeRequest())
 
-      behave like commonEnrolmentAndSessionBehaviour(getIsNotEligible)
+      behave like commonEnrolmentAndSessionBehaviour(() => getIsNotEligible())
 
       "show the you are not eligible page if session data indicates that they are not eligible" in {
         mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)

@@ -64,9 +64,8 @@ class IntroductionController @Inject() (
       Ok(timeOutView())
   }
 
-  def keepAlive(): Action[AnyContent] = unprotected { implicit request =>
-    implicit htsContext =>
-      Ok("")
+  def keepAlive(): Action[AnyContent] = unprotected { _ => _ =>
+    Ok("")
   }
 
   def getAboutHelpToSave: Action[AnyContent] = unprotected { _ => _=>

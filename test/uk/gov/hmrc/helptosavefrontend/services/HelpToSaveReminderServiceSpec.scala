@@ -25,9 +25,8 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
-import uk.gov.hmrc.http.HeaderCarrier
 import org.mockito.ArgumentMatchersSugar.*
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 // scalastyle:off magic.number
 class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures {

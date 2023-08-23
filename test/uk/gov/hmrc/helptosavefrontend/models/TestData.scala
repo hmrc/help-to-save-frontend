@@ -25,7 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.{EligibilityCheckRespon
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
 import uk.gov.hmrc.helptosavefrontend.testutil._
-import uk.gov.hmrc.smartstub.{Addresses, AdvGen, AutoGen, Enumerable}
+import uk.gov.hmrc.smartstub.{AdvGen, AutoGen, Enumerable}
 
 import scala.language.implicitConversions
 
@@ -91,7 +91,7 @@ object TestData {
 
     implicit val userInfoGen: Gen[UserInfo] =
       for {
-        forename <- Gen.forename
+        forename <- Gen.forename()
         surname <- Gen.surname
         nino <- Enumerable.instances.ninoEnum.gen
         dateOfBirth <- Gen.date

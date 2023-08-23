@@ -19,12 +19,11 @@ package uk.gov.hmrc.helptosavefrontend.audit
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 import org.mockito.ArgumentMatchersSugar.*
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 class HTSAuditorSpec extends ControllerSpecWithGuiceApp {
 

@@ -38,6 +38,7 @@ class HTSAuditor @Inject() (val auditConnector: AuditConnector)(implicit transfo
           e,
           nino
         )
+      case fatal => throw fatal
     }
   }
 }

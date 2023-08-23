@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.net.URLDecoder
 import java.time.LocalDate
-import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -36,16 +35,14 @@ import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
-import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams, NINO}
+import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
 import uk.gov.hmrc.helptosavefrontend.views.html.email.{update_email_address, we_updated_your_email}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.http.connector.AuditResult
 import org.mockito.ArgumentMatchersSugar.*
 
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 class AccountHolderControllerSpec

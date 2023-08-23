@@ -201,7 +201,7 @@ class IvController @Inject() (
     request: Request[_],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionStore.store(session) fold ({ e =>
+    sessionStore.store(session).fold({ e =>
       logger.warn(
         s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e"
       )
