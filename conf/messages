@@ -594,10 +594,15 @@ hts.help-information.section.payments-info-not-available.s2.p1=The details you�
 hts.help-information.section.payments-info-not-available.s2.p2=You’ll need to come back later to get these details.
 
 hts.help-information.section.payments.s3.title=When payments will appear in your account
-hts.help-information.section.payments.s3.p1=Debit card payments should appear in your account immediately. You’ll need to wait one working day before you can withdraw money paid in by debit card.
-hts.help-information.section.payments.s3.p2=Bank transfers or regular payments, called standing orders, take up to 3 working days to appear in your account.
-hts.help-information.section.payments.s3.p3=Your payment will be returned if you try to pay in more than £50 in a calendar month.
-hts.help-information.section.payments.s3.p4=If there is a problem, check with your bank.
+hts.help-information.section.payments.s3.h1=If you paid by debit card
+hts.help-information.section.payments.s3.p1=Debit card payments should show in your account within one working day.
+hts.help-information.section.payments.s3.h2=If you paid by bank transfer
+hts.help-information.section.payments.s3.p2=Bank transfers can take 3 to 5 working days to show in your account.
+hts.help-information.section.payments.s3.h3=If you paid by standing order
+hts.help-information.section.payments.s3.p3=Standing orders can take 3 to 5 working days to show in your account.
+hts.help-information.section.payments.s3.h4=Failed payments
+hts.help-information.section.payments.s3.p4=Failed payments may still show in your account. These should clear after 2 hours.
+hts.help-information.section.payments.s3.p5=If there is a problem, check with your bank.
 
 # Help/information: Bonuses
 hts.help-information.section.bonuses.title=Bonuses
