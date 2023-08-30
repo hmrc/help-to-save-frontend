@@ -653,6 +653,7 @@ hts.help-information.section.bonuses.s5.p5=Mae mis calendr yn fis llawn o ddiwrn
 
 hts.help-information.section.bonuses.s6.title=Ble y telir eich bonws
 hts.help-information.section.bonuses.s6.p1=Telir unrhyw arian bonws a enillwch i mewn i’ch cyfrif banc, nid i’ch cyfrif Cymorth i Gynilo.
+hts.help-information.section.bonuses.s6.p2=Telir bonysau erbyn y 14eg o’r mis.
 
 hts.help-information.section.bonuses.s7.title=Sut mae tynnu arian allan yn effeithio ar eich bonysau
 hts.help-information.section.bonuses.s7.p1=Gallwch dynnu arian allan ac fe fyddwch yn parhau i gael bonysau.
