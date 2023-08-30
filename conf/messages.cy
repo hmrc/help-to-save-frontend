@@ -593,10 +593,15 @@ hts.help-information.section.payments-info-not-available.s2.p1=Nid yw'r manylion
 hts.help-information.section.payments-info-not-available.s2.p2=Bydd angen i chi ddod yn ôl yn nes ymlaen i gael y manylion hyn.
 
 hts.help-information.section.payments.s3.title=Pryd fydd taliadau yn ymddangos yn eich cyfrif
-hts.help-information.section.payments.s3.p1=Dylai taliadau cerdyn debyd ymddangos yn eich cyfrif ar unwaith. Bydd angen i chi aros un diwrnod gwaith cyn y gallwch dynnu arian a dalwyd i mewn gyda cherdyn debyd.
-hts.help-information.section.payments.s3.p2=Mae trosglwyddiadau banc neu daliadau rheolaidd, a elwir yn archebion sefydlog, yn cymryd hyd at 3 diwrnod gwaith i ymddangos yn eich cyfrif.
-hts.help-information.section.payments.s3.p3=Bydd eich taliad yn cael ei ddychwelyd os ydych yn ceisio talu mwy na £50 i mewn yn ystod mis calendr.
-hts.help-information.section.payments.s3.p4=Os oes problem, holwch eich banc.
+hts.help-information.section.payments.s3.h1=Os gwnaethoch dalu gan ddefnyddio cerdyn debyd
+hts.help-information.section.payments.s3.p1=Dylai taliadau cerdyn debyd ymddangos yn eich cyfrif cyn pen un diwrnod gwaith.
+hts.help-information.section.payments.s3.h2=Os gwnaethoch dalu drwy drosglwyddiad banc
+hts.help-information.section.payments.s3.p2=Gall trosglwyddiadau banc gymryd 3 i 5 diwrnod gwaith i ymddangos yn eich cyfrif.
+hts.help-information.section.payments.s3.h3=Os gwnaethoch dalu drwy archeb sefydlog
+hts.help-information.section.payments.s3.p3=Gall archebion sefydlog gymryd 3 i 5 diwrnod gwaith i ymddangos yn eich cyfrif.
+hts.help-information.section.payments.s3.h4=Taliadau wedi methu
+hts.help-information.section.payments.s3.p4=Mae’n bosibl y bydd taliadau wedi methu yn dal i ymddangos yn eich cyfrif. Dylai’r rhain glirio ar ôl 2 awr.
+hts.help-information.section.payments.s3.p5=Os oes problem, holwch eich banc.
 
 # Help/information: Bonuses
 hts.help-information.section.bonuses.title=Bonysau
