@@ -593,7 +593,7 @@ hts.help-information.section.payments-info-not-available.s2.h1=There is a proble
 hts.help-information.section.payments-info-not-available.s2.p1=The details you’ll need to set up a standing order or bank transfer are not available at the moment.
 hts.help-information.section.payments-info-not-available.s2.p2=You’ll need to come back later to get these details.
 
-hts.help-information.section.payments.s3.title=When payments will appear in your account
+hts.help-information.section.payments.s3.title=When payments will show in your account
 hts.help-information.section.payments.s3.h1=If you paid by debit card
 hts.help-information.section.payments.s3.p1=Debit card payments should show in your account within one working day.
 hts.help-information.section.payments.s3.h2=If you paid by bank transfer
