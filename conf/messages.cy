@@ -603,6 +603,16 @@ hts.help-information.section.payments.s3.h4=Taliadau wedi methu
 hts.help-information.section.payments.s3.p4=Mae’n bosibl y bydd taliadau wedi methu yn dal i ymddangos yn eich cyfrif. Dylai’r rhain glirio ar ôl 2 awr.
 hts.help-information.section.payments.s3.p5=Os oes problem, holwch eich banc.
 
+hts.help-information.section.payments.s4.title=Taliad nad yw’n ymddangos yn eich cyfrif
+hts.help-information.section.payments.s4.p1=Gall gymryd 3 i 5 diwrnod gwaith i daliadau ymddangos yn eich cyfrif.
+hts.help-information.section.payments.s4.p2=Gwiriwch nad ydych wedi talu mwy na £50 i mewn yn ystod un mis calendr. Os byddwch yn gwneud taliad dros y terfyn hwn, bydd yn mynd yn ôl i’r cyfrif y daeth ohono cyn pen 5 diwrnod.
+hts.help-information.section.payments.s4.p3=Os gwnaethoch dalu drwy archeb sefydlog neu drosglwyddiad banc, gwiriwch eich bod wedi defnyddio’r manylion banc cywir.
+hts.help-information.section.bonuses.s4.ul1-li1=cod didoli - 60 89 77
+hts.help-information.section.bonuses.s4.ul1-li2=hif y cyfrif - 10028471
+hts.help-information.section.bonuses.s4.ul1-li3=enw’r cyfrif - HTS
+hts.help-information.section.payments.s4.p4=Gwiriwch eich bod wedi nodi’r cyfeirnod cywir. Rhaid mai’ch rhif cyfrif Cymorth i Gynilo yw hwn. Mae rhai banciau’n ei alw’n ‘cyfeirnod talu’, ‘archeb sefydlog’ neu ‘talai’. Os byddwch yn defnyddio’r rhif anghywir, bydd eich taliad yn mynd yn ôl i’r cyfrif y daeth ohono cyn pen 5 diwrnod.
+hts.help-information.section.payments.s4.p5=Os oes problem neu os ydych wedi nodi’r manylion anghywir, cysylltwch â’ch banc.
+
 # Help/information: Bonuses
 hts.help-information.section.bonuses.title=Bonysau
 hts.help-information.section.bonuses.s1.title=Pa fonysau y gallwch eu cael
