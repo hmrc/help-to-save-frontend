@@ -604,6 +604,17 @@ hts.help-information.section.payments.s3.h4=Failed payments
 hts.help-information.section.payments.s3.p4=Failed payments may still show in your account. These should clear after 2 hours.
 hts.help-information.section.payments.s3.p5=If there is a problem, check with your bank.
 
+hts.help-information.section.payments.s4.title=Payment not showing in your account
+hts.help-information.section.payments.s4.p1=It can take 3 to 5 working days for payments to show in your account.
+hts.help-information.section.payments.s4.p2=Check you have not paid in more than £50 in a calendar month. If you make a payment over this limit, it will go back to the account it came from within 5 days.
+hts.help-information.section.payments.s4.p3=If you have paid by standing order or bank transfer, check you used the correct bank details:
+
+hts.help-information.section.bonuses.s4.ul1-li1=sort code - 60 89 77
+hts.help-information.section.bonuses.s4.ul1-li2=account number - 10028471
+hts.help-information.section.bonuses.s4.ul1-li3=account name - HTS
+hts.help-information.section.payments.s4.p4=Check you used the correct reference number. This must be your Help to Save account number. Some banks call it the ‘standing order’, ‘payee’ or ‘payment reference number’. If you use the wrong number, your payment will go back to the account it came from within 5 days.
+hts.help-information.section.payments.s4.p5=If there is a problem or you used the wrong details, contact your bank.
+
 # Help/information: Bonuses
 hts.help-information.section.bonuses.title=Bonuses
 hts.help-information.section.bonuses.s1.title=What bonuses you can get

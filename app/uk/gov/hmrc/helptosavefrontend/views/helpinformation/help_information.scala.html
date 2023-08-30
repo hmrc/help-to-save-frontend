@@ -36,7 +36,8 @@
 @paymentDetailsList = @{detailsHelper.payment(
   payments_how_much().toString,
   setup_regular_payment(accountNumber).toString,
-  when_will_payments_appear().toString
+  when_will_payments_appear().toString,
+  payments_not_showing().toString
   )}
 @bonusesDetailsList = @{detailsHelper.bonuses(
   what_bonuses().toString,

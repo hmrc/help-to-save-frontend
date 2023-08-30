@@ -27,7 +27,7 @@ class DetailsHelper {
       summary = Text(title),
       content = HtmlContent(htmlContent)
     )
-  def payment(paymentsHowMuch: String, setUpRegularPayment: String, whenWillPaymentsAppear: String)
+  def payment(paymentsHowMuch: String, setUpRegularPayment: String, whenWillPaymentsAppear: String, paymentsNotShow:String)
              (implicit messages: Messages): List[Details] = {
     val paymentsHowMuchDetails: Details =
       detailsRow(
@@ -41,7 +41,11 @@ class DetailsHelper {
       detailsRow(
         messages("hts.help-information.section.payments.s3.title"),
         whenWillPaymentsAppear)
-    List(paymentsHowMuchDetails, whenWillPaymentsAppearDetails, setUpRegularPaymentDetails)
+    val paymentsNotShowing: Details =
+      detailsRow(
+        messages("hts.help-information.section.payments.s4.title"),
+        paymentsNotShow)
+    List(paymentsHowMuchDetails, whenWillPaymentsAppearDetails, paymentsNotShowing, setUpRegularPaymentDetails)
   }
   def bonuses(whatBonuses: String, highestBalance: String, firstBonus: String,
               finalBonus: String, bonusExamples: String, bonusPaid: String, howWithdrawalsAffectBonuses: String)
