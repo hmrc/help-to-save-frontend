@@ -651,7 +651,7 @@ hts.help-information.section.bonuses.s5.p4=Ym mlynyddoedd 3 a 4 rydych yn cynilo
 hts.help-information.section.bonuses.s5.h3=Mis calendr
 hts.help-information.section.bonuses.s5.p5=Mae mis calendr yn fis llawn o ddiwrnod cyntaf y mis tan ddiwrnod olaf y mis. Er enghraifft, 1 i 31 Ionawr.
 
-hts.help-information.section.bonuses.s6.title=Ble y telir eich bonws
+hts.help-information.section.bonuses.s6.title=Sut mae eich bonws yn cael ei dalu
 hts.help-information.section.bonuses.s6.p1=Telir unrhyw arian bonws a enillwch i mewn i’ch cyfrif banc, nid i’ch cyfrif Cymorth i Gynilo.
 hts.help-information.section.bonuses.s6.p2=Telir bonysau erbyn y 14eg o’r mis.
 
