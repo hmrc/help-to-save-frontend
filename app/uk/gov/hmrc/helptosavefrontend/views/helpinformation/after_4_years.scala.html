@@ -19,14 +19,9 @@
 @(maybeDate:Option[LocalDate])(implicit messages: play.api.i18n.Messages)
 
 @maybeDate match{
-  case Some(date) =>{
+  case Some(date) =>
    <p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p1",date.getDayOfMonth.toString+" "+date.getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
    <p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p2","14 "+date.plusMonths(1).getMonth.toString.toLowerCase.capitalize+" "+date.getYear.toString)</p>
- }
-  case None =>{
-<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p1.error")</p>
-<p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p2.error")</p>
- }
 }
 <p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p3")</p>
 <p class="govuk-body">@Messages("hts.help-information.section.when-your-account-ends.s2.p4")</p>
