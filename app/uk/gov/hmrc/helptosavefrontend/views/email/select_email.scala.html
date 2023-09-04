@@ -40,7 +40,8 @@
       classes = "govuk-label--s"
     ),
     hint = Some(Hint(
-      content = HtmlContent(messages("hts.select-email.enter-new-address-hint")))),
+      content = HtmlContent(messages("hts.select-email.enter-new-address-hint") +
+                "<br>"+s"${messages("hts.select-email.enter-new-address-body-text")}"))),
     errorMessage = if(form.error(newEmailKey).isDefined) {
       Some(ErrorMessage(
         content = HtmlContent(email_form_validation_error_message(form, newEmailKey)),
@@ -51,7 +52,6 @@
     spellcheck = Some(false),
     value = form.data.get(newEmailKey)
   ))
-  <p class="govuk-body govuk-!-margin-top-2">@messages("hts.select-email.enter-new-address-body-text")</p>
 }
 
 @defining((form.error("email").isDefined, form.error("new-email").isDefined, form.data.get("new-email"))){ case (hasNotSelected, hasInvalidEmail, newEmail) =>
