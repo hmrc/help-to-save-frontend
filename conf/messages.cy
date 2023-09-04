@@ -395,18 +395,6 @@ hts.account-creation-error.exit-button=Gadael a mynd i GOV.UK
 # Account created
 hts.account-created.title.h1=Cyfrif Cymorth i Gynilo wedi’i greu
 hts.account-created.title.p1=Eich rhif cyfrif yw
-hts.account-created.p1-1=Rydym wedi anfon e-bost o gadarnhad at
-hts.account-created.p1-2=.
-hts.account-created.p2=Mae gennych 4 blynedd yn dechrau nawr i ddefnyddio’ch cyfrif Cymorth i Gynilo.
-hts.account-created.h2=Nodweddion allweddol y cyfrif
-hts.account-created.p3=Gallwch wneud y canlynol:
-hts.account-created.ul1-li1=trefnu taliad rheolaidd i wneud cynilo’n haws
-hts.account-created.ul1-li2=cynilo rhwng &pound;1 a &pound;50 bob mis calendr
-hts.account-created.ul1-li3=dewis cynilo yn fisol, neu golli misoedd os ydych chi eisiau
-hts.account-created.ul1-li4=talu i mewn nifer o weithiau yn ystod mis calendr
-hts.account-created.ul1-li5=tynnu arian allan a pharhau i ennill bonws
-hts.account-created.p4=Mae gennych hyd at {0} i dalu i mewn y mis hwn.
-hts.account-created.continue-button=Mynd yn eich blaen i’ch cyfrif
 
 hts.account-created.savingreminders.h2=Nodynnau atgoffa ynghylch cynilion
 hts.account-created.savingreminders.l1=Gallwch hefyd
@@ -489,14 +477,13 @@ generic.yes=Iawn
 generic.no=Na
 
 hts.register.create_account.confirmation-info.p1=Rydym wedi anfon e-bost cadarnhau atoch yn:
-hts.register.create_account.confirmation-info.p2=. Mae’r e-bost yn rhoi manylion am sut mae’ch cyfrif yn gweithio.
+hts.register.create_account.confirmation-info.p2=Mae’r e-bost yn rhoi manylion am sut mae’ch cyfrif yn gweithio.
 hts.register.create_account.what-you-need-to-do.title=Yr hyn y mae angen i chi ei wneud nesaf
-hts.register.create_account.what-you-need-to-do.p1=Mae’ch cyfrif 4 blynedd Cymorth i Gynilo wedi’i greu, felly mae’r cloc wedi cychwyn.
+hts.register.create_account.what-you-need-to-do.p1=Mae’ch cyfrif Cymorth i Gynilo wedi’i greu. Gallwch ei gadw ar agor am hyd at 4 blynedd o ddyddiad heddiw.
 hts.register.create_account.what-you-need-to-do.p2=Gallwch ddechrau cynilo ac ennill bonysau’n syth.
-hts.register.create_account.what-you-need-to-do.p3.1=Gallwch gynilo hyd at £50 bob mis calendr. Mae gennych tan
-hts.register.create_account.what-you-need-to-do.p3.2=i dalu arian i mewn y mis hwn er mwyn dechrau ennill bonws.
+hts.register.create_account.what-you-need-to-do.p3=Gallwch gynilo hyd at £50 bob mis calendr. Mae gennych tan
 hts.register.create_account.payInNow.title=A ydych am dalu’ch taliad cyntaf i mewn nawr?
-hts.register.create_account.payInNow.noContent=Cofiwch dalu’ch taliad cyntaf i mewn erbyn y dyddiad a nodir uchod i ddechrau ennill bonws.
+hts.register.create_account.payInNow.hint=Mae gennych tan <strong>{0}</strong> i dalu arian i mewn y mis hwn er mwyn dechrau ennill bonws.
 hts.register.create_account.payInNow.continue=Yn eich blaen
 
 hts.payInNow.error=Dewiswch a ydych am dalu eich taliad cyntaf i mewn nawr
