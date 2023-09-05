@@ -397,18 +397,6 @@ hts.account-creation-error.exit-button=Exit to GOV.UK
 # Account created
 hts.account-created.title.h1=Help to Save account created
 hts.account-created.title.p1=Your account number is
-hts.account-created.p1-1=We’ve sent a confirmation email to
-hts.account-created.p1-2=.
-hts.account-created.p2=You have 4 years from now to use your Help to Save account.
-hts.account-created.h2=Key account features
-hts.account-created.p3=You can:
-hts.account-created.ul1-li1=set up a regular payment to make saving easier
-hts.account-created.ul1-li2=save from &pound;1 to &pound;50 each calendar month
-hts.account-created.ul1-li3=choose to save each month or miss months if you want to
-hts.account-created.ul1-li4=pay in many times in a calendar month
-hts.account-created.ul1-li5=withdraw money and still earn bonuses
-hts.account-created.p4=You have until {0} to pay in this month.
-hts.account-created.continue-button=Continue to your account
 
 hts.account-created.savingreminders.h2=Savings reminders
 hts.account-created.savingreminders.l1=You can also
@@ -490,14 +478,13 @@ generic.yes=Yes
 generic.no=No
 
 hts.register.create_account.confirmation-info.p1=We’ve sent a confirmation email to you at:
-hts.register.create_account.confirmation-info.p2=. The email gives you details on how your account works.
+hts.register.create_account.confirmation-info.p2=The email gives you details on how your account works.
 hts.register.create_account.what-you-need-to-do.title=What you need to do next
-hts.register.create_account.what-you-need-to-do.p1=Your 4-year Help to Save account has been created, so the clock has started.
+hts.register.create_account.what-you-need-to-do.p1=Your Help to Save account has been created. You can keep it open for up to 4 years from today.
 hts.register.create_account.what-you-need-to-do.p2=You can start saving and earning bonuses straight away.
-hts.register.create_account.what-you-need-to-do.p3.1=You can save up to £50 each calendar month. You have until
-hts.register.create_account.what-you-need-to-do.p3.2=to pay in money this month to start earning a bonus.
+hts.register.create_account.what-you-need-to-do.p3=You can save up to £50 each calendar month.
 hts.register.create_account.payInNow.title=Do you want to pay in your first deposit now?
-hts.register.create_account.payInNow.noContent=Remember to pay your first deposit by the date mentioned above to start earning a bonus.
+hts.register.create_account.payInNow.hint=You have until <strong>{0}</strong> to pay money this month to start earning a bonus.
 hts.register.create_account.payInNow.continue=Continue
 
 hts.payInNow.error=Select whether you want to pay in your first deposit now

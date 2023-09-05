@@ -55,43 +55,45 @@ viewHelpers: ViewHelpers
     }
 
     @viewHelpers.govukPanel(Panel(
-      title = Text(messages("hts.account-created.title.h1")),
+      title = Text(title),
       content = HtmlContent(s"${messages("hts.account-created.title.p1")}<br><strong>${accountNumber}</strong>")
     ))
 
-    <p class="govuk-body">@Html(Messages("hts.register.create_account.confirmation-info.p1")) @email@Html(Messages("hts.register.create_account.confirmation-info.p2"))</p>
-    <h2 class="govuk-heading-m">@Messages("hts.register.create_account.what-you-need-to-do.title")</h2>
-    <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p1")</p>
-    <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p2")</p>
-    <p class="govuk-body">@Messages("hts.register.create_account.what-you-need-to-do.p3.1") <strong class="bold">@{DateUtils.toLocalisedString(lastPayDateThisMonth)}</strong> @Messages("hts.register.create_account.what-you-need-to-do.p3.2")</p>
+    <p class="govuk-body">@messages("hts.register.create_account.confirmation-info.p1") @email. @messages("hts.register.create_account.confirmation-info.p2")</p>
+    <h2 class="govuk-heading-m">@messages("hts.register.create_account.what-you-need-to-do.title")</h2>
+    <p class="govuk-body">@messages("hts.register.create_account.what-you-need-to-do.p1")</p>
+    <p class="govuk-body">@messages("hts.register.create_account.what-you-need-to-do.p2")</p>
+    <p class="govuk-body">@messages("hts.register.create_account.what-you-need-to-do.p3")</p>
 
     @viewHelpers.form(routes.RegisterController.accessOrPayIn) {
         @viewHelpers.govukRadios(Radios(
           fieldset = Some(Fieldset(
             legend = Some(Legend(
               content = Text(messages("hts.register.create_account.payInNow.title")),
-              classes = "govuk-fieldset__legend--s",
-              isPageHeading = true
+              classes = "govuk-fieldset__legend--m",
+              isPageHeading = false
             ))
           )),
-            idPrefix = Some(key),
-            name = key,
-            errorMessage = if(form(key).hasErrors) {
-              Some(ErrorMessage(content = Text(messages("hts.payInNow.error"))))
-            } else None,
-            items = Seq(
-              RadioItem(
-                content = Text(Messages("generic.yes")),
-                value = Some("true"),
-                checked = form.data.values.toList.contains("true")
-              ),
-              RadioItem(
-                content = Text(Messages("generic.no")),
-                value = Some("false"),
-                checked = form.data.values.toList.contains("false"),
-                conditionalHtml = Some(Html("<p class=govuk-body>" + messages("hts.register.create_account.payInNow.noContent") + "</p>"))
-              )
+          hint = Some(Hint(
+            content = HtmlContent(messages("hts.register.create_account.payInNow.hint", DateUtils.toLocalisedString(lastPayDateThisMonth)))
+          )),
+          idPrefix = Some(key),
+          name = key,
+          errorMessage = if(form(key).hasErrors) {
+            Some(ErrorMessage(content = Text(messages("hts.payInNow.error"))))
+          } else None,
+          items = Seq(
+            RadioItem(
+              content = Text(messages("generic.yes")),
+              value = Some("true"),
+              checked = form.data.values.toList.contains("true")
+            ),
+            RadioItem(
+              content = Text(messages("generic.no")),
+              value = Some("false"),
+              checked = form.data.values.toList.contains("false")
             )
+          )
         ))
 
         @viewHelpers.govukButton(Button(
@@ -101,30 +103,30 @@ viewHelpers: ViewHelpers
             "data-ga-event-action" -> "Continue",
             "data-ga-event-label" -> "Account created page"
           ),
-          content = Text(Messages("hts.register.create_account.payInNow.continue"))
+          content = Text(messages("hts.register.create_account.payInNow.continue"))
         ))
     }
 
     @if(appConfig.pushToApp){
-      <h2 class="govuk-heading-m">@Messages("hts.register.create_account.hmrc-app.title")</h2>
-      <p class="govuk-body">@Messages("hts.register.create_account.hmrc-app.benefits.s1")</p>
+      <h2 class="govuk-heading-m">@messages("hts.register.create_account.hmrc-app.title")</h2>
+      <p class="govuk-body">@messages("hts.register.create_account.hmrc-app.benefits.s1")</p>
       <ul class="govuk-list govuk-list--bullet">
-          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li1")</li>
-          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li2")</li>
-          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li3")</li>
-          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li4")</li>
-          <li>@Messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li5")</li>
+          <li>@messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li1")</li>
+          <li>@messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li2")</li>
+          <li>@messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li3")</li>
+          <li>@messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li4")</li>
+          <li>@messages("hts.register.create_account.hmrc-app.benefits.s1.ul1-li5")</li>
       </ul>
 
-      <p class="govuk-body">@Messages("hts.register.create_account.hmrc-app.get-the-app.s1")</p>
+      <p class="govuk-body">@messages("hts.register.create_account.hmrc-app.get-the-app.s1")</p>
 
-      <a href='@appConfig.appleAppUrl' target="_blank" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.label")'>
-          <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.apple.alt")' src='@controllers.routes.Assets.versioned("images/apple-store.svg")'></a>
+      <a href='@appConfig.appleAppUrl' target="_blank" aria-label='@messages("hts.register.create_account.hmrc-app.get-the-app.apple.label")'>
+          <img alt='@messages("hts.register.create_account.hmrc-app.get-the-app.apple.alt")' src='@controllers.routes.Assets.versioned("images/apple-store.svg")'></a>
 
-      <a href="@appConfig.androidAppUrl" target="_blank" aria-label='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.label")'>
-          <img alt='@Messages("hts.register.create_account.hmrc-app.get-the-app.android.alt")' src='@controllers.routes.Assets.versioned("images/android-store.svg")'></a>
+      <a href="@appConfig.androidAppUrl" target="_blank" aria-label='@messages("hts.register.create_account.hmrc-app.get-the-app.android.label")'>
+          <img alt='@messages("hts.register.create_account.hmrc-app.get-the-app.android.alt")' src='@controllers.routes.Assets.versioned("images/android-store.svg")'></a>
 
-      <p class="govuk-body">@Messages("hts.register.create_account.hmrc-app.get-the-app.new-tab")</p>
+      <p class="govuk-body">@messages("hts.register.create_account.hmrc-app.get-the-app.new-tab")</p>
     }
 
 }

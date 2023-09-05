@@ -568,7 +568,7 @@ class RegisterControllerSpec
         status(result) shouldBe OK
         contentAsString(result) should include("Account created")
         contentAsString(result) should include(accountNumber)
-        contentAsString(result) should include("""You have until <strong class="bold">31 January 1970</strong> to pay in money this month""")
+        contentAsString(result) should include("""You have until <strong>31 January 1970</strong> to pay money this month to start earning a bonus.""")
       }
 
       "redirect to check eligibility" when {
