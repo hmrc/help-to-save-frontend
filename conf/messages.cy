@@ -353,7 +353,6 @@ hts.cannot-change-email.registration.p3=Neu gallwch ddod yn ôl yn ddiweddarach 
 hts.cannot-change-email.de.to.digital.p2=Gallwch newid i gyfrif Cymorth i Gynilo ar-lein nawr drwy ddefnyddio’r cyfeiriad e-bost sydd gennym ar eich cyfer. Byddwch yn gallu diweddaru eich cyfeiriad e-bost yn ddiweddarach drwy gyfrwng eich cyfrif ar-lein.
 hts.cannot-change-email.de.to.digital.p3=Neu gallwch adael nawr a dod yn ôl yn ddiweddarach i ddefnyddio cyfeiriad e-bost gwahanol.
 hts.cannot-change-email.header1=Beth rydych am ei wneud?
-hts.cannot-change-email.p4=Rwyf eisiau:
 hts.cannot-change-email.opt1=defnyddio {0}
 hts.cannot-change-email.opt2=ceisio eto nes ymlaen a gadael i fynd at Wybodaeth am Gymorth i Gynilo
 hts.cannot-change-email.select-option=Dewiswch un opsiwn
