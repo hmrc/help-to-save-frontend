@@ -80,7 +80,10 @@ viewHelpers: ViewHelpers
           idPrefix = Some(key),
           name = key,
           errorMessage = if(form(key).hasErrors) {
-            Some(ErrorMessage(content = Text(messages("hts.payInNow.error"))))
+            Some(ErrorMessage(
+              content = Text(messages("hts.payInNow.error")),
+              visuallyHiddenText = Some(messages("hts.global.error.prefix"))
+            ))
           } else None,
           items = Seq(
             RadioItem(
