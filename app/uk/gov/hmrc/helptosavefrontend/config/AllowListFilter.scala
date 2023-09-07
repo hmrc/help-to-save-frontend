@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import akka.stream.ActorMaterializer
+import akka.stream.Materializer
 import com.google.inject.Inject
 import configs.syntax._
 import play.api.Configuration
@@ -27,7 +27,7 @@ import uk.gov.hmrc.allowlist.{AkamaiAllowlistFilter => AkamaiAllowListFilter}
 
 import scala.concurrent.Future
 
-class AllowListFilter @Inject() (configuration: Configuration, val mat:ActorMaterializer)
+class AllowListFilter @Inject() (configuration: Configuration, val mat:Materializer)
     extends AkamaiAllowListFilter with Logging {
 
   override def allowlist: Seq[String] =
