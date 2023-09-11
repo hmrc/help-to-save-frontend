@@ -579,10 +579,25 @@ hts.help-information.section.payments-info-not-available.s2.p1=Nid yw'r manylion
 hts.help-information.section.payments-info-not-available.s2.p2=Bydd angen i chi ddod yn ôl yn nes ymlaen i gael y manylion hyn.
 
 hts.help-information.section.payments.s3.title=Pryd fydd taliadau yn ymddangos yn eich cyfrif
-hts.help-information.section.payments.s3.p1=Dylai taliadau cerdyn debyd ymddangos yn eich cyfrif ar unwaith. Bydd angen i chi aros un diwrnod gwaith cyn y gallwch dynnu arian a dalwyd i mewn gyda cherdyn debyd.
-hts.help-information.section.payments.s3.p2=Mae trosglwyddiadau banc neu daliadau rheolaidd, a elwir yn archebion sefydlog, yn cymryd hyd at 3 diwrnod gwaith i ymddangos yn eich cyfrif.
-hts.help-information.section.payments.s3.p3=Bydd eich taliad yn cael ei ddychwelyd os ydych yn ceisio talu mwy na £50 i mewn yn ystod mis calendr.
-hts.help-information.section.payments.s3.p4=Os oes problem, holwch eich banc.
+hts.help-information.section.payments.s3.h1=Os gwnaethoch dalu gan ddefnyddio cerdyn debyd
+hts.help-information.section.payments.s3.p1=Dylai taliadau cerdyn debyd ymddangos yn eich cyfrif cyn pen un diwrnod gwaith.
+hts.help-information.section.payments.s3.h2=Os gwnaethoch dalu drwy drosglwyddiad banc
+hts.help-information.section.payments.s3.p2=Gall trosglwyddiadau banc gymryd 3 i 5 diwrnod gwaith i ymddangos yn eich cyfrif.
+hts.help-information.section.payments.s3.h3=Os gwnaethoch dalu drwy archeb sefydlog
+hts.help-information.section.payments.s3.p3=Gall archebion sefydlog gymryd 3 i 5 diwrnod gwaith i ymddangos yn eich cyfrif.
+hts.help-information.section.payments.s3.h4=Taliadau wedi methu
+hts.help-information.section.payments.s3.p4=Mae’n bosibl y bydd taliadau wedi methu yn dal i ymddangos yn eich cyfrif. Dylai’r rhain glirio ar ôl 2 awr.
+hts.help-information.section.payments.s3.p5=Os oes problem, holwch eich banc.
+
+hts.help-information.section.payments.s4.title=Taliad nad yw’n ymddangos yn eich cyfrif
+hts.help-information.section.payments.s4.p1=Gall gymryd 3 i 5 diwrnod gwaith i daliadau ymddangos yn eich cyfrif.
+hts.help-information.section.payments.s4.p2=Gwiriwch nad ydych wedi talu mwy na £50 i mewn yn ystod un mis calendr. Os byddwch yn gwneud taliad dros y terfyn hwn, bydd yn mynd yn ôl i’r cyfrif y daeth ohono cyn pen 5 diwrnod.
+hts.help-information.section.payments.s4.p3=Os gwnaethoch dalu drwy archeb sefydlog neu drosglwyddiad banc, gwiriwch eich bod wedi defnyddio’r manylion banc cywir:
+hts.help-information.section.bonuses.s4.ul1-li1=cod didoli - 60 89 77
+hts.help-information.section.bonuses.s4.ul1-li2=rhif y cyfrif - 10028471
+hts.help-information.section.bonuses.s4.ul1-li3=enw’r cyfrif - HTS
+hts.help-information.section.payments.s4.p4=Gwiriwch eich bod wedi nodi’r cyfeirnod cywir. Rhaid mai’ch rhif cyfrif Cymorth i Gynilo yw hwn. Mae rhai banciau’n ei alw’n ‘cyfeirnod talu’, ‘archeb sefydlog’ neu ‘talai’. Os byddwch yn defnyddio’r rhif anghywir, bydd eich taliad yn mynd yn ôl i’r cyfrif y daeth ohono cyn pen 5 diwrnod.
+hts.help-information.section.payments.s4.p5=Os oes problem neu os ydych wedi nodi’r manylion anghywir, cysylltwch â’ch banc.
 
 # Help/information: Bonuses
 hts.help-information.section.bonuses.title=Bonysau
@@ -622,8 +637,9 @@ hts.help-information.section.bonuses.s5.p4=Ym mlynyddoedd 3 a 4 rydych yn cynilo
 hts.help-information.section.bonuses.s5.h3=Mis calendr
 hts.help-information.section.bonuses.s5.p5=Mae mis calendr yn fis llawn o ddiwrnod cyntaf y mis tan ddiwrnod olaf y mis. Er enghraifft, 1 i 31 Ionawr.
 
-hts.help-information.section.bonuses.s6.title=Ble y telir eich bonws
+hts.help-information.section.bonuses.s6.title=Sut mae eich bonws yn cael ei dalu
 hts.help-information.section.bonuses.s6.p1=Telir unrhyw arian bonws a enillwch i mewn i’ch cyfrif banc, nid i’ch cyfrif Cymorth i Gynilo.
+hts.help-information.section.bonuses.s6.p2=Telir bonysau erbyn y 14eg o’r mis.
 
 hts.help-information.section.bonuses.s7.title=Sut mae tynnu arian allan yn effeithio ar eich bonysau
 hts.help-information.section.bonuses.s7.p1=Gallwch dynnu arian allan ac fe fyddwch yn parhau i gael bonysau.
@@ -697,9 +713,9 @@ hts.help-information.section.when-your-account-ends.s2.title=Yr hyn sy’n digwy
 hts.help-information.section.when-your-account-ends.s2.p1=Bydd eich cyfrif yn cau ar {0}
 hts.help-information.section.when-your-account-ends.s2.p2=Dylech gael taliad i’ch cyfrif banc erbyn {0}
 hts.help-information.section.when-your-account-ends.s2.p1.error=Bydd eich cyfrif yn cau 4 blynedd ar ôl iddo ddechrau. Mae cyfrifon wastad yn cau ar ddiwrnod olaf y mis.
-hts.help-information.section.when-your-account-ends.s2.p2.error=Er enghraifft, os gwnaethoch agor eich cyfrif ar 15 Ebrill 2021, rydym yn cymryd hyn fel petai’r cyfrif wedi ei ddechrau ar 1 Ebrill 2021. Felly, byddai’ch cyfrif yn cau ar 31 Mawrth 2025. Yna, byddech yn cael taliad i’ch cyfrif banc enwebedig yn y DU erbyn 10 Ebrill 2025.
+hts.help-information.section.when-your-account-ends.s2.p2.error=Er enghraifft, os gwnaethoch agor eich cyfrif ar 6 Ebrill 2021, rydym yn cymryd hyn fel petai’r cyfrif wedi ei ddechrau ar 1 Ebrill 2021. Felly, byddai’ch cyfrif yn cau ar 31 Mawrth 2025. Yna, byddech yn cael taliad i’ch cyfrif banc enwebedig yn y DU erbyn 10 Ebrill 2025.
 hts.help-information.section.when-your-account-ends.s2.p3=Os nad ydych wedi cael taliad erbyn hynny, cysylltwch â ni ar 0800 138 0555
-hts.help-information.section.when-your-account-ends.s2.p4=Os ydych wedi ennill bonws terfynol a bod gennych rai cynilion yn eich cyfrif Cymorth i Gynilo, bydd y rhain yn cael eu talu i’ch cyfrif banc enwebedig yn y DU fel dau swm ar wahân.
+hts.help-information.section.when-your-account-ends.s2.p4=Os ydych wedi ennill bonws terfynol a bod gennych rywfaint o gynilion yn eich cyfrif Cymorth i Gynilo, caiff y rhain eu talu i’ch cyfrif banc enwebedig yn y DU fel dau swm ar wahân. Dylech gael eich bonws erbyn y 14eg o’r mis.
 hts.help-information.section.when-your-account-ends.s2.p5=Byddwch yn gallu bwrw golwg dros eich cyfrif ar ôl iddo gau ond ni fyddwch yn gallu gwneud rhagor o daliadau i’ch cyfrif.
 hts.help-information.section.when-your-account-ends.s2.p6=Byddwch yn gallu bwrw golwg dros eich cyfrif caeedig a’ch hanes trafodion, a darllen eich negeseuon
 hts.help-information.section.when-your-account-ends.s3.title=Sut i barhau i gynilo ar ôl i’ch cyfrif gau

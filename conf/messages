@@ -579,11 +579,26 @@ hts.help-information.section.payments-info-not-available.s2.h1=There is a proble
 hts.help-information.section.payments-info-not-available.s2.p1=The details you’ll need to set up a standing order or bank transfer are not available at the moment.
 hts.help-information.section.payments-info-not-available.s2.p2=You’ll need to come back later to get these details.
 
-hts.help-information.section.payments.s3.title=When payments will appear in your account
-hts.help-information.section.payments.s3.p1=Debit card payments should appear in your account immediately. You’ll need to wait one working day before you can withdraw money paid in by debit card.
-hts.help-information.section.payments.s3.p2=Bank transfers or regular payments, called standing orders, take up to 3 working days to appear in your account.
-hts.help-information.section.payments.s3.p3=Your payment will be returned if you try to pay in more than £50 in a calendar month.
-hts.help-information.section.payments.s3.p4=If there is a problem, check with your bank.
+hts.help-information.section.payments.s3.title=When payments will show in your account
+hts.help-information.section.payments.s3.h1=If you paid by debit card
+hts.help-information.section.payments.s3.p1=Debit card payments should show in your account within one working day.
+hts.help-information.section.payments.s3.h2=If you paid by bank transfer
+hts.help-information.section.payments.s3.p2=Bank transfers can take 3 to 5 working days to show in your account.
+hts.help-information.section.payments.s3.h3=If you paid by standing order
+hts.help-information.section.payments.s3.p3=Standing orders can take 3 to 5 working days to show in your account.
+hts.help-information.section.payments.s3.h4=Failed payments
+hts.help-information.section.payments.s3.p4=Failed payments may still show in your account. These should clear after 2 hours.
+hts.help-information.section.payments.s3.p5=If there is a problem, check with your bank.
+
+hts.help-information.section.payments.s4.title=Payment not showing in your account
+hts.help-information.section.payments.s4.p1=It can take 3 to 5 working days for payments to show in your account.
+hts.help-information.section.payments.s4.p2=Check you have not paid in more than £50 in a calendar month. If you make a payment over this limit, it will go back to the account it came from within 5 days.
+hts.help-information.section.payments.s4.p3=If you have paid by standing order or bank transfer, check you used the correct bank details:
+hts.help-information.section.bonuses.s4.ul1-li1=sort code - 60 89 77
+hts.help-information.section.bonuses.s4.ul1-li2=account number - 10028471
+hts.help-information.section.bonuses.s4.ul1-li3=account name - HTS
+hts.help-information.section.payments.s4.p4=Check you used the correct reference number. This must be your Help to Save account number. Some banks call it the ‘standing order’, ‘payee’ or ‘payment reference number’. If you use the wrong number, your payment will go back to the account it came from within 5 days.
+hts.help-information.section.payments.s4.p5=If there is a problem or you used the wrong details, contact your bank.
 
 # Help/information: Bonuses
 hts.help-information.section.bonuses.title=Bonuses
@@ -623,8 +638,9 @@ hts.help-information.section.bonuses.s5.p4=In years 3 and 4 you save money but a
 hts.help-information.section.bonuses.s5.h3=Calendar Month
 hts.help-information.section.bonuses.s5.p5=A calendar month is a full month from the first day of the month until the last day of the month. For example, 1 to 31 January.
 
-hts.help-information.section.bonuses.s6.title=Where your bonus is paid
+hts.help-information.section.bonuses.s6.title=How your bonus is paid
 hts.help-information.section.bonuses.s6.p1=Any bonus money you earn will be paid into your bank account, not your Help to Save account.
+hts.help-information.section.bonuses.s6.p2=Bonuses are paid by the 14th of the month.
 
 hts.help-information.section.bonuses.s7.title=How withdrawals affect bonuses
 hts.help-information.section.bonuses.s7.p1=You can make withdrawals and you will still get bonuses.
@@ -698,9 +714,9 @@ hts.help-information.section.when-your-account-ends.s2.title=What happens after 
 hts.help-information.section.when-your-account-ends.s2.p1=Your account will close on {0}.
 hts.help-information.section.when-your-account-ends.s2.p2=You should receive payment into your UK bank account by {0}.
 hts.help-information.section.when-your-account-ends.s2.p1.error=Your account will close 4 years after it started. Accounts always close on the last day of a month.
-hts.help-information.section.when-your-account-ends.s2.p2.error=For example, if you opened your account on 15 April 2021, we count it as having started on 1 April 2021, so your account would close on 31 March 2025. You would then receive payment into your chosen UK bank account by 10 April 2025.
+hts.help-information.section.when-your-account-ends.s2.p2.error=For example, if you opened your account on 6 April 2021, we count it as having started on 1 April 2021, so your account would close on 31 March 2025. You would then receive payment into your chosen UK bank account by 10 April 2025.
 hts.help-information.section.when-your-account-ends.s2.p3=If you have not received payment by then, call 0300 322 7093.
-hts.help-information.section.when-your-account-ends.s2.p4=If you have earned a final bonus and you have some savings in your Help to Save account, these will be paid into your nominated UK bank account as two separate amounts.
+hts.help-information.section.when-your-account-ends.s2.p4=If you have earned a final bonus and you have some savings in your Help to Save account, these will be paid into your nominated UK bank account as two separate amounts. You should get your bonus by the 14th of the month.
 hts.help-information.section.when-your-account-ends.s2.p5=You will be able to view your account after it has closed but you will not be able to make any more payments into your account.
 hts.help-information.section.when-your-account-ends.s2.p6=You will be able to view your closed account, transactions history and read your messages.
 hts.help-information.section.when-your-account-ends.s3.title=How to carry on saving after your account closes
