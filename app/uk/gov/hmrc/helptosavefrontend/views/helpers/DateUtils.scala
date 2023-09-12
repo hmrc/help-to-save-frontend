@@ -22,13 +22,17 @@ import play.api.i18n.Messages
 
 object DateUtils {
 
-  val dayExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("d")
-  val monthExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM")
-  val yearExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy")
+  private val dayExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("d")
+  private val monthExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM")
+  private val yearExtractor: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy")
+
+  def toLocalisedStringMonth(date: LocalDate)(implicit messages: Messages): String = {
+    val monthKey = date.format(monthExtractor)
+    messages.translate(s"hts.month.$monthKey", Seq.empty).getOrElse(monthKey)
+  }
 
   def toLocalisedString(date: LocalDate)(implicit messages: Messages): String = {
-    val monthKey = date.format(monthExtractor)
-    val monthValue = messages.translate(s"hts.month.${monthKey}", Seq.empty).getOrElse(monthKey)
+    val monthValue: String = toLocalisedStringMonth(date)
     s"${date.format(dayExtractor)} $monthValue ${date.format(yearExtractor)}"
   }
 }
