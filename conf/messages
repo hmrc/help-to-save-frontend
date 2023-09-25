@@ -751,6 +751,19 @@ language-switcher.welsh.hidden=Newid yr iaith i’r Gymraeg
 language-switcher.welsh.hover=Defnyddio’r cyfrif hwn yn Cymraeg
 language-switcher.nav=Language switcher
 
+#### Help to Save Explained ####
+
+hts.explained.heading = ‘Help to Save explained" video transcript
+hts.explained.p1 = Help to Save is a new government savings account where you can get a bonus of 50 pence for every pound you save.
+hts.explained.p2 = If you receive Working Tax Credit or Universal Credit, you could be eligible for Help to Save.
+hts.explained.p3 = You can save between £1 and £50 every month in a Help to Save account. And how much you save and when is up to you.
+hts.explained.p4 = After 2 years, you’ll get a 50% bonus on your savings. And if you continue saving you could get another 50% bonus after 4 years. This means you could receive tax-free bonuses worth up to £1,200, to spend how you like.
+hts.explained.p5 = Paying in is easy. You can make one-off payments by debit card or set up a standing order to make regular payments.
+hts.explained.p6 = And if you need some money quickly, you can withdraw it at any time from your account.
+hts.explained.p7 = If your situation changes and you stop receiving Working Tax Credit or Universal Credit, you can still keep your account, pay in money and get any bonuses you're entitled to.
+hts.explained.p8 = Help to Save is backed by the government so all your savings are secure.
+hts.explained.p9 = To start saving, apply today for Help to Save.
+
 # Savings reminders
 hts.email-saving-remainders.title.h1=Email savings reminders
 hts.email-saving-remainders.intro=Email reminders help you remember to save each month. This helps you earn the highest possible bonus.
