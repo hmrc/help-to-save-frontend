@@ -752,7 +752,7 @@ language-switcher.nav=Newid yr iaith
 
 #### Help to Save Explained ####
 
-hts.explained.heading = ‘Cymorth i Gynilo wedi’i esbonio’ - trawsgrifiad y fideo
+hts.explained.heading = “Cymorth i Gynilo wedi’i esbonio” - trawsgrifiad y fideo
 hts.explained.p1 = Cyfrifo cynilo newydd gan y llywodraeth yw Cymorth i Gynilo. Drwy ei defnyddio gallwch gael bonws o 50 ceiniog am bob punt yr ydych yn ei gynilo.
 hts.explained.p2 = Os ydych yn cael Credydau Treth Gwaith neu Gredyd Cynhwysol, fe allech fod yn gymwys ar gyfer Cymorth i Gynilo.
 hts.explained.p3 = Gallwch gynilo rhwng £1 a £50 bob mis mewn cyfrif Cymorth i Gynilo. A’ch dewis chi yw faint yr ydych yn ei gynilo a phryd y byddwch yn gwneud hynny.
