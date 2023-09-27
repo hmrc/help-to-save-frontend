@@ -750,6 +750,19 @@ language-switcher.welsh.hidden=Newid yr iaith i''r Gymraeg
 language-switcher.welsh.hover=Defnyddio''r cyfrif hwn yn Cymraeg
 language-switcher.nav=Newid yr iaith
 
+#### Help to Save Explained ####
+
+hts.explained.heading = “Cymorth i Gynilo wedi’i esbonio” - trawsgrifiad y fideo
+hts.explained.p1 = Cyfrifo cynilo newydd gan y llywodraeth yw Cymorth i Gynilo. Drwy ei defnyddio gallwch gael bonws o 50 ceiniog am bob punt yr ydych yn ei gynilo.
+hts.explained.p2 = Os ydych yn cael Credydau Treth Gwaith neu Gredyd Cynhwysol, fe allech fod yn gymwys ar gyfer Cymorth i Gynilo.
+hts.explained.p3 = Gallwch gynilo rhwng £1 a £50 bob mis mewn cyfrif Cymorth i Gynilo. A’ch dewis chi yw faint yr ydych yn ei gynilo a phryd y byddwch yn gwneud hynny.
+hts.explained.p4 = Ar ôl dwy 2 flynedd, cewch fonws o 50% ar eich cynilion. Ac os byddwch yn parhau i gynilo, gallech gael bonws arall o 50% ar ôl 4 blynedd. Mae hyn yn golygu y gallech gael bonysau rhydd o dreth gwerth hyd at £1,200 i’w gwario fel y dymunwch.
+hts.explained.p5 = Mae talu i mewn yn hawdd. Gallwch wneud taliadau untro gyda cherdyn debyd neu drefnu archeb sefydlog i wneud taliadau rheolaidd.
+hts.explained.p6 = Ac os oes angen rhywfaint o arian arnoch yn gyflym, gallwch ei dynnu o’ch cyfrif ar unrhyw adeg.
+hts.explained.p7 = Os yw’ch sefyllfa’n newid, ac rydych yn rhoi’r gorau i gael Credyd Treth Gwaith neu Gredyd Cynhwysol, byddwch yn dal i allu cadw eich cyfrif, talu arian i mewn a chael unrhyw fonws y mae hawl gennych iddo.
+hts.explained.p8 = Mae Cymorth i Gynilo wedi’i gefnogi gan y llywodraeth sy’n golygu bod eich cynilion i gyd yn ddiogel.
+hts.explained.p9 = I ddechrau cynilo, gwnewch gais am Gymorth i Gynilo.
+
 # Savings reminders
 hts.email-saving-remainders.title.h1=E-byst atgoffa ynghylch cynilion
 hts.email-saving-remainders.intro=Mae e-byst atgoffa yn eich helpu i gofio cynilo bob mis. Mae hyn yn eich helpu i ennill y bonws mwyaf posibl.
