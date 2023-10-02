@@ -24,13 +24,25 @@
 @title = @{Messages("hts.iv.insufficient_evidence.title.h1")}
 
 @layout(title) {
-    <h1 class="govuk-heading-l">@title</h1>
-    <p class="govuk-body">@Html(Messages("hts.iv.insufficient_evidence.p1"))</p>
-    <p class="govuk-body">
-        @Messages("hts.iv.insufficient_evidence.telephone-title")
-        <br />
-        <strong class="bold">@Messages("hts.iv.insufficient_evidence.telephone-number")</strong>
-    </p>
-        <h2>@Messages("hts.iv.insufficient_evidence.h2")</h2>
-        <p class="govuk-body">@Html(Messages("hts.iv.insufficient_evidence.p2"))</p>
+  <h1 class="govuk-heading-l">
+    @title
+  </h1>
+
+  <p class="govuk-body">
+    @Html(Messages("hts.iv.insufficient_evidence.p1"))
+  </p>
+
+  <p class="govuk-body">
+    @Messages("hts.iv.insufficient_evidence.telephone-title")
+    <br />
+    <strong class="govuk-!-font-weight-bold">@Messages("hts.iv.insufficient_evidence.telephone-number")</strong>
+  </p>
+
+  <h2 class="govuk-heading-m">
+    @Messages("hts.iv.insufficient_evidence.h2")
+  </h2>
+
+  <p class="govuk-body">
+    @Html(Messages("hts.iv.insufficient_evidence.p2"))
+  </p>
 }
