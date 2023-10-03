@@ -131,7 +131,7 @@ class EmailVerificationConnectorImpl @Inject() (http: HttpClient, metrics: Metri
       case other =>
         logger.warn(
           s"Received unexpected status $other from email verification" +
-            s" body = ${maskNino(response.body)} (round-trip time: ${nanosToPrettyString(time)})",
+            s"(round-trip time: ${nanosToPrettyString(time)})",
           nino
         )
         Left(OtherError)
