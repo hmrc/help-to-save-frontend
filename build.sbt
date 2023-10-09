@@ -1,7 +1,6 @@
 import scala.language.postfixOps
 
 val appName = "help-to-save-frontend"
-val silencerVersion = "1.7.13"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
@@ -12,12 +11,6 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
-  .settings(scalacOptions ++= List(
-    "-P:silencer:pathFilters=routes;views"
-  ),
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
-    )
-  )
+  .settings(scalacOptions += "-Wconf:src=routes/.*:s")
+  .settings(scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s")
   .settings(CodeCoverageSettings.settings *)
