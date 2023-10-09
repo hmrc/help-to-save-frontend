@@ -13,18 +13,6 @@ lazy val formatMessageQuotes = taskKey[Unit]("Makes sure smart quotes are used i
 lazy val plugins: Seq[Plugins] = Seq.empty
 lazy val playSettings: Seq[Setting[_]] = Seq.empty
 
-lazy val scoverageSettings = {
-  import scoverage.ScoverageKeys
-  Seq(
-    // Semicolon-separated list of regexs matching classes to exclude
-    ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|views.*);.*(AuthService|BuildInfo|Routes).*",
-    ScoverageKeys.coverageMinimumStmtTotal := 90,
-    ScoverageKeys.coverageFailOnMinimum := true,
-    ScoverageKeys.coverageHighlighting := true,
-    Test / parallelExecution := false
-  )
-}
-
 def wartRemoverSettings(ignoreFiles: File ⇒ Seq[File] = _ ⇒ Seq.empty[File]) = {
   // list of warts here: http://www.wartremover.org/doc/warts.html
   val excludedWarts = Seq(
@@ -76,7 +64,7 @@ lazy val commonSettings = Seq(
   ),
   Compile / scalacOptions -= "utf8",
 ) ++
-  scalaSettings ++ defaultSettings() ++ scoverageSettings ++ playSettings
+  scalaSettings ++ defaultSettings() ++ playSettings
 
 lazy val microservice = Project(appName, file("."))
   .settings(commonSettings: _*)
@@ -122,3 +110,4 @@ lazy val microservice = Project(appName, file("."))
     },
     compile := ((Compile / compile) dependsOn formatMessageQuotes).value
   )
+  .settings(CodeCoverageSettings.settings *)
