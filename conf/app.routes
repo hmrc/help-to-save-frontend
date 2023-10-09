@@ -99,4 +99,3 @@ GET        /apply-savings-reminders                         uk.gov.hmrc.helptosa
 POST       /apply-savings-reminders                         uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.submitApplySavingsReminderPage
 GET        /apply-savings-reminders-signup                  uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.getApplySavingsReminderSignUpPage
 POST       /apply-savings-reminders-signup                  uk.gov.hmrc.helptosavefrontend.controllers.ReminderController.submitApplySavingsReminderSignUpPage
-
