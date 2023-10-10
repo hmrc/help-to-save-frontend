@@ -51,8 +51,8 @@ class EmailValidationSpec extends AnyWordSpec with Matchers with ScalaCheckDrive
     ): EmailValidation =
       new EmailValidation(
         Configuration(
-          "email-validation.max-total-length" -> maxTotalLength,
-          "email-validation.max-local-length" -> maxLocalLength,
+          "email-validation.max-total-length"  -> maxTotalLength,
+          "email-validation.max-local-length"  -> maxLocalLength,
           "email-validation.max-domain-length" -> maxDomainLength
         )
       )

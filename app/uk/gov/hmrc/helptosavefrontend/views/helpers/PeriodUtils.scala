@@ -20,15 +20,12 @@ import play.api.i18n.Messages
 
 object PeriodUtils {
 
- def getMessage(period :String)(implicit messages: Messages): String = {
-   period match {
-    case "1st" => messages("hts.reminder-confirmation.frequency.1")
-    case "25th" =>messages("hts.reminder-confirmation.frequency.25")
-    case "1st day and 25th" => messages("hts.reminder-confirmation.frequency.both")
-    case _ => ""
-  }
- }
-
-
+  def getMessage(period: String)(implicit messages: Messages): String =
+    period match {
+      case "1st"              => messages("hts.reminder-confirmation.frequency.1")
+      case "25th"             => messages("hts.reminder-confirmation.frequency.25")
+      case "1st day and 25th" => messages("hts.reminder-confirmation.frequency.both")
+      case _                  => ""
+    }
 
 }

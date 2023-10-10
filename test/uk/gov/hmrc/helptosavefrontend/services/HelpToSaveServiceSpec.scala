@@ -42,7 +42,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
   val htsService = new HelpToSaveServiceImpl(htsConnector)
   val emptyBody = ""
-  val emptyHeaders :Map[String, Seq[String]] = Map.empty
+  val emptyHeaders: Map[String, Seq[String]] = Map.empty
 
   "The HelpToSaveService" when {
 
@@ -118,11 +118,10 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       def mockCreateAccount(response: Option[HttpResponse]) =
         htsConnector.createAccount(createAccountRequest)(*, *) returns
-            response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
-
+          response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
 
       "return a CREATED response along with the account number when a new account has been created" in {
-        mockCreateAccount(Some(HttpResponse(201, Json.parse("""{"accountNumber" : "1234567890123"}"""),emptyHeaders)))
+        mockCreateAccount(Some(HttpResponse(201, Json.parse("""{"accountNumber" : "1234567890123"}"""), emptyHeaders)))
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue shouldBe Right(SubmissionSuccess(AccountNumber(Some("1234567890123"))))
 
@@ -137,7 +136,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       "should handle a failure result" in {
 
         val submissionFailure = SubmissionFailure(Some("id"), "message", "detail")
-        mockCreateAccount(Some(HttpResponse(400, Json.toJson(submissionFailure),emptyHeaders)))
+        mockCreateAccount(Some(HttpResponse(400, Json.toJson(submissionFailure), emptyHeaders)))
 
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue should be(Left(submissionFailure))
@@ -153,7 +152,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       }
 
       "create a SubmissionFailure when parsing the error response returns a Left" in {
-        mockCreateAccount(Some(HttpResponse(400, Json.toJson("""{"name":"some_name"}"""),emptyHeaders)))
+        mockCreateAccount(Some(HttpResponse(400, Json.toJson("""{"name":"some_name"}"""), emptyHeaders)))
 
         val result = htsService.createAccount(createAccountRequest)
         result.value.futureValue shouldBe
@@ -172,8 +171,9 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
       val nsiPayload = validNSIPayload
 
       def mockUpdateEmail(response: Option[HttpResponse]) =
-        htsConnector.updateEmail(nsiPayload)(*, *) returns response.fold[Future[HttpResponse]](Future.failed(new Exception("oh no!")))(r => Future.successful(r))
-
+        htsConnector.updateEmail(nsiPayload)(*, *) returns response.fold[Future[HttpResponse]](
+          Future.failed(new Exception("oh no!"))
+        )(r => Future.successful(r))
 
       "return a success response" in {
 
@@ -232,7 +232,7 @@ class HelpToSaveServiceSpec extends ControllerSpecWithGuiceApp with ScalaFutures
 
       "return a successful response" in {
         mockValidateBankDetails(request)(
-          HttpResponse(200, Json.parse("""{"isValid":true, "sortCodeExists":true}"""),emptyHeaders)
+          HttpResponse(200, Json.parse("""{"isValid":true, "sortCodeExists":true}"""), emptyHeaders)
         )
 
         val result = htsService.validateBankDetails(request)

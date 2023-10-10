@@ -74,10 +74,10 @@ object NSIPayload {
     def extractContactDetails(userInfo: UserInfo): ContactDetails = {
       val (line1, line2, line3, line4, line5) =
         userInfo.address.lines.map(_.cleanupSpecialCharacters).filter(_.nonEmpty) match {
-          case Nil => ("", "", None, None, None)
-          case line1 :: Nil => (line1, "", None, None, None)
-          case line1 :: line2 :: Nil => (line1, line2, None, None, None)
-          case line1 :: line2 :: line3 :: Nil => (line1, line2, Some(line3), None, None)
+          case Nil                                     => ("", "", None, None, None)
+          case line1 :: Nil                            => (line1, "", None, None, None)
+          case line1 :: line2 :: Nil                   => (line1, line2, None, None, None)
+          case line1 :: line2 :: line3 :: Nil          => (line1, line2, Some(line3), None, None)
           case line1 :: line2 :: line3 :: line4 :: Nil => (line1, line2, Some(line3), Some(line4), None)
           case line1 :: line2 :: line3 :: line4 :: line5 :: Nil =>
             (line1, line2, Some(line3), Some(line4), Some(s"$line5"))
@@ -121,7 +121,7 @@ object NSIPayload {
     override def reads(json: JsValue): JsResult[LocalDate] = json match {
       case JsString(s) =>
         Try(LocalDate.parse(s, formatter)) match {
-          case Success(date) => JsSuccess(date)
+          case Success(date)  => JsSuccess(date)
           case Failure(error) => JsError(s"Could not parse date as yyyyMMdd: ${error.getMessage}")
         }
 

@@ -27,7 +27,7 @@ import uk.gov.hmrc.allowlist.{AkamaiAllowlistFilter => AkamaiAllowListFilter}
 
 import scala.concurrent.Future
 
-class AllowListFilter @Inject() (configuration: Configuration, val mat:Materializer)
+class AllowListFilter @Inject() (configuration: Configuration, val mat: Materializer)
     extends AkamaiAllowListFilter with Logging {
 
   override def allowlist: Seq[String] =

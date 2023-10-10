@@ -42,11 +42,11 @@ object IneligibilityReason {
 
   implicit val ineligibilityTypeEq: Eq[IneligibilityReason] = new Eq[IneligibilityReason] {
     override def eqv(x: IneligibilityReason, y: IneligibilityReason) = (x, y) match {
-      case (EntitledToWTCNoTCAndNoUC, EntitledToWTCNoTCAndNoUC) => true
+      case (EntitledToWTCNoTCAndNoUC, EntitledToWTCNoTCAndNoUC)                     => true
       case (EntitledToWTCNoTCAndInsufficientUC, EntitledToWTCNoTCAndInsufficientUC) => true
-      case (NotEntitledToWTCAndNoUC, NotEntitledToWTCAndNoUC) => true
-      case (NotEntitledToWTCAndUCInsufficient, NotEntitledToWTCAndUCInsufficient) => true
-      case _ => false
+      case (NotEntitledToWTCAndNoUC, NotEntitledToWTCAndNoUC)                       => true
+      case (NotEntitledToWTCAndUCInsufficient, NotEntitledToWTCAndUCInsufficient)   => true
+      case _                                                                        => false
     }
   }
 

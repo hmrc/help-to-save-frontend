@@ -140,16 +140,20 @@ trait AuthSupport extends IdiomaticMockito {
     mockAuthConnector.authorise(AuthProviders(GovernmentGateway), *)(*, *) returns Future.failed(ex)
 
   def mockAuthWithRetrievalsWithFail(predicate: Predicate)(ex: Throwable): Unit =
-    mockAuthConnector.authorise(predicate, *)( *, *) returns Future.failed(ex)
+    mockAuthConnector.authorise(predicate, *)(*, *) returns Future.failed(ex)
 
   def mockAuthWithNINORetrievalWithSuccess(predicate: Predicate)(result: Option[String]): Unit =
     mockAuthConnector.authorise(predicate, v2.Retrievals.nino)(*, *) returns Future.successful(result)
 
   def mockAuthWithNINOAndName(predicate: Predicate)(result: NameRetrievalType): Unit =
-    mockAuthConnector.authorise(predicate, v2.Retrievals.name and v2.Retrievals.itmpName and v2.Retrievals.nino)(*, *) returns Future.successful(result)
+    mockAuthConnector
+      .authorise(predicate, v2.Retrievals.name and v2.Retrievals.itmpName and v2.Retrievals.nino)(*, *) returns Future
+      .successful(result)
 
   def mockAuthWithAllRetrievalsWithSuccess(predicate: Predicate)(result: UserRetrievalType): Unit =
-    mockAuthConnector.authorise(predicate, UserInfoRetrievals and v2.Retrievals.nino)(*, *) returns Future.successful(result)
+    mockAuthConnector.authorise(predicate, UserInfoRetrievals and v2.Retrievals.nino)(*, *) returns Future.successful(
+      result
+    )
 
   def mockAuthWithNoRetrievals(predicate: Predicate): Unit =
     mockAuthConnector.authorise(predicate, EmptyRetrieval)(*, *) returns Future.successful(EmptyRetrieval)

@@ -42,7 +42,7 @@ object SelectEmailForm {
 
     Form(
       mapping(
-        "email" -> text.verifying(l => l === "Yes" || l === "No"),
+        "email"     -> text.verifying(l => l === "Yes" || l === "No"),
         "new-email" -> of(emailFormatter)
       )(SelectEmail.apply)(SelectEmail.unapply)
     )

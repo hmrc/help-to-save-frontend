@@ -27,10 +27,10 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class BankDetailsValidationSpec extends ControllerSpecWithGuiceApp {
 
   val bankValidationConfig = Configuration(
-    "bank-details-validation.sort-code.length" -> 6,
-    "bank-details-validation.account-number.length" -> 8,
-    "bank-details-validation.roll-number.min-length" -> 4,
-    "bank-details-validation.roll-number.max-length" -> 18,
+    "bank-details-validation.sort-code.length"        -> 6,
+    "bank-details-validation.account-number.length"   -> 8,
+    "bank-details-validation.roll-number.min-length"  -> 4,
+    "bank-details-validation.roll-number.max-length"  -> 18,
     "bank-details-validation.account-name.min-length" -> 3,
     "bank-details-validation.account-name.max-length" -> 4
   )

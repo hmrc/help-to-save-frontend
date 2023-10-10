@@ -111,11 +111,11 @@ class EligibilityCheckController @Inject() (
           .merge
 
       val result = for {
-        session <- sessionStore.get
+        session         <- sessionStore.get
         enrolmentStatus <- EitherT.liftF(getEnrolmentStatus)
         eligibilityResult <- EitherT.liftF[Future, String, PlayResult](
-                             handleSessionAndEnrolmentStatus(session, enrolmentStatus)
-                           )
+                              handleSessionAndEnrolmentStatus(session, enrolmentStatus)
+                            )
       } yield eligibilityResult
 
       result
@@ -250,7 +250,7 @@ class EligibilityCheckController @Inject() (
         helpToSaveService.setITMPFlagAndUpdateMongo().value.onComplete {
           case Failure(e) =>
             logger.warn(s"error in setting ITMP flag and updating mongo, future failed: ${e.getMessage}", nino)
-          case Success(Left(e)) => logger.warn(s"error in setting ITMP flag and updating mongo: $e", nino)
+          case Success(Left(e))  => logger.warn(s"error in setting ITMP flag and updating mongo: $e", nino)
           case Success(Right(_)) => logger.info(s"Successfully set ITMP flag and updated mongo for user", nino)
         }
 

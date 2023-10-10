@@ -57,14 +57,16 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
 
   private val emailUpdateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-email"
 
-  override def updateHtsUser(htsUser: HtsUserSchedule)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
+  override def updateHtsUser(
+    htsUser: HtsUserSchedule
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
     handle(http.post(updateHtsReminderURL, htsUser), _.parseJSON[HtsUserSchedule](), "update htsUser")
 
   override def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[HtsUserSchedule] =
     handle(http.get(getHtsReminderUserURL(nino)), _.parseJSON[HtsUserSchedule](), "get hts user")
 
   override def updateReminderEmail(
-      updateReminderEmail: UpdateReminderEmail
+    updateReminderEmail: UpdateReminderEmail
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[Unit] =
     handle(http.post(emailUpdateHtsReminderURL, updateReminderEmail), _ => Right(()), "update email")
 
@@ -74,12 +76,17 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
     for {
       response <- toEitherT("cancel reminder", http.post(cancelHtsReminderURL, cancelHtsUserReminder))
       result <- response.status match {
-        case Status.OK | Status.NOT_MODIFIED => EitherT.rightT[Future, String](())
-        case _ => EitherT.leftT[Future, Unit](s"Call to 'cancel reminder' came back with status ${response.status}. Body was ${response.body}")
-      }
+                 case Status.OK | Status.NOT_MODIFIED => EitherT.rightT[Future, String](())
+                 case _ =>
+                   EitherT.leftT[Future, Unit](
+                     s"Call to 'cancel reminder' came back with status ${response.status}. Body was ${response.body}"
+                   )
+               }
     } yield result
 
-  private def toEitherT[T](endpoint : String, future : Future[T])(implicit ec : ExecutionContext): EitherT[Future, String, T] =
+  private def toEitherT[T](endpoint: String, future: Future[T])(
+    implicit ec: ExecutionContext
+  ): EitherT[Future, String, T] =
     EitherT(future.map(Right(_)).recover { case NonFatal(t) => Left(s"Call to $endpoint failed: ${t.getMessage}") })
 
   private def handle[B](
@@ -90,9 +97,12 @@ class HelpToSaveReminderConnectorImpl @Inject() (http: HttpClient)(implicit fron
     for {
       response <- toEitherT(description, resF)
       result <- response.status match {
-        case Status.OK | Status.NOT_FOUND => EitherT.fromEither[Future](ifHTTP200or404(response))
-        case _ => EitherT.leftT[Future, B](s"Call to $description came back with status ${response.status}. Body was ${response.body}")
-      }
+                 case Status.OK | Status.NOT_FOUND => EitherT.fromEither[Future](ifHTTP200or404(response))
+                 case _ =>
+                   EitherT.leftT[Future, B](
+                     s"Call to $description came back with status ${response.status}. Body was ${response.body}"
+                   )
+               }
     } yield result
 
 }

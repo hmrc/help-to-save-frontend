@@ -251,9 +251,9 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
     Redirect(
       appConfig.ggLoginUrl,
       Map(
-        "continue_url"    -> Seq(appConfig.ggContinueUrlPrefix + redirectOnLoginURL),
-        "accountType" -> Seq("individual"),
-        "origin"      -> Seq(appConfig.appName)
+        "continue_url" -> Seq(appConfig.ggContinueUrlPrefix + redirectOnLoginURL),
+        "accountType"  -> Seq("individual"),
+        "origin"       -> Seq(appConfig.appName)
       )
     )
 

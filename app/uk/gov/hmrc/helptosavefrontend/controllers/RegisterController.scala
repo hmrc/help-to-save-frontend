@@ -91,44 +91,44 @@ class RegisterController @Inject() (
   val clock: Clock = Clock.systemUTC()
 
   def accessOrPayIn: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request =>
-      implicit htsContext =>
-        val result = for {
-          enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
-          session <- enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ =>
-            sessionStore.get
-          })
-        } yield session
-        result.fold(
-          { e =>
-            logger.warn(s"Could not get enrolment status or session: $e")
-            internalServerError()
-          }, { session =>
-            val accountNumberAndEmail: Option[(String, Email)] = for {
-              s <- session
-              a <- s.accountNumber
-              e <- s.confirmedEmail
-            } yield (a, e)
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      val result = for {
+        enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
+        session <- enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ =>
+                    sessionStore.get
+                  })
+      } yield session
+      result.fold(
+        { e =>
+          logger.warn(s"Could not get enrolment status or session: $e")
+          internalServerError()
+        }, { session =>
+          val accountNumberAndEmail: Option[(String, Email)] = for {
+            s <- session
+            a <- s.accountNumber
+            e <- s.confirmedEmail
+          } yield (a, e)
 
-            accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
-              case (accountNumber, email) =>
-                val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
-                this.payNowForm
-                  .bindFromRequest()
-                  .fold( e =>{
-                    Ok(accountCreatedView(e, accountNumber, email, lastDayOfMonth))},
-                    payInNow =>
-                      if (payInNow) {
-                        SeeOther(routes.AccessAccountController.payIn.url)
-                      }
-                      else {
-                        SeeOther(routes.AccessAccountController.accessAccount.url)
-                      }
-                  )
-            }
+          accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
+            case (accountNumber, email) =>
+              val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
+              this.payNowForm
+                .bindFromRequest()
+                .fold(
+                  e => {
+                    Ok(accountCreatedView(e, accountNumber, email, lastDayOfMonth))
+                  },
+                  payInNow =>
+                    if (payInNow) {
+                      SeeOther(routes.AccessAccountController.payIn.url)
+                    } else {
+                      SeeOther(routes.AccessAccountController.accessAccount.url)
+                    }
+                )
           }
-        )}(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
-
+        }
+      )
+    }(loginContinueURL = routes.RegisterController.getCreateAccountPage.url)
 
   val payNowForm: Form[Boolean] = {
     Form(
@@ -223,11 +223,11 @@ class RegisterController @Inject() (
 
               val result = for {
                 submissionSuccess <- helpToSaveService
-                                     .createAccount(createAccountRequest)
-                                     .leftMap(s => CreateAccountError(Left(s)))
+                                      .createAccount(createAccountRequest)
+                                      .leftMap(s => CreateAccountError(Left(s)))
                 r <- EitherT.liftF(
-                     processReminderServiceRequest(eligibleWithInfo.session.reminderDetails, nino, eligibleWithInfo)
-                   )
+                      processReminderServiceRequest(eligibleWithInfo.session.reminderDetails, nino, eligibleWithInfo)
+                    )
                 _ <- {
                   val update = submissionSuccess.accountNumber.accountNumber
                     .map(a => sessionStore.store(eligibleWithInfo.session.copy(accountNumber = Some(a))))
@@ -279,7 +279,19 @@ class RegisterController @Inject() (
     val daysToReceiveReminders = reminderDetails.getOrElse("None")
     if (daysToReceiveReminders =!= "None") {
       auditor.sendEvent(
-        HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(nino, eligibleWithInfo.email, eligibleWithInfo.userInfo.userInfo.forename, eligibleWithInfo.userInfo.userInfo.surname, true, DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq()))), request.uri),
+        HtsReminderCreatedEvent(
+          HtsReminderCreated(
+            HTSReminderAccount(
+              nino,
+              eligibleWithInfo.email,
+              eligibleWithInfo.userInfo.userInfo.forename,
+              eligibleWithInfo.userInfo.userInfo.surname,
+              true,
+              DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq())
+            )
+          ),
+          request.uri
+        ),
         nino
       )
       helpToSaveReminderService
@@ -312,8 +324,8 @@ class RegisterController @Inject() (
       val result = for {
         enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
         session <- enrolmentStatus.fold[util.Result[Option[HTSSession]]](EitherT.pure[Future, String](None), { _ =>
-                   sessionStore.get
-                 })
+                    sessionStore.get
+                  })
       } yield session
 
       result.fold(
@@ -330,7 +342,7 @@ class RegisterController @Inject() (
           accountNumberAndEmail.fold(SeeOther(routes.EligibilityCheckController.getCheckEligibility.url)) {
             case (accountNumber, email) =>
               val lastDayOfMonth = LocalDate.now(clock).`with`(TemporalAdjusters.lastDayOfMonth())
-              Ok(accountCreatedView(payNowForm,accountNumber, email, lastDayOfMonth))
+              Ok(accountCreatedView(payNowForm, accountNumber, email, lastDayOfMonth))
           }
         }
       )

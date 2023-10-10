@@ -27,8 +27,7 @@ class ForbiddenController @Inject() (
   mcc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
   maintenanceSchedule: MaintenanceSchedule
-)
-    extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) {
+) extends BaseController(cpd, mcc, errorHandler, maintenanceSchedule) {
 
   def forbidden: Action[AnyContent] = Action {
     Forbidden("Please ask the HtS Dev team for permissions to access this site")

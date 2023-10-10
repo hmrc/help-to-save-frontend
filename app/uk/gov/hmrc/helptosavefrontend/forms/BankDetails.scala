@@ -44,7 +44,7 @@ case class SortCode(digit1: Int, digit2: Int, digit3: Int, digit4: Int, digit5: 
 object SortCode {
   def apply(digits: Seq[Int]): Option[SortCode] = digits.toList match {
     case d1 :: d2 :: d3 :: d4 :: d5 :: d6 :: Nil => Some(SortCode(d1, d2, d3, d4, d5, d6))
-    case _ => None
+    case _                                       => None
   }
 
   implicit val writes: Writes[SortCode] = Writes[SortCode](s => JsString(s.toString))
@@ -52,7 +52,7 @@ object SortCode {
   implicit val reads: Reads[SortCode] = Reads[SortCode](s => {
     Try(s.as[String].map(_.asDigit)).toOption.flatMap(SortCode(_)) match {
       case Some(p) => JsSuccess(p)
-      case None => JsError(s"couldn't read SortCode out of the json: $s")
+      case None    => JsError(s"couldn't read SortCode out of the json: $s")
     }
   })
 }

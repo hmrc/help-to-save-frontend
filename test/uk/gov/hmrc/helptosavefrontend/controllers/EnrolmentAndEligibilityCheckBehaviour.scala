@@ -44,8 +44,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
   val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
 
-  val mockHelpToSaveReminderConnector= mock[HelpToSaveReminderConnector]
-
+  val mockHelpToSaveReminderConnector = mock[HelpToSaveReminderConnector]
 
   val confirmedEmail = "confirmed"
   val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")
@@ -72,7 +71,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       .fold(EitherT.liftF[Future, String, Unit](Future.failed(new Exception)))(r => EitherT.fromEither[Future](r))
 
   def mockGetAccount()(result: Either[String, Account]): Unit =
-    mockHelpToSaveService.getAccount(nino, *)( *, *) returns EitherT.fromEither[Future](result)
+    mockHelpToSaveService.getAccount(nino, *)(*, *) returns EitherT.fromEither[Future](result)
 
   def mockWriteITMPFlag(result: Either[String, Unit]): Unit =
     mockWriteITMPFlag(Some(result))
@@ -88,11 +87,12 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   def mockGetAccountNumberFromService()(result: Either[String, AccountNumber]): Unit =
     mockHelpToSaveService.getAccountNumber()(*, *) returns EitherT.fromEither[Future](result)
 
-  def mockGetHtsUserReminders(nino:String)(result: Either[String, HtsUserSchedule]): Unit =
+  def mockGetHtsUserReminders(nino: String)(result: Either[String, HtsUserSchedule]): Unit =
     mockHelpToSaveReminderConnector.getHtsUser(nino)(*, *) returns EitherT.fromEither[Future](result)
 
   def mockCancelHtsUserReminders(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
-    mockHelpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)(*, *) returns EitherT.fromEither[Future](result)
+    mockHelpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)(*, *) returns EitherT
+      .fromEither[Future](result)
 
   def commonEnrolmentAndSessionBehaviour(
     getResult: () => Future[Result], // scalastyle:ignore method.length
@@ -104,8 +104,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   ): Unit = {
 
     "redirect to NS&I if the user is already enrolled" in {
-        mockSuccessfulAuth()
-        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = true)))
+      mockSuccessfulAuth()
+      mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = true)))
 
       val result = getResult()
       status(result) shouldBe SEE_OTHER
@@ -114,9 +114,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     "redirect to NS&I if the user is already enrolled and set the ITMP flag " +
       "if it has not already been set" in {
-        mockSuccessfulAuth()
-        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
-        mockWriteITMPFlag(Right(()))
+      mockSuccessfulAuth()
+      mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(itmpHtSFlag = false)))
+      mockWriteITMPFlag(Right(()))
 
       val result = getResult()
       status(result) shouldBe SEE_OTHER
@@ -147,9 +147,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     if (testRedirectOnNoSession) {
       "redirect to the eligibility checks if there is no session data for the user" in {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStoreGet(Right(None))
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionStoreGet(Right(None))
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
@@ -159,9 +159,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
     if (testRedirectOnNoEligibilityCheckResult) {
       "redirect to the eligibility checks if there is no eligibility check result in the session data for the user" in {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
         val result = getResult()
         status(result) shouldBe SEE_OTHER
@@ -173,8 +173,8 @@ trait EnrolmentAndEligibilityCheckBehaviour {
 
       if (testEnrolmentCheckError) {
         "there is an error getting the enrolment status" in {
-            mockSuccessfulAuth()
-            mockEnrolmentCheck()(Left(""))
+          mockSuccessfulAuth()
+          mockEnrolmentCheck()(Left(""))
           checkIsTechnicalErrorPage(getResult())
         }
       }
@@ -186,9 +186,9 @@ trait EnrolmentAndEligibilityCheckBehaviour {
       }
 
       "there is an error getting the session data" in {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStoreGet(Left(""))
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionStoreGet(Left(""))
 
         checkIsTechnicalErrorPage(getResult())
       }

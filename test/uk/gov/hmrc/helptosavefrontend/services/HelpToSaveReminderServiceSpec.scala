@@ -77,7 +77,9 @@ class HelpToSaveReminderServiceSpec extends ControllerSpecWithGuiceApp with Scal
       val cancelHtsUserReminder = CancelHtsUserReminder(ninoNew)
 
       def mockCancelHtsUserReminder(cancelHtsUserReminder: CancelHtsUserReminder)(result: Either[String, Unit]): Unit =
-        htsReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)(*, *) returns EitherT.fromEither[Future]((result))
+        htsReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder)(*, *) returns EitherT.fromEither[Future](
+          (result)
+        )
 
       "return a successful response" in {
         mockCancelHtsUserReminder(cancelHtsUserReminder)(Right(()))

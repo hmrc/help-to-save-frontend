@@ -148,14 +148,16 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
   override def validateBankDetails(
     request: ValidateBankDetailsRequest
   )(implicit hc: HeaderCarrier, ex: ExecutionContext): Result[ValidateBankDetailsResult] =
-    EitherT(helpToSaveConnector.validateBankDetails(request).map[Either[String, ValidateBankDetailsResult]] { response =>
-      response.status match {
-        case Status.OK =>
-          response.parseJSON[ValidateBankDetailsResult]()
-        case other =>
-          Left(s"Received unexpected status $other from /validate-bank-details. Body was ${maskNino(response.body)}")
+    EitherT(
+      helpToSaveConnector.validateBankDetails(request).map[Either[String, ValidateBankDetailsResult]] { response =>
+        response.status match {
+          case Status.OK =>
+            response.parseJSON[ValidateBankDetailsResult]()
+          case other =>
+            Left(s"Received unexpected status $other from /validate-bank-details. Body was ${maskNino(response.body)}")
+        }
       }
-    })
+    )
 
   def getAccountNumber()(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[AccountNumber] =
     helpToSaveConnector.getAccountNumber()
@@ -163,7 +165,7 @@ class HelpToSaveServiceImpl @Inject() (helpToSaveConnector: HelpToSaveConnector)
   private def handleError(response: HttpResponse): SubmissionFailure =
     response.parseJSON[SubmissionFailure]() match {
       case Right(submissionFailure) => submissionFailure
-      case Left(error) => SubmissionFailure(None, "", error)
+      case Left(error)              => SubmissionFailure(None, "", error)
     }
 }
 

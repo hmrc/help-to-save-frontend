@@ -54,7 +54,7 @@ package object util {
   def maskNino(original: String): String =
     Option(original) match {
       case Some(text) => ninoRegex.replaceAllIn(text, "<NINO>")
-      case None => original
+      case None       => original
     }
 
 }

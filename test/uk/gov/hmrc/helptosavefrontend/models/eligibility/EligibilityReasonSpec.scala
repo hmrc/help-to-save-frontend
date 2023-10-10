@@ -23,7 +23,7 @@ import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResultT
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityReason._
 
 // scalastyle:off magic.number
-class EligibilityTypeSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks{
+class EligibilityTypeSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   "EligibilityType" must {
 

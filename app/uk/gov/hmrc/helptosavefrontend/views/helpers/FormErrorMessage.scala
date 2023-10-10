@@ -26,31 +26,40 @@ import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 import uk.gov.hmrc.helptosavefrontend.forms.EmailValidation.FormOps
 import javax.inject.Inject
 
-class FormErrorMessage @Inject()(ui: ViewHelpers) {
+class FormErrorMessage @Inject() (ui: ViewHelpers) {
 
-  def errorText(formName: String, e: FormError)(
-    implicit messages: Messages): String =
-    messages(s"${formName}.${e.key}.${e.message}", e.args: _*)
+  def errorText(formName: String, e: FormError)(implicit messages: Messages): String =
+    messages(s"$formName.${e.key}.${e.message}", e.args: _*)
 
-  def govukErrorText(formName: String, e: FormError)(
-    implicit messages: Messages): Text = Text(errorText(formName, e))
+  def govukErrorText(formName: String, e: FormError)(implicit messages: Messages): Text = Text(errorText(formName, e))
 
-  def errorSummary[A](formName: String, form: Form[A], customErrorFunction: Option[(Form[A], String) => Option[String]] = None)(
-      implicit messages: Messages): Option[HtmlFormat.Appendable] =
-    if(form.errors.nonEmpty) {
-      Some(ui.govukErrorSummary(ErrorSummary(errorList = form.errors.map(e =>
-        ErrorLink(
-          href = Some(s"#${e.key}"),
-          content = customErrorFunction match {
-            case None => Text(errorText(formName, e))
-            case Some(f) => Text(f.apply(form, e.key).getOrElse(errorText(formName, e)))
-          }
+  def errorSummary[A](
+    formName: String,
+    form: Form[A],
+    customErrorFunction: Option[(Form[A], String) => Option[String]] = None
+  )(implicit messages: Messages): Option[HtmlFormat.Appendable] =
+    if (form.errors.nonEmpty) {
+      Some(
+        ui.govukErrorSummary(
+          ErrorSummary(
+            errorList = form.errors.map(
+              e =>
+                ErrorLink(
+                  href = Some(s"#${e.key}"),
+                  content = customErrorFunction match {
+                    case None    => Text(errorText(formName, e))
+                    case Some(f) => Text(f.apply(form, e.key).getOrElse(errorText(formName, e)))
+                  }
+                )
+            ),
+            title = Text(messages("hts.global.error-summary.title"))
+          )
         )
-      ),
-        title = Text(messages("hts.global.error-summary.title")))))
+      )
     } else None
   def formErrorMessage(formName: String, form: Form[_], key: String)(
-    implicit messages: Messages): Option[ErrorMessage] =
+    implicit messages: Messages
+  ): Option[ErrorMessage] =
     form
       .error(key)
       .map(
@@ -58,7 +67,8 @@ class FormErrorMessage @Inject()(ui: ViewHelpers) {
           ErrorMessage(
             content = Text(errorText(formName, e)),
             visuallyHiddenText = Some(messages("hts.global.error.prefix"))
-        ))
+          )
+      )
 
   def emailErrorTypesToString(form: Form[_], key: String)(implicit messages: play.api.i18n.Messages): Option[String] = {
     val messagesKey: String = if (form.emailIsBlank(key)) {
@@ -85,7 +95,7 @@ class FormErrorMessage @Inject()(ui: ViewHelpers) {
       ""
     }
 
-    if(!messagesKey.isEmpty) {
+    if (!messagesKey.isEmpty) {
       Some(messages(messagesKey))
     } else {
       None

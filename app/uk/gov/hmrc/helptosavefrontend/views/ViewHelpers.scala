@@ -20,7 +20,7 @@ import uk.gov.hmrc.govukfrontend.views.html.components._
 
 import javax.inject.Inject
 
-class ViewHelpers @Inject()(
+class ViewHelpers @Inject() (
   val govukButton: GovukButton,
   val govukErrorSummary: GovukErrorSummary,
   val govukRadios: GovukRadios,

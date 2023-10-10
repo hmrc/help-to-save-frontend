@@ -39,7 +39,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val authUrl: String = servicesConfig.baseUrl("auth")
 
-  val appleAppUrl: String  = servicesConfig.getString("get-the-app.apple-app-store")
+  val appleAppUrl: String = servicesConfig.getString("get-the-app.apple-app-store")
 
   val androidAppUrl: String = servicesConfig.getString("get-the-app.google-play-store")
 
@@ -147,7 +147,9 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val signOutUri: String = s"$basGatewayFrontendUrl/sign-out-without-state"
   val signOutUrl: String = s"$signOutUri?continue=$feedbackSurveyUrl"
-  val timeOutSignOutUrl: String = s"$signOutUri?continue=$helpToSaveFrontendUrl" + routes.IntroductionController.timedOut().url
+  val timeOutSignOutUrl: String = s"$signOutUri?continue=$helpToSaveFrontendUrl" + routes.IntroductionController
+    .timedOut()
+    .url
   val timeOutKeepAliveUrl: String = helpToSaveFrontendUrl + routes.IntroductionController.keepAlive().url
 
   object TimeoutConfig {

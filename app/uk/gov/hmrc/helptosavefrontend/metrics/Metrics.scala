@@ -71,10 +71,10 @@ object Metrics {
     "ns" -> 1000L,
     "μs" -> 1000L,
     "ms" -> 1000L,
-    "s" -> 60L,
-    "m" -> 60L,
-    "h" -> 24L,
-    "d" -> 7L
+    "s"  -> 60L,
+    "m"  -> 60L,
+    "h"  -> 24L,
+    "d"  -> 7L
   )
 
   /** Return the integer part and the remainder of the result of dividing th enumerator by the denominator */

@@ -35,7 +35,7 @@ object TestData {
 
     implicit val eligibilityCheckResponseGen: Gen[EligibilityCheckResponse] =
       for {
-        result <- AutoGen[EligibilityCheckResult]
+        result    <- AutoGen[EligibilityCheckResult]
         threshold <- Gen.option(Gen.posNum[Double])
       } yield EligibilityCheckResponse(result, threshold)
 
@@ -72,7 +72,8 @@ object TestData {
 
     def ineligibilityReason4or9WithNoThreshold(): Ineligible = sample(ineligibilityReason4or9Gen(None))
 
-    def randomEligibleWithUserInfo(userInfo: UserInfo): EligibleWithUserInfo = EligibleWithUserInfo(randomEligibility(), userInfo)
+    def randomEligibleWithUserInfo(userInfo: UserInfo): EligibleWithUserInfo =
+      EligibleWithUserInfo(randomEligibility(), userInfo)
 
     def eligibleSpecificReasonCodeWithUserInfo(userInfo: UserInfo, reasonCode: Int): EligibleWithUserInfo =
       EligibleWithUserInfo(
@@ -82,21 +83,21 @@ object TestData {
   }
 
   object UserData {
-    implicit val addressGen: Gen[Address]  =
+    implicit val addressGen: Gen[Address] =
       for {
-        lines <- Gen.ukAddress
+        lines    <- Gen.ukAddress
         postcode <- Gen.option(Gen.postcode)
-        country <-  Gen.option(alphaStr)
+        country  <- Gen.option(alphaStr)
       } yield Address(lines, postcode, country)
 
     implicit val userInfoGen: Gen[UserInfo] =
       for {
-        forename <- Gen.forename()
-        surname <- Gen.surname
-        nino <- Enumerable.instances.ninoEnum.gen
+        forename    <- Gen.forename()
+        surname     <- Gen.surname
+        nino        <- Enumerable.instances.ninoEnum.gen
         dateOfBirth <- Gen.date
-        email <- Gen.option(alphaStr)
-        address <- addressGen
+        email       <- Gen.option(alphaStr)
+        address     <- addressGen
       } yield UserInfo(forename, surname, nino, dateOfBirth, email, address)
 
     def randomUserInfo(): UserInfo = sample(userInfoGen)

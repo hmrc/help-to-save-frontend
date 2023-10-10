@@ -46,8 +46,7 @@ import java.util.UUID
 import scala.concurrent.duration._
 
 class SessionStoreSpec
-    extends ControllerSpecWithGuiceApp with ScalaFutures with ScalaCheckDrivenPropertyChecks
-    with Eventually {
+    extends ControllerSpecWithGuiceApp with ScalaFutures with ScalaCheckDrivenPropertyChecks with Eventually {
 
   implicit val config: PatienceConfig =
     PatienceConfig().copy(timeout = scaled(1.minute))
@@ -63,12 +62,12 @@ class SessionStoreSpec
     implicit val htsSessionGen: Gen[HTSSession] =
       for {
         result <- Gen.option(
-                  Gen.oneOf[Either[Ineligible, EligibleWithUserInfo]](
-                    TestData.Eligibility.ineligibilityGen.map(Left(_)),
-                    eligibleWithUserInfoGen.map(Right(_))
-                  )
-                )
-        email <- Gen.option(Gen.alphaStr)
+                   Gen.oneOf[Either[Ineligible, EligibleWithUserInfo]](
+                     TestData.Eligibility.ineligibilityGen.map(Left(_)),
+                     eligibleWithUserInfoGen.map(Right(_))
+                   )
+                 )
+        email        <- Gen.option(Gen.alphaStr)
         pendingEmail <- Gen.option(Gen.alphaStr)
       } yield HTSSession(result, email, pendingEmail)
 

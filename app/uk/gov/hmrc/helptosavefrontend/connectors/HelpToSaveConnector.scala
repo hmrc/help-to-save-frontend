@@ -206,9 +206,9 @@ class HelpToSaveConnectorImpl @Inject() (http: HttpClient)(implicit frontendAppC
   // scalastyle:off magic.number
   private def toEligibilityCheckResult(response: EligibilityCheckResponse): Either[String, EligibilityCheckResultType] =
     response.eligibilityCheckResult.resultCode match {
-      case 1 => Right(EligibilityCheckResultType.Eligible(response))
+      case 1     => Right(EligibilityCheckResultType.Eligible(response))
       case 2 | 4 => Right(EligibilityCheckResultType.Ineligible(response))
-      case 3 => Right(EligibilityCheckResultType.AlreadyHasAccount(response))
+      case 3     => Right(EligibilityCheckResultType.AlreadyHasAccount(response))
       case other => Left(s"Could not parse eligibility result code '$other'. Response was '$response'")
     }
 
