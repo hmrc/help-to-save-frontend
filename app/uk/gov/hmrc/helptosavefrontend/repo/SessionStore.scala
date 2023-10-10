@@ -53,7 +53,8 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
     collectionName = "sessions",
     ttl = expireAfterSeconds,
     timestampSupport = new CurrentTimestampSupport,
-    cacheIdType = CacheIdType.SimpleCacheId)(ec)
+    cacheIdType = CacheIdType.SimpleCacheId
+  )(ec)
 
   private type EitherStringOr[A] = Either[String, A]
 
@@ -67,14 +68,14 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
             maybeCache =>
               val response: OptionT[EitherStringOr, HTSSession] = for {
                 cache <- OptionT.fromOption[EitherStringOr](maybeCache)
-                data <- OptionT.fromOption[EitherStringOr][JsObject](Some(cache.data))
+                data  <- OptionT.fromOption[EitherStringOr][JsObject](Some(cache.data))
                 result <- OptionT.liftF[EitherStringOr, HTSSession](
-                          (data \ "htsSession")
-                            .validate[HTSSession]
-                            .asEither
-                            .left
-                            .map(e => s"Could not parse session data from mongo: ${e.mkString("; ")}")
-                        )
+                           (data \ "htsSession")
+                             .validate[HTSSession]
+                             .asEither
+                             .left
+                             .map(e => s"Could not parse session data from mongo: ${e.mkString("; ")}")
+                         )
               } yield result
 
               val _ = timerContext.stop()
@@ -124,9 +125,9 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
           cacheRepository
             .put(sessionId)(DataKey("htsSession"), Json.toJson(sessionToStore))
             .map[Either[String, Unit]] { dbUpdate =>
-                val _ = timerContext.stop()
-                Right(())
-              }
+              val _ = timerContext.stop()
+              Right(())
+            }
             .recover {
               case e =>
                 val _ = timerContext.stop()
@@ -140,7 +141,7 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
 
     for {
       oldSession <- get
-      result <- EitherT(doUpdate(newSession, oldSession))
+      result     <- EitherT(doUpdate(newSession, oldSession))
     } yield result
 
   }

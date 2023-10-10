@@ -44,18 +44,18 @@ class HttpResponseOpsSpec extends UnitSpec {
       import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 
       val status = 200
-      val emptyBody= ""
-      val emptyHeaders :Map[String, Seq[String]] = Map.empty
+      val emptyBody = ""
+      val emptyHeaders: Map[String, Seq[String]] = Map.empty
       val data = Test1(0)
 
       // test when there is an exception
       ThrowingHttpResponse().parseJSON[Test1]().isLeft shouldBe true
 
       // test when there is no JSON
-      HttpResponse(status,emptyBody).parseJSON[Test1]().isLeft shouldBe true
+      HttpResponse(status, emptyBody).parseJSON[Test1]().isLeft shouldBe true
 
       // test when the JSON isn't the right format
-      HttpResponse(status, Json.toJson(data),emptyHeaders)
+      HttpResponse(status, Json.toJson(data), emptyHeaders)
         .parseJSON[Test2]()
         .isLeft shouldBe true
 

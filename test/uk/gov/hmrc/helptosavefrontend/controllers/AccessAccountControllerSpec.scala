@@ -69,7 +69,8 @@ class AccessAccountControllerSpec
       behave like commonBehaviour(
         () => Future.successful(await(controller.accessAccount(FakeRequest()))),
         appConfig.nsiManageAccountUrl,
-        withRemindersRemoval = true)
+        withRemindersRemoval = true
+      )
 
     }
 
@@ -77,7 +78,8 @@ class AccessAccountControllerSpec
 
       behave like commonBehaviour(
         () => Future.successful(await(controller.payIn(FakeRequest()))),
-        appConfig.nsiPayInUrl)
+        appConfig.nsiPayInUrl
+      )
 
     }
 
@@ -87,10 +89,9 @@ class AccessAccountControllerSpec
         Future.successful(await(controller.getNoAccountPage(FakeRequest())))
 
       "show the 'no account' page if the user is not enrolled" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionStoreGet(Right(None))
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockSessionStoreGet(Right(None))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
 
         val result = csrfAddToken(controller.getNoAccountPage)(FakeRequest())
         status(result) shouldBe 200
@@ -98,10 +99,9 @@ class AccessAccountControllerSpec
       }
 
       "redirect to check eligibility if there is an error checking eligibility" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionStoreGet(Right(None))
-          mockEnrolmentCheck()(Left(""))
-
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockSessionStoreGet(Right(None))
+        mockEnrolmentCheck()(Left(""))
 
         val result = doRequest()
         status(result) shouldBe 303
@@ -110,9 +110,9 @@ class AccessAccountControllerSpec
 
       "redirect to a previously attempted redirect URL if the user is enrolled and the session indicates they were" +
         "trying to previously reach an account holder page" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockSessionStoreGet(Right(Some(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some("abc")))))
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
 
         val result = doRequest()
         status(result) shouldBe 303
@@ -122,9 +122,9 @@ class AccessAccountControllerSpec
       "redirect to the NS&I homepage by default if the user is enrolled and there is no session data" in {
         def test(session: Option[HTSSession]) =
           withClue(s"For session $session: ") {
-              mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-              mockSessionStoreGet(Right(session))
-              mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+            mockSessionStoreGet(Right(session))
+            mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
 
             val result = doRequest()
             status(result) shouldBe 303
@@ -136,8 +136,8 @@ class AccessAccountControllerSpec
       }
 
       "show an error page when there session data cannot be obtained" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionStoreGet(Left(""))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockSessionStoreGet(Left(""))
 
         val result = doRequest()
         checkIsTechnicalErrorPage(result)
@@ -145,18 +145,32 @@ class AccessAccountControllerSpec
 
     }
 
-    def commonBehaviour(doRequest: () => Future[Result], expectedRedirectURL: String, withRemindersRemoval: Boolean = false): Unit = { // scalastyle:ignore
+    def commonBehaviour(
+      doRequest: () => Future[Result],
+      expectedRedirectURL: String,
+      withRemindersRemoval: Boolean = false
+    ): Unit = { // scalastyle:ignore
 
-      val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(BonusTerm(0,0,LocalDate.parse("1900-01-01"), LocalDate.parse("1900-01-01"))), None, None)
+      val account = Account(
+        false,
+        123.45,
+        0,
+        0,
+        0,
+        LocalDate.parse("1900-01-01"),
+        List(BonusTerm(0, 0, LocalDate.parse("1900-01-01"), LocalDate.parse("1900-01-01"))),
+        None,
+        None
+      )
 
       val schedule = HtsUserSchedule(Nino(nino2), "", "", "", false, List(), LocalDate.parse("1900-01-01"), "")
       "redirect to NS&I if the user is enrolled" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) {
-            mockGetAccount()(Right(account))
-            mockGetHtsUserReminders(nino2)(Right(schedule))
-          }
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        if (withRemindersRemoval) {
+          mockGetAccount()(Right(account))
+          mockGetHtsUserReminders(nino2)(Right(schedule))
+        }
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
@@ -165,12 +179,12 @@ class AccessAccountControllerSpec
 
       "redirect to NS&I if the user is enrolled even when account closed" in {
         val closedAccount = account.copy(isClosed = true)
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) {
-            mockGetAccount()(Right(closedAccount))
-            mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
-          }
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        if (withRemindersRemoval) {
+          mockGetAccount()(Right(closedAccount))
+          mockCancelHtsUserReminders(cancelHtsUserReminder)(Right(()))
+        }
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(true)))
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
@@ -179,13 +193,13 @@ class AccessAccountControllerSpec
 
       "redirect to NS&I if the user is enrolled and set the ITMP flag if " +
         "it hasn't already been set" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) {
-            mockGetAccount()(Right(account))
-            mockGetHtsUserReminders(nino2)(Right(schedule))
-          }
-          mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
-          mockWriteITMPFlag(Right(()))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        if (withRemindersRemoval) {
+          mockGetAccount()(Right(account))
+          mockGetHtsUserReminders(nino2)(Right(schedule))
+        }
+        mockEnrolmentCheck()(Right(EnrolmentStatus.Enrolled(false)))
+        mockWriteITMPFlag(Right(()))
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
@@ -193,15 +207,15 @@ class AccessAccountControllerSpec
       }
 
       "redirect to the no-account page if the user is not enrolled to HTS" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) {
-            mockGetAccount()(Right(account))
-            mockGetHtsUserReminders(nino2)(Right(schedule))
-          }
-          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-          mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
-            Right(())
-          )
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        if (withRemindersRemoval) {
+          mockGetAccount()(Right(account))
+          mockGetHtsUserReminders(nino2)(Right(schedule))
+        }
+        mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+        mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
+          Right(())
+        )
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
@@ -210,16 +224,15 @@ class AccessAccountControllerSpec
 
       "store the attempted redirect location and redirect to check eligibility if there is  an error" +
         "checking the enrolment status" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) {
-            mockGetAccount()(Right(account))
-            mockGetHtsUserReminders(nino2)(Right(schedule))
-          }
-          mockEnrolmentCheck()(Left("Oh no!"))
-          mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
-            Right(())
-          )
-
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        if (withRemindersRemoval) {
+          mockGetAccount()(Right(account))
+          mockGetHtsUserReminders(nino2)(Right(schedule))
+        }
+        mockEnrolmentCheck()(Left("Oh no!"))
+        mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
+          Right(())
+        )
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
@@ -227,15 +240,15 @@ class AccessAccountControllerSpec
       }
 
       "show an error screen if there is an error storing the session data" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          if (withRemindersRemoval) {
-            mockGetAccount()(Right(account))
-            mockGetHtsUserReminders(nino2)(Right(schedule))
-          }
-          mockEnrolmentCheck()(Left("Oh no!"))
-          mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
-            Left("")
-          )
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        if (withRemindersRemoval) {
+          mockGetAccount()(Right(account))
+          mockGetHtsUserReminders(nino2)(Right(schedule))
+        }
+        mockEnrolmentCheck()(Left("Oh no!"))
+        mockSessionStorePut(HTSSession.empty.copy(attemptedAccountHolderPageURL = Some(expectedRedirectURL)))(
+          Left("")
+        )
 
         val result = doRequest()
         checkIsTechnicalErrorPage(result)

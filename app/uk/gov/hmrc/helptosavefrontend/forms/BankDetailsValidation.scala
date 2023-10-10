@@ -75,11 +75,14 @@ class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
           .get(key)
           .map(_.cleanupSpecialCharacters.removeAllSpaces)
           .fold(invalid[String](ErrorMessages.accountNumberEmpty)) { s =>
-            validatedFromBoolean(s)(s => s.length === accountNumberLength && s.forall(_.isDigit), if (s.isEmpty) {
-              ErrorMessages.accountNumberEmpty
-            } else {
-              ErrorMessages.accountNumberIncorrectFormat
-            })
+            validatedFromBoolean(s)(
+              s => s.length === accountNumberLength && s.forall(_.isDigit),
+              if (s.isEmpty) {
+                ErrorMessages.accountNumberEmpty
+              } else {
+                ErrorMessages.accountNumberIncorrectFormat
+              }
+            )
           }
 
       validation.toEither.leftMap(_.map(e => FormError(key, e)).toList)

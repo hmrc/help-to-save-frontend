@@ -46,7 +46,7 @@ import scala.concurrent.Future
 import scala.util.Try
 
 class EmailControllerSpec
-  extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with EnrolmentAndEligibilityCheckBehaviour
+    extends ControllerSpecWithGuiceApp with AuthSupport with CSRFSupport with EnrolmentAndEligibilityCheckBehaviour
     with SessionStoreBehaviourSupport {
 
   val mockEmailVerificationConnector: EmailVerificationConnector = mock[EmailVerificationConnector]
@@ -96,7 +96,9 @@ class EmailControllerSpec
     mockHelpToSaveService.storeConfirmedEmail(email)(*, *) returns EitherT.fromEither[Future](result)
 
   def mockStoreConfirmedEmailInReminders(updateReminderEmail: UpdateReminderEmail)(result: Either[String, Unit]): Unit =
-    mockHelpToSaveReminderService.updateReminderEmail(updateReminderEmail)(*, *) returns EitherT.fromEither[Future](result)
+    mockHelpToSaveReminderService.updateReminderEmail(updateReminderEmail)(*, *) returns EitherT.fromEither[Future](
+      result
+    )
 
   def mockGetConfirmedEmail()(result: Either[String, Option[String]]): Unit =
     mockHelpToSaveService.getConfirmedEmail()(*, *) returns EitherT.fromEither[Future](result)
@@ -284,7 +286,8 @@ class EmailControllerSpec
       def selectEmailSubmit(newEmail: Option[String]): Future[Result] =
         newEmail.fold(
           csrfAddToken(controller.selectEmailSubmit())(
-            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes"))
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes")
+          )
         ) { e =>
           csrfAddToken(controller.selectEmailSubmit())(
             fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "No", "new-email" -> e)
@@ -435,7 +438,9 @@ class EmailControllerSpec
 
       def selectEmailSubmitReminder(newEmail: Option[String]): Future[Result] =
         newEmail.fold(
-          csrfAddToken(controller.selectEmailSubmitReminder())(fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes"))
+          csrfAddToken(controller.selectEmailSubmitReminder())(
+            fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "Yes")
+          )
         ) { e =>
           csrfAddToken(controller.selectEmailSubmitReminder())(
             fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> "No", "new-email" -> e)
@@ -759,7 +764,9 @@ class EmailControllerSpec
       val email = "email@test.com"
 
       def giveEmailSubmit(email: String): Future[Result] =
-        csrfAddToken(controller.giveEmailSubmit())(fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> email))
+        csrfAddToken(controller.giveEmailSubmit())(
+          fakeRequest.withMethod("POST").withFormUrlEncodedBody("email" -> email)
+        )
 
       "handle Digital(new applicant) users with no valid session in mongo" in {
 

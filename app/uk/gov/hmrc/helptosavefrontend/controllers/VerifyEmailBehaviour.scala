@@ -50,9 +50,9 @@ trait VerifyEmailBehaviour extends Logging {
     ec: ExecutionContext
   ): Future[Result] =
     emailVerificationConnector.verifyEmail(htsContext.nino, email, firstName, isNewApplicant).map {
-      case Right(_) => ifSuccess
+      case Right(_)              => ifSuccess
       case Left(AlreadyVerified) => SeeOther(ifAlreadyVerifiedURL(EmailVerificationParams(htsContext.nino, email)))
-      case Left(e) => ifFailure(e)
+      case Left(e)               => ifFailure(e)
     }
 
   def withEmailVerificationParameters(

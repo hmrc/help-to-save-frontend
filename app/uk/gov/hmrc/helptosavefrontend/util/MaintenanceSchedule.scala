@@ -40,10 +40,12 @@ case class Schedule(times: Seq[Maintenance]) {
 object Schedule {
   def parse(x: String): Schedule =
     Schedule(
-      x.split(",").toIndexedSeq.map(_.split("/") match {
-        case Array(start, end) => Maintenance(LocalDateTime.parse(start), LocalDateTime.parse(end))
-        case _ => throw new Exception("Schedule has an incorrect format")
-      })
+      x.split(",")
+        .toIndexedSeq
+        .map(_.split("/") match {
+          case Array(start, end) => Maintenance(LocalDateTime.parse(start), LocalDateTime.parse(end))
+          case _                 => throw new Exception("Schedule has an incorrect format")
+        })
     )
 
   def londonNow(): LocalDateTime = LocalDateTime.now(londonZone)

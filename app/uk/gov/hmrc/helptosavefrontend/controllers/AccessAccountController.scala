@@ -65,9 +65,9 @@ class AccessAccountController @Inject() (
   }
 
   def accessAccount: Action[AnyContent] =
-    authorisedForHtsWithNINO { implicit request =>
-      implicit htsContext =>
-        (() =>
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      (
+        () =>
           helpToSaveService
             .getAccount(htsContext.nino, UUID.randomUUID())
             .fold(
@@ -77,34 +77,40 @@ class AccessAccountController @Inject() (
               }, { account =>
                 if (account.isClosed) {
                   val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
-                  helpToSaveReminderConnector.cancelHtsUserReminders(cancelHtsUserReminder).fold(
-                    { _ =>
-                      logger.info("Reminders Failed to cancel for Closed Account User on Login")
-                    }, { _ =>
-                      logger.info("Reminders Canceled for Closed Account User on Login")
-                    }
-                  )
+                  helpToSaveReminderConnector
+                    .cancelHtsUserReminders(cancelHtsUserReminder)
+                    .fold(
+                      { _ =>
+                        logger.info("Reminders Failed to cancel for Closed Account User on Login")
+                      }, { _ =>
+                        logger.info("Reminders Canceled for Closed Account User on Login")
+                      }
+                    )
                 } else {
-                  val accountEndDate = account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
+                  val accountEndDate =
+                    account.bonusTerms.lastOption.fold[Option[LocalDate]](None)(bonusTerm => Some(bonusTerm.endDate))
                   accountEndDate match {
                     case Some(updatedEndDate) => {
                       val htsUserSchedule = helpToSaveReminderConnector.getHtsUser(htsContext.nino)
-                      htsUserSchedule.flatMap { htsUserScheduleToUpdate =>
-                        helpToSaveReminderConnector.updateHtsUser(
-                          htsUserScheduleToUpdate.copy(endDate = Some(updatedEndDate)))
-                      }.fold(
-                        { _ =>
-                          logger.info(s"endDate field of htsUserSchedule updated to: $updatedEndDate")
-                        }, { _ =>
-                          logger.info("endDate field of htsUserSchedule not updated")
+                      htsUserSchedule
+                        .flatMap { htsUserScheduleToUpdate =>
+                          helpToSaveReminderConnector
+                            .updateHtsUser(htsUserScheduleToUpdate.copy(endDate = Some(updatedEndDate)))
                         }
-                      )
+                        .fold(
+                          { _ =>
+                            logger.info(s"endDate field of htsUserSchedule updated to: $updatedEndDate")
+                          }, { _ =>
+                            logger.info("endDate field of htsUserSchedule not updated")
+                          }
+                        )
                     }
                     case _ => Future.successful({})
                   }
                 }
               }
-            )).apply().flatMap(_ => redirectToAccountHolderPage(appConfig.nsiManageAccountUrl))
+            )
+        ).apply().flatMap(_ => redirectToAccountHolderPage(appConfig.nsiManageAccountUrl))
     }(loginContinueURL = frontendAppConfig.accessAccountUrl)
 
   def payIn: Action[AnyContent] =

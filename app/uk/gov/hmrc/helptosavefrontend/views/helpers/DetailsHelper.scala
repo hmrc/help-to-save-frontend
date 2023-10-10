@@ -27,132 +27,113 @@ class DetailsHelper {
       summary = Text(title),
       content = HtmlContent(htmlContent)
     )
-  def payment(paymentsHowMuch: String, setUpRegularPayment: String, whenWillPaymentsAppear: String, paymentsNotShow:String)
-             (implicit messages: Messages): List[Details] = {
+  def payment(
+    paymentsHowMuch: String,
+    setUpRegularPayment: String,
+    whenWillPaymentsAppear: String,
+    paymentsNotShow: String
+  )(implicit messages: Messages): List[Details] = {
     val paymentsHowMuchDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.payments.s1.title"),
-        paymentsHowMuch)
+      detailsRow(messages("hts.help-information.section.payments.s1.title"), paymentsHowMuch)
     val setUpRegularPaymentDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.payments.s2.title"),
-        setUpRegularPayment)
+      detailsRow(messages("hts.help-information.section.payments.s2.title"), setUpRegularPayment)
     val whenWillPaymentsAppearDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.payments.s3.title"),
-        whenWillPaymentsAppear)
+      detailsRow(messages("hts.help-information.section.payments.s3.title"), whenWillPaymentsAppear)
     val paymentsNotShowing: Details =
-      detailsRow(
-        messages("hts.help-information.section.payments.s4.title"),
-        paymentsNotShow)
+      detailsRow(messages("hts.help-information.section.payments.s4.title"), paymentsNotShow)
     List(paymentsHowMuchDetails, whenWillPaymentsAppearDetails, paymentsNotShowing, setUpRegularPaymentDetails)
   }
-  def bonuses(whatBonuses: String, highestBalance: String, firstBonus: String,
-              finalBonus: String, bonusExamples: String, bonusPaid: String, howWithdrawalsAffectBonuses: String)
-             (implicit messages: Messages): List[Details] = {
+  def bonuses(
+    whatBonuses: String,
+    highestBalance: String,
+    firstBonus: String,
+    finalBonus: String,
+    bonusExamples: String,
+    bonusPaid: String,
+    howWithdrawalsAffectBonuses: String
+  )(implicit messages: Messages): List[Details] = {
     val whatBonusesDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.bonuses.s1.title"),
-        whatBonuses)
+      detailsRow(messages("hts.help-information.section.bonuses.s1.title"), whatBonuses)
     val highestBalanceDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.bonuses.s2.title"),
-        highestBalance)
+      detailsRow(messages("hts.help-information.section.bonuses.s2.title"), highestBalance)
     val firstBonusDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.bonuses.s3.title"),
-        firstBonus)
+      detailsRow(messages("hts.help-information.section.bonuses.s3.title"), firstBonus)
     val finalBonusDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.bonuses.s4.title"),
-        finalBonus)
+      detailsRow(messages("hts.help-information.section.bonuses.s4.title"), finalBonus)
     val bonusExamplesDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.bonuses.s5.title"),
-        bonusExamples)
+      detailsRow(messages("hts.help-information.section.bonuses.s5.title"), bonusExamples)
     val bonusPaidDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.bonuses.s6.title"),
-        bonusPaid)
+      detailsRow(messages("hts.help-information.section.bonuses.s6.title"), bonusPaid)
     val howWithdrawalsAffectBonusesDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.bonuses.s7.title"),
-        howWithdrawalsAffectBonuses)
-    List(whatBonusesDetails, highestBalanceDetails, firstBonusDetails, finalBonusDetails,
-      bonusExamplesDetails, bonusPaidDetails, howWithdrawalsAffectBonusesDetails)
+      detailsRow(messages("hts.help-information.section.bonuses.s7.title"), howWithdrawalsAffectBonuses)
+    List(
+      whatBonusesDetails,
+      highestBalanceDetails,
+      firstBonusDetails,
+      finalBonusDetails,
+      bonusExamplesDetails,
+      bonusPaidDetails,
+      howWithdrawalsAffectBonusesDetails
+    )
   }
-  def withdrawals(withdrawingMoney: String)
-                 (implicit messages: Messages): List[Details] = {
+  def withdrawals(withdrawingMoney: String)(implicit messages: Messages): List[Details] = {
     val withdrawingMoneyDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.withdrawals.s1.title"),
-        withdrawingMoney)
+      detailsRow(messages("hts.help-information.section.withdrawals.s1.title"), withdrawingMoney)
     List(withdrawingMoneyDetails)
   }
-  def howAccountWorks(savingsExplained: String, howSignIn: String, whyUseApp: String, howContactYou: String, leaveUk: String,
-                      stopClaimingBenefits: String, closeAccountEarly: String, deathTerminalIllness: String)
-                     (implicit messages: Messages): List[Details] = {
+  def howAccountWorks(
+    savingsExplained: String,
+    howSignIn: String,
+    whyUseApp: String,
+    howContactYou: String,
+    leaveUk: String,
+    stopClaimingBenefits: String,
+    closeAccountEarly: String,
+    deathTerminalIllness: String
+  )(implicit messages: Messages): List[Details] = {
     val savingsExplainedDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.how-account-works.s1.title"),
-        savingsExplained)
+      detailsRow(messages("hts.help-information.section.how-account-works.s1.title"), savingsExplained)
     val howSignInDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.how-account-works.s2.title"),
-        howSignIn)
+      detailsRow(messages("hts.help-information.section.how-account-works.s2.title"), howSignIn)
     val whyUseAppDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.how-account-works.s3.title"),
-        whyUseApp)
+      detailsRow(messages("hts.help-information.section.how-account-works.s3.title"), whyUseApp)
     val howContactYouDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.how-account-works.s4.title"),
-        howContactYou)
+      detailsRow(messages("hts.help-information.section.how-account-works.s4.title"), howContactYou)
     val leaveUkDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.how-account-works.s4.title"),
-        leaveUk)
+      detailsRow(messages("hts.help-information.section.how-account-works.s4.title"), leaveUk)
     val stopClaimingBenefitsDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.how-account-works.s6.title"),
-        stopClaimingBenefits)
+      detailsRow(messages("hts.help-information.section.how-account-works.s6.title"), stopClaimingBenefits)
     val closeAccountEarlyDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.how-account-works.s8.title"),
-        closeAccountEarly)
+      detailsRow(messages("hts.help-information.section.how-account-works.s8.title"), closeAccountEarly)
     val deathTerminalIllnessDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.how-account-works.s9.title"),
-        deathTerminalIllness)
-    List(savingsExplainedDetails, howSignInDetails, whyUseAppDetails, howContactYouDetails, leaveUkDetails,
-      stopClaimingBenefitsDetails, closeAccountEarlyDetails, deathTerminalIllnessDetails)
+      detailsRow(messages("hts.help-information.section.how-account-works.s9.title"), deathTerminalIllness)
+    List(
+      savingsExplainedDetails,
+      howSignInDetails,
+      whyUseAppDetails,
+      howContactYouDetails,
+      leaveUkDetails,
+      stopClaimingBenefitsDetails,
+      closeAccountEarlyDetails,
+      deathTerminalIllnessDetails
+    )
   }
-  def whenYourAccountEnds(beforeAccountCloses: String, after4Years: String, savingsAfterAccountCloses: String)
-                         (implicit messages: Messages): List[Details] = {
+  def whenYourAccountEnds(beforeAccountCloses: String, after4Years: String, savingsAfterAccountCloses: String)(
+    implicit messages: Messages
+  ): List[Details] = {
     val beforeAccountClosesDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.when-your-account-ends.s1.title"),
-        beforeAccountCloses)
+      detailsRow(messages("hts.help-information.section.when-your-account-ends.s1.title"), beforeAccountCloses)
     val after4YearsDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.when-your-account-ends.s2.title"),
-        after4Years)
+      detailsRow(messages("hts.help-information.section.when-your-account-ends.s2.title"), after4Years)
     val savingsAfterAccountClosesDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.when-your-account-ends.s3.title"),
-        savingsAfterAccountCloses)
+      detailsRow(messages("hts.help-information.section.when-your-account-ends.s3.title"), savingsAfterAccountCloses)
     List(beforeAccountClosesDetails, after4YearsDetails, savingsAfterAccountClosesDetails)
   }
-  def hmrcApp(appBenefits: String, getApp: String)
-             (implicit messages: Messages): List[Details] = {
+  def hmrcApp(appBenefits: String, getApp: String)(implicit messages: Messages): List[Details] = {
     val appBenefitsDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.hmrc-app.benefits.title"),
-        appBenefits)
+      detailsRow(messages("hts.help-information.section.hmrc-app.benefits.title"), appBenefits)
     val getAppDetails: Details =
-      detailsRow(
-        messages("hts.help-information.section.hmrc-app.get-the-app.title"),
-        getApp)
+      detailsRow(messages("hts.help-information.section.hmrc-app.get-the-app.title"), getApp)
     List(appBenefitsDetails, getAppDetails)
   }
 }

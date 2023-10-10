@@ -152,7 +152,7 @@ class IvController @Inject() (
         }
       } else {
         storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue.url)
-      }
+    }
     }(loginContinueURL = routes.IvController.journeyResult(continueURL, journeyId).url)
 
   def getIVSuccessful: Action[AnyContent] =
@@ -201,12 +201,17 @@ class IvController @Inject() (
     request: Request[_],
     hc: HeaderCarrier
   ): Future[Result] =
-    sessionStore.store(session).fold({ e =>
-      logger.warn(
-        s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e"
+    sessionStore
+      .store(session)
+      .fold(
+        { e =>
+          logger.warn(
+            s"Could not write to session cache after redirect from IV (journey ID: ${journeyId.getOrElse("not found")}): $e"
+          )
+          internalServerError()
+        },
+        _ => SeeOther(redirectTo)
       )
-      internalServerError()
-    }, _ => SeeOther(redirectTo))
 
   private def retrieveURLFromSessionCache(url: HTSSession => Option[String], defaultUrl: String)(f: String => Result)(
     implicit

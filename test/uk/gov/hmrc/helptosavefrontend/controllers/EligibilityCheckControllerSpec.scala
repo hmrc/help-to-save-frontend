@@ -39,7 +39,7 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
 class EligibilityCheckControllerSpec
-  extends ControllerSpecWithGuiceApp with CSRFSupport with AuthSupport with EnrolmentAndEligibilityCheckBehaviour
+    extends ControllerSpecWithGuiceApp with CSRFSupport with AuthSupport with EnrolmentAndEligibilityCheckBehaviour
     with SessionStoreBehaviourSupport {
 
   def newController(earlyCapCheck: Boolean): EligibilityCheckController = {
@@ -476,16 +476,16 @@ class EligibilityCheckControllerSpec
 
         "redirect to the not eligible page if there is no session data and the ineligibility check" +
           "indicates that the person is ineligible" in {
-            val ineligibility = randomIneligibility()
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockSessionStoreGet(Right(None))
-            mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-            mockEligibilityResult()(Right(ineligibility))
-            mockSessionStorePut(HTSSession(Some(Left(ineligibility)), None, None))(Right(()))
+          val ineligibility = randomIneligibility()
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockSessionStoreGet(Right(None))
+          mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+          mockEligibilityResult()(Right(ineligibility))
+          mockSessionStorePut(HTSSession(Some(Left(ineligibility)), None, None))(Right(()))
 
-            val result = doCheckEligibilityRequest()
-            status(result) shouldBe Status.SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
+          val result = doCheckEligibilityRequest()
+          status(result) shouldBe Status.SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.EligibilityCheckController.getIsNotEligible.url)
         }
 
         "report missing user info back to the user if they have no session data" in {
@@ -571,18 +571,16 @@ class EligibilityCheckControllerSpec
             test({
               mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
               mockSessionStoreGet(Left(""))
-            }
-            )
+            })
           }
 
           "the eligibility check call returns with an error" in {
-              test({
-                mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-                mockSessionStoreGet(Right(None))
-                mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
-                mockEligibilityResult()(Left("Bang!"))
-              }
-              )
+            test({
+              mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+              mockSessionStoreGet(Right(None))
+              mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
+              mockEligibilityResult()(Left("Bang!"))
+            })
           }
 
           "there is an error writing to the session cache" in {
@@ -593,8 +591,7 @@ class EligibilityCheckControllerSpec
               mockEnrolmentCheck()(Right(EnrolmentStatus.NotEnrolled))
               mockEligibilityResult()(Right(eligibleWithUserInfo.eligible))
               mockSessionStorePut(HTSSession(Some(Right(eligibleWithUserInfo)), None, None))(Left("Bang"))
-            }
-            )
+            })
           }
         }
       }
@@ -606,12 +603,12 @@ class EligibilityCheckControllerSpec
         import uk.gov.hmrc.helptosavefrontend.controllers.AuthSupport._
 
         def missingUserInfoRetrieval(
-                                      name: Option[String],
-                                      surname: Option[String],
-                                      dob: Option[LocalDate],
-                                      address: ItmpAddress
-                                    ) =
-          new~(Some(Name(name, surname)), email) and dob and Some(ItmpName(name, None, surname)) and dob and Some(
+          name: Option[String],
+          surname: Option[String],
+          dob: Option[LocalDate],
+          address: ItmpAddress
+        ) =
+          new ~(Some(Name(name, surname)), email) and dob and Some(ItmpName(name, None, surname)) and dob and Some(
             address
           ) and mockedNINORetrieval
 
@@ -623,11 +620,11 @@ class EligibilityCheckControllerSpec
         def isDobInvalid(dob: Option[LocalDate]) = dob.isEmpty
 
         case class TestParameters(
-                                   name: Option[String],
-                                   surname: Option[String],
-                                   dob: Option[LocalDate],
-                                   address: ItmpAddress
-                                 )
+          name: Option[String],
+          surname: Option[String],
+          dob: Option[LocalDate],
+          address: ItmpAddress
+        )
 
         val itmpAddresses: List[ItmpAddress] = List(
           ItmpAddress(None, Some(line2), None, None, None, Some(postCode), Some(countryCode), Some(countryCode)),
@@ -642,16 +639,16 @@ class EligibilityCheckControllerSpec
         val dobs: List[Option[LocalDate]] = List(Some(LocalDate.now()), None)
 
         val testParams: List[TestParameters] = for {
-          name <- names
+          name    <- names
           surname <- names
-          dob <- dobs
+          dob     <- dobs
           address <- itmpAddresses
         } yield TestParameters(name, surname, dob, address)
 
         testParams.foreach { params =>
           if (isNameInvalid(params.name) || isNameInvalid(params.surname) || isDobInvalid(params.dob) || isAddressInvalid(
-            params.address
-          )) {
+                params.address
+              )) {
             mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(
               missingUserInfoRetrieval(params.name, params.surname, params.dob, params.address)
             )

@@ -42,7 +42,7 @@ class BaseController @Inject() (
   val Messages: MessagesApi = messagesApi
 
   implicit override def hc(implicit rh: RequestHeader): HeaderCarrier =
-    HeaderCarrierConverter.fromRequestAndSession(rh,rh.session)
+    HeaderCarrierConverter.fromRequestAndSession(rh, rh.session)
 
   def internalServerError()(implicit request: Request[_]): Result =
     InternalServerError(errorHandler.internalServerErrorTemplate(request))

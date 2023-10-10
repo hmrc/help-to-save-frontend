@@ -36,4 +36,3 @@ object DateUtils {
     s"${date.format(dayExtractor)} $monthValue ${date.format(yearExtractor)}"
   }
 }
-

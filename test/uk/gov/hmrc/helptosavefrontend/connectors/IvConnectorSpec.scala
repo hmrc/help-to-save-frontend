@@ -37,7 +37,7 @@ class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with S
     val ivConnector = new IvConnectorImpl(mockHttp)
 
     val emptyBody = ""
-    val emptyHeaders :Map[String, Seq[String]] = Map.empty
+    val emptyHeaders: Map[String, Seq[String]] = Map.empty
   }
 
   "The IvConnectorImpl" when {
@@ -46,7 +46,7 @@ class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with S
 
       "handle successful response" in new TestApparatus {
 
-        val httpResponse = HttpResponse(200, Json.parse("""{"result": "Success"}"""),emptyHeaders)
+        val httpResponse = HttpResponse(200, Json.parse("""{"result": "Success"}"""), emptyHeaders)
 
         mockGet(url)(Some(httpResponse))
 
@@ -73,7 +73,7 @@ class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with S
 
         result.futureValue match {
           case Some(IvErrorResponse(_)) => ()
-          case other => fail(s"Expected IvErrorResponse but got $other")
+          case other                    => fail(s"Expected IvErrorResponse but got $other")
         }
       }
 

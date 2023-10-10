@@ -59,16 +59,15 @@ class IntroductionController @Inject() (
 
   private val baseUrl: String = frontendAppConfig.govUkURL
 
-  def timedOut(): Action[AnyContent] = unprotected{ implicit request =>
-    implicit htsContext =>
-      Ok(timeOutView())
+  def timedOut(): Action[AnyContent] = unprotected { implicit request => implicit htsContext =>
+    Ok(timeOutView())
   }
 
   def keepAlive(): Action[AnyContent] = unprotected { _ => _ =>
     Ok("")
   }
 
-  def getAboutHelpToSave: Action[AnyContent] = unprotected { _ => _=>
+  def getAboutHelpToSave: Action[AnyContent] = unprotected { _ => _ =>
     SeeOther(baseUrl)
   }
 
@@ -106,25 +105,27 @@ class IntroductionController @Inject() (
         () =>
           for {
             // get account
-            account <- helpToSaveService.getAccount(htsContext.nino,UUID.randomUUID()).fold(
-              e =>{
-                logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-                None
-              },{account =>
-                Some(account)
-              })
+            account <- helpToSaveService
+                        .getAccount(htsContext.nino, UUID.randomUUID())
+                        .fold(e => {
+                          logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+                          None
+                        }, { account =>
+                          Some(account)
+                        })
             //get account number
-            accountNumber <-helpToSaveService
-              .getAccountNumber()
-              .fold(
-                e => {
-                  logger.warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
-                  None
-                }, { accountNumber =>
-                  accountNumber.accountNumber
-                }
-              )
-          }yield Ok(helpInformationView(accountNumber,account))
+            accountNumber <- helpToSaveService
+                              .getAccountNumber()
+                              .fold(
+                                e => {
+                                  logger
+                                    .warn(s"error retrieving Account details from NS&I, error = $e", htsContext.nino)
+                                  None
+                                }, { accountNumber =>
+                                  accountNumber.accountNumber
+                                }
+                              )
+          } yield Ok(helpInformationView(accountNumber, account))
       )
 
     }(routes.IntroductionController.getAboutHelpToSave.url)

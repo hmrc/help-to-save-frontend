@@ -112,30 +112,28 @@ class ReminderController @Inject() (
 
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
 
-  def getSelectRendersPage(): Action[AnyContent] = {
-
-    authorisedForHtsWithNINO { implicit request =>
-      implicit htsContext =>
-        helpToSaveService
-          .getAccount(htsContext.nino, UUID.randomUUID())
-          .fold(
-            e => {
-              logger.warn(s"error retrieving Account details from NS&I, error = $e")
-              def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
-              Ok(
-                reminderFrequencySet(
-                  ReminderForm.giveRemindersDetailsForm(),
-                  "none",
-                  "account",
-                  Some(bckLink)
-                )
+  def getSelectRendersPage(): Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      helpToSaveService
+        .getAccount(htsContext.nino, UUID.randomUUID())
+        .fold(
+          e => {
+            logger.warn(s"error retrieving Account details from NS&I, error = $e")
+            def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
+            Ok(
+              reminderFrequencySet(
+                ReminderForm.giveRemindersDetailsForm(),
+                "none",
+                "account",
+                Some(bckLink)
               )
-            }, { account => {
+            )
+          }, { account =>
+            {
               if (account.isClosed) {
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
-                Ok(accountClosed(Some(bckLink),account.closureDate.getOrElse(LocalDate.now())))
-              }
-              else if (account.isClosed === false && isFeatureEnabled) {
+                Ok(accountClosed(Some(bckLink), account.closureDate.getOrElse(LocalDate.now())))
+              } else if (account.isClosed === false && isFeatureEnabled) {
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
                 Ok(
                   reminderFrequencySet(
@@ -149,9 +147,9 @@ class ReminderController @Inject() (
                 SeeOther(routes.RegisterController.getServiceUnavailablePage.url)
               }
             }
-            })
+          }
+        )
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
-  }
 
   def selectRemindersSubmit(): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
@@ -176,8 +174,7 @@ class ReminderController @Inject() (
                         s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : $noEmailError"
                       )
                       internalServerError()
-                    },
-                    {
+                    }, {
                       case Some(email) if email.nonEmpty => {
                         val daysToReceiveReminders =
                           DateToDaysMapper.d2dMapper.getOrElse(success.reminderFrequency, Seq())
@@ -190,7 +187,19 @@ class ReminderController @Inject() (
                           daysToReceiveReminders
                         )
                         auditor.sendEvent(
-                          HtsReminderCreatedEvent(HtsReminderCreated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName, htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                          HtsReminderCreatedEvent(
+                            HtsReminderCreated(
+                              HTSReminderAccount(
+                                htsUserToBeUpdated.nino.value,
+                                htsUserToBeUpdated.email,
+                                htsUserToBeUpdated.firstName,
+                                htsUserToBeUpdated.lastName,
+                                htsUserToBeUpdated.optInStatus,
+                                htsUserToBeUpdated.daysToReceive
+                              )
+                            ),
+                            request.uri
+                          ),
                           userInfo.nino
                         )
                         helpToSaveReminderService
@@ -261,26 +270,26 @@ class ReminderController @Inject() (
 
     }(loginContinueURL = routes.ReminderController.getRendersConfirmPage(email, period, "page").url)
 
-  def getSelectedRendersPage(): Action[AnyContent] = {
-    authorisedForHtsWithNINO { implicit request =>
-      implicit htsContext =>
-        helpToSaveService
-          .getAccount(htsContext.nino, UUID.randomUUID())
-          .fold(
-            e => {
-              logger.warn(s"error retrieving Account details from NS&I, error = $e")
-              internalServerError()
-            }, { account => {
+  def getSelectedRendersPage(): Action[AnyContent] =
+    authorisedForHtsWithNINO { implicit request => implicit htsContext =>
+      helpToSaveService
+        .getAccount(htsContext.nino, UUID.randomUUID())
+        .fold(
+          e => {
+            logger.warn(s"error retrieving Account details from NS&I, error = $e")
+            internalServerError()
+          }, { account =>
+            {
               if (account.isClosed) {
                 def bckLink: String = routes.ReminderController.getEmailsavingsReminders.url
-                Ok(accountClosed(Some(bckLink),account.closureDate.getOrElse(LocalDate.now())))
+                Ok(accountClosed(Some(bckLink), account.closureDate.getOrElse(LocalDate.now())))
               } else {
                 SeeOther(routes.ReminderController.accountOpenGetSelectedRendersPage.url)
               }
             }
-            })
+          }
+        )
     }(loginContinueURL = routes.ReminderController.selectRemindersSubmit.url)
-  }
 
   def accountOpenGetSelectedRendersPage(): Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
@@ -332,13 +341,11 @@ class ReminderController @Inject() (
                         s"An error occurred while accessing confirmed email service for user: ${userInfo.nino} Exception : $noEmailError"
                       )
                       internalServerError()
-                    },
-                    {
+                    }, {
                       case Some(email) if email.nonEmpty => {
                         if (success.reminderFrequency === "cancel") {
                           auditor.sendEvent(
-                            HtsReminderCancelledEvent(HtsReminderCancelled(
-                              userInfo.nino, email), request.uri),
+                            HtsReminderCancelledEvent(HtsReminderCancelled(userInfo.nino, email), request.uri),
                             userInfo.nino
                           )
                           val cancelHtsUserReminder = CancelHtsUserReminder(htsContext.nino)
@@ -366,7 +373,19 @@ class ReminderController @Inject() (
                             daysToReceiveReminders
                           )
                           auditor.sendEvent(
-                            HtsReminderUpdatedEvent(HtsReminderUpdated(HTSReminderAccount(htsUserToBeUpdated.nino.value, htsUserToBeUpdated.email, htsUserToBeUpdated.firstName, htsUserToBeUpdated.lastName, htsUserToBeUpdated.optInStatus, htsUserToBeUpdated.daysToReceive)), request.uri),
+                            HtsReminderUpdatedEvent(
+                              HtsReminderUpdated(
+                                HTSReminderAccount(
+                                  htsUserToBeUpdated.nino.value,
+                                  htsUserToBeUpdated.email,
+                                  htsUserToBeUpdated.firstName,
+                                  htsUserToBeUpdated.lastName,
+                                  htsUserToBeUpdated.optInStatus,
+                                  htsUserToBeUpdated.daysToReceive
+                                )
+                              ),
+                              request.uri
+                            ),
                             userInfo.nino
                           )
                           helpToSaveReminderService

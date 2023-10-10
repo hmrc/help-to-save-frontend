@@ -23,10 +23,8 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.http.HttpResponse
 
-
 // scalastyle:off magic.number
-class HelpToSaveReminderConnectorSpec
-    extends ControllerSpecWithGuiceApp with HttpSupport  {
+class HelpToSaveReminderConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport {
 
   lazy val connector: HelpToSaveReminderConnector = new HelpToSaveReminderConnectorImpl(mockHttp)
 
@@ -42,13 +40,13 @@ class HelpToSaveReminderConnectorSpec
   val emailUpdateHtsReminderURL = s"$htsReminderURL/help-to-save-reminder/update-htsuser-email"
 
   val emptyBody = ""
-  val emptyHeaders :Map[String, Seq[String]] = Map.empty
+  val emptyHeaders: Map[String, Seq[String]] = Map.empty
   implicit val unitFormat: Format[Unit] = new Format[Unit] {
     override def writes(o: Unit) = JsNull
 
     override def reads(json: JsValue) = json match {
       case JsNull => JsSuccess(())
-      case _ => JsError("JSON was not null")
+      case _      => JsError("JSON was not null")
     }
   }
 

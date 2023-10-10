@@ -64,7 +64,9 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
   def mockIvConnector(journeyId: JourneyId, ivServiceResponse: String): Unit =
-    ivConnector.getJourneyStatus(journeyId)(*, *) returns Future.successful(IvSuccessResponse.fromString(ivServiceResponse))
+    ivConnector.getJourneyStatus(journeyId)(*, *) returns Future.successful(
+      IvSuccessResponse.fromString(ivServiceResponse)
+    )
 
   private def doRequest() =
     ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"), Some(journeyId.Id))(FakeRequest())
@@ -73,8 +75,8 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
 
     def noSessionPutBehaviour(expectedRedirectURL: => String, ivServiceResponse: String): Unit =
       "redirect to the correct URL" in {
-          mockAuthWithNoRetrievals(AuthProvider)
-          mockIvConnector(journeyId, ivServiceResponse)
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockIvConnector(journeyId, ivServiceResponse)
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
@@ -84,9 +86,9 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     def sessionPutIVURLBehaviour(expectedRedirectURL: => String, ivServiceResponse: String): Unit = {
 
       "redirect to the correct URL if the write to session cache is successful" in {
-          mockAuthWithNoRetrievals(AuthProvider)
-          mockIvConnector(journeyId, ivServiceResponse)
-          mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockIvConnector(journeyId, ivServiceResponse)
+        mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Right(()))
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
@@ -94,9 +96,9 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       }
 
       "show an error page if the write to session cache is unsuccessful" in {
-          mockAuthWithNoRetrievals(AuthProvider)
-          mockIvConnector(journeyId, ivServiceResponse)
-          mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Left(""))
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockIvConnector(journeyId, ivServiceResponse)
+        mockSessionStorePut(HTSSession(None, None, None, Some(appConfig.ivUrl(continueURL)), None))(Left(""))
         val result = doRequest()
         checkIsTechnicalErrorPage(result)
       }
@@ -106,9 +108,9 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     "handling success responses" must {
 
       "redirect to the correct URL if the write to session cache is successful" in {
-          mockAuthWithNoRetrievals(AuthProvider)
-          mockIvConnector(journeyId, "Success")
-          mockSessionStorePut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockIvConnector(journeyId, "Success")
+        mockSessionStorePut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
 
         val result = doRequest()
         status(result) shouldBe SEE_OTHER
@@ -116,18 +118,18 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       }
 
       "show an error page if the write to session cache is unsuccessful" in {
-          mockAuthWithNoRetrievals(AuthProvider)
-          mockIvConnector(journeyId, "Success")
-          mockSessionStorePut(HTSSession(None, None, None, None, Some(continueURL)))(Left(""))
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockIvConnector(journeyId, "Success")
+        mockSessionStorePut(HTSSession(None, None, None, None, Some(continueURL)))(Left(""))
         val result = doRequest()
         checkIsTechnicalErrorPage(result)
       }
 
       "show an error page if URL contains unexpected characters" in {
         val badURL = "javascript%3Aalert%281%29%3B&journeyId=b9087faf-adcb-40ae-9e74-1e8afe35df69"
-          mockAuthWithNoRetrievals(AuthProvider)
-          mockIvConnector(journeyId, "Success")
-          mockSessionStorePut(HTSSession(None, None, None, None, Some(badURL)))(Left(""))
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockIvConnector(journeyId, "Success")
+        mockSessionStorePut(HTSSession(None, None, None, None, Some(badURL)))(Left(""))
         val result = ivController.journeyResult(badURL, Some(journeyId.Id))(FakeRequest())
         checkIsTechnicalErrorPage(result)
       }
@@ -185,8 +187,8 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     }
 
     "handles the case where no iv response for a given journeyId" in {
-        mockAuthWithNoRetrievals(AuthProvider)
-        mockPutIVURLInSessionCache
+      mockAuthWithNoRetrievals(AuthProvider)
+      mockPutIVURLInSessionCache
       val result =
         ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"), None)(FakeRequest())
 
@@ -210,8 +212,8 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
           mockSessionCacheBehaviour.fold(
             mockAuthWithNoRetrievals(AuthProvider)
           ) { behaviour =>
-              mockAuthWithNoRetrievals(AuthProvider)
-              behaviour()
+            mockAuthWithNoRetrievals(AuthProvider)
+            behaviour()
           }
 
           successChecks(expectedUrl, getResult())
@@ -222,22 +224,22 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
           "show an error page" when {
 
             "session cache retrieval fails" in {
-                mockAuthWithNoRetrievals(AuthProvider)
-                mockSessionStoreGet(Left(""))
+              mockAuthWithNoRetrievals(AuthProvider)
+              mockSessionStoreGet(Left(""))
 
               checkIsTechnicalErrorPage(getResult())
             }
 
             "there is no session data" in {
-                mockAuthWithNoRetrievals(AuthProvider)
-                mockSessionStoreGet(Right(None))
+              mockAuthWithNoRetrievals(AuthProvider)
+              mockSessionStoreGet(Right(None))
 
               successChecks(defaultUrl, getResult())
             }
 
             "the data required is not present in the session" in {
-                mockAuthWithNoRetrievals(AuthProvider)
-                mockSessionStoreGet(Right(Some(HTSSession(None, None, None, None, None))))
+              mockAuthWithNoRetrievals(AuthProvider)
+              mockSessionStoreGet(Right(Some(HTSSession(None, None, None, None, None))))
 
               checkIsTechnicalErrorPage(getResult())
             }

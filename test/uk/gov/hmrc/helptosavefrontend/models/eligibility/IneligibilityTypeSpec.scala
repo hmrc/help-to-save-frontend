@@ -55,7 +55,7 @@ class IneligibilityTypeSpec extends AnyWordSpec with Matchers with ScalaCheckDri
       val uniquePairs: List[(IneligibilityReason, IneligibilityReason)] =
         list.combinations(2).toList.flatMap(_.permutations.toList).map {
           case a :: b :: Nil => a -> b
-          case other => sys.error(s"Expected two elements but got $other")
+          case other         => sys.error(s"Expected two elements but got $other")
         }
 
       val samePairs: List[(IneligibilityReason, IneligibilityReason)] =

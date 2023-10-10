@@ -167,7 +167,7 @@ class AccountHolderController @Inject() (
     authorisedForHts { implicit request => implicit htsContext: HtsContext =>
       val result: EitherT[Future, String, String] = for {
         session <- sessionStore.get
-        email <- EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
+        email   <- EitherT.fromEither(getEmailFromSession(session)(_.confirmedEmail, "confirmed email"))
       } yield email
 
       result.fold(
@@ -238,21 +238,21 @@ class AccountHolderController @Inject() (
         case Right(userInfo) =>
           val result: EitherT[Future, UpdateEmailError, Unit] = for {
             _ <- helpToSaveService
-                 .updateEmail(
-                   NSIPayload(
-                     userInfo,
-                     emailVerificationParams.email,
-                     frontendAppConfig.version,
-                     frontendAppConfig.systemId
-                   )
-                 )
-                 .leftMap(UpdateEmailError.NSIError)
+                  .updateEmail(
+                    NSIPayload(
+                      userInfo,
+                      emailVerificationParams.email,
+                      frontendAppConfig.version,
+                      frontendAppConfig.systemId
+                    )
+                  )
+                  .leftMap(UpdateEmailError.NSIError)
             _ <- helpToSaveService
-                 .storeConfirmedEmail(emailVerificationParams.email)
-                 .leftMap(UpdateEmailError.EmailMongoError)
+                  .storeConfirmedEmail(emailVerificationParams.email)
+                  .leftMap(UpdateEmailError.EmailMongoError)
             _ <- sessionStore
-                 .store(HTSSession(None, Some(emailVerificationParams.email), None))
-                 .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
+                  .store(HTSSession(None, Some(emailVerificationParams.email), None))
+                  .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
           } yield ()
 
           lazy val auditEvent =
@@ -295,7 +295,7 @@ class AccountHolderController @Inject() (
   ): Future[Result] = {
     val enrolled: EitherT[Future, String, (EnrolmentStatus, Option[Email])] = for {
       enrolmentStatus <- helpToSaveService.getUserEnrolmentStatus()
-      maybeEmail <- helpToSaveService.getConfirmedEmail()
+      maybeEmail      <- helpToSaveService.getConfirmedEmail()
     } yield (enrolmentStatus, maybeEmail)
 
     enrolled

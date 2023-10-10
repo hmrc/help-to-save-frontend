@@ -32,16 +32,20 @@ trait HttpSupport { this: IdiomaticMockito with Matchers =>
   def mockGet(url: String, queryParams: Map[String, String] = emptyMap, headers: Map[String, String] = emptyMap)(
     response: Option[HttpResponse]
   ) =
-    mockHttp.GET[HttpResponse](url, queryParams.toSeq, headers.toSeq)(*, *, *) returns response.fold(Future.failed[HttpResponse](new Exception("Test exception message")))(Future.successful)
-
+    mockHttp.GET[HttpResponse](url, queryParams.toSeq, headers.toSeq)(*, *, *) returns response.fold(
+      Future.failed[HttpResponse](new Exception("Test exception message"))
+    )(Future.successful)
 
   def mockPut[A](url: String, body: A, headers: Map[String, String] = Map.empty[String, String])(
     result: Option[HttpResponse]
   ): Unit =
-    mockHttp.PUT[A,HttpResponse](url, body, headers.toSeq)(*, *, *, *) returns result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
-
+    mockHttp.PUT[A, HttpResponse](url, body, headers.toSeq)(*, *, *, *) returns result.fold[Future[HttpResponse]](
+      Future.failed(new Exception("Test exception message"))
+    )(Future.successful)
 
   def mockPost[A](url: String, headers: Map[String, String], body: A)(result: Option[HttpResponse]): Unit =
-    mockHttp.POST[A,HttpResponse](url, body, headers.toSeq)(*, *, *, *) returns result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
+    mockHttp.POST[A, HttpResponse](url, body, headers.toSeq)(*, *, *, *) returns result.fold[Future[HttpResponse]](
+      Future.failed(new Exception("Test exception message"))
+    )(Future.successful)
 
 }

@@ -47,8 +47,7 @@ class SummaryListRowsHelper {
       )
     )
 
-  def yourDetailsRow(eligibleWithUserInfo: EligibleWithUserInfo)
-                    (implicit messages: Messages): List[SummaryListRow] = {
+  def yourDetailsRow(eligibleWithUserInfo: EligibleWithUserInfo)(implicit messages: Messages): List[SummaryListRow] = {
     val name: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.name"),
@@ -77,8 +76,9 @@ class SummaryListRowsHelper {
     )
   }
 
-  def yourEmailDetailsRow(yourEmail: String, period: String, areRemindersEnabled: Boolean)
-                         (implicit messages: Messages): List[SummaryListRow] = {
+  def yourEmailDetailsRow(yourEmail: String, period: String, areRemindersEnabled: Boolean)(
+    implicit messages: Messages
+  ): List[SummaryListRow] = {
     val email: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-email.email"),
@@ -95,8 +95,7 @@ class SummaryListRowsHelper {
           routes.RegisterController.changeReminder,
           messages("hts.email-saving-remainders.title.h1")
         )
-      }
-      else {
+      } else {
         summaryListRow(
           messages("hts.email-saving-remainders.title.h1"),
           messages("hts.reminder-confirmation.title.p1-1") + " " +
@@ -116,8 +115,7 @@ class SummaryListRowsHelper {
     }
   }
 
-  def yourBankDetailsRow(bankDetails: BankDetails)
-                        (implicit messages: Messages): List[SummaryListRow] = {
+  def yourBankDetailsRow(bankDetails: BankDetails)(implicit messages: Messages): List[SummaryListRow] = {
     val sortCode: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-bank-details.sort-code"),
@@ -134,14 +132,15 @@ class SummaryListRowsHelper {
       )
     val rollNumber: Option[SummaryListRow] = {
       if (bankDetails.rollNumber.nonEmpty) {
-        Some(summaryListRow(
-          messages("hts.register.create_account.your-bank-details.roll-number"),
-          messages(bankDetails.rollNumber.getOrElse("")),
-          routes.RegisterController.changeBankDetails,
-          messages("hts.register.create_account.your-bank-details.roll-number")
-        ))
-      }
-      else {
+        Some(
+          summaryListRow(
+            messages("hts.register.create_account.your-bank-details.roll-number"),
+            messages(bankDetails.rollNumber.getOrElse("")),
+            routes.RegisterController.changeBankDetails,
+            messages("hts.register.create_account.your-bank-details.roll-number")
+          )
+        )
+      } else {
         None
       }
 
@@ -161,7 +160,6 @@ class SummaryListRowsHelper {
     ).collect { case Some(r) => r }
   }
 
-  private def display2CharFormat(str: String): String = {
+  private def display2CharFormat(str: String): String =
     str.filterNot((x: Char) => x.isWhitespace || x.toString.matches("-")).grouped(2).mkString(" ")
-  }
 }

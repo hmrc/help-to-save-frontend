@@ -25,8 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.forms.ReminderFrequencyValidation.{ErrorMessages, FormOps}
 import uk.gov.hmrc.helptosavefrontend.forms.TestForm.{testForm, testFormWithErrorMessage}
 
-class ReminderFrequencyValidationSpec
-    extends AnyWordSpec with Matchers with ControllerSpecWithGuiceApp {
+class ReminderFrequencyValidationSpec extends AnyWordSpec with Matchers with ControllerSpecWithGuiceApp {
 
   val logger: Logger = Logger(this.getClass)
 

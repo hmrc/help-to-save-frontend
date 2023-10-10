@@ -69,7 +69,7 @@ class AccountHolderControllerSpec
     mockAuditor.sendEvent(*, nino)(*).doesNothing()
 
   def mockAuditEmailChanged(nino: String, oldEmail: String, newEmail: String, path: String) =
-    mockAuditor.sendEvent(EmailChanged(nino, oldEmail, newEmail, false, path),(nino)).doesNothing()
+    mockAuditor.sendEvent(EmailChanged(nino, oldEmail, newEmail, false, path), (nino)).doesNothing()
 
   def mockGetAccount(nino: String)(result: Either[String, Account]): Unit =
     mockHelpToSaveService.getAccount(nino, *)(*, *) returns EitherT.fromEither[Future](result)
@@ -121,9 +121,9 @@ class AccountHolderControllerSpec
 
       "show a page which allows the user to change their email if they are already " +
         "enrolled and we have an email stored for them" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockEnrolmentCheck()(Right(Enrolled(true)))
-          mockEmailGet()(Right(Some("email")))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockEmailGet()(Right(Some("email")))
 
         val result = getUpdateYourEmailAddress()
         status(result) shouldBe OK
@@ -144,7 +144,8 @@ class AccountHolderControllerSpec
         controller.onSubmit()(
           FakeRequest()
             .withMethod("POST")
-            .withFormUrlEncodedBody("new-email-address" -> email))
+            .withFormUrlEncodedBody("new-email-address" -> email)
+        )
 
       behave like commonEnrolmentBehaviour(
         () => submit("email"),
@@ -153,11 +154,11 @@ class AccountHolderControllerSpec
       )
 
       "return the check your email page with a status of Ok, given a valid email address " in {
-          mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
-          mockEnrolmentCheck()(Right(enrolled))
-          mockEmailGet()(Right(Some("email")))
-          mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
-          mockEmailVerificationConn(nino, email, firstName)(Right(()))
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockEnrolmentCheck()(Right(enrolled))
+        mockEmailGet()(Right(Some("email")))
+        mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
+        mockEmailVerificationConn(nino, email, firstName)(Right(()))
 
         val result = Future.successful(await(csrfAddToken(controller.onSubmit())(fakePostRequest)))
         status(result) shouldBe Status.SEE_OTHER
@@ -166,11 +167,11 @@ class AccountHolderControllerSpec
 
       "return an AlreadyVerified status and redirect the user to email verified page," +
         " given an email address of an already verified user " in {
-          mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
-          mockEnrolmentCheck()(Right(enrolled))
-          mockEmailGet()(Right(Some("email")))
-          mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
-          mockEmailVerificationConn(nino, email, firstName)(Left(AlreadyVerified))
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockEnrolmentCheck()(Right(enrolled))
+        mockEmailGet()(Right(Some("email")))
+        mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
+        mockEmailVerificationConn(nino, email, firstName)(Left(AlreadyVerified))
 
         val result = Future.successful(await(csrfAddToken(controller.onSubmit())(fakePostRequest))(60.seconds))
         status(result) shouldBe Status.SEE_OTHER
@@ -199,10 +200,10 @@ class AccountHolderControllerSpec
       "show an error page if the write to session cache fails" in {
         val fakePostRequest =
           FakeRequest().withMethod("POST").withFormUrlEncodedBody("new-email-address" -> email)
-          mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
-          mockEnrolmentCheck()(Right(enrolled))
-          mockEmailGet()(Right(Some("email")))
-          mockSessionStorePut(HTSSession(None, None, Some(email)))(Left(""))
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockEnrolmentCheck()(Right(enrolled))
+        mockEmailGet()(Right(Some("email")))
+        mockSessionStorePut(HTSSession(None, None, Some(email)))(Left(""))
 
         val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
@@ -212,11 +213,11 @@ class AccountHolderControllerSpec
       "show an error page if the email verification fails" in {
         val fakePostRequest =
           FakeRequest().withMethod("POST").withFormUrlEncodedBody("new-email-address" -> email)
-          mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
-          mockEnrolmentCheck()(Right(enrolled))
-          mockEmailGet()(Right(Some("email")))
-          mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
-          mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
+        mockAuthWithNINOAndName(AuthWithCL200)(mockedNINOAndNameRetrieval)
+        mockEnrolmentCheck()(Right(enrolled))
+        mockEmailGet()(Right(Some("email")))
+        mockSessionStorePut(HTSSession(None, None, Some(email)))(Right(()))
+        mockEmailVerificationConn(nino, email, firstName)(Left(OtherError))
 
         val result = csrfAddToken(controller.onSubmit())(fakePostRequest)
         status(result) shouldBe Status.SEE_OTHER
@@ -251,20 +252,20 @@ class AccountHolderControllerSpec
         "NS&I is successful and the email is successfully updated in mongo" in {
         val encodedParams = emailVerificationParams.encode()
 
-          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-          mockEnrolmentCheck()(Right(Enrolled(true)))
-          mockEmailGet()(Right(Some("email")))
-          mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
-          mockStoreEmail(verifiedEmail)(Right(()))
-          mockSessionStorePut(HTSSession(None, Some(verifiedEmail), None))(Right(()))
-          mockAuditEmailChanged(
-            nino,
-            "email",
-            verifiedEmail,
-            routes.AccountHolderController
-              .emailVerifiedCallback(encodedParams)
-              .url
-          )
+        mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockEmailGet()(Right(Some("email")))
+        mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
+        mockStoreEmail(verifiedEmail)(Right(()))
+        mockSessionStorePut(HTSSession(None, Some(verifiedEmail), None))(Right(()))
+        mockAuditEmailChanged(
+          nino,
+          "email",
+          verifiedEmail,
+          routes.AccountHolderController
+            .emailVerifiedCallback(encodedParams)
+            .url
+        )
 
         val result = verifyEmail(encodedParams)
         status(result) shouldBe SEE_OTHER
@@ -277,19 +278,19 @@ class AccountHolderControllerSpec
           "NS&I is successful but the email is not successfully updated in mongo" in {
           val encodedParams = emailVerificationParams.encode()
 
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck()(Right(Enrolled(true)))
-            mockEmailGet()(Right(Some("email")))
-            mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
-            mockStoreEmail(verifiedEmail)(Left(""))
-            mockAuditEmailChanged(
-              nino,
-              "email",
-              verifiedEmail,
-              routes.AccountHolderController
-                .emailVerifiedCallback(encodedParams)
-                .url
-            )
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockEmailGet()(Right(Some("email")))
+          mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
+          mockStoreEmail(verifiedEmail)(Left(""))
+          mockAuditEmailChanged(
+            nino,
+            "email",
+            verifiedEmail,
+            routes.AccountHolderController
+              .emailVerifiedCallback(encodedParams)
+              .url
+          )
 
           val result = verifyEmail(encodedParams)
           status(result) shouldBe SEE_OTHER
@@ -301,37 +302,37 @@ class AccountHolderControllerSpec
       "return an error" when {
 
         "the parameter in the URL cannot be decoded" in {
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockAuditSuspiciousActivity()
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockAuditSuspiciousActivity()
 
           val result = verifyEmail("random crap")
           checkIsErrorPage(result)
         }
 
         "the NINO in the URL does not match the NINO from auth" in {
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck()(Right(Enrolled(true)))
-            mockEmailGet()(Right(Some("email")))
-            mockAuditSuspiciousActivity()
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockEmailGet()(Right(Some("email")))
+          mockAuditSuspiciousActivity()
 
           val result = verifyEmail(emailVerificationParams.copy(nino = "other nino").encode())
           checkIsErrorPage(result)
         }
 
         "there is missing user info from auth" in {
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
-            mockEnrolmentCheck()(Right(Enrolled(true)))
-            mockEmailGet()(Right(Some("email")))
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievalsMissingUserInfo)
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockEmailGet()(Right(Some("email")))
 
           val result = verifyEmail(emailVerificationParams.encode())
           checkIsErrorPage(result)
         }
 
         "the call to NS&I to update the email is unsuccessful" in {
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck()(Right(Enrolled(true)))
-            mockEmailGet()(Right(Some("email")))
-            mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Left(""))
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockEmailGet()(Right(Some("email")))
+          mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Left(""))
 
           val result = verifyEmail(emailVerificationParams.encode())
           checkIsErrorPage(result)
@@ -340,20 +341,20 @@ class AccountHolderControllerSpec
         "the write to session cache is unsuccessful" in {
           val encodedParams = emailVerificationParams.encode()
 
-            mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
-            mockEnrolmentCheck()(Right(Enrolled(true)))
-            mockEmailGet()(Right(Some("email")))
-            mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
-            mockStoreEmail(verifiedEmail)(Right(()))
-            mockSessionStorePut(HTSSession(None, Some(verifiedEmail), None))(Left(""))
-            mockAuditEmailChanged(
-              nino,
-              "email",
-              verifiedEmail,
-              routes.AccountHolderController
-                .emailVerifiedCallback(encodedParams)
-                .url
-            )
+          mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
+          mockEnrolmentCheck()(Right(Enrolled(true)))
+          mockEmailGet()(Right(Some("email")))
+          mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
+          mockStoreEmail(verifiedEmail)(Right(()))
+          mockSessionStorePut(HTSSession(None, Some(verifiedEmail), None))(Left(""))
+          mockAuditEmailChanged(
+            nino,
+            "email",
+            verifiedEmail,
+            routes.AccountHolderController
+              .emailVerifiedCallback(encodedParams)
+              .url
+          )
 
           val result = verifyEmail(encodedParams)
           checkIsErrorPage(result)
@@ -365,8 +366,8 @@ class AccountHolderControllerSpec
     "handling getEmailVerified" must {
 
       "return the email verified page" in {
-          mockAuthWithNoRetrievals(AuthProvider)
-          mockSessionStoreGet(Right(Some(HTSSession(None, Some("email"), None))))
+        mockAuthWithNoRetrievals(AuthProvider)
+        mockSessionStoreGet(Right(Some(HTSSession(None, Some("email"), None))))
 
         val result = controller.getEmailVerified(FakeRequest())
         status(result) shouldBe OK
@@ -376,24 +377,24 @@ class AccountHolderControllerSpec
       "return an error" when {
 
         "there is no session" in {
-            mockAuthWithNoRetrievals(AuthProvider)
-            mockSessionStoreGet(Right(None))
+          mockAuthWithNoRetrievals(AuthProvider)
+          mockSessionStoreGet(Right(None))
 
           val result = controller.getEmailVerified(FakeRequest())
           checkIsErrorPage(result)
         }
 
         "there is no confirmed email in the session" in {
-            mockAuthWithNoRetrievals(AuthProvider)
-            mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
+          mockAuthWithNoRetrievals(AuthProvider)
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
           val result = controller.getEmailVerified(FakeRequest())
           checkIsErrorPage(result)
         }
 
         "the call to session cache fails" in {
-            mockAuthWithNoRetrievals(AuthProvider)
-            mockSessionStoreGet(Left(""))
+          mockAuthWithNoRetrievals(AuthProvider)
+          mockSessionStoreGet(Left(""))
 
           val result = controller.getEmailVerified(FakeRequest())
           checkIsErrorPage(result)
@@ -405,8 +406,8 @@ class AccountHolderControllerSpec
     "handling getCheckYourEmail" must {
 
       "return the check your email page" in {
-          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-          mockSessionStoreGet(Right(Some(HTSSession(None, None, Some("email")))))
+        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+        mockSessionStoreGet(Right(Some(HTSSession(None, None, Some("email")))))
 
         val result = csrfAddToken(controller.getCheckYourEmail)(fakeRequest)
         status(result) shouldBe OK
@@ -416,24 +417,24 @@ class AccountHolderControllerSpec
       "return an error" when {
 
         "there is no session" in {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionStoreGet(Right(None))
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockSessionStoreGet(Right(None))
 
           val result = controller.getCheckYourEmail(FakeRequest())
           checkIsErrorPage(result)
         }
 
         "there is no pending email in the session" in {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockSessionStoreGet(Right(Some(HTSSession(None, None, None))))
 
           val result = controller.getCheckYourEmail(FakeRequest())
           checkIsErrorPage(result)
         }
 
         "the call to session cache fails" in {
-            mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
-            mockSessionStoreGet(Left(""))
+          mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(mockedNINORetrieval)
+          mockSessionStoreGet(Left(""))
 
           val result = controller.getCheckYourEmail(FakeRequest())
           checkIsErrorPage(result)
@@ -449,9 +450,9 @@ class AccountHolderControllerSpec
     val account = Account(false, 123.45, 0, 0, 0, LocalDate.parse("1900-01-01"), List(), None, None)
 
     "return the close account are you sure page if they have a help-to-save account" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
-        mockEnrolmentCheck()(Right(Enrolled(true)))
-        mockGetAccount(nino)(Right(account))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockEnrolmentCheck()(Right(Enrolled(true)))
+      mockGetAccount(nino)(Right(account))
 
       val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 200
@@ -459,9 +460,9 @@ class AccountHolderControllerSpec
     }
 
     "redirect to NS&I if the account is already closed" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
-        mockEnrolmentCheck()(Right(Enrolled(true)))
-        mockGetAccount(nino)(Right(account.copy(isClosed = true)))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockEnrolmentCheck()(Right(Enrolled(true)))
+      mockGetAccount(nino)(Right(account.copy(isClosed = true)))
 
       val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 303
@@ -469,9 +470,9 @@ class AccountHolderControllerSpec
     }
 
     "return close account page with no account if there is any error during retrieving Account from NS&I" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
-        mockEnrolmentCheck()(Right(Enrolled(true)))
-        mockGetAccount(nino)(Left("unknown error"))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockEnrolmentCheck()(Right(Enrolled(true)))
+      mockGetAccount(nino)(Left("unknown error"))
 
       val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 200
@@ -481,8 +482,8 @@ class AccountHolderControllerSpec
     }
 
     "redirect the user to the no account page if they are not enrolled in help-to-save" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
-        mockEnrolmentCheck()(Right(NotEnrolled))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockEnrolmentCheck()(Right(NotEnrolled))
 
       val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 303
@@ -490,8 +491,8 @@ class AccountHolderControllerSpec
     }
 
     "throw an Internal Server Error if the enrolment check fails" in {
-        mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
-        mockEnrolmentCheck()(Left("An error occurred"))
+      mockAuthWithNINORetrievalWithSuccess(AuthWithCL200)(Some(nino))
+      mockEnrolmentCheck()(Left("An error occurred"))
 
       val result = csrfAddToken(controller.getCloseAccountPage)(fakeRequest)
       status(result) shouldBe 500
@@ -513,34 +514,34 @@ class AccountHolderControllerSpec
       }
 
       "there is an error getting the enrolment status" in {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Left(""))
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Left(""))
 
         checkIsErrorPage(getResult())
       }
 
       "there is an error getting the confirmed email" in {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(Enrolled(true)))
-          mockEmailGet()(Left(""))
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockEmailGet()(Left(""))
 
         checkIsErrorPage(getResult())
       }
 
       "the user is not enrolled" in {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(NotEnrolled))
-          mockEmailGet()(Right(Some("email")))
-          mockAuditSuspiciousActivity()
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(NotEnrolled))
+        mockEmailGet()(Right(Some("email")))
+        mockAuditSuspiciousActivity()
 
         checkIsErrorPage(getResult())
       }
 
       "the user is enrolled but has no stored email" in {
-          mockSuccessfulAuth()
-          mockEnrolmentCheck()(Right(Enrolled(true)))
-          mockEmailGet()(Right(None))
-          mockAuditSuspiciousActivity()
+        mockSuccessfulAuth()
+        mockEnrolmentCheck()(Right(Enrolled(true)))
+        mockEmailGet()(Right(None))
+        mockAuditSuspiciousActivity()
 
         checkIsErrorPage(getResult())
       }

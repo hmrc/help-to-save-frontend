@@ -42,7 +42,9 @@ trait HelpToSaveReminderService {
 class HelpToSaveReminderServiceImpl @Inject() (helpToSaveReminderConnector: HelpToSaveReminderConnector)
     extends HelpToSaveReminderService with Logging {
 
-  def updateHtsUser(htsUserSchedule: HtsUserSchedule)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
+  def updateHtsUser(
+    htsUserSchedule: HtsUserSchedule
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =
     helpToSaveReminderConnector.updateHtsUser(htsUserSchedule)
 
   def getHtsUser(nino: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Result[HtsUserSchedule] =

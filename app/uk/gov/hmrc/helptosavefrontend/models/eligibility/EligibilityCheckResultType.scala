@@ -44,8 +44,8 @@ object EligibilityCheckResultType {
       ifIneligible: EligibilityCheckResponse => A,
       ifAlreadyHasAccount: EligibilityCheckResponse => A
     ): A = result match {
-      case Eligible(reason) => ifEligible(reason)
-      case Ineligible(reason) => ifIneligible(reason)
+      case Eligible(reason)          => ifEligible(reason)
+      case Ineligible(reason)        => ifIneligible(reason)
       case AlreadyHasAccount(reason) => ifAlreadyHasAccount(reason)
     }
   }
