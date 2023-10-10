@@ -1,3 +1,5 @@
+import play.sbt.routes.RoutesKeys
+
 import scala.language.postfixOps
 
 val appName = "help-to-save-frontend"
@@ -8,6 +10,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(PlayKeys.playDefaultPort := 7000)
   .settings(scalaVersion := "2.13.8")
   .settings(
+    RoutesKeys.routesImport += "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl",
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
