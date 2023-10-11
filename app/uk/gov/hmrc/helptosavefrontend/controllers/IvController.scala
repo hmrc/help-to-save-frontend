@@ -24,6 +24,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.IvConnector
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse._
@@ -32,7 +33,8 @@ import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
 import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl.idFunctor
+import uk.gov.hmrc.play.bootstrap.binders.{OnlyRelative, RedirectUrl}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -67,12 +69,12 @@ class IvController @Inject() (
   val defaultIVUrl: String = appConfig.ivUrl(eligibilityUrl)
 
   def journeyResult(
-    continueURL: String, //scalastyle:ignore cyclomatic.complexity method.length
+    redirectUrl: RedirectUrl, //scalastyle:ignore cyclomatic.complexity method.length
     journeyId: Option[String]
   ): Action[AnyContent] =
     authorisedForHts { implicit request => _ =>
       //Will be populated if we arrived here because of an IV success/failure
-      val newIVUrl = frontendAppConfig.ivUrl(continueURL)
+      val newIVUrl = frontendAppConfig.ivUrl(redirectUrl.get(OnlyRelative).url)
       lazy val storeNewIVURLThenRedirectTo =
         storeInSessionCacheThenRedirect(HTSSession(None, None, None, Some(newIVUrl), None), journeyId) _
       val urlRegex = "[A-Za-z0-9=&-?/]*"
@@ -83,7 +85,7 @@ class IvController @Inject() (
               case Some(Success) =>
                 metrics.ivSuccessCounter.inc()
                 storeInSessionCacheThenRedirect(
-                  HTSSession(None, None, None, None, Some(continueURL)),
+                  HTSSession(None, None, None, None, Some(redirectUrl.get(OnlyRelative).url)),
                   Some(id)
                 )(
                   routes.IvController.getIVSuccessful.url
@@ -153,7 +155,7 @@ class IvController @Inject() (
       } else {
         storeNewIVURLThenRedirectTo(routes.IvController.getTechnicalIssue.url)
     }
-    }(loginContinueURL = routes.IvController.journeyResult(continueURL, journeyId).url)
+    }(loginContinueURL = routes.IvController.journeyResult(redirectUrl, journeyId).url)
 
   def getIVSuccessful: Action[AnyContent] =
     authorisedForHts { implicit r => implicit h =>

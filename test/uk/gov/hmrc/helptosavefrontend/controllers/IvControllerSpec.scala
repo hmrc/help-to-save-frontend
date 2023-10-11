@@ -25,6 +25,7 @@ import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.AuthProvider
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
+import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
 import java.net.URLEncoder
 import java.util.UUID.randomUUID
@@ -55,7 +56,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     injector.instanceOf[precondition_failed]
   )
 
-  val continueURL = "continue-here"
+  val continueURL = "/continue-here"
 
   lazy val mockPutContinueURLInSessionCache =
     mockSessionStorePut(HTSSession(None, None, None, None, Some(continueURL)))(Right(()))
@@ -69,7 +70,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
     )
 
   private def doRequest() =
-    ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"), Some(journeyId.Id))(FakeRequest())
+    ivController.journeyResult(RedirectUrl(continueURL), Some(journeyId.Id))(FakeRequest())
 
   "GET /iv/journey-result" when {
 
@@ -126,11 +127,11 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       }
 
       "show an error page if URL contains unexpected characters" in {
-        val badURL = "javascript%3Aalert%281%29%3B&journeyId=b9087faf-adcb-40ae-9e74-1e8afe35df69"
+        val badURL = "/javascript%3Aalert%281%29%3B&journeyId=b9087faf-adcb-40ae-9e74-1e8afe35df69"
         mockAuthWithNoRetrievals(AuthProvider)
         mockIvConnector(journeyId, "Success")
         mockSessionStorePut(HTSSession(None, None, None, None, Some(badURL)))(Left(""))
-        val result = ivController.journeyResult(badURL, Some(journeyId.Id))(FakeRequest())
+        val result = ivController.journeyResult(RedirectUrl(badURL), Some(journeyId.Id))(FakeRequest())
         checkIsTechnicalErrorPage(result)
       }
 
@@ -190,7 +191,7 @@ class IvControllerSpec extends ControllerSpecWithGuiceApp with SessionStoreBehav
       mockAuthWithNoRetrievals(AuthProvider)
       mockPutIVURLInSessionCache
       val result =
-        ivController.journeyResult(URLEncoder.encode(continueURL, "UTF-8"), None)(FakeRequest())
+        ivController.journeyResult(RedirectUrl(continueURL), None)(FakeRequest())
 
       status(result) shouldBe SEE_OTHER
       redirectLocation(result) shouldBe Some(routes.IvController.getTechnicalIssue.url)
