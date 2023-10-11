@@ -169,7 +169,7 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
       val redirectTo =
         redirectLocation(result)(new Timeout(1, SECONDS)).getOrElse("")
       redirectTo should include("/iv-stub/uplift")
-      redirectTo should include("continueURL")
+      redirectTo should include("redirectUrl")
     }
 
     "handle UnsupportedAuthProvider exceptions and redirect user to the correct page" in {
