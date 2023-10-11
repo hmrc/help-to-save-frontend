@@ -66,7 +66,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   def ivUrl(redirectOnLoginURL: String): String = {
     def encodedCallbackUrl(redirectOnLoginURL: String): String =
-      urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?continueURL=$redirectOnLoginURL")
+      urlEncode(s"$helpToSaveFrontendUrl/iv/journey-result?redirectUrl=$redirectOnLoginURL")
 
     new URI(
       s"$ivUpliftUrl" +
