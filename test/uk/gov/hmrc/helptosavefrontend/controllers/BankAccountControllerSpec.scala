@@ -171,8 +171,9 @@ class BankAccountControllerSpec
         ) and
           include("sortCode") and
           include("accountNumber") and
-          include("accountName"))
-
+          include("accountName") and
+          include("rollNumber") and
+          include("Building society roll number (if you have one)"))
       }
     }
 
@@ -203,8 +204,8 @@ class BankAccountControllerSpec
             fakeRequest.withMethod("POST").withFormUrlEncodedBody("rollNumber" -> "a")
           )
         status(result) shouldBe Status.OK
-        contentAsString(result) should include("Enter sort code")
-        contentAsString(result) should include("Enter account number")
+        contentAsString(result) should include("Enter a sort code")
+        contentAsString(result) should include("Enter an account number")
         contentAsString(result) should include("Enter the name on the account")
         contentAsString(result) should include("Roll number must be 4 characters or more")
       }

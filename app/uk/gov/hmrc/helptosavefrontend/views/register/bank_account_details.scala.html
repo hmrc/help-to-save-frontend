@@ -41,6 +41,22 @@
   @viewHelpers.form(routes.BankAccountController.submitBankDetails, 'id -> "bankDetailsForm") {
 
     @viewHelpers.govukInput(Input(
+      id = "accountName",
+      name = "accountName",
+      label = Label(
+        isPageHeading = false,
+        classes = "govuk-label--m",
+        content = Text(messages("hts.register.bank-details.accountName.label"))
+      ),
+      value = form.data.get("accountName"),
+      errorMessage = getErrorMessage(form, "accountName").map(errorMsg =>
+        ErrorMessage(
+          content = Text(errorMsg),
+          visuallyHiddenText = Some(messages("hts.global.error.prefix"))
+        ))
+    ))
+
+    @viewHelpers.govukInput(Input(
       id = "sortCode",
       name = "sortCode",
       label = Label(
@@ -101,22 +117,6 @@
           content = Text(errorMsg),
           visuallyHiddenText = Some(messages("hts.global.error.prefix"))
         ))
-    ))
-
-    @viewHelpers.govukInput(Input(
-    id = "accountName",
-    name = "accountName",
-    label = Label(
-    isPageHeading = false,
-    classes = "govuk-label--m",
-    content = Text(messages("hts.register.bank-details.accountName.label"))
-    ),
-    value = form.data.get("accountName"),
-    errorMessage = getErrorMessage(form, "accountName").map(errorMsg =>
-      ErrorMessage(
-        content = Text(errorMsg),
-        visuallyHiddenText = Some(messages("hts.global.error.prefix"))
-      ))
     ))
 
     @viewHelpers.govukButton(Button(
