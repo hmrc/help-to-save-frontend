@@ -14,14 +14,14 @@
  * limitations under the License.
  *@
 
-@import cats.syntax.eq._
 @import cats.instances.bigDecimal.catsKernelStdOrderForBigDecimal
+@import cats.syntax.eq._
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account._
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
-@import uk.gov.hmrc.govukfrontend.views.html.components._
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout,
       zeroBalanceZeroBonus: zero_balance_zero_bonus,

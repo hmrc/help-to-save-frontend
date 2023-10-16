@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.util
 
-import java.time.{LocalDateTime, ZoneId}
-
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
+
+import java.time.{LocalDateTime, ZoneId}
+import javax.inject.{Inject, Singleton}
 
 @Singleton
 class MaintenanceSchedule @Inject() (implicit frontendAppConfig: FrontendAppConfig) extends Logging {

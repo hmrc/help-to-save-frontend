@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.forms
 
-import java.util.regex.Matcher
-
 import cats.data.Validated.Valid
 import cats.instances.int._
 import cats.instances.string._
@@ -30,6 +28,8 @@ import play.api.data.{Form, FormError}
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetailsValidation.{ErrorMessages, StringOps}
 import uk.gov.hmrc.helptosavefrontend.util.Validation.{ValidOrErrorStrings, invalid, validatedFromBoolean}
+
+import java.util.regex.Matcher
 
 class BankDetailsValidation @Inject() (configuration: FrontendAppConfig) {
 

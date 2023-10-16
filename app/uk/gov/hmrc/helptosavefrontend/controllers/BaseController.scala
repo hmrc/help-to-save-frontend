@@ -22,8 +22,8 @@ import play.api.mvc.{MessagesControllerComponents, Request, RequestHeader, Resul
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.util.MaintenanceSchedule
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 @Singleton
 class BaseController @Inject() (

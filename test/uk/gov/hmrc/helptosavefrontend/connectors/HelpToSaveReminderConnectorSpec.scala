@@ -16,12 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.time.LocalDate
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.http.HttpResponse
+
+import java.time.LocalDate
 
 // scalastyle:off magic.number
 class HelpToSaveReminderConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport {

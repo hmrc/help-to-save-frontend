@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.account
 
-import java.time.{Clock, LocalDate}
-
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
+import java.time.{Clock, LocalDate}
 
 class AccountSpec extends AnyWordSpec with Matchers {
 

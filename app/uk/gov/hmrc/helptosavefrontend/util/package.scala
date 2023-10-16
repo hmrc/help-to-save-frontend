@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend
 
-import java.net.{URLDecoder, URLEncoder}
-import java.util.Base64
-
 import cats.data.EitherT
 import org.joda.time.LocalDate
 
+import java.net.{URLDecoder, URLEncoder}
+import java.util.Base64
 import scala.concurrent.Future
 import scala.language.implicitConversions
 import scala.util.matching.Regex

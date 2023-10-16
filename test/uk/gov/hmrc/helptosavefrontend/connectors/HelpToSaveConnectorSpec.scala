@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.time.LocalDate
-import java.util.{Base64, UUID}
 import cats.data.EitherT
 import cats.instances.int._
 import cats.syntax.eq._
@@ -35,6 +33,8 @@ import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionSuccess
 import uk.gov.hmrc.http.HttpResponse
 
+import java.time.LocalDate
+import java.util.{Base64, UUID}
 import scala.concurrent.Future
 
 // scalastyle:off magic.number

@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.views.helpers
 
+import play.api.i18n.Messages
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import play.api.i18n.Messages
 
 object DateUtils {
 

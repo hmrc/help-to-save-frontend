@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.time.Duration
-
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status._
 import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
@@ -27,9 +25,10 @@ import uk.gov.hmrc.helptosavefrontend.metrics.Metrics.nanosToPrettyString
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError._
 import uk.gov.hmrc.helptosavefrontend.models.email.{EmailVerificationRequest, VerifyEmailError}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
-import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO, NINOLogMessageTransformer, maskNino}
+import uk.gov.hmrc.helptosavefrontend.util.{Crypto, EmailVerificationParams, Logging, NINO, NINOLogMessageTransformer}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpResponse}
 
+import java.time.Duration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 

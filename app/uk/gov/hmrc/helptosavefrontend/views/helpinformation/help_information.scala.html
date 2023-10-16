@@ -14,17 +14,14 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
-@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+@import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.account.Account
-@import uk.gov.hmrc.helptosavefrontend.models.account.Account._
-@import uk.gov.hmrc.helptosavefrontend.models.account.BonusTerm
-@import java.time.LocalDate
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
-@import uk.gov.hmrc.govukfrontend.views.html.components._
 @import uk.gov.hmrc.helptosavefrontend.views.helpers.DetailsHelper
-@import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
+@import uk.gov.hmrc.helptosavefrontend.views.html.helpers._
+
+@import java.time.LocalDate
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, detailsHelper: DetailsHelper)
 @(accountNumber: Option[String], maybeAccount: Option[Account])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)

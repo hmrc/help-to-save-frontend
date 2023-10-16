@@ -18,12 +18,12 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.instances.future._
 import com.google.inject.Inject
-import javax.inject.Singleton
 import play.api.mvc._
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
@@ -31,9 +31,9 @@ import uk.gov.hmrc.helptosavefrontend.util.{MaintenanceSchedule, NINOLogMessageT
 import uk.gov.hmrc.helptosavefrontend.views.html.core.privacy
 import uk.gov.hmrc.helptosavefrontend.views.html.helpinformation.help_information
 import uk.gov.hmrc.helptosavefrontend.views.html.time_out
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import java.util.UUID
+import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 
 @Singleton

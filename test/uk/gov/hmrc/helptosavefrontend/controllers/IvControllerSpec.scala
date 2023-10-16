@@ -27,7 +27,6 @@ import uk.gov.hmrc.helptosavefrontend.models.iv.{IvSuccessResponse, JourneyId}
 import uk.gov.hmrc.helptosavefrontend.views.html.iv._
 import uk.gov.hmrc.play.bootstrap.binders.RedirectUrl
 
-import java.net.URLEncoder
 import java.util.UUID.randomUUID
 import scala.concurrent.Future
 

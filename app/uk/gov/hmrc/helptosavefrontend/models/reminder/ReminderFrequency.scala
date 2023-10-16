@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.reminder
 
-import java.time.LocalDate
-
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import uk.gov.hmrc.domain.Nino
+
+import java.time.LocalDate
 case class ReminderFrequency(
   nino: Nino,
   email: String,
