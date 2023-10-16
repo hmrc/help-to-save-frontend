@@ -25,7 +25,7 @@ hts.global.error-summary.title=Mae problem wedi codi
 
 hts.nav.title=Cymorth i Gynilo
 hts.sign-out=Allgofnodi
-hts.sign-in=Mewngofnodi
+hts.sign-in=Mewngofnodwch i’r cyfrif Cymorth i Gynilo
 
 hts.sign-in.title.h1=Mewngofnodi i’ch cyfrif Cymorth i Gynilo
 hts.sign-in.p1=Mewngofnodi i’ch cyfrif Cymorth i Gynilo er mwyn:
@@ -47,9 +47,7 @@ hts.core.not-eligible.wtc.p-2-2=.
 hts.core.not-eligible.wtc.h2-1=Os ydych wedi gwneud cais yn ddiweddar am Gredyd Treth Gwaith
 hts.core.not-eligible.wtc.p-3=Dylech aros nes eich bod wedi cael llythyr gan Gyllid a Thollau EF yn cadarnhau bod gennych hawl i Gredyd Treth Gwaith. Unwaith eich bod wedi cael y llythyr cewch geisio eto am gyfrif Cymorth i Gynilo.
 hts.core.not-eligible.wtc.h3=Os ydych o’r farn eich bod yn gymwys am gyfrif
-hts.core.not-eligible.wtc.p-4-1=Beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ac yn parhau
-hts.core.not-eligible.wtc.p-4-link-text=i fod o’r farn eich bod yn gymwys
-hts.core.not-eligible.wtc.p-4-2=am gyfrif Cymorth i Gynilo.
+hts.core.not-eligible.wtc.p-4=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ar gyfer cyfrif Cymorth i Gynilo ac yn <a class="govuk-link" href={0}>parhau i fod o’r farn eich bod yn gymwys (yn agor tab newydd).</a>
 
 hts.core.not-eligible.uc.p-1=Mae hyn oherwydd bod incwm eich aelwyd - yn ystod eich cyfnod asesu misol diwethaf
 hts.core.not-eligible.uc.p-1b=Mae hyn oherwydd bod incwm eich aelwyd yn ystod eich cyfnod asesu misol diwethaf
@@ -124,7 +122,7 @@ hts.register.bank-details.error.button.try-again=Rhowch gynnig arall arni
 # Eligible
 hts.register.you-are-eligible.title.h1=Rydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
 hts.register.you-are-eligible.p1={0}, cyn i chi allu creu cyfrif, dechrau cynilo ac ennill bonws, bydd rhaid i chi:
-hts.register.you-are-eligible.li1=rhoi eich cyfeiriad e-bost i ni
+hts.register.you-are-eligible.li1=nodwch eich cyfeiriad e-bost
 hts.register.you-are-eligible.li2=nodi eich manylion banc
 
 # Register - missing information
@@ -309,7 +307,7 @@ hts.email-verification.submit.text=Dilysu’ch e-bost
 hts.email-verification.check-your-email.title.h1=Mae gennych 30 munud i gadarnhau’r cyfeiriad e-bost
 hts.email-verification.check-your-email.we-have-sent-mail=Rydym wedi anfon e-bost at {0}. <a class="govuk-link" href={1}>Defnyddiwch gyfeiriad e-bost gwahanol</a>.
 hts.email-verification.check-your-email.what-next=Yr hyn y mae’n rhaid i chi ei wneud
-hts.email-verification.check-your-email.content1=Ewch i’r cyfrif e-bost hwnnw a dewiswch y cysylltiad yn y neges a anfonwyd atoch chi.
+hts.email-verification.check-your-email.content1=Ewch i’ch cyfrif e-bost a dewiswch y cysylltiad yn y neges a anfonwyd atoch gennym.
 hts.email-verification.check-your-email.where-used-heading=Os na chyrhaeddodd yr e-bost
 hts.email-verification.check-your-email.where-used=Gallwch ddweud wrthym am <a class="govuk-link" href={0}>ail-anfon yr e-bost</a> at y cyfrif e-bost hwnnw.
 
@@ -328,7 +326,7 @@ hts.email-verified.p2=Nid yw eich e-bost wedi cael ei ddiweddaru ar gyfer gwasan
 hts.email-verification.existing-user.check-your-email.title.h1=Mae gennych 30 munud i gadarnhau’r cyfeiriad e-bost
 hts.email-verification.existing-user.check-your-email.we-have-sent-mail=Rydym wedi anfon e-bost at {0}. <a class="govuk-link" href={1}>Defnyddiwch gyfeiriad e-bost gwahanol</a>.
 hts.email-verification.existing-user.check-your-email.what-next=Yr hyn y mae’n rhaid i chi ei wneud
-hts.email-verification.existing-user.check-your-email.content1=Ewch i’r cyfrif e-bost hwnnw a dewiswch y cysylltiad yn y neges a anfonwyd atoch chi.
+hts.email-verification.existing-user.check-your-email.content1=Ewch i’ch cyfrif e-bost a dewiswch y cysylltiad yn y neges a anfonwyd atoch gennym.
 hts.email-verification.existing-user.check-your-email.h3=Os na chyrhaeddodd yr e-bost
 hts.email-verification.existing-user.check-your-email.resend-1=Gallwch ddweud wrthym am
 hts.email-verification.existing-user.check-your-email.resend-button-text=ail-anfon yr e-bost
