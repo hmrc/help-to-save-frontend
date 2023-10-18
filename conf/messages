@@ -311,7 +311,7 @@ hts.email-verification.check-your-email.we-have-sent-mail=We’ve sent an email 
 hts.email-verification.check-your-email.what-next=What you must do
 hts.email-verification.check-your-email.content1=Go to your email account and select the link in the message we sent you.
 hts.email-verification.check-your-email.where-used-heading=If the email did not arrive
-hts.email-verification.check-your-email.where-used=You can tell us to resend the email to that email account.
+hts.email-verification.check-your-email.where-used=You can tell us to <a class="govuk-link" href={0}>resend the email</a> to that email account.
 
 hts.email-verification.error-title=There is a problem
 hts.email-verification.error-link-description=Enter a valid email address
