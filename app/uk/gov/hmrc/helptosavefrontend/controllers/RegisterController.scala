@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.time.temporal.TemporalAdjusters
-import java.time.{Clock, LocalDate, LocalDateTime}
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
@@ -28,15 +25,14 @@ import cats.syntax.traverse._
 import com.google.inject.Inject
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
-import javax.inject.Singleton
 import play.api.mvc._
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.controllers.RegisterController.{CreateAccountError, EligibleWithInfo}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
@@ -46,8 +42,8 @@ import uk.gov.hmrc.helptosavefrontend.models.register.CreateAccountRequest
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{DateToDaysMapper, HtsUserSchedule}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveServiceImpl.SubmissionFailure
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
@@ -55,6 +51,9 @@ import uk.gov.hmrc.helptosavefrontend.views.html.cannot_check_details
 import uk.gov.hmrc.helptosavefrontend.views.html.register._
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.temporal.TemporalAdjusters
+import java.time.{Clock, LocalDate, LocalDateTime}
+import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
+import org.mockito.ArgumentMatchersSugar.*
 import org.scalatest.concurrent.ScalaFutures
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
-import org.mockito.ArgumentMatchersSugar.*
+
+import java.time.LocalDate
 import scala.concurrent.Future
 
 // scalastyle:off magic.number

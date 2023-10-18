@@ -29,6 +29,7 @@ import uk.gov.hmrc.helptosavefrontend.audit.HTSAuditor
 import uk.gov.hmrc.helptosavefrontend.auth.HelpToSaveAuth
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.CannotCreateAccountReason
 import uk.gov.hmrc.helptosavefrontend.controllers.EmailController.EligibleInfo.{EligibleWithEmail, EligibleWithNoEmail}
 import uk.gov.hmrc.helptosavefrontend.forms._
@@ -45,7 +46,6 @@ import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationPara
 import uk.gov.hmrc.helptosavefrontend.views.html.email._
 import uk.gov.hmrc.helptosavefrontend.views.html.link_expired
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}

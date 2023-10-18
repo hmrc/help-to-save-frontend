@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.helptosavefrontend.audit
 
-import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.helptosavefrontend.models.HTSEvent
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, NINO, NINOLogMessageTransformer}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.util.control.NonFatal
 

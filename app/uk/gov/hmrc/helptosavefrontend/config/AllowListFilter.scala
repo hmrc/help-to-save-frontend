@@ -21,9 +21,9 @@ import com.google.inject.Inject
 import configs.syntax._
 import play.api.Configuration
 import play.api.mvc.{Call, RequestHeader, Result, Results}
+import uk.gov.hmrc.allowlist.{AkamaiAllowlistFilter => AkamaiAllowListFilter}
 import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.util.Logging
-import uk.gov.hmrc.allowlist.{AkamaiAllowlistFilter => AkamaiAllowListFilter}
 
 import scala.concurrent.Future
 

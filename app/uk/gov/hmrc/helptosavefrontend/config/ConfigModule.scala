@@ -17,9 +17,10 @@
 package uk.gov.hmrc.helptosavefrontend.config
 
 import com.google.inject.Provider
-import javax.inject.Inject
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+
+import javax.inject.Inject
 
 class ConfigModule @Inject() (configuration: Configuration, environment: Environment) extends Provider[ServicesConfig] {
 

@@ -17,12 +17,12 @@
 package uk.gov.hmrc.helptosavefrontend.services
 
 import com.google.inject.{ImplementedBy, Inject}
-import javax.inject.Singleton
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveReminderConnector
 import uk.gov.hmrc.helptosavefrontend.models.reminder.{CancelHtsUserReminder, HtsUserSchedule, UpdateReminderEmail}
 import uk.gov.hmrc.helptosavefrontend.util.{Logging, Result}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import javax.inject.Singleton
 import scala.concurrent.ExecutionContext
 
 @ImplementedBy(classOf[HelpToSaveReminderServiceImpl])

@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import org.mockito.ArgumentMatchersSugar.*
 import org.mockito.IdiomaticMockito
-
-import java.time.LocalDate
 import uk.gov.hmrc.auth.core.AuthProvider.GovernmentGateway
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise._
@@ -26,7 +25,8 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.helptosavefrontend.models.HtsAuth.UserInfoRetrievals
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
-import org.mockito.ArgumentMatchersSugar.*
+
+import java.time.LocalDate
 import scala.concurrent.Future
 
 object AuthSupport {

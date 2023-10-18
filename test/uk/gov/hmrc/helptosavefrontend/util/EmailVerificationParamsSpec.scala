@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.util
 
 import java.nio.charset.Charset
 import java.util.Base64
-
 import scala.util.{Failure, Success, Try}
 
 class EmailVerificationParamsSpec extends UnitSpec {

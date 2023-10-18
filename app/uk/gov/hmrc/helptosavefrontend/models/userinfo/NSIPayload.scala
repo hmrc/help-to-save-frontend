@@ -16,15 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.userinfo
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import cats.instances.string._
 import cats.syntax.eq._
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload.ContactDetails
 
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import scala.util.{Failure, Success, Try}
 
 case class NSIPayload(

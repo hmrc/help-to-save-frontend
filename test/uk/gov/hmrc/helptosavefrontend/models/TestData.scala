@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import java.time.LocalDate
 import org.scalacheck.Gen
 import org.scalacheck.Gen.alphaStr
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession.EligibleWithUserInfo
@@ -27,6 +26,7 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, User
 import uk.gov.hmrc.helptosavefrontend.testutil._
 import uk.gov.hmrc.smartstub.{AdvGen, AutoGen, Enumerable}
 
+import java.time.LocalDate
 import scala.language.implicitConversions
 
 object TestData {

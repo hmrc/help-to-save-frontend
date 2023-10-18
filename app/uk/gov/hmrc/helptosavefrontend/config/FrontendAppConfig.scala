@@ -16,14 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.config
 
-import java.net.URI
-
-import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.helptosavefrontend.controllers.routes
 import uk.gov.hmrc.helptosavefrontend.models.iv.JourneyId
 import uk.gov.hmrc.helptosavefrontend.util.urlEncode
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.helptosavefrontend.controllers.routes
 
+import java.net.URI
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.duration.Duration
 
 @Singleton

@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.helptosavefrontend.models
 
-import java.time.LocalDate
-
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.{validNSIPayload, validUserInfo}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, NSIPayload, UserInfo}
+
+import java.time.LocalDate
 
 class NSIPayloadSpec extends AnyWordSpec with Matchers {
 

@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.userinfo
 
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-
 import cats.Show
 import play.api.libs.json._
 import uk.gov.hmrc.helptosavefrontend.util.Email
+
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /** Details of the user obtained from HMRC services */
 case class UserInfo(

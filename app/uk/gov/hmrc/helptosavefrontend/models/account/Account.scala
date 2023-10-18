@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.models.account
 
-import java.time.{Clock, LocalDate}
-
 import cats.Show
 import play.api.libs.json.{Format, Json}
+
+import java.time.{Clock, LocalDate}
 
 case class BonusTerm(
   bonusEstimate: BigDecimal,

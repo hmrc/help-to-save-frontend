@@ -26,7 +26,7 @@ hts.global.error-summary.title=There is a problem
 
 hts.nav.title=Help to Save
 hts.sign-out=Sign out
-hts.sign-in=Sign in
+hts.sign-in=Sign in to Help to Save account.
 
 # Sign in
 hts.sign-in.title.h1=Sign in to your Help to Save account
@@ -50,9 +50,7 @@ hts.core.not-eligible.wtc.p-2-2=.
 hts.core.not-eligible.wtc.h2-1=If you’ve recently applied for Working Tax Credit
 hts.core.not-eligible.wtc.p-3=You should wait until you’ve received a letter from HM Revenue and Customs confirming that you’re entitled to Working Tax Credit. Once you’ve received this you can apply for a Help to Save account again.
 hts.core.not-eligible.wtc.h3=If you think you’re eligible for an account
-hts.core.not-eligible.wtc.p-4-1=Find out what to do if you have checked the eligibility criteria and still
-hts.core.not-eligible.wtc.p-4-link-text=think you’re eligible
-hts.core.not-eligible.wtc.p-4-2=for a Help to Save account.
+hts.core.not-eligible.wtc.p-4=Find out what to do if you have checked the eligibility criteria for a Help to Save account and <a class="govuk-link" href={0}>still think you're eligible (opens in a new tab).</a>
 
 hts.core.not-eligible.uc.p-1=This is because your household income - in your last monthly assessment period
 hts.core.not-eligible.uc.p-1b=This is because your household income in your last monthly assessment period
@@ -127,7 +125,7 @@ hts.register.bank-details.error.button.try-again=Try again
 # Eligible
 hts.register.you-are-eligible.title.h1=You are eligible for a Help to Save account
 hts.register.you-are-eligible.p1={0}, before you can create an account, start saving and earn bonuses, you will need to:
-hts.register.you-are-eligible.li1=give us your email address
+hts.register.you-are-eligible.li1=enter your email address
 hts.register.you-are-eligible.li2=enter your UK bank details
 
 # Register - missing information
@@ -311,9 +309,9 @@ hts.email-verification.submit.text=Verify your email
 hts.email-verification.check-your-email.title.h1=You have 30 minutes to confirm the email address
 hts.email-verification.check-your-email.we-have-sent-mail=We’ve sent an email to {0}. <a class="govuk-link" href={1}>Use a different email address</a>.
 hts.email-verification.check-your-email.what-next=What you must do
-hts.email-verification.check-your-email.content1=Go to that email account and select the link in the message we sent you.
+hts.email-verification.check-your-email.content1=Go to your email account and select the link in the message we sent you.
 hts.email-verification.check-your-email.where-used-heading=If the email did not arrive
-hts.email-verification.check-your-email.where-used=You can tell us to <a class="govuk-link" href={0}>resend the email</a> to that email account.
+hts.email-verification.check-your-email.where-used=You can tell us to resend the email to that email account.
 
 hts.email-verification.error-title=There is a problem
 hts.email-verification.error-link-description=Enter a valid email address
@@ -330,7 +328,7 @@ hts.email-verified.p2=Your email has not been updated in other government servic
 hts.email-verification.existing-user.check-your-email.title.h1=You have 30 minutes to confirm the email address
 hts.email-verification.existing-user.check-your-email.we-have-sent-mail=We’ve sent an email to {0}. <a class="govuk-link" href={1}>Use a different email address</a>.
 hts.email-verification.existing-user.check-your-email.what-next=What you must do
-hts.email-verification.existing-user.check-your-email.content1=Go to that email account and select the link in the message we sent you.
+hts.email-verification.existing-user.check-your-email.content1=Go to your email account and select the link in the message we sent you.
 hts.email-verification.existing-user.check-your-email.h3=If the email did not arrive
 hts.email-verification.existing-user.check-your-email.resend-1=You can tell us to
 hts.email-verification.existing-user.check-your-email.resend-button-text=resend the email

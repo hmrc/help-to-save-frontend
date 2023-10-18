@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.services
 
-import java.util.UUID
-
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject}
-import javax.inject.Singleton
 import play.api.http.Status
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.helptosavefrontend.connectors.HelpToSaveConnector
@@ -34,6 +31,8 @@ import uk.gov.hmrc.helptosavefrontend.util.HttpResponseOps._
 import uk.gov.hmrc.helptosavefrontend.util.{Email, Logging, Result, maskNino}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
+import java.util.UUID
+import javax.inject.Singleton
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[HelpToSaveServiceImpl])

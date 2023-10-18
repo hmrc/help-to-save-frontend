@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.helptosavefrontend.connectors
 
-import java.util.UUID
-
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.Json
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.iv.IvSuccessResponse.Success
 import uk.gov.hmrc.helptosavefrontend.models.iv.{IvErrorResponse, IvUnexpectedResponse, JourneyId}
 import uk.gov.hmrc.http.HttpResponse
+
+import java.util.UUID
 
 // scalastyle:off magic.number
 class IvConnectorSpec extends ControllerSpecWithGuiceApp with HttpSupport with ScalaFutures {

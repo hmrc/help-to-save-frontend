@@ -16,13 +16,10 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import java.time.LocalDateTime
-
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
 import cats.syntax.apply._
 import cats.syntax.option._
-import java.time.LocalDate
 import play.api.mvc.{Action, AnyContent, Request, Result}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.Predicate
@@ -40,6 +37,7 @@ import uk.gov.hmrc.helptosavefrontend.util._
 import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging {

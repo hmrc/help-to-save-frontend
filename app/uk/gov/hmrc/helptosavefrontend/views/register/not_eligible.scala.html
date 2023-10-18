@@ -14,11 +14,11 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason
 @import uk.gov.hmrc.helptosavefrontend.models.eligibility.IneligibilityReason._
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
@@ -102,7 +102,7 @@
 
             <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.wtc.h3"))</h2>
 
-            <p class="govuk-body">@messages("hts.core.not-eligible.wtc.p-4-1") <a class="govuk-link" href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage.url>@Html(messages("hts.core.not-eligible.wtc.p-4-link-text"))</a> @messages("hts.core.not-eligible.wtc.p-4-2")</p>
+            <p class="govuk-body">@Html(messages("hts.core.not-eligible.wtc.p-4", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
 
         }
     }
