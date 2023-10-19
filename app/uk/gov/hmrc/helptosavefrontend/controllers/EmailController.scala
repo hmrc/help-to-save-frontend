@@ -141,11 +141,11 @@ class EmailController @Inject() (
 
     }(loginContinueURL = routes.EmailController.getSelectEmailPage.url)
 
-  def selectEmailSubmit(): Action[AnyContent] =
-    selectEmailSubmitter(routes.EmailController.selectEmailSubmit().url)
+  def selectEmailSubmit: Action[AnyContent] =
+    selectEmailSubmitter(routes.EmailController.selectEmailSubmit.url)
 
-  def selectEmailSubmitReminder(): Action[AnyContent] =
-    selectEmailSubmitter(routes.EmailController.selectEmailSubmitReminder().url)
+  def selectEmailSubmitReminder: Action[AnyContent] =
+    selectEmailSubmitter(routes.EmailController.selectEmailSubmitReminder.url)
 
   def selectEmailSubmitter(URI: String): Action[AnyContent] =
     authorisedForHtsWithInfo { implicit request => implicit htsContext =>
@@ -229,7 +229,7 @@ class EmailController @Inject() (
 
     }(loginContinueURL = routes.EmailController.getGiveEmailPage.url)
 
-  def giveEmailSubmit(): Action[AnyContent] =
+  def giveEmailSubmit: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => implicit htsContext =>
       def handleForm(session: HTSSession): Future[Result] =
         GiveEmailForm.giveEmailForm
@@ -690,11 +690,12 @@ class EmailController @Inject() (
 
       def ifDigitalNewApplicant(session: Option[HTSSession]) =
         withEligibleSession(
-          (_, eligible) => handleForm(eligible.userInfo.email, true)
+          (_, eligible) => handleForm(eligible.userInfo.email, duringRegistrationJourney = true)
         )(session)
 
       def ifDE =
-        (session: Option[HTSSession]) => handleForm(session.flatMap(_.confirmedEmail), false)
+        (session: Option[HTSSession]) =>
+          handleForm(session.flatMap(_.confirmedEmail), duringRegistrationJourney = false)
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, ifDE)
 
@@ -753,7 +754,7 @@ class EmailController @Inject() (
 
       checkSessionAndEnrolmentStatus(ifDigitalNewApplicant, _ => ifDE, ifDigitalAccountHolder)
 
-    }(routes.EmailController.getEmailUpdated().url)
+    }(routes.EmailController.getEmailUpdated.url)
 
   def emailUpdatedSubmit: Action[AnyContent] =
     authorisedForHtsWithNINO { implicit request => _ =>

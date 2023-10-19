@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.models.userinfo.UserInfo
@@ -24,7 +23,7 @@
 
 @this(layout: layout, viewHelpers: ViewHelpers)
 
-@(userInfo: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(userInfo: UserInfo)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{
   Messages("hts.register.you-are-eligible.title.h1")

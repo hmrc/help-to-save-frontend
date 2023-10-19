@@ -31,10 +31,6 @@
 
 @title = @{Messages("hts.register.create_account.title")}
 
-@display2CharFormat(str: String) = @{
-  str.filterNot((x: Char) => x.isWhitespace || x.toString.matches("-")).grouped(2).mkString(" ")
-}
-
 @layout(title, Some(routes.BankAccountController.getBankDetailsPage.url)) {
 
   <h1 class="govuk-heading-l">@title</h1>

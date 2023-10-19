@@ -10,8 +10,8 @@ GET         /how-the-account-works                              uk.gov.hmrc.help
 GET         /how-we-calculate-bonuses                           uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getHowWeCalculateBonuses
 GET         /apply                                              uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.getApply
 
-GET         /exit/we-signed-you-out                             uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.timedOut()
-GET         /keep-alive                                         uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.keepAlive()
+GET         /exit/we-signed-you-out                             uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.timedOut
+GET         /keep-alive                                         uk.gov.hmrc.helptosavefrontend.controllers.IntroductionController.keepAlive
 
 GET         /sign-in                                            uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.getSignInPage
 GET         /access-account                                     uk.gov.hmrc.helptosavefrontend.controllers.AccessAccountController.accessAccount
@@ -25,8 +25,8 @@ POST        /eligible                                           uk.gov.hmrc.help
 GET         /missing-details                                    uk.gov.hmrc.helptosavefrontend.controllers.EligibilityCheckController.getMissingInfoPage
 
 GET         /select-email                                       uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getSelectEmailPage
-POST        /select-email                                       uk.gov.hmrc.helptosavefrontend.controllers.EmailController.selectEmailSubmit()
-POST        /select-email-reminder                              uk.gov.hmrc.helptosavefrontend.controllers.EmailController.selectEmailSubmitReminder()
+POST        /select-email                                       uk.gov.hmrc.helptosavefrontend.controllers.EmailController.selectEmailSubmit
+POST        /select-email-reminder                              uk.gov.hmrc.helptosavefrontend.controllers.EmailController.selectEmailSubmitReminder
 GET         /enter-email                                        uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getGiveEmailPage
 POST        /enter-email                                        uk.gov.hmrc.helptosavefrontend.controllers.EmailController.giveEmailSubmit
 GET         /confirm-email/:email                               uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailConfirmed(email)
@@ -36,7 +36,7 @@ GET         /email-confirmed                                    uk.gov.hmrc.help
 GET         /cannot-change-email                                uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmailError
 POST        /cannot-change-email                                uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmailErrorSubmit
 GET         /cannot-change-email-try-later                      uk.gov.hmrc.helptosavefrontend.controllers.EmailController.confirmEmailErrorTryLater
-GET         /email-updated                                      uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailUpdated()
+GET         /email-updated                                      uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getEmailUpdated
 POST        /email-updated                                      uk.gov.hmrc.helptosavefrontend.controllers.EmailController.emailUpdatedSubmit
 GET         /link-expired                                       uk.gov.hmrc.helptosavefrontend.controllers.EmailController.getLinkExpiredPage
 

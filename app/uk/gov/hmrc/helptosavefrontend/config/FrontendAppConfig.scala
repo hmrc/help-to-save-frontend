@@ -36,8 +36,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   private def getUrlFor(service: String) = servicesConfig.getString(s"microservice.services.$service.url")
 
-  val authUrl: String = servicesConfig.baseUrl("auth")
-
   val appleAppUrl: String = servicesConfig.getString("get-the-app.apple-app-store")
 
   val androidAppUrl: String = servicesConfig.getString("get-the-app.google-play-store")
@@ -59,7 +57,7 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   val ivJourneyResultUrl: String =
     s"${servicesConfig.baseUrl("identity-verification-journey-result")}/mdtp/journey/journeyId"
 
-  val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"
+  private val ivUpliftUrl: String = s"${getUrlFor("identity-verification-uplift")}/uplift"
 
   val ivFailedMatchingUrl: String = servicesConfig.getString("gov-uk.url.contact-us")
 
@@ -78,13 +76,13 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val maintenanceSchedule: String = servicesConfig.getString("scheduled-maintenance-times")
 
-  val basGatewayFrontendUrl: String = s"${getUrlFor("bas-gateway-frontend")}"
+  private val basGatewayFrontendUrl: String = s"${getUrlFor("bas-gateway-frontend")}"
 
   val ggLoginUrl: String = s"$basGatewayFrontendUrl/sign-in"
   val ggContinueUrlPrefix: String =
     servicesConfig.getString("microservice.services.bas-gateway-frontend.continue-url-prefix")
 
-  val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
+  private val feedbackSurveyUrl: String = s"${getUrlFor("feedback-survey")}"
 
   val ggUserUrl: String =
     s"${getUrlFor("government-gateway-registration")}/government-gateway-registration-frontend?" +
@@ -107,16 +105,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   val nsiManageAccountUrl: String = getUrlFor("nsi.manage-account")
   val nsiPayInUrl: String = getUrlFor("nsi.pay-in")
 
-  val contactFormServiceIdentifier: String = "HTS"
-
-  val contactBaseUrl: String = getUrlFor("contact-frontend")
-  val reportAProblemPartialUrl: String =
-    s"$contactBaseUrl/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
-  val reportAProblemNonJSUrl: String =
-    s"$contactBaseUrl/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
-  val betaFeedbackUrlNoAuth: String =
-    s"$contactBaseUrl/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
-
   val govUkURL: String = servicesConfig.getString("gov-uk.url.base")
   val govUkEligibilityInfoUrl: String = s"$govUkURL/eligibility"
   val govUkCallChargesUrl: String = servicesConfig.getString("gov-uk.url.call-charges")
@@ -125,11 +113,6 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
   val hmrcAppGuideURL: String = servicesConfig.getString("gov-uk.url.hmrc-app-guide")
 
   val youtubeSavingsExplained: String = servicesConfig.getString("youtube-embeds.savings-explained")
-  val youtubeWhatBonuses: String = servicesConfig.getString("youtube-embeds.what-bonuses")
-  val youtubeHowWithdrawalsAffectBonuses: String =
-    servicesConfig.getString("youtube-embeds.how-withdrawals-affect-bonuses")
-
-  val enableLanguageSwitching: Boolean = servicesConfig.getBoolean("enableLanguageSwitching")
 
   val earlyCapCheckOn: Boolean = servicesConfig.getBoolean("enable-early-cap-check")
 
@@ -144,17 +127,14 @@ class FrontendAppConfig @Inject() (servicesConfig: ServicesConfig) {
 
   val mongoSessionExpireAfter: Duration = servicesConfig.getDuration("mongodb.session.expireAfter")
 
-  val signOutUri: String = s"$basGatewayFrontendUrl/sign-out-without-state"
+  private val signOutUri: String = s"$basGatewayFrontendUrl/sign-out-without-state"
   val signOutUrl: String = s"$signOutUri?continue=$feedbackSurveyUrl"
-  val timeOutSignOutUrl: String = s"$signOutUri?continue=$helpToSaveFrontendUrl" + routes.IntroductionController
-    .timedOut()
-    .url
-  val timeOutKeepAliveUrl: String = helpToSaveFrontendUrl + routes.IntroductionController.keepAlive().url
+  private val timeOutSignOutUrl
+    : String = s"$signOutUri?continue=$helpToSaveFrontendUrl" + routes.IntroductionController.timedOut.url
 
   object TimeoutConfig {
     val timeoutSeconds: Int = servicesConfig.getInt("timeout.timeout-seconds")
     val countdownSeconds: Int = servicesConfig.getInt("timeout.countdown-seconds")
-    val keepAliveUrl: String = timeOutKeepAliveUrl
     val timedOutUrl: String = timeOutSignOutUrl
   }
 

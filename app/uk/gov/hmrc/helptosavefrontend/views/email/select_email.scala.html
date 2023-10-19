@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.forms.SelectEmail
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
@@ -25,7 +24,7 @@
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
-@(email: String, form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(email: String, form: Form[SelectEmail], backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{messages("hts.select-email.title.h1")}
 @key = @{"email"}

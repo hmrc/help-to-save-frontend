@@ -35,7 +35,7 @@ class AccountSpec extends AnyWordSpec with Matchers {
       val bonusTerm4 = BonusTerm(0, 0, today.plusDays(1L), dummyDate)
 
       val account1 = Account(
-        false,
+        isClosed = false,
         0,
         0,
         0,
@@ -44,15 +44,15 @@ class AccountSpec extends AnyWordSpec with Matchers {
         List(bonusTerm3, bonusTerm4)
       )
 
-      account1.currentBonusTerm() shouldBe Some(bonusTerm4)
+      account1.currentBonusTerm shouldBe Some(bonusTerm4)
 
       // test when there all bonus terms ends today
       val account2 = account1.copy(bonusTerms = List(bonusTerm2, bonusTerm3))
-      account2.currentBonusTerm() shouldBe None
+      account2.currentBonusTerm shouldBe None
 
       // test when there all bonus terms are all past ones
       val account3 = account1.copy(bonusTerms = List(bonusTerm1, bonusTerm2))
-      account3.currentBonusTerm() shouldBe None
+      account3.currentBonusTerm shouldBe None
 
     }
 

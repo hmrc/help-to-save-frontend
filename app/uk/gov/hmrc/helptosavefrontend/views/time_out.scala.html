@@ -17,12 +17,11 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Request
 @import play.twirl.api.Html
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
-@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages, frontendAppConfig: FrontendAppConfig)
+@()(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{ Messages("hts.timeout.signedOutMessage") }
 

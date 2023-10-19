@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
@@ -23,7 +22,7 @@
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage, summaryRowHelper: SummaryListRowsHelper)
 
-@(email: String,period :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(email: String,period :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{messages("hts.reminder-dashboard.title.h1")}
 

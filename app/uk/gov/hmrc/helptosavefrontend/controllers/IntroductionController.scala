@@ -59,11 +59,11 @@ class IntroductionController @Inject() (
 
   private val baseUrl: String = frontendAppConfig.govUkURL
 
-  def timedOut(): Action[AnyContent] = unprotected { implicit request => implicit htsContext =>
+  def timedOut: Action[AnyContent] = unprotected { implicit request => implicit htsContext =>
     Ok(timeOutView())
   }
 
-  def keepAlive(): Action[AnyContent] = unprotected { _ => _ =>
+  def keepAlive: Action[AnyContent] = unprotected { _ => _ =>
     Ok("")
   }
 

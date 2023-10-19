@@ -50,7 +50,7 @@ object Account {
   private val clock = Clock.systemUTC()
 
   implicit class AccountOps(val account: Account) extends AnyVal {
-    def currentBonusTerm(): Option[BonusTerm] = {
+    def currentBonusTerm: Option[BonusTerm] = {
       val dateNow = LocalDate.now(clock)
       account.bonusTerms
         .sortWith((t1, t2) => t1.endDate.isBefore(t2.endDate))

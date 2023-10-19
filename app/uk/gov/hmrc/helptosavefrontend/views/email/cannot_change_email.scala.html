@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.forms.Continue
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
@@ -24,7 +23,7 @@
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
-@(backupEmail: String, form: Form[Continue], duringRegistrationJourney: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(backupEmail: String, form: Form[Continue], duringRegistrationJourney: Boolean)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{messages("hts.cannot-change-email.title.h1")}
 @key = @{"radio-inline-group"}

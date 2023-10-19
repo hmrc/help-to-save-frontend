@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.controllers.routes
 @import uk.gov.hmrc.helptosavefrontend.forms.ReminderForm
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
@@ -24,7 +23,7 @@
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers, errorHelpers: FormErrorMessage)
 
-@(form: Form[ReminderForm],period :String,screenFrom :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(form: Form[ReminderForm],period :String,screenFrom :String,backLink: Option[String] = None)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 @title = @{messages("hts.reminder-frequency.select")}
 @key = @{"reminderFrequency"}
 @formName = @{"reminder-select"}
