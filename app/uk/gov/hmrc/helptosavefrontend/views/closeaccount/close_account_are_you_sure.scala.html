@@ -59,8 +59,8 @@
 
     @{
       maybeAccount -> maybeAccount.flatMap(_.currentBonusTerm.map(_.bonusEstimate)) match {
-        case (Some(account), Some(bd)) ⇒ {
-          if(bd === BigDecimal(0.0) && account.balance === BigDecimal(0.0)) {
+        case (Some(account), Some(bd)) =>
+            if(bd === BigDecimal(0.0) && account.balance === BigDecimal(0.0)) {
             {zeroBalanceZeroBonus()}
           } else {
               if(bd > BigDecimal(0.0) && account.balance > BigDecimal(0.0)) {
@@ -71,11 +71,9 @@
                 }
               }
           }
-        }
 
-        case _ => {
-          {balanceUnknown()}
-        }
+        case _ =>
+        balanceUnknown()
       }
     }
 

@@ -40,7 +40,7 @@
   enableSignOutLink: Boolean = true,
   extraMeta: Option[Html] = None,
   beforeContent: Option[Html] = None
-)(contentBlock: Html)(implicit htsContext: HtsContext, request : Request[_], messages: Messages, config: FrontendAppConfig)
+)(contentBlock: Html)(implicit htsContext: HtsContext, request : Request[_], messages: Messages)
 
 @serviceName = @{messages("hts.global.title-suffix")}
 
@@ -86,7 +86,7 @@
   </div>
 }
 
-@gdsTitle = @{s"""${if(hasErrors){ s"""${messages("hts.global.error.prefix")}: """} else ""}$title - ${serviceName} - GOV.UK"""}
+@gdsTitle = @{s"""${if(hasErrors){ s"""${messages("hts.global.error.prefix")}: """} else ""}$title - $serviceName - GOV.UK"""}
 
 @hmrcLayout(
   pageTitle = Some(gdsTitle),

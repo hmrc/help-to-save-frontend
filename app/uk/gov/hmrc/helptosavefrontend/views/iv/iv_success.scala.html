@@ -15,13 +15,12 @@
  *@
 
 @import uk.gov.hmrc.govukfrontend.views.html.components._
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.views.ViewHelpers
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout, viewHelpers: ViewHelpers)
 
-@(continueUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(continueUrl: String)(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{Messages("hts.iv.we_ve_confirmed_your_identity.title.h1")}
 

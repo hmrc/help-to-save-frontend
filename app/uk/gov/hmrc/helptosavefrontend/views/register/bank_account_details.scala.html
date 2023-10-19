@@ -38,7 +38,7 @@
 
   <h1 class="govuk-heading-l">@title</h1>
 
-  @viewHelpers.form(routes.BankAccountController.submitBankDetails, 'id -> "bankDetailsForm") {
+  @viewHelpers.form(routes.BankAccountController.submitBankDetails, Symbol("id") -> "bankDetailsForm") {
 
     @viewHelpers.govukInput(Input(
       id = "accountName",

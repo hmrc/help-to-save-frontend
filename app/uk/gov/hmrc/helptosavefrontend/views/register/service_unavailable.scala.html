@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 @import uk.gov.hmrc.helptosavefrontend.models.HtsContext
 @import uk.gov.hmrc.helptosavefrontend.util.LanguageUtils
 
@@ -22,7 +21,7 @@
 
 @this(layout: uk.gov.hmrc.helptosavefrontend.views.html.layout)
 
-@(headMessage : String, end:Option[LocalDateTime])(implicit htsContext: HtsContext, request: Request[_], messages: Messages, appConfig: FrontendAppConfig)
+@(headMessage : String, end:Option[LocalDateTime])(implicit htsContext: HtsContext, request: Request[_], messages: Messages)
 
 @title = @{messages(headMessage)}
 

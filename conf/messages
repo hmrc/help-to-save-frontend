@@ -43,14 +43,15 @@ hts.sign-in.ul2-li2=Government Gateway account
 
 # Not eligible
 hts.core.not-eligible.title.h1=You’re not eligible for a Help to Save account
+hts.core.not-eligible.h=If you think you’re eligible for an account
+hts.core.not-eligible.p=Find out what to do if you have checked the eligibility criteria for a Help to Save account and <a class="govuk-link" href={0}>still think you’re eligible (opens in a new tab).</a>
+
 hts.core.not-eligible.wtc.p-1=You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.
 hts.core.not-eligible.wtc.p-2=Go to GOV.UK to find out about
 hts.core.not-eligible.wtc.link-1=eligibility for Help to Save
 hts.core.not-eligible.wtc.p-2-2=.
 hts.core.not-eligible.wtc.h2-1=If you’ve recently applied for Working Tax Credit
 hts.core.not-eligible.wtc.p-3=You should wait until you’ve received a letter from HM Revenue and Customs confirming that you’re entitled to Working Tax Credit. Once you’ve received this you can apply for a Help to Save account again.
-hts.core.not-eligible.wtc.h3=If you think you’re eligible for an account
-hts.core.not-eligible.wtc.p-4=Find out what to do if you have checked the eligibility criteria for a Help to Save account and <a class="govuk-link" href={0}>still think you’re eligible (opens in a new tab).</a>
 
 hts.core.not-eligible.uc.p-1=This is because your household income - in your last monthly assessment period
 hts.core.not-eligible.uc.p-1b=This is because your household income in your last monthly assessment period
@@ -62,10 +63,6 @@ hts.core.not-eligible.uc.p-2=Go to GOV.UK to find out about
 hts.core.not-eligible.uc.link-1=eligibility for Help to Save
 hts.core.not-eligible.uc.p-2-2=.
 hts.core.not-eligible.uc.p-3=If your situation changes, you can apply for a Help to Save account again.
-hts.core.not-eligible.uc.h2=If you think you’re eligible for an account
-hts.core.not-eligible.uc.p-4=Find out what to do if you have checked the eligibility criteria and still
-hts.core.not-eligible.uc.link-2=think you’re eligible
-hts.core.not-eligible.uc.p-4-2=for a Help to Save account.
 
 hts.core.not-eligible.wtc.uc.p1=You can only open a Help to Save account if one of the following applies to you. You are:
 hts.core.not-eligible.wtc.uc.ul1-li1=entitled to Working Tax Credit and receiving payments for Working Tax Credit or Child Tax Credit
@@ -77,10 +74,6 @@ hts.core.not-eligible.wtc.uc.p2=Payments from Universal Credit are not considere
 hts.core.not-eligible.wtc.uc.p3=Go to GOV.UK to find out about
 hts.core.not-eligible.wtc.uc.p3-link=eligibility for Help to Save
 hts.core.not-eligible.wtc.uc.p3-2=.
-hts.core.not-eligible.wtc.uc.h2=If you think you’re eligible for an account
-hts.core.not-eligible.wtc.uc.p4=Find out what to do if you have checked the eligibility criteria and still
-hts.core.not-eligible.wtc.uc.p4-link=think you’re eligible
-hts.core.not-eligible.wtc.uc.p4-2=for a Help to Save account.
 
 # Sidebar
 hts.helpers.sidebar.header=Elsewhere on GOV.UK
