@@ -52,10 +52,9 @@
 
             <p class="govuk-body">@messages("hts.core.not-eligible.uc.p-3")</p>
 
-            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.uc.h2"))</h2>
+            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.h"))</h2>
 
-            <p class="govuk-body">@messages("hts.core.not-eligible.uc.p-4")
-            <a class="govuk-link" href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage.url>@Html(Messages("hts.core.not-eligible.uc.link-2"))</a> @Messages("hts.core.not-eligible.uc.p-4-2")</p>
+            <p class="govuk-body">@Html(messages("hts.core.not-eligible.p", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
         }
 
         case EntitledToWTCNoTCAndInsufficientUC | NotEntitledToWTCAndNoUC => {
@@ -82,9 +81,9 @@
             data-ga-event-label="Not eligible page"
             href=@appConfig.govUkEligibilityInfoUrl>@messages("hts.core.not-eligible.wtc.uc.p3-link")</a>@messages("hts.core.not-eligible.wtc.uc.p3-2")</p>
 
-            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.wtc.uc.h2"))</h2>
-            <p class="govuk-body">@messages("hts.core.not-eligible.wtc.uc.p4")
-            <a class="govuk-link" href=@routes.EligibilityCheckController.getThinkYouAreEligiblePage.url>@Html(messages("hts.core.not-eligible.wtc.uc.p4-link"))</a> @Messages("hts.core.not-eligible.wtc.uc.p4-2")</p>
+            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.h"))</h2>
+
+            <p class="govuk-body">@Html(messages("hts.core.not-eligible.p", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
         }
 
         case EntitledToWTCNoTCAndNoUC => {
@@ -100,9 +99,9 @@
             <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.wtc.h2-1"))</h2>
             <p class="govuk-body">@Html(messages("hts.core.not-eligible.wtc.p-3"))</p>
 
-            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.wtc.h3"))</h2>
+            <h2 class="govuk-heading-m">@Html(messages("hts.core.not-eligible.h"))</h2>
 
-            <p class="govuk-body">@Html(messages("hts.core.not-eligible.wtc.p-4", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
+            <p class="govuk-body">@Html(messages("hts.core.not-eligible.p", routes.EligibilityCheckController.getThinkYouAreEligiblePage.url))</p>
         }
     }
 }
