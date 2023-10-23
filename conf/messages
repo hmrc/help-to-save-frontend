@@ -44,7 +44,7 @@ hts.sign-in.ul2-li2=Government Gateway account
 # Not eligible
 hts.core.not-eligible.title.h1=You’re not eligible for a Help to Save account
 hts.core.not-eligible.h=If you think you’re eligible for an account
-hts.core.not-eligible.p=Find out what to do if you have checked the eligibility criteria for a Help to Save account and <a class="govuk-link" href={0}>still think you’re eligible (opens in a new tab).</a>
+hts.core.not-eligible.p=Find out what to do if you have checked the eligibility criteria for a Help to Save account and <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">still think you’re eligible (opens in a new tab).</a>
 
 hts.core.not-eligible.wtc.p-1=You can only open a Help to Save account if you are entitled to Working Tax Credit and also receiving payments for Working Tax Credit or Child Tax Credit.
 hts.core.not-eligible.wtc.p-2=Go to GOV.UK to find out about
