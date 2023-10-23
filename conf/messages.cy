@@ -41,7 +41,7 @@ hts.sign-in.ul2-li2=Cyfrif Porth y Llywodraeth
 
 hts.core.not-eligible.title.h1=Nid ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
 hts.core.not-eligible.h=Os ydych o’r farn eich bod yn gymwys am gyfrif
-hts.core.not-eligible.p=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ar gyfer cyfrif Cymorth i Gynilo ac yn <a class="govuk-link" href={0}>parhau i fod o’r farn eich bod yn gymwys (yn agor tab newydd).</a>
+hts.core.not-eligible.p=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ar gyfer cyfrif Cymorth i Gynilo ac yn <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">parhau i fod o’r farn eich bod yn gymwys (yn agor tab newydd).</a>
 
 hts.core.not-eligible.wtc.p-1=Dim ond os oes gennych hawl i Gredyd Treth Gwaith a hefyd yn cael taliadau am Gredyd Treth Gwaith neu Gredyd Treth Plant y gallwch agor cyfrif Cymorth i Gynilo.
 hts.core.not-eligible.wtc.p-2=Ewch i GOV.UK i gael gwybod am
