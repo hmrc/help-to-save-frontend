@@ -18,7 +18,6 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.net.URLDecoder
 import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.http.Status
@@ -34,7 +33,7 @@ import uk.gov.hmrc.helptosavefrontend.models.account.Account
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError
 import uk.gov.hmrc.helptosavefrontend.models.email.VerifyEmailError.{AlreadyVerified, OtherError}
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.{Email, EmailVerificationParams}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
 import uk.gov.hmrc.helptosavefrontend.views.html.email.accountholder.check_your_email
@@ -51,6 +50,7 @@ class AccountHolderControllerSpec
   private val fakeRequest = FakeRequest("GET", "/")
 
   val mockHelpToSaveService = mock[HelpToSaveService]
+  val mockHelpToSaveReminderService = mock[HelpToSaveReminderService]
 
   val mockEmailVerificationConnector = mock[EmailVerificationConnector]
 
@@ -64,6 +64,8 @@ class AccountHolderControllerSpec
 
   def mockStoreEmail(email: Email)(result: Either[String, Unit]): Unit =
     mockHelpToSaveService.storeConfirmedEmail(email)(*, *) returns EitherT.fromEither[Future](result)
+  def mockUpdateRemindersEmail(result: Either[String, Unit]): Unit =
+    mockHelpToSaveReminderService.updateReminderEmail(*)(*, *) returns EitherT.fromEither[Future](result)
 
   def mockAuditSuspiciousActivity() =
     mockAuditor.sendEvent(*, nino)(*).doesNothing()
@@ -76,6 +78,7 @@ class AccountHolderControllerSpec
 
   lazy val controller = new AccountHolderController(
     mockHelpToSaveService,
+    mockHelpToSaveReminderService,
     mockAuthConnector,
     mockEmailVerificationConnector,
     mockMetrics,
@@ -257,6 +260,7 @@ class AccountHolderControllerSpec
         mockEmailGet()(Right(Some("email")))
         mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
         mockStoreEmail(verifiedEmail)(Right(()))
+        mockUpdateRemindersEmail(Right(()))
         mockSessionStorePut(HTSSession(None, Some(verifiedEmail), None))(Right(()))
         mockAuditEmailChanged(
           nino,
@@ -283,6 +287,7 @@ class AccountHolderControllerSpec
           mockEmailGet()(Right(Some("email")))
           mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
           mockStoreEmail(verifiedEmail)(Left(""))
+          mockUpdateRemindersEmail(Right(()))
           mockAuditEmailChanged(
             nino,
             "email",
@@ -333,6 +338,7 @@ class AccountHolderControllerSpec
           mockEnrolmentCheck()(Right(Enrolled(true)))
           mockEmailGet()(Right(Some("email")))
           mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Left(""))
+          mockUpdateRemindersEmail(Right(()))
 
           val result = verifyEmail(emailVerificationParams.encode())
           checkIsErrorPage(result)
@@ -346,6 +352,7 @@ class AccountHolderControllerSpec
           mockEmailGet()(Right(Some("email")))
           mockUpdateEmailWithNSI(nsiPayload.updateEmail(verifiedEmail))(Right(()))
           mockStoreEmail(verifiedEmail)(Right(()))
+          mockUpdateRemindersEmail(Right(()))
           mockSessionStorePut(HTSSession(None, Some(verifiedEmail), None))(Left(""))
           mockAuditEmailChanged(
             nino,

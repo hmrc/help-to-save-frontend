@@ -32,9 +32,10 @@ import uk.gov.hmrc.helptosavefrontend.controllers.BaseController
 import uk.gov.hmrc.helptosavefrontend.forms.{EmailValidation, UpdateEmail, UpdateEmailForm}
 import uk.gov.hmrc.helptosavefrontend.metrics.Metrics
 import uk.gov.hmrc.helptosavefrontend.models._
+import uk.gov.hmrc.helptosavefrontend.models.reminder.UpdateReminderEmail
 import uk.gov.hmrc.helptosavefrontend.models.userinfo.NSIPayload
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import uk.gov.hmrc.helptosavefrontend.services.HelpToSaveService
+import uk.gov.hmrc.helptosavefrontend.services.{HelpToSaveReminderService, HelpToSaveService}
 import uk.gov.hmrc.helptosavefrontend.util.Logging._
 import uk.gov.hmrc.helptosavefrontend.util.{Crypto, Email, EmailVerificationParams, Logging, MaintenanceSchedule, NINOLogMessageTransformer, toFuture}
 import uk.gov.hmrc.helptosavefrontend.views.html.closeaccount.close_account_are_you_sure
@@ -48,6 +49,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class AccountHolderController @Inject() (
   val helpToSaveService: HelpToSaveService,
+  helpToSaveReminderService: HelpToSaveReminderService,
   val authConnector: AuthConnector,
   val emailVerificationConnector: EmailVerificationConnector,
   val metrics: Metrics,
@@ -250,6 +252,16 @@ class AccountHolderController @Inject() (
             _ <- helpToSaveService
                   .storeConfirmedEmail(emailVerificationParams.email)
                   .leftMap(UpdateEmailError.EmailMongoError)
+            _ <- helpToSaveReminderService
+                  .updateReminderEmail(
+                    UpdateReminderEmail(
+                      nino = nino,
+                      email = emailVerificationParams.email,
+                      firstName = userInfo.forename,
+                      lastName = userInfo.surname
+                    )
+                  )
+                  .leftMap(UpdateEmailError.RemindersError)
             _ <- sessionStore
                   .store(HTSSession(None, Some(emailVerificationParams.email), None))
                   .leftMap[UpdateEmailError](UpdateEmailError.SessionCacheError)
@@ -271,6 +283,13 @@ class AccountHolderController @Inject() (
               case UpdateEmailError.EmailMongoError(e) =>
                 logger.warn(
                   "Email updated with NS&I but could not write email to email mongo store. Redirecting back to NS&I",
+                  nino
+                )
+                auditor.sendEvent(auditEvent, nino)
+                SeeOther(frontendAppConfig.nsiManageAccountUrl)
+              case UpdateEmailError.RemindersError(e) =>
+                logger.warn(
+                  s"Email updated with NS&I and mongo but not with the reminders service. Redirecting back to NS&I $e",
                   nino
                 )
                 auditor.sendEvent(auditEvent, nino)
@@ -346,6 +365,7 @@ object AccountHolderController {
     case class NSIError(message: String) extends UpdateEmailError
 
     case class EmailMongoError(message: String) extends UpdateEmailError
+    case class RemindersError(message: String) extends UpdateEmailError
 
     case class SessionCacheError(message: String) extends UpdateEmailError
 
