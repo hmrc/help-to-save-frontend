@@ -32,7 +32,6 @@
 @title = @{Messages("hts.register.create_account.title")}
 
 @layout(title, Some(routes.BankAccountController.getBankDetailsPage.url)) {
-
   <h1 class="govuk-heading-l">@title</h1>
 
   <p class="govuk-body">@Html(Messages("hts.register.create_account.intro"))</p>
@@ -58,8 +57,9 @@
     <li>@Messages("hts.register.create_account.tandc-ul1-li5")</li>
   </ul>
 
-  @viewHelpers.form(routes.RegisterController.createAccount){
+  @viewHelpers.form(routes.RegisterController.createAccount, Symbol("data-prevent-multiple-submit") -> "true"){
     @viewHelpers.govukButton(Button(
+      preventDoubleClick = Some(true),
       attributes = Map(
         "id" -> "accept-and-create-account",
         "data-ga-event-category" -> "buttons",
@@ -69,5 +69,4 @@
       content = Text(Messages("hts.register.create_account.accept-label"))
     ))
   }
-
 }

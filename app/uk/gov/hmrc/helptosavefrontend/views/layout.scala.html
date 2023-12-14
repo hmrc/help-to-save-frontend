@@ -60,6 +60,7 @@
 
 @scripts = {
   <script src=@routes.Assets.versioned("javascripts/do-not-track.js") @CSPNonce.attr></script>
+  <script src=@routes.Assets.versioned("javascripts/prevent-multiple-submission.js") @CSPNonce.attr></script>
   <script @CSPNonce.attr>
           const DoNotTrackYouTube = new GOVUK.DoNotTrackYouTube();
           DoNotTrackYouTube.init()
