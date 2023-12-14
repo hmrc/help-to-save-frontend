@@ -13,7 +13,7 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     RoutesKeys.routesImport += "uk.gov.hmrc.play.bootstrap.binders.RedirectUrl",
     majorVersion := 2,
-    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
+    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test()
   )
   .settings(scalacOptions += "-Wconf:src=routes/.*:s")
   .settings(scalacOptions += "-Wconf:cat=unused-imports&src=html/.*:s")

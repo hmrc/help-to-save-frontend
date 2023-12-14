@@ -17,11 +17,11 @@ object AppDependencies {
     hmrc                %% "play-frontend-hmrc"               % s"7.29.0-$playVersion"
   )
 
-  val test: Seq[ModuleID] = Seq(
-    hmrc                   %% "stub-data-generator"          % "1.1.0"                 % "test",
-    hmrc                   %% s"bootstrap-test-$playVersion" % bootstrapBackendVersion % "test",
-    "com.vladsch.flexmark" % "flexmark-all"                  % "0.64.6"                % "test",
-    "org.mockito"          %% "mockito-scala"                % mockitoScalaVersion     % "test",
-    "org.scalatestplus"    %% "scalacheck-1-17"              % "3.2.16.0"              % "test"
+  def test(scope: String = "test"): Seq[ModuleID] = Seq(
+    hmrc                   %% "stub-data-generator"          % "1.1.0"                 % scope,
+    hmrc                   %% s"bootstrap-test-$playVersion" % bootstrapBackendVersion % scope,
+    "com.vladsch.flexmark" % "flexmark-all"                  % "0.64.6"                % scope,
+    "org.mockito"          %% "mockito-scala"                % mockitoScalaVersion     % scope,
+    "org.scalatestplus"    %% "scalacheck-1-17"              % "3.2.16.0"              % scope
   )
 }
