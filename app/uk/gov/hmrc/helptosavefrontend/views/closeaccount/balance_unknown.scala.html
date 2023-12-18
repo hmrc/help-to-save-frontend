@@ -22,6 +22,6 @@
 @()(implicit messages: play.api.i18n.Messages)
 
 @viewHelpers.govukWarningText(WarningText(
-iconFallbackText = messages("hts.global.hidden-icon-text.warning"),
+iconFallbackText = Some(messages("hts.global.hidden-icon-text.warning")),
 content = Text(Messages("hts.close-account.account-retrieval-error.warning"))
 ))
