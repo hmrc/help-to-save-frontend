@@ -27,18 +27,6 @@ hts.nav.title=Cymorth i Gynilo
 hts.sign-out=Allgofnodi
 hts.sign-in=Mewngofnodwch i’r cyfrif Cymorth i Gynilo
 
-hts.sign-in.title.h1=Mewngofnodi i’ch cyfrif Cymorth i Gynilo
-hts.sign-in.p1=Mewngofnodi i’ch cyfrif Cymorth i Gynilo er mwyn:
-hts.sign-in.ul1-li1=gwirio eich balans presennol
-hts.sign-in.ul1-li2=tyfu’ch cynilion a’ch bonws
-hts.sign-in.ul1-li3=cael gwybod pryd y cewch eich bonws nesaf
-hts.sign-in.ul1-li4=darllen eich negeseuon
-hts.sign-in.p2=I fewngofnodi, bydd arnoch angen y Dynodydd Defnyddiwr (ID) a’r cyfrinair Porth y Llywodraeth a ddefnyddioch wrth wneud cais.
-hts.sign-in.h2=Cyn i chi ddechrau
-hts.sign-in.p3=I ddefnyddio’r gwasanaeth hwn mae’n rhaid bod gennych:
-hts.sign-in.ul2-li1=Cyfrif Cymorth i Gynilo
-hts.sign-in.ul2-li2=Cyfrif Porth y Llywodraeth
-
 hts.core.not-eligible.title.h1=Nid ydych yn gymwys ar gyfer cyfrif Cymorth i Gynilo
 hts.core.not-eligible.h=Os ydych o’r farn eich bod yn gymwys am gyfrif
 hts.core.not-eligible.p=Dysgwch beth i’w wneud os ydych wedi gwirio’r meini prawf cymhwystra ar gyfer cyfrif Cymorth i Gynilo ac yn <a class="govuk-link" href={0} rel="noreferrer noopener" target="_blank">parhau i fod o’r farn eich bod yn gymwys (yn agor tab newydd).</a>

@@ -28,19 +28,6 @@ hts.nav.title=Help to Save
 hts.sign-out=Sign out
 hts.sign-in=Sign in to Help to Save account.
 
-# Sign in
-hts.sign-in.title.h1=Sign in to your Help to Save account
-hts.sign-in.p1=Sign in to your Help to Save account to:
-hts.sign-in.ul1-li1=check your current balance
-hts.sign-in.ul1-li2=grow your savings and bonus
-hts.sign-in.ul1-li3=find out when you’ll get your next bonus
-hts.sign-in.ul1-li4=read your messages
-hts.sign-in.p2=To sign in, you’ll need the Government Gateway ID and password you used to apply.
-hts.sign-in.h2=Before you start
-hts.sign-in.p3=To use this service you must have a:
-hts.sign-in.ul2-li1=Help to Save account
-hts.sign-in.ul2-li2=Government Gateway account
-
 # Not eligible
 hts.core.not-eligible.title.h1=You’re not eligible for a Help to Save account
 hts.core.not-eligible.h=If you think you’re eligible for an account
