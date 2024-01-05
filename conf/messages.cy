@@ -60,13 +60,6 @@ hts.core.not-eligible.wtc.uc.p3=Ewch i GOV.UK i gael gwybod am
 hts.core.not-eligible.wtc.uc.p3-link=gymhwystra ar gyfer Cymorth i Gynilo
 hts.core.not-eligible.wtc.uc.p3-2=.
 
-# Sidebar
-hts.helpers.sidebar.header=Mewn mannau eraill ar GOV.UK
-hts.helpers.sidebar.government-gateway=Porth y Llywodraeth
-hts.helpers.sidebar.universal-credit=Credyd Cynhwysol
-hts.helpers.sidebar.apply-for-universal-credit=Gwneud cais am Gredyd Cynhwysol
-hts.helpers.sidebar.working-tax-credit=Credyd Treth Gwaith
-
 hts.core.not-eligible.sidebar.h2=Mewn mannau eraill ar GOV.UK
 hts.core.not-eligible.sidebar.p=Credyd Treth Gwaith
 
