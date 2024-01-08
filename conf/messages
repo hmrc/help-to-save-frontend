@@ -62,13 +62,6 @@ hts.core.not-eligible.wtc.uc.p3=Go to GOV.UK to find out about
 hts.core.not-eligible.wtc.uc.p3-link=eligibility for Help to Save
 hts.core.not-eligible.wtc.uc.p3-2=.
 
-# Sidebar
-hts.helpers.sidebar.header=Elsewhere on GOV.UK
-hts.helpers.sidebar.government-gateway=Government Gateway
-hts.helpers.sidebar.universal-credit=Universal Credit
-hts.helpers.sidebar.apply-for-universal-credit=Apply for Universal Credit
-hts.helpers.sidebar.working-tax-credit=Working Tax Credit
-
 hts.core.not-eligible.sidebar.h2=Elsewhere on GOV.UK
 hts.core.not-eligible.sidebar.p=Working Tax Credit
 
