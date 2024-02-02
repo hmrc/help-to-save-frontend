@@ -28,6 +28,7 @@ import uk.gov.hmrc.helptosavefrontend.util.{Result, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.mongo.cache.{CacheIdType, DataKey, MongoCacheRepository}
 import uk.gov.hmrc.mongo.{CurrentTimestampSupport, MongoComponent}
+import uk.gov.hmrc.play.http.logging.Mdc.preservingMdc
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Future}
@@ -62,26 +63,28 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
     EitherT(hc.sessionId.map(_.value) match {
       case Some(sessionId) =>
         val timerContext = metrics.sessionReadTimer.time()
-        cacheRepository
-          .findById(sessionId)
-          .map {
-            maybeCache =>
-              val response: OptionT[EitherStringOr, HTSSession] = for {
-                cache <- OptionT.fromOption[EitherStringOr](maybeCache)
-                data  <- OptionT.fromOption[EitherStringOr][JsObject](Some(cache.data))
-                result <- OptionT.liftF[EitherStringOr, HTSSession](
-                           (data \ "htsSession")
-                             .validate[HTSSession]
-                             .asEither
-                             .left
-                             .map(e => s"Could not parse session data from mongo: ${e.mkString("; ")}")
-                         )
-              } yield result
+          preservingMdc{
+            cacheRepository
+              .findById(sessionId)
+              .map {
+                maybeCache =>
+                  val response: OptionT[EitherStringOr, HTSSession] = for {
+                    cache <- OptionT.fromOption[EitherStringOr](maybeCache)
+                    data <- OptionT.fromOption[EitherStringOr][JsObject](Some(cache.data))
+                    result <- OptionT.liftF[EitherStringOr, HTSSession](
+                      (data \ "htsSession")
+                        .validate[HTSSession]
+                        .asEither
+                        .left
+                        .map(e => s"Could not parse session data from mongo: ${e.mkString("; ")}")
+                    )
+                  } yield result
 
-              val _ = timerContext.stop()
+                  val _ = timerContext.stop()
 
-              response.value
+                  response.value
 
+              }
           }
           .recover {
             case e =>
@@ -122,12 +125,14 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
               )
           )
 
-          cacheRepository
-            .put(sessionId)(DataKey("htsSession"), Json.toJson(sessionToStore))
-            .map[Either[String, Unit]] { dbUpdate =>
-              val _ = timerContext.stop()
-              Right(())
-            }
+          preservingMdc {
+            cacheRepository
+              .put(sessionId)(DataKey("htsSession"), Json.toJson(sessionToStore))
+              .map[Either[String, Unit]] { dbUpdate =>
+                val _ = timerContext.stop()
+                Right(())
+              }
+          }
             .recover {
               case e =>
                 val _ = timerContext.stop()
