@@ -33,3 +33,5 @@ lazy val microservice = Project(appName, file("."))
       "target/test-reports/html-report"
     )
   )
+
+libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
