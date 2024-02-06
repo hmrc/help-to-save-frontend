@@ -63,30 +63,29 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
     EitherT(hc.sessionId.map(_.value) match {
       case Some(sessionId) =>
         val timerContext = metrics.sessionReadTimer.time()
-          preservingMdc{
-            cacheRepository
-              .findById(sessionId)
-              .map {
-                maybeCache =>
-                  val response: OptionT[EitherStringOr, HTSSession] = for {
-                    cache <- OptionT.fromOption[EitherStringOr](maybeCache)
-                    data <- OptionT.fromOption[EitherStringOr][JsObject](Some(cache.data))
-                    result <- OptionT.liftF[EitherStringOr, HTSSession](
-                      (data \ "htsSession")
-                        .validate[HTSSession]
-                        .asEither
-                        .left
-                        .map(e => s"Could not parse session data from mongo: ${e.mkString("; ")}")
-                    )
-                  } yield result
+        preservingMdc {
+          cacheRepository
+            .findById(sessionId)
+            .map {
+              maybeCache =>
+                val response: OptionT[EitherStringOr, HTSSession] = for {
+                  cache <- OptionT.fromOption[EitherStringOr](maybeCache)
+                  data  <- OptionT.fromOption[EitherStringOr][JsObject](Some(cache.data))
+                  result <- OptionT.liftF[EitherStringOr, HTSSession](
+                             (data \ "htsSession")
+                               .validate[HTSSession]
+                               .asEither
+                               .left
+                               .map(e => s"Could not parse session data from mongo: ${e.mkString("; ")}")
+                           )
+                } yield result
 
-                  val _ = timerContext.stop()
+                val _ = timerContext.stop()
 
-                  response.value
+                response.value
 
-              }
-          }
-          .recover {
+            }
+        }.recover {
             case e =>
               val _ = timerContext.stop()
               metrics.sessionReadErrorCounter.inc()
@@ -132,8 +131,7 @@ class SessionStoreImpl @Inject() (mongo: MongoComponent, metrics: Metrics)(
                 val _ = timerContext.stop()
                 Right(())
               }
-          }
-            .recover {
+          }.recover {
               case e =>
                 val _ = timerContext.stop()
                 metrics.sessionStoreWriteErrorCounter.inc()
