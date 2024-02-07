@@ -33,8 +33,9 @@
 package uk.gov.hmrc.helptosavefrontend.repo
 
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.helptosavefrontend.config.FrontendAppConfig
 import uk.gov.hmrc.helptosavefrontend.controllers.ControllerSpecWithGuiceApp
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 import uk.gov.hmrc.helptosavefrontend.models._
@@ -43,18 +44,12 @@ import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.mongo.MongoComponent
 
 import java.util.UUID
-import scala.concurrent.duration._
 
-class SessionStoreSpec
-    extends ControllerSpecWithGuiceApp with ScalaFutures with ScalaCheckDrivenPropertyChecks with Eventually {
-
-  implicit val config: PatienceConfig =
-    PatienceConfig().copy(timeout = scaled(1.minute))
-
-  val mongoComponent = app.injector.instanceOf[MongoComponent]
+class SessionStoreSpec extends ControllerSpecWithGuiceApp with ScalaFutures with ScalaCheckDrivenPropertyChecks {
+  private val mongoComponent = app.injector.instanceOf[MongoComponent]
+  private val config = app.injector.instanceOf[FrontendAppConfig]
 
   class TestApparatus {
-
     implicit val eligibleWithUserInfoGen: Gen[EligibleWithUserInfo] = for {
       userInfo <- TestData.UserData.userInfoGen
     } yield EligibleWithUserInfo(TestData.Eligibility.randomEligibility(), userInfo)
@@ -73,35 +68,33 @@ class SessionStoreSpec
 
     implicit val htsSessionArb: Arbitrary[HTSSession] = Arbitrary(htsSessionGen)
 
-    val sessionStore = new SessionStoreImpl(mongoComponent, mockMetrics)
+    val sessionStore = new SessionStoreImpl(mongoComponent, mockMetrics, config)
   }
 
   "The SessionStore" should {
     "be able to insert and read a new HTSSession into mongo" in new TestApparatus {
-
       forAll(htsSessionGen) { htsSession =>
         val hc: HeaderCarrier =
           HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
-        val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
+        val result = sessionStore.store(htsSession)(hc)
 
         result.value.futureValue should be(Right(()))
 
-        val getResult = sessionStore.get(htsSessionReads, hc)
+        val getResult = sessionStore.get(hc)
         getResult.value.futureValue should be(Right(Some(htsSession)))
       }
     }
+
     "handle the case where there is no sessionId in the HeaderCarrier" in new TestApparatus {
-
       htsSessionGen.sample.foreach { htsSession =>
-        val hc: HeaderCarrier = HeaderCarrier(sessionId = None)
-        val result = sessionStore.store(htsSession)(htsSessionWrites, hc)
+        val hc = HeaderCarrier(sessionId = None)
+        val result = sessionStore.store(htsSession)(hc)
 
-        result.value.futureValue should be(Left("can't query mongo dueto no sessionId in the HeaderCarrier"))
-
+        result.value.futureValue should be(Left("can't query mongo due to no sessionId in the HeaderCarrier"))
       }
     }
-    "be able to update an existing HTSSession against the same user sessionId" in new TestApparatus {
 
+    "be able to update an existing HTSSession against the same user sessionId" in new TestApparatus {
       forAll(htsSessionGen) { htsSession =>
         val ivUrl = "/some/iv/url"
         val ivSuccessUrl = "/some/iv/successUrl"
@@ -110,22 +103,20 @@ class SessionStoreSpec
         val expectedSessionToStore =
           htsSession.copy(ivURL = None, ivSuccessURL = None)
 
-        val hc: HeaderCarrier =
+        val hc =
           HeaderCarrier(sessionId = Some(SessionId(UUID.randomUUID().toString)))
-        val result1 = sessionStore.store(existingSession)(htsSessionWrites, hc)
+        val result1 = sessionStore.store(existingSession)(hc)
         result1.value.futureValue should be(Right(()))
 
         val result2 =
-          sessionStore.store(expectedSessionToStore)(htsSessionWrites, hc)
+          sessionStore.store(expectedSessionToStore)(hc)
         result2.value.futureValue should be(Right(()))
 
-        val getResult = sessionStore.get(htsSessionReads, hc)
+        val getResult = sessionStore.get(hc)
         getResult.value.futureValue should be(
           Right(Some(htsSession.copy(ivURL = Some(ivUrl), ivSuccessURL = Some(ivSuccessUrl))))
         )
-
       }
     }
   }
-
 }

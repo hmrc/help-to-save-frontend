@@ -18,21 +18,20 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.mockito.ArgumentMatchersSugar.*
 import org.mockito.IdiomaticMockito
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession
 import uk.gov.hmrc.helptosavefrontend.repo.SessionStore
-import org.mockito.ArgumentMatchersSugar.*
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait SessionStoreBehaviourSupport { this: IdiomaticMockito =>
-
   val mockSessionStore: SessionStore = mock[SessionStore]
 
   def mockSessionStorePut(expectedSession: HTSSession)(result: Either[String, Unit]): Unit =
-    mockSessionStore.store(expectedSession)(*, *) returns EitherT.fromEither[Future](result.map(_ => ()))
+    mockSessionStore.store(expectedSession)(*) returns EitherT.fromEither[Future](result.map(_ => ()))
 
   def mockSessionStoreGet(result: Either[String, Option[HTSSession]]): Unit =
-    mockSessionStore.get(*, *) returns EitherT.fromEither[Future](result)
+    mockSessionStore.get(*) returns EitherT.fromEither[Future](result)
 }
