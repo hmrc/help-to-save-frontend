@@ -48,6 +48,8 @@
         classes = "govuk-label--m",
         content = Text(messages("hts.register.bank-details.accountName.label"))
       ),
+      autocomplete = Some("name"),
+      spellcheck = Some(false),
       value = form.data.get("accountName"),
       errorMessage = getErrorMessage(form, "accountName").map(errorMsg =>
         ErrorMessage(
@@ -66,6 +68,7 @@
       ),
       classes = "govuk-input--width-5",
       attributes = Map("inputmode" -> "numeric"),
+      spellcheck = Some(false),
       value = form.data.get("sortCode"),
       hint = Some(Hint(
       content = Text(Messages("hts.register.bank-details.sort-code.hint")),
@@ -87,6 +90,7 @@
       ),
       classes = "govuk-!-width-one-third",
       attributes = Map("inputmode" -> "numeric"),
+      spellcheck = Some(false),
       value = form.data.get("accountNumber"),
       hint = Some(Hint(
         content = Text(Messages("hts.register.bank-details.accountNumber.hint")),
@@ -108,6 +112,7 @@
         )
       ),
       classes = "govuk-!-width-one-third",
+      spellcheck = Some(false),
       value = form.data.get("rollNumber"),
       hint = Some(Hint(
           content = Text(Messages("hts.register.bank-details.rollNumber.hint"))
