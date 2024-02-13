@@ -119,7 +119,7 @@ class RegisterControllerSpec
         val result = controller.getCannotCheckDetailsPage(FakeRequest())
         status(result) shouldBe Status.OK
         contentAsString(result) should include(
-          "This is because you cannot use the Government Gateway account you signed into"
+          "This is because you cannot use the HMRC online details you signed into"
         )
       }
 
