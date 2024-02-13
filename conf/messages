@@ -227,15 +227,15 @@ hts.iv.we_ve_confirmed_your_identity.p2=We’ll check if you’re eligible for a
 
 # IV Precondition Failed
 hts.iv.precondition_failed.title.h1=You’re not able to use this service
-hts.iv.precondition_failed.p1=We’ve checked the details in your Government Gateway account and you do not meet the criteria to use this service.
+hts.iv.precondition_failed.p1=We’ve checked your HMRC online details and you do not meet the criteria to use this service.
 hts.iv.precondition_failed.p2=This could be for several different reasons. For example, it could be because:
-hts.iv.precondition_failed.ul1-li1=you used the Government Gateway account that is linked to your business tax account to apply for a Help to Save account
+hts.iv.precondition_failed.ul1-li1=you signed in to HMRC online using your business tax account to apply for a Help to Save account
 hts.iv.precondition_failed.ul1-li2=you do not have a National Insurance number
 hts.iv.precondition_failed.ul1-li3=you do not have a passport
 hts.iv.precondition_failed.ul1-li4=we could not verify your address
 hts.iv.precondition_failed.h2=How to apply again
-hts.iv.precondition_failed.p3=If you want to try to apply for a Help to Save account again you’ll need to create a new Government Gateway account. This will need to be for a personal tax account.
-hts.iv.precondition_failed.create-new-gg-account=Create a new Government Gateway account
+hts.iv.precondition_failed.p3=If you want to apply for a Help to Save account again you’ll need to register for HMRC sign in details. This will need to be for a personal tax account.
+hts.iv.precondition_failed.create-new-gg-account=Register for HMRC sign in details
 
 hts.iv.try_again_button=Try again
 hts.iv.continue_button=Continue
@@ -469,7 +469,7 @@ hts.privacy.ul1.li2=confirm your employment status and income
 hts.privacy.ul1.li3=check whether you’re entitled to a Help to Save account and any bonuses due
 hts.privacy.ul1.li4=check whether you have held a Help to Save account previously
 hts.privacy.p4=We will gather only the data that we need to establish your entitlement to open and maintain a Help to Save account.
-hts.privacy.p5=The data that we currently gather and use to achieve that with regard to Working Tax Credit and Universal Credit customers will be your name, National Insurance number, address, date of birth and email address.  We will gather this information from your Government Gateway account.
+hts.privacy.p5=The data that we currently gather and use to achieve that with regard to Working Tax Credit and Universal Credit customers will be your name, National Insurance number, address, date of birth and email address. We will gather this information from your existing online details that you use to register for and login into your account.
 hts.privacy.p6=We will establish your entitlement as a Working Tax Credit recipient through information already held on HMRC’s internal National Tax Credits system. We will establish your entitlement as a Universal Credit recipient based on information obtained from the Department for Work and Pensions (DWP).
 hts.privacy.p7=The only information that we will directly ask you for beyond this is where you need to provide a change of your email address.
 hts.privacy.p8=We’ll be sharing all of this information with NS&I who are helping to administer the Help to Save scheme.
@@ -499,14 +499,14 @@ hts.close-account.back=Back
 
 # Cannot Check Details
 hts.we-cannot-check-details.title.h1=We cannot check your details
-hts.we-cannot-check-details.title.p1=This is because you cannot use the Government Gateway account you signed into:
+hts.we-cannot-check-details.title.p1=This is because you cannot use the HMRC online details you signed into:
 hts.we-cannot-check-details.ul1-li1=to apply for a Help to Save account
 hts.we-cannot-check-details.ul1-li2=to sign in to your Help to Save account if you already have one
 hts.we-cannot-check-details.h2=If you want to apply for a Help to Save account
-hts.we-cannot-check-details.title.p2=You’ll need to create a new Government Gateway account for Help to Save. You can then apply for a Help to Save account.
-hts.we-cannot-check-details.create-gg-account=Create a new Government Gateway account
+hts.we-cannot-check-details.title.p2=You’ll need to create new HMRC online sign in details for Help to Save. You can then apply for a Help to Save account
+hts.we-cannot-check-details.create-gg-account=Register for HMRC sign in details
 hts.we-cannot-check-details.h3=If you already have a Help to Save account
-hts.we-cannot-check-details.title.p3=To sign in, enter the ‘user ID’ and ‘password’ for the Government Gateway account you used to create your Help to Save account.
+hts.we-cannot-check-details.title.p3=To sign in, you‘ll need the HMRC online username and password you used to create your Help to Save account.
 
 hts.close-account.positive-balance.positive-bonus.warning=If you close your account now you will not get your £{0} first bonus payment or a final bonus. You will not be able to open another Help to Save account.
 hts.close-account.positive-balance.positive-bonus.withdraw.p1=You can
