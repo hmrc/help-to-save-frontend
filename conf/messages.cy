@@ -443,6 +443,8 @@ hts.register.create_account.hmrc-app.get-the-app.android.label=Lawrlwythwch o si
 hts.register.create_account.hmrc-app.get-the-app.android.alt=logo siop apiau Google Play
 hts.register.create_account.hmrc-app.get-the-app.new-tab=Mae cysylltiadau’r Siop Apiau yn agor tab newydd.
 
+hts.register.create_account.progress=Rydym wrthi’n creu eich cyfrif
+
 # Register PayInNow
 generic.yes=Iawn
 generic.no=Na

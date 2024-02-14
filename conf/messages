@@ -443,6 +443,8 @@ hts.register.create_account.hmrc-app.get-the-app.android.label=Download from the
 hts.register.create_account.hmrc-app.get-the-app.android.alt=google play store logo
 hts.register.create_account.hmrc-app.get-the-app.new-tab=App store links open in new tab.
 
+hts.register.create_account.progress=We are creating your account
+
 # Register PayInNow
 generic.yes=Yes
 generic.no=No
