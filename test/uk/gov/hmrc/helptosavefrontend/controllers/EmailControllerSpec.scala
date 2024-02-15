@@ -336,7 +336,7 @@ class EmailControllerSpec
           None,
           None,
           None,
-          Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))
+          Some(BankDetails("name", SortCode(1, 2, 3, 4, 5, 6), "1", None))
         )
 
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -489,7 +489,7 @@ class EmailControllerSpec
           None,
           None,
           None,
-          Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))
+          Some(BankDetails("name", SortCode(1, 2, 3, 4, 5, 6), "1", None))
         )
 
         mockAuthWithAllRetrievalsWithSuccess(AuthWithCL200)(mockedRetrievals)
@@ -800,7 +800,7 @@ class EmailControllerSpec
                 None,
                 None,
                 None,
-                Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))
+                Some(BankDetails("name", SortCode(1, 2, 3, 4, 5, 6), "1", None))
               )
             )
           )
@@ -813,7 +813,7 @@ class EmailControllerSpec
             Some(email),
             None,
             None,
-            Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name"))
+            Some(BankDetails("name", SortCode(1, 2, 3, 4, 5, 6), "1", None))
           )
         )(Right(None))
 
@@ -939,7 +939,7 @@ class EmailControllerSpec
                 None,
                 None,
                 None,
-                Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")),
+                Some(BankDetails("a", SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"))),
                 None,
                 None,
                 true
@@ -955,7 +955,7 @@ class EmailControllerSpec
             None,
             None,
             None,
-            Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"), "a")),
+            Some(BankDetails("a", SortCode(1, 2, 3, 4, 5, 6), "1", Some("1"))),
             None,
             None,
             true
@@ -1588,7 +1588,7 @@ class EmailControllerSpec
                 None,
                 None,
                 None,
-                Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")),
+                Some(BankDetails("name", SortCode(1, 2, 3, 4, 5, 6), "1", None)),
                 changingDetails = true
               )
             )

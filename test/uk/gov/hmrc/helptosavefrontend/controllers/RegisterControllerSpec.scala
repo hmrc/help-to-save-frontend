@@ -192,7 +192,7 @@ class RegisterControllerSpec
 
       val email = "email"
 
-      val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name")
+      val bankDetails = BankDetails("test user name", SortCode(1, 2, 3, 4, 5, 6), "12345678", None)
 
       val userInfo = eligibleSpecificReasonCodeWithUserInfo(validUserInfo, 6)
 
@@ -733,7 +733,7 @@ class RegisterControllerSpec
 
     "handling checkYourDetails page" must {
 
-      val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name")
+      val bankDetails = BankDetails("test user name", SortCode(1, 2, 3, 4, 5, 6), "12345678", None)
 
       def doRequest(): Future[PlayResult] = csrfAddToken(controller.getCreateAccountPage())(fakeRequest)
 
