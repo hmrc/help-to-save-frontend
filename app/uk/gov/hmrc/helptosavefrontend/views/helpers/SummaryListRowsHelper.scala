@@ -47,8 +47,15 @@ class SummaryListRowsHelper {
               )
             )
           )
-      )
+        )
+      else None
+    SummaryListRow(
+      key = Key(content = Text(question), classes = "govuk-!-width-one-third " + additionalClasses),
+      value = Value(content = Text(answer)),
+      actions = actions
     )
+  }
+
   def yourDetailsRow(eligibleWithUserInfo: EligibleWithUserInfo)(implicit messages: Messages): List[SummaryListRow] = {
     val name: SummaryListRow =
       summaryListRow(
@@ -66,6 +73,7 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-details.dob"),
         changeLabel = None
       )
+
     val nino: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.nino"),
