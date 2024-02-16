@@ -226,15 +226,15 @@ hts.iv.we_ve_confirmed_your_identity.p2=Byddwn yn gwirio a ydych chi’n gymwys 
 
 # IV Precondition Failed
 hts.iv.precondition_failed.title.h1=Ni allwch ddefnyddio’r gwasanaeth hwn
-hts.iv.precondition_failed.p1=Rydym wedi gwirio’r manylion yn eich cyfrif Porth y Llywodraeth ac nid ydych yn bodloni’r meini prawf er mwyn gallu defnyddio’r gwasanaeth hwn.
+hts.iv.precondition_failed.p1=Rydym wedi gwirio’ch manylion ar gyfer gwasanaethau ar-lein CThEF ac nid ydych yn bodloni’r meini prawf er mwyn gallu defnyddio’r gwasanaeth hwn.
 hts.iv.precondition_failed.p2=Gallai hyn fod am sawl rheswm gwahanol. Er enghraifft, gallai fod oherwydd:
-hts.iv.precondition_failed.ul1-li1=gwnaethoch ddefnyddio cyfrif Porth y Llywodraeth sy’n gysylltiedig â’ch cyfrif treth busnes i wneud cais am gyfrif Cymorth i Gynilo
+hts.iv.precondition_failed.ul1-li1=gwnaethoch fewngofnodi i wasanaethau ar-lein CThEF gan ddefnyddio’ch cyfrif treth busnes i wneud cais am gyfrif Cymorth i Gynilo
 hts.iv.precondition_failed.ul1-li2=nid oes gennych rif Yswiriant Gwladol
 hts.iv.precondition_failed.ul1-li3=nid oes gennych basbort
 hts.iv.precondition_failed.ul1-li4=nid oeddwn yn gallu cadarnhau eich cyfeiriad
 hts.iv.precondition_failed.h2=Sut i wneud cais eto
-hts.iv.precondition_failed.p3=Os ydych am geisio gwneud cais am gyfrif Cymorth i Gynilo eto, bydd angen i chi greu cyfrif newydd Porth y Llywodraeth. Bydd angen i hwn fod ar gyfer cyfrif treth personol.
-hts.iv.precondition_failed.create-new-gg-account=Creu cyfrif newydd Porth y Llywodraeth
+hts.iv.precondition_failed.p3=Os ydych am wneud cais am gyfrif Cymorth i Gynilo eto, bydd angen i chi gofrestru ar gyfer manylion mewngofnodi ar gyfer CThEF. Bydd angen i hwn fod ar gyfer cyfrif treth personol.
+hts.iv.precondition_failed.create-new-gg-account=Cofrestrwch ar gyfer manylion mewngofnodi ar gyfer CThEF
 
 hts.iv.try_again_button=Rhowch gynnig arall arni
 hts.iv.continue_button=Yn eich blaen
@@ -471,7 +471,7 @@ hts.privacy.ul1.li2=cadarnhau eich statws cyflogaeth a’ch incwm
 hts.privacy.ul1.li3=gwirio a oes gennych hawl i gyfrif Cymorth i Gynilo ac unrhyw fonysau sy’n ddyledus
 hts.privacy.ul1.li4=gwirio a ydych wedi cael cyfrif Cymorth i Gynilo yn flaenorol
 hts.privacy.p4=Byddwn ond yn casglu’r data sydd ei angen arnom i gadarnhau’ch hawl i agor a chynnal cyfrif Cymorth i Gynilo.
-hts.privacy.p5=Y data yr ydym yn ei gasglu a’i ddefnyddio ar hyn o bryd i gyflawni hynny mewn perthynas â chwsmeriaid Credyd Treth Gwaith a Chredyd Cynhwysol fydd eich enw, rhif Yswiriant Gwladol, cyfeiriad, dyddiad geni a chyfeiriad e-bost. Byddwn yn casglu’r wybodaeth hon o’ch cyfrif Porth y Llywodraeth.
+hts.privacy.p5=Y data yr ydym yn eu casglu a’u defnyddio ar hyn o bryd i gyflawni hynny mewn perthynas â chwsmeriaid Credyd Treth Gwaith a Chredyd Cynhwysol fydd eich enw, rhif Yswiriant Gwladol, cyfeiriad, dyddiad geni a’ch cyfeiriad e-bost. Byddwn yn casglu’r wybodaeth hon o’ch manylion ar-lein presennol, sef y rhai rydych yn eu defnyddio i gofrestru ar gyfer eich cyfrif ac i fewngofnodi iddo.
 hts.privacy.p6=Byddwn yn cadarnhau’ch hawl fel derbynnydd Credyd Treth Gwaith drwy wybodaeth a gedwir eisoes ar system Credydau Treth Cenedlaethol fewnol CThEF. Byddwn yn cadarnhau’ch hawl fel derbynnydd Credyd Cynhwysol yn seiliedig ar wybodaeth a gafwyd gan yr Adran Gwaith a Phensiynau (DWP).
 hts.privacy.p7=Yr unig wybodaeth y byddwn yn gofyn amdani’n uniongyrchol, heblaw hyn, yw pan fo angen i chi roi gwybod bod eich cyfeiriad e-bost wedi newid.
 hts.privacy.p8=Byddwn yn rhannu’r holl wybodaeth hon gyda Chynilion a Buddsoddiadau Cenedlaethol (NS&I) sy’n helpu i weinyddu’r cynllun Cymorth i Gynilo.
@@ -501,14 +501,14 @@ hts.close-account.back=Yn ôl
 
 # Cannot Check Details
 hts.we-cannot-check-details.title.h1=Ni allwn wirio eich manylion
-hts.we-cannot-check-details.title.p1=Mae hyn oherwydd na allwch ddefnyddio cyfrif Porth y Llywodraeth y gwnaethoch fewngofnodi iddo:
+hts.we-cannot-check-details.title.p1=Mae hyn oherwydd na allwch ddefnyddio’r manylion ar gyfer gwasanaethau ar-lein CThEF y gwnaethoch ddefnyddio i wneud y canlynol:
 hts.we-cannot-check-details.ul1-li1=i wneud cais am gyfrif Cymorth i Gynilo
 hts.we-cannot-check-details.ul1-li2=i fewngofnodi i’ch cyfrif Cymorth i Gynilo os oes un gennych yn barod
 hts.we-cannot-check-details.h2=Os ydych chi eisiau gwneud cais am gyfrif Cymorth i Gynilo
-hts.we-cannot-check-details.title.p2=Bydd angen i chi greu cyfrif newydd Porth y Llywodraeth ar gyfer Cymorth i Gynilo. Yna gallwch wneud cais am gyfrif Cymorth i Gynilo.
-hts.we-cannot-check-details.create-gg-account=Creu cyfrif newydd Porth y Llywodraeth
+hts.we-cannot-check-details.title.p2=Bydd angen i chi greu manylion mewngofnodi newydd ar gyfer gwasanaethau ar-lein CThEF ar gyfer Cymorth i Gynilo. Yna, gallwch wneud cais am gyfrif Cymorth i Gynilo
+hts.we-cannot-check-details.create-gg-account=Cofrestrwch ar gyfer manylion mewngofnodi ar gyfer CThEF
 hts.we-cannot-check-details.h3=Os oes gennych gyfrif Cymorth i Gynilo eisoes
-hts.we-cannot-check-details.title.p3=I fewngofnodi, nodwch y ‘Dynodydd Defnyddiwr (ID)’ a’r ‘cyfrinair’ ar gyfer cyfrif Porth y Llywodraeth a ddefnyddiwyd gennych i greu eich cyfrif Cymorth i Gynilo.
+hts.we-cannot-check-details.title.p3=Er mwyn mewngofnodi, bydd angen yr enw defnyddiwr a’r cyfrinair ar gyfer gwasanaethau ar-lein CThEF y
 
 hts.close-account.positive-balance.positive-bonus.warning=Os ydych yn cau eich cyfrif nawr, ni fyddwch yn cael eich taliad bonws cyntaf o £{0} neu fonws terfynol. Ni fyddwch yn gallu agor cyfrif Cymorth i Gynilo arall.
 hts.close-account.positive-balance.positive-bonus.withdraw.p1=Gallwch
