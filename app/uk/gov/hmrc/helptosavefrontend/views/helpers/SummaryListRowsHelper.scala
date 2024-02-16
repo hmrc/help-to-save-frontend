@@ -35,7 +35,7 @@ class SummaryListRowsHelper {
     changeLabel: Option[String] = None
   )(implicit messages: Messages): SummaryListRow = {
     val actions =
-      if (addLink)
+      if (addLink) {
         Some(
           Actions(
             items = Seq(
@@ -47,7 +47,9 @@ class SummaryListRowsHelper {
             )
           )
         )
-      else None
+      } else {
+        None
+      }
     SummaryListRow(
       key = Key(content = Text(question), classes = "govuk-!-width-one-third " + additionalClasses),
       value = Value(content = Text(answer)),
