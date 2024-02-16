@@ -47,7 +47,7 @@ trait EnrolmentAndEligibilityCheckBehaviour {
   val mockHelpToSaveReminderConnector = mock[HelpToSaveReminderConnector]
 
   val confirmedEmail = "confirmed"
-  val bankDetails = BankDetails(SortCode(1, 2, 3, 4, 5, 6), "1", None, "name")
+  val bankDetails = BankDetails("name", SortCode(1, 2, 3, 4, 5, 6), "1", None)
   val userInfo = randomEligibleWithUserInfo(validUserInfo)
   val payload = validNSIPayload
     .updateEmail(confirmedEmail)

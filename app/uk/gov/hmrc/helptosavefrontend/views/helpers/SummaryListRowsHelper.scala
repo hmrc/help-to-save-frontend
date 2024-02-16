@@ -153,10 +153,10 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-bank-details.account-name")
       )
     List(
+      Some(accountName),
       Some(sortCode),
       Some(accountNumber),
-      rollNumber,
-      Some(accountName)
+      rollNumber
     ).collect { case Some(r) => r }
   }
 

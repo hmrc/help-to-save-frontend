@@ -158,7 +158,7 @@ class BankAccountControllerSpec
                 None,
                 None,
                 None,
-                Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some(""), "accountName"))
+                Some(BankDetails("accountName", SortCode(1, 2, 3, 4, 5, 6), "accountNumber", Some("")))
               )
             )
           )
@@ -261,7 +261,7 @@ class BankAccountControllerSpec
             None,
             None,
             None,
-            Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))
+            Some(BankDetails("test user name", SortCode(1, 2, 3, 4, 5, 6), "12345678", None))
           )
         )(Right(()))
 
@@ -287,7 +287,7 @@ class BankAccountControllerSpec
             None,
             None,
             None,
-            Some(BankDetails(SortCode(1, 2, 3, 4, 5, 6), "12345678", None, "test user name"))
+            Some(BankDetails("test user name", SortCode(1, 2, 3, 4, 5, 6), "12345678", None))
           )
         )(Left("error"))
 

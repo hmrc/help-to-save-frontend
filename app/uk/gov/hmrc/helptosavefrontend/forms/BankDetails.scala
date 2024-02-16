@@ -25,17 +25,17 @@ import scala.util.Try
 object BankDetails {
   def giveBankDetailsForm()(implicit validation: BankDetailsValidation): Form[BankDetails] = Form(
     mapping(
+      "accountName"   -> of(validation.accountNameFormatter),
       "sortCode"      -> of(validation.sortCodeFormatter),
       "accountNumber" -> of(validation.accountNumberFormatter),
-      "rollNumber"    -> of(validation.rollNumberFormatter),
-      "accountName"   -> of(validation.accountNameFormatter)
+      "rollNumber"    -> of(validation.rollNumberFormatter)
     )(BankDetails.apply)(BankDetails.unapply)
   )
 
   implicit val bankDetailsFormat: Format[BankDetails] = Json.format[BankDetails]
 }
 
-case class BankDetails(sortCode: SortCode, accountNumber: String, rollNumber: Option[String], accountName: String)
+case class BankDetails(accountName: String, sortCode: SortCode, accountNumber: String, rollNumber: Option[String])
 
 case class SortCode(digit1: Int, digit2: Int, digit3: Int, digit4: Int, digit5: Int, digit6: Int) {
   override def toString: String = s"$digit1$digit2$digit3$digit4$digit5$digit6"
