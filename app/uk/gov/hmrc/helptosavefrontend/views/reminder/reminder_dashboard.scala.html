@@ -38,14 +38,14 @@
           s"""${messages("hts.reminder-dashboard.t1-1")} ${PeriodUtils.getMessage(period)} ${messages("hts.reminder-dashboard.t1-2")}""".stripMargin,
           routes.ReminderController.getSelectedRendersPage,
           messages("hts.reminder-dashboard.t1"),
-          (messages("hts.reminder-dashboard-change-cancel"))
+          Some(messages("hts.reminder-dashboard-change-cancel"))
         ),
         summaryRowHelper.summaryListRow(
           messages("hts.reminder-dashboard.t2"),
           email,
           routes.AccountHolderController.getUpdateYourEmailAddress,
           messages("hts.reminder-dashboard.t2"),
-          (messages("hts.reminder-dashboard-change"))
+          Some(messages("hts.reminder-dashboard-change"))
         ),
       )
     )
