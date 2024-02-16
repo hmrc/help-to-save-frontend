@@ -24,6 +24,7 @@ import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 
 class SummaryListRowsHelper {
+
   def summaryListRow(
     question: String,
     answer: String,
