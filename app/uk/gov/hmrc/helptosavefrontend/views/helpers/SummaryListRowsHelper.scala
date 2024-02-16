@@ -24,7 +24,6 @@ import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 
 class SummaryListRowsHelper {
-
   def summaryListRow(
     question: String,
     answer: String,
@@ -51,12 +50,22 @@ class SummaryListRowsHelper {
         None
       }
     SummaryListRow(
-      key = Key(content = Text(question), classes = "govuk-!-width-one-third " + additionalClasses),
+      key = Key(content = Text(question), classes = "govuk-!-width-one-third"),
       value = Value(content = Text(answer)),
-      actions = actions
+      classes = if (changeLabel.isDefined) "govuk-summary-list__row--no-actions" else "",
+      actions = changeLabel.map(
+        label =>
+          Actions(
+            items = Seq(
+              ActionItem(
+                href = changeLocation.url,
+                content = Text(label),
+                visuallyHiddenText = Some(changeScreenReaderText)
+              )
+            )
+          )
+      )
     )
-  }
-
   def yourDetailsRow(eligibleWithUserInfo: EligibleWithUserInfo)(implicit messages: Messages): List[SummaryListRow] = {
     val name: SummaryListRow =
       summaryListRow(
@@ -71,18 +80,15 @@ class SummaryListRowsHelper {
         messages(DateUtils.toLocalisedString(eligibleWithUserInfo.userInfo.dateOfBirth)),
         routes.RegisterController.getDetailsAreIncorrect,
         messages("hts.register.create_account.your-details.dob"),
-        additionalClasses = "govuk-summary-list__row--no-actions",
-        addLink = false
+        changeLabel = None
       )
-
     val nino: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.nino"),
         messages(display2CharFormat(eligibleWithUserInfo.userInfo.nino)),
         routes.RegisterController.getDetailsAreIncorrect,
         messages("hts.register.create_account.your-details.nino"),
-        additionalClasses = "govuk-summary-list__row--no-actions",
-        addLink = false
+        changeLabel = None
       )
     List(
       name,
