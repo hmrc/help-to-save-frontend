@@ -24,28 +24,36 @@ import uk.gov.hmrc.helptosavefrontend.forms.BankDetails
 import uk.gov.hmrc.helptosavefrontend.models.HTSSession._
 
 class SummaryListRowsHelper {
+
   def summaryListRow(
     question: String,
     answer: String,
     changeLocation: Call,
     changeScreenReaderText: String,
+    additionalClasses: String = "",
+    addLink: Boolean = true,
     changeLabel: Option[String] = None
-  )(implicit messages: Messages): SummaryListRow =
-    SummaryListRow(
-      key = Key(content = Text(question), classes = "govuk-!-width-one-third"),
-      value = Value(content = Text(answer)),
-      actions = Some(
-        Actions(
-          items = Seq(
-            ActionItem(
-              href = changeLocation.url,
-              content = Text(changeLabel.getOrElse(messages("hts.register.create_account.change"))),
-              visuallyHiddenText = Some(changeScreenReaderText)
+  )(implicit messages: Messages): SummaryListRow = {
+    val actions =
+      if (addLink)
+        Some(
+          Actions(
+            items = Seq(
+              ActionItem(
+                href = changeLocation.url,
+                content = Text(changeLabel.getOrElse(messages("hts.register.create_account.change"))),
+                visuallyHiddenText = Some(changeScreenReaderText)
+              )
             )
           )
         )
-      )
+      else None
+    SummaryListRow(
+      key = Key(content = Text(question), classes = "govuk-!-width-one-third " + additionalClasses),
+      value = Value(content = Text(answer)),
+      actions = actions
     )
+  }
 
   def yourDetailsRow(eligibleWithUserInfo: EligibleWithUserInfo)(implicit messages: Messages): List[SummaryListRow] = {
     val name: SummaryListRow =
@@ -60,14 +68,19 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-details.dob"),
         messages(DateUtils.toLocalisedString(eligibleWithUserInfo.userInfo.dateOfBirth)),
         routes.RegisterController.getDetailsAreIncorrect,
-        messages("hts.register.create_account.your-details.dob")
+        messages("hts.register.create_account.your-details.dob"),
+        additionalClasses = "govuk-summary-list__row--no-actions",
+        addLink = false
       )
+
     val nino: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.nino"),
         messages(display2CharFormat(eligibleWithUserInfo.userInfo.nino)),
         routes.RegisterController.getDetailsAreIncorrect,
-        messages("hts.register.create_account.your-details.nino")
+        messages("hts.register.create_account.your-details.nino"),
+        additionalClasses = "govuk-summary-list__row--no-actions",
+        addLink = false
       )
     List(
       name,
