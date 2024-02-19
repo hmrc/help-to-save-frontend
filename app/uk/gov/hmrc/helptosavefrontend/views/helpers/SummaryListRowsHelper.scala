@@ -46,23 +46,6 @@ class SummaryListRowsHelper {
               )
             )
           )
-        )
-      else None
-    SummaryListRow(
-      key = Key(content = Text(question), classes = "govuk-!-width-one-third"),
-      value = Value(content = Text(answer)),
-      classes = if (changeLabel.isDefined) "govuk-summary-list__row--no-actions" else "",
-      actions = changeLabel.map(
-        label =>
-          Actions(
-            items = Seq(
-              ActionItem(
-                href = changeLocation.url,
-                content = Text(label),
-                visuallyHiddenText = Some(changeScreenReaderText)
-              )
-            )
-          )
       )
     )
   def yourDetailsRow(eligibleWithUserInfo: EligibleWithUserInfo)(implicit messages: Messages): List[SummaryListRow] = {
