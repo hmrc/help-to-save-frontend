@@ -14,7 +14,7 @@ object AppDependencies {
     "com.github.kxbmap" %% "configs"                          % "0.6.1",
     "org.typelevel"     %% "cats-core"                        % "2.9.0",
     hmrc                %% "domain"                           % s"8.3.0-$playVersion",
-    hmrc                %% "play-frontend-hmrc"               % s"7.29.0-$playVersion"
+    hmrc                %% s"play-frontend-hmrc-$playVersion"               % "8.5.0"
   )
 
   def test(scope: String = "test"): Seq[ModuleID] = Seq(
