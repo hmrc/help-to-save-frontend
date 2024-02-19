@@ -29,45 +29,49 @@ class SummaryListRowsHelper {
     answer: String,
     changeLocation: Call,
     changeScreenReaderText: String,
-    changeLabel: Option[String] = None
+    changeLabel: Option[String]
   )(implicit messages: Messages): SummaryListRow =
     SummaryListRow(
       key = Key(content = Text(question), classes = "govuk-!-width-one-third"),
       value = Value(content = Text(answer)),
-      actions = Some(
-        Actions(
-          items = Seq(
-            ActionItem(
-              href = changeLocation.url,
-              content = Text(changeLabel.getOrElse(messages("hts.register.create_account.change"))),
-              visuallyHiddenText = Some(changeScreenReaderText)
+      classes = if (changeLabel.isEmpty) "govuk-summary-list__row--no-actions" else "",
+      actions = changeLabel.map(
+        label =>
+          Actions(
+            items = Seq(
+              ActionItem(
+                href = changeLocation.url,
+                content = Text(label),
+                visuallyHiddenText = Some(changeScreenReaderText)
+              )
             )
           )
-        )
       )
     )
-
   def yourDetailsRow(eligibleWithUserInfo: EligibleWithUserInfo)(implicit messages: Messages): List[SummaryListRow] = {
     val name: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.name"),
         messages(eligibleWithUserInfo.userInfo.forename + " " + eligibleWithUserInfo.userInfo.surname),
         routes.RegisterController.getDetailsAreIncorrect,
-        messages("hts.register.create_account.your-details.name")
+        messages("hts.register.create_account.your-details.name"),
+        changeLabel = Some(messages("hts.register.create_account.change"))
       )
     val dob: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.dob"),
         messages(DateUtils.toLocalisedString(eligibleWithUserInfo.userInfo.dateOfBirth)),
         routes.RegisterController.getDetailsAreIncorrect,
-        messages("hts.register.create_account.your-details.dob")
+        messages("hts.register.create_account.your-details.dob"),
+        changeLabel = None
       )
     val nino: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-details.nino"),
         messages(display2CharFormat(eligibleWithUserInfo.userInfo.nino)),
         routes.RegisterController.getDetailsAreIncorrect,
-        messages("hts.register.create_account.your-details.nino")
+        messages("hts.register.create_account.your-details.nino"),
+        changeLabel = None
       )
     List(
       name,
@@ -84,7 +88,8 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-email.email"),
         messages(yourEmail),
         routes.RegisterController.changeEmail,
-        messages("hts.register.create_account.your-email.email")
+        messages("hts.register.create_account.your-email.email"),
+        changeLabel = Some(messages("hts.register.create_account.change"))
       )
 
     val emailReminder: SummaryListRow = {
@@ -93,7 +98,8 @@ class SummaryListRowsHelper {
           messages("hts.email-saving-remainders.title.h1"),
           messages("hts.register.create_account.your-remainder.note"),
           routes.RegisterController.changeReminder,
-          messages("hts.email-saving-remainders.title.h1")
+          messages("hts.email-saving-remainders.title.h1"),
+          changeLabel = Some(messages("hts.register.create_account.change"))
         )
       } else {
         summaryListRow(
@@ -101,7 +107,8 @@ class SummaryListRowsHelper {
           messages("hts.reminder-confirmation.title.p1-1") + " " +
             PeriodUtils.getMessage(period) + " " + messages("hts.reminder-confirmation.title.p1-2"),
           routes.RegisterController.changeReminder,
-          messages("hts.email-saving-remainders.title.h1")
+          messages("hts.email-saving-remainders.title.h1"),
+          changeLabel = Some(messages("hts.register.create_account.change"))
         )
       }
     }
@@ -121,14 +128,16 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-bank-details.sort-code"),
         messages(display2CharFormat(bankDetails.sortCode.toString)),
         routes.RegisterController.changeBankDetails,
-        messages("hts.register.create_account.your-bank-details.sort-code")
+        messages("hts.register.create_account.your-bank-details.sort-code"),
+        changeLabel = Some(messages("hts.register.create_account.change"))
       )
     val accountNumber: SummaryListRow =
       summaryListRow(
         messages("hts.register.create_account.your-bank-details.account-number"),
         messages(bankDetails.accountNumber),
         routes.RegisterController.changeBankDetails,
-        messages("hts.register.create_account.your-bank-details.account-number")
+        messages("hts.register.create_account.your-bank-details.account-number"),
+        changeLabel = Some(messages("hts.register.create_account.change"))
       )
     val rollNumber: Option[SummaryListRow] = {
       if (bankDetails.rollNumber.nonEmpty) {
@@ -137,7 +146,8 @@ class SummaryListRowsHelper {
             messages("hts.register.create_account.your-bank-details.roll-number"),
             messages(bankDetails.rollNumber.getOrElse("")),
             routes.RegisterController.changeBankDetails,
-            messages("hts.register.create_account.your-bank-details.roll-number")
+            messages("hts.register.create_account.your-bank-details.roll-number"),
+            changeLabel = Some(messages("hts.register.create_account.change"))
           )
         )
       } else {
@@ -150,7 +160,8 @@ class SummaryListRowsHelper {
         messages("hts.register.create_account.your-bank-details.account-name"),
         messages(bankDetails.accountName),
         routes.RegisterController.changeBankDetails,
-        messages("hts.register.create_account.your-bank-details.account-name")
+        messages("hts.register.create_account.your-bank-details.account-name"),
+        changeLabel = Some(messages("hts.register.create_account.change"))
       )
     List(
       Some(accountName),
