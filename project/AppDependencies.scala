@@ -1,10 +1,10 @@
-import sbt.*
+import sbt._
 
 object AppDependencies {
 
   val hmrc = "uk.gov.hmrc"
   val playVersion = "play-28"
-  val bootstrapBackendVersion = "7.16.0"
+  val bootstrapBackendVersion = "7.17.0"
   val mockitoScalaVersion = "1.17.12"
   val mongoVersion = "1.3.0"
 
