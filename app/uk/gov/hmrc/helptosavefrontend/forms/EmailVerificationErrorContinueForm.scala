@@ -32,7 +32,7 @@ object EmailVerificationErrorContinueForm {
         case _       => Left(Seq(FormError(key, "error.required", Nil)))
       }
 
-    def unbind(key: String, value: Boolean) = Map(key -> value.toString)
+    def unbind(key: String, value: Boolean): Map[String, String] = Map(key -> value.toString)
   }
 
   val continueForm: Form[Continue] = Form(
