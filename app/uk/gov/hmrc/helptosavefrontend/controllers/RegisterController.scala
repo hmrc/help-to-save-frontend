@@ -285,7 +285,7 @@ class RegisterController @Inject() (
               eligibleWithInfo.email,
               eligibleWithInfo.userInfo.userInfo.forename,
               eligibleWithInfo.userInfo.userInfo.surname,
-              true,
+              optInStatus = true,
               DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq())
             )
           ),
@@ -300,7 +300,7 @@ class RegisterController @Inject() (
             eligibleWithInfo.email,
             eligibleWithInfo.userInfo.userInfo.forename,
             eligibleWithInfo.userInfo.userInfo.surname,
-            true,
+            optInStatus = true,
             DateToDaysMapper.d2dMapper.getOrElse(daysToReceiveReminders, Seq())
           )
         )

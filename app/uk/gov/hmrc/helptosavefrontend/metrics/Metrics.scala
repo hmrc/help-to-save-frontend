@@ -18,17 +18,17 @@ package uk.gov.hmrc.helptosavefrontend.metrics
 
 import cats.instances.long._
 import cats.syntax.eq._
-import com.codahale.metrics.{Counter, Timer}
+import com.codahale.metrics.{Counter, MetricRegistry, Timer}
 import com.google.inject.{Inject, Singleton}
 
 import scala.annotation.tailrec
 
 @Singleton
-class Metrics @Inject() (val metrics: com.kenshoo.play.metrics.Metrics) {
+class Metrics @Inject() (val metrics: MetricRegistry) {
 
-  def timer(name: String): Timer = metrics.defaultRegistry.timer(name)
+  def timer(name: String): Timer = metrics.timer(name)
 
-  def counter(name: String): Counter = metrics.defaultRegistry.counter(name)
+  def counter(name: String): Counter = metrics.counter(name)
 
   val sessionStoreWriteTimer: Timer = timer("frontend.sessionstore-write-time")
 
