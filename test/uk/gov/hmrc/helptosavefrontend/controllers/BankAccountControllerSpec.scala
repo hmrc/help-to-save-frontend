@@ -18,6 +18,7 @@ package uk.gov.hmrc.helptosavefrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.mockito.ArgumentMatchersSugar.*
 import play.api.http.Status
 import play.api.mvc.Result
 import play.api.test.FakeRequest
@@ -29,7 +30,7 @@ import uk.gov.hmrc.helptosavefrontend.models.TestData.UserData.validUserInfo
 import uk.gov.hmrc.helptosavefrontend.models.eligibility.EligibilityCheckResponse
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession, ValidateBankDetailsRequest, ValidateBankDetailsResult}
 import uk.gov.hmrc.helptosavefrontend.views.html.register.{bank_account_details, not_eligible}
-import org.mockito.ArgumentMatchersSugar.*
+
 import scala.concurrent.Future
 
 class BankAccountControllerSpec

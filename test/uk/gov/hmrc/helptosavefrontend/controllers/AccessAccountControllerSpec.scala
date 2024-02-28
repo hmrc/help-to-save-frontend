@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
+import org.mockito.ArgumentMatchersSugar.*
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -27,7 +28,6 @@ import uk.gov.hmrc.helptosavefrontend.models.account.{Account, BonusTerm}
 import uk.gov.hmrc.helptosavefrontend.models.reminder.HtsUserSchedule
 import uk.gov.hmrc.helptosavefrontend.models.{EnrolmentStatus, HTSSession}
 import uk.gov.hmrc.helptosavefrontend.views.html.core.{confirm_check_eligibility, error_template}
-import org.mockito.ArgumentMatchersSugar.*
 
 import java.time.LocalDate
 import scala.concurrent.Future

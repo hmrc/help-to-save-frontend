@@ -16,9 +16,8 @@
 
 package uk.gov.hmrc.helptosavefrontend.controllers
 
-import java.util.UUID
-import org.apache.pekko.util.Timeout
 import com.typesafe.config.ConfigFactory
+import org.apache.pekko.util.Timeout
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.INTERNAL_SERVER_ERROR
 import play.api.i18n.{I18nSupport, MessagesApi}
@@ -31,9 +30,9 @@ import play.api.{Application, Configuration, Environment}
 import play.filters.csrf.CSRFAddToken
 import uk.gov.hmrc.helptosavefrontend.config.{ErrorHandler, FrontendAppConfig}
 import uk.gov.hmrc.helptosavefrontend.util._
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 
+import java.util.UUID
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
