@@ -17,7 +17,7 @@
 package uk.gov.hmrc.helptosavefrontend.controllers
 
 import java.util.UUID
-import akka.util.Timeout
+import org.apache.pekko.util.Timeout
 import com.typesafe.config.ConfigFactory
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status.INTERNAL_SERVER_ERROR

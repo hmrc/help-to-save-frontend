@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.helptosavefrontend.auth
 
-import akka.util.Timeout
+import org.apache.pekko.util.Timeout
 import play.api.http.Status
 import play.api.libs.json.Json
 import play.api.mvc.Results.{InternalServerError, Ok}
@@ -46,9 +46,9 @@ class HelpToSaveAuthSpec extends ControllerSpecWithGuiceApp with AuthSupport {
 
     override def authConnector: AuthConnector = mockAuthConnector
 
-    override def config: Configuration = configuration
+    def config: Configuration = configuration
 
-    override def env: Environment = environment
+    def env: Environment = environment
   }
 
   val htsAuth = new HtsAuth

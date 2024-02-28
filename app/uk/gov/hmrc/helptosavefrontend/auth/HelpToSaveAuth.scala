@@ -34,13 +34,12 @@ import uk.gov.hmrc.helptosavefrontend.models.userinfo.{Address, MissingUserInfo,
 import uk.gov.hmrc.helptosavefrontend.models.{HtsContext, HtsContextWithNINO, HtsContextWithNINOAndFirstName, HtsContextWithNINOAndUserDetails}
 import uk.gov.hmrc.helptosavefrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.helptosavefrontend.util._
-import uk.gov.hmrc.play.bootstrap.config.AuthRedirects
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
-trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging {
+trait HelpToSaveAuth extends AuthorisedFunctions with Logging {
   this: FrontendController =>
 
   val metrics: Metrics
@@ -245,7 +244,7 @@ trait HelpToSaveAuth extends AuthorisedFunctions with AuthRedirects with Logging
       internalServerError()
   }
 
-  override def toGGLogin(redirectOnLoginURL: RelativeURL): Result =
+  def toGGLogin(redirectOnLoginURL: RelativeURL): Result =
     Redirect(
       appConfig.ggLoginUrl,
       Map(
